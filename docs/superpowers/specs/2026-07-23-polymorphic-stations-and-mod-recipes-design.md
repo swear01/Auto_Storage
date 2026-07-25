@@ -23,7 +23,7 @@ The exact Modrinth artifact IDs used by CI are reproducibility evidence only. Pl
 
 ### A. One descriptor per concrete block
 
-This reuses the current integer rate but creates many Fuel-page slots, makes every recipe choose one arbitrary descriptor, and cannot show that several stations satisfy the same recipe requirement. Rejected.
+This reuses the current integer rate but creates many Stations-page slots, makes every recipe choose one arbitrary descriptor, and cannot show that several stations satisfy the same recipe requirement. Rejected.
 
 ### B. One descriptor with a wider Ingredient and one shared rate
 
@@ -112,4 +112,4 @@ CI loads one representative release per optional mod. Those versions do not beco
 
 ## Visual gate
 
-The implementation changes recipe and Fuel-page rendering, so automated tests cannot approve the GUI. The final Prism F11 fullscreen handoff must start from one preloaded server-owned Core repository record with every repeatable item, station, reserve, and typed resource setup already complete. The player performs only fullscreen approval, page/recipe selection, and visual inspection; behavior mutation belongs in automated tests. No intermediate commit may claim visual approval.
+The implementation changes recipe and Stations-page rendering, so automated tests cannot approve the GUI. The final Prism F11 fullscreen handoff must start from one preloaded server-owned Core repository record with every repeatable item, station, Transform reserve/input, processing work, and typed resource setup already complete. The player performs only fullscreen approval, page/recipe selection, and visual inspection; behavior mutation belongs in automated tests. No intermediate commit may claim visual approval.

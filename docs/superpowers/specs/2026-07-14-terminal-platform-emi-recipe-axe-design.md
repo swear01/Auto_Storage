@@ -1,6 +1,6 @@
 # Shared Terminal Platform, EMI-First Recipes, and Axe Energy Design
 
-> Partial replacement: visual assets, Fuel-page layout, cycle reset/status grammar, progression recipes, wrench/connected casing, and Patchouli guide are now specified by `2026-07-14-connected-progression-fuel-guide-design.md`. Server-authoritative crafting/storage/EMI/Axe transaction contracts below remain current.
+> Partial replacement: visual assets, Transform/Stations layout, cycle reset/status grammar, progression recipes, wrench/connected casing, and Patchouli guide are now specified by `2026-07-14-connected-progression-fuel-guide-design.md`. Server-authoritative crafting/storage/EMI/Axe transaction contracts below remain current.
 
 ## Goal
 
@@ -11,7 +11,7 @@ Replace the split Storage/Crafting Terminal presentation with one capability-dri
 Storage Terminal and Crafting Terminal remain distinct menu/screen registrations, but both use one shared terminal shell. The shell owns adaptive geometry, panel rendering, the item grid, search, scrolling, amount overlays, left-rail controls, focus cleanup, hit testing, and EMI exclusion bounds. A terminal profile enables only the capabilities that terminal exposes:
 
 - Storage Terminal: Storage page plus shared search, sorting, order, extraction, and player inventory.
-- Crafting Terminal: Storage, Craftable, and Fuel pages plus recipe selection, resource preview, ingredient-source toggle, output-destination toggle, stations, fuel targets, and craft actions.
+- Crafting Terminal: Storage, Craftable, Transform, and Stations pages plus recipe selection, resource preview, ingredient-source toggle, output-destination toggle, deterministic resource targets, stations, and craft actions.
 - Future terminals: compose a profile from the same capabilities instead of copying a screen or creating then hiding inherited widgets.
 
 `TerminalLayout` has one profile-driven entry point. Rendering, widgets, reconstructed slots, mouse regions, tooltips, scrolling, popups, and EMI exclusions consume the same immutable geometry. The old separate Storage layout/control path and Crafting-only replacement rail are removed.
@@ -125,7 +125,7 @@ An item carrying the Unbreakable component sets an explicit infinite Axe Energy 
 
 This design originally specified one-time migration from the old persisted axe station and stacked instant stations. The 2026-07-17 Core repository design supersedes that compatibility path: the current early-development schema does not read old inline machine slots. New transient axe input is still converted atomically, rejected stacks remain unchanged, and installable descriptors accept only their current maximum.
 
-## Fuel target selector and station hit boxes
+## Transform target selector and station hit boxes
 
 The current target cycle remains available and gains a separate list button. The anchored popup is generated from the ordered server-approved target descriptors and shows representative item, localized name, and selected state. It supports bounded scrolling, outside-click close, Escape close, page-leave focus cleanup, and an EMI exclusion rectangle. While open, its rectangle consumes pointer/scroll input and suppresses covered container-slot tooltips instead of clicking or describing the UI underneath it.
 
@@ -133,7 +133,7 @@ The popup is an input widget but renders exactly once in a foreground layer abov
 
 Station tooltips trigger only over the actual station slot or representative icon bounds. Hovering unused padding in a flow cell produces no station tooltip. Paging and future descriptor growth continue to use panel-local flow geometry.
 
-Every Fuel descriptor cell uses a compact vertical grammar: the 18-pixel station slot or 16-pixel representative icon is centered in the upper area, and its amount is centered and width-scaled in a separate lower line. Current panel filling, multi-row paging, and the inventory-side type-capacity information panel are defined by the replacement Fuel-layout design linked at the top of this document; Instant Stations no longer reserves a status cell.
+Transform owns the target selector and conversion input. Stations uses compact horizontal representative-item-plus-installed-amount rows in separate Processing and Instant groups. Current paging, search, and the inventory-side type-capacity panel are defined by the replacement layout design linked at the top of this document.
 
 ## Retired Bottle Energy migration
 

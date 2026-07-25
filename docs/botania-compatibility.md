@@ -32,9 +32,9 @@ Each family requires one matching installed instant station:
 | Runic Altar | Runic Altar | Consumed ingredients and reagent, retained catalysts, exact crafting remainders, Mana, output |
 | Terrestrial Agglomeration Plate | Terrestrial Agglomeration | Ingredients, Mana, output |
 | Petal Apothecary | Petal Apothecary | Ingredients, reagent, exactly 1000 stored water, output |
-| Elven Gateway Core | Elven Trade | Exact inputs and every fixed output |
+| Elven Gateway Core | Elven Trade | Exact inputs, Botania's runtime `MANA_COST`, and every fixed output |
 
-All item, water, Mana, catalyst, remainder, and output deltas are part of one existing typed simulate-then-commit transaction. Output overflow, missing station, missing input, empty Mana Infusion output, or invalid plan leaves every resource unchanged. Plans above the shared nine-input bound and ingredient/state semantics that cannot be represented exactly fail closed.
+All item, water, Mana, catalyst, remainder, and output deltas are part of one existing typed simulate-then-commit transaction. Elven Trade reads Botania's exposed runtime Mana cost and fails explicitly if that contract is unavailable; it does not assume a local fallback value. Output overflow, missing station, missing input, empty Mana Infusion output, or invalid plan leaves every resource unchanged. Plans above the shared nine-input bound and ingredient/state semantics that cannot be represented exactly fail closed.
 
 ## Excluded semantics
 
@@ -53,4 +53,4 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest \
   scripts.test_static_regressions.StaticRegressionTests.test_botania_mana_and_recipe_compat_is_optional_and_isolated
 ```
 
-The Botania run requires `All 13 required tests passed` plus the current SelfTest summary. It loads Botania, Curios, and Patchouli without JEI. No new Magic Storage player-facing string is introduced in this slice: the existing localized Other group and Botania's own item names provide the UI labels.
+The Botania run requires `All 14 required tests passed` plus the current SelfTest summary. It loads Botania, Curios, and Patchouli without JEI. No new Magic Storage player-facing string is introduced in this slice: the existing localized Other group and Botania's own item names provide the UI labels.

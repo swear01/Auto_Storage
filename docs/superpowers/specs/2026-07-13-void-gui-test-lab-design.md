@@ -29,7 +29,7 @@ The lab is built at Y=80 on a 37×25 neutral platform (`x=-18..18`, `z=-12..12`)
 |---|---:|---|
 | Storage Core | `(0,80,0)` | Single authoritative Core |
 | Storage Terminal | `(-1,80,0)` | Storage grid checks |
-| Crafting Terminal | `(1,80,0)` | Storage/Craftable/Fuel and recipe checks |
+| Crafting Terminal | `(1,80,0)` | Storage/Craftable/Transform/Stations and recipe checks |
 | T6 → T1 units | `(0,80,-1)` through `(0,80,-6)` | Connected capacity spine, total 785 types |
 | Import Bus | `(-1,80,-1)`, facing west | Functional import bay |
 | Import barrel | `(-2,80,-1)` | Bus source |

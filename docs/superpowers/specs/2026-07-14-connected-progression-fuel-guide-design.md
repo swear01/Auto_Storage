@@ -1,8 +1,8 @@
-# Connected Storage Family, Fuel Workspace, Progression, and Guide Design
+# Connected Storage Family, Transform/Stations Workspace, Progression, and Guide Design
 
 ## Goal
 
-Turn the 0.1.17 functional baseline into a coherent player-facing release: storage tiers become visibly more ornate, adjacent network blocks share connected casing, every tagged wrench can rotate or safely dismantle the network, the Fuel page becomes three scalable category rows, terminal controls follow one reset/status grammar, recipes form an affordable progression, and the Patchouli guide explains the complete system in English and Traditional Chinese.
+Turn the functional baseline into a coherent player-facing release: storage tiers become visibly more ornate, adjacent network blocks share connected casing, every tagged wrench can rotate or safely dismantle the network, deterministic conversions live on Transform, installed machines live on a two-group Stations page, terminal controls follow one reset/status grammar, recipes form an affordable progression, and the Patchouli guide explains the complete system in English and Traditional Chinese.
 
 This document replaces the visual, Fuel-layout, recipe-cost, and guide-writing parts of `2026-07-14-terminal-platform-emi-recipe-axe-design.md`. The server-authoritative storage, crafting transaction, menu parity, EMI, and Axe Energy contracts from that design remain unchanged.
 
@@ -42,7 +42,7 @@ The later dark-workspace replacement was also rejected. The current visual contr
 
 The recipe body is a compact card above the fixed footer. Its diagram remains above its resource ledger. Ledger resources are top-aligned, use at most four columns, and add a third row when more than eight resources are present; current wire bounds allow up to twelve total item/energy/tool rows. Narrow layouts reserve the same three-row capacity while preserving the diagram, footer gap, and non-overlap guarantees.
 
-The Fuel workspace uses a dedicated compact Fuel Target bar inside the first of three full-width category panels. Consumables, Timed Stations, and Instant Stations start below the terminal heading and divide the complete vertical span down to the fixed player-inventory label band. Each category name occupies a bounded left label strip; the remaining area becomes an adaptive multi-row, independently paged descriptor grid. Long category names wrap to at most two centered lines instead of truncating. Empty station slots show a dim representative station item behind the real slot so their purpose is discoverable. Stored types over total type capacity appears in a separate information panel immediately to the right of the player inventory, so Instant Stations keeps its full category width.
+The current replacement separates two different actions. Transform owns one transient input, Auto/exact target selection, and explicit ×1/×8/×64/Max conversion into typed resources. Stations owns exactly two top-aligned groups—Processing and Instant—with horizontal representative item plus installed amount, independent previous/next controls, and panel-local wheel paging. Empty station slots show a dim representative item behind the real slot. Stored types over total type capacity remains in the independent panel beside the player inventory.
 
 ## Fullscreen execution contract
 
@@ -120,25 +120,26 @@ When no supported recipe is selected, the diagram and ledger bounds become one n
 
 Previous/next recipe arrows remain a separate navigation group. `x1`, `x8`, `x64`, and `Max` remain equal-width actions and use normal vanilla button rendering, including hover, focus, and disabled states.
 
-## Fuel workspace
+## Transform and Stations workspaces
 
-The Fuel page has one compact Fuel Target control bar followed by three full-width horizontal category panels between the title and player inventory. Geometry is generated from descriptor categories rather than fixed slot indexes. All four semantic surfaces and the player inventory use the same vanilla light container grammar.
+The Crafting Terminal has four pages: Storage, Craftable, Transform, and Stations. The left rail keeps a clear gap between page selection and item-page controls.
 
-### Consumables
+### Transform
 
-The compact bar contains the current Fuel Target selector and target-list button. The Consumables row below contains only the consumable input slot, stored Fuel/Brew reserves, and Axe Energy. Every descriptor cell keeps its representative item or real slot above a centered amount below, so nearby values remain visually paired without side-by-side ambiguity. It answers “what can be spent?” and does not pretend an axe is an installed station. The target popup remains available for future descriptor growth.
+Transform is a deterministic resource-conversion shortcut, not a machine inventory and not an automatic background job. It has one server-owned transient input, an Auto/exact target selector with bounded popup, and the shared ×1/×8/×64/Max strip. Auto discovers valid uses but never consumes by itself. Closing or leaving the page returns every unconverted input.
 
-### Timed Stations
+Fuel, Brew Energy, Axe Energy, FE, Mana, and addon-defined resources are ordinary typed ledger entries visible through Storage resource groups. Runtime Fuel uses current burn time; tool transforms use exact remaining durability; optional providers may require installed Processing work before conversion. Every conversion simulates input, typed output, work, capacity, container remainder, and overflow before one atomic commit.
 
-One row contains Furnace, Blast Furnace, Smoker, Campfire, and Brewing Stand process-machine slots. Each installed-machine slot is above its centered stored-process-energy amount. Installed stack count controls generation rate exactly as before. Stored process energy is presented with the matching station, not in a disconnected reserve panel.
+### Stations
 
-### Instant Stations
+Stations has exactly two groups:
 
-The current Instant Stations descriptor grid contains Crafting Table, Stonecutter, and Smithing Table. Each is max-one, removable, and unlock-only; no fake energy number is drawn. Its entire category width belongs to station descriptors. Type capacity is rendered separately beside the player inventory, aligned to that inventory's top and bottom, and cannot overlap or displace any station.
+- **Processing Stations** are stackable exact variants with provider-derived rational work rates. The persisted item prototype remains count one while the aggregate installed count is stored separately up to `Integer.MAX_VALUE`.
+- **Instant Stations** accept at most one per descriptor and only unlock matching recipes. They do not display made-up work or energy.
 
-Each panel has a bounded left label strip plus its own right-side descriptor grid, adaptive column and row counts, page count, panel-local wheel paging, and exact slot/icon hover bounds. Sparse pages distribute their current cells across the content bounds; overflow uses every row that fits before continuing on the next page. Empty machine slots show a dim representative item behind the real slot, while installed items still come only from the server-owned menu slot. A fixed 13px label band separates the final panel from the player inventory. Geometry regression coverage uses 64 descriptors in each category and verifies every page remains reachable without overlap at supported widths. Current production accepts third-party descriptors through the public server-owned NeoForge registry during normal mod loading, preserves fixed menu parity, and retains unavailable add-on entries as raw repository NBT; it does not support post-freeze hot registration.
+Each group uses a horizontal representative item plus installed amount, explicit previous/next controls, and panel-local wheel paging. Search Stations replaces both groups with one result grid containing stations only; clearing search restores the two paged groups. Hovering an installed row reports the exact variant and combined decimal rate. Shift-click routing uses the exact descriptor regardless of the current group page. A dim representative behind an empty real slot explains what belongs there without pretending it is installed.
 
-The category labels are localized as `Consumables`, `Timed Stations`, and `Instant Stations`. `Stations & Axe Energy` and the old separate `Energy Reserves` composition are removed.
+The player-inventory-side type-capacity panel remains independent. The Prism scenario preloads every repeatable resource and station; the only player item is one Coal in hotbar 3 because the Transform visual check itself needs an input.
 
 ## Recipe progression
 
@@ -194,16 +195,15 @@ Book structure:
    - T1-T6 progression, ornament language, and upgrade recipes;
    - connected casing and that Fusion is an optional visual enhancement.
 3. **Terminals**
-   - Storage/Craftable/Fuel tabs;
+   - Storage/Craftable/Transform/Stations tabs;
    - exact amounts, searching, Name/Quantity/Mod/ID sorting;
    - left/right/wheel/middle-reset grammar;
    - recipe preview, amounts, Max, player/storage output, and EMI behavior.
-4. **Fuel and Stations**
-   - the three-row model;
-   - runtime Fuel values and Auto target priority;
-   - timed stations and accumulated process energy;
-   - instant stations;
-   - consumable Axe Energy, Unbreaking, and Unbreakable infinity.
+4. **Transform and Stations**
+   - explicit Transform input, Auto target discovery, and typed-resource outputs;
+   - runtime Fuel values, tool durability, timed provider work, and atomic rollback;
+   - Processing and Instant station groups with paging and search;
+   - Unbreaking and Unbreakable Axe Energy behavior.
 5. **Automation and Remote Access**
    - active and passive Import behavior;
    - directional Export and filters;
@@ -224,9 +224,9 @@ Every production change starts with a focused failing SelfTest, GameTest, or Pyt
 
 Required automated coverage:
 
-- three non-overlapping Fuel category panels at representative narrow/wide/fullscreen sizes;
-- category-driven vertical slot/icon-over-amount placement, sparse full-width distribution, independent paging, exact hover bounds, and unchanged menu parity;
-- lower-right Fuel type-capacity reservation remains contained and non-overlapping when descriptor counts or pages grow;
+- four non-overlapping Crafting Terminal pages at representative narrow/wide/fullscreen sizes;
+- Transform input/target/action geometry plus two horizontal Stations groups with independent paging, exact hover bounds, and unchanged menu parity;
+- player-inventory-side type-capacity panel remains contained and non-overlapping as station counts or pages grow;
 - middle-click reset for every cyclic selector with explicit server defaults;
 - no output-destination status light and no value-cycle status lights;
 - wrapped empty prompt across a unified diagram/ledger surface, no empty ledger frame, and an integrated segmented craft strip;
