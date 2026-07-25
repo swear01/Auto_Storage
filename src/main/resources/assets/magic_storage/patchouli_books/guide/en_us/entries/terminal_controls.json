@@ -10,7 +10,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Reset defaults are Name sort, Ascending order, Search Sync Off, Items resource view, $(thing)Auto target$(), and Player craft output. Auto Focus is a separate on/off control and starts enabled."
+      "text": "Reset defaults are Name sort, Ascending order, Search Sync Off, Items resource view, $(thing)Auto Transform target$(), and Player craft output. Auto Focus is a separate on/off control and starts enabled."
     },
     {
       "type": "patchouli:text",
@@ -18,11 +18,11 @@
     },
     {
       "type": "patchouli:text",
-      "text": "A colored light means a true on/off control such as Auto Focus or Use Player Inventory. Resource view, sort, Search Sync, Fuel Target, and Craft Output are selected values, so they use labels or icons instead. The active page uses a neutral selected-tab frame."
+      "text": "A colored light means a true on/off control such as Auto Focus or Use Player Inventory. Resource view, sort, Search Sync, Transform Target, and Craft Output are selected values, so they use labels or icons instead. The active page uses a neutral selected-tab frame."
     },
     {
       "type": "patchouli:text",
-      "text": "Your Auto Focus choice, sort, order, Search Sync mode, resource view, Crafting tab, ingredient source, output destination, and Fuel Target are remembered for every terminal on this Minecraft client. Search text, scroll position, and selected recipes reset when the screen closes."
+      "text": "Your Auto Focus choice, sort, order, Search Sync mode, resource view, Crafting tab, ingredient source, output destination, and Transform Target are remembered for every terminal on this Minecraft client. Search text, target/card pages, scroll position, and selected recipes reset when the screen closes."
     }
   ]
 }

@@ -269,7 +269,7 @@ class StaticRegressionTests(unittest.TestCase):
             "src/main/java/com/swearprom/magicstorage/magic_storage/MagicStorage.java"
         )
 
-        self.assertIn('event.registrar(MODID).versioned("1.2")', mod)
+        self.assertIn('event.registrar(MODID).versioned("1.3")', mod)
 
     def nested_java_classes(self, text: str) -> list[tuple[str, str]]:
         classes = []
@@ -569,7 +569,8 @@ class StaticRegressionTests(unittest.TestCase):
             "CycleButton<" in crafting,
             "CraftingTerminalScreen must not retain a vanilla CycleButton field",
         )
-        self.assertRegex(crafting, r"\bTerminalCycleButton\s+fuelTargetSelector\b")
+        self.assertNotIn("fuelTargetSelector", crafting)
+        self.assertRegex(crafting, r"\bTerminalCycleButton\s+outputDestinationRailBtn\b")
 
     def test_terminal_output_destination_is_distinct_from_emi_destination(self):
         destination = self.read_required(
@@ -650,6 +651,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertEqual("Processing Stations", lang["gui.magic_storage.fuel_group.timed_stations"])
         self.assertEqual("Instant Stations", lang["gui.magic_storage.fuel_group.instant_stations"])
         self.assertEqual("No transformations", lang["gui.magic_storage.no_transformations"])
+        self.assertEqual("Station Work", lang["gui.magic_storage.resource_view.station_work"])
+        self.assertIn("gui.magic_storage.transform_search", lang)
+        self.assertIn("gui.magic_storage.transform_select_recipe", lang)
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
@@ -891,7 +895,7 @@ class StaticRegressionTests(unittest.TestCase):
     def test_all_gametest_gates_reject_any_selftest_failure(self):
         build = self.read_required("build.gradle")
         expected = {
-            "runGameTestServer": 392,
+            "runGameTestServer": 395,
             "runRecipeAddonGameTestServer": 17,
             "runMekanismGameTestServer": 47,
             "runBotaniaGameTestServer": 14,
@@ -917,7 +921,7 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(f"All {count} required tests passed", body, task)
             self.assertIn("expectedSelfTestSummary", body, task)
             self.assertIn("TESTS FAILED!", body, task)
-        self.assertIn("SelfTest: 229484 passed, 0 failed, 229484 total", build)
+        self.assertIn("SelfTest: 210337 passed, 0 failed, 210337 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
@@ -2301,7 +2305,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("nextFuelTargetBtn", crafting_screen)
         self.assertIn("CraftingTerminalPage.TRANSFORM", crafting_screen)
         self.assertIn("CraftingTerminalPage.STATIONS", crafting_screen)
-        self.assertIn("getTransformUses", crafting_screen)
+        self.assertIn("getVisibleTransformUses", crafting_screen)
 
         lang = self.read_required("src/main/resources/assets/magic_storage/lang/en_us.json")
         self.assertNotIn("container.magic_storage.fuel_selection", lang)
@@ -2321,7 +2325,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("gui.magic_storage.previous_fuel_target", lang)
         self.assertNotIn("gui.magic_storage.next_fuel_target", lang)
 
-    def test_fuel_target_selector_keeps_cycle_control_and_adds_scalable_popup(self):
+    def test_transform_target_sidebar_is_persistent_searchable_and_paged(self):
         layout = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java"
         )
@@ -2335,139 +2339,142 @@ class StaticRegressionTests(unittest.TestCase):
             self.read_required("src/main/resources/assets/magic_storage/lang/zh_tw.json")
         )
 
-        self.assertIn("record PopupList", layout)
-        self.assertIn("Rect fuelTargetListButton", layout)
-        self.assertIn("PopupList fuelTargetPopup", layout)
-        self.assertIn("int maxScrollOffset()", layout)
-        self.assertIn("int clampScrollOffset(int", layout)
-        self.assertIn("List<Rect> rows(int", layout)
-        self.assertRegex(screen, r"\bTerminalCycleButton\s+fuelTargetSelector\b")
-        self.assertRegex(screen, r"\bTerminalIconButton\s+fuelTargetListBtn\b")
-        self.assertRegex(screen, r"\bFuelTargetPopup\s+fuelTargetPopup\b")
-        self.assertIn("selectAdjacentFuelTarget", screen)
-        self.assertIn("TerminalCycleDirection.NEXT", screen)
+        self.assertIn("record PagedList", layout)
+        self.assertIn("Rect transformTargetSearch", layout)
+        self.assertIn("PagedList transformTargetList", layout)
+        self.assertIn("FuelPageControls transformTargetPageControls", layout)
+        self.assertIn("int pageCount()", layout)
+        self.assertIn("int firstIndex(int page)", layout)
+        self.assertIn("List<Rect> rows(int page)", layout)
+        self.assertRegex(screen, r"\bEditBox\s+transformTargetSearchBox\b")
+        self.assertRegex(screen, r"\bFuelPageButtons\s+transformTargetPageButtons\b")
+        self.assertRegex(screen, r"\bint\s+transformTargetPage\b")
+        self.assertIn("filteredTransformTargets()", screen)
+        self.assertRegex(
+            screen,
+            r'transformTargetSearchBox\.setHint\(Component\.translatable\(\s*'
+            r'"gui\.magic_storage\.transform_search"\s*\)\)',
+        )
         self.assertIn("fuelTargetOptions()", screen)
         self.assertIn("displayedPreferences().transformTarget()", screen)
         self.assertIn("CraftingTerminalMenu.AUTO_FUEL_TARGET_BUTTON", screen)
         self.assertIn("TransformProviderApi.targetButtonId", screen)
-        self.assertIn("geometry.fuelTargetListButton()", screen)
-        self.assertIn("geometry.fuelTargetPopup()", screen)
-        self.assertIn(
-            'fuelTargetListBtn.setTooltip(Tooltip.create(Component.translatable('
-            '"gui.magic_storage.fuel_target_list")))',
+        self.assertIn("geometry.transformTargetSearch()", screen)
+        self.assertIn("geometry.transformTargetList()", screen)
+        self.assertIn("geometry.transformTargetPageControls()", screen)
+        self.assertNotIn("FuelTargetPopup", screen)
+        self.assertNotIn("fuelTargetListBtn", screen)
+        target_render = self.java_block(
             screen,
+            r"\bprivate\s+void\s+renderTransformTargetList\s*\(",
+            "CraftingTerminalScreen.renderTransformTargetList",
         )
-        popup_class = self.java_block(
-            screen,
-            r"\bclass\s+FuelTargetPopup\b",
-            "FuelTargetPopup",
-        )
-        render_popup = self.java_block(
-            popup_class,
-            r"\bprotected\s+void\s+renderWidget\s*\(",
-            "FuelTargetPopup.renderWidget",
-        )
-        self.assertIn("fuelTargetOptions()", render_popup)
-        self.assertIn("option.icon()", render_popup)
-        self.assertIn("option.label()", render_popup)
+        self.assertIn("filteredTransformTargets()", target_render)
+        self.assertIn("option.icon()", target_render)
+        self.assertIn("option.label()", target_render)
         self.assertRegex(
-            render_popup,
+            target_render,
             r"Objects\.equals\(\s*option\.target\(\),\s*"
             r"displayedPreferences\(\)\.transformTarget\(\)\)",
-        )
-        self.assertIn("gui.magic_storage.fuel_target_list", en_us)
-        self.assertIn("gui.magic_storage.fuel_target_list", zh_tw)
-
-    def test_fuel_target_popup_closes_cleanly_and_excludes_emi(self):
-        screen = self.read_required(
-            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
         click = self.java_block(
             screen,
             r"\bpublic\s+boolean\s+mouseClicked\s*\(",
             "CraftingTerminalScreen.mouseClicked",
         )
-        key = self.java_block(
-            screen,
-            r"\bpublic\s+boolean\s+keyPressed\s*\(",
-            "CraftingTerminalScreen.keyPressed",
-        )
+        self.assertIn("transformTargetAt(mouseX, mouseY)", click)
+        self.assertIn("button == 2", click)
         scroll = self.java_block(
             screen,
             r"^[ ]{4}public\s+boolean\s+mouseScrolled\s*\(",
             "CraftingTerminalScreen.mouseScrolled",
         )
-        exclusions = self.java_block(
+        self.assertIn("geometry.transformTargetList().bounds().contains", scroll)
+        self.assertIn("gui.magic_storage.fuel_target_list", en_us)
+        self.assertIn("gui.magic_storage.fuel_target_list", zh_tw)
+
+    def test_transform_cards_require_explicit_full_card_selection_and_show_preview(self):
+        screen = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
+        )
+        en_us = self.read_required(
+            "src/main/resources/assets/magic_storage/lang/en_us.json"
+        )
+        zh_tw = self.read_required(
+            "src/main/resources/assets/magic_storage/lang/zh_tw.json"
+        )
+        click = self.java_block(
             screen,
-            r"\bpublic\s+List<Rect2i>\s+getEmiExclusionAreas\s*\(",
-            "CraftingTerminalScreen.getEmiExclusionAreas",
+            r"\bpublic\s+boolean\s+mouseClicked\s*\(",
+            "CraftingTerminalScreen.mouseClicked",
+        )
+        card_hit = self.java_block(
+            screen,
+            r"\bprivate\s+int\s+transformUseIndexAt\s*\(",
+            "CraftingTerminalScreen.transformUseIndexAt",
+        )
+        card_render = self.java_block(
+            screen,
+            r"\bprivate\s+void\s+renderTransformCards\s*\(",
+            "CraftingTerminalScreen.renderTransformCards",
+        )
+        preview = self.java_block(
+            screen,
+            r"\bprivate\s+void\s+renderTransformPreview\s*\(",
+            "CraftingTerminalScreen.renderTransformPreview",
+        )
+        station_work = self.java_block(
+            screen,
+            r"\bprivate\s+Component\s+transformStationWork\s*\(",
+            "CraftingTerminalScreen.transformStationWork",
         )
 
-        self.assertIn("closeFuelTargetPopup", click)
-        self.assertIn("fuelTargetListBtn.isMouseOver", click)
-        self.assertIn("fuelTargetPopup.onClick", click)
-        self.assertLess(click.index("fuelTargetPopup.onClick"), click.index("super.mouseClicked"))
-        self.assertIn("GLFW.GLFW_KEY_ESCAPE", key)
-        self.assertIn("closeFuelTargetPopup", key)
-        self.assertIn("fuelTargetPopup.mouseScrolled", scroll)
-        self.assertIn("fuelTargetPopup.visible", exclusions)
-        self.assertIn("geometry.fuelTargetPopup().bounds()", exclusions)
-        toggle = self.java_block(
-            screen,
-            r"\bprivate\s+void\s+toggleFuelTargetPopup\s*\(",
-            "CraftingTerminalScreen.toggleFuelTargetPopup",
-        )
-        close = self.java_block(
-            screen,
-            r"\bprivate\s+void\s+closeFuelTargetPopup\s*\(",
-            "CraftingTerminalScreen.closeFuelTargetPopup",
-        )
-        page_update = self.java_block(
-            screen,
-            r"\bprivate\s+void\s+updatePageWidgets\s*\(",
-            "CraftingTerminalScreen.updatePageWidgets",
-        )
-        self.assertIn("fuelTargetPopup.reveal(selected)", toggle)
-        self.assertIn("setFocused(null)", toggle)
-        self.assertIn("setFocused(null)", close)
-        self.assertIn("if (!transform) closeFuelTargetPopup()", page_update)
+        self.assertIn("menu.getVisibleTransformUses()", card_hit)
+        self.assertIn("cell.contains", card_hit)
+        self.assertIn("transformUseIndexAt((int) mouseX, (int) mouseY)", click)
+        self.assertIn("CraftingTerminalMenu.transformUseButtonId", click)
+        self.assertIn("menu.getVisibleTransformUses()", card_render)
+        self.assertIn("menu.getSelectedTransformUse()", card_render)
+        self.assertIn("drawInsetPanel", card_render)
+        self.assertIn("cell.contains(mouseX - leftPos, mouseY - topPos)", card_render)
+        self.assertIn("graphics.fill", card_render)
+        self.assertIn("use.stationId()", card_render)
+        self.assertIn("use.stationWorkPerItem()", card_render)
+        self.assertIn("geometry.transformPreview()", preview)
+        self.assertIn("menu.getSelectedTransformUse()", preview)
+        self.assertIn("gui.magic_storage.transform_select_recipe", preview)
+        self.assertIn("use.stationId()", preview)
+        self.assertIn("use.stationWorkPerItem()", preview)
+        self.assertIn("transformStationWork(use)", preview)
+        self.assertIn("menu.getMachineDescriptors()", station_work)
+        self.assertIn("use.stationId()", station_work)
+        self.assertIn("use.stationWorkPerItem()", station_work)
+        self.assertIn("gui.magic_storage.transform_station_work", en_us)
+        self.assertIn("gui.magic_storage.transform_station_work", zh_tw)
 
-        tooltip = self.java_block(
-            screen,
-            r"\bprotected\s+void\s+renderTooltip\s*\(",
-            "CraftingTerminalScreen.renderTooltip",
-        )
-        self.assertIn("fuelTargetPopup.isMouseOver", tooltip)
-        self.assertLess(
-            tooltip.index("fuelTargetPopup.isMouseOver"),
-            tooltip.index("super.renderTooltip"),
-            "popup rows must suppress tooltips from covered container slots",
-        )
-
-    def test_fuel_page_tooltips_use_only_station_slot_and_reserve_icon_bounds(self):
+    def test_station_rows_and_transform_cards_use_whole_cell_hit_targets(self):
         layout = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java"
         )
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
-        machine_hit = screen[
-            screen.index("private int machineEnergyIndexAt"):
-            screen.index("private int storedFuelIndexAt")
-        ]
-        reserve_hit = self.java_block(
+        machine_hit = self.java_block(
             screen,
-            r"\bprivate\s+int\s+storedFuelIndexAt\s*\(",
-            "CraftingTerminalScreen.storedFuelIndexAt",
+            r"\bprivate\s+int\s+machineEnergyIndexAt\s*\(\s*int\s+mouseX",
+            "CraftingTerminalScreen.machineEnergyIndexAt",
+        )
+        transform_hit = self.java_block(
+            screen,
+            r"\bprivate\s+int\s+transformUseIndexAt\s*\(",
+            "CraftingTerminalScreen.transformUseIndexAt",
         )
 
         self.assertIn("static Rect fuelSlot(Rect", layout)
         self.assertIn("static Rect fuelIcon(Rect", layout)
         self.assertIn("static Rect fuelAmountBounds(Rect", layout)
-        self.assertIn("TerminalLayout.fuelSlot(cells.get(visibleIndex)).contains", machine_hit)
-        self.assertNotIn("cell.contains", machine_hit)
-        self.assertIn("TerminalLayout.fuelIcon(cells.get(visibleIndex)).contains", reserve_hit)
-        self.assertNotIn("cell.contains", reserve_hit)
+        self.assertIn("cell.contains", machine_hit)
+        self.assertIn("cell.contains", transform_hit)
 
     def test_fuel_custom_tooltips_own_machine_slots_before_vanilla_slot_tooltips(self):
         screen = self.read_required(
@@ -2491,7 +2498,13 @@ class StaticRegressionTests(unittest.TestCase):
             "Fuel custom hit regions must return before vanilla renders the same slot tooltip",
         )
         self.assertIn("machineEnergyIndexAt(mouseX, mouseY)", fuel_tooltip)
-        self.assertIn("storedFuelIndexAt(mouseX, mouseY)", fuel_tooltip)
+        self.assertRegex(
+            fuel_tooltip,
+            r"displayedPreferences\(\)\.page\(\)\s*==\s*CraftingTerminalPage\.STATIONS"
+            r"\s*\?\s*machineEnergyIndexAt\(mouseX,\s*mouseY\)\s*:\s*-1",
+        )
+        self.assertIn("transformUseAt(mouseX, mouseY)", fuel_tooltip)
+        self.assertNotIn("storedFuelIndexAt", fuel_tooltip)
         self.assertNotIn("super.renderTooltip", fuel_tooltip)
 
     def test_crafting_terminal_repositions_fuel_slots_without_sticky_checkbox_focus(self):
@@ -2505,7 +2518,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("MACHINE_SLOT_COUNT", screen)
         self.assertIn("repositionFuelSlots", screen)
         self.assertIn("replaceSlot", screen)
-        self.assertIn("geometry.consumablesGrid()", screen)
+        self.assertIn("geometry.transformCards()", screen)
         self.assertIn("geometry.timedStationsGrid()", screen)
         self.assertIn("geometry.instantStationsGrid()", screen)
         self.assertIn("boolean handled = super.mouseClicked", shared_shell)
@@ -2612,7 +2625,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("drawEnergyIcon", fuel_panel)
         self.assertNotIn("nextFuelTargetBtn", crafting)
         self.assertIn("displayedPreferences().page() == CraftingTerminalPage.TRANSFORM", crafting)
-        self.assertIn("renderFuelTypeCapacity", crafting)
+        self.assertIn("renderUtilityStatus", crafting)
         self.assertIn("geometry.fuelStatus()", crafting)
         flow_amount = self.java_block(
             crafting,
@@ -2625,12 +2638,14 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("cell.right()", flow_amount)
         type_capacity = self.java_block(
             crafting,
-            r"\bprivate\s+void\s+renderFuelTypeCapacity\s*\(",
-            "CraftingTerminalScreen.renderFuelTypeCapacity",
+            r"\bprivate\s+void\s+renderUtilityStatus\s*\(",
+            "CraftingTerminalScreen.renderUtilityStatus",
         )
         self.assertIn("geometry.fuelStatus()", type_capacity)
         self.assertIn("drawRaisedPanel(graphics, leftPos, topPos, status)", type_capacity)
         self.assertIn('"gui.magic_storage.type_capacity"', type_capacity)
+        self.assertIn('"tooltip.magic_storage.energy_stored"', type_capacity)
+        self.assertIn("machineStoredAmount(descriptor)", type_capacity)
         self.assertNotIn("drawFlowAmount(graphics, status", type_capacity)
         labels = self.java_block(
             crafting,
@@ -2903,10 +2918,10 @@ class StaticRegressionTests(unittest.TestCase):
             "Rect recipeFooter",
             "List<Rect> recipeNavigationButtons",
             "List<Rect> recipeCraftButtons",
-            "Rect consumablesPanel",
+            "Rect transformPanel",
             "Rect timedStationsPanel",
             "Rect instantStationsPanel",
-            "Rect fuelInput",
+            "Rect transformInput",
         ]
         self.assertEqual([], [region for region in required_layout_regions if region not in layout])
         self.assertIn("static final int CONTROL_SIZE = SLOT_SIZE", layout)
@@ -3010,7 +3025,11 @@ class StaticRegressionTests(unittest.TestCase):
             "TOOL_ROW_BACKGROUND", "TOOL_ROW_BORDER",
         ]:
             self.assertNotIn(palette_name, screen)
-        self.assertIn("drawRaisedPanel(graphics, leftPos, topPos, bar)", screen)
+        self.assertIn("drawRaisedPanel(graphics, leftPos, topPos, row)", screen)
+        self.assertIn(
+            "drawInsetPanel(graphics, leftPos, topPos, geometry.transformTargetSearch())",
+            screen,
+        )
         self.assertIn("drawInsetPanel(graphics, leftPos, topPos, panel)", screen)
         self.assertIn("drawVanillaSlot(graphics, x, y)", screen)
         self.assertIn("super.renderWidget(graphics, mouseX, mouseY, partialTick)", storage)
@@ -3149,7 +3168,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("displays all eight totals live", guide)
         self.assertIn("cooking time", guide)
         self.assertIn("runtime burn time", guide)
-        self.assertIn("Auto discovers valid uses but never consumes", guide)
+        self.assertIn("Auto", guide)
+        self.assertIn("Neither mode selects or consumes anything", guide)
+        self.assertIn("there is no hidden priority", guide)
         self.assertIn("Transform tab", guide)
         self.assertNotIn("Energy Reserves header", guide)
         self.assertNotIn("all currently registered totals", guide)
@@ -3441,11 +3462,15 @@ class StaticRegressionTests(unittest.TestCase):
 
         for declaration in [
             "record FuelDescriptorCounts",
-            "Rect consumablesPanel",
+            "Rect transformPanel",
             "Rect timedStationsPanel",
             "Rect instantStationsPanel",
             "Rect fuelStatus",
-            "FlowGrid consumablesGrid",
+            "Rect transformTargetSearch",
+            "PagedList transformTargetList",
+            "Rect transformInput",
+            "Rect transformPreview",
+            "FlowGrid transformCards",
             "FlowGrid timedStationsGrid",
             "FlowGrid instantStationsGrid",
         ]:
@@ -3463,6 +3488,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("pagedFlowGrid", layout)
         self.assertNotIn("horizontalFlowGrid", layout)
         self.assertIn("renderConsumablesPanel", screen)
+        self.assertIn("renderTransformTargetList", screen)
+        self.assertIn("renderTransformCards", screen)
+        self.assertIn("renderTransformPreview", screen)
         self.assertIn("renderTimedStationsPanel", screen)
         self.assertIn("renderInstantStationsPanel", screen)
         self.assertIn("CraftingTerminalPage.TRANSFORM", screen)
@@ -3494,10 +3522,13 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("fuelStatus.x() - CONTROL_GAP", assembly)
         status = self.java_block(
             screen,
-            r"\bprivate\s+void\s+renderFuelTypeCapacity\s*\(",
-            "CraftingTerminalScreen.renderFuelTypeCapacity",
+            r"\bprivate\s+void\s+renderUtilityStatus\s*\(",
+            "CraftingTerminalScreen.renderUtilityStatus",
         )
         self.assertIn("drawRaisedPanel", status)
+        self.assertIn("machineEnergyIndexAt(mouseX, mouseY)", status)
+        self.assertIn("tooltip.magic_storage.machine_installed", status)
+        self.assertIn("tooltip.magic_storage.machine_rate", status)
         self.assertRegex(
             status,
             r'Component\.translatable\(\s*"gui\.magic_storage\.type_capacity"',
@@ -3630,7 +3661,8 @@ class StaticRegressionTests(unittest.TestCase):
 
         self.assertIn("record FuelPageControls", layout)
         for controls in [
-            "consumablesPageControls",
+            "transformTargetPageControls",
+            "transformCardPageControls",
             "timedStationsPageControls",
             "instantStationsPageControls",
             "fuelSearchPageControls",
@@ -3644,9 +3676,9 @@ class StaticRegressionTests(unittest.TestCase):
             "CraftingTerminalScreen.init",
         )
         self.assertEqual(
-            4,
+            5,
             init.count("addFuelPageControls("),
-            "each Fuel descriptor row and unified search must construct explicit previous/next controls",
+            "Transform targets/cards, Station rows, and unified search need explicit paging controls",
         )
         page_controls = self.java_block(
             screen,
@@ -3736,10 +3768,12 @@ class StaticRegressionTests(unittest.TestCase):
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
-        machine_hit = screen[
-            screen.index("private int machineEnergyIndexAt"):
-            screen.index("private int storedFuelIndexAt")
-        ]
+        machine_hit = self.java_block(
+            screen,
+            r"\bprivate\s+int\s+machineEnergyIndexAt\s*\(\s*"
+            r"MachineEnergyTable\.Category",
+            "CraftingTerminalScreen.machineEnergyIndexAt category overload",
+        )
         fuel_tooltip = self.java_block(
             screen,
             r"\bprivate\s+boolean\s+renderFuelTooltip\s*\(",
@@ -3747,11 +3781,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
 
         self.assertIn("static Rect fuelAmountBounds(Rect", layout)
-        self.assertIn(
-            "TerminalLayout.fuelAmountBounds(cells.get(visibleIndex)).contains",
-            machine_hit,
-            "hovering the visible Timed Station amount must resolve the same descriptor as its slot",
-        )
+        self.assertIn("cell.contains", machine_hit)
         self.assertIn("entry.representativeStack().getHoverName()", fuel_tooltip)
         self.assertIn("installed.getHoverName()", fuel_tooltip)
         self.assertIn("entry.rateFor(installed)", fuel_tooltip)
@@ -3850,19 +3880,20 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertEqual(4, amount_controls.count("addRecipeAmountButton("))
         self.assertIn("contiguousSegmentRects", layout)
 
-    def test_fuel_target_popup_renders_once_after_container_foreground(self):
+    def test_transform_sidebar_and_preview_render_in_the_normal_container_pass(self):
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
-        self.assertIn("addWidget(fuelTargetPopup)", screen)
-        self.assertNotIn("addRenderableWidget(fuelTargetPopup)", screen)
-        foreground = self.java_block(
+        self.assertNotIn("FuelTargetPopup", screen)
+        self.assertNotIn("fuelTargetPopup.render", screen)
+        panel = self.java_block(
             screen,
-            r"\bpublic\s+void\s+render\s*\(\s*GuiGraphics",
-            "Crafting Terminal foreground overlay pass",
+            r"\bprivate\s+void\s+renderConsumablesPanel\s*\(",
+            "CraftingTerminalScreen.renderConsumablesPanel",
         )
-        self.assertLess(foreground.index("super.render"), foreground.index("fuelTargetPopup.render"))
-        self.assertRegex(foreground, r"translate\([^;]*[3-9]\d\d(?:\.0)?F?\s*\)")
+        self.assertIn("renderTransformTargetList", panel)
+        self.assertIn("renderTransformCards", panel)
+        self.assertIn("renderTransformPreview", panel)
 
     def test_terminal_control_name_icon_is_even_grid_centered(self):
         atlas = ROOT / "src/main/resources/assets/magic_storage/textures/gui/terminal_controls.png"

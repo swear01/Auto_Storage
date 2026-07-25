@@ -186,10 +186,12 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     static final int RESET_OUTPUT_DESTINATION_BUTTON = 24;
     static final int RESET_PLAYER_INVENTORY_BUTTON = 25;
     static final int STATIONS_PAGE_BUTTON = 29;
+    private static final int TRANSFORM_USE_BUTTON_BASE = 2_000;
     private static final List<EnergyType> FUEL_TARGETS = List.of(
             EnergyType.FURNACE_FUEL,
             EnergyType.BLAZE_FUEL);
-    private static final int ENERGY_DATA_START = 8;
+    private static final int SELECTED_TRANSFORM_USE_DATA_SLOT = 8;
+    private static final int ENERGY_DATA_START = SELECTED_TRANSFORM_USE_DATA_SLOT + 1;
     private static final int LIVE_ENERGY_DATA_SLOTS = EnergyType.values().length * 4;
     private static final int RETIRED_ENERGY_DATA_SLOTS = 4;
     private static final int ENERGY_DATA_SLOTS = LIVE_ENERGY_DATA_SLOTS + RETIRED_ENERGY_DATA_SLOTS;
@@ -223,6 +225,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private final Inventory playerInventory;
     private CraftingTerminalPage page = CraftingTerminalPage.STORAGE;
     private ResourceLocation selectedTransformTarget;
+    private ResourceLocation selectedTransformUseId;
     private final long[] energyAmounts = new long[EnergyType.values().length];
     private final long[] ingredientAvailable = new long[MAX_INGREDIENTS];
     private long processRequired;
@@ -279,6 +282,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     case 5 -> page.ordinal();
                     case 6 -> encodeTransformTarget(selectedTransformTarget);
                     case 7 -> outputDestination.ordinal();
+                    case SELECTED_TRANSFORM_USE_DATA_SLOT ->
+                            encodeTransformUse(selectedTransformUseId);
                     default -> getPreviewData(index);
                 };
             }
@@ -294,6 +299,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     case 5 -> page = CraftingTerminalPage.fromOrdinal(value);
                     case 6 -> selectedTransformTarget = decodeTransformTarget(value);
                     case 7 -> outputDestination = TerminalOutputDestination.byId(value);
+                    case SELECTED_TRANSFORM_USE_DATA_SLOT ->
+                            selectedTransformUseId = decodeTransformUse(value);
                     default -> setPreviewData(index, value);
                 }
             }
@@ -384,6 +391,18 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         int index = value - 1;
         List<ResourceLocation> targets = TransformProviderApi.targetIds(descriptorSnapshot);
         return index >= 0 && index < targets.size() ? targets.get(index) : null;
+    }
+
+    private int encodeTransformUse(ResourceLocation useId) {
+        if (useId == null) return 0;
+        int index = TransformProviderApi.useIds(descriptorSnapshot).indexOf(useId);
+        return index < 0 ? 0 : index + 1;
+    }
+
+    private ResourceLocation decodeTransformUse(int value) {
+        int index = value - 1;
+        List<ResourceLocation> useIds = TransformProviderApi.useIds(descriptorSnapshot);
+        return index >= 0 && index < useIds.size() ? useIds.get(index) : null;
     }
 
     @Override
@@ -787,32 +806,32 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 getSlot(FUEL_INPUT_SLOT).getItem(), descriptorSnapshot);
     }
 
-    private TransformProviderApi.Use resolveTransformUse(
-            ItemStack stack,
-            StorageCoreBlockEntity core
-    ) {
-        List<TransformProviderApi.Use> uses =
-                TransformProviderApi.uses(stack, descriptorSnapshot);
-        if (selectedTransformTarget != null) {
-            return uses.stream()
-                    .filter(use -> use.id().equals(selectedTransformTarget))
-                    .findFirst()
-                    .orElse(null);
+    public List<TransformProviderApi.Use> getVisibleTransformUses() {
+        List<TransformProviderApi.Use> uses = getTransformUses();
+        if (selectedTransformTarget == null) return uses;
+        return uses.stream()
+                .filter(use -> use.targetId().equals(selectedTransformTarget))
+                .toList();
+    }
+
+    public TransformProviderApi.Use getSelectedTransformUse() {
+        if (selectedTransformUseId == null) return null;
+        return getVisibleTransformUses().stream()
+                .filter(use -> use.id().equals(selectedTransformUseId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static int transformUseButtonId(int visibleIndex) {
+        if (visibleIndex < 0) {
+            throw new IllegalArgumentException("Transform use index must be non-negative");
         }
-        FuelValue autoFuel = FuelTable.getAutoFuelValue(stack, core::getEnergy);
-        if (autoFuel != null) {
-            ResourceLocation id = TransformProviderApi.energyTargetId(autoFuel.pool());
-            TransformProviderApi.Use selected = uses.stream()
-                    .filter(use -> use.id().equals(id))
-                    .findFirst()
-                    .orElse(null);
-            if (selected != null) return selected;
-        }
-        return uses.isEmpty() ? null : uses.getFirst();
+        return TRANSFORM_USE_BUTTON_BASE + visibleIndex;
     }
 
     private void onFuelInputChanged() {
         if (processingFuelInput || playerInventory.player.level().isClientSide()) return;
+        selectedTransformUseId = null;
         updateTransformPreview(getCore(playerInventory.player.level()));
     }
 
@@ -830,7 +849,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         int amount = requested == Integer.MAX_VALUE ? available : requested;
         if (amount <= 0 || amount > available || amount > stack.getCount()) return false;
         ItemStack converted = stack.copyWithCount(amount);
-        TransformProviderApi.Use use = resolveTransformUse(converted, core);
+        TransformProviderApi.Use use = getSelectedTransformUse();
         if (use == null || !commitTransform(core, use, converted)) return false;
 
         ItemStack remainder = stack.hasCraftingRemainingItem()
@@ -861,7 +880,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
     private int transformableCount(StorageCoreBlockEntity core, ItemStack input) {
         if (input.isEmpty()) return 0;
-        TransformProviderApi.Use use = resolveTransformUse(input, core);
+        TransformProviderApi.Use use = getSelectedTransformUse();
         if (use == null) return 0;
         int low = 0;
         int high = input.getCount();
@@ -3027,6 +3046,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             if (buttonId == AUTO_FUEL_TARGET_BUTTON) {
                 if (page != CraftingTerminalPage.TRANSFORM) return false;
                 selectedTransformTarget = null;
+                selectedTransformUseId = null;
                 updateTransformPreview(getCore(player.level()));
                 return true;
             }
@@ -3038,6 +3058,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 if (page != CraftingTerminalPage.TRANSFORM) return false;
                 selectedTransformTarget = transformTargets.get(
                         buttonId - TransformProviderApi.LEGACY_FUEL_BUTTON_BASE);
+                selectedTransformUseId = null;
                 updateTransformPreview(getCore(player.level()));
                 return true;
             }
@@ -3047,6 +3068,16 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 if (page != CraftingTerminalPage.TRANSFORM) return false;
                 selectedTransformTarget = transformTargets.get(
                         buttonId - TransformProviderApi.TARGET_BUTTON_BASE);
+                selectedTransformUseId = null;
+                updateTransformPreview(getCore(player.level()));
+                return true;
+            }
+            List<TransformProviderApi.Use> transformUses = getVisibleTransformUses();
+            if (buttonId >= TRANSFORM_USE_BUTTON_BASE
+                    && buttonId < TRANSFORM_USE_BUTTON_BASE + transformUses.size()) {
+                if (page != CraftingTerminalPage.TRANSFORM) return false;
+                selectedTransformUseId = transformUses.get(
+                        buttonId - TRANSFORM_USE_BUTTON_BASE).id();
                 updateTransformPreview(getCore(player.level()));
                 return true;
             }
@@ -3120,9 +3151,16 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             outputDestination = preferences.outputDestination();
             changed = true;
         }
+        ResourceLocation requestedTransformTarget = preferences.transformTarget();
+        if (requestedTransformTarget != null
+                && !TransformProviderApi.targetIds(descriptorSnapshot)
+                .contains(requestedTransformTarget)) {
+            requestedTransformTarget = null;
+        }
         if (!java.util.Objects.equals(
-                selectedTransformTarget, preferences.transformTarget())) {
-            selectedTransformTarget = preferences.transformTarget();
+                selectedTransformTarget, requestedTransformTarget)) {
+            selectedTransformTarget = requestedTransformTarget;
+            selectedTransformUseId = null;
             changed = true;
         }
         if (page != preferences.page()) {
@@ -3140,6 +3178,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         if (page == nextPage) return true;
         if (page == CraftingTerminalPage.TRANSFORM) returnTransientInputs(player);
         page = nextPage;
+        selectedTransformUseId = null;
         scrollOffset = 0;
         StorageCoreBlockEntity core = getCore(player.level());
         if (core != null && page.isItemPage()) {

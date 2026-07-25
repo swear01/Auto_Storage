@@ -26,7 +26,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)Fuel, remote, or casing issue:$() verify the selected Fuel Target and the item's valid burn value; keep the bound Core and route loaded in the same dimension; and install optional Fusion 1.2.12 only if you want connected casing."
+      "text": "$(thing)Transform, remote, or casing issue:$() verify the selected Transform Target, click a compatible use card, and check the item's burn value; keep the bound Core and route loaded in the same dimension; install optional Fusion only for connected casing."
     }
   ]
 }

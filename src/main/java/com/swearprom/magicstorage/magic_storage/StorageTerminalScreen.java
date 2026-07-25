@@ -413,6 +413,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             case FLUID -> Items.WATER_BUCKET.getDefaultInstance();
             case ENERGY -> Items.REDSTONE.getDefaultInstance();
             case GAS -> Items.BREWING_STAND.getDefaultInstance();
+            case STATION_WORK -> Items.CLOCK.getDefaultInstance();
             case OTHER -> Items.AMETHYST_SHARD.getDefaultInstance();
         };
     }

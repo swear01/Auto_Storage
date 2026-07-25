@@ -15,7 +15,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Use the left resource selector for Items, Fluids, Energy, Gases, or Other registered addon kinds. Item view supports normal extraction and inventory insertion. Other views use display-only representatives and never give you the icon item."
+      "text": "Use the left resource selector for Items, Fluids, Energy, Gases, Station Work, or Other registered addon kinds. Energy includes FE and generated Fuel/Brew/Axe/descriptor reserves; Station Work contains only processing work. Item view supports normal extraction and inventory insertion. Other views use display-only representatives."
     },
     {
       "type": "patchouli:text",

@@ -63,6 +63,7 @@ class SelfTest {
         testMachineRateFormatter();
         testEnergyCost();
         testFuelValue();
+        testTransformProviderApi();
         testEnergyTypeUniqueness();
         testSortMode();
         testSortOrder();
@@ -116,6 +117,17 @@ class SelfTest {
         assertTrue("recipe resource amount bounds the largest exact long without truncation",
                 RecipeResourceAmountFormatter.format(Long.MAX_VALUE, Long.MAX_VALUE, false)
                         .required().equals("/9.2E"));
+    }
+
+    private static void testTransformProviderApi() {
+        var fuel = TransformProviderApi.targets(MachineEnergyTable.entries()).stream()
+                .filter(target -> target.id().equals(
+                        TransformProviderApi.energyTargetId(EnergyType.FURNACE_FUEL)))
+                .findFirst()
+                .orElseThrow();
+        assertTrue("Transform targets carry a localized produced-resource label",
+                fuel.label().equals(
+                        Component.translatable("gui.magic_storage.energy.furnace_fuel")));
     }
 
     private static void testItemKey() {
@@ -1366,13 +1378,14 @@ class SelfTest {
     }
 
     private static void testTerminalResourceView() {
-        assertTrue("TerminalResourceView has five explicit groups",
-                TerminalResourceView.values().length == 5);
-        assertTrue("resource view cycle keeps stable item-fluid-energy-gas-other order",
+        assertTrue("TerminalResourceView has six explicit groups",
+                TerminalResourceView.values().length == 6);
+        assertTrue("resource view cycle keeps stable item-fluid-energy-gas-station-work-other order",
                 TerminalResourceView.ITEM.next() == TerminalResourceView.FLUID
                         && TerminalResourceView.FLUID.next() == TerminalResourceView.ENERGY
                         && TerminalResourceView.ENERGY.next() == TerminalResourceView.GAS
-                        && TerminalResourceView.GAS.next() == TerminalResourceView.OTHER
+                        && TerminalResourceView.GAS.next() == TerminalResourceView.STATION_WORK
+                        && TerminalResourceView.STATION_WORK.next() == TerminalResourceView.OTHER
                         && TerminalResourceView.OTHER.next() == TerminalResourceView.ITEM);
         assertTrue("resource view previous wraps from item to other",
                 TerminalResourceView.ITEM.previous() == TerminalResourceView.OTHER);
@@ -1385,6 +1398,10 @@ class SelfTest {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "water"),
                 new net.minecraft.nbt.CompoundTag());
         StorageResourceKey energy = StorageResourceKey.neoforgeEnergy();
+        StorageResourceKey fuelEnergy =
+                StorageResourceBridge.energyKey(EnergyType.FURNACE_FUEL);
+        StorageResourceKey stationWork = StorageResourceBridge.stationWorkKey(
+                ResourceLocation.fromNamespaceAndPath("magic_storage", "test_station"));
         StorageResourceKey gas = StorageResourceKey.of(
                 StorageResourceKindApi.CHEMICAL_KIND,
                 ResourceLocation.fromNamespaceAndPath("mekanism", "oxygen"),
@@ -1401,13 +1418,17 @@ class SelfTest {
                 TerminalResourceView.ITEM.matches(item)
                         && TerminalResourceView.FLUID.matches(fluid)
                         && TerminalResourceView.ENERGY.matches(energy)
+                        && TerminalResourceView.ENERGY.matches(fuelEnergy)
                         && TerminalResourceView.GAS.matches(gas)
-                        && TerminalResourceView.GAS.matches(canonicalGas));
+                        && TerminalResourceView.GAS.matches(canonicalGas)
+                        && TerminalResourceView.STATION_WORK.matches(stationWork)
+                        && !TerminalResourceView.ENERGY.matches(stationWork));
         assertTrue("other view is reserved for addon kinds",
                 TerminalResourceView.OTHER.matches(addon)
                         && !TerminalResourceView.OTHER.matches(item)
                         && !TerminalResourceView.OTHER.matches(fluid)
                         && !TerminalResourceView.OTHER.matches(energy)
+                        && !TerminalResourceView.OTHER.matches(stationWork)
                         && !TerminalResourceView.OTHER.matches(gas)
                         && !TerminalResourceView.OTHER.matches(canonicalGas));
         assertTrue("invalid resource view wire id fails to item default",
@@ -1600,13 +1621,13 @@ class SelfTest {
                 sideBySide.railButtons().get(4).y() - sideBySide.railButtons().get(3).bottom() >= 6);
         assertTrue("utility rail contains only the four page tabs",
                 sideBySide.fuelRailButtons().size() == 4);
-        assertTrue("Fuel popup includes Auto plus every server-approved target",
-                sideBySide.fuelTargetPopup().itemCount() == counts.fuelTargetCount());
-        assertTrue("Fuel popup rows are descriptor-driven and bounded",
-                sideBySide.fuelTargetPopup().rows(0).size() == counts.fuelTargetCount()
-                        && rectanglesDoNotOverlap(sideBySide.fuelTargetPopup().rows(0)));
-        assertTrue("Fuel popup never overlaps the left control rail",
-                !sideBySide.fuelTargetPopup().bounds().overlaps(sideBySide.railPanel()));
+        assertTrue("Transform sidebar includes Auto plus every server-approved target",
+                sideBySide.transformTargetList().itemCount() == counts.fuelTargetCount());
+        assertTrue("Transform target rows are descriptor-driven and bounded",
+                sideBySide.transformTargetList().rows(0).size() == counts.fuelTargetCount()
+                        && rectanglesDoNotOverlap(sideBySide.transformTargetList().rows(0)));
+        assertTrue("Transform target sidebar never overlaps the left control rail",
+                !sideBySide.transformTargetList().bounds().overlaps(sideBySide.railPanel()));
 
         TerminalLayout.Rect sampleFlowCell = new TerminalLayout.Rect(20, 30, 72, 28);
         assertTrue("station hover geometry is the left-centered 18px slot",
@@ -1626,18 +1647,18 @@ class SelfTest {
 
         var overflowCounts = new TerminalLayout.FuelDescriptorCounts(64, 64, 64, 61);
         var overflow = TerminalLayout.forProfile(TerminalProfile.CRAFTING, 423, 291, overflowCounts);
-        assertTrue("large Fuel target lists expose a bounded popup viewport",
-                overflow.fuelTargetPopup().capacity() > 0
-                        && overflow.fuelTargetPopup().capacity() <= 6
-                        && overflow.fuelTargetPopup().itemCount() == 61);
-        assertFullWidthLastPage("consumables", overflow.consumablesGrid());
+        assertTrue("large Transform target lists expose a paged persistent viewport",
+                overflow.transformTargetList().capacity() > 0
+                        && overflow.transformTargetList().pageCount() > 1
+                        && overflow.transformTargetList().itemCount() == 61);
+        assertFullWidthLastPage("transform cards", overflow.transformCards());
         assertFullWidthLastPage("timed stations", overflow.timedStationsGrid());
         assertFullWidthLastPage("instant stations", overflow.instantStationsGrid());
         assertTrue("descriptor growth preserves the inventory-side type-capacity panel",
                 overflow.fuelStatus().equals(sideBySide.fuelStatus())
                         && overflow.instantStationsGrid().bounds().equals(
                         sideBySide.instantStationsGrid().bounds())
-                        && overflow.consumablesGrid().pageCount() > 1
+                        && overflow.transformCards().pageCount() > 1
                         && overflow.timedStationsGrid().pageCount() > 1
                         && overflow.instantStationsGrid().pageCount() > 1);
         for (int page = 0; page < overflow.instantStationsGrid().pageCount(); page++) {
@@ -1646,6 +1667,28 @@ class SelfTest {
                         !cell.overlaps(overflow.fuelStatus()));
             }
         }
+
+        var fullscreen = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING, 640, 416, overflowCounts);
+        for (TerminalLayout.FlowGrid grid : List.of(
+                fullscreen.timedStationsGrid(),
+                fullscreen.instantStationsGrid())) {
+            assertTrue("fullscreen Stations derive at least seven readable rows from available height",
+                    grid.rows() >= 7);
+            assertTrue("adaptive Station rows preserve an 18px item slot",
+                    grid.cells().stream().allMatch(cell -> cell.height() >= TerminalLayout.SLOT_SIZE));
+        }
+        assertTrue("Station search uses the same readable adaptive row sizing",
+                fullscreen.fuelSearchGrid().cells().stream()
+                        .allMatch(cell -> cell.height() >= TerminalLayout.SLOT_SIZE));
+        var tallFullscreen = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING, 640, 600, overflowCounts);
+        assertTrue("taller viewports expose more Station rows instead of keeping a fixed cap",
+                tallFullscreen.timedStationsGrid().rows()
+                        > fullscreen.timedStationsGrid().rows()
+                        && tallFullscreen.instantStationsGrid().rows()
+                        > fullscreen.instantStationsGrid().rows()
+                        && tallFullscreen.timedStationsGrid().rows() >= 8);
 
         for (int height = 240; height <= 600; height++) {
             for (int width : new int[]{320, 415, 416, 423, 480, 854}) {
@@ -1725,12 +1768,11 @@ class SelfTest {
             TerminalLayout.Geometry geometry,
             TerminalLayout.FuelDescriptorCounts counts
     ) {
-        TerminalLayout.Rect transform = geometry.consumablesPanel();
+        TerminalLayout.Rect transform = geometry.transformPanel();
         List<TerminalLayout.Rect> stations = List.of(
                 geometry.timedStationsPanel(),
                 geometry.instantStationsPanel());
-        List<TerminalLayout.Rect> panels = List.of(
-                transform, stations.getFirst(), stations.getLast());
+        List<TerminalLayout.Rect> panels = stations;
         assertTrue(label + " Transform fills the complete upper workspace",
                 transform.x() == 8
                         && transform.y() == TerminalLayout.TOP_HEIGHT
@@ -1746,16 +1788,14 @@ class SelfTest {
                         && stations.getLast().right() == transform.right());
         assertTrue(label + " Stations preserve a visible group gap",
                 stations.getLast().x() > stations.getFirst().right());
-        assertPagedFlowGrid(label + " consumables", geometry.consumablesGrid(), counts.consumableCount());
+        assertPagedFlowGrid(label + " transform cards", geometry.transformCards(), counts.consumableCount());
         assertPagedFlowGrid(label + " timed stations", geometry.timedStationsGrid(), counts.timedStationCount());
         assertPagedFlowGrid(label + " instant stations", geometry.instantStationsGrid(), counts.instantStationCount());
         List<TerminalLayout.FlowGrid> grids = List.of(
-                geometry.consumablesGrid(),
                 geometry.timedStationsGrid(),
                 geometry.instantStationsGrid());
         boolean horizontalHeaders = grids.get(0).bounds().x() == panels.get(0).x() + 2
-                && grids.get(1).bounds().x() == panels.get(1).x() + 2
-                && grids.get(2).bounds().x() == panels.get(2).x() + 2;
+                && grids.get(1).bounds().x() == panels.get(1).x() + 2;
         for (int index = 0; index < grids.size(); index++) {
             TerminalLayout.Rect panel = panels.get(index);
             TerminalLayout.FlowGrid grid = grids.get(index);
@@ -1773,17 +1813,22 @@ class SelfTest {
                                 && header.right() <= grid.bounds().x());
             }
         }
-        assertTrue(label + " Fuel input is the first consumable slot",
-                geometry.fuelInput().equals(
-                        TerminalLayout.fuelSlot(geometry.consumablesGrid().cells().getFirst())));
-        assertTrue(label + " Fuel target selector stays in Consumables header",
-                geometry.fuelTargetSelector().x() >= geometry.consumablesPanel().x()
-                        && geometry.fuelTargetSelector().right() <= geometry.consumablesPanel().right()
-                        && geometry.fuelTargetSelector().y() >= geometry.consumablesPanel().y()
-                        && geometry.fuelTargetSelector().bottom()
-                        <= geometry.consumablesGrid().bounds().y());
-        assertTrue(label + " Fuel target selector is a compact control",
-                geometry.fuelTargetSelector().width() <= 96);
+        assertTrue(label + " Transform input remains a standalone slot outside recipe cards",
+                geometry.transformPanel().contains(
+                        geometry.transformInput().x(), geometry.transformInput().y())
+                        && geometry.transformCards().cells().stream()
+                        .noneMatch(cell -> cell.overlaps(geometry.transformInput())));
+        assertTrue(label + " Transform target search and persistent list occupy the left column",
+                geometry.transformTargetSearch().x() == geometry.transformTargetList().bounds().x()
+                        && geometry.transformTargetSearch().bottom()
+                        <= geometry.transformTargetList().bounds().y()
+                        && geometry.transformTargetList().bounds().right()
+                        < geometry.transformCards().bounds().x());
+        assertTrue(label + " Transform cards remain above the selected recipe preview",
+                geometry.transformCards().bounds().bottom()
+                        <= geometry.transformPreview().y()
+                        && !geometry.transformCards().bounds().overlaps(
+                        geometry.transformPreview()));
         assertTrue(label + " type capacity is an independent panel right of player inventory",
                 geometry.fuelStatus().x() == geometry.playerInventory().right() + 2
                         && geometry.fuelStatus().right() == geometry.imageWidth() - 8
@@ -1822,7 +1867,6 @@ class SelfTest {
                         && !geometry.fuelSearchPageControls().previous().overlaps(
                         geometry.fuelSearchPageControls().next()));
         for (TerminalLayout.FlowGrid grid : List.of(
-                geometry.consumablesGrid(),
                 geometry.timedStationsGrid(),
                 geometry.instantStationsGrid())) {
             for (TerminalLayout.Rect cell : grid.cells()) {

@@ -7,6 +7,7 @@ public enum TerminalResourceView {
     FLUID,
     ENERGY,
     GAS,
+    STATION_WORK,
     OTHER;
 
     public TerminalResourceView next() {
@@ -23,6 +24,8 @@ public enum TerminalResourceView {
             case FLUID -> StorageResourceKinds.isKindAvailable(StorageResourceKindApi.FLUID_KIND);
             case ENERGY -> StorageResourceKinds.isKindAvailable(StorageResourceKindApi.ENERGY_KIND);
             case GAS -> StorageResourceKinds.isChemicalKindAvailable();
+            case STATION_WORK ->
+                    StorageResourceKinds.isKindAvailable(StorageResourceKindApi.WORK_KIND);
             case OTHER -> StorageResourceKinds.hasOtherKind();
         };
     }
@@ -55,8 +58,11 @@ public enum TerminalResourceView {
             case ITEM -> kind.equals(StorageResourceKindApi.ITEM_KIND);
             case FLUID -> kind.equals(StorageResourceKindApi.FLUID_KIND);
             case ENERGY -> kind.equals(StorageResourceKindApi.ENERGY_KIND)
-                    || kind.equals(StorageResourceKindApi.WORK_KIND);
+                    || kind.equals(StorageResourceKindApi.WORK_KIND)
+                    && StorageResourceBridge.stationWorkDescriptorId(key).isEmpty();
             case GAS -> StorageResourceKinds.isChemicalKindId(kind);
+            case STATION_WORK ->
+                    StorageResourceBridge.stationWorkDescriptorId(key).isPresent();
             case OTHER -> !StorageResourceKinds.isBuiltInKindId(kind);
         };
     }

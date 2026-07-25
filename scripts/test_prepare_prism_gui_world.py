@@ -295,6 +295,14 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 10_000,
                 manifest["baseline"]["station_work"]["magic_storage:mekanism_crusher"],
             )
+            self.assertEqual(
+                {"item": "powah:furnator_starter", "count": 1},
+                manifest["baseline"]["installed_stations"]["magic_storage:powah_furnator"],
+            )
+            self.assertEqual(
+                100_000,
+                manifest["baseline"]["station_work"]["magic_storage:powah_furnator"],
+            )
             self.assertEqual("magic_storage:storage_terminal", manifest["player_kit"]["hotbar"]["1"]["item"])
             self.assertEqual([], manifest["player_kit"]["inventory"])
             self.assertTrue(manifest["fullscreen_gate"]["required"])

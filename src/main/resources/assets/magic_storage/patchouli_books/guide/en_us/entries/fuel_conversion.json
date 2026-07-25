@@ -6,7 +6,7 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "Open $(thing)Transform$(), place one input in the slot, then choose a matching target or leave it on $(thing)Auto$(). Auto discovers valid uses but never consumes the item by itself. Use ×1, ×8, ×64, or Max to commit explicitly. Leaving the page or closing the terminal returns every unconverted item."
+      "text": "Open $(thing)Transform$() and place one exact input in the slot. $(thing)Auto$() shows every compatible use of that item; choosing Fuel, Energy, Mana, or another produced target only filters those uses. Neither mode selects or consumes anything. Click one whole horizontal card, then use ×1, ×8, ×64, or Max. Leaving returns every unconverted item."
     },
     {
       "type": "patchouli:text",
@@ -14,7 +14,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)Brew Energy:$() Blaze Rod adds 1,200 and Blaze Powder adds 600. Auto first chooses the compatible target with fewer accepted item sources, then the lower stored amount, then stable order. A Blaze Rod therefore chooses Brew Energy when both pools are otherwise tied."
+      "text": "$(thing)Brew Energy:$() Blaze Rod adds 1,200 and Blaze Powder adds 600. A Blaze Rod may therefore show both Fuel and Brew Energy cards in Auto. The player chooses the conversion; there is no hidden priority."
     },
     {
       "type": "patchouli:text",
@@ -23,6 +23,10 @@
     {
       "type": "patchouli:text",
       "text": "Some modded transforms are timed. For example, a generator can convert fuel into FE only after its installed processing station has accumulated enough work at that exact variant's rate. Storage container transfer is not a transform: batteries, tanks, and Mana containers use direct deposit or withdrawal instead."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The target sidebar is always visible. Search uses localized produced-resource names, arrows or the wheel change pages, and middle-click returns to Auto. The selected card's output and work cost appear in the lower preview."
     }
   ]
 }

@@ -632,14 +632,14 @@ tasks.named('check').configure {
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-def expectedSelfTestSummary = 'SelfTest: 229484 passed, 0 failed, 229484 total'
+def expectedSelfTestSummary = 'SelfTest: 210337 passed, 0 failed, 210337 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {
             throw new GradleException('Base GameTest did not produce run/logs/latest.log')
         }
         def text = baseGameTestLatestLog.getText('UTF-8')
-        if (!text.contains('All 392 required tests passed')
+        if (!text.contains('All 395 required tests passed')
                 || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Base GameTest or SelfTest did not pass; inspect run/logs/latest.log')

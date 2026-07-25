@@ -127,13 +127,11 @@ This design originally specified one-time migration from the old persisted axe s
 
 ## Transform target selector and station hit boxes
 
-The current target cycle remains available and gains a separate list button. The anchored popup is generated from the ordered server-approved target descriptors and shows representative item, localized name, and selected state. It supports bounded scrolling, outside-click close, Escape close, page-leave focus cleanup, and an EMI exclusion rectangle. While open, its rectangle consumes pointer/scroll input and suppresses covered container-slot tooltips instead of clicking or describing the UI underneath it.
+GitHub #23 replaces the old target cycle and popup with a persistent left target list. Auto is exact-input Show Uses only: it lists every compatible use but never preselects, consumes, or executes one. Explicit targets filter uses of that same inserted item by produced target. The list has localized target labels independent of representative item names, search, paging, full-row hit boxes, selected state, wheel navigation, and middle-click reset.
 
-The popup is an input widget but renders exactly once in a foreground layer above the container screen, slots, and ordinary tooltips. It must not be registered as a second independently rendered screen child.
+Each visible use is a whole horizontal card. Clicking it selects a server-validated stable use ID; amount actions remain disabled until selection. The lower preview shows the selected output and station/work cost. Search, list page, card page, and selected card are session presentation state; only the existing validated Transform target preference persists.
 
-Station tooltips trigger only over the actual station slot or representative icon bounds. Hovering unused padding in a flow cell produces no station tooltip. Paging and future descriptor growth continue to use panel-local flow geometry.
-
-Transform owns the target selector and conversion input. Stations uses compact horizontal representative-item-plus-installed-amount rows in separate Processing and Instant groups. Current paging, search, and the inventory-side type-capacity panel are defined by the replacement layout design linked at the top of this document.
+Station hover and click regions use the whole horizontal cell. Processing and Instant remain separate, but each grid derives its rows from available height and the shared readable row height instead of a fixed count. The lower detail panel shows the hovered station name, installed count, rate, and stored work; otherwise it shows type capacity.
 
 ## Retired Bottle Energy migration
 

@@ -11,7 +11,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "See $(l:magic_storage:recipes)Recipe Catalog$() for the exact crafting layout."
+      "text": "Transform keeps a searchable target list on the left. Insert one exact item, choose Auto to see all its uses or a produced target to filter them, then click one horizontal card. Auto never selects or executes a conversion."
     },
     {
       "type": "patchouli:text",
@@ -32,6 +32,10 @@
     {
       "type": "patchouli:text",
       "text": "Craftable may show an output with zero stored quantity when its recipe can run now. Such an entry selects a recipe but is not a stored stack to extract. See $(l:magic_storage:recipe_costs)Recipe Costs and Support$() for station and recipe limits."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Stations has only Processing and Instant groups. Their visible rows grow with the screen. Hover a station row for its installed count, rate, and stored work; use the resource selector's separate Energy and Station Work pages to inspect generated reserves and processing work."
     }
   ]
 }

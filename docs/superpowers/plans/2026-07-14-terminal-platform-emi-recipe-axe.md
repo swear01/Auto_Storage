@@ -173,7 +173,7 @@
 
 ## Task 7: Scalable Fuel target popup and exact hover bounds
 
-> Status: complete. RED began with missing popup/list/exact-hitbox APIs and three focused static failures, then added overlay click-through, covered-slot tooltip, and stale Prism checklist failures. GREEN is compileJava, build, SelfTest 222959/222959, GameTest 251/251, Python 102/102, runData without drift, and runClient dry-run. The shared cycle remains, while immutable bounded popup geometry, descriptor rows, selected state, close/focus/EMI behavior, event suppression, and exact slot/icon hover bounds are now guarded.
+> Historical status: completed, then superseded by GitHub #23. The current UI has no Fuel target cycle or popup; it uses a persistent Transform target sidebar, exact-input use cards, and whole-station-row hover bounds.
 
 **Files:**
 
@@ -187,9 +187,9 @@
 - Modify: `scripts/test_run_prism_gui_session.py`
 - Modify: `docs/notes.md`
 
-**RED:** Add tests for the separate list button, descriptor-driven popup rows, selected state, bounded scrolling, left-next/right-previous cycle behavior, outside-click and Escape close, focus cleanup, popup EMI exclusion, no rail overlap, and tooltips only inside the actual station slot/icon rectangle. Run SelfTest/Python and observe the current whole-flow-cell hover and cycle-only selector fail.
+**Historical RED:** Add tests for the separate list button, descriptor-driven popup rows, selected state, bounded scrolling, left-next/right-previous cycle behavior, outside-click and Escape close, focus cleanup, popup EMI exclusion, no rail overlap, and tooltips only inside the actual station slot/icon rectangle.
 
-**GREEN:** Add popup geometry to the shared immutable layout, render the ordered server-approved target list, route bounded pointer/wheel/key input, and tighten station hit testing to icon/slot bounds. Run the focused tests.
+**Historical GREEN:** Added the popup geometry later removed by #23.
 
 **Commit:** `feat: add scalable fuel target selector`
 
@@ -274,7 +274,7 @@
 
 **RED:** Add dist-neutral, GameTest, and static contracts before production edits. The first run must prove Bottle Energy still exists in enum/Fuel/UI/NBT behavior; legacy conversion/overflow recovery and missing-live-energy reset are absent; Import Bus has no all-side stable insert-only capability; popup ordering, neutral no-recipe state, station badge, destination icon, concise localized tooltips, even-grid Name A, role differentiation, direction grammar, and symmetry are not satisfied. Record the focused failures, then separately change the GUI-lab/checklist tests to reject `bottle_fuel` and confirm the generated baseline/checklist still fail.
 
-**GREEN:** Remove Bottle Energy from live enum, fuel mappings, targets, labels, guide, and test world. Preserve the existing 100-data-slot menu wire with one retired zero-filled four-word region. Migrate legacy NBT one-for-one into plain Glass Bottles and keep any `Long.MAX_VALUE` collision in an escrow that drains as bottle count space opens; defer refill until the outermost mutation batch ends so crafting commit/rollback remains atomic. Register one stable Import Bus item handler on all faces/null side; it accepts insert only, never stores a stack, never mutates caller input, follows Core simulate-then-commit exact remainder semantics, and shares the active path's 10-tick missing-Core negative cache while the original front pull remains. Render the Fuel popup once after container foreground; show a neutral no-recipe state, one dim lower-right station badge, and destination-specific player-head/Core icons; remove interaction-hint text and keep all runtime keys at exact English/Traditional-Chinese parity. Revise the 16×16 family with fixed revision seeds, x-axis symmetry, stronger terminal/tier differentiation, and cyan-in/orange-out bus grammar. Run every focused test and then the complete gates.
+**GREEN:** Remove Bottle Energy from live enum, fuel mappings, targets, labels, guide, and test world. Preserve the existing 100-data-slot menu wire with one retired zero-filled four-word region. Migrate legacy NBT one-for-one into plain Glass Bottles and keep any `Long.MAX_VALUE` collision in an escrow that drains as bottle count space opens; defer refill until the outermost mutation batch ends so crafting commit/rollback remains atomic. Register one stable Import Bus item handler on all faces/null side; it accepts insert only, never stores a stack, never mutates caller input, follows Core simulate-then-commit exact remainder semantics, and shares the active path's 10-tick missing-Core negative cache while the original front pull remains. The historical Fuel popup in this task was later removed by GitHub #23 in favor of a persistent Transform target sidebar and explicit use cards. Keep the neutral no-recipe state, one dim lower-right station badge, destination-specific player-head/Core icons, and exact English/Traditional-Chinese parity. Revise the 16×16 family with fixed revision seeds, x-axis symmetry, stronger terminal/tier differentiation, and cyan-in/orange-out bus grammar. Run every focused test and then the complete gates.
 
 **Visual boundary:** Static pixel/geometry tests cannot approve actual Minecraft appearance. Run the deployed 0.1.17 through `crafting-fuel-page`, stop at `MS_GUI_TEST_READY`, and let the user verify fullscreen popup layering, recipe station/no-recipe/output icons, centered controls, and the differentiated symmetric block/bus family.
 

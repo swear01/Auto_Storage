@@ -46,6 +46,23 @@ MachineDescriptor.consumable(
 
 The callback must be deterministic from the supplied stack and must not mutate the world, player, or stack. Returning a negative value, or a nonzero amount together with `infinite=true`, is rejected.
 
+## Transform providers and shared targets
+
+Use `TransformProviderApi.register(...)` when an addon conversion needs a typed output and optional station-work cost instead of a `MachineDescriptor.CONSUMABLE` value:
+
+```java
+TransformProviderApi.register(
+        ResourceLocation.fromNamespaceAndPath(MOD_ID, "generator_recipe"),
+        StorageResourceKindApi.ENERGY_KIND,
+        new ItemStack(Items.REDSTONE),
+        Component.translatable("gui.magic_storage.resource_view.energy"),
+        input -> resolveGeneratorUse(input));
+```
+
+The first ID identifies one selectable conversion card. It must be unique and stable. `targetId` identifies the produced target shown in the persistent Transform sidebar; multiple provider cards may share one target. `targetLabel` names that produced resource independently of the representative icon. The resolver receives a one-count copy of the exact inserted item and returns either no use or a positive typed output plus an optional matching station ID/work cost. It must be deterministic and side-effect free.
+
+Auto lists every compatible exact-input use without selecting or executing one. An explicit target filters those same uses by `targetId`; it is not a global recipe catalog. The server validates the visible card index, stable use ID, current exact input, output capacity, and station work again before simulate-then-commit.
+
 ## Polymorphic station variants
 
 Use one logical descriptor when several concrete blocks satisfy the same recipe station. Each `MachineVariant` has one exact item identity and a normalized rational `MachineWorkRate`; variants in the same slot may run at different rates.

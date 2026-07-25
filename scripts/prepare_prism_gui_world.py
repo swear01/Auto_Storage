@@ -306,6 +306,10 @@ CRAFTING_FUEL_CORE_BASELINE = {
             "item": "powah:energizing_rod_starter",
             "count": 1,
         },
+        "magic_storage:powah_furnator": {
+            "item": "powah:furnator_starter",
+            "count": 1,
+        },
         "magic_storage:industrial_foregoing_dissolution_chamber": {
             "item": "industrialforegoing:dissolution_chamber",
             "count": 1,
@@ -465,6 +469,7 @@ CRAFTING_FUEL_CORE_BASELINE = {
         "magic_storage:ars_nouveau_imbuement_chamber": 10_000,
         "magic_storage:ars_nouveau_enchanting_apparatus": 10_000,
         "magic_storage:powah_energizing": 100_000,
+        "magic_storage:powah_furnator": 100_000,
         "magic_storage:industrial_foregoing_dissolution_chamber": 10_000,
         "magic_storage:industrial_foregoing_material_stonework_factory": 10_000,
         "magic_storage:create_milling": 10_000,

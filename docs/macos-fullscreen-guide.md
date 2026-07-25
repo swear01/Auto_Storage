@@ -37,7 +37,7 @@ visual scenario 的 owner 是使用者。READY、GameTest 或 client smoke 都�
 
 READY 後先確認完整遊戲內容、左下版本文字、底部 hotbar 與 GUI 坐標都沒有被裁切；通過後才可執行該次 `checklist.md` 的 `u`、hotbar、點擊、滾輪或截圖步驟。
 
-`crafting-fuel-page`是一個batched visual gate。世界在handoff前已把代表items、optional stations、Processing work、Fuel/Brew/Axe、fluid/FE/chemical/Source/Mana與recipe材料寫入唯一server-owned Core record；玩家只保留hotbar `1`/`2`導航物與hotbar `3`的一顆Coal作Transform視覺輸入。不得要求使用者逐台安裝、逐項補資源、等待work或先完成craft；這些行為由GameTest/fixture負責。使用者只需通過fullscreen gate、開Storage/Craftable/Transform/Stations、把預載Coal shift-click進Transform並目視代表配方。Stations固定只有Processing/Instant兩區，各自有前後頁與滾輪；搜尋只合併stations。Craftable warm return應立即使用最多81格的visible cache且不得產生新keep-up warning；recipe ledger數字、station badge 1000ms輪播、registered resource groups與optional-mod recipes仍由使用者目視判定。EvilCraft GUI不在combined gate，只用隔離GameTest證據。
+`crafting-fuel-page`是一個batched visual gate。世界在handoff前已把代表items、optional stations（含Powah Furnator）、Processing work、Fuel/Brew/Axe、fluid/FE/chemical/Source/Mana與recipe材料寫入唯一server-owned Core record；玩家只保留hotbar `1`/`2`導航物與hotbar `3`的一顆Coal作Transform Fuel/FE多用途視覺輸入。不得要求使用者逐台安裝、逐項補資源、等待work或先完成craft；這些行為由GameTest/fixture負責。使用者只需通過fullscreen gate、開Storage/Craftable/Transform/Stations、把預載Coal shift-click進Transform並目視。Transform檢查persistent target list/search/page、Auto exact-input Show Uses、明確card selection與底部preview；Stations固定只有Processing/Instant兩區，但可見列數依可用高度自適應，各自有前後頁與滾輪，搜尋只合併stations。Energy資源頁顯示FE與可轉換reserve，Station Work獨立顯示Processing work。Craftable warm return應立即使用最多81格的visible cache且不得產生新keep-up warning；recipe ledger數字、station badge 1000ms輪播、registered resource groups與optional-mod recipes仍由使用者目視判定。EvilCraft GUI不在combined gate，只用隔離GameTest證據。
 
 禁止使用 macOS 綠色按鈕、Control-Command-F，或將 macOS native fullscreen 與 Minecraft F11 疊加。
 

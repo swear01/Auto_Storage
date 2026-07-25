@@ -404,7 +404,7 @@ public final class CreativeStorageUnitTests {
             var craftingServer = new CraftingTerminalMenu(211, player.getInventory(), core);
             var craftingBuffer = menuBuffer(level, corePos, true);
             var craftingClient = new CraftingTerminalMenu(212, player.getInventory(), craftingBuffer);
-            if (!syncMenuData(craftingServer, craftingClient, 102)) {
+            if (!syncMenuData(craftingServer, craftingClient, 103)) {
                 helper.fail("Crafting menu data-slot parity must include explicit unlimited capacity");
                 return;
             }

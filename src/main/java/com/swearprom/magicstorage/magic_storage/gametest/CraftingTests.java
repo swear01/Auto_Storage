@@ -3446,6 +3446,7 @@ public class CraftingTests {
             menu.clickMenuButton(player,
                     CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             menu.quickMoveStack(player, coalSlot);
+            menu.clickMenuButton(player, CraftingTerminalMenu.transformUseButtonId(0));
             menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.STORAGE_PAGE_BUTTON);
             if (menu.getCraftableCount() != 1) {

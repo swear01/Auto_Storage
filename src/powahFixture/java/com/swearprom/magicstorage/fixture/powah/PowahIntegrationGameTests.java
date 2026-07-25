@@ -11,6 +11,7 @@ import com.swearprom.magicstorage.magic_storage.MachineWorkRate;
 import com.swearprom.magicstorage.magic_storage.MagicStorage;
 import com.swearprom.magicstorage.magic_storage.StorageCoreBlockEntity;
 import com.swearprom.magicstorage.magic_storage.StorageResourceKey;
+import com.swearprom.magicstorage.magic_storage.StorageResourceKindApi;
 import com.swearprom.magicstorage.magic_storage.StorageTerminalMenu;
 import com.swearprom.magicstorage.magic_storage.TerminalDisplayStack;
 import com.swearprom.magicstorage.magic_storage.TerminalResourceDisplay;
@@ -325,6 +326,17 @@ public final class PowahIntegrationGameTests {
     ) {
         withCore(helper, context -> {
             var menu = transformMenu(context, new ItemStack(Items.COAL));
+            var furnatorUse = menu.getTransformUses().stream()
+                    .filter(use -> use.id().equals(FURNATOR_TRANSFORM))
+                    .findFirst()
+                    .orElse(null);
+            if (furnatorUse == null
+                    || !furnatorUse.targetId().equals(StorageResourceKindApi.ENERGY_KIND)
+                    || menu.getTransformTargets().stream().noneMatch(
+                    target -> target.id().equals(StorageResourceKindApi.ENERGY_KIND))) {
+                helper.fail("Furnator must be a distinct recipe card under the FE target");
+                return;
+            }
             selectTransform(menu, context, FURNATOR_TRANSFORM);
             if (menu.clickMenuButton(context.player(), 2)
                     || context.core().getResourceAmount(StorageResourceKey.neoforgeEnergy()) != 0
@@ -463,9 +475,16 @@ public final class PowahIntegrationGameTests {
             FixtureContext context,
             ResourceLocation transformId
     ) {
-        int button = TransformProviderApi.targetButtonId(
-                transformId, menu.getMachineDescriptors());
-        if (!menu.clickMenuButton(context.player(), button)) {
+        int useIndex = -1;
+        var uses = menu.getVisibleTransformUses();
+        for (int index = 0; index < uses.size(); index++) {
+            if (uses.get(index).id().equals(transformId)) {
+                useIndex = index;
+                break;
+            }
+        }
+        if (useIndex < 0 || !menu.clickMenuButton(
+                context.player(), CraftingTerminalMenu.transformUseButtonId(useIndex))) {
             throw new IllegalStateException("Could not select transform " + transformId);
         }
     }

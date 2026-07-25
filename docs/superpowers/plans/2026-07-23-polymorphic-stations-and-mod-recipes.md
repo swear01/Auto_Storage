@@ -1,5 +1,7 @@
 # Polymorphic Stations and Mod Recipes Implementation Plan
 
+> Current replacement: GitHub #23 removes the historical Consumables group and three-panel Fuel layout. Transform now owns exact-input conversions; Stations contains only height-adaptive Processing and Instant groups.
+
 ## Task 1: Lock public station-variant contracts — complete
 
 1. Add RED compile/SelfTests for `MachineWorkRate`, `MachineVariant`, variant descriptor factories, validation, exact lookup, and client snapshot round-trip.

@@ -88,9 +88,9 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                 long newAmount,
                 Actor actor
         ) {
-            if (!key.kindId().equals(StorageResourceBridge.WORK_KIND)) {
-                storageDirty = true;
-            }
+            if (StorageResourceBridge.stationWorkDescriptorId(key).isPresent()) return;
+            if (key.kindId().equals(StorageResourceBridge.WORK_KIND)) energyDirty = true;
+            else storageDirty = true;
         }
     };
 
@@ -691,7 +691,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             Map<ResourceLocation, Long> increases,
             boolean decreased
     ) {
-        if (resourceView == TerminalResourceView.ENERGY) refreshDisplayItems(core);
+        if (resourceView == TerminalResourceView.STATION_WORK) refreshDisplayItems(core);
     }
 
     @Override

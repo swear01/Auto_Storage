@@ -11,6 +11,7 @@ import com.swearprom.magicstorage.magic_storage.RecipeFamilyCost;
 import com.swearprom.magicstorage.magic_storage.RecipeFamilyFactories;
 import com.swearprom.magicstorage.magic_storage.RecipePresentationKind;
 import com.swearprom.magicstorage.magic_storage.StorageResourceKey;
+import com.swearprom.magicstorage.magic_storage.StorageResourceKindApi;
 import com.swearprom.magicstorage.magic_storage.TypedRecipeInput;
 import com.swearprom.magicstorage.magic_storage.TypedRecipeOutput;
 import com.swearprom.magicstorage.magic_storage.TypedRecipePlan;
@@ -18,6 +19,7 @@ import com.swearprom.magicstorage.magic_storage.TransformProviderApi;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -85,7 +87,9 @@ public final class PowahCompat {
                         null));
         TransformProviderApi.register(
                 furnatorId,
+                StorageResourceKindApi.ENERGY_KIND,
                 new ItemStack(Items.REDSTONE),
+                Component.translatable("gui.magic_storage.resource_view.energy"),
                 stack -> furnatorTransform(stack, furnatorId));
     }
 

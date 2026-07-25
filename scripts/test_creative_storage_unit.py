@@ -75,8 +75,8 @@ class CreativeStorageUnitTests(unittest.TestCase):
 
     def test_fuel_capacity_uses_creative_icon_only_for_unlimited_state(self):
         crafting_screen = (ROOT / "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java").read_text()
-        method_start = crafting_screen.index("private void renderFuelTypeCapacity")
-        method_end = crafting_screen.index("private void drawFlowPageIndicator", method_start)
+        method_start = crafting_screen.index("private void renderUtilityStatus")
+        method_end = crafting_screen.index("private void drawStatusLine", method_start)
         method = crafting_screen[method_start:method_end]
         self.assertRegex(
             method,

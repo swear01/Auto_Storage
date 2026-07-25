@@ -53,15 +53,7 @@ ENTRIES = {
         "storage_system",
         1,
         "magic_storage:storage_unit_t1",
-        (
-            "patchouli:spotlight",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-        ),
+        ("patchouli:spotlight",) + ("patchouli:text",) * 6,
     ),
     "connected_casing": (
         "storage_system",
@@ -85,15 +77,7 @@ ENTRIES = {
         "terminals",
         1,
         "magic_storage:crafting_terminal",
-        (
-            "patchouli:spotlight",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-        ),
+        ("patchouli:spotlight",) + ("patchouli:text",) * 7,
     ),
     "terminal_controls": (
         "terminals",
@@ -111,7 +95,7 @@ ENTRIES = {
         "energy",
         1,
         "minecraft:coal",
-        ("patchouli:text",) * 5,
+        ("patchouli:text",) * 6,
     ),
     "recipe_costs": (
         "energy",

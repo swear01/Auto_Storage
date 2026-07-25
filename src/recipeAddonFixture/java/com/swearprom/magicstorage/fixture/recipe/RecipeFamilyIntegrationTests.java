@@ -303,7 +303,10 @@ public final class RecipeFamilyIntegrationTests {
             }
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             var terminal = new StorageTerminalMenu(402, player.getInventory(), core);
-            for (int step = 0; step < 3; step++) {
+            for (int step = 0;
+                 step < TerminalResourceView.values().length
+                         && terminal.getResourceView() != TerminalResourceView.OTHER;
+                 step++) {
                 if (!terminal.clickMenuButton(player, NEXT_RESOURCE_VIEW_BUTTON)) {
                     helper.fail("Could not select the Other resource view");
                     return;
@@ -841,7 +844,10 @@ public final class RecipeFamilyIntegrationTests {
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             player.setPos(corePos.getX() + 0.5, corePos.getY() + 0.5, corePos.getZ() + 0.5);
             var menu = new StorageTerminalMenu(404, player.getInventory(), core);
-            for (int step = 0; step < 3; step++) {
+            for (int step = 0;
+                 step < TerminalResourceView.values().length
+                         && menu.getResourceView() != TerminalResourceView.OTHER;
+                 step++) {
                 menu.clickMenuButton(player, NEXT_RESOURCE_VIEW_BUTTON);
             }
             ItemStack filled = new ItemStack(FixtureMod.MANA_CELL.get());

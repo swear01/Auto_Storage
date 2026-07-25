@@ -674,8 +674,8 @@ public class TerminalFlowTests {
             if (menu.getResourceView() != TerminalResourceView.ITEM)
                 helper.fail("previous resource button should sync ITEM, got " + menu.getResourceView());
             menu.clickMenuButton(player, StorageTerminalMenu.PREVIOUS_RESOURCE_VIEW_BUTTON);
-            if (menu.getResourceView() != TerminalResourceView.ENERGY)
-                helper.fail("previous resource button should skip unavailable views and wrap ITEM to ENERGY, got "
+            if (menu.getResourceView() != TerminalResourceView.STATION_WORK)
+                helper.fail("previous resource button should skip unavailable views and wrap ITEM to STATION_WORK, got "
                         + menu.getResourceView());
             menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_ORDER_BUTTON);
             menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_MODE_BUTTON);
@@ -1208,6 +1208,7 @@ public class TerminalFlowTests {
             if (menuSlot < 0) { helper.fail("Lava bucket player slot not found"); return; }
 
             menu.quickMoveStack(player, menuSlot);
+            selectFirstTransformUse(menu, player);
             menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 20000) {
                 helper.fail("Lava bucket should convert to 20000 furnace fuel");
@@ -1248,6 +1249,7 @@ public class TerminalFlowTests {
             if (menuSlot < 0) { helper.fail("Stacked lava bucket player slot not found"); return; }
 
             menu.quickMoveStack(player, menuSlot);
+            selectFirstTransformUse(menu, player);
             menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 60000) {
                 helper.fail("Three lava buckets should convert to 60000 furnace fuel");
@@ -1280,6 +1282,13 @@ public class TerminalFlowTests {
 
             int autoSlot = findPlayerMenuSlot(menu, Items.BLAZE_ROD);
             menu.quickMoveStack(player, autoSlot);
+            if (!menu.getVisibleTransformUses().stream().anyMatch(
+                    use -> use.targetId().equals(
+                            TransformProviderApi.energyTargetId(EnergyType.BLAZE_FUEL)))) {
+                helper.fail("Auto Show Uses did not expose the Blaze transformation");
+                return;
+            }
+            menu.clickMenuButton(player, CraftingTerminalMenu.transformUseButtonId(1));
             menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.BLAZE_FUEL) != 1200
                     || core.getEnergy(EnergyType.FURNACE_FUEL) != 0) {
@@ -1294,6 +1303,7 @@ public class TerminalFlowTests {
             }
             int furnaceSlot = findPlayerMenuSlot(menu, Items.BLAZE_ROD);
             menu.quickMoveStack(player, furnaceSlot);
+            selectFirstTransformUse(menu, player);
             menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 2400) {
                 helper.fail("Furnace selection should add exactly 2400 furnace fuel");
@@ -1367,6 +1377,7 @@ public class TerminalFlowTests {
             craftingMenu.clickMenuButton(localPlayer, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             int localSlot = findPlayerMenuSlot(craftingMenu, Items.COAL);
             craftingMenu.quickMoveStack(localPlayer, localSlot);
+            selectFirstTransformUse(craftingMenu, localPlayer);
             craftingMenu.clickMenuButton(localPlayer, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
 
             var remotePlayer = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
@@ -1375,6 +1386,7 @@ public class TerminalFlowTests {
             remoteMenu.clickMenuButton(remotePlayer, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             int remoteSlot = findPlayerMenuSlot(remoteMenu, Items.COAL);
             remoteMenu.quickMoveStack(remotePlayer, remoteSlot);
+            selectFirstTransformUse(remoteMenu, remotePlayer);
             remoteMenu.clickMenuButton(remotePlayer, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 3200) {
                 helper.fail("Crafting and remote terminals should both convert one coal, got "
@@ -2707,7 +2719,7 @@ public class TerminalFlowTests {
             int serverCount = serverData.size();
             int bufCount = clientData.size();
             if (serverCount != bufCount) { helper.fail("crafting data-slot count mismatch: server=" + serverCount + " buf=" + bufCount); return; }
-            if (serverCount != 102) { helper.fail("crafting menu should sync base 13 + crafting/fuel/resource/output/Axe Energy 89 data slots, got " + serverCount); return; }
+            if (serverCount != 103) { helper.fail("crafting menu should sync base 13 + crafting/fuel/resource/output/Axe Energy/Transform-card 90 data slots, got " + serverCount); return; }
             for (int i = 0; i < serverData.size(); i++) {
                 var wire = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
                 var packet = new net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket(
@@ -2867,6 +2879,17 @@ public class TerminalFlowTests {
             if (menu.getSlot(i).getItem().is(item)) return i;
         }
         return -1;
+    }
+
+    private static void selectFirstTransformUse(
+            CraftingTerminalMenu menu,
+            net.minecraft.world.entity.player.Player player
+    ) {
+        if (menu.getVisibleTransformUses().isEmpty()
+                || !menu.clickMenuButton(
+                player, CraftingTerminalMenu.transformUseButtonId(0))) {
+            throw new IllegalStateException("No compatible Transform card");
+        }
     }
 
     private static final class CountingStorageTerminalMenu extends StorageTerminalMenu {

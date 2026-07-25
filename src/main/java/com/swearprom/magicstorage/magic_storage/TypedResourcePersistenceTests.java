@@ -448,10 +448,9 @@ public final class TypedResourcePersistenceTests {
                 return;
             }
             menu.clickMenuButton(player, StorageTerminalMenu.NEXT_RESOURCE_VIEW_BUTTON);
-            if (menu.getResourceView() != TerminalResourceView.ITEM
-                    || menu.getTotalItemTypes() != 1
-                    || !menu.getSlot(0).getItem().is(Items.STONE)) {
-                helper.fail("Selector did not skip absent Gas and Other providers");
+            if (menu.getResourceView() != TerminalResourceView.STATION_WORK
+                    || menu.getTotalItemTypes() != 0) {
+                helper.fail("Selector did not expose the built-in Station Work view");
                 return;
             }
 

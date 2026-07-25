@@ -1,5 +1,7 @@
 # Connected Storage Family, Transform/Stations Workspace, Progression, and Guide Design
 
+> Current replacement: GitHub #23 supersedes this document's Fuel Target cycle/list-button and fixed station-row presentation with the persistent Transform target sidebar/use cards and height-adaptive Stations contract. Progression, textures, wrench, recipes, and guide principles below remain current.
+
 ## Goal
 
 Turn the functional baseline into a coherent player-facing release: storage tiers become visibly more ornate, adjacent network blocks share connected casing, every tagged wrench can rotate or safely dismantle the network, deterministic conversions live on Transform, installed machines live on a two-group Stations page, terminal controls follow one reset/status grammar, recipes form an affordable progression, and the Patchouli guide explains the complete system in English and Traditional Chinese.
@@ -126,7 +128,7 @@ The Crafting Terminal has four pages: Storage, Craftable, Transform, and Station
 
 ### Transform
 
-Transform is a deterministic resource-conversion shortcut, not a machine inventory and not an automatic background job. It has one server-owned transient input, an Auto/exact target selector with bounded popup, and the shared ×1/×8/×64/Max strip. Auto discovers valid uses but never consumes by itself. Closing or leaving the page returns every unconverted input.
+Transform is a deterministic resource-conversion shortcut, not a machine inventory and not an automatic background job. It has one server-owned transient input, the persistent searchable Auto/exact target sidebar defined by GitHub #23, exact-input use cards, and the shared ×1/×8/×64/Max strip. Auto discovers every compatible use but never preselects or consumes one. Closing or leaving the page returns every unconverted input.
 
 Fuel, Brew Energy, Axe Energy, FE, Mana, and addon-defined resources are ordinary typed ledger entries visible through Storage resource groups. Runtime Fuel uses current burn time; tool transforms use exact remaining durability; optional providers may require installed Processing work before conversion. Every conversion simulates input, typed output, work, capacity, container remainder, and overflow before one atomic commit.
 

@@ -215,10 +215,10 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             self.assertIn("Other appears only when an addon", checklist)
             self.assertIn("middle-click resets it to Items", checklist)
             self.assertIn("Storage and Craftable expose the resource selector", checklist)
-            self.assertIn("Fuel hides the resource selector", checklist)
+            self.assertIn("Transform and Stations hide the resource selector", checklist)
             self.assertIn("reopen Storage Terminal", checklist)
             self.assertIn("restart the client", checklist)
-            self.assertIn("Crafting-only page, source, output, and Fuel Target", checklist)
+            self.assertIn("Crafting-only page, source, output, and Transform Target", checklist)
             self.assertIn("Manual GUI required: yes", checklist)
             self.assertIn("Visual verification owner: user", checklist)
             self.assertIn("automatically starts in borderless Minecraft F11 fullscreen", checklist)
@@ -613,7 +613,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "large item counts",
                 "inside their own slot",
                 "stored types / total type capacity",
-                "Transform Target bar",
+                "persistent target list",
                 "visible previous/next buttons",
                 "dim representative station item",
                 "stored types / total type capacity",
@@ -623,15 +623,19 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "at most four columns",
                 "third row",
                 "without an oversized empty panel",
-                "list button",
+                "Search targets",
                 "selected row",
-                "bounded scrolling",
-                "outside the popup",
+                "page indicator",
+                "whole horizontal card",
+                "selected transformation preview",
+                "Station Work",
+                "available content height",
+                "hovered station detail",
                 "bottom-right Search Stations",
                 "one result grid",
                 "stations only",
                 "right-click",
-                "actual station slot or horizontal amount",
+                "anywhere on that station row",
                 "×8",
                 "×64",
                 "Max",

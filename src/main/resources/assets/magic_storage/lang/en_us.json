@@ -129,5 +129,9 @@
   "gui.magic_storage.bus.side.short.north": "N",
   "gui.magic_storage.bus.side.short.south": "S",
   "gui.magic_storage.bus.side.short.west": "W",
-  "gui.magic_storage.bus.side.short.east": "E"
+  "gui.magic_storage.bus.side.short.east": "E",
+  "gui.magic_storage.resource_view.station_work": "Station Work",
+  "gui.magic_storage.transform_search": "Search targets",
+  "gui.magic_storage.transform_select_recipe": "Select a transformation",
+  "gui.magic_storage.transform_station_work": "%s · %s work"
 }
