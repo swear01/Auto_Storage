@@ -988,7 +988,10 @@ class StaticRegressionTests(unittest.TestCase):
             "src/botaniaFixture/resources/META-INF/neoforge.mods.toml"
         )
 
-        self.assertRegex(properties, r"(?m)^botania_ci_version=455-SNAPSHOT$")
+        self.assertRegex(
+            properties,
+            r"(?m)^botania_ci_version=455-20260723\.172746-31$",
+        )
         self.assertRegex(
             properties,
             r"(?m)^botania_ci_sha256="
@@ -1011,7 +1014,7 @@ class StaticRegressionTests(unittest.TestCase):
             build,
             r'(?m)^\s*runtimeOnly\s+"vazkii\.botania:botania-neoforge-1\.21\.1',
         )
-        self.assertNotIn("455-20260723.172746-31", build)
+        self.assertNotIn("455-SNAPSHOT", build)
         self.assertIn('url = "https://maven.theillusivec4.top/"', build)
         self.assertIn(
             'def botaniaFixtureRuntime = '
