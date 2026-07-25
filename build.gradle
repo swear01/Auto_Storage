@@ -632,14 +632,14 @@ tasks.named('check').configure {
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-def expectedSelfTestSummary = 'SelfTest: 264525 passed, 0 failed, 264525 total'
+def expectedSelfTestSummary = 'SelfTest: 229484 passed, 0 failed, 229484 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {
             throw new GradleException('Base GameTest did not produce run/logs/latest.log')
         }
         def text = baseGameTestLatestLog.getText('UTF-8')
-        if (!text.contains('All 381 required tests passed')
+        if (!text.contains('All 391 required tests passed')
                 || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Base GameTest or SelfTest did not pass; inspect run/logs/latest.log')
@@ -684,7 +684,7 @@ tasks.named('runBotaniaGameTestServer').configure {
             throw new GradleException('Botania GameTest did not produce run/logs/latest.log')
         }
         def text = botaniaLatestLog.getText('UTF-8')
-        if (!text.contains('All 13 required tests passed')
+        if (!text.contains('All 14 required tests passed')
                 || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Botania GameTest or SelfTest did not pass; inspect run/logs/latest.log')
@@ -779,7 +779,7 @@ tasks.named('runPowahGameTestServer').configure {
             throw new GradleException('Powah GameTest did not produce run/logs/latest.log')
         }
         def text = powahLatestLog.getText('UTF-8')
-        if (!text.contains('All 9 required tests passed')
+        if (!text.contains('All 11 required tests passed')
                 || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException(

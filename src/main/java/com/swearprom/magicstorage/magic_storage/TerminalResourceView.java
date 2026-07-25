@@ -54,7 +54,8 @@ public enum TerminalResourceView {
         return switch (this) {
             case ITEM -> kind.equals(StorageResourceKindApi.ITEM_KIND);
             case FLUID -> kind.equals(StorageResourceKindApi.FLUID_KIND);
-            case ENERGY -> kind.equals(StorageResourceKindApi.ENERGY_KIND);
+            case ENERGY -> kind.equals(StorageResourceKindApi.ENERGY_KIND)
+                    || kind.equals(StorageResourceKindApi.WORK_KIND);
             case GAS -> StorageResourceKinds.isChemicalKindId(kind);
             case OTHER -> !StorageResourceKinds.isBuiltInKindId(kind);
         };

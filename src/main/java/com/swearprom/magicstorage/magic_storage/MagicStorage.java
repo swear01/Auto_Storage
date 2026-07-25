@@ -253,6 +253,8 @@ public class MagicStorage {
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
         NeoForge.EVENT_BUS.addListener(this::onChunkTicketLevelUpdated);
+        NeoForge.EVENT_BUS.addListener(this::onServerStarted);
+        NeoForge.EVENT_BUS.addListener(this::onDatapackSync);
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::commonSetup);
         if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -360,6 +362,16 @@ public class MagicStorage {
                                     false);
                             return 1;
                         })));
+    }
+
+    private void onServerStarted(
+            net.neoforged.neoforge.event.server.ServerStartedEvent event
+    ) {
+        CraftableRecipeCatalog.prewarm(event.getServer().overworld());
+    }
+
+    private void onDatapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
+        CraftableRecipeCatalog.prewarm(event.getPlayerList().getServer().overworld());
     }
 
     private void handleSearchFilter(SearchFilterPacket packet, net.neoforged.neoforge.network.handling.IPayloadContext ctx) {

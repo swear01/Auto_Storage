@@ -1,12 +1,12 @@
 {
-  "name": "Fuel and Axe Energy",
+  "name": "Transforms",
   "category": "magic_storage:energy",
   "icon": "minecraft:coal",
   "sortnum": 1,
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "In Consumables, choose Fuel Target and place an item in the input. The $(thing)Auto target$() chooses between Fuel and Brew Energy; you may select either pool directly. Changing page or closing the terminal never consumes an item that was not accepted."
+      "text": "Open $(thing)Transform$(), place one input in the slot, then choose a matching target or leave it on $(thing)Auto$(). Auto discovers valid uses but never consumes the item by itself. Use ×1, ×8, ×64, or Max to commit explicitly. Leaving the page or closing the terminal returns every unconverted item."
     },
     {
       "type": "patchouli:text",
@@ -14,11 +14,15 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)Brew Energy:$() Blaze Rod adds 1,200 and Blaze Powder adds 600. Auto first chooses the compatible pool with fewer accepted item sources, then the lower stored amount, then a stable order. A Blaze Rod therefore chooses Brew Energy when both pools are otherwise tied."
+      "text": "$(thing)Brew Energy:$() Blaze Rod adds 1,200 and Blaze Powder adds 600. Auto first chooses the compatible target with fewer accepted item sources, then the lower stored amount, then stable order. A Blaze Rod therefore chooses Brew Energy when both pools are otherwise tied."
     },
     {
       "type": "patchouli:text",
       "text": "$(thing)Axe Energy:$() an accepted axe is consumed. Finite value comes from remaining $(thing)durability$() × ($(thing)Unbreaking$() level + 1) × stack count; Mending adds nothing. An $(thing)Unbreakable$() axe supplies infinity. Supported strip, scrape, and wax-off recipes spend one Axe Energy each."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Some modded transforms are timed. For example, a generator can convert fuel into FE only after its installed processing station has accumulated enough work at that exact variant's rate. Storage container transfer is not a transform: batteries, tanks, and Mana containers use direct deposit or withdrawal instead."
     }
   ]
 }

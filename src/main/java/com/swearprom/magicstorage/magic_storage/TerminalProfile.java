@@ -22,7 +22,7 @@ final class TerminalProfile {
             Capability.PLAYER_INVENTORY_SOURCE,
             Capability.OUTPUT_DESTINATION);
 
-    private static final int PAGE_CONTROL_COUNT = 3;
+    private static final int PAGE_CONTROL_COUNT = 4;
     private static final int VIEW_CONTROL_COUNT = 5;
 
     private final Set<Capability> capabilities;

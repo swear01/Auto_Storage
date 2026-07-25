@@ -29,17 +29,19 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             ResourceLocation.fromNamespaceAndPath(
                     MagicStorage.MODID, "textures/gui/terminal_controls.png");
 
-    private static final int SCROLLER_HEIGHT = 15;
-    private static final int SB_TEXTURE_HEIGHT = 16;
     private static final int SCROLL_TRACK_INSET = 2;
-    private static final int SCROLLER_UV_X = 232;
     private static final int SEARCH_DEBOUNCE_TICKS = 2;
+    private static final ResourceLocation SCROLLER_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
+    private static final ResourceLocation SCROLLER_DISABLED_SPRITE =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
 
     private final List<Slot> semanticSlots;
     private final TerminalPreferenceSession preferenceSession;
     private final TerminalSearchSynchronizer searchSynchronizer;
     private EditBox searchBox;
     private boolean isScrolling;
+    private double scrollGrabOffset;
     private int lastRequestedScroll = Integer.MIN_VALUE;
     private int searchTimer;
     private String lastSentSearch = "";
@@ -508,16 +510,13 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         int totalItems = menu.getTotalItemTypes();
         int maxOffset = Math.max(0,
                 totalItems - visibleRows * StorageTerminalMenu.DISPLAY_COLS);
-        int travel = scrollTrackHeight() - SCROLLER_HEIGHT;
-        if (maxOffset > 0 && travel > 0) {
-            float ratio = (float) menu.getScrollOffset() / maxOffset;
-            int thumbY = scrollTrackTop() + (int) (ratio * travel);
-            graphics.blit(ICONS_TEXTURE,
-                    leftPos + geometry.scrollbar().x(), thumbY,
-                    SCROLLER_UV_X, 0,
-                    geometry.scrollbar().width(), SCROLLER_HEIGHT,
-                    256, SB_TEXTURE_HEIGHT);
-        }
+        drawScrollbar(
+                graphics,
+                leftPos + geometry.scrollbar().x(),
+                scrollTrackTop(),
+                scrollTrackHeight(),
+                menu.getScrollOffset(),
+                maxOffset);
     }
 
     private int scrollTrackTop() {
@@ -630,9 +629,22 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         if (stack.isEmpty()) return;
 
         ItemStack icon = stack.copyWithCount(1);
+        renderTypedResourceBackground(graphics, stack, slot.x, slot.y);
         graphics.renderItem(icon, slot.x, slot.y);
         graphics.renderItemDecorations(font, icon, slot.x, slot.y);
         renderNetworkAmount(graphics, slot.x, slot.y, TerminalDisplayStack.amount(stack));
+    }
+
+    private static void renderTypedResourceBackground(
+            GuiGraphics graphics,
+            ItemStack stack,
+            int x,
+            int y
+    ) {
+        StorageResourceKey key = TerminalResourceDisplay.key(stack).orElse(null);
+        if (key == null || key.kindId().equals(StorageResourceKindApi.ITEM_KIND)) return;
+        graphics.fill(x, y, x + TerminalLayout.ICON_CANVAS_SIZE,
+                y + TerminalLayout.ICON_CANVAS_SIZE, 0x403F7692);
     }
 
     @Override
@@ -690,9 +702,25 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             return true;
         }
         if (isItemViewActive() && isOverScrollBar(mouseX, mouseY) && button == 0) {
-            isScrolling = true;
             lastRequestedScroll = Integer.MIN_VALUE;
-            handleScrollClick(mouseY);
+            int maxOffset = maxScrollOffset();
+            int thumbTop = TerminalScrollbar.thumbTop(
+                    scrollTrackTop(), scrollTrackHeight(), menu.getScrollOffset(), maxOffset);
+            int target = TerminalScrollbar.pageTarget(
+                    mouseY,
+                    thumbTop,
+                    menu.getScrollOffset(),
+                    visibleRows * StorageTerminalMenu.DISPLAY_COLS,
+                    maxOffset);
+            if (target == menu.getScrollOffset()
+                    && mouseY >= thumbTop
+                    && mouseY < thumbTop + TerminalScrollbar.THUMB_HEIGHT
+                    && maxOffset > 0) {
+                isScrolling = true;
+                scrollGrabOffset = mouseY - thumbTop;
+            } else {
+                sendScrollTarget(target);
+            }
             return true;
         }
         if (isItemViewActive() && hoveredSlot != null
@@ -717,7 +745,12 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (isItemViewActive() && isScrolling) {
-            handleScrollClick(mouseY);
+            sendScrollTarget(TerminalScrollbar.positionForPointer(
+                    mouseY,
+                    scrollGrabOffset,
+                    scrollTrackTop(),
+                    scrollTrackHeight(),
+                    maxScrollOffset()));
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
@@ -726,10 +759,10 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (isItemViewActive() && (isOverGrid(mouseX, mouseY) || isOverScrollBar(mouseX, mouseY))) {
-            if (scrollY > 0 && menu.getScrollOffset() > 0) {
+            double direction = scrollY != 0.0 ? scrollY : scrollX;
+            if (direction > 0 && menu.getScrollOffset() > 0) {
                 sendButton(0);
-            } else if (scrollY < 0 && menu.getScrollOffset() < Math.max(0,
-                    menu.getTotalItemTypes() - visibleRows * StorageTerminalMenu.DISPLAY_COLS)) {
+            } else if (direction < 0 && menu.getScrollOffset() < maxScrollOffset()) {
                 sendButton(1);
             }
             return true;
@@ -821,18 +854,35 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 && mouseY >= topPos + scrollbar.y() && mouseY < topPos + scrollbar.bottom();
     }
 
-    void handleScrollClick(double mouseY) {
-        if (minecraft == null || minecraft.getConnection() == null) return;
-        int maxOffset = Math.max(0,
+    private int maxScrollOffset() {
+        return Math.max(0,
                 menu.getTotalItemTypes() - visibleRows * StorageTerminalMenu.DISPLAY_COLS);
-        if (maxOffset <= 0) return;
-        int travel = scrollTrackHeight() - SCROLLER_HEIGHT;
-        if (travel <= 0) return;
-        float ratio = (float) (mouseY - scrollTrackTop() - SCROLLER_HEIGHT / 2.0) / travel;
-        int target = Math.clamp((int) (ratio * maxOffset), 0, maxOffset);
+    }
+
+    private void sendScrollTarget(int target) {
+        if (minecraft == null || minecraft.getConnection() == null) return;
+        target = Math.clamp(target, 0, maxScrollOffset());
         if (target == lastRequestedScroll) return;
         lastRequestedScroll = target;
         minecraft.getConnection().send(new TerminalScrollPacket(menu.containerId, target));
+    }
+
+    protected static void drawScrollbar(
+            GuiGraphics graphics,
+            int x,
+            int trackTop,
+            int trackHeight,
+            int position,
+            int maxPosition
+    ) {
+        int thumbTop = TerminalScrollbar.thumbTop(
+                trackTop, trackHeight, position, maxPosition);
+        graphics.blitSprite(
+                maxPosition > 0 ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE,
+                x,
+                thumbTop,
+                TerminalScrollbar.THUMB_WIDTH,
+                TerminalScrollbar.THUMB_HEIGHT);
     }
 
     protected static void blitControlIcon(

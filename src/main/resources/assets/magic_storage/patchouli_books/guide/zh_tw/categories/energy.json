@@ -1,6 +1,6 @@
 {
-  "name": "燃料與工作站",
-  "description": "管理消耗品、計時機器、即時工作站，以及斧頭能量。",
+  "name": "轉換與工作站",
+  "description": "把輸入轉成已儲存資源，並安裝處理或即時工作站。",
   "icon": "minecraft:furnace",
   "sortnum": 3
 }

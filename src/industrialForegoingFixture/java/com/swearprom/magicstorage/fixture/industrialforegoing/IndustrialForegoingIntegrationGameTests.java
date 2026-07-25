@@ -32,7 +32,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class IndustrialForegoingIntegrationGameTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final ResourceLocation DISSOLUTION =
             stationId("dissolution_chamber");
     private static final ResourceLocation STONEWORK =
@@ -349,7 +349,7 @@ public final class IndustrialForegoingIntegrationGameTests {
         ItemStack station = new ItemStack(stationItem);
         var menu = new CraftingTerminalMenu(
                 914, context.player().getInventory(), context.core());
-        menu.clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START
                      + CraftingTerminalMenu.MACHINE_SLOT_COUNT;

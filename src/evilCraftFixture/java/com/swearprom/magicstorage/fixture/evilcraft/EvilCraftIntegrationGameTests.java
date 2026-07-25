@@ -35,7 +35,7 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class EvilCraftIntegrationGameTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;
     private static final ResourceLocation BLOOD_INFUSER = stationId("blood_infuser");
     private static final ResourceLocation TIERED_BATCH = fixtureRecipe("tiered_blood_batch");
@@ -332,7 +332,7 @@ public final class EvilCraftIntegrationGameTests {
         var menu = new CraftingTerminalMenu(
                 902, context.player().getInventory(), context.core());
         ItemStack station = new ItemStack(evilItem("blood_infuser"));
-        menu.clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START
                      + CraftingTerminalMenu.MACHINE_SLOT_COUNT;

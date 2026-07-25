@@ -44,7 +44,7 @@ import java.util.List;
 @PrefixGameTestTemplate(false)
 public final class BotaniaIntegrationGameTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;
 
     private static final ResourceLocation MANA_POOL =
@@ -329,6 +329,7 @@ public final class BotaniaIntegrationGameTests {
         withCore(helper, context -> {
             seedItem(context.core(), Items.COAL, 2);
             seedItem(context.core(), Items.FLINT, 2);
+            seedResource(context.core(), manaKey(), 1_000);
             if (!installStation(context, "elven_gateway_core")
                     || !craft(context, recipeId("elven_trade"), 2)) {
                 helper.fail("Elven Trade batch was not discovered or committed");
@@ -337,8 +338,34 @@ public final class BotaniaIntegrationGameTests {
             if (itemCount(context.core(), Items.COAL) != 0
                     || itemCount(context.core(), Items.FLINT) != 0
                     || itemCount(context.core(), Items.DIAMOND) != 4
-                    || itemCount(context.core(), Items.EMERALD) != 6) {
-                helper.fail("Elven Trade did not preserve every exact multi-output count");
+                    || itemCount(context.core(), Items.EMERALD) != 6
+                    || context.core().getResourceAmount(manaKey()) != 0) {
+                helper.fail("Elven Trade did not preserve outputs or consume 500 Mana per trade");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void elven_trade_rejects_one_mana_short_without_partial_mutation(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            seedItem(context.core(), Items.COAL, 1);
+            seedItem(context.core(), Items.FLINT, 1);
+            seedResource(context.core(), manaKey(), 499);
+            if (!installStation(context, "elven_gateway_core")) {
+                helper.fail("Could not install Elven Gateway for insufficient-Mana fixture");
+                return;
+            }
+            if (craft(context, recipeId("elven_trade"), 1)
+                    || itemCount(context.core(), Items.COAL) != 1
+                    || itemCount(context.core(), Items.FLINT) != 1
+                    || itemCount(context.core(), Items.DIAMOND) != 0
+                    || itemCount(context.core(), Items.EMERALD) != 0
+                    || context.core().getResourceAmount(manaKey()) != 499) {
+                helper.fail("Insufficient Elven Trade Mana partially changed one transaction");
                 return;
             }
             helper.succeed();
@@ -448,7 +475,7 @@ public final class BotaniaIntegrationGameTests {
         var menu = new CraftingTerminalMenu(
                 703, context.player().getInventory(), context.core());
         ItemStack station = new ItemStack(botaniaItem(itemPath));
-        menu.clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START
                      + CraftingTerminalMenu.MACHINE_SLOT_COUNT;

@@ -69,7 +69,7 @@ import java.util.List;
 public final class MekanismRecipeIntegrationTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final int CRAFTABLE_PAGE_BUTTON = 6;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;
     private static final int SIMPLE_WORK = 200;
     private static final int CHEMICAL_OXIDIZER_WORK = 100;
@@ -1497,7 +1497,7 @@ public final class MekanismRecipeIntegrationTests {
         Item stationItem = BuiltInRegistries.ITEM.get(stationItemId);
         ItemStack stationStack = new ItemStack(stationItem);
         if (stationStack.isEmpty()) return false;
-        context.menu().clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        context.menu().clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START + CraftingTerminalMenu.MACHINE_SLOT_COUNT;
              index++) {

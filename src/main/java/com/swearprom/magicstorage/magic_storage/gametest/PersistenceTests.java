@@ -21,9 +21,43 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @GameTestHolder(MagicStorage.MODID)
 public class PersistenceTests {
+
+    @GameTest(template = "platform")
+    public static void processing_tick_commits_all_station_work_once(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)
+                    || !core.isStorageAvailable()) {
+                helper.fail("Fresh Core did not attach to world storage");
+                return;
+            }
+            core.getMachineContainer().setItem(
+                    MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE));
+            core.getMachineContainer().setItem(
+                    MachineEnergyTable.SMOKER_SLOT, new ItemStack(Items.SMOKER));
+            AtomicInteger dirtyCalls = new AtomicInteger();
+            core.storageRecordForTesting().setDirtyCallback(dirtyCalls::incrementAndGet);
+
+            core.tick();
+
+            if (core.getEnergy(EnergyType.SMELTING_ENERGY) != 1
+                    || core.getEnergy(EnergyType.SMOKING_ENERGY) != 1
+                    || dirtyCalls.get() != 1) {
+                helper.fail("One processing tick must atomically persist every station once: "
+                        + "smelt=" + core.getEnergy(EnergyType.SMELTING_ENERGY)
+                        + ", smoke=" + core.getEnergy(EnergyType.SMOKING_ENERGY)
+                        + ", dirty=" + dirtyCalls.get());
+                return;
+            }
+            helper.succeed();
+        });
+    }
 
     @GameTest(template = "platform")
     public static void core_persistence_contract_is_repository_owned_and_segmented(GameTestHelper helper) {
@@ -105,13 +139,13 @@ public class PersistenceTests {
         CoreStorageRecord source = CoreStorageRecord.fresh(storageId);
         UUID networkId = source.networkId();
         for (EnergyType type : EnergyType.values()) {
-            source.energy().put(type, 101L + type.ordinal());
+            source.setEnergyAmount(type, 101L + type.ordinal());
         }
         ItemStack namedDiamond = new ItemStack(Items.DIAMOND);
         namedDiamond.set(DataComponents.CUSTOM_NAME, Component.literal("Repository Diamond"));
         source.putItem(ItemKey.of(namedDiamond), Long.MAX_VALUE - 7, registries);
         source.machines().setItem(MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE, 3));
-        source.descriptorAmounts().put(MachineEnergyTable.AXE_ID, 37L);
+        source.setDescriptorAmount(MachineEnergyTable.AXE_ID, 37L);
         source.machineWorkRemainders().put(
                 MachineEnergyTable.FURNACE_ID,
                 new MachineWorkAccumulator.Remainder(
@@ -145,14 +179,14 @@ public class PersistenceTests {
             return;
         }
         for (EnergyType type : EnergyType.values()) {
-            if (restored.energy().getOrDefault(type, 0L) != 101L + type.ordinal()) {
+            if (restored.energyAmount(type) != 101L + type.ordinal()) {
                 helper.fail("Energy did not round trip for " + type);
                 return;
             }
         }
         if (restored.getItemCount(ItemKey.of(namedDiamond), registries) != Long.MAX_VALUE - 7
                 || restored.machines().getItem(MachineEnergyTable.FURNACE_SLOT).getCount() != 3
-                || restored.descriptorAmounts().getOrDefault(MachineEnergyTable.AXE_ID, 0L) != 37
+                || restored.descriptorAmount(MachineEnergyTable.AXE_ID) != 37
                 || restored.machineWorkRemainders().get(MachineEnergyTable.FURNACE_ID).remainder() != 7
                 || restored.unresolvedInventoryEntries().size() != 1
                 || restored.unresolvedMachineEntries().size() != 1
@@ -176,7 +210,7 @@ public class PersistenceTests {
         encoded.remove(CoreStorageRecord.TAG_MACHINE_WORK);
         CoreStorageRecord.LoadResult decoded = CoreStorageRecord.load(encoded, registries);
         if (!decoded.success()
-                || !decoded.record().stationWork().isEmpty()
+                || decoded.record().hasStationWork()
                 || !decoded.record().machineWorkRemainders().isEmpty()) {
             helper.fail("Legacy record without optional machine work payload did not load empty");
             return;
@@ -889,7 +923,7 @@ public class PersistenceTests {
         ItemStack namedFurnaces = new ItemStack(Items.FURNACE, 7);
         namedFurnaces.set(DataComponents.CUSTOM_NAME, Component.literal("Arc Furnaces"));
         record.machines().setItem(MachineEnergyTable.FURNACE_SLOT, namedFurnaces.copy());
-        record.descriptorAmounts().put(MachineEnergyTable.AXE_ID, 74L);
+        record.setDescriptorAmount(MachineEnergyTable.AXE_ID, 74L);
         record.infiniteDescriptors().add(ResourceLocation.fromNamespaceAndPath(
                 MagicStorage.MODID, "test_infinite_descriptor"));
         CoreStorageRecord.LoadResult loaded = CoreStorageRecord.load(record.save(registries), registries);
@@ -899,7 +933,7 @@ public class PersistenceTests {
         }
         ItemStack restored = loaded.record().machines().getItem(MachineEnergyTable.FURNACE_SLOT);
         if (!ItemStack.isSameItemSameComponents(restored, namedFurnaces) || restored.getCount() != 7
-                || loaded.record().descriptorAmounts().getOrDefault(MachineEnergyTable.AXE_ID, 0L) != 74
+                || loaded.record().descriptorAmount(MachineEnergyTable.AXE_ID) != 74
                 || loaded.record().unresolvedDescriptorEntries().size() != 1) {
             helper.fail("Record lost machine components or descriptor state");
             return;
@@ -918,8 +952,8 @@ public class PersistenceTests {
                 return;
             }
             CoreStorageRecord record = core.storageRecordForTesting();
-            record.energy().put(EnergyType.SMELTING_ENERGY, Long.MAX_VALUE);
-            record.energy().put(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
+            record.setEnergyAmount(EnergyType.SMELTING_ENERGY, Long.MAX_VALUE);
+            record.setEnergyAmount(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
             record.machines().setItem(MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE));
             core.tick();
             ItemStack coal = new ItemStack(Items.COAL);

@@ -26,6 +26,91 @@ public final class TypedResourcePersistenceTests {
     }
 
     @GameTest(template = "behavioraltests.platform")
+    public static void legacy_work_balances_migrate_once_into_the_typed_ledger(
+            GameTestHelper helper
+    ) {
+        CoreStorageRecord original = CoreStorageRecord.fresh(UUID.randomUUID());
+        CompoundTag legacy = original.save(helper.getLevel().registryAccess());
+        legacy.remove(CoreStorageRecord.TAG_RESOURCE_LEDGER);
+        legacy.getCompound(CoreStorageRecord.TAG_ENERGY)
+                .putLong(EnergyType.FURNACE_FUEL.getId(), 3_200);
+        CompoundTag axe = new CompoundTag();
+        axe.putString(CoreStorageRecord.TAG_DESCRIPTOR_ID, MachineEnergyTable.AXE_ID.toString());
+        axe.putLong(CoreStorageRecord.TAG_AMOUNT, 17);
+        axe.putBoolean(CoreStorageRecord.TAG_INFINITE, false);
+        legacy.getList(CoreStorageRecord.TAG_DESCRIPTOR_CONSUMABLES, Tag.TAG_COMPOUND).add(axe);
+
+        CoreStorageRecord.LoadResult migrated = CoreStorageRecord.load(
+                legacy, helper.getLevel().registryAccess());
+        if (!migrated.success()
+                || migrated.record().resourceLedger().amount(
+                StorageResourceBridge.energyKey(EnergyType.FURNACE_FUEL)) != 3_200
+                || migrated.record().resourceLedger().amount(
+                StorageResourceBridge.descriptorKey(MachineEnergyTable.AXE_ID)) != 17) {
+            helper.fail("Legacy Fuel/Axe balances did not migrate into the typed ledger");
+            return;
+        }
+
+        CompoundTag saved = migrated.record().save(helper.getLevel().registryAccess());
+        if (saved.getCompound(CoreStorageRecord.TAG_ENERGY)
+                .getLong(EnergyType.FURNACE_FUEL.getId()) != 0
+                || !saved.getList(
+                CoreStorageRecord.TAG_DESCRIPTOR_CONSUMABLES, Tag.TAG_COMPOUND).isEmpty()) {
+            helper.fail("Migrated work balances remained duplicated in legacy persistence");
+            return;
+        }
+        CoreStorageRecord.LoadResult reloaded = CoreStorageRecord.load(
+                saved, helper.getLevel().registryAccess());
+        if (!reloaded.success()
+                || reloaded.record().resourceLedger().amount(
+                StorageResourceBridge.energyKey(EnergyType.FURNACE_FUEL)) != 3_200
+                || reloaded.record().resourceLedger().amount(
+                StorageResourceBridge.descriptorKey(MachineEnergyTable.AXE_ID)) != 17) {
+            helper.fail("Typed work migration was not idempotent");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "behavioraltests.platform")
+    public static void storage_energy_view_lists_fuel_as_a_typed_resource(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new net.minecraft.core.BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(),
+                net.minecraft.world.level.block.Block.UPDATE_ALL);
+        level.setBlock(corePos.east(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(),
+                net.minecraft.world.level.block.Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            ItemStack coal = new ItemStack(Items.COAL);
+            if (!core.addFuel(coal, EnergyType.FURNACE_FUEL)) {
+                helper.fail("Could not seed typed Fuel");
+                return;
+            }
+            var player = helper.makeMockPlayer(GameType.SURVIVAL);
+            var menu = new StorageTerminalMenu(910, player.getInventory(), core);
+            menu.clickMenuButton(player, StorageTerminalMenu.NEXT_RESOURCE_VIEW_BUTTON);
+            menu.clickMenuButton(player, StorageTerminalMenu.NEXT_RESOURCE_VIEW_BUTTON);
+            ItemStack display = menu.getSlot(0).getItem();
+            if (menu.getResourceView() != TerminalResourceView.ENERGY
+                    || menu.getTotalItemTypes() != 1
+                    || TerminalDisplayStack.amount(display) != 1_600
+                    || !TerminalResourceDisplay.key(display).orElseThrow().equals(
+                    StorageResourceBridge.energyKey(EnergyType.FURNACE_FUEL))) {
+                helper.fail("Energy view did not list the exact typed Fuel balance");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "behavioraltests.platform")
     public static void typed_item_output_rejects_a_different_presentation_item(
             GameTestHelper helper
     ) {
@@ -408,7 +493,7 @@ public final class TypedResourcePersistenceTests {
                 helper.fail("Craftable page did not accept the shared typed resource selector");
                 return;
             }
-            craftingMenu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            craftingMenu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             if (craftingMenu.clickMenuButton(
                     player, StorageTerminalMenu.NEXT_RESOURCE_VIEW_BUTTON)) {
                 helper.fail("Fuel page accepted a forged resource-view transition");

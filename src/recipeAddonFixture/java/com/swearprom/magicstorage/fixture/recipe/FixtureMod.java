@@ -111,7 +111,8 @@ public final class FixtureMod {
                 INFUSION_TYPE,
                 MachineEnergyTable.STONECUTTER_ID,
                 (recipe, registries) -> TypedRecipePlan.builder()
-                        .input(TypedRecipeInput.consume(item("cobblestone", registries), 2))
+                        .input(TypedRecipeInput.consume(item("cobblestone", registries), 1))
+                        .input(TypedRecipeInput.consume(item("cobblestone", registries), 1))
                         .input(TypedRecipeInput.consumeAnyWithRemainders(
                                 java.util.List.of(mana("blue"), mana("green")),
                                 1,
@@ -125,7 +126,7 @@ public final class FixtureMod {
                                 new FluidStack(Fluids.WATER, 1), registries), 250))
                         .presentationOutput(new net.minecraft.world.item.ItemStack(
                                 net.minecraft.world.item.Items.GRAVEL, 3))
-                        .layout(2, 2, true)
+                        .layout(3, 2, true)
                         .build(),
                 recipe -> RecipeFamilyCost.free(),
                 RecipePresentationKind.STONECUTTING));

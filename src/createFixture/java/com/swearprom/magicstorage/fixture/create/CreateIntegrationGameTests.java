@@ -35,7 +35,7 @@ import java.util.Map;
 @PrefixGameTestTemplate(false)
 public final class CreateIntegrationGameTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final Map<String, String> STATIONS = Map.of(
             "milling", "millstone",
             "crushing", "crushing_wheel",
@@ -170,7 +170,7 @@ public final class CreateIntegrationGameTests {
                 reloaded.rebuildNetwork(context.level());
                 var menu = new CraftingTerminalMenu(
                         916, context.player().getInventory(), reloaded);
-                menu.clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+                menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
                 ItemStack installed = menu.getSlot(
                         CraftingTerminalMenu.MACHINE_SLOT_START
                                 + MachineEnergyTable.findSlot(descriptorId)).getItem();
@@ -364,7 +364,7 @@ public final class CreateIntegrationGameTests {
         ItemStack station = new ItemStack(createItem(itemPath));
         var menu = new CraftingTerminalMenu(
                 914, context.player().getInventory(), context.core());
-        menu.clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START
                      + CraftingTerminalMenu.MACHINE_SLOT_COUNT;

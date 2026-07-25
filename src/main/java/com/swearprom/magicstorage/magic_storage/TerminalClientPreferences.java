@@ -3,9 +3,8 @@ package com.swearprom.magicstorage.magic_storage;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import net.minecraft.resources.ResourceLocation;
 
 final class TerminalClientPreferences {
     private static final String AUTO_FUEL_TARGET = "auto";
@@ -36,7 +35,8 @@ final class TerminalClientPreferences {
                 VALUES.page.get(),
                 VALUES.usePlayerInventory.get(),
                 VALUES.outputDestination.get(),
-                fuelTarget(VALUES.fuelTarget.get()));
+                fuelTarget(VALUES.fuelTarget.get()),
+                transformTarget(VALUES.fuelTarget.get()));
     }
 
     static void save(TerminalPreferences preferences) {
@@ -48,9 +48,9 @@ final class TerminalClientPreferences {
         changed |= setIfChanged(VALUES.usePlayerInventory, preferences.usePlayerInventory());
         changed |= setIfChanged(VALUES.outputDestination, preferences.outputDestination());
         changed |= setIfChanged(VALUES.fuelTarget,
-                preferences.fuelTarget() == null
+                preferences.transformTarget() == null
                         ? AUTO_FUEL_TARGET
-                        : preferences.fuelTarget().getId());
+                        : preferences.transformTarget().toString());
         if (changed) SPEC.save();
     }
 
@@ -63,11 +63,19 @@ final class TerminalClientPreferences {
     }
 
     private static EnergyType fuelTarget(String id) {
+        return TransformProviderApi.energyType(transformTarget(id)).orElse(null);
+    }
+
+    private static ResourceLocation transformTarget(String id) {
         if (AUTO_FUEL_TARGET.equals(id)) return null;
         for (EnergyType type : EnergyType.values()) {
-            if (!type.isMachineGenerated() && type.getId().equals(id)) return type;
+            if (!type.isMachineGenerated() && type.getId().equals(id)) {
+                return TransformProviderApi.energyTargetId(type);
+            }
         }
-        throw new IllegalStateException("Unknown configured fuel target " + id);
+        ResourceLocation parsed = ResourceLocation.tryParse(id);
+        if (parsed == null) throw new IllegalStateException("Invalid configured transform target " + id);
+        return parsed;
     }
 
     private static <T> boolean setIfChanged(ModConfigSpec.ConfigValue<T> value, T next) {
@@ -76,13 +84,10 @@ final class TerminalClientPreferences {
         return true;
     }
 
-    private static List<String> fuelTargetIds() {
-        List<String> result = new ArrayList<>();
-        result.add(AUTO_FUEL_TARGET);
-        for (EnergyType type : EnergyType.values()) {
-            if (!type.isMachineGenerated()) result.add(type.getId());
-        }
-        return result;
+    private static boolean validTransformTarget(Object value) {
+        return value instanceof String id
+                && (AUTO_FUEL_TARGET.equals(id)
+                || ResourceLocation.tryParse(id) != null);
     }
 
     private static final class Values {
@@ -108,8 +113,8 @@ final class TerminalClientPreferences {
             usePlayerInventory = builder.define("usePlayerInventory", false);
             outputDestination = builder.defineEnum(
                     "outputDestination", TerminalOutputDestination.PLAYER);
-            fuelTarget = builder.defineInList(
-                    "fuelTarget", AUTO_FUEL_TARGET, fuelTargetIds());
+            fuelTarget = builder.define(
+                    "fuelTarget", AUTO_FUEL_TARGET, TerminalClientPreferences::validTransformTarget);
             builder.pop();
         }
     }

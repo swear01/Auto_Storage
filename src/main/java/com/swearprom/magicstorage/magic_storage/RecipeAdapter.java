@@ -17,6 +17,10 @@ interface RecipeAdapter {
 
     RecipeCandidateIndex candidateIndex(RecipeHolder<?> holder);
 
+    default RecipeCandidateIndex candidateIndex(RecipeHolder<?> holder, Level level) {
+        return candidateIndex(holder);
+    }
+
     RecipeAdapterMatch.Contract contract(RecipeHolder<?> holder);
 
     List<RecipeAdapterMatch.Contract> resolveVariants(

@@ -134,11 +134,15 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertEqual("crafting_terminal", crafting_manifest["start_target"])
             hotbar = crafting_manifest["player_kit"]["hotbar"]
             inventory = crafting_manifest["player_kit"]["inventory"]
-            self.assertEqual({"1", "2"}, set(hotbar))
+            self.assertEqual({"1", "2", "3"}, set(hotbar))
             self.assertEqual([], inventory)
             self.assertEqual(
-                {"hotbar.0", "hotbar.1"},
+                {"hotbar.0", "hotbar.1", "hotbar.2"},
                 {entry["slot"] for entry in hotbar.values()},
+            )
+            self.assertEqual(
+                {"slot": "hotbar.2", "item": "minecraft:coal", "count": 1},
+                hotbar["3"],
             )
             self.assertEqual(121_000, crafting_manifest["baseline"]["stored_items"]["minecraft:oak_log"])
             self.assertEqual(
@@ -572,7 +576,11 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 {descriptor: encoded_stations[descriptor] for descriptor in expected_stations},
             )
             self.assertEqual([], manifest["player_kit"]["inventory"])
-            self.assertEqual({"1", "2"}, set(manifest["player_kit"]["hotbar"]))
+            self.assertEqual({"1", "2", "3"}, set(manifest["player_kit"]["hotbar"]))
+            self.assertEqual(
+                {"slot": "hotbar.2", "item": "minecraft:coal", "count": 1},
+                manifest["player_kit"]["hotbar"]["3"],
+            )
 
     def test_each_scenario_places_only_the_blocks_needed_by_its_checklist(self):
         mod = self.load_script()

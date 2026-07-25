@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
@@ -12,7 +13,8 @@ public record TerminalPreferences(
         CraftingTerminalPage page,
         boolean usePlayerInventory,
         TerminalOutputDestination outputDestination,
-        EnergyType fuelTarget
+        EnergyType fuelTarget,
+        ResourceLocation transformTarget
 ) {
     public TerminalPreferences {
         Objects.requireNonNull(sortMode);
@@ -21,9 +23,40 @@ public record TerminalPreferences(
         Objects.requireNonNull(resourceView);
         Objects.requireNonNull(page);
         Objects.requireNonNull(outputDestination);
+        page = page.normalized();
         if (fuelTarget != null && fuelTarget.isMachineGenerated()) {
             throw new IllegalArgumentException("Not a selectable fuel target: " + fuelTarget);
         }
+        ResourceLocation legacyTarget = fuelTarget == null
+                ? null : TransformProviderApi.energyTargetId(fuelTarget);
+        if (transformTarget == null) {
+            transformTarget = legacyTarget;
+        } else if (legacyTarget != null && !legacyTarget.equals(transformTarget)) {
+            throw new IllegalArgumentException("Conflicting transform targets");
+        }
+        fuelTarget = TransformProviderApi.energyType(transformTarget).orElse(null);
+    }
+
+    public TerminalPreferences(
+            SortMode sortMode,
+            SortOrder sortOrder,
+            SearchMode searchMode,
+            TerminalResourceView resourceView,
+            CraftingTerminalPage page,
+            boolean usePlayerInventory,
+            TerminalOutputDestination outputDestination,
+            EnergyType fuelTarget
+    ) {
+        this(
+                sortMode,
+                sortOrder,
+                searchMode,
+                resourceView,
+                page,
+                usePlayerInventory,
+                outputDestination,
+                fuelTarget,
+                fuelTarget == null ? null : TransformProviderApi.energyTargetId(fuelTarget));
     }
 
     public static TerminalPreferences defaults() {
@@ -54,7 +87,8 @@ public record TerminalPreferences(
                 page,
                 usePlayerInventory,
                 outputDestination,
-                fuelTarget);
+                fuelTarget,
+                transformTarget);
     }
 
     void write(FriendlyByteBuf buf) {
@@ -66,6 +100,8 @@ public record TerminalPreferences(
         buf.writeBoolean(usePlayerInventory);
         buf.writeVarInt(outputDestination.ordinal());
         buf.writeVarInt(fuelTarget == null ? 0 : fuelTarget.ordinal() + 1);
+        buf.writeBoolean(transformTarget != null);
+        if (transformTarget != null) buf.writeResourceLocation(transformTarget);
     }
 
     static TerminalPreferences read(FriendlyByteBuf buf) {
@@ -83,6 +119,7 @@ public record TerminalPreferences(
             throw new IllegalArgumentException("Unknown fuel target " + fuelTargetId);
         }
         EnergyType fuelTarget = fuelTargetId == 0 ? null : EnergyType.values()[fuelTargetId - 1];
+        ResourceLocation transformTarget = buf.readBoolean() ? buf.readResourceLocation() : null;
         return new TerminalPreferences(
                 sortMode,
                 sortOrder,
@@ -91,7 +128,8 @@ public record TerminalPreferences(
                 page,
                 usePlayerInventory,
                 outputDestination,
-                fuelTarget);
+                fuelTarget,
+                transformTarget);
     }
 
     private static <T> T readEnum(FriendlyByteBuf buf, T[] values, String name) {

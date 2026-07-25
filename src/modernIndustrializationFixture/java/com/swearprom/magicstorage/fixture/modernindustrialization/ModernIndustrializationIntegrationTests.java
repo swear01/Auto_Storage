@@ -28,7 +28,7 @@ import java.util.List;
 @PrefixGameTestTemplate(false)
 public final class ModernIndustrializationIntegrationTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final ResourceLocation MACERATOR = ResourceLocation.fromNamespaceAndPath(
             MagicStorage.MODID, "modern_industrialization_macerator");
     private static final ResourceLocation RECIPE_ID = ResourceLocation.fromNamespaceAndPath(
@@ -157,7 +157,7 @@ public final class ModernIndustrializationIntegrationTests {
             }
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             var menu = new CraftingTerminalMenu(400, player.getInventory(), core);
-            menu.clickMenuButton(player, FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
             var machineSlot = findMachineSlot(menu, bronze);
             if (machineSlot == null) {
                 helper.fail("Macerator had no installable terminal slot");
@@ -223,7 +223,7 @@ public final class ModernIndustrializationIntegrationTests {
             }
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             var menu = new CraftingTerminalMenu(401, player.getInventory(), core);
-            menu.clickMenuButton(player, FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
             var machineSlot = findMachineSlot(menu, station);
             if (machineSlot == null) {
                 helper.fail("Distillery had no installable terminal slot");
@@ -288,7 +288,7 @@ public final class ModernIndustrializationIntegrationTests {
             }
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             var menu = new CraftingTerminalMenu(402, player.getInventory(), core);
-            menu.clickMenuButton(player, FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
             ItemStack station = stack(ResourceLocation.fromNamespaceAndPath(
                     "modern_industrialization", "bronze_mixer"));
             var machineSlot = findMachineSlot(menu, station);
@@ -378,7 +378,7 @@ public final class ModernIndustrializationIntegrationTests {
             }
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             var menu = new CraftingTerminalMenu(403, player.getInventory(), core);
-            menu.clickMenuButton(player, FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
             ItemStack station = stack(ResourceLocation.fromNamespaceAndPath(
                     "modern_industrialization", "chemical_reactor"));
             var machineSlot = findMachineSlot(menu, station);
@@ -478,7 +478,7 @@ public final class ModernIndustrializationIntegrationTests {
             }
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             var menu = new CraftingTerminalMenu(405, player.getInventory(), core);
-            menu.clickMenuButton(player, FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
             ItemStack station = stack(ResourceLocation.fromNamespaceAndPath(
                     "modern_industrialization", "centrifuge"));
             var machineSlot = findMachineSlot(menu, station);

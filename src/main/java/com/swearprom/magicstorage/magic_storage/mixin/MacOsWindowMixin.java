@@ -11,11 +11,35 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Window.class)
-abstract class MacOsWindowMixin {
+abstract class MacOsWindowMixin implements MacOsWindowAccess {
+    @Shadow
+    private long window;
+
+    @Shadow
+    private boolean fullscreen;
+
+    @Shadow
+    private boolean actuallyFullscreen;
+
+    @Shadow
+    private void setMode() {
+    }
+
+    @Override
+    @Unique
+    public void magicStorage$leaveBorderlessFullscreen() {
+        if (!Minecraft.ON_OSX || !CocoaWindow.isBorderlessFullscreen(window)) return;
+        fullscreen = false;
+        actuallyFullscreen = false;
+        setMode();
+    }
+
     @Redirect(
             method = "setMode",
             at = @At(
@@ -65,7 +89,7 @@ abstract class MacOsWindowMixin {
         CocoaWindow.restorePresentationOptions();
     }
 
-    private static final class CocoaWindow {
+    static final class CocoaWindow {
         private static final int NORMAL_WINDOW_LEVEL_KEY = 4;
         private static final int MAIN_MENU_WINDOW_LEVEL_KEY = 8;
         private static final long AUTO_HIDE_DOCK_AND_MENU_BAR = (1L << 0) | (1L << 2);

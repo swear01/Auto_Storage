@@ -31,6 +31,10 @@ final class StorageResourceLedger {
         return amounts.size();
     }
 
+    int typeCount(Predicate<StorageResourceKey> include) {
+        return (int) amounts.keySet().stream().filter(include).count();
+    }
+
     boolean isEmpty() {
         return amounts.isEmpty();
     }
@@ -95,26 +99,31 @@ final class StorageResourceLedger {
         Objects.requireNonNull(deltas, "deltas");
         Objects.requireNonNull(capacity, "capacity");
         Objects.requireNonNull(action, "action");
-        Map<StorageResourceKey, Long> projected = new HashMap<>(amounts);
+        Map<StorageResourceKey, Long> updates = new HashMap<>();
+        int projectedTypeCount = amounts.size();
         for (Map.Entry<StorageResourceKey, Long> entry : deltas.entrySet()) {
             StorageResourceKey key = Objects.requireNonNull(entry.getKey(), "delta key");
             Long boxedDelta = Objects.requireNonNull(entry.getValue(), "delta amount");
             long delta = boxedDelta;
             if (delta == 0) return false;
+            long existing = amounts.getOrDefault(key, 0L);
             long updated;
             try {
-                updated = Math.addExact(projected.getOrDefault(key, 0L), delta);
+                updated = Math.addExact(existing, delta);
             } catch (ArithmeticException exception) {
                 return false;
             }
             if (updated < 0) return false;
-            if (updated == 0) projected.remove(key);
-            else projected.put(key, updated);
+            if (existing == 0 && updated > 0) projectedTypeCount++;
+            if (existing > 0 && updated == 0) projectedTypeCount--;
+            updates.put(key, updated);
         }
-        if (!capacity.unlimited() && projected.size() > capacity.finiteTypeSlots()) return false;
+        if (!capacity.unlimited() && projectedTypeCount > capacity.finiteTypeSlots()) return false;
         if (action == Action.EXECUTE) {
-            amounts.clear();
-            amounts.putAll(projected);
+            for (Map.Entry<StorageResourceKey, Long> update : updates.entrySet()) {
+                if (update.getValue() == 0) amounts.remove(update.getKey());
+                else amounts.put(update.getKey(), update.getValue());
+            }
         }
         return true;
     }

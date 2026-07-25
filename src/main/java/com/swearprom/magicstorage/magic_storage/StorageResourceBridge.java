@@ -18,12 +18,71 @@ final class StorageResourceBridge {
     static final ResourceLocation ITEM_KIND = StorageResourceKindApi.ITEM_KIND;
     static final ResourceLocation FLUID_KIND = StorageResourceKindApi.FLUID_KIND;
     static final ResourceLocation ENERGY_KIND = StorageResourceKindApi.ENERGY_KIND;
+    static final ResourceLocation WORK_KIND = StorageResourceKindApi.WORK_KIND;
+    private static final ResourceLocation DESCRIPTOR_RESOURCE =
+            ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "descriptor");
+    private static final ResourceLocation STATION_WORK_RESOURCE =
+            ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "station_work");
+    private static final String DESCRIPTOR_ID = "descriptorId";
     static final StorageResourceKey ENERGY_KEY = StorageResourceKey.of(
             ENERGY_KIND,
             ResourceLocation.fromNamespaceAndPath("neoforge", "energy"),
             new CompoundTag());
 
     private StorageResourceBridge() {
+    }
+
+    static StorageResourceKey energyKey(EnergyType type) {
+        return StorageResourceKey.of(
+                WORK_KIND,
+                ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, type.getId()),
+                new CompoundTag());
+    }
+
+    static Optional<EnergyType> energyType(StorageResourceKey key) {
+        if (!key.kindId().equals(WORK_KIND) || !key.variantData().isEmpty()) {
+            return Optional.empty();
+        }
+        for (EnergyType type : EnergyType.values()) {
+            if (key.equals(energyKey(type))) return Optional.of(type);
+        }
+        return Optional.empty();
+    }
+
+    static StorageResourceKey descriptorKey(ResourceLocation descriptorId) {
+        return workKey(DESCRIPTOR_RESOURCE, descriptorId);
+    }
+
+    static Optional<ResourceLocation> descriptorId(StorageResourceKey key) {
+        return workDescriptorId(key, DESCRIPTOR_RESOURCE);
+    }
+
+    static StorageResourceKey stationWorkKey(ResourceLocation descriptorId) {
+        return workKey(STATION_WORK_RESOURCE, descriptorId);
+    }
+
+    static Optional<ResourceLocation> stationWorkDescriptorId(StorageResourceKey key) {
+        return workDescriptorId(key, STATION_WORK_RESOURCE);
+    }
+
+    private static StorageResourceKey workKey(
+            ResourceLocation resourceId,
+            ResourceLocation descriptorId
+    ) {
+        CompoundTag variant = new CompoundTag();
+        variant.putString(DESCRIPTOR_ID, descriptorId.toString());
+        return StorageResourceKey.of(WORK_KIND, resourceId, variant);
+    }
+
+    private static Optional<ResourceLocation> workDescriptorId(
+            StorageResourceKey key,
+            ResourceLocation resourceId
+    ) {
+        if (!key.kindId().equals(WORK_KIND) || !key.resourceId().equals(resourceId)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(ResourceLocation.tryParse(
+                key.variantData().getString(DESCRIPTOR_ID)));
     }
 
     static StorageResourceKey itemKey(

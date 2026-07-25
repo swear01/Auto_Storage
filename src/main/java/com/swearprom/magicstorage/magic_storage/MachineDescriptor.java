@@ -25,7 +25,7 @@ public final class MachineDescriptor {
     @Nullable
     private final Supplier<List<MachineVariant>> variantSource;
     @Nullable
-    private final ConsumableValue consumableValue;
+    private final TransformValue transformValue;
 
     private MachineDescriptor(
             ResourceLocation id,
@@ -36,7 +36,7 @@ public final class MachineDescriptor {
             @Nullable EnergyType energyType,
             int energyPerTick,
             @Nullable Supplier<List<MachineVariant>> variantSource,
-            @Nullable ConsumableValue consumableValue
+            @Nullable TransformValue transformValue
     ) {
         this.id = Objects.requireNonNull(id);
         this.representative = Objects.requireNonNull(representative).copyWithCount(1);
@@ -46,7 +46,7 @@ public final class MachineDescriptor {
         this.energyType = energyType;
         this.energyPerTick = energyPerTick;
         this.variantSource = variantSource;
-        this.consumableValue = consumableValue;
+        this.transformValue = transformValue;
         validate();
     }
 
@@ -92,22 +92,22 @@ public final class MachineDescriptor {
                 null);
     }
 
-    public static MachineDescriptor consumable(
+    public static MachineDescriptor transform(
             ResourceLocation id,
             ItemStack representative,
             Ingredient acceptedItems,
-            ConsumableValue consumableValue
+            TransformValue transformValue
     ) {
         return new MachineDescriptor(
                 id,
                 representative,
                 acceptedItems,
-                MachineEnergyTable.Category.CONSUMABLE,
+                MachineEnergyTable.Category.TRANSFORM,
                 0,
                 null,
                 0,
                 null,
-                Objects.requireNonNull(consumableValue));
+                Objects.requireNonNull(transformValue));
     }
 
     static MachineDescriptor clientSynced(
@@ -119,10 +119,12 @@ public final class MachineDescriptor {
             @Nullable EnergyType energyType,
             int energyPerTick
     ) {
-        ConsumableValue clientOnly = category == MachineEnergyTable.Category.CONSUMABLE
-                ? stack -> {
-                    throw new IllegalStateException("Consumable descriptor values are server-owned");
-                }
+        TransformValue clientOnly = category == MachineEnergyTable.Category.TRANSFORM
+                ? id.equals(MachineEnergyTable.AXE_ID)
+                ? stack -> AxeEnergy.isInfinite(stack)
+                ? new TransformAmount(0, true)
+                : new TransformAmount(AxeEnergy.finiteValue(stack), false)
+                : stack -> TransformAmount.EMPTY
                 : null;
         return new MachineDescriptor(
                 id,
@@ -154,16 +156,16 @@ public final class MachineDescriptor {
         if (acceptedItems.isEmpty()) {
             throw new IllegalArgumentException("Descriptor ingredient cannot be explicitly empty: " + id);
         }
-        if (category == MachineEnergyTable.Category.CONSUMABLE) {
+        if (category == MachineEnergyTable.Category.TRANSFORM) {
             if (maxInstalledCount != 0 || energyType != null || energyPerTick != 0
-                    || consumableValue == null) {
-                throw new IllegalArgumentException("Invalid consumable descriptor: " + id);
+                    || transformValue == null) {
+                throw new IllegalArgumentException("Invalid transform descriptor: " + id);
             }
             return;
         }
         if (maxInstalledCount < 1
                 || maxInstalledCount > MachineDescriptorApi.MAX_INSTALLED_COUNT
-                || consumableValue != null) {
+                || transformValue != null) {
             throw new IllegalArgumentException("Invalid installable descriptor count: " + id);
         }
         if (variantSource == null && ((energyType == null) != (energyPerTick == 0) || energyPerTick < 0)) {
@@ -218,7 +220,7 @@ public final class MachineDescriptor {
     }
 
     public List<MachineVariant> variants() {
-        if (category == MachineEnergyTable.Category.CONSUMABLE) return List.of();
+        if (category == MachineEnergyTable.Category.TRANSFORM) return List.of();
         if (variantSource != null) return checkedVariants(id, category, variantSource.get());
         MachineWorkRate rate = category == MachineEnergyTable.Category.PROCESS
                 ? MachineWorkRate.of(energyPerTick, 1) : MachineWorkRate.ZERO;
@@ -233,7 +235,7 @@ public final class MachineDescriptor {
     }
 
     public Optional<MachineWorkRate> rateFor(ItemStack stack) {
-        if (category == MachineEnergyTable.Category.CONSUMABLE || !accepts(stack)) {
+        if (category == MachineEnergyTable.Category.TRANSFORM || !accepts(stack)) {
             return Optional.empty();
         }
         if (variantSource == null) {
@@ -260,8 +262,8 @@ public final class MachineDescriptor {
             if (category == MachineEnergyTable.Category.INSTANT && !rate.isZero()) {
                 throw new IllegalArgumentException("Instant machine variants cannot generate work: " + id);
             }
-            if (category == MachineEnergyTable.Category.CONSUMABLE) {
-                throw new IllegalArgumentException("Consumable descriptors cannot expose installable variants: " + id);
+            if (category == MachineEnergyTable.Category.TRANSFORM) {
+                throw new IllegalArgumentException("Transform descriptors cannot expose installable variants: " + id);
             }
         }
         return snapshot;
@@ -286,29 +288,29 @@ public final class MachineDescriptor {
         return snapshot;
     }
 
-    public ConsumableAmount valueOf(ItemStack stack) {
-        if (category != MachineEnergyTable.Category.CONSUMABLE || consumableValue == null) {
-            throw new IllegalStateException("Descriptor is not consumable: " + id);
+    public TransformAmount valueOf(ItemStack stack) {
+        if (category != MachineEnergyTable.Category.TRANSFORM || transformValue == null) {
+            throw new IllegalStateException("Descriptor is not a transform: " + id);
         }
-        if (!accepts(stack)) return ConsumableAmount.EMPTY;
-        ConsumableAmount value = Objects.requireNonNull(consumableValue.value(stack.copy()));
+        if (!accepts(stack)) return TransformAmount.EMPTY;
+        TransformAmount value = Objects.requireNonNull(transformValue.value(stack.copy()));
         if (value.amount() < 0 || value.infinite() && value.amount() != 0) {
-            throw new IllegalStateException("Invalid consumable value from descriptor: " + id);
+            throw new IllegalStateException("Invalid transform value from descriptor: " + id);
         }
         return value;
     }
 
     @FunctionalInterface
-    public interface ConsumableValue {
-        ConsumableAmount value(ItemStack stack);
+    public interface TransformValue {
+        TransformAmount value(ItemStack stack);
     }
 
-    public record ConsumableAmount(long amount, boolean infinite) {
-        public static final ConsumableAmount EMPTY = new ConsumableAmount(0, false);
+    public record TransformAmount(long amount, boolean infinite) {
+        public static final TransformAmount EMPTY = new TransformAmount(0, false);
 
-        public ConsumableAmount {
+        public TransformAmount {
             if (amount < 0 || infinite && amount != 0) {
-                throw new IllegalArgumentException("Invalid consumable amount");
+                throw new IllegalArgumentException("Invalid transform amount");
             }
         }
     }

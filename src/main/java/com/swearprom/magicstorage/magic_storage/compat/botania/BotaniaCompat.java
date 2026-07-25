@@ -49,6 +49,7 @@ public final class BotaniaCompat {
     private static final ResourceLocation MANA_TABLET_ID =
             ResourceLocation.fromNamespaceAndPath("botania", "mana_tablet");
     private static final long PETAL_WATER_AMOUNT = 1_000;
+    private static final long ELVEN_TRADE_MANA = loadElvenTradeManaCost();
 
     private BotaniaCompat() {
     }
@@ -334,8 +335,26 @@ public final class BotaniaCompat {
         List<TypedRecipeInput> inputs = new ArrayList<>();
         recipe.getIngredients().forEach(ingredient ->
                 inputs.add(consumed(ingredient, registries)));
+        inputs.add(TypedRecipeInput.consume(manaKey(), ELVEN_TRADE_MANA));
         List<ItemStack> outputs = recipe.getOutputs().stream().map(ItemStack::copy).toList();
         return plan(inputs, outputs, outputs.getFirst(), registries);
+    }
+
+    private static long loadElvenTradeManaCost() {
+        try {
+            long cost = Class.forName(
+                            "vazkii.botania.common.block.block_entity.AlfheimPortalBlockEntity")
+                    .getField("MANA_COST")
+                    .getLong(null);
+            if (cost <= 0) {
+                throw new IllegalStateException(
+                        "Botania Elven Trade MANA_COST must be positive");
+            }
+            return cost;
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException(
+                    "Installed Botania does not expose Elven Trade MANA_COST", exception);
+        }
     }
 
     private static TypedRecipePlan plan(

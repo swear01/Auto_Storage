@@ -15,6 +15,7 @@ import com.swearprom.magicstorage.magic_storage.StorageTerminalMenu;
 import com.swearprom.magicstorage.magic_storage.TerminalDisplayStack;
 import com.swearprom.magicstorage.magic_storage.TerminalResourceDisplay;
 import com.swearprom.magicstorage.magic_storage.TerminalResourceView;
+import com.swearprom.magicstorage.magic_storage.TransformProviderApi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -40,9 +41,13 @@ import java.util.Map;
 @PrefixGameTestTemplate(false)
 public final class PowahIntegrationGameTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int TRANSFORM_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;
     private static final ResourceLocation ENERGIZING = stationId("energizing");
+    private static final ResourceLocation FURNATOR = stationId("furnator");
+    private static final ResourceLocation FURNATOR_TRANSFORM =
+            ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "powah_furnator");
     private static final ResourceLocation ENERGIZED_STEEL =
             powahId("energizing/energized_steel");
     private static final ResourceLocation SIX_INPUT_BATCH = fixtureRecipe("six_input_batch");
@@ -314,6 +319,78 @@ public final class PowahIntegrationGameTests {
         });
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void furnator_transform_requires_station_and_commits_fe_work_atomically(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            selectTransform(menu, context, FURNATOR_TRANSFORM);
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(StorageResourceKey.neoforgeEnergy()) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().is(Items.COAL)) {
+                helper.fail("Furnator transform must reject without an installed Furnator");
+                return;
+            }
+
+            if (!installStation(context, new ItemStack(powahItem("furnator_starter")))) {
+                helper.fail("Could not install the Starter Furnator");
+                return;
+            }
+            long output = expectedFurnatorOutput(new ItemStack(Items.COAL));
+            long rate = Powah.config().generators.furnators.getGeneration(Tier.STARTER);
+            tick(context.core(), Math.toIntExact((output + rate - 1) / rate));
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(StorageResourceKey.neoforgeEnergy()) != output
+                    || context.core().getStationWork(FURNATOR) !=
+                    Math.toIntExact((output + rate - 1) / rate) * rate - output
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().isEmpty()) {
+                helper.fail("Furnator transform committed the wrong FE/work/input transaction");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void furnator_transform_overflow_and_removed_station_fail_without_mutation(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            if (!installStation(context, new ItemStack(powahItem("furnator_nitro")))) {
+                helper.fail("Could not install the Nitro Furnator");
+                return;
+            }
+            long output = expectedFurnatorOutput(new ItemStack(Items.COAL));
+            long rate = Powah.config().generators.furnators.getGeneration(Tier.NITRO);
+            tick(context.core(), Math.toIntExact((output + rate - 1) / rate));
+            long workBefore = context.core().getStationWork(FURNATOR);
+            seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), Long.MAX_VALUE);
+
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            selectTransform(menu, context, FURNATOR_TRANSFORM);
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(StorageResourceKey.neoforgeEnergy())
+                    != Long.MAX_VALUE
+                    || context.core().getStationWork(FURNATOR) != workBefore
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().is(Items.COAL)) {
+                helper.fail("Furnator output overflow partially mutated the transform");
+                return;
+            }
+
+            removeStation(context, FURNATOR);
+            context.core().extractResource(
+                    StorageResourceKey.neoforgeEnergy(), Long.MAX_VALUE, Action.EXECUTE);
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getStationWork(FURNATOR) != workBefore
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().is(Items.COAL)) {
+                helper.fail("Removing a Furnator must disable its transform without deleting work");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
     private static boolean supports(GameTestHelper helper, ResourceLocation recipeId) {
         var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
         if (holder == null) throw new IllegalStateException("Missing recipe " + recipeId);
@@ -354,7 +431,7 @@ public final class PowahIntegrationGameTests {
     private static boolean installStation(FixtureContext context, ItemStack station) {
         var menu = new CraftingTerminalMenu(
                 912, context.player().getInventory(), context.core());
-        menu.clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START
                      + CraftingTerminalMenu.MACHINE_SLOT_COUNT;
@@ -368,6 +445,46 @@ public final class PowahIntegrationGameTests {
         }
         menu.clickMenuButton(context.player(), STORAGE_PAGE_BUTTON);
         return false;
+    }
+
+    private static CraftingTerminalMenu transformMenu(
+            FixtureContext context,
+            ItemStack input
+    ) {
+        var menu = new CraftingTerminalMenu(
+                914, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), TRANSFORM_PAGE_BUTTON);
+        menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(input);
+        return menu;
+    }
+
+    private static void selectTransform(
+            CraftingTerminalMenu menu,
+            FixtureContext context,
+            ResourceLocation transformId
+    ) {
+        int button = TransformProviderApi.targetButtonId(
+                transformId, menu.getMachineDescriptors());
+        if (!menu.clickMenuButton(context.player(), button)) {
+            throw new IllegalStateException("Could not select transform " + transformId);
+        }
+    }
+
+    private static void removeStation(
+            FixtureContext context,
+            ResourceLocation descriptorId
+    ) {
+        int slot = MachineEnergyTable.findSlot(descriptorId);
+        var menu = new CraftingTerminalMenu(
+                915, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
+        menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + slot).set(ItemStack.EMPTY);
+    }
+
+    private static long expectedFurnatorOutput(ItemStack stack) {
+        return Math.multiplyExact(
+                stack.getBurnTime(net.minecraft.world.item.crafting.RecipeType.SMELTING),
+                Powah.config().general.energy_per_fuel_tick);
     }
 
     private static boolean craft(

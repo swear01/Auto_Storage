@@ -7,7 +7,7 @@
     {
       "type": "patchouli:spotlight",
       "item": "magic_storage:crafting_terminal",
-      "text": "The Crafting Terminal combines resource access with three workspaces: the $(thing)Storage tab$() for stored items, fluids, energy, gases, or addon kinds, the item-only $(thing)Craftable tab$() for recipes ready now, and the $(thing)Fuel tab$() for resources and stations."
+      "text": "The Crafting Terminal has four workspaces: the $(thing)Storage tab$() for stored items and typed resources, the $(thing)Craftable tab$() for recipes ready now, $(thing)Transform$() for explicit deterministic conversions, and the $(thing)Stations tab$() for installed processing and instant stations."
     },
     {
       "type": "patchouli:text",
@@ -15,11 +15,11 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Install the matching station on the Fuel tab, then select an output in Storage or Craftable. The preview shows the exact recipe, ingredients, station, process energy, Fuel, or Axe Energy needed. A neutral message appears when no supported recipe is available."
+      "text": "Install the matching block on Stations, then select an output in Storage or Craftable. The preview shows the exact recipe, ingredients, station, process resource, Fuel, Mana, tool work, and output count. A neutral message appears when no supported recipe is available."
     },
     {
       "type": "patchouli:text",
-      "text": "Use the shared ×1, ×8, ×64, or Max strip. Fixed amounts dim when the full batch cannot be made. Max checks ingredients, energy, and destination room together and chooses the largest complete amount that currently fits."
+      "text": "Use the shared ×1, ×8, ×64, or Max strip. Fixed amounts dim when the full batch cannot be made. Max checks ingredients, work resources, and destination room together and chooses the largest complete amount that currently fits."
     },
     {
       "type": "patchouli:text",

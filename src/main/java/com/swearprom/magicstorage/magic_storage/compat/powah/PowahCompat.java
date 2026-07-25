@@ -14,6 +14,7 @@ import com.swearprom.magicstorage.magic_storage.StorageResourceKey;
 import com.swearprom.magicstorage.magic_storage.TypedRecipeInput;
 import com.swearprom.magicstorage.magic_storage.TypedRecipeOutput;
 import com.swearprom.magicstorage.magic_storage.TypedRecipePlan;
+import com.swearprom.magicstorage.magic_storage.TransformProviderApi;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import owmii.powah.Powah;
 import owmii.powah.block.Tier;
@@ -56,6 +58,8 @@ public final class PowahCompat {
 
         ResourceLocation descriptorId = ResourceLocation.fromNamespaceAndPath(
                 machineDescriptors.getNamespace(), "powah_energizing");
+        ResourceLocation furnatorId = ResourceLocation.fromNamespaceAndPath(
+                machineDescriptors.getNamespace(), "powah_furnator");
         machineDescriptors.register(descriptorId.getPath(), () ->
                 MachineDescriptor.installableVariants(
                         descriptorId,
@@ -72,6 +76,17 @@ public final class PowahCompat {
                         PowahCompat::plan,
                         recipe -> RecipeFamilyCost.stationWork(recipe.getScaledEnergy()),
                         RecipePresentationKind.CRAFTING));
+        machineDescriptors.register(furnatorId.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        furnatorId,
+                        PowahCompat::furnatorVariants,
+                        MachineEnergyTable.Category.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
+        TransformProviderApi.register(
+                furnatorId,
+                new ItemStack(Items.REDSTONE),
+                stack -> furnatorTransform(stack, furnatorId));
     }
 
     private static List<MachineVariant> rodVariants() {
@@ -82,6 +97,33 @@ public final class PowahCompat {
                                 Powah.config().devices.energizing_rods.getTransfer(tier),
                                 1)))
                 .toList();
+    }
+
+    private static List<MachineVariant> furnatorVariants() {
+        return Arrays.stream(Tier.getNormalVariants())
+                .map(tier -> MachineVariant.of(
+                        new ItemStack(requiredItem("furnator_" + tier.getName())),
+                        MachineWorkRate.of(
+                                Powah.config().generators.furnators.getGeneration(tier),
+                                1)))
+                .toList();
+    }
+
+    private static TransformProviderApi.Result furnatorTransform(
+            ItemStack stack,
+            ResourceLocation furnatorId
+    ) {
+        int burnTicks = stack.getBurnTime(RecipeType.SMELTING);
+        if (burnTicks <= 0) return null;
+        long output = Math.multiplyExact(
+                (long) burnTicks,
+                Powah.config().general.energy_per_fuel_tick);
+        if (output <= 0) return null;
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                output,
+                furnatorId,
+                output);
     }
 
     private static boolean supports(EnergizingRecipe recipe) {

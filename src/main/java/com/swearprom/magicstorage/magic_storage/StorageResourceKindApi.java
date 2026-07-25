@@ -10,6 +10,7 @@ public final class StorageResourceKindApi {
     public static final ResourceLocation ITEM_KIND = id("item");
     public static final ResourceLocation FLUID_KIND = id("fluid");
     public static final ResourceLocation ENERGY_KIND = id("neoforge_energy");
+    public static final ResourceLocation WORK_KIND = id("work");
     public static final ResourceLocation CHEMICAL_KIND =
             ResourceLocation.fromNamespaceAndPath("mekanism", "chemical");
     public static final ResourceLocation BOTANIA_MANA_KIND =

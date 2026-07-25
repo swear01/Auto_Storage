@@ -658,6 +658,7 @@ SCENARIO_PROFILES = {
             "hotbar": {
                 "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
                 "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
+                "3": {"slot": "hotbar.2", "item": "minecraft:coal", "count": 1},
             },
             "inventory": [],
         },

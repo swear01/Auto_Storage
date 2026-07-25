@@ -204,6 +204,42 @@ public final class RecipeFamily {
         }
 
         @Override
+        public RecipeCandidateIndex candidateIndex(
+                RecipeHolder<?> holder,
+                Level level
+        ) {
+            Recipe<?> recipe = checkedRecipe(holder);
+            if (typedPlan == null || level == null) return candidateIndex(holder);
+            return typedCandidateIndex(
+                    typedPlanFor(recipe, level.registryAccess()),
+                    level.registryAccess());
+        }
+
+        private RecipeCandidateIndex typedCandidateIndex(
+                TypedRecipePlan plan,
+                HolderLookup.Provider registries
+        ) {
+            List<ItemStack> representatives = new java.util.ArrayList<>();
+            boolean indexed = false;
+            for (TypedRecipeInput input : plan.inputs()) {
+                if (input.alternatives().stream().anyMatch(
+                        key -> !key.kindId().equals(StorageResourceKindApi.ITEM_KIND))) continue;
+                List<ItemStack> inputRepresentatives = input.alternatives().stream()
+                        .map(key -> StorageResourceBridge.itemKey(key, registries)
+                                .map(item -> item.toStack(1))
+                                .orElse(ItemStack.EMPTY))
+                        .filter(stack -> !stack.isEmpty())
+                        .toList();
+                if (inputRepresentatives.size() != input.alternatives().size()) continue;
+                indexed = true;
+                representatives.addAll(inputRepresentatives);
+            }
+            return indexed
+                    ? RecipeCandidateIndex.exhaustive(representatives)
+                    : RecipeCandidateIndex.nonExhaustive(representatives);
+        }
+
+        @Override
         public RecipeAdapterMatch.Contract contract(RecipeHolder<?> holder) {
             Recipe<?> recipe = checkedRecipe(holder);
             if (isTyped()) {

@@ -57,7 +57,7 @@ import java.util.Optional;
 @PrefixGameTestTemplate(false)
 public final class RecipeFamilyIntegrationTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;
     private static final ResourceLocation RECIPE_ID = ResourceLocation.fromNamespaceAndPath(
             FixtureMod.MODID, "grinding_cobblestone");
@@ -167,7 +167,7 @@ public final class RecipeFamilyIntegrationTests {
             GameTestHelper helper
     ) {
         withFixture(helper, context -> {
-            context.menu().clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+            context.menu().clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
             var machineSlot = findMachineSlot(context, new ItemStack(Items.COPPER_BLOCK));
             if (machineSlot == null) {
                 helper.fail("Polymorphic fixture station had no installable terminal slot");
@@ -196,7 +196,7 @@ public final class RecipeFamilyIntegrationTests {
             GameTestHelper helper
     ) {
         withFixture(helper, context -> {
-            context.menu().clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+            context.menu().clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
             var machineSlot = findMachineSlot(context, new ItemStack(Items.COPPER_BLOCK));
             if (machineSlot == null) {
                 helper.fail("Process fixture station had no installable terminal slot");
@@ -636,11 +636,24 @@ public final class RecipeFamilyIntegrationTests {
                 helper.fail("Typed family was not discovered");
                 return;
             }
-            int craftable = context.menu().computeCraftPreview(
-                    context.core(), context.player()).craftable();
-            if (craftable != 2) {
+            CraftingTerminalMenu.CraftPreview preview = context.menu().computeCraftPreview(
+                    context.core(), context.player());
+            if (preview.craftable() != 2) {
                 helper.fail("Typed family preview did not aggregate retained and consumed resources: "
-                        + craftable);
+                        + preview.craftable());
+                return;
+            }
+            long cobblestoneRows = preview.ingredients().stream()
+                    .filter(row -> row.stack().is(Items.COBBLESTONE))
+                    .count();
+            CraftingTerminalMenu.IngredientPreview cobblestone = preview.ingredients().stream()
+                    .filter(row -> row.stack().is(Items.COBBLESTONE))
+                    .findFirst()
+                    .orElse(null);
+            if (cobblestoneRows != 1 || cobblestone == null
+                    || cobblestone.available() != 4 || cobblestone.required() != 2) {
+                helper.fail("Duplicate typed ingredients were not merged into one 4 / 2 row: "
+                        + preview.ingredients());
                 return;
             }
             if (!context.menu().handleRecipeRequest(
@@ -956,7 +969,7 @@ public final class RecipeFamilyIntegrationTests {
     }
 
     private static boolean installStonecutter(FixtureContext context) {
-        context.menu().clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        context.menu().clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         ItemStack station = new ItemStack(Items.STONECUTTER);
         boolean installed = false;
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;

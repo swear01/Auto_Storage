@@ -41,7 +41,7 @@ import java.util.List;
 @PrefixGameTestTemplate(false)
 public final class ArsNouveauIntegrationGameTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;
     private static final ResourceLocation IMBUEMENT =
             stationId("imbuement_chamber");
@@ -418,7 +418,7 @@ public final class ArsNouveauIntegrationGameTests {
         var menu = new CraftingTerminalMenu(
                 802, context.player().getInventory(), context.core());
         ItemStack station = new ItemStack(arsItem(itemPath));
-        menu.clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START
                      + CraftingTerminalMenu.MACHINE_SLOT_COUNT;

@@ -34,14 +34,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private StorageTypeCapacity typeCapacity = StorageTypeCapacity.zero();
     private int typeCount = 0;
     private long machineRevision;
-    private Map<ResourceLocation, Long> descriptorAmounts = new HashMap<>();
     private Set<ResourceLocation> infiniteDescriptors = new HashSet<>();
-    private Map<ResourceLocation, Long> stationWork = new HashMap<>();
     private Map<ResourceLocation, MachineWorkAccumulator.Remainder> machineWorkRemainders =
             new HashMap<>();
     private UUID preparedRecoveryId;
 
-    private Map<EnergyType, Long> energy = new EnumMap<>(EnergyType.class);
     private SimpleContainer machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
 
     private StorageResourceLedger resourceLedger = new StorageResourceLedger();
@@ -62,19 +59,22 @@ public class StorageCoreBlockEntity extends BlockEntity {
 
     public void tick() {
         if (level == null || level.isClientSide() || conflicted || !isStorageAvailable()) return;
-        boolean changed = false;
+        boolean remainderChanged = false;
+        Map<StorageResourceKey, Long> workDeltas = new HashMap<>();
         List<MachineDescriptor> descriptors = MachineEnergyTable.entries();
         for (int slot = 0; slot < descriptors.size(); slot++) {
             MachineDescriptor entry = MachineEnergyTable.get(slot);
             ItemStack machineStack = machines.getItem(slot);
             if (entry == null || entry.category() != MachineEnergyTable.Category.PROCESS
                     || !entry.accepts(machineStack)) {
-                if (entry != null && machineWorkRemainders.remove(entry.id()) != null) changed = true;
+                if (entry != null && machineWorkRemainders.remove(entry.id()) != null) {
+                    remainderChanged = true;
+                }
                 continue;
             }
             MachineWorkRate rate = entry.rateFor(machineStack).orElse(null);
             if (rate == null || rate.isZero()) {
-                if (machineWorkRemainders.remove(entry.id()) != null) changed = true;
+                if (machineWorkRemainders.remove(entry.id()) != null) remainderChanged = true;
                 continue;
             }
             MachineWorkAccumulator.Remainder previous = machineWorkRemainders.get(entry.id());
@@ -84,31 +84,25 @@ public class StorageCoreBlockEntity extends BlockEntity {
                     rate,
                     machineStack.getCount());
             if (advance.remainder().remainder() == 0) {
-                if (machineWorkRemainders.remove(entry.id()) != null) changed = true;
+                if (machineWorkRemainders.remove(entry.id()) != null) remainderChanged = true;
             } else if (!advance.remainder().equals(previous)) {
                 machineWorkRemainders.put(entry.id(), advance.remainder());
-                changed = true;
+                remainderChanged = true;
             }
             if (advance.wholeWork() <= 0) continue;
-            if (entry.energyType() != null) {
-                long current = getEnergy(entry.energyType());
-                long updated = saturatingAdd(current, advance.wholeWork());
-                if (updated != current) {
-                    energy.put(entry.energyType(), updated);
-                    fireEnergyChanged(entry.energyType(), updated);
-                    changed = true;
-                }
-            } else {
-                long current = getStationWork(entry.id());
-                long updated = saturatingAdd(current, advance.wholeWork());
-                if (updated != current) {
-                    stationWork.put(entry.id(), updated);
-                    machineRevision++;
-                    changed = true;
-                }
-            }
+            StorageResourceKey workKey = entry.energyType() != null
+                    ? StorageResourceBridge.energyKey(entry.energyType())
+                    : StorageResourceBridge.stationWorkKey(entry.id());
+            long current = resourceLedger.amount(workKey);
+            long pending = workDeltas.getOrDefault(workKey, 0L);
+            long delta = Math.min(advance.wholeWork(), Long.MAX_VALUE - current - pending);
+            if (delta > 0) workDeltas.put(workKey, pending + delta);
         }
-        if (changed) markStorageChanged();
+        boolean workChanged = !workDeltas.isEmpty()
+                && applyResourceTransaction(workDeltas, Action.EXECUTE, Actor.EMPTY);
+        if (remainderChanged && !workChanged) {
+            markStorageChanged();
+        }
     }
 
     Container getMachineContainer() {
@@ -132,11 +126,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     public boolean canAddAxeEnergy(ItemStack stack) {
-        return canAddDescriptorConsumable(MachineEnergyTable.AXE_ID, stack);
+        return canAddDescriptorTransform(MachineEnergyTable.AXE_ID, stack);
     }
 
     public boolean addAxeEnergy(ItemStack stack) {
-        return addDescriptorConsumable(MachineEnergyTable.AXE_ID, stack);
+        return addDescriptorTransform(MachineEnergyTable.AXE_ID, stack);
     }
 
     public boolean consumeAxeEnergy(long amount) {
@@ -145,24 +139,28 @@ public class StorageCoreBlockEntity extends BlockEntity {
 
     public long getDescriptorAmount(ResourceLocation descriptorId) {
         if (!isStorageAvailable()) return 0;
-        return descriptorAmounts.getOrDefault(descriptorId, 0L);
+        return resourceLedger.amount(StorageResourceBridge.descriptorKey(descriptorId));
     }
 
     public long getStationWork(ResourceLocation descriptorId) {
         if (!isStorageAvailable()) return 0;
-        return stationWork.getOrDefault(descriptorId, 0L);
+        return resourceLedger.amount(StorageResourceBridge.stationWorkKey(descriptorId));
+    }
+
+    public boolean isMachineInstalled(ResourceLocation descriptorId) {
+        int slot = MachineEnergyTable.findSlot(descriptorId);
+        MachineDescriptor descriptor = slot < 0 ? null : MachineEnergyTable.get(slot);
+        return descriptor != null
+                && descriptor.maxInstalledCount() > 0
+                && descriptor.accepts(machines.getItem(slot));
     }
 
     public boolean consumeStationWork(ResourceLocation descriptorId, long amount) {
         if (amount <= 0 || conflicted || !isStorageAvailable()) return false;
-        long current = getStationWork(descriptorId);
-        if (current < amount) return false;
-        long remaining = current - amount;
-        if (remaining == 0) stationWork.remove(descriptorId);
-        else stationWork.put(descriptorId, remaining);
-        machineRevision++;
-        markStorageChanged();
-        return true;
+        return applyResourceTransaction(
+                Map.of(StorageResourceBridge.stationWorkKey(descriptorId), -amount),
+                Action.EXECUTE,
+                Actor.EMPTY);
     }
 
     boolean consumeCraftCosts(RecipeAdapterMatch.Cost cost, long crafts) {
@@ -195,38 +193,33 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 && getStationWork(stationCost.descriptorId()) < stationNeed) return false;
         if (toolCost != null && !hasDescriptorAmount(toolCost.descriptorId(), toolNeed)) return false;
 
-        boolean changed = false;
+        Map<StorageResourceKey, Long> deltas = new HashMap<>();
         if (energyCost != null) {
             if (processNeed > 0) {
-                energy.merge(energyCost.processType(), -processNeed, Long::sum);
-                fireEnergyChanged(energyCost.processType(), getEnergy(energyCost.processType()));
-                changed = true;
+                deltas.merge(
+                        StorageResourceBridge.energyKey(energyCost.processType()),
+                        -processNeed,
+                        Math::addExact);
             }
             if (fuelNeed > 0) {
-                energy.merge(energyCost.fuelType(), -fuelNeed, Long::sum);
-                fireEnergyChanged(energyCost.fuelType(), getEnergy(energyCost.fuelType()));
-                changed = true;
+                deltas.merge(
+                        StorageResourceBridge.energyKey(energyCost.fuelType()),
+                        -fuelNeed,
+                        Math::addExact);
             }
         }
-        boolean descriptorChanged = false;
         if (stationCost != null) {
-            long remaining = getStationWork(stationCost.descriptorId()) - stationNeed;
-            if (remaining == 0) stationWork.remove(stationCost.descriptorId());
-            else stationWork.put(stationCost.descriptorId(), remaining);
-            descriptorChanged = true;
+            deltas.put(
+                    StorageResourceBridge.stationWorkKey(stationCost.descriptorId()),
+                    -stationNeed);
         }
         if (toolCost != null && !hasInfiniteDescriptor(toolCost.descriptorId())) {
-            long remaining = getDescriptorAmount(toolCost.descriptorId()) - toolNeed;
-            if (remaining == 0) descriptorAmounts.remove(toolCost.descriptorId());
-            else descriptorAmounts.put(toolCost.descriptorId(), remaining);
-            descriptorChanged = true;
+            deltas.put(
+                    StorageResourceBridge.descriptorKey(toolCost.descriptorId()),
+                    -toolNeed);
         }
-        if (descriptorChanged) {
-            machineRevision++;
-            changed = true;
-        }
-        if (changed) markStorageChanged();
-        return true;
+        return deltas.isEmpty() || applyResourceTransaction(
+                deltas, Action.EXECUTE, Actor.EMPTY);
     }
 
     public boolean hasInfiniteDescriptor(ResourceLocation descriptorId) {
@@ -238,46 +231,57 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 || getDescriptorAmount(descriptorId) >= amount);
     }
 
-    public boolean canAddDescriptorConsumable(ResourceLocation descriptorId, ItemStack stack) {
+    public boolean canAddDescriptorTransform(ResourceLocation descriptorId, ItemStack stack) {
         if (stack.isEmpty() || conflicted || !isStorageAvailable()
                 || hasInfiniteDescriptor(descriptorId)) return false;
         MachineDescriptor descriptor = MachineEnergyTable.get(descriptorId);
-        if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.CONSUMABLE
+        if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.TRANSFORM
                 || !descriptor.accepts(stack)) return false;
-        MachineDescriptor.ConsumableAmount value = descriptor.valueOf(stack);
+        MachineDescriptor.TransformAmount value = descriptor.valueOf(stack);
         return value.infinite() || value.amount() > 0
                 && getDescriptorAmount(descriptorId) <= Long.MAX_VALUE - value.amount();
     }
 
-    public boolean addDescriptorConsumable(ResourceLocation descriptorId, ItemStack stack) {
-        if (!canAddDescriptorConsumable(descriptorId, stack)) return false;
-        MachineDescriptor.ConsumableAmount value = MachineEnergyTable.get(descriptorId).valueOf(stack);
+    public boolean addDescriptorTransform(ResourceLocation descriptorId, ItemStack stack) {
+        if (!canAddDescriptorTransform(descriptorId, stack)) return false;
+        MachineDescriptor.TransformAmount value = MachineEnergyTable.get(descriptorId).valueOf(stack);
         if (value.infinite()) {
-            descriptorAmounts.remove(descriptorId);
+            long current = getDescriptorAmount(descriptorId);
+            if (current > 0 && !applyResourceTransaction(
+                    Map.of(StorageResourceBridge.descriptorKey(descriptorId), -current),
+                    Action.EXECUTE,
+                    Actor.EMPTY)) {
+                return false;
+            }
             infiniteDescriptors.add(descriptorId);
+            machineRevision++;
+            markStorageChanged();
         } else {
-            descriptorAmounts.merge(descriptorId, value.amount(), Math::addExact);
+            if (!applyResourceTransaction(
+                    Map.of(StorageResourceBridge.descriptorKey(descriptorId), value.amount()),
+                    Action.EXECUTE,
+                    Actor.EMPTY)) {
+                return false;
+            }
         }
         stack.setCount(0);
-        machineRevision++;
-        markStorageChanged();
         return true;
     }
 
     public boolean consumeDescriptor(ResourceLocation descriptorId, long amount) {
         if (!hasDescriptorAmount(descriptorId, amount)) return false;
         if (!hasInfiniteDescriptor(descriptorId)) {
-            long remaining = getDescriptorAmount(descriptorId) - amount;
-            if (remaining == 0) descriptorAmounts.remove(descriptorId);
-            else descriptorAmounts.put(descriptorId, remaining);
+            return applyResourceTransaction(
+                    Map.of(StorageResourceBridge.descriptorKey(descriptorId), -amount),
+                    Action.EXECUTE,
+                    Actor.EMPTY);
         }
-        machineRevision++;
-        markStorageChanged();
         return true;
     }
 
     public long getEnergy(EnergyType type) {
-        return isStorageAvailable() ? energy.getOrDefault(type, 0L) : 0;
+        return isStorageAvailable()
+                ? resourceLedger.amount(StorageResourceBridge.energyKey(type)) : 0;
     }
 
     public boolean consumeEnergy(EnergyCost cost, long multiplier) {
@@ -292,14 +296,21 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
         if (getEnergy(cost.processType()) < processNeed) return false;
         if (getEnergy(cost.fuelType()) < fuelNeed) return false;
-        energy.merge(cost.processType(), -processNeed, Long::sum);
-        energy.merge(cost.fuelType(), -fuelNeed, Long::sum);
-        fireEnergyChanged(cost.processType(), getEnergy(cost.processType()));
-        if (cost.fuelType() != cost.processType()) {
-            fireEnergyChanged(cost.fuelType(), getEnergy(cost.fuelType()));
+        Map<StorageResourceKey, Long> deltas = new HashMap<>();
+        if (processNeed > 0) {
+            deltas.merge(
+                    StorageResourceBridge.energyKey(cost.processType()),
+                    -processNeed,
+                    Math::addExact);
         }
-        markStorageChanged();
-        return true;
+        if (fuelNeed > 0) {
+            deltas.merge(
+                    StorageResourceBridge.energyKey(cost.fuelType()),
+                    -fuelNeed,
+                    Math::addExact);
+        }
+        return deltas.isEmpty() || applyResourceTransaction(
+                deltas, Action.EXECUTE, Actor.EMPTY);
     }
 
     public boolean addFuel(ItemStack stack, EnergyType targetPool) {
@@ -315,10 +326,13 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 }
                 long current = getEnergy(targetPool);
                 if (amount <= 0 || current > Long.MAX_VALUE - amount) return false;
-                energy.put(targetPool, current + amount);
+                if (!applyResourceTransaction(
+                        Map.of(StorageResourceBridge.energyKey(targetPool), amount),
+                        Action.EXECUTE,
+                        Actor.EMPTY)) {
+                    return false;
+                }
                 stack.setCount(0);
-                fireEnergyChanged(targetPool, current + amount);
-                markStorageChanged();
                 return true;
             }
         }
@@ -421,11 +435,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
             }
             storageRecord = null;
             networkId = null;
-            energy = new EnumMap<>(EnergyType.class);
             machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
-            descriptorAmounts = new HashMap<>();
             infiniteDescriptors = new HashSet<>();
-            stationWork = new HashMap<>();
             machineWorkRemainders = new HashMap<>();
             resourceLedger = new StorageResourceLedger();
             typeCount = 0;
@@ -473,11 +484,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
         storageRecord = record;
         networkId = record.networkId();
-        energy = record.energy();
         machines = record.machines();
-        descriptorAmounts = record.descriptorAmounts();
         infiniteDescriptors = record.infiniteDescriptors();
-        stationWork = record.stationWork();
         machineWorkRemainders = record.machineWorkRemainders();
         resourceLedger = record.resourceLedger();
         typeCount = record.typeCount();
@@ -599,6 +607,29 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
     }
 
+    private void fireStationWorkChanged(
+            ResourceLocation descriptorId,
+            long delta,
+            long newAmount
+    ) {
+        if (mutationBatchDepth > 0) {
+            deferredListenerEvents.add(() ->
+                    notifyStationWorkChanged(descriptorId, delta, newAmount));
+            return;
+        }
+        notifyStationWorkChanged(descriptorId, delta, newAmount);
+    }
+
+    private void notifyStationWorkChanged(
+            ResourceLocation descriptorId,
+            long delta,
+            long newAmount
+    ) {
+        for (StorageListener listener : List.copyOf(listeners)) {
+            listener.onStationWorkChanged(descriptorId, delta, newAmount);
+        }
+    }
+
     void beginMutationBatch() {
         mutationBatchDepth++;
     }
@@ -631,7 +662,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
     long insertResource(StorageResourceKey key, long amount, Action action, Actor actor) {
         if (amount <= 0 || conflicted || !isStorageAvailable()) return 0;
         long existing = resourceLedger.amount(key);
-        if (existing == 0 && !ledgerCapacity().canAcceptNewType(resourceLedger.typeCount())) return 0;
+        if (existing == 0
+                && !key.kindId().equals(StorageResourceBridge.WORK_KIND)
+                && !ledgerCapacity().canAcceptNewType(capacityTypeCount())) return 0;
         long inserted = Math.min(amount, Long.MAX_VALUE - existing);
         if (inserted <= 0 || !applyResourceTransaction(
                 Map.of(key, inserted), action, actor)) return 0;
@@ -660,17 +693,25 @@ public class StorageCoreBlockEntity extends BlockEntity {
         Objects.requireNonNull(actor, "actor");
         if (deltas.isEmpty() || conflicted || !isStorageAvailable() || level == null) return false;
         Map<StorageResourceKey, ItemKey> itemKeys = new HashMap<>();
+        boolean capacityTypesChanged = false;
         for (StorageResourceKey key : deltas.keySet()) {
             if (!StorageResourceKinds.accepts(key)) return false;
+            if (!key.kindId().equals(StorageResourceBridge.WORK_KIND)) {
+                capacityTypesChanged = true;
+            }
             if (!key.kindId().equals(StorageResourceBridge.ITEM_KIND)) continue;
             var itemKey = StorageResourceBridge.itemKey(key, level.registryAccess());
             if (itemKey.isEmpty()) return false;
             itemKeys.put(key, itemKey.get());
         }
-        if (!resourceLedger.applyExact(deltas, ledgerCapacity(), action)) return false;
+        if (!resourceLedger.applyExact(deltas, ledgerCapacity(deltas), action)) return false;
         if (action == Action.EXECUTE) {
-            refreshTypeCount();
+            if (capacityTypesChanged) refreshTypeCount();
             if (!itemKeys.isEmpty()) cacheDirty = true;
+            if (deltas.keySet().stream().anyMatch(
+                    key -> StorageResourceBridge.descriptorId(key).isPresent())) {
+                machineRevision++;
+            }
             markStorageChanged();
             for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
                 fireChanged(
@@ -686,6 +727,13 @@ public class StorageCoreBlockEntity extends BlockEntity {
                         entry.getValue(),
                         resourceLedger.amount(entry.getKey()),
                         actor);
+                StorageResourceBridge.energyType(entry.getKey()).ifPresent(
+                        type -> fireEnergyChanged(type, resourceLedger.amount(entry.getKey())));
+                StorageResourceBridge.stationWorkDescriptorId(entry.getKey()).ifPresent(
+                        descriptorId -> fireStationWorkChanged(
+                                descriptorId,
+                                entry.getValue(),
+                                resourceLedger.amount(entry.getKey())));
             }
         }
         return true;
@@ -732,6 +780,32 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 0, typeCapacity.finiteTypeSlots() - unresolvedTypes));
     }
 
+    private StorageTypeCapacity ledgerCapacity(Map<StorageResourceKey, Long> deltas) {
+        StorageTypeCapacity base = ledgerCapacity();
+        if (base.unlimited()) return base;
+        int projectedWorkTypes = resourceLedger.typeCount(
+                key -> key.kindId().equals(StorageResourceBridge.WORK_KIND));
+        for (Map.Entry<StorageResourceKey, Long> entry : deltas.entrySet()) {
+            if (!entry.getKey().kindId().equals(StorageResourceBridge.WORK_KIND)) continue;
+            long current = resourceLedger.amount(entry.getKey());
+            long updated;
+            try {
+                updated = Math.addExact(current, entry.getValue());
+            } catch (ArithmeticException exception) {
+                return base;
+            }
+            if (current == 0 && updated > 0) projectedWorkTypes++;
+            else if (current > 0 && updated == 0) projectedWorkTypes--;
+        }
+        long adjusted = (long) base.finiteTypeSlots() + projectedWorkTypes;
+        return StorageTypeCapacity.finite((int) Math.min(Integer.MAX_VALUE, adjusted));
+    }
+
+    private int capacityTypeCount() {
+        return resourceLedger.typeCount(
+                key -> !key.kindId().equals(StorageResourceBridge.WORK_KIND));
+    }
+
     private void refreshTypeCount() {
         typeCount = storageRecord == null
                 ? resourceLedger.typeCount() : storageRecord.typeCount();
@@ -742,7 +816,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (level == null) return 0;
         StorageResourceKey resourceKey = StorageResourceBridge.itemKey(key, level.registryAccess());
         long existing = resourceLedger.amount(resourceKey);
-        if (existing == 0 && !ledgerCapacity().canAcceptNewType(resourceLedger.typeCount())) return 0;
+        if (existing == 0 && !ledgerCapacity().canAcceptNewType(capacityTypeCount())) return 0;
         long inserted = Math.min(amount, Long.MAX_VALUE - existing);
         if (inserted <= 0) return 0;
         return applyResourceTransaction(Map.of(resourceKey, inserted), action, actor)
@@ -904,11 +978,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
         storageSchema = tag.getInt(TAG_STORAGE_SCHEMA);
         storageRecord = null;
         networkId = null;
-        energy = new EnumMap<>(EnergyType.class);
         machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
-        descriptorAmounts = new HashMap<>();
         infiniteDescriptors = new HashSet<>();
-        stationWork = new HashMap<>();
         machineWorkRemainders = new HashMap<>();
         resourceLedger = new StorageResourceLedger();
         typeCount = 0;

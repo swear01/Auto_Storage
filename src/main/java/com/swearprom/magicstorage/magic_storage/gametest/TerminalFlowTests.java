@@ -1171,13 +1171,13 @@ public class TerminalFlowTests {
                 helper.fail("Craftable page button must be idempotent and keep only item slots active");
                 return;
             }
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
-            if (menu.getPage() != CraftingTerminalPage.FUEL) {
-                helper.fail("Fuel page button should update server-owned page state");
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            if (menu.getPage() != CraftingTerminalPage.TRANSFORM) {
+                helper.fail("Transform page button should update server-owned page state");
                 return;
             }
             if (menu.getSlot(0).isActive() || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).isActive()) {
-                helper.fail("Fuel page should deactivate display slots and activate fuel input");
+                helper.fail("Transform page should deactivate display slots and activate its input");
                 return;
             }
             menu.clickMenuButton(player, CraftingTerminalMenu.STORAGE_PAGE_BUTTON);
@@ -1202,12 +1202,13 @@ public class TerminalFlowTests {
             var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             player.getInventory().setItem(0, new ItemStack(Items.LAVA_BUCKET));
             var menu = new CraftingTerminalMenu(92, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             int menuSlot = findPlayerMenuSlot(menu, Items.LAVA_BUCKET);
             if (menuSlot < 0) { helper.fail("Lava bucket player slot not found"); return; }
 
             menu.quickMoveStack(player, menuSlot);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 20000) {
                 helper.fail("Lava bucket should convert to 20000 furnace fuel");
                 return;
@@ -1241,12 +1242,13 @@ public class TerminalFlowTests {
             lavaBuckets.setCount(3);
             player.getInventory().setItem(0, lavaBuckets);
             var menu = new CraftingTerminalMenu(93, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             int menuSlot = findPlayerMenuSlot(menu, Items.LAVA_BUCKET);
             if (menuSlot < 0) { helper.fail("Stacked lava bucket player slot not found"); return; }
 
             menu.quickMoveStack(player, menuSlot);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 60000) {
                 helper.fail("Three lava buckets should convert to 60000 furnace fuel");
                 return;
@@ -1274,10 +1276,11 @@ public class TerminalFlowTests {
             player.getInventory().setItem(0, new ItemStack(Items.BLAZE_ROD));
             player.getInventory().setItem(1, new ItemStack(Items.BLAZE_ROD));
             var menu = new CraftingTerminalMenu(87, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
 
             int autoSlot = findPlayerMenuSlot(menu, Items.BLAZE_ROD);
             menu.quickMoveStack(player, autoSlot);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.BLAZE_FUEL) != 1200
                     || core.getEnergy(EnergyType.FURNACE_FUEL) != 0) {
                 helper.fail("Auto should route Blaze Rod to scarce Blaze Fuel only");
@@ -1291,6 +1294,7 @@ public class TerminalFlowTests {
             }
             int furnaceSlot = findPlayerMenuSlot(menu, Items.BLAZE_ROD);
             menu.quickMoveStack(player, furnaceSlot);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 2400) {
                 helper.fail("Furnace selection should add exactly 2400 furnace fuel");
                 return;
@@ -1316,13 +1320,16 @@ public class TerminalFlowTests {
             var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             player.getInventory().setItem(0, new ItemStack(Items.COAL));
             var menu = new CraftingTerminalMenu(88, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL));
             int coalSlot = findPlayerMenuSlot(menu, Items.COAL);
 
             menu.quickMoveStack(player, coalSlot);
-            if (!menu.getSlot(coalSlot).getItem().is(Items.COAL)) {
-                helper.fail("Incompatible explicit target must preserve the source fuel");
+            if (!menu.getSlot(coalSlot).getItem().isEmpty()
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().is(Items.COAL)
+                    || menu.clickMenuButton(player, 2)) {
+                helper.fail("Incompatible explicit target must preserve the Transform input");
                 return;
             }
             menu.clickMenuButton(player, 999);
@@ -1335,8 +1342,9 @@ public class TerminalFlowTests {
                 helper.fail("Invalid fuel requests must not mutate any energy pool");
                 return;
             }
-            if (menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).mayPlace(new ItemStack(Items.COAL))) {
-                helper.fail("Fuel input must reject coal while Blaze is selected");
+            if (!menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .mayPlace(new ItemStack(Items.COAL))) {
+                helper.fail("Transform input must accept coal while Blaze is selected");
                 return;
             }
             helper.succeed();
@@ -1356,16 +1364,18 @@ public class TerminalFlowTests {
             var localPlayer = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             localPlayer.getInventory().setItem(0, new ItemStack(Items.COAL));
             var craftingMenu = new CraftingTerminalMenu(89, localPlayer.getInventory(), core);
-            craftingMenu.clickMenuButton(localPlayer, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            craftingMenu.clickMenuButton(localPlayer, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             int localSlot = findPlayerMenuSlot(craftingMenu, Items.COAL);
             craftingMenu.quickMoveStack(localPlayer, localSlot);
+            craftingMenu.clickMenuButton(localPlayer, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
 
             var remotePlayer = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             remotePlayer.getInventory().setItem(0, new ItemStack(Items.COAL));
             var remoteMenu = new CraftingTerminalMenu(90, remotePlayer.getInventory(), core, corePos, true);
-            remoteMenu.clickMenuButton(remotePlayer, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            remoteMenu.clickMenuButton(remotePlayer, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             int remoteSlot = findPlayerMenuSlot(remoteMenu, Items.COAL);
             remoteMenu.quickMoveStack(remotePlayer, remoteSlot);
+            remoteMenu.clickMenuButton(remotePlayer, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 3200) {
                 helper.fail("Crafting and remote terminals should both convert one coal, got "
                         + core.getEnergy(EnergyType.FURNACE_FUEL));
@@ -2730,9 +2740,14 @@ public class TerminalFlowTests {
                 helper.fail("Inactive Storage-page fuel input must reject placement");
                 return;
             }
-            serverMenu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            serverMenu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             if (!fuelInput.isActive() || !fuelInput.mayPlace(new ItemStack(Items.COAL))) {
-                helper.fail("Active Auto fuel input should accept coal on the Fuel page");
+                helper.fail("Active Auto transform input should accept coal on the Transform page");
+                return;
+            }
+            serverMenu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            if (fuelInput.isActive()) {
+                helper.fail("Transform input must be inactive on the Stations page");
                 return;
             }
             int machineStart = CraftingTerminalMenu.FUEL_INPUT_SLOT + 1;
@@ -2749,12 +2764,14 @@ public class TerminalFlowTests {
             };
             for (int i = 0; i < machines.length; i++) {
                 var slot = serverMenu.getSlot(machineStart + i);
-                if (!slot.isActive() || !slot.mayPlace(machines[i])) {
-                    helper.fail("Fuel machine slot " + i + " must be active and accept its exact machine");
+                boolean installableStation = i < MachineEnergyTable.AXE_SLOT;
+                if (slot.isActive() != installableStation
+                        || slot.mayPlace(machines[i]) != installableStation) {
+                    helper.fail("Stations slot " + i + " active/acceptance mismatch");
                     return;
                 }
-                if (slot.mayPlace(machines[(i + 1) % machines.length])) {
-                    helper.fail("Fuel machine slot " + i + " accepted the wrong machine");
+                if (installableStation && slot.mayPlace(machines[(i + 1) % machines.length])) {
+                    helper.fail("Stations slot " + i + " accepted the wrong machine");
                     return;
                 }
             }

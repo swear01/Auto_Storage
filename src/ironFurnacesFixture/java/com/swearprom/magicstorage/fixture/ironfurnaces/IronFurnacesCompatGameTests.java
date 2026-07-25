@@ -27,7 +27,7 @@ import java.util.List;
 @GameTestHolder(IronFurnacesFixtureMod.MODID)
 @PrefixGameTestTemplate(false)
 public final class IronFurnacesCompatGameTests {
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final ResourceLocation COPPER = ironFurnace("copper_furnace");
     private static final ResourceLocation IRON = ironFurnace("iron_furnace");
     private static final ResourceLocation NETHERITE = ironFurnace("netherite_furnace");
@@ -120,7 +120,7 @@ public final class IronFurnacesCompatGameTests {
                 var player = helper.makeMockPlayer(GameType.SURVIVAL);
                 player.setPos(corePos.getX() + 0.5, corePos.getY() + 0.5, corePos.getZ() + 0.5);
                 var menu = new CraftingTerminalMenu(601, player.getInventory(), core);
-                menu.clickMenuButton(player, FUEL_PAGE_BUTTON);
+                menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
                 ItemStack copperFurnace = new ItemStack(
                         BuiltInRegistries.ITEM.get(COPPER));
                 var slot = findMachineSlot(menu, copperFurnace);

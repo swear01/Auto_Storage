@@ -28,6 +28,8 @@ final class StorageResourceKinds {
                 StorageResourceKind.variantAware(() -> new ItemStack(Items.BUCKET)));
         kinds.register(StorageResourceKindApi.ENERGY_KIND.getPath(), () ->
                 StorageResourceKind.variantless(() -> new ItemStack(Items.REDSTONE)));
+        kinds.register(StorageResourceKindApi.WORK_KIND.getPath(), () ->
+                StorageResourceKind.variantAware(() -> new ItemStack(Items.CLOCK)));
     }
 
     static void registerChemical(DeferredRegister<StorageResourceKind> kinds) {
@@ -75,6 +77,7 @@ final class StorageResourceKinds {
         return kindId.equals(StorageResourceKindApi.ITEM_KIND)
                 || kindId.equals(StorageResourceKindApi.FLUID_KIND)
                 || kindId.equals(StorageResourceKindApi.ENERGY_KIND)
+                || kindId.equals(StorageResourceKindApi.WORK_KIND)
                 || isChemicalKindId(kindId);
     }
 
@@ -98,6 +101,16 @@ final class StorageResourceKinds {
                 ItemStack bucket = new ItemStack(fluid.get().getFluid().getBucket());
                 if (!bucket.isEmpty()) return bucket;
             }
+        }
+        if (key.kindId().equals(StorageResourceKindApi.WORK_KIND)) {
+            EnergyType energyType = StorageResourceBridge.energyType(key).orElse(null);
+            if (energyType != null) return energyType.representativeStack();
+            ResourceLocation descriptorId = StorageResourceBridge.descriptorId(key)
+                    .or(() -> StorageResourceBridge.stationWorkDescriptorId(key))
+                    .orElse(null);
+            MachineDescriptor descriptor = descriptorId == null
+                    ? null : MachineEnergyTable.get(descriptorId);
+            if (descriptor != null) return descriptor.representativeStack();
         }
         StorageResourceKind kind = MagicStorage.RESOURCE_KIND_REGISTRY.get(key.kindId());
         if (kind == null) throw new IllegalArgumentException("Unknown storage resource kind " + key.kindId());

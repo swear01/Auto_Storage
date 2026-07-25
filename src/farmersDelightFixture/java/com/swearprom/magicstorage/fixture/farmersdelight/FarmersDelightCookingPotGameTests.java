@@ -31,7 +31,7 @@ import java.util.List;
 public final class FarmersDelightCookingPotGameTests {
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final int CRAFTABLE_PAGE_BUTTON = 6;
-    private static final int FUEL_PAGE_BUTTON = 15;
+    private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int PLAYER_INVENTORY_BUTTON = 7;
     private static final int COOK_TIME = 40;
     private static final ResourceLocation RECIPE_ID = ResourceLocation.fromNamespaceAndPath(
@@ -312,7 +312,7 @@ public final class FarmersDelightCookingPotGameTests {
     }
 
     private static boolean installCookingPot(FixtureContext context) {
-        context.menu().clickMenuButton(context.player(), FUEL_PAGE_BUTTON);
+        context.menu().clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
         ItemStack station = new ItemStack(ModItems.COOKING_POT.get());
         for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
              index < CraftingTerminalMenu.MACHINE_SLOT_START + CraftingTerminalMenu.MACHINE_SLOT_COUNT;

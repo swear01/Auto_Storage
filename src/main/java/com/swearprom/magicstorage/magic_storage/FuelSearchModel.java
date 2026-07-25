@@ -14,7 +14,7 @@ final class FuelSearchModel {
             MachineEnergyTable.Category category
     ) {
         static Entry energy(EnergyType energyType) {
-            return new Entry(energyType, -1, MachineEnergyTable.Category.CONSUMABLE);
+            return new Entry(energyType, -1, MachineEnergyTable.Category.TRANSFORM);
         }
 
         static Entry machine(int machineSlot, MachineEnergyTable.Category category) {
@@ -46,12 +46,6 @@ final class FuelSearchModel {
             List<MachineDescriptor> descriptors
     ) {
         List<IndexedEntry> entries = new ArrayList<>();
-        for (EnergyType energyType : energyTypes) {
-            entries.add(new IndexedEntry(
-                    Entry.energy(energyType),
-                    List.of(TerminalSearchEntry.create(energyType.representativeStack()))));
-        }
-        appendMachines(entries, descriptors, MachineEnergyTable.Category.CONSUMABLE);
         appendMachines(entries, descriptors, MachineEnergyTable.Category.PROCESS);
         appendMachines(entries, descriptors, MachineEnergyTable.Category.INSTANT);
         return new Index(entries);
@@ -94,7 +88,7 @@ final class FuelSearchModel {
         List<TerminalSearchEntry> result = new ArrayList<>();
         Set<net.minecraft.world.item.Item> seen = new HashSet<>();
         appendSearchEntry(result, seen, descriptor.representativeStack());
-        if (descriptor.category() != MachineEnergyTable.Category.CONSUMABLE) {
+        if (descriptor.category() != MachineEnergyTable.Category.TRANSFORM) {
             for (MachineVariant variant : descriptor.variants()) {
                 appendSearchEntry(result, seen, variant.stack());
             }

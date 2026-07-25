@@ -19,6 +19,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -64,6 +65,29 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {}
     private record CraftPlan(long crafts, IngredientPlan ingredients, DeliveryPlan delivery) {}
     private record CraftableOutput(StorageResourceKey key, ItemStack icon, long storedAmount) {}
+    private record CraftableBuildResult(
+            List<ItemStack> stacks,
+            int candidates,
+            int variants,
+            long candidateSelectionNanos,
+            long variantResolutionNanos,
+            long previewSimulationNanos
+    ) {}
+    private record CraftableVisibleCache(
+            Object recipeSnapshot,
+            String filter,
+            SortMode sortMode,
+            SortOrder sortOrder,
+            TerminalResourceView resourceView,
+            int visibleRows,
+            int scrollOffset,
+            int totalItemTypes,
+            List<ItemStack> stacks
+    ) {
+        private CraftableVisibleCache {
+            stacks = stacks.stream().map(ItemStack::copy).toList();
+        }
+    }
     private enum DeliveryTarget {
         CURSOR,
         PLAYER,
@@ -124,15 +148,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     static final int CRAFTABLE_PAGE_BUTTON = 6;
     static final int OUTPUT_DESTINATION_BUTTON = 10;
     static final int STORAGE_PAGE_BUTTON = 14;
-    static final int FUEL_PAGE_BUTTON = 15;
+    static final int TRANSFORM_PAGE_BUTTON = 15;
     static final int AUTO_FUEL_TARGET_BUTTON = 16;
-    private static final int FUEL_TARGET_BUTTON_BASE = 19;
     static final int RESET_OUTPUT_DESTINATION_BUTTON = 24;
     static final int RESET_PLAYER_INVENTORY_BUTTON = 25;
+    static final int STATIONS_PAGE_BUTTON = 29;
     private static final List<EnergyType> FUEL_TARGETS = List.of(
             EnergyType.FURNACE_FUEL,
             EnergyType.BLAZE_FUEL);
-    private static final int FUEL_TARGET_BUTTON_COUNT = FUEL_TARGETS.size();
     private static final int ENERGY_DATA_START = 8;
     private static final int LIVE_ENERGY_DATA_SLOTS = EnergyType.values().length * 4;
     private static final int RETIRED_ENERGY_DATA_SLOTS = 4;
@@ -166,7 +189,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private int lastCheckedItem = -1;
     private final Inventory playerInventory;
     private CraftingTerminalPage page = CraftingTerminalPage.STORAGE;
-    private EnergyType selectedFuelTarget;
+    private ResourceLocation selectedTransformTarget;
     private final long[] energyAmounts = new long[EnergyType.values().length];
     private final long[] ingredientAvailable = new long[MAX_INGREDIENTS];
     private long processRequired;
@@ -178,6 +201,9 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private int lastPlayerInventoryFingerprint;
     private long lastTopologyRevision;
     private long lastMachineRevision;
+    private final long[] nextCraftableEnergyThreshold = new long[EnergyType.values().length];
+    private final Map<ResourceLocation, Long> nextCraftableStationThreshold = new HashMap<>();
+    private CraftableVisibleCache craftableVisibleCache;
 
     public CraftingTerminalMenu(int containerId, Inventory playerInv, StorageCoreBlockEntity core) {
         this(containerId, playerInv, core, core.getBlockPos(), false);
@@ -191,6 +217,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         this.lastPlayerInventoryFingerprint = playerInventoryFingerprint();
         this.lastTopologyRevision = core.getTopologyRevision();
         this.lastMachineRevision = core.getMachineRevision();
+        Arrays.fill(nextCraftableEnergyThreshold, Long.MAX_VALUE);
         refreshEnergyAmounts(core);
         addContainerData();
         refreshDisplayItems(core);
@@ -216,7 +243,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     case 3 -> recipeCount;
                     case 4 -> currentRecipeTypeOrder;
                     case 5 -> page.ordinal();
-                    case 6 -> encodeFuelTarget(selectedFuelTarget);
+                    case 6 -> encodeTransformTarget(selectedTransformTarget);
                     case 7 -> outputDestination.ordinal();
                     default -> getPreviewData(index);
                 };
@@ -231,7 +258,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     case 3 -> recipeCount = value;
                     case 4 -> currentRecipeTypeOrder = value;
                     case 5 -> page = CraftingTerminalPage.fromOrdinal(value);
-                    case 6 -> selectedFuelTarget = decodeFuelTarget(value);
+                    case 6 -> selectedTransformTarget = decodeTransformTarget(value);
                     case 7 -> outputDestination = TerminalOutputDestination.byId(value);
                     default -> setPreviewData(index, value);
                 }
@@ -313,15 +340,16 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         return (current & ~mask) | (((long) value & 0xFFFFL) << shift);
     }
 
-    private static int encodeFuelTarget(EnergyType target) {
+    private int encodeTransformTarget(ResourceLocation target) {
         if (target == null) return 0;
-        int index = FUEL_TARGETS.indexOf(target);
+        int index = TransformProviderApi.targetIds(descriptorSnapshot).indexOf(target);
         return index < 0 ? 0 : index + 1;
     }
 
-    private static EnergyType decodeFuelTarget(int value) {
+    private ResourceLocation decodeTransformTarget(int value) {
         int index = value - 1;
-        return index >= 0 && index < FUEL_TARGETS.size() ? FUEL_TARGETS.get(index) : null;
+        List<ResourceLocation> targets = TransformProviderApi.targetIds(descriptorSnapshot);
+        return index >= 0 && index < targets.size() ? targets.get(index) : null;
     }
 
     @Override
@@ -358,17 +386,17 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         this.addSlot(new Slot(fuelContainer, 0, FUEL_INPUT_X, FUEL_INPUT_Y) {
             @Override
             public boolean isActive() {
-                return page == CraftingTerminalPage.FUEL;
+                return page == CraftingTerminalPage.TRANSFORM;
             }
 
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return page == CraftingTerminalPage.FUEL && isCompatibleWithSelectedFuelTarget(stack);
+                return page == CraftingTerminalPage.TRANSFORM && !stack.isEmpty();
             }
 
             @Override
             public boolean mayPickup(Player player) {
-                return page == CraftingTerminalPage.FUEL && super.mayPickup(player);
+                return page == CraftingTerminalPage.TRANSFORM && super.mayPickup(player);
             }
         });
 
@@ -387,7 +415,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             int mappedSlot = machineSlot;
             MachineDescriptor descriptor = descriptorAt(mappedSlot);
             boolean consumable = descriptor != null
-                    && descriptor.category() == MachineEnergyTable.Category.CONSUMABLE;
+                    && descriptor.category() == MachineEnergyTable.Category.TRANSFORM;
             Container slotContainer = consumable ? consumableInputContainer : machineContainer;
             int containerSlot = mappedSlot;
             this.addSlot(new Slot(slotContainer, containerSlot,
@@ -421,27 +449,30 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
                 @Override
                 public boolean isActive() {
-                    return descriptorAt(mappedSlot) != null && page == CraftingTerminalPage.FUEL;
+                    MachineDescriptor entry = descriptorAt(mappedSlot);
+                    return entry != null
+                            && entry.category() != MachineEnergyTable.Category.TRANSFORM
+                            && page == CraftingTerminalPage.STATIONS;
                 }
 
                 @Override
                 public boolean mayPlace(ItemStack stack) {
-                    if (page != CraftingTerminalPage.FUEL) return false;
+                    if (page != CraftingTerminalPage.STATIONS) return false;
                     StorageCoreBlockEntity currentCore = getCore(playerInv.player.level());
                     MachineDescriptor entry = descriptorAt(mappedSlot);
                     if (currentCore == null || currentCore.isConflicted()
-                            || entry == null || !entry.accepts(stack)) return false;
+                            || entry == null
+                            || entry.category() == MachineEnergyTable.Category.TRANSFORM
+                            || !entry.accepts(stack)) return false;
                     if (hasRetainedLegacyInput()) return false;
-                    return entry.category() == MachineEnergyTable.Category.CONSUMABLE
-                            ? currentCore.canAddDescriptorConsumable(entry.id(), stack)
-                            : entry.maxInstalledCount() > 0;
+                    return entry.maxInstalledCount() > 0;
                 }
 
                 @Override
                 public int getMaxStackSize(ItemStack stack) {
                     MachineDescriptor entry = descriptorAt(mappedSlot);
                     if (entry == null) return 0;
-                    if (entry.category() == MachineEnergyTable.Category.CONSUMABLE) {
+                    if (entry.category() == MachineEnergyTable.Category.TRANSFORM) {
                         return Math.min(64, stack.getMaxStackSize());
                     }
                     return entry.maxInstalledCount();
@@ -455,7 +486,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
                 @Override
                 public boolean mayPickup(Player player) {
-                    return page == CraftingTerminalPage.FUEL && super.mayPickup(player);
+                    return page == CraftingTerminalPage.STATIONS && super.mayPickup(player);
                 }
             });
         }
@@ -633,7 +664,11 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     }
 
     public EnergyType getSelectedFuelTarget() {
-        return selectedFuelTarget;
+        return TransformProviderApi.energyType(selectedTransformTarget).orElse(null);
+    }
+
+    public ResourceLocation getSelectedTransformTarget() {
+        return selectedTransformTarget;
     }
 
     @Override
@@ -647,7 +682,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 page,
                 usePlayerInventory,
                 outputDestination,
-                selectedFuelTarget);
+                getSelectedFuelTarget(),
+                selectedTransformTarget);
     }
 
     public long getEnergyAmount(EnergyType type) {
@@ -701,104 +737,190 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     static int fuelTargetButtonId(EnergyType target) {
         int index = FUEL_TARGETS.indexOf(target);
         if (index < 0) throw new IllegalArgumentException("Not a fuel target: " + target);
-        return FUEL_TARGET_BUTTON_BASE + index;
+        return TransformProviderApi.LEGACY_FUEL_BUTTON_BASE + index;
     }
 
     static List<EnergyType> fuelTargets() {
         return FUEL_TARGETS;
     }
 
-    private boolean isCompatibleWithSelectedFuelTarget(ItemStack stack) {
-        if (!FuelTable.isFuel(stack)) return false;
-        return selectedFuelTarget == null || FuelTable.getFuelValues(stack).stream()
-                .anyMatch(value -> value.pool() == selectedFuelTarget);
+    public List<TransformProviderApi.Target> getTransformTargets() {
+        return TransformProviderApi.targets(descriptorSnapshot);
     }
 
-    private FuelValue resolveFuelValue(ItemStack stack, StorageCoreBlockEntity core) {
-        if (selectedFuelTarget == null) {
-            return FuelTable.getAutoFuelValue(stack, core::getEnergy);
+    public List<TransformProviderApi.Use> getTransformUses() {
+        return TransformProviderApi.uses(
+                getSlot(FUEL_INPUT_SLOT).getItem(), descriptorSnapshot);
+    }
+
+    private TransformProviderApi.Use resolveTransformUse(
+            ItemStack stack,
+            StorageCoreBlockEntity core
+    ) {
+        List<TransformProviderApi.Use> uses =
+                TransformProviderApi.uses(stack, descriptorSnapshot);
+        if (selectedTransformTarget != null) {
+            return uses.stream()
+                    .filter(use -> use.id().equals(selectedTransformTarget))
+                    .findFirst()
+                    .orElse(null);
         }
-        return FuelTable.getFuelValues(stack).stream()
-                .filter(value -> value.pool() == selectedFuelTarget)
-                .findFirst()
-                .orElse(null);
+        FuelValue autoFuel = FuelTable.getAutoFuelValue(stack, core::getEnergy);
+        if (autoFuel != null) {
+            ResourceLocation id = TransformProviderApi.energyTargetId(autoFuel.pool());
+            TransformProviderApi.Use selected = uses.stream()
+                    .filter(use -> use.id().equals(id))
+                    .findFirst()
+                    .orElse(null);
+            if (selected != null) return selected;
+        }
+        return uses.isEmpty() ? null : uses.getFirst();
     }
 
     private void onFuelInputChanged() {
-        if (processingFuelInput || fuelContainer == null || playerInventory == null
-                || page != CraftingTerminalPage.FUEL) return;
-        Player player = playerInventory.player;
-        if (player.level().isClientSide()) return;
-        StorageCoreBlockEntity core = getCore(player.level());
-        if (core == null) return;
-        ItemStack stack = fuelContainer.getItem(0);
-        if (!stack.isEmpty()) {
-            convertFuelStack(core, stack, getSlot(FUEL_INPUT_SLOT), player);
-        }
+        if (processingFuelInput || playerInventory.player.level().isClientSide()) return;
+        updateTransformPreview(getCore(playerInventory.player.level()));
     }
 
     private void onConsumableInputsChanged() {
-        if (processingConsumableInput || consumableInputContainer == null || playerInventory == null
-                || page != CraftingTerminalPage.FUEL) return;
-        Player player = playerInventory.player;
-        if (player.level().isClientSide()) return;
-        StorageCoreBlockEntity core = getCore(player.level());
-        if (core == null) return;
-        boolean changed = false;
-        processingConsumableInput = true;
-        try {
-            for (int slot = 0; slot < descriptorSnapshot.size(); slot++) {
-                MachineDescriptor descriptor = descriptorAt(slot);
-                if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.CONSUMABLE) continue;
-                ItemStack stack = consumableInputContainer.getItem(slot);
-                if (stack.isEmpty() || !core.addDescriptorConsumable(descriptor.id(), stack)) continue;
-                consumableInputContainer.removeItemNoUpdate(slot);
-                changed = true;
-            }
-        } finally {
-            processingConsumableInput = false;
-        }
-        if (changed) refreshEnergyAmounts(core);
+        if (processingConsumableInput) return;
     }
 
-    private boolean convertFuelStack(
-            StorageCoreBlockEntity core,
-            ItemStack stack,
-            Slot sourceSlot,
-            Player player
-    ) {
-        FuelValue fuelValue = resolveFuelValue(stack, core);
-        if (fuelValue == null) return false;
-        int convertedCount = stack.getCount();
-        ItemStack remainder = stack.hasCraftingRemainingItem()
-                ? stack.getCraftingRemainingItem()
-                : ItemStack.EMPTY;
-        if (!core.addFuel(stack, fuelValue.pool())) return false;
+    private boolean transformInput(int requested, Player player) {
+        if (requested <= 0 || page != CraftingTerminalPage.TRANSFORM) return false;
+        StorageCoreBlockEntity core = getCore(player.level());
+        Slot source = getSlot(FUEL_INPUT_SLOT);
+        ItemStack stack = source.getItem();
+        if (core == null || stack.isEmpty()) return false;
+        int available = transformableCount(core, stack);
+        int amount = requested == Integer.MAX_VALUE ? available : requested;
+        if (amount <= 0 || amount > available || amount > stack.getCount()) return false;
+        ItemStack converted = stack.copyWithCount(amount);
+        TransformProviderApi.Use use = resolveTransformUse(converted, core);
+        if (use == null || !commitTransform(core, use, converted)) return false;
 
+        ItemStack remainder = stack.hasCraftingRemainingItem()
+                ? stack.getCraftingRemainingItem() : ItemStack.EMPTY;
         processingFuelInput = true;
         try {
-            if (remainder.isEmpty()) {
-                sourceSlot.set(ItemStack.EMPTY);
-            } else {
-                returnFuelRemainders(sourceSlot, remainder, convertedCount, player);
+            stack.shrink(amount);
+            source.setChanged();
+            if (!remainder.isEmpty()) {
+                returnFuelRemaindersToPlayer(remainder, amount, player);
             }
-            sourceSlot.setChanged();
         } finally {
             processingFuelInput = false;
         }
         refreshEnergyAmounts(core);
+        updateTransformPreview(core);
         return true;
     }
 
-    private void returnFuelRemainders(Slot sourceSlot, ItemStack template, int count, Player player) {
-        int inSlot = Math.min(count, template.getMaxStackSize());
-        sourceSlot.set(template.copyWithCount(inSlot));
-        int remaining = count - inSlot;
+    private void updateTransformPreview(@Nullable StorageCoreBlockEntity core) {
+        if (page != CraftingTerminalPage.TRANSFORM || core == null) {
+            craftableCount = 0;
+            return;
+        }
+        craftableCount = transformableCount(
+                core, getSlot(FUEL_INPUT_SLOT).getItem());
+    }
+
+    private int transformableCount(StorageCoreBlockEntity core, ItemStack input) {
+        if (input.isEmpty()) return 0;
+        TransformProviderApi.Use use = resolveTransformUse(input, core);
+        if (use == null) return 0;
+        int low = 0;
+        int high = input.getCount();
+        while (low < high) {
+            int candidate = low + (high - low) / 2 + (high - low) % 2;
+            if (canCommitTransform(core, use, input.copyWithCount(candidate))) {
+                low = candidate;
+            } else {
+                high = candidate - 1;
+            }
+        }
+        return low;
+    }
+
+    private boolean canCommitTransform(
+            StorageCoreBlockEntity core,
+            TransformProviderApi.Use use,
+            ItemStack input
+    ) {
+        MachineDescriptor descriptor = transformDescriptor(use);
+        if (descriptor != null) {
+            return core.canAddDescriptorTransform(descriptor.id(), input);
+        }
+        StorageResourceTransaction transaction = transformTransaction(core, use, input);
+        return transaction != null
+                && core.applyResourceTransaction(transaction, Action.SIMULATE, Actor.EMPTY);
+    }
+
+    private boolean commitTransform(
+            StorageCoreBlockEntity core,
+            TransformProviderApi.Use use,
+            ItemStack input
+    ) {
+        MachineDescriptor descriptor = transformDescriptor(use);
+        if (descriptor != null) return core.addDescriptorTransform(descriptor.id(), input);
+        StorageResourceTransaction transaction = transformTransaction(core, use, input);
+        return transaction != null
+                && core.applyResourceTransaction(transaction, Action.SIMULATE, Actor.EMPTY)
+                && core.applyResourceTransaction(transaction, Action.EXECUTE, Actor.EMPTY);
+    }
+
+    @Nullable
+    private MachineDescriptor transformDescriptor(TransformProviderApi.Use use) {
+        return descriptorSnapshot.stream()
+                .filter(candidate -> candidate.id().equals(use.id())
+                        && candidate.category() == MachineEnergyTable.Category.TRANSFORM)
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Nullable
+    private StorageResourceTransaction transformTransaction(
+            StorageCoreBlockEntity core,
+            TransformProviderApi.Use use,
+            ItemStack input
+    ) {
+        if (use.stationId() != null && !core.isMachineInstalled(use.stationId())) return null;
+
+        long output;
+        long stationWork;
+        try {
+            output = Math.multiplyExact(use.amountPerItem(), (long) input.getCount());
+            stationWork = Math.multiplyExact(use.stationWorkPerItem(), (long) input.getCount());
+        } catch (ArithmeticException exception) {
+            return null;
+        }
+        StorageResourceTransaction.Builder transaction =
+                StorageResourceTransaction.builder().add(use.output(), output);
+        if (stationWork > 0) {
+            transaction.add(
+                    StorageResourceBridge.stationWorkKey(use.stationId()),
+                    -stationWork);
+        }
+        StorageResourceTransaction exact;
+        try {
+            exact = transaction.build();
+        } catch (ArithmeticException | IllegalArgumentException exception) {
+            return null;
+        }
+        return exact;
+    }
+
+    private static void returnFuelRemaindersToPlayer(
+            ItemStack template,
+            int count,
+            Player player
+    ) {
+        int remaining = count;
         while (remaining > 0) {
             int amount = Math.min(remaining, template.getMaxStackSize());
-            ItemStack extra = template.copyWithCount(amount);
-            if (!player.getInventory().add(extra) && !extra.isEmpty()) {
-                player.drop(extra, false);
+            ItemStack stack = template.copyWithCount(amount);
+            if (!player.getInventory().add(stack) && !stack.isEmpty()) {
+                player.drop(stack, false);
             }
             remaining -= amount;
         }
@@ -806,9 +928,9 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
     @Override
     public void clicked(int slotIndex, int button, ClickType clickType, Player player) {
-        if (slotIndex == FUEL_INPUT_SLOT && page != CraftingTerminalPage.FUEL) return;
+        if (slotIndex == FUEL_INPUT_SLOT && page != CraftingTerminalPage.TRANSFORM) return;
         if (slotIndex >= MACHINE_SLOT_START && slotIndex < MACHINE_SLOT_END
-                && page != CraftingTerminalPage.FUEL) return;
+                && page != CraftingTerminalPage.STATIONS) return;
         if (slotIndex >= 0 && slotIndex < DISPLAY_SLOTS) {
             if (!page.isItemPage()) return;
             if (clickType == ClickType.QUICK_MOVE && (button == 0 || button == 1)) {
@@ -851,7 +973,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
 
         if (index >= MACHINE_SLOT_START && index < MACHINE_SLOT_END) {
-            if (page != CraftingTerminalPage.FUEL) return ItemStack.EMPTY;
+            if (page != CraftingTerminalPage.STATIONS) return ItemStack.EMPTY;
             ItemStack original = slot.getItem().copy();
             ItemStack stack = slot.getItem();
             if (!moveMachineStackToPlayer(stack)) return ItemStack.EMPTY;
@@ -861,7 +983,20 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             return original;
         }
 
-        if (page == CraftingTerminalPage.FUEL) {
+        if (page == CraftingTerminalPage.TRANSFORM) {
+            if (index < DISPLAY_SLOTS || index >= FUEL_INPUT_SLOT) return ItemStack.EMPTY;
+            ItemStack original = slot.getItem().copy();
+            ItemStack stack = slot.getItem();
+            if (!moveItemStackTo(
+                    stack, FUEL_INPUT_SLOT, FUEL_INPUT_SLOT + 1, false)) {
+                return ItemStack.EMPTY;
+            }
+            if (stack.isEmpty()) slot.set(ItemStack.EMPTY);
+            else slot.setChanged();
+            return original;
+        }
+
+        if (page == CraftingTerminalPage.STATIONS) {
             if (index < DISPLAY_SLOTS || index >= FUEL_INPUT_SLOT) return ItemStack.EMPTY;
             ItemStack original = slot.getItem().copy();
             if (!player.level().isClientSide()) {
@@ -871,21 +1006,13 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     if (core == null || core.isConflicted()) return ItemStack.EMPTY;
                     ItemStack stack = slot.getItem();
                     MachineDescriptor entry = descriptorAt(machineSlot);
-                    if (entry != null && entry.category() == MachineEnergyTable.Category.CONSUMABLE) {
-                        if (!core.addDescriptorConsumable(entry.id(), stack)) return ItemStack.EMPTY;
-                        if (stack.isEmpty()) slot.set(ItemStack.EMPTY);
-                        else slot.setChanged();
-                        refreshEnergyAmounts(core);
-                        broadcastChanges();
-                        return original;
+                    if (entry == null
+                            || entry.category() == MachineEnergyTable.Category.TRANSFORM) {
+                        return ItemStack.EMPTY;
                     }
                     if (!moveStackToMachineSlot(stack, machineSlot)) return ItemStack.EMPTY;
                     if (stack.isEmpty()) slot.set(ItemStack.EMPTY);
                     else slot.setChanged();
-                    broadcastChanges();
-                    return original;
-                }
-                if (core != null && convertFuelStack(core, slot.getItem(), slot, player)) {
                     broadcastChanges();
                     return original;
                 }
@@ -1581,7 +1708,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         TypedRecipePlan typedPlan = match.typedRecipePlan().orElse(null);
         if (typedPlan != null) {
             max = Math.min(max, maximumTypedCrafts(core, typedPlan, sources));
-            for (TypedRecipeInput input : typedPlan.inputs()) {
+            for (TypedRecipeInput input : summarizeTypedInputs(typedPlan.inputs())) {
                 long available = typedInputAvailable(core, input, sources);
                 ItemStack representative = StorageResourceKinds.representative(
                         typedInputRepresentativeKey(core, input, sources),
@@ -1671,6 +1798,26 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
         if (craftable > 0) missing.clear();
         return new CraftPreview(craftable, missing, ingredientPreviews, energyPreviews);
+    }
+
+    private static List<TypedRecipeInput> summarizeTypedInputs(
+            List<TypedRecipeInput> inputs
+    ) {
+        record Identity(
+                List<StorageResourceKey> alternatives,
+                TypedRecipeInput.Role role,
+                Map<StorageResourceKey, TypedRecipeOutput> remainders
+        ) {}
+        Map<Identity, Long> amounts = new LinkedHashMap<>();
+        for (TypedRecipeInput input : inputs) {
+            Identity identity = new Identity(
+                    input.alternatives(), input.role(), input.alternativeRemainders());
+            amounts.merge(identity, input.amount(), Math::addExact);
+        }
+        List<TypedRecipeInput> result = new ArrayList<>(amounts.size());
+        amounts.forEach((identity, amount) -> result.add(new TypedRecipeInput(
+                identity.alternatives(), amount, identity.role(), identity.remainders())));
+        return result;
     }
 
     private static ItemStack ingredientRepresentative(
@@ -1831,7 +1978,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {
         MachineDescriptor station = MachineEnergyTable.get(match.stationDescriptorId());
         if (station == null) throw new IllegalStateException("Recipe presentation has no station descriptor");
-        if (station.category() == MachineEnergyTable.Category.CONSUMABLE) {
+        if (station.category() == MachineEnergyTable.Category.TRANSFORM) {
             if (!isStationAvailable(core, match)) {
                 throw new IllegalStateException("Recipe presentation tool station is unavailable");
             }
@@ -2558,7 +2705,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         MachineDescriptor station = MachineEnergyTable.get(match.stationDescriptorId());
         if (station == null) return false;
         RecipeAdapterMatch.ToolCost toolCost = match.cost().toolCost().orElse(null);
-        if (station.category() == MachineEnergyTable.Category.CONSUMABLE) {
+        if (station.category() == MachineEnergyTable.Category.TRANSFORM) {
             return toolCost != null
                     && toolCost.descriptorId().equals(station.id())
                     && core.hasDescriptorAmount(toolCost.descriptorId(), toolCost.amountPerCraft());
@@ -2650,14 +2797,53 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
     @Override
     protected void onObservedStorageChanged(StorageCoreBlockEntity core) {
-        updatePreview(core, playerInventory.player);
+        if (page != CraftingTerminalPage.CRAFTABLE) craftableVisibleCache = null;
+        if (page == CraftingTerminalPage.TRANSFORM) {
+            updateTransformPreview(core);
+        } else if (page.isItemPage() && !selectedOutput.isEmpty()) {
+            updatePreview(core, playerInventory.player);
+        }
     }
 
     @Override
     protected void onObservedEnergyChanged(StorageCoreBlockEntity core) {
+        if (page != CraftingTerminalPage.CRAFTABLE) super.onObservedEnergyChanged(core);
+        boolean crossedCraftableThreshold = energyCrossedCraftableThreshold(core);
         refreshEnergyAmounts(core);
-        if (page == CraftingTerminalPage.CRAFTABLE) refreshDisplayItems(core);
-        updatePreview(core, playerInventory.player);
+        if (crossedCraftableThreshold) {
+            if (page == CraftingTerminalPage.CRAFTABLE) refreshDisplayItems(core);
+            else craftableVisibleCache = null;
+        }
+        if (page == CraftingTerminalPage.TRANSFORM) {
+            updateTransformPreview(core);
+        } else if (page.isItemPage() && !selectedOutput.isEmpty()) {
+            updatePreview(core, playerInventory.player);
+        }
+    }
+
+    @Override
+    protected void onObservedStationWorkChanged(
+            StorageCoreBlockEntity core,
+            Map<ResourceLocation, Long> increases,
+            boolean decreased
+    ) {
+        if (page != CraftingTerminalPage.CRAFTABLE) {
+            super.onObservedStationWorkChanged(core, increases, decreased);
+        }
+        boolean crossedCraftableThreshold =
+                decreased || increases.entrySet().stream().anyMatch(entry ->
+                entry.getValue() >= nextCraftableStationThreshold.getOrDefault(
+                        entry.getKey(), Long.MAX_VALUE));
+        if (crossedCraftableThreshold) {
+            if (page == CraftingTerminalPage.CRAFTABLE) refreshDisplayItems(core);
+            else craftableVisibleCache = null;
+        }
+        if (page == CraftingTerminalPage.TRANSFORM) {
+            updateTransformPreview(core);
+        } else if (page.isItemPage() && !selectedOutput.isEmpty()) {
+            updatePreview(core, playerInventory.player);
+        }
+        sendDescriptorStates();
     }
 
     @Override
@@ -2677,6 +2863,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
             if (core != null && (topologyChanged || machinesChanged
                     || playerInventoryChanged && usePlayerInventory)) {
+                craftableVisibleCache = null;
                 if (machinesChanged) refreshEnergyAmounts(core);
                 if (topologyChanged || machinesChanged || page == CraftingTerminalPage.CRAFTABLE) {
                     refreshDisplayItems(core);
@@ -2694,7 +2881,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         sendDescriptorStates();
     }
 
-    private void sendDescriptorStates() {
+    protected void sendDescriptorStates() {
         if (!(playerInventory.player instanceof ServerPlayer serverPlayer)) return;
         StorageCoreBlockEntity core = getCore(serverPlayer.level());
         if (core == null) return;
@@ -2704,14 +2891,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             states.add(new MachineDescriptorStatePacket.State(
                     descriptor.id(),
                     descriptorStateAmount(core, descriptor),
-                    descriptor.category() == MachineEnergyTable.Category.CONSUMABLE
+                    descriptor.category() == MachineEnergyTable.Category.TRANSFORM
                             && core.hasInfiniteDescriptor(descriptor.id())));
         }
         PacketDistributor.sendToPlayer(serverPlayer, new MachineDescriptorStatePacket(containerId, states));
     }
 
     private static boolean hasDescriptorState(MachineDescriptor descriptor) {
-        return descriptor.category() == MachineEnergyTable.Category.CONSUMABLE
+        return descriptor.category() == MachineEnergyTable.Category.TRANSFORM
                 || descriptor.category() == MachineEnergyTable.Category.PROCESS
                 && descriptor.energyType() == null;
     }
@@ -2745,7 +2932,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             descriptorStates.put(descriptor.id(), new MachineDescriptorStatePacket.State(
                     descriptor.id(),
                     descriptorStateAmount(core, descriptor),
-                    descriptor.category() == MachineEnergyTable.Category.CONSUMABLE
+                    descriptor.category() == MachineEnergyTable.Category.TRANSFORM
                             && core.hasInfiniteDescriptor(descriptor.id())));
         }
     }
@@ -2755,16 +2942,36 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         if (!player.level().isClientSide()) {
             if (buttonId == STORAGE_PAGE_BUTTON) return switchPage(player, CraftingTerminalPage.STORAGE);
             if (buttonId == CRAFTABLE_PAGE_BUTTON) return switchPage(player, CraftingTerminalPage.CRAFTABLE);
-            if (buttonId == FUEL_PAGE_BUTTON) return switchPage(player, CraftingTerminalPage.FUEL);
+            if (buttonId == TRANSFORM_PAGE_BUTTON) {
+                return switchPage(player, CraftingTerminalPage.TRANSFORM);
+            }
+            if (buttonId == STATIONS_PAGE_BUTTON) {
+                return switchPage(player, CraftingTerminalPage.STATIONS);
+            }
             if (buttonId == AUTO_FUEL_TARGET_BUTTON) {
-                if (page != CraftingTerminalPage.FUEL) return false;
-                selectedFuelTarget = null;
+                if (page != CraftingTerminalPage.TRANSFORM) return false;
+                selectedTransformTarget = null;
+                updateTransformPreview(getCore(player.level()));
                 return true;
             }
-            if (buttonId >= FUEL_TARGET_BUTTON_BASE
-                    && buttonId < FUEL_TARGET_BUTTON_BASE + FUEL_TARGET_BUTTON_COUNT) {
-                if (page != CraftingTerminalPage.FUEL) return false;
-                selectedFuelTarget = FUEL_TARGETS.get(buttonId - FUEL_TARGET_BUTTON_BASE);
+            List<ResourceLocation> transformTargets =
+                    TransformProviderApi.targetIds(descriptorSnapshot);
+            if (buttonId >= TransformProviderApi.LEGACY_FUEL_BUTTON_BASE
+                    && buttonId < TransformProviderApi.LEGACY_FUEL_BUTTON_BASE
+                    + FUEL_TARGETS.size()) {
+                if (page != CraftingTerminalPage.TRANSFORM) return false;
+                selectedTransformTarget = transformTargets.get(
+                        buttonId - TransformProviderApi.LEGACY_FUEL_BUTTON_BASE);
+                updateTransformPreview(getCore(player.level()));
+                return true;
+            }
+            if (buttonId >= TransformProviderApi.TARGET_BUTTON_BASE
+                    && buttonId < TransformProviderApi.TARGET_BUTTON_BASE
+                    + transformTargets.size()) {
+                if (page != CraftingTerminalPage.TRANSFORM) return false;
+                selectedTransformTarget = transformTargets.get(
+                        buttonId - TransformProviderApi.TARGET_BUTTON_BASE);
+                updateTransformPreview(getCore(player.level()));
                 return true;
             }
             if (buttonId == OUTPUT_DESTINATION_BUTTON) {
@@ -2777,7 +2984,16 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 outputDestination = TerminalOutputDestination.PLAYER;
                 return true;
             }
-            if (page == CraftingTerminalPage.FUEL) return false;
+            if (page == CraftingTerminalPage.TRANSFORM) {
+                return switch (buttonId) {
+                    case 2 -> transformInput(1, player);
+                    case 3 -> transformInput(8, player);
+                    case 4 -> transformInput(64, player);
+                    case MAX_CRAFT_BUTTON -> transformInput(Integer.MAX_VALUE, player);
+                    default -> false;
+                };
+            }
+            if (page == CraftingTerminalPage.STATIONS) return false;
             StorageCoreBlockEntity core = getCore(player.level());
             switch (buttonId) {
                 case 0, 1,
@@ -2828,26 +3044,38 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             outputDestination = preferences.outputDestination();
             changed = true;
         }
-        if (selectedFuelTarget != preferences.fuelTarget()) {
-            selectedFuelTarget = preferences.fuelTarget();
+        if (!java.util.Objects.equals(
+                selectedTransformTarget, preferences.transformTarget())) {
+            selectedTransformTarget = preferences.transformTarget();
             changed = true;
         }
         if (page != preferences.page()) {
             switchPage(player, preferences.page());
             changed = true;
         }
+        if (changed && page == CraftingTerminalPage.TRANSFORM) {
+            updateTransformPreview(getCore(player.level()));
+        }
         return changed;
     }
 
     private boolean switchPage(Player player, CraftingTerminalPage nextPage) {
+        nextPage = nextPage.normalized();
         if (page == nextPage) return true;
-        if (page == CraftingTerminalPage.FUEL) returnTransientInputs(player);
+        if (page == CraftingTerminalPage.TRANSFORM) returnTransientInputs(player);
         page = nextPage;
         scrollOffset = 0;
         StorageCoreBlockEntity core = getCore(player.level());
         if (core != null && page.isItemPage()) {
-            refreshDisplayItems(core);
+            if (page != CraftingTerminalPage.CRAFTABLE
+                    || !restoreCraftableVisibleCache(core)) {
+                refreshDisplayItems(core);
+            }
             updatePreview(core, player);
+        } else if (page == CraftingTerminalPage.TRANSFORM) {
+            updateTransformPreview(core);
+        } else {
+            craftableCount = 0;
         }
         return true;
     }
@@ -2879,40 +3107,44 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
     @Override
     public void refreshDisplayItems(StorageCoreBlockEntity core) {
+        if (!page.isItemPage()) {
+            refreshDisplayMetadata(core);
+            return;
+        }
         refreshDisplayItemsFiltered(core, currentFilter);
     }
 
     @Override
     public void refreshDisplayItemsFiltered(StorageCoreBlockEntity core, String filter) {
         this.currentFilter = filter != null ? filter : "";
-        displayInventory.clearContent();
         if (core == null) {
             totalItemTypes = 0;
+            replaceVisibleDisplayStacks(List.of(), getVisibleRows());
             return;
         }
         List<ItemStack> displayStacks;
+        CraftableBuildResult craftableBuild = null;
+        long sortNanos = 0;
         if (page == CraftingTerminalPage.CRAFTABLE) {
             Player player = playerInventory != null ? playerInventory.player : null;
-            displayStacks = buildCraftableDisplayStacks(core, player);
+            craftableBuild = buildCraftableDisplayStacks(core, player);
+            displayStacks = craftableBuild.stacks();
+            long sortStarted = System.nanoTime();
             sortCraftableDisplayStacks(displayStacks);
+            sortNanos = System.nanoTime() - sortStarted;
         } else {
             displayStacks = new ArrayList<>(core.getTerminalDisplayStacks(
                     currentFilter, getSortMode(), getSortOrder(), getResourceView()));
         }
 
         totalItemTypes = displayStacks.size();
-        displayTypeCount = core.getTypeCount();
-        displayMaxTypes = core.getTotalTypeSlots();
-        displayUnlimitedTypeCapacity = core.getTypeCapacity().unlimited();
+        refreshDisplayMetadata(core);
         int vRows = getVisibleRows();
         int maxOffset = Math.max(0, totalItemTypes - vRows * DISPLAY_COLS);
         scrollOffset = Math.min(scrollOffset, maxOffset);
-        for (int i = 0; i < DISPLAY_SLOTS; i++) {
-            int idx = scrollOffset + i;
-            if (idx < displayStacks.size() && i < vRows * DISPLAY_COLS) {
-                displayInventory.setItem(i, displayStacks.get(idx).copy());
-            }
-        }
+        long syncStarted = System.nanoTime();
+        replaceVisibleDisplayStacks(displayStacks, vRows);
+        long syncNanos = System.nanoTime() - syncStarted;
 
         if (!selectedOutput.isEmpty()) {
             if (selectedRecipeId != null) {
@@ -2925,6 +3157,94 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 clearSelection();
             }
         }
+        if (page == CraftingTerminalPage.CRAFTABLE) {
+            cacheCraftableVisible(core);
+            logCraftableRefresh(craftableBuild, sortNanos, syncNanos);
+        }
+    }
+
+    private static void logCraftableRefresh(
+            CraftableBuildResult build,
+            long sortNanos,
+            long syncNanos
+    ) {
+        if (build == null) return;
+        long totalNanos = build.candidateSelectionNanos()
+                + build.variantResolutionNanos()
+                + build.previewSimulationNanos()
+                + sortNanos
+                + syncNanos;
+        if (totalNanos < 50_000_000L) return;
+        MagicStorage.LOGGER.info(
+                "Craftable refresh took {} ms: candidates={} variants={} outputs={}, "
+                        + "candidateSelection={} ms, variantResolution={} ms, "
+                        + "previewSimulation={} ms, sort={} ms, sync={} ms",
+                totalNanos / 1_000_000L,
+                build.candidates(),
+                build.variants(),
+                build.stacks().size(),
+                build.candidateSelectionNanos() / 1_000_000L,
+                build.variantResolutionNanos() / 1_000_000L,
+                build.previewSimulationNanos() / 1_000_000L,
+                sortNanos / 1_000_000L,
+                syncNanos / 1_000_000L);
+    }
+
+    private void cacheCraftableVisible(StorageCoreBlockEntity core) {
+        Level level = core.getLevel();
+        if (level == null) return;
+        List<ItemStack> visible = new ArrayList<>(DISPLAY_SLOTS);
+        for (int slot = 0; slot < DISPLAY_SLOTS; slot++) {
+            visible.add(displayInventory.getItem(slot).copy());
+        }
+        craftableVisibleCache = new CraftableVisibleCache(
+                level.getRecipeManager().getRecipes(),
+                currentFilter,
+                getSortMode(),
+                getSortOrder(),
+                getResourceView(),
+                getVisibleRows(),
+                scrollOffset,
+                totalItemTypes,
+                visible);
+    }
+
+    private boolean restoreCraftableVisibleCache(StorageCoreBlockEntity core) {
+        Level level = core.getLevel();
+        CraftableVisibleCache cache = craftableVisibleCache;
+        if (level == null || cache == null
+                || cache.recipeSnapshot() != level.getRecipeManager().getRecipes()
+                || !cache.filter().equals(currentFilter)
+                || cache.sortMode() != getSortMode()
+                || cache.sortOrder() != getSortOrder()
+                || cache.resourceView() != getResourceView()
+                || cache.visibleRows() != getVisibleRows()) {
+            return false;
+        }
+        scrollOffset = cache.scrollOffset();
+        totalItemTypes = cache.totalItemTypes();
+        refreshDisplayMetadata(core);
+        List<ItemStack> updated = cache.stacks().stream()
+                .map(stack -> updateCraftableDisplayAmount(core, stack))
+                .toList();
+        replaceVisibleDisplayStacks(updated, getVisibleRows());
+        return true;
+    }
+
+    private static ItemStack updateCraftableDisplayAmount(
+            StorageCoreBlockEntity core,
+            ItemStack stack
+    ) {
+        if (stack.isEmpty() || core.getLevel() == null) return stack;
+        StorageResourceKey key = TerminalResourceDisplay.key(stack).orElseGet(() ->
+                StorageResourceKey.item(
+                        TerminalDisplayStack.strip(stack),
+                        core.getLevel().registryAccess()));
+        long amount = core.getResourceAmount(key);
+        ItemStack icon = TerminalDisplayStack.strip(stack);
+        return key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
+                ? TerminalDisplayStack.create(icon, amount)
+                : TerminalResourceDisplay.create(icon, key, amount);
     }
 
     private boolean isSelectedRecipeCurrent(StorageCoreBlockEntity core) {
@@ -2939,39 +3259,69 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         return matchesSelectionOutput(match, selectedOutput, level);
     }
 
-    private List<ItemStack> buildCraftableDisplayStacks(StorageCoreBlockEntity core, Player player) {
+    private CraftableBuildResult buildCraftableDisplayStacks(
+            StorageCoreBlockEntity core,
+            Player player
+    ) {
         Level level = core.getLevel();
-        if (level == null) return new ArrayList<>();
+        if (level == null) {
+            return new CraftableBuildResult(List.of(), 0, 0, 0, 0, 0);
+        }
+        Arrays.fill(nextCraftableEnergyThreshold, Long.MAX_VALUE);
+        nextCraftableStationThreshold.clear();
         List<IngredientSource> sources = snapshotIngredientSources(core, player);
         List<ItemStack> availableStacks = sources.stream().map(IngredientSource::stack).toList();
         TerminalSearchQuery query = TerminalSearchQuery.compile(currentFilter);
         Map<StorageResourceKey, CraftableOutput> craftableOutputs = new LinkedHashMap<>();
-        for (ResourceLocation recipeId : craftableRecipeCatalog.getCandidateRecipeIds(
-                level.getRecipeManager(), availableStacks)) {
+        long candidateSelectionStarted = System.nanoTime();
+        List<ResourceLocation> candidateIds = craftableRecipeCatalog.getCandidateRecipeIds(
+                level, availableStacks);
+        long candidateSelectionNanos = System.nanoTime() - candidateSelectionStarted;
+        long variantResolutionNanos = 0;
+        long previewSimulationNanos = 0;
+        int variants = 0;
+        for (ResourceLocation recipeId : candidateIds) {
+            long variantStarted = System.nanoTime();
             RecipeHolder<?> holder = level.getRecipeManager().byKey(recipeId).orElse(null);
             RecipeAdapterMatch baseMatch = holder == null ? null : classifyAvailable(holder, core);
-            if (baseMatch == null) continue;
-            for (RecipeAdapterMatch match : baseMatch.resolveVariants(availableStacks, level)) {
+            List<RecipeAdapterMatch> resolved = baseMatch == null
+                    ? List.of() : baseMatch.resolveVariants(availableStacks, level);
+            variantResolutionNanos += System.nanoTime() - variantStarted;
+            variants += resolved.size();
+            for (RecipeAdapterMatch match : resolved) {
                 StorageResourceKey key = match.selectionOutputKey(level).orElse(null);
                 ItemStack output = match.presentationOutput(List.of(), level);
                 if (key == null || output.isEmpty() || !getResourceView().matches(key)
                         || !matchesCraftableFilter(key, output, query, level)) continue;
+                long previewStarted = System.nanoTime();
                 CraftPreview preview = computeCraftPreviewFor(match, core, sources);
-                if (preview.craftable() <= 0) continue;
+                previewSimulationNanos += System.nanoTime() - previewStarted;
+                if (preview.craftable() <= 0) {
+                    recordNextCraftableThreshold(match, preview, core);
+                    continue;
+                }
                 craftableOutputs.putIfAbsent(key, new CraftableOutput(
                         key, output.copyWithCount(1), core.getResourceAmount(key)));
             }
         }
         for (RecipeHolder<?> holder : axeTransformationCatalog.recipes(level, core)) {
+            long variantStarted = System.nanoTime();
             RecipeAdapterMatch match = classifyAvailable(holder, core);
+            variantResolutionNanos += System.nanoTime() - variantStarted;
             if (match == null) continue;
+            variants++;
             ItemStack output = match.presentationOutput(List.of(), level);
             if (output.isEmpty()) continue;
             StorageResourceKey key = StorageResourceKey.item(output, level.registryAccess());
             if (!getResourceView().matches(key)
                     || !matchesCraftableFilter(key, output, query, level)) continue;
+            long previewStarted = System.nanoTime();
             CraftPreview preview = computeCraftPreviewFor(match, core, sources);
-            if (preview.craftable() <= 0) continue;
+            previewSimulationNanos += System.nanoTime() - previewStarted;
+            if (preview.craftable() <= 0) {
+                recordNextCraftableThreshold(match, preview, core);
+                continue;
+            }
             craftableOutputs.putIfAbsent(key, new CraftableOutput(
                     key, output.copyWithCount(1), core.getResourceAmount(key)));
         }
@@ -2983,7 +3333,60 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     : TerminalResourceDisplay.create(
                     output.icon(), output.key(), output.storedAmount()));
         }
-        return result;
+        return new CraftableBuildResult(
+                result,
+                candidateIds.size(),
+                variants,
+                candidateSelectionNanos,
+                variantResolutionNanos,
+                previewSimulationNanos);
+    }
+
+    private boolean energyCrossedCraftableThreshold(StorageCoreBlockEntity core) {
+        for (EnergyType type : ENERGY_SYNC_ORDER) {
+            long current = core.getEnergy(type);
+            long previous = energyAmounts[type.ordinal()];
+            if (current < previous
+                    || current > previous
+                    && current >= nextCraftableEnergyThreshold[type.ordinal()]) return true;
+        }
+        return false;
+    }
+
+    private void recordNextCraftableThreshold(
+            RecipeAdapterMatch match,
+            CraftPreview preview,
+            StorageCoreBlockEntity core
+    ) {
+        if (preview.ingredients().stream()
+                .anyMatch(input -> input.available() < input.required())) return;
+        RecipeAdapterMatch.ToolCost tool = match.cost().toolCost().orElse(null);
+        if (tool != null && !core.hasDescriptorAmount(tool.descriptorId(), tool.amountPerCraft())) {
+            return;
+        }
+        EnergyCost energy = match.cost().energyCost().orElse(null);
+        if (energy != null) {
+            recordEnergyThreshold(core, energy.processType(), energy.processAmount());
+            recordEnergyThreshold(core, energy.fuelType(), energy.fuelAmount());
+        }
+        RecipeAdapterMatch.StationWorkCost station =
+                match.cost().stationWorkCost().orElse(null);
+        if (station != null && core.getStationWork(station.descriptorId())
+                < station.amountPerCraft()) {
+            nextCraftableStationThreshold.merge(
+                    station.descriptorId(), station.amountPerCraft(), Math::min);
+        }
+    }
+
+    private void recordEnergyThreshold(
+            StorageCoreBlockEntity core,
+            EnergyType type,
+            long required
+    ) {
+        if (required > 0 && core.getEnergy(type) < required) {
+            nextCraftableEnergyThreshold[type.ordinal()] =
+                    Math.min(nextCraftableEnergyThreshold[type.ordinal()], required);
+        }
     }
 
     private static boolean matchesCraftableFilter(

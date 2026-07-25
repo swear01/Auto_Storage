@@ -2,6 +2,7 @@ package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,7 +15,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.UUID;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StorageTerminalMenu extends AbstractContainerMenu {
     static final int SORT_ORDER_BUTTON = 11;
@@ -55,6 +58,8 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     private long observedTopologyRevision;
     private boolean storageDirty;
     private boolean energyDirty;
+    private final Map<ResourceLocation, Long> stationWorkIncreases = new HashMap<>();
+    private boolean stationWorkDecreased;
     private final StorageListener storageListener = new StorageListener() {
         @Override
         public void onChanged(ItemKey key, long delta, long newAmount, Actor actor) {
@@ -67,13 +72,25 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         }
 
         @Override
+        public void onStationWorkChanged(
+                ResourceLocation descriptorId,
+                long delta,
+                long newAmount
+        ) {
+            if (delta < 0) stationWorkDecreased = true;
+            else stationWorkIncreases.merge(descriptorId, newAmount, Math::max);
+        }
+
+        @Override
         public void onResourceChanged(
                 StorageResourceKey key,
                 long delta,
                 long newAmount,
                 Actor actor
         ) {
-            storageDirty = true;
+            if (!key.kindId().equals(StorageResourceBridge.WORK_KIND)) {
+                storageDirty = true;
+            }
         }
     };
 
@@ -271,20 +288,35 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
 
     public void refreshDisplayItemsFiltered(StorageCoreBlockEntity core, String filter) {
         this.currentFilter = filter != null ? filter : "";
-        displayInventory.clearContent();
-        if (core == null) { totalItemTypes = 0; return; }
+        if (core == null) {
+            totalItemTypes = 0;
+            replaceVisibleDisplayStacks(List.of(), visibleRows);
+            return;
+        }
         java.util.List<ItemStack> stacks = core.getTerminalDisplayStacks(
                 currentFilter, sortMode, sortOrder, resourceView);
         totalItemTypes = stacks.size();
+        refreshDisplayMetadata(core);
+        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
+        scrollOffset = Math.min(scrollOffset, maxOffset);
+        replaceVisibleDisplayStacks(stacks, visibleRows);
+    }
+
+    protected final void refreshDisplayMetadata(StorageCoreBlockEntity core) {
         displayTypeCount = core.getTypeCount();
         displayMaxTypes = core.getTotalTypeSlots();
         displayUnlimitedTypeCapacity = core.getTypeCapacity().unlimited();
-        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
-        scrollOffset = Math.min(scrollOffset, maxOffset);
+    }
+
+    protected final void replaceVisibleDisplayStacks(List<ItemStack> stacks, int rows) {
         for (int i = 0; i < DISPLAY_SLOTS; i++) {
             int idx = scrollOffset + i;
-            if (idx < stacks.size() && i < visibleRows * DISPLAY_COLS) {
-                displayInventory.setItem(i, stacks.get(idx).copy());
+            ItemStack next = idx < stacks.size() && i < rows * DISPLAY_COLS
+                    ? stacks.get(idx) : ItemStack.EMPTY;
+            ItemStack current = displayInventory.getItem(i);
+            if (current.getCount() != next.getCount()
+                    || !ItemStack.isSameItemSameComponents(current, next)) {
+                displayInventory.setItem(i, next.copy());
             }
         }
     }
@@ -637,6 +669,13 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             energyDirty = false;
             onObservedEnergyChanged(observedCore);
         }
+        if ((stationWorkDecreased || !stationWorkIncreases.isEmpty()) && observedCoreValid) {
+            boolean decreased = stationWorkDecreased;
+            Map<ResourceLocation, Long> increases = Map.copyOf(stationWorkIncreases);
+            stationWorkDecreased = false;
+            stationWorkIncreases.clear();
+            onObservedStationWorkChanged(observedCore, increases, decreased);
+        }
         super.broadcastChanges();
     }
 
@@ -644,6 +683,15 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     protected void onObservedEnergyChanged(StorageCoreBlockEntity core) {
+        if (resourceView == TerminalResourceView.ENERGY) refreshDisplayItems(core);
+    }
+
+    protected void onObservedStationWorkChanged(
+            StorageCoreBlockEntity core,
+            Map<ResourceLocation, Long> increases,
+            boolean decreased
+    ) {
+        if (resourceView == TerminalResourceView.ENERGY) refreshDisplayItems(core);
     }
 
     @Override

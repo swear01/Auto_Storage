@@ -159,7 +159,7 @@ class StaticRegressionTests(unittest.TestCase):
             "preferenceSession.presentation(menu.getTerminalPreferences())", screen
         )
         self.assertIn("displayedPreferences().page()", crafting_screen)
-        self.assertIn("displayedPreferences().fuelTarget()", crafting_screen)
+        self.assertIn("displayedPreferences().transformTarget()", crafting_screen)
         self.assertIn("preferences.usePlayerInventory()", crafting_screen)
         self.assertIn("preferences.outputDestination()", crafting_screen)
         for stale_read in (
@@ -254,7 +254,7 @@ class StaticRegressionTests(unittest.TestCase):
 
         craftable = self.java_block(
             crafting,
-            r"\bprivate\s+List<ItemStack>\s+buildCraftableDisplayStacks\s*\(",
+            r"\bprivate\s+CraftableBuildResult\s+buildCraftableDisplayStacks\s*\(",
             "CraftingTerminalMenu.buildCraftableDisplayStacks",
         )
         self.assertEqual(1, craftable.count("TerminalSearchQuery.compile"))
@@ -641,24 +641,25 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertTrue(expected.issubset(en_us))
         self.assertTrue(expected.issubset(zh_tw))
 
-    def test_fuel_page_distinguishes_stations_from_consumed_axe_energy(self):
+    def test_transform_and_stations_have_no_consumables_station_category(self):
         lang = json.loads(
             self.read_required("src/main/resources/assets/magic_storage/lang/en_us.json")
         )
-        self.assertEqual("Consumables", lang["gui.magic_storage.fuel_group.consumables"])
-        self.assertEqual("Timed Stations", lang["gui.magic_storage.fuel_group.timed_stations"])
+        self.assertEqual("Transform", lang["gui.magic_storage.page_transform"])
+        self.assertEqual("Stations", lang["gui.magic_storage.page_stations"])
+        self.assertEqual("Processing Stations", lang["gui.magic_storage.fuel_group.timed_stations"])
         self.assertEqual("Instant Stations", lang["gui.magic_storage.fuel_group.instant_stations"])
-        self.assertEqual("Axe Energy", lang["gui.magic_storage.axe_energy"])
+        self.assertEqual("No transformations", lang["gui.magic_storage.no_transformations"])
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
-        consumables_panel = screen[
-            screen.index("private void renderConsumablesPanel"):
-            screen.index("private void renderTimedStationsPanel")
-        ]
-        self.assertIn("MachineEnergyTable.Category.CONSUMABLE", consumables_panel)
-        self.assertIn("menu.hasInfiniteDescriptor(entry.id())", consumables_panel)
-        self.assertIn("menu.getDescriptorAmount(entry.id())", consumables_panel)
+        table = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/MachineEnergyTable.java"
+        )
+        self.assertNotIn("Category.CONSUMABLE", screen)
+        self.assertNotIn("CONSUMABLE", table)
+        self.assertIn("MachineEnergyTable.Category.PROCESS", screen)
+        self.assertIn("MachineEnergyTable.Category.INSTANT", screen)
 
     def test_emi_uses_terminal_display_slot_contract_without_54_slot_hardcode(self):
         text = self.read_required("src/main/java/com/swearprom/magicstorage/magic_storage/compat/MagicStorageEmiPlugin.java")
@@ -890,16 +891,16 @@ class StaticRegressionTests(unittest.TestCase):
     def test_all_gametest_gates_reject_any_selftest_failure(self):
         build = self.read_required("build.gradle")
         expected = {
-            "runGameTestServer": 381,
+            "runGameTestServer": 391,
             "runRecipeAddonGameTestServer": 17,
             "runMekanismGameTestServer": 47,
-            "runBotaniaGameTestServer": 13,
+            "runBotaniaGameTestServer": 14,
             "runIronFurnacesGameTestServer": 3,
             "runFarmersDelightGameTestServer": 7,
             "runModernIndustrializationGameTestServer": 7,
             "runArsNouveauGameTestServer": 11,
             "runEvilCraftGameTestServer": 10,
-            "runPowahGameTestServer": 9,
+            "runPowahGameTestServer": 11,
             "runIndustrialForegoingGameTestServer": 9,
             "runCreateGameTestServer": 13,
             "runPneumaticCraftGameTestServer": 9,
@@ -916,7 +917,7 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(f"All {count} required tests passed", body, task)
             self.assertIn("expectedSelfTestSummary", body, task)
             self.assertIn("TESTS FAILED!", body, task)
-        self.assertIn("SelfTest: 264525 passed, 0 failed, 264525 total", build)
+        self.assertIn("SelfTest: 229484 passed, 0 failed, 229484 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
@@ -1601,6 +1602,77 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("StorageResourceBridge.itemKey(key", core)
         self.assertIn("resourceLedger.applyExact", core)
 
+    def test_exact_resource_transactions_only_copy_touched_entries(self):
+        ledger = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/StorageResourceLedger.java"
+        )
+        apply_exact = self.java_block(
+            ledger,
+            r"\bboolean\s+applyExact\s*\(",
+            "StorageResourceLedger.applyExact",
+        )
+        self.assertNotIn("new HashMap<>(amounts)", apply_exact)
+        self.assertNotIn("amounts.clear()", apply_exact)
+        self.assertNotIn("amounts.putAll", apply_exact)
+
+    def test_work_only_transactions_skip_capacity_type_recount(self):
+        core = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockEntity.java"
+        )
+        transaction = self.java_block(
+            core,
+            r"\bboolean\s+applyResourceTransaction\s*\(\s*"
+            r"Map<StorageResourceKey,\s*Long>\s+deltas",
+            "StorageCoreBlockEntity.applyResourceTransaction(Map)",
+        )
+        self.assertIn("boolean capacityTypesChanged", transaction)
+        self.assertIn("if (capacityTypesChanged) refreshTypeCount();", transaction)
+
+    def test_terminal_refresh_does_not_clear_and_rewrite_unchanged_visible_slots(self):
+        storage = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/StorageTerminalMenu.java"
+        )
+        crafting = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java"
+        )
+        storage_refresh = self.java_block(
+            storage,
+            r"\bpublic\s+void\s+refreshDisplayItemsFiltered\s*\(",
+            "StorageTerminalMenu.refreshDisplayItemsFiltered",
+        )
+        crafting_refresh = self.java_block(
+            crafting,
+            r"\bpublic\s+void\s+refreshDisplayItemsFiltered\s*\(",
+            "CraftingTerminalMenu.refreshDisplayItemsFiltered",
+        )
+        self.assertNotIn("displayInventory.clearContent()", storage_refresh)
+        self.assertNotIn("displayInventory.clearContent()", crafting_refresh)
+        self.assertIn("replaceVisibleDisplayStacks", storage_refresh)
+        self.assertIn("replaceVisibleDisplayStacks", crafting_refresh)
+        crafting_entry = self.java_block(
+            crafting,
+            r"\bpublic\s+void\s+refreshDisplayItems\s*\(",
+            "CraftingTerminalMenu.refreshDisplayItems",
+        )
+        self.assertIn("if (!page.isItemPage())", crafting_entry)
+        self.assertIn("refreshDisplayMetadata(core)", crafting_entry)
+
+    def test_passive_resource_updates_skip_recipe_preview_when_nothing_is_selected(self):
+        crafting = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java"
+        )
+        for method in [
+            "onObservedStorageChanged",
+            "onObservedEnergyChanged",
+            "onObservedStationWorkChanged",
+        ]:
+            body = self.java_block(
+                crafting,
+                rf"\bprotected\s+void\s+{method}\s*\(",
+                f"CraftingTerminalMenu.{method}",
+            )
+            self.assertIn("page.isItemPage() && !selectedOutput.isEmpty()", body)
+
     def test_recipe_family_registry_freezes_before_selftests(self):
         entrypoint = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/MagicStorage.java"
@@ -1771,12 +1843,25 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("searchBox.setCanLoseFocus(!searchBoxAutoSelected)", text)
         self.assertNotIn("this.searchTimer = 0;", text)
 
-    def test_terminal_scrollbar_uses_real_texture_height_and_single_tooltip_pass(self):
+    def test_terminal_scrollbar_uses_vanilla_enabled_and_disabled_sprites(self):
         text = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/StorageTerminalScreen.java"
         )
-        self.assertIn("SB_TEXTURE_HEIGHT = 16", text)
-        self.assertIn("256, SB_TEXTURE_HEIGHT", text)
+        self.assertIn('"container/creative_inventory/scroller"', text)
+        self.assertIn('"container/creative_inventory/scroller_disabled"', text)
+        self.assertIn("graphics.blitSprite(", text)
+        self.assertIn("TerminalScrollbar.pageTarget(", text)
+        self.assertIn("scrollGrabOffset", text)
+        scrollbar = self.java_block(
+            text,
+            r"\bprotected\s+static\s+void\s+drawScrollbar\s*\(",
+            "StorageTerminalScreen.drawScrollbar",
+        )
+        self.assertNotIn(
+            "graphics.fill",
+            scrollbar,
+            "AE2 and RS2 draw only the vanilla-style handle over the screen surface",
+        )
         self.assertNotIn("g.renderTooltip(font, hoveredSlot.getItem(), mx, my);", text)
 
     def test_terminal_scrollbar_sends_one_server_validated_absolute_packet(self):
@@ -2175,7 +2260,7 @@ class StaticRegressionTests(unittest.TestCase):
             for y in range(16) for x in range(len(icons) * 16, 256)
         ))
 
-    def test_crafting_terminal_uses_dedicated_fuel_page_without_separate_popup_screen(self):
+    def test_crafting_terminal_separates_transform_from_station_management(self):
         terminal_screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/StorageTerminalScreen.java"
         )
@@ -2200,31 +2285,36 @@ class StaticRegressionTests(unittest.TestCase):
         crafting_menu = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java"
         )
-        self.assertIn("CraftingTerminalMenu.FUEL_PAGE_BUTTON", crafting_screen)
+        self.assertIn("CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON", crafting_screen)
+        self.assertIn("CraftingTerminalMenu.STATIONS_PAGE_BUTTON", crafting_screen)
+        self.assertNotIn("FUEL_PAGE_BUTTON", crafting_screen + crafting_menu)
         self.assertIn("CraftingTerminalMenu.AUTO_FUEL_TARGET_BUTTON", crafting_screen)
         self.assertNotIn("PREVIOUS_FUEL_TARGET_BUTTON", crafting_screen + crafting_menu)
         self.assertNotIn("NEXT_FUEL_TARGET_BUTTON", crafting_screen + crafting_menu)
         self.assertNotIn("cycleFuelTarget", crafting_menu)
-        self.assertIn("CraftingTerminalMenu.fuelTargetButtonId", crafting_screen)
+        self.assertIn("TransformProviderApi.targetButtonId", crafting_screen)
         self.assertNotIn("autoFuelBtn", crafting_screen)
         self.assertNotIn("previousFuelTargetBtn", crafting_screen)
         self.assertNotIn("nextFuelTargetBtn", crafting_screen)
-        self.assertIn("CraftingTerminalPage.FUEL", crafting_screen)
-        self.assertIn("getEnergyAmount", crafting_screen)
+        self.assertIn("CraftingTerminalPage.TRANSFORM", crafting_screen)
+        self.assertIn("CraftingTerminalPage.STATIONS", crafting_screen)
+        self.assertIn("getTransformUses", crafting_screen)
 
         lang = self.read_required("src/main/resources/assets/magic_storage/lang/en_us.json")
         self.assertNotIn("container.magic_storage.fuel_selection", lang)
         for key in [
-            "gui.magic_storage.page_fuel",
+            "gui.magic_storage.page_transform",
+            "gui.magic_storage.page_stations",
             "gui.magic_storage.page_storage",
             "gui.magic_storage.page_craftable",
             "gui.magic_storage.fuel_target_auto",
             "gui.magic_storage.fuel_target",
-            "gui.magic_storage.fuel_group.consumables",
             "gui.magic_storage.fuel_group.timed_stations",
             "gui.magic_storage.fuel_group.instant_stations",
         ]:
             self.assertIn(key, lang)
+        self.assertNotIn("gui.magic_storage.page_fuel", lang)
+        self.assertNotIn("Consumables", lang)
         self.assertNotIn("gui.magic_storage.previous_fuel_target", lang)
         self.assertNotIn("gui.magic_storage.next_fuel_target", lang)
 
@@ -2254,9 +2344,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("selectAdjacentFuelTarget", screen)
         self.assertIn("TerminalCycleDirection.NEXT", screen)
         self.assertIn("fuelTargetOptions()", screen)
-        self.assertIn("displayedPreferences().fuelTarget()", screen)
+        self.assertIn("displayedPreferences().transformTarget()", screen)
         self.assertIn("CraftingTerminalMenu.AUTO_FUEL_TARGET_BUTTON", screen)
-        self.assertIn("CraftingTerminalMenu.fuelTargetButtonId", screen)
+        self.assertIn("TransformProviderApi.targetButtonId", screen)
         self.assertIn("geometry.fuelTargetListButton()", screen)
         self.assertIn("geometry.fuelTargetPopup()", screen)
         self.assertIn(
@@ -2277,9 +2367,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("fuelTargetOptions()", render_popup)
         self.assertIn("option.icon()", render_popup)
         self.assertIn("option.label()", render_popup)
-        self.assertIn(
-            "Objects.equals(option.target(), displayedPreferences().fuelTarget())",
+        self.assertRegex(
             render_popup,
+            r"Objects\.equals\(\s*option\.target\(\),\s*"
+            r"displayedPreferences\(\)\.transformTarget\(\)\)",
         )
         self.assertIn("gui.magic_storage.fuel_target_list", en_us)
         self.assertIn("gui.magic_storage.fuel_target_list", zh_tw)
@@ -2336,7 +2427,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("fuelTargetPopup.reveal(selected)", toggle)
         self.assertIn("setFocused(null)", toggle)
         self.assertIn("setFocused(null)", close)
-        self.assertIn("if (!fuel) closeFuelTargetPopup()", page_update)
+        self.assertIn("if (!transform) closeFuelTargetPopup()", page_update)
 
         tooltip = self.java_block(
             screen,
@@ -2446,6 +2537,9 @@ class StaticRegressionTests(unittest.TestCase):
         machine_table = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/MachineEnergyTable.java"
         )
+        descriptor = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/MachineDescriptor.java"
+        )
 
         for name in ["STORAGE", "CRAFTABLE", "FUEL"]:
             self.assertIn(name, page)
@@ -2488,6 +2582,15 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("TerminalAmountFormatter.formatCompact", storage)
         self.assertIn("copyWithCount(1)", storage)
         self.assertIn("TerminalDisplayStack.amount(stack)", storage)
+        self.assertIn("renderTypedResourceBackground(graphics, stack, slot.x, slot.y)", storage)
+        typed_background = self.java_block(
+            storage,
+            r"\bprivate\s+static\s+void\s+renderTypedResourceBackground\s*\(",
+            "StorageTerminalScreen.renderTypedResourceBackground",
+        )
+        self.assertIn("TerminalResourceDisplay.key(stack)", typed_background)
+        self.assertIn("StorageResourceKindApi.ITEM_KIND", typed_background)
+        self.assertIn("graphics.fill", typed_background)
         self.assertIn("if (amount <= 0) return;", storage)
         self.assertIn("getTooltipFromContainerItem", storage)
         self.assertIn("gui.magic_storage.stored_amount", storage)
@@ -2502,10 +2605,10 @@ class StaticRegressionTests(unittest.TestCase):
             crafting.index("private void renderConsumablesPanel"):
             crafting.index("private void drawFlowPageIndicator")
         ]
-        self.assertIn("type.representativeStack()", fuel_panel)
+        self.assertIn("use.representative()", fuel_panel)
         self.assertNotIn("drawEnergyIcon", fuel_panel)
         self.assertNotIn("nextFuelTargetBtn", crafting)
-        self.assertIn("displayedPreferences().page() == CraftingTerminalPage.FUEL", crafting)
+        self.assertIn("displayedPreferences().page() == CraftingTerminalPage.TRANSFORM", crafting)
         self.assertIn("renderFuelTypeCapacity", crafting)
         self.assertIn("geometry.fuelStatus()", crafting)
         flow_amount = self.java_block(
@@ -3043,14 +3146,16 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("displays all eight totals live", guide)
         self.assertIn("cooking time", guide)
         self.assertIn("runtime burn time", guide)
-        self.assertIn("third page", guide)
-        self.assertNotIn("previous/next", guide)
-        self.assertIn("Fuel Target", guide)
+        self.assertIn("Auto discovers valid uses but never consumes", guide)
+        self.assertIn("Transform tab", guide)
         self.assertNotIn("Energy Reserves header", guide)
         self.assertNotIn("all currently registered totals", guide)
-        self.assertIn("Consumables", guide)
-        self.assertIn("Timed Stations", guide)
+        self.assertNotIn("Consumables", guide)
+        self.assertNotIn("Timed Stations", guide)
+        self.assertIn("Processing Stations", guide)
         self.assertIn("Instant Stations", guide)
+        self.assertIn("Elven Trade", guide)
+        self.assertIn("runtime portal Mana cost", guide)
 
     def test_remote_access_is_pinned_to_exact_loaded_core_identity(self):
         core = self.read_required(
@@ -3317,7 +3422,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("MagicStorage.STORAGE_CORE_ITEM", screen)
         self.assertIn("outputDestinationRailBtn.setItemIcon", screen)
 
-    def test_fuel_workspace_uses_three_descriptor_category_rows(self):
+    def test_transform_is_separate_and_stations_use_two_category_rows(self):
         layout = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java"
         )
@@ -3326,6 +3431,9 @@ class StaticRegressionTests(unittest.TestCase):
         )
         machine_table = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/MachineEnergyTable.java"
+        )
+        descriptor = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/MachineDescriptor.java"
         )
 
         for declaration in [
@@ -3354,13 +3462,17 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("renderConsumablesPanel", screen)
         self.assertIn("renderTimedStationsPanel", screen)
         self.assertIn("renderInstantStationsPanel", screen)
+        self.assertIn("CraftingTerminalPage.TRANSFORM", screen)
+        self.assertIn("CraftingTerminalPage.STATIONS", screen)
         self.assertNotIn("renderMachinePanel", screen)
         self.assertNotIn("renderFuelPanel", screen)
         self.assertNotIn("renderFuelControlPanel", screen)
         self.assertNotIn('"gui.magic_storage.installed_machines"', screen)
         self.assertNotIn('"gui.magic_storage.energy_reserves"', screen)
-        for category in ["PROCESS", "INSTANT", "CONSUMABLE"]:
+        for category in ["PROCESS", "INSTANT", "TRANSFORM"]:
             self.assertIn(category, machine_table)
+        self.assertNotIn("CONSUMABLE", machine_table)
+        self.assertNotIn("Consumable", machine_table + descriptor)
 
     def test_fuel_panels_fill_vertical_space_and_type_capacity_is_inventory_side(self):
         layout = self.read_required(
@@ -3406,8 +3518,8 @@ class StaticRegressionTests(unittest.TestCase):
         zh_tw = json.loads(self.read_required(
             "src/main/resources/assets/magic_storage/lang/zh_tw.json"
         ))
-        self.assertEqual("Consumables", en_us["gui.magic_storage.fuel_group.consumables"])
-        self.assertEqual("Timed Stations", en_us["gui.magic_storage.fuel_group.timed_stations"])
+        self.assertEqual("Transform", en_us["gui.magic_storage.fuel_group.consumables"])
+        self.assertEqual("Processing Stations", en_us["gui.magic_storage.fuel_group.timed_stations"])
         self.assertEqual("Instant Stations", en_us["gui.magic_storage.fuel_group.instant_stations"])
         self.assertEqual(set(en_us), set(zh_tw))
         self.assertNotIn("Stations & Axe Energy", en_us.values())
@@ -3477,6 +3589,28 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(key, en_us)
         self.assertEqual(set(en_us), set(zh_tw))
 
+    def test_station_slots_render_one_icon_and_the_horizontal_installed_count_only(self):
+        screen = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
+        )
+        render_slot_contents = self.java_block(
+            screen,
+            r"\bprotected\s+void\s+renderSlotContents\s*\(",
+            "CraftingTerminalScreen.renderSlotContents",
+        )
+        self.assertIn("CraftingTerminalMenu.MACHINE_SLOT_START", render_slot_contents)
+        self.assertIn("stack.copyWithCount(1)", render_slot_contents)
+        self.assertNotIn("renderItemDecorations", render_slot_contents)
+
+        search_results = self.java_block(
+            screen,
+            r"\bprivate\s+void\s+renderFuelSearchResults\s*\(",
+            "CraftingTerminalScreen.renderFuelSearchResults",
+        )
+        self.assertIn("installed.getCount()", search_results)
+        self.assertNotIn("machineStoredAmount", search_results)
+        self.assertNotIn("getDescriptorAmount", search_results)
+
     def test_fuel_descriptor_rows_have_explicit_previous_next_buttons_and_keep_wheel_paging(self):
         layout = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java"
@@ -3521,6 +3655,13 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn('"gui.magic_storage.previous_fuel_page"', page_controls)
         self.assertIn('"gui.magic_storage.next_fuel_page"', page_controls)
         self.assertIn("repositionFuelSlots()", page_controls)
+        page_state = self.java_block(
+            screen,
+            r"\bprivate\s+void\s+updateFuelPageButtons\s*\(",
+            "CraftingTerminalScreen.updateFuelPageButtons",
+        )
+        self.assertIn("boolean visible = fuel;", page_state)
+        self.assertNotIn("fuel && pageCount > 1", page_state)
 
         scroll = self.java_block(
             screen,
@@ -3528,7 +3669,6 @@ class StaticRegressionTests(unittest.TestCase):
             "CraftingTerminalScreen.mouseScrolled",
         )
         for panel, page in [
-            ("consumablesPanel", "consumablePage"),
             ("timedStationsPanel", "timedStationPage"),
             ("instantStationsPanel", "instantStationPage"),
         ]:
@@ -3536,13 +3676,55 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(f"{page} = Math.clamp", scroll)
         self.assertGreaterEqual(
             scroll.count("repositionFuelSlots()"),
+            2,
+            "wheel paging must remain available for both Stations rows",
+        )
+        self.assertGreaterEqual(
+            scroll.count("updateFuelPageButtonStates()"),
             3,
-            "wheel paging must remain available for every Fuel descriptor row",
+            "wheel paging and Transform target cycling must refresh page state",
         )
 
         self.assertEqual(set(en_us), set(zh_tw))
         self.assertIn("gui.magic_storage.previous_fuel_page", en_us)
         self.assertIn("gui.magic_storage.next_fuel_page", en_us)
+
+    def test_craftable_recipe_hot_path_uses_exact_dispatch_shared_cache_and_typed_candidates(self):
+        registry = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/RecipeAdapterRegistry.java"
+        )
+        catalog = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftableRecipeCatalog.java"
+        )
+        adapter = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/RecipeAdapter.java"
+        )
+        family = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/RecipeFamily.java"
+        )
+        entrypoint = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/MagicStorage.java"
+        )
+        menu = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java"
+        )
+
+        self.assertIn("Map<RecipeFamilyKey, RecipeAdapter>", registry)
+        self.assertIn("exactAdaptersByKey.get", registry)
+        self.assertIn("static final Map<RecipeManager", catalog)
+        self.assertIn("WeakHashMap", catalog)
+        self.assertIn("static void prewarm", catalog)
+        self.assertIn("CraftableRecipeCatalog.prewarm", entrypoint)
+        for phase in [
+            "candidateSelectionNanos",
+            "variantResolutionNanos",
+            "previewSimulationNanos",
+            "sortNanos",
+            "syncNanos",
+        ]:
+            self.assertIn(phase, menu)
+        self.assertIn("candidateIndex(RecipeHolder<?> holder, Level level)", adapter)
+        self.assertIn("typedCandidateIndex", family)
 
     def test_timed_station_amount_hover_names_machine_and_reports_total_rate_per_tick(self):
         layout = self.read_required(
@@ -3615,7 +3797,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("RESET_OUTPUT_DESTINATION_BUTTON", crafting_menu)
         self.assertIn("RESET_PLAYER_INVENTORY_BUTTON", crafting_menu)
         self.assertIn("outputDestination = TerminalOutputDestination.PLAYER", crafting_menu)
-        self.assertIn("selectedFuelTarget = null", crafting_menu)
+        self.assertIn("selectedTransformTarget = null", crafting_menu)
         self.assertIn("usePlayerInventory = false", crafting_menu)
 
         side_rail = self.java_block(
@@ -3724,7 +3906,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("createDeferredRegister", api)
         self.assertRegex(api, r"MAX_DESCRIPTORS\s*=\s*256")
         self.assertIn("Ingredient", descriptor)
-        self.assertIn("ConsumableValue", descriptor)
+        self.assertIn("TransformValue", descriptor)
         self.assertIn("writeSnapshot", table)
         self.assertIn("readSnapshot", table)
         self.assertIn(

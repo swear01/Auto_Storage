@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -45,10 +44,7 @@ final class CoreStorageRecord {
 
     private final UUID storageId;
     private final UUID networkId;
-    private final Map<EnergyType, Long> energy = new EnumMap<>(EnergyType.class);
-    private final Map<ResourceLocation, Long> descriptorAmounts = new java.util.HashMap<>();
     private final Set<ResourceLocation> infiniteDescriptors = new java.util.HashSet<>();
-    private final Map<ResourceLocation, Long> stationWork = new java.util.HashMap<>();
     private final Map<ResourceLocation, MachineWorkAccumulator.Remainder> machineWorkRemainders =
             new java.util.HashMap<>();
     private final List<CompoundTag> unresolvedDescriptorEntries = new ArrayList<>();
@@ -66,9 +62,6 @@ final class CoreStorageRecord {
     private CoreStorageRecord(UUID storageId, UUID networkId) {
         this.storageId = java.util.Objects.requireNonNull(storageId, "storageId");
         this.networkId = java.util.Objects.requireNonNull(networkId, "networkId");
-        for (EnergyType type : EnergyType.values()) {
-            energy.put(type, 0L);
-        }
         machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS) {
             @Override
             public int getMaxStackSize() {
@@ -83,7 +76,7 @@ final class CoreStorageRecord {
             @Override
             public void setItem(int slot, ItemStack stack) {
                 MachineDescriptor descriptor = MachineEnergyTable.get(slot);
-                if (descriptor != null && descriptor.category() != MachineEnergyTable.Category.CONSUMABLE) {
+                if (descriptor != null && descriptor.category() != MachineEnergyTable.Category.TRANSFORM) {
                     stack.limitSize(descriptor.maxInstalledCount());
                 }
                 super.setItem(slot, stack);
@@ -93,7 +86,7 @@ final class CoreStorageRecord {
             public boolean canPlaceItem(int slot, ItemStack stack) {
                 MachineDescriptor descriptor = MachineEnergyTable.get(slot);
                 return descriptor != null
-                        && descriptor.category() != MachineEnergyTable.Category.CONSUMABLE
+                        && descriptor.category() != MachineEnergyTable.Category.TRANSFORM
                         && descriptor.maxInstalledCount() > 0
                         && descriptor.accepts(stack);
             }
@@ -136,6 +129,13 @@ final class CoreStorageRecord {
 
         CoreStorageRecord record = new CoreStorageRecord(storageId, tag.getUUID(TAG_NETWORK_ID));
         try {
+            if (tag.contains(TAG_RESOURCE_LEDGER)) {
+                if (!tag.contains(TAG_RESOURCE_LEDGER, Tag.TAG_COMPOUND)) {
+                    return LoadResult.failure(storageId, raw, "typed resource ledger is not a compound");
+                }
+                record.resourceLedger = StorageResourceLedger.load(
+                        tag.getCompound(TAG_RESOURCE_LEDGER));
+            }
             String energyError = record.loadEnergy(tag.getCompound(TAG_ENERGY));
             if (energyError != null) {
                 return LoadResult.failure(storageId, raw, energyError);
@@ -152,13 +152,6 @@ final class CoreStorageRecord {
                             "machine work list has non-compound elements");
                 }
                 record.loadMachineWorkEntries(workEntries);
-            }
-            if (tag.contains(TAG_RESOURCE_LEDGER)) {
-                if (!tag.contains(TAG_RESOURCE_LEDGER, Tag.TAG_COMPOUND)) {
-                    return LoadResult.failure(storageId, raw, "typed resource ledger is not a compound");
-                }
-                record.resourceLedger = StorageResourceLedger.load(
-                        tag.getCompound(TAG_RESOURCE_LEDGER));
             }
             String inventoryError = record.loadInventorySegments(inventorySegments, registries);
             if (inventoryError != null) {
@@ -178,18 +171,17 @@ final class CoreStorageRecord {
 
         CompoundTag energyTag = new CompoundTag();
         for (EnergyType type : EnergyType.values()) {
-            energyTag.putLong(type.getId(), Math.max(0, energy.getOrDefault(type, 0L)));
+            energyTag.putLong(type.getId(), 0);
         }
         tag.put(TAG_ENERGY, energyTag);
 
         ListTag descriptorTags = new ListTag();
         Set<ResourceLocation> descriptorIds = new TreeSet<>(Comparator.comparing(ResourceLocation::toString));
-        descriptorIds.addAll(descriptorAmounts.keySet());
         descriptorIds.addAll(infiniteDescriptors);
         for (ResourceLocation descriptorId : descriptorIds) {
             CompoundTag entry = new CompoundTag();
             entry.putString(TAG_DESCRIPTOR_ID, descriptorId.toString());
-            entry.putLong(TAG_AMOUNT, Math.max(0, descriptorAmounts.getOrDefault(descriptorId, 0L)));
+            entry.putLong(TAG_AMOUNT, 0);
             entry.putBoolean(TAG_INFINITE, infiniteDescriptors.contains(descriptorId));
             descriptorTags.add(entry);
         }
@@ -214,12 +206,11 @@ final class CoreStorageRecord {
 
         ListTag machineWorkTags = new ListTag();
         Set<ResourceLocation> workIds = new TreeSet<>(Comparator.comparing(ResourceLocation::toString));
-        workIds.addAll(stationWork.keySet());
         workIds.addAll(machineWorkRemainders.keySet());
         for (ResourceLocation descriptorId : workIds) {
             CompoundTag entry = new CompoundTag();
             entry.putString(TAG_DESCRIPTOR_ID, descriptorId.toString());
-            entry.putLong(TAG_AMOUNT, Math.max(0, stationWork.getOrDefault(descriptorId, 0L)));
+            entry.putLong(TAG_AMOUNT, 0);
             MachineWorkAccumulator.Remainder remainder = machineWorkRemainders.get(descriptorId);
             if (remainder != null) {
                 entry.putString(TAG_VARIANT_ITEM_ID, remainder.variantItemId().toString());
@@ -272,7 +263,11 @@ final class CoreStorageRecord {
             if (!tag.contains(type.getId(), Tag.TAG_LONG) || tag.getLong(type.getId()) < 0) {
                 return "invalid energy field " + type.getId();
             }
-            energy.put(type, tag.getLong(type.getId()));
+            long amount = tag.getLong(type.getId());
+            if (amount > 0 && !migrateLegacyAmount(
+                    StorageResourceBridge.energyKey(type), amount)) {
+                return "energy exists in both legacy and typed storage for " + type.getId();
+            }
         }
         return null;
     }
@@ -282,7 +277,7 @@ final class CoreStorageRecord {
             CompoundTag entry = entries.getCompound(index);
             ResourceLocation descriptorId = ResourceLocation.tryParse(entry.getString(TAG_DESCRIPTOR_ID));
             MachineDescriptor descriptor = descriptorId == null ? null : MachineEnergyTable.get(descriptorId);
-            if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.CONSUMABLE
+            if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.TRANSFORM
                     || !entry.contains(TAG_AMOUNT, Tag.TAG_LONG)
                     || !entry.contains(TAG_INFINITE, Tag.TAG_BYTE)
                     || entry.getLong(TAG_AMOUNT) < 0
@@ -292,15 +287,16 @@ final class CoreStorageRecord {
             }
             if (entry.getBoolean(TAG_INFINITE)) {
                 infiniteDescriptors.add(descriptorId);
-                descriptorAmounts.remove(descriptorId);
                 continue;
             }
             long amount = entry.getLong(TAG_AMOUNT);
             if (amount <= 0) {
                 continue;
             }
-            long current = descriptorAmounts.getOrDefault(descriptorId, 0L);
-            descriptorAmounts.put(descriptorId, saturatingAdd(current, amount));
+            if (!migrateLegacyAmount(StorageResourceBridge.descriptorKey(descriptorId), amount)) {
+                throw new IllegalArgumentException(
+                        "descriptor exists in both legacy and typed storage for " + descriptorId);
+            }
         }
     }
 
@@ -319,7 +315,7 @@ final class CoreStorageRecord {
                 long persistedCount = entry.contains(TAG_COUNT, Tag.TAG_LONG)
                         ? entry.getLong(TAG_COUNT) : stack.getCount();
                 int slot = descriptorId == null ? -1 : MachineEnergyTable.findSlot(descriptorId);
-                if (descriptor == null || descriptor.category() == MachineEnergyTable.Category.CONSUMABLE
+                if (descriptor == null || descriptor.category() == MachineEnergyTable.Category.TRANSFORM
                         || stack.isEmpty() || slot < 0 || !descriptor.accepts(stack)
                         || persistedCount <= 0 || persistedCount > Integer.MAX_VALUE) {
                     unresolvedMachineEntries.add(entry.copy());
@@ -381,9 +377,22 @@ final class CoreStorageRecord {
                     continue;
                 }
             }
-            if (amount > 0) stationWork.put(descriptorId, amount);
+            if (amount > 0 && !migrateLegacyAmount(
+                    StorageResourceBridge.stationWorkKey(descriptorId), amount)) {
+                throw new IllegalArgumentException(
+                        "station work exists in both legacy and typed storage for " + descriptorId);
+            }
             if (remainder != null) machineWorkRemainders.put(descriptorId, remainder);
         }
+    }
+
+    private boolean migrateLegacyAmount(StorageResourceKey key, long amount) {
+        if (resourceLedger.amount(key) > 0) return false;
+        return resourceLedger.insert(
+                key,
+                amount,
+                StorageTypeCapacity.unlimitedCapacity(),
+                Action.EXECUTE) == amount;
     }
 
     private String loadInventorySegments(ListTag segments, HolderLookup.Provider registries) {
@@ -456,24 +465,33 @@ final class CoreStorageRecord {
         return networkId;
     }
 
-    Map<EnergyType, Long> energy() {
-        return energy;
+    long energyAmount(EnergyType type) {
+        return resourceLedger.amount(StorageResourceBridge.energyKey(type));
+    }
+
+    void setEnergyAmount(EnergyType type, long amount) {
+        setResourceAmount(StorageResourceBridge.energyKey(type), amount);
     }
 
     SimpleContainer machines() {
         return machines;
     }
 
-    Map<ResourceLocation, Long> descriptorAmounts() {
-        return descriptorAmounts;
+    long descriptorAmount(ResourceLocation descriptorId) {
+        return resourceLedger.amount(StorageResourceBridge.descriptorKey(descriptorId));
+    }
+
+    void setDescriptorAmount(ResourceLocation descriptorId, long amount) {
+        setResourceAmount(StorageResourceBridge.descriptorKey(descriptorId), amount);
     }
 
     Set<ResourceLocation> infiniteDescriptors() {
         return infiniteDescriptors;
     }
 
-    Map<ResourceLocation, Long> stationWork() {
-        return stationWork;
+    boolean hasStationWork() {
+        return resourceLedger.keys(StorageResourceBridge.WORK_KIND).stream()
+                .anyMatch(key -> StorageResourceBridge.stationWorkDescriptorId(key).isPresent());
     }
 
     Map<ResourceLocation, MachineWorkAccumulator.Remainder> machineWorkRemainders() {
@@ -501,7 +519,8 @@ final class CoreStorageRecord {
     }
 
     int typeCount() {
-        long count = unresolvedInventoryEntries.size() + (long) resourceLedger.typeCount();
+        long count = unresolvedInventoryEntries.size() + (long) resourceLedger.typeCount(
+                key -> !key.kindId().equals(StorageResourceBridge.WORK_KIND));
         if (count >= Integer.MAX_VALUE) return Integer.MAX_VALUE;
         return (int) count;
     }
@@ -536,19 +555,29 @@ final class CoreStorageRecord {
                 key, amount, StorageTypeCapacity.unlimitedCapacity(), Action.EXECUTE);
     }
 
+    private void setResourceAmount(StorageResourceKey key, long amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("Core storage amount cannot be negative");
+        }
+        long current = resourceLedger.amount(key);
+        if (current == amount) return;
+        if (!resourceLedger.applyExact(
+                Map.of(key, amount - current),
+                StorageTypeCapacity.unlimitedCapacity(),
+                Action.EXECUTE)) {
+            throw new IllegalArgumentException("Core storage amount cannot be represented");
+        }
+        markChanged();
+    }
+
     boolean isEmpty() {
         if (!resourceLedger.isEmpty()
-                || !machines.isEmpty() || !descriptorAmounts.isEmpty()
+                || !machines.isEmpty()
                 || !infiniteDescriptors.isEmpty() || !unresolvedDescriptorEntries.isEmpty()
-                || !stationWork.isEmpty() || !machineWorkRemainders.isEmpty()
+                || !machineWorkRemainders.isEmpty()
                 || !unresolvedMachineEntries.isEmpty() || !unresolvedMachineWorkEntries.isEmpty()
                 || !unresolvedInventoryEntries.isEmpty()) {
             return false;
-        }
-        for (long amount : energy.values()) {
-            if (amount > 0) {
-                return false;
-            }
         }
         return true;
     }

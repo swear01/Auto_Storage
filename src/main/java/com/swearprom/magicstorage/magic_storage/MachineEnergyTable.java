@@ -17,7 +17,7 @@ public final class MachineEnergyTable {
     public enum Category {
         PROCESS,
         INSTANT,
-        CONSUMABLE
+        TRANSFORM
     }
 
     public static final int FURNACE_SLOT = 0;
@@ -83,7 +83,7 @@ public final class MachineEnergyTable {
                 STONECUTTER_ID, new ItemStack(Items.STONECUTTER), null, 0, Category.INSTANT, 1));
         descriptors.register(SMITHING_TABLE_ID.getPath(), () -> installable(
                 SMITHING_TABLE_ID, new ItemStack(Items.SMITHING_TABLE), null, 0, Category.INSTANT, 1));
-        descriptors.register(AXE_ID.getPath(), () -> MachineDescriptor.consumable(
+        descriptors.register(AXE_ID.getPath(), () -> MachineDescriptor.transform(
                 AXE_ID,
                 new ItemStack(Items.IRON_AXE),
                 Ingredient.of(
@@ -94,8 +94,8 @@ public final class MachineEnergyTable {
                         Items.DIAMOND_AXE,
                         Items.NETHERITE_AXE),
                 stack -> AxeEnergy.isInfinite(stack)
-                        ? new MachineDescriptor.ConsumableAmount(0, true)
-                        : new MachineDescriptor.ConsumableAmount(AxeEnergy.finiteValue(stack), false)));
+                        ? new MachineDescriptor.TransformAmount(0, true)
+                        : new MachineDescriptor.TransformAmount(AxeEnergy.finiteValue(stack), false)));
     }
 
     public static int size() {
