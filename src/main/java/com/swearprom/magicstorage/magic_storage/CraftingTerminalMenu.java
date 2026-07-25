@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,35 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {}
     private record IngredientNeed(RecipeAdapterMatch.Input ingredient, long count) {}
     private record IngredientSource(ItemKey key, int playerSlot, ItemStack stack, long amount) {}
+    private record IngredientAvailability(
+            List<IngredientSource> sources,
+            Map<ItemKey, Long> amountsByKey,
+            Map<Item, List<IngredientSource>> sourcesByItem
+    ) {
+        static IngredientAvailability create(List<IngredientSource> sources) {
+            Map<ItemKey, Long> amountsByKey = new HashMap<>();
+            Map<Item, List<IngredientSource>> sourcesByItem = new HashMap<>();
+            for (IngredientSource source : sources) {
+                amountsByKey.merge(source.key(), source.amount(), CraftingTerminalMenu::saturatingAdd);
+                sourcesByItem.computeIfAbsent(
+                        source.stack().getItem(), ignored -> new ArrayList<>()).add(source);
+            }
+            sourcesByItem.replaceAll((item, matching) -> List.copyOf(matching));
+            return new IngredientAvailability(
+                    sources, Map.copyOf(amountsByKey), Map.copyOf(sourcesByItem));
+        }
+
+        List<IngredientSource> matching(RecipeAdapterMatch.Input input) {
+            List<Item> items = input.representativeItems();
+            if (!input.representativeItemsExhaustive() || items.isEmpty()) return sources;
+            if (items.size() == 1) return sourcesByItem.getOrDefault(items.getFirst(), List.of());
+            List<IngredientSource> matching = new ArrayList<>();
+            for (Item item : items) {
+                matching.addAll(sourcesByItem.getOrDefault(item, List.of()));
+            }
+            return matching;
+        }
+    }
     private record PlayerReservation(ItemKey key, int count) {}
     private record IngredientPlan(
             Map<ItemKey, Long> coreReservations,
@@ -65,6 +96,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {}
     private record CraftPlan(long crafts, IngredientPlan ingredients, DeliveryPlan delivery) {}
     private record CraftableOutput(StorageResourceKey key, ItemStack icon, long storedAmount) {}
+    private record CraftableStatus(boolean craftable, boolean inputsAvailable) {}
     private record CraftableBuildResult(
             List<ItemStack> stacks,
             int candidates,
@@ -79,6 +111,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             SortMode sortMode,
             SortOrder sortOrder,
             TerminalResourceView resourceView,
+            boolean usePlayerInventory,
             int visibleRows,
             int scrollOffset,
             int totalItemTypes,
@@ -204,6 +237,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private final long[] nextCraftableEnergyThreshold = new long[EnergyType.values().length];
     private final Map<ResourceLocation, Long> nextCraftableStationThreshold = new HashMap<>();
     private CraftableVisibleCache craftableVisibleCache;
+    private boolean craftablePrefetchPending = true;
 
     public CraftingTerminalMenu(int containerId, Inventory playerInv, StorageCoreBlockEntity core) {
         this(containerId, playerInv, core, core.getBlockPos(), false);
@@ -1412,7 +1446,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {
         TypedRecipePlan typedPlan = match.typedRecipePlan().orElse(null);
         if (typedPlan != null) {
-            long high = maximumTypedCrafts(core, typedPlan, sources);
+            long high = maximumTypedCrafts(core, typedPlan, sources, Long.MAX_VALUE);
             RecipeAdapterMatch.ToolCost toolCost = match.cost().toolCost().orElse(null);
             if (toolCost != null) {
                 long available = core.hasInfiniteDescriptor(toolCost.descriptorId())
@@ -1497,9 +1531,10 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private static long maximumTypedCrafts(
             StorageCoreBlockEntity core,
             TypedRecipePlan plan,
-            List<IngredientSource> sources
+            List<IngredientSource> sources,
+            long craftLimit
     ) {
-        long upperBound = Long.MAX_VALUE;
+        long upperBound = craftLimit;
         boolean hasConsumedInput = false;
         for (TypedRecipeInput input : plan.inputs()) {
             long available = typedInputAvailable(core, input, sources);
@@ -1706,8 +1741,10 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         List<IngredientPreview> ingredientPreviews = new ArrayList<>();
         List<RecipeAdapterMatch.Input> ingredients = match.orderedInputs();
         TypedRecipePlan typedPlan = match.typedRecipePlan().orElse(null);
+        List<IngredientNeed> summarizedNeeds =
+                typedPlan == null ? summarizeIngredients(ingredients) : List.of();
         if (typedPlan != null) {
-            max = Math.min(max, maximumTypedCrafts(core, typedPlan, sources));
+            max = Math.min(max, maximumTypedCrafts(core, typedPlan, sources, craftLimit));
             for (TypedRecipeInput input : summarizeTypedInputs(typedPlan.inputs())) {
                 long available = typedInputAvailable(core, input, sources);
                 ItemStack representative = StorageResourceKinds.representative(
@@ -1720,7 +1757,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 }
             }
         } else {
-            for (IngredientNeed need : summarizeIngredients(ingredients)) {
+            for (IngredientNeed need : summarizedNeeds) {
                 long avail = 0;
                 for (IngredientSource source : sources) {
                     if (need.ingredient().test(source.stack())) {
@@ -1780,7 +1817,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             int high = upperBound;
             while (low < high) {
                 int candidate = (int) (((long) low + high + 1L) / 2L);
-                if (planIngredients(ingredients, candidate, sources) != null) {
+                if (canAllocateIngredients(
+                        ingredients, summarizedNeeds, candidate, sources)) {
                     low = candidate;
                 } else {
                     high = candidate - 1;
@@ -1798,6 +1836,35 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
         if (craftable > 0) missing.clear();
         return new CraftPreview(craftable, missing, ingredientPreviews, energyPreviews);
+    }
+
+    private boolean canAllocateIngredients(
+            List<RecipeAdapterMatch.Input> ingredients,
+            List<IngredientNeed> needs,
+            long crafts,
+            List<IngredientSource> sources
+    ) {
+        int[] sourceMatches = new int[sources.size()];
+        for (IngredientNeed need : needs) {
+            long required;
+            try {
+                required = Math.multiplyExact(need.count(), crafts);
+            } catch (ArithmeticException exception) {
+                return false;
+            }
+            long available = 0;
+            for (int sourceIndex = 0; sourceIndex < sources.size(); sourceIndex++) {
+                IngredientSource source = sources.get(sourceIndex);
+                if (!need.ingredient().test(source.stack())) continue;
+                available = saturatingAdd(available, source.amount());
+                sourceMatches[sourceIndex]++;
+            }
+            if (available < required) return false;
+        }
+        for (int matches : sourceMatches) {
+            if (matches > 1) return planIngredients(ingredients, crafts, sources) != null;
+        }
+        return true;
     }
 
     private static List<TypedRecipeInput> summarizeTypedInputs(
@@ -2619,7 +2686,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         List<ItemStack> availableStacks = sources.stream()
                 .map(IngredientSource::stack)
                 .toList();
-        List<RecipeAdapterMatch> variants = baseMatch.resolveVariants(availableStacks, level);
+        List<RecipeAdapterMatch> variants =
+                baseMatch.resolveVariantsFromSnapshot(availableStacks, level);
         if (requestedOutput == null || requestedOutput.isEmpty()) {
             return variants.size() == 1 ? variants.getFirst() : null;
         }
@@ -2640,7 +2708,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         if (baseMatch == null || requestedOutput == null || requestedOutput.isEmpty()) return null;
         ItemStack requested = TerminalDisplayStack.strip(requestedOutput);
         List<ItemStack> availableStacks = sources.stream().map(IngredientSource::stack).toList();
-        List<RecipeAdapterMatch> variants = baseMatch.resolveVariants(availableStacks, level);
+        List<RecipeAdapterMatch> variants =
+                baseMatch.resolveVariantsFromSnapshot(availableStacks, level);
         for (RecipeAdapterMatch variant : variants) {
             if (variant.typedRecipePlan().isPresent()
                     ? matchesSelectionOutput(variant, requested, level)
@@ -2869,6 +2938,13 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     refreshDisplayItems(core);
                 }
                 updatePreview(core, playerInventory.player);
+            }
+            if (craftablePrefetchPending) {
+                craftablePrefetchPending = false;
+                if (core != null && page != CraftingTerminalPage.CRAFTABLE
+                        && craftableVisibleCache == null) {
+                    prefetchCraftableVisibleCache(core);
+                }
             }
         }
         super.broadcastChanges();
@@ -3203,6 +3279,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 getSortMode(),
                 getSortOrder(),
                 getResourceView(),
+                usePlayerInventory,
                 getVisibleRows(),
                 scrollOffset,
                 totalItemTypes,
@@ -3218,6 +3295,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 || cache.sortMode() != getSortMode()
                 || cache.sortOrder() != getSortOrder()
                 || cache.resourceView() != getResourceView()
+                || cache.usePlayerInventory() != usePlayerInventory
                 || cache.visibleRows() != getVisibleRows()) {
             return false;
         }
@@ -3229,6 +3307,27 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 .toList();
         replaceVisibleDisplayStacks(updated, getVisibleRows());
         return true;
+    }
+
+    private void prefetchCraftableVisibleCache(StorageCoreBlockEntity core) {
+        Level level = core.getLevel();
+        if (level == null) return;
+        List<ItemStack> stacks = new ArrayList<>(buildCraftableDisplayStacks(
+                core, playerInventory == null ? null : playerInventory.player).stacks());
+        sortCraftableDisplayStacks(stacks);
+        int visibleRows = getVisibleRows();
+        int visibleCount = Math.min(stacks.size(), visibleRows * DISPLAY_COLS);
+        craftableVisibleCache = new CraftableVisibleCache(
+                level.getRecipeManager().getRecipes(),
+                currentFilter,
+                getSortMode(),
+                getSortOrder(),
+                getResourceView(),
+                usePlayerInventory,
+                visibleRows,
+                0,
+                stacks.size(),
+                stacks.subList(0, visibleCount));
     }
 
     private static ItemStack updateCraftableDisplayAmount(
@@ -3267,37 +3366,52 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         if (level == null) {
             return new CraftableBuildResult(List.of(), 0, 0, 0, 0, 0);
         }
+        if (core.isConflicted()) {
+            return new CraftableBuildResult(List.of(), 0, 0, 0, 0, 0);
+        }
         Arrays.fill(nextCraftableEnergyThreshold, Long.MAX_VALUE);
         nextCraftableStationThreshold.clear();
         List<IngredientSource> sources = snapshotIngredientSources(core, player);
+        IngredientAvailability availability = IngredientAvailability.create(sources);
         List<ItemStack> availableStacks = sources.stream().map(IngredientSource::stack).toList();
         TerminalSearchQuery query = TerminalSearchQuery.compile(currentFilter);
         Map<StorageResourceKey, CraftableOutput> craftableOutputs = new LinkedHashMap<>();
         long candidateSelectionStarted = System.nanoTime();
-        List<ResourceLocation> candidateIds = craftableRecipeCatalog.getCandidateRecipeIds(
+        List<CraftableRecipeCatalog.Candidate> candidates =
+                craftableRecipeCatalog.getCandidates(
                 level, availableStacks);
         long candidateSelectionNanos = System.nanoTime() - candidateSelectionStarted;
         long variantResolutionNanos = 0;
         long previewSimulationNanos = 0;
         int variants = 0;
-        for (ResourceLocation recipeId : candidateIds) {
+        for (CraftableRecipeCatalog.Candidate candidate : candidates) {
             long variantStarted = System.nanoTime();
-            RecipeHolder<?> holder = level.getRecipeManager().byKey(recipeId).orElse(null);
-            RecipeAdapterMatch baseMatch = holder == null ? null : classifyAvailable(holder, core);
+            RecipeHolder<?> holder =
+                    level.getRecipeManager().byKey(candidate.id()).orElse(null);
+            RecipeAdapterMatch baseMatch = holder == null ? null : candidate.match(holder);
+            if (baseMatch != null && !isStationAvailable(core, baseMatch)) {
+                baseMatch = null;
+            }
+            if (baseMatch != null && !hasPotentialRecipeInputs(
+                    baseMatch, core, availability)) {
+                baseMatch = null;
+            }
             List<RecipeAdapterMatch> resolved = baseMatch == null
-                    ? List.of() : baseMatch.resolveVariants(availableStacks, level);
+                    ? List.of() : baseMatch.resolveVariantsFromSnapshot(availableStacks, level);
             variantResolutionNanos += System.nanoTime() - variantStarted;
             variants += resolved.size();
             for (RecipeAdapterMatch match : resolved) {
-                StorageResourceKey key = match.selectionOutputKey(level).orElse(null);
                 ItemStack output = match.presentationOutput(List.of(), level);
+                StorageResourceKey key =
+                        match.selectionOutputKey(level, output).orElse(null);
                 if (key == null || output.isEmpty() || !getResourceView().matches(key)
                         || !matchesCraftableFilter(key, output, query, level)) continue;
                 long previewStarted = System.nanoTime();
-                CraftPreview preview = computeCraftPreviewFor(match, core, sources);
-                previewSimulationNanos += System.nanoTime() - previewStarted;
-                if (preview.craftable() <= 0) {
-                    recordNextCraftableThreshold(match, preview, core);
+                CraftableStatus status = computeCraftableStatus(match, core, availability);
+                long previewNanos = System.nanoTime() - previewStarted;
+                previewSimulationNanos += previewNanos;
+                if (!status.craftable()) {
+                    recordNextCraftableThreshold(match, status.inputsAvailable(), core);
                     continue;
                 }
                 craftableOutputs.putIfAbsent(key, new CraftableOutput(
@@ -3335,7 +3449,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
         return new CraftableBuildResult(
                 result,
-                candidateIds.size(),
+                candidates.size(),
                 variants,
                 candidateSelectionNanos,
                 variantResolutionNanos,
@@ -3358,8 +3472,19 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             CraftPreview preview,
             StorageCoreBlockEntity core
     ) {
-        if (preview.ingredients().stream()
-                .anyMatch(input -> input.available() < input.required())) return;
+        recordNextCraftableThreshold(
+                match,
+                preview.ingredients().stream()
+                        .allMatch(input -> input.available() >= input.required()),
+                core);
+    }
+
+    private void recordNextCraftableThreshold(
+            RecipeAdapterMatch match,
+            boolean inputsAvailable,
+            StorageCoreBlockEntity core
+    ) {
+        if (!inputsAvailable) return;
         RecipeAdapterMatch.ToolCost tool = match.cost().toolCost().orElse(null);
         if (tool != null && !core.hasDescriptorAmount(tool.descriptorId(), tool.amountPerCraft())) {
             return;
@@ -3376,6 +3501,109 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             nextCraftableStationThreshold.merge(
                     station.descriptorId(), station.amountPerCraft(), Math::min);
         }
+    }
+
+    private CraftableStatus computeCraftableStatus(
+            RecipeAdapterMatch match,
+            StorageCoreBlockEntity core,
+            IngredientAvailability availability
+    ) {
+        boolean inputsAvailable = match.typedRecipePlan()
+                .map(plan -> typedInputsAvailableForOne(core, plan, availability))
+                .orElseGet(() -> {
+                    List<RecipeAdapterMatch.Input> ingredients = match.orderedInputs();
+                    return canAllocateIngredientsForListing(
+                            ingredients, summarizeIngredients(ingredients), availability);
+                });
+        return new CraftableStatus(
+                inputsAvailable && hasRecipeCostsForCrafts(core, match.cost(), 1),
+                inputsAvailable);
+    }
+
+    private boolean hasPotentialRecipeInputs(
+            RecipeAdapterMatch match,
+            StorageCoreBlockEntity core,
+            IngredientAvailability availability
+    ) {
+        TypedRecipePlan plan = match.typedRecipePlan().orElse(null);
+        if (plan != null) {
+            for (TypedRecipeInput input : plan.inputs()) {
+                if (typedInputAvailable(core, input, availability) < input.amount()) return false;
+            }
+            return true;
+        }
+        if (match.contract().pendingTypedPlan()) return true;
+        for (IngredientNeed need : summarizeIngredients(match.orderedInputs())) {
+            long available = 0;
+            for (IngredientSource source : availability.matching(need.ingredient())) {
+                if (need.ingredient().test(source.stack())) {
+                    available = saturatingAdd(available, source.amount());
+                }
+            }
+            if (available < need.count()) return false;
+        }
+        return true;
+    }
+
+    private static boolean typedInputsAvailableForOne(
+            StorageCoreBlockEntity core,
+            TypedRecipePlan plan,
+            IngredientAvailability availability
+    ) {
+        Map<StorageResourceKey, Integer> consumedBy = new HashMap<>();
+        for (TypedRecipeInput input : plan.inputs()) {
+            if (typedInputAvailable(core, input, availability) < input.amount()) return false;
+            if (input.role() != TypedRecipeInput.Role.CONSUME) continue;
+            for (StorageResourceKey alternative : input.alternatives()) {
+                consumedBy.merge(alternative, 1, Integer::sum);
+            }
+        }
+        if (consumedBy.values().stream().noneMatch(count -> count > 1)) return true;
+        return planTypedConsumption(core, plan, 1, availability.sources()) != null;
+    }
+
+    private boolean canAllocateIngredientsForListing(
+            List<RecipeAdapterMatch.Input> ingredients,
+            List<IngredientNeed> needs,
+            IngredientAvailability availability
+    ) {
+        Map<IngredientSource, Integer> sourceMatches = new IdentityHashMap<>();
+        for (IngredientNeed need : needs) {
+            long available = 0;
+            for (IngredientSource source : availability.matching(need.ingredient())) {
+                if (!need.ingredient().test(source.stack())) continue;
+                available = saturatingAdd(available, source.amount());
+                sourceMatches.merge(source, 1, Integer::sum);
+            }
+            if (available < need.count()) return false;
+        }
+        if (sourceMatches.values().stream().anyMatch(matches -> matches > 1)) {
+            return planIngredients(ingredients, 1, availability.sources()) != null;
+        }
+        return true;
+    }
+
+    private static long typedInputAvailable(
+            StorageCoreBlockEntity core,
+            TypedRecipeInput input,
+            IngredientAvailability availability
+    ) {
+        long available = 0;
+        for (StorageResourceKey alternative : input.alternatives()) {
+            if (!alternative.kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
+                available = saturatingAdd(available, core.getResourceAmount(alternative));
+                continue;
+            }
+            Level level = core.getLevel();
+            if (level == null) continue;
+            ItemKey key = StorageResourceBridge.itemKey(
+                    alternative, level.registryAccess()).orElse(null);
+            if (key != null) {
+                available = saturatingAdd(
+                        available, availability.amountsByKey().getOrDefault(key, 0L));
+            }
+        }
+        return available;
     }
 
     private void recordEnergyThreshold(

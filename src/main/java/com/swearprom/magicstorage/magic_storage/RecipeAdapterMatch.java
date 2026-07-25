@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
@@ -54,12 +55,16 @@ record RecipeAdapterMatch(
 
     Optional<StorageResourceKey> selectionOutputKey(Level level) {
         if (level == null) return Optional.empty();
+        return selectionOutputKey(level, presentationOutput(List.of(), level));
+    }
+
+    Optional<StorageResourceKey> selectionOutputKey(Level level, ItemStack presentationOutput) {
+        if (level == null) return Optional.empty();
         TypedRecipePlan plan = contract.typedRecipePlan();
         if (plan != null) return Optional.of(plan.selectionOutputKey());
-        ItemStack output = presentationOutput(List.of(), level);
-        return output.isEmpty()
+        return presentationOutput.isEmpty()
                 ? Optional.empty()
-                : Optional.of(StorageResourceKey.item(output, level.registryAccess()));
+                : Optional.of(StorageResourceKey.item(presentationOutput, level.registryAccess()));
     }
 
     boolean isCurrentHolder(RecipeHolder<?> currentHolder) {
@@ -121,7 +126,14 @@ record RecipeAdapterMatch(
                 .filter(stack -> !stack.isEmpty())
                 .map(stack -> stack.copyWithCount(1))
                 .toList();
-        return adapter.resolveVariants(holder, snapshot, level).stream()
+        return resolveVariantsFromSnapshot(snapshot, level);
+    }
+
+    List<RecipeAdapterMatch> resolveVariantsFromSnapshot(
+            List<ItemStack> availableStacks,
+            Level level
+    ) {
+        return adapter.resolveVariants(holder, contract, availableStacks, level).stream()
                 .map(variantContract -> {
                     Objects.requireNonNull(variantContract, "variantContract");
                     return new RecipeAdapterMatch(adapter, holder, candidateIndex, variantContract);
@@ -206,6 +218,8 @@ record RecipeAdapterMatch(
         private final Object identity;
         private final Predicate<ItemStack> matcher;
         private final List<ItemStack> representatives;
+        private final List<Item> representativeItems;
+        private final boolean representativeItemsExhaustive;
         private final int multiplicity;
         private final boolean empty;
 
@@ -213,6 +227,7 @@ record RecipeAdapterMatch(
                 Object identity,
                 Predicate<ItemStack> matcher,
                 List<ItemStack> representatives,
+                boolean representativeItemsExhaustive,
                 int multiplicity,
                 boolean empty
         ) {
@@ -223,6 +238,11 @@ record RecipeAdapterMatch(
                     .filter(stack -> !stack.isEmpty())
                     .map(stack -> stack.copyWithCount(1))
                     .toList();
+            this.representativeItems = this.representatives.stream()
+                    .map(ItemStack::getItem)
+                    .distinct()
+                    .toList();
+            this.representativeItemsExhaustive = representativeItemsExhaustive;
             if (empty != (multiplicity == 0)) {
                 throw new IllegalArgumentException("Empty inputs require zero multiplicity");
             }
@@ -239,11 +259,27 @@ record RecipeAdapterMatch(
                 List<ItemStack> representatives,
                 int multiplicity
         ) {
-            return new Input(identity, matcher, representatives, multiplicity, false);
+            return of(identity, matcher, representatives, false, multiplicity);
+        }
+
+        static Input of(
+                Object identity,
+                Predicate<ItemStack> matcher,
+                List<ItemStack> representatives,
+                boolean representativeItemsExhaustive,
+                int multiplicity
+        ) {
+            return new Input(
+                    identity,
+                    matcher,
+                    representatives,
+                    representativeItemsExhaustive,
+                    multiplicity,
+                    false);
         }
 
         static Input empty(Object identity) {
-            return new Input(identity, stack -> false, List.of(), 0, true);
+            return new Input(identity, stack -> false, List.of(), true, 0, true);
         }
 
         boolean test(ItemStack stack) {
@@ -252,6 +288,14 @@ record RecipeAdapterMatch(
 
         List<ItemStack> representatives() {
             return representatives.stream().map(ItemStack::copy).toList();
+        }
+
+        List<Item> representativeItems() {
+            return representativeItems;
+        }
+
+        boolean representativeItemsExhaustive() {
+            return representativeItemsExhaustive;
         }
 
         int multiplicity() {

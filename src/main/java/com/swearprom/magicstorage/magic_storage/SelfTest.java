@@ -512,10 +512,11 @@ class SelfTest {
             @Override
             public List<RecipeAdapterMatch.Contract> resolveVariants(
                     RecipeHolder<?> holder,
+                    RecipeAdapterMatch.Contract baseContract,
                     List<ItemStack> availableStacks,
                     net.minecraft.world.level.Level level
             ) {
-                return List.of(contract(holder));
+                return List.of(baseContract);
             }
 
             @Override

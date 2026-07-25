@@ -25,6 +25,7 @@ interface RecipeAdapter {
 
     List<RecipeAdapterMatch.Contract> resolveVariants(
             RecipeHolder<?> holder,
+            RecipeAdapterMatch.Contract baseContract,
             List<ItemStack> availableStacks,
             Level level
     );

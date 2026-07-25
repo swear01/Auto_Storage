@@ -891,7 +891,7 @@ class StaticRegressionTests(unittest.TestCase):
     def test_all_gametest_gates_reject_any_selftest_failure(self):
         build = self.read_required("build.gradle")
         expected = {
-            "runGameTestServer": 391,
+            "runGameTestServer": 392,
             "runRecipeAddonGameTestServer": 17,
             "runMekanismGameTestServer": 47,
             "runBotaniaGameTestServer": 14,
@@ -904,7 +904,7 @@ class StaticRegressionTests(unittest.TestCase):
             "runIndustrialForegoingGameTestServer": 9,
             "runCreateGameTestServer": 13,
             "runPneumaticCraftGameTestServer": 9,
-            "runCompatibilityMatrixGameTestServer": 2,
+            "runCompatibilityMatrixGameTestServer": 3,
         }
         for task, count in expected.items():
             match = re.search(

@@ -10,10 +10,12 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -31,6 +33,10 @@ public final class RecipeFamily {
     private final boolean allowSpecial;
     private final Function<Recipe<?>, RecipeFamilyCost> cost;
     private final RecipePresentationKind presentationKind;
+    private final Map<Recipe<?>, TypedRecipePlan> typedPlanCache =
+            Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<Recipe<?>, RecipeAdapterMatch.Contract> typedContractCache =
+            Collections.synchronizedMap(new WeakHashMap<>());
 
     RecipeFamily(
             Class<? extends Recipe<?>> exactRecipeClass,
@@ -138,7 +144,8 @@ public final class RecipeFamily {
             HolderLookup.Provider registries
     ) {
         if (typedPlan == null) throw new IllegalStateException("Legacy recipe family has no typed plan");
-        return Objects.requireNonNull(typedPlan.apply(recipe, registries), "typed recipe plan");
+        return typedPlanCache.computeIfAbsent(recipe, ignored ->
+                Objects.requireNonNull(typedPlan.apply(recipe, registries), "typed recipe plan"));
     }
 
     private List<TypedRecipePlan> typedPlansFor(
@@ -210,9 +217,9 @@ public final class RecipeFamily {
         ) {
             Recipe<?> recipe = checkedRecipe(holder);
             if (typedPlan == null || level == null) return candidateIndex(holder);
-            return typedCandidateIndex(
-                    typedPlanFor(recipe, level.registryAccess()),
-                    level.registryAccess());
+            TypedRecipePlan plan = typedPlanFor(recipe, level.registryAccess());
+            typedContractCache.computeIfAbsent(recipe, ignored -> typedContract(recipe, plan));
+            return typedCandidateIndex(plan, level.registryAccess());
         }
 
         private RecipeCandidateIndex typedCandidateIndex(
@@ -243,6 +250,8 @@ public final class RecipeFamily {
         public RecipeAdapterMatch.Contract contract(RecipeHolder<?> holder) {
             Recipe<?> recipe = checkedRecipe(holder);
             if (isTyped()) {
+                RecipeAdapterMatch.Contract cached = typedContractCache.get(recipe);
+                if (cached != null) return cached;
                 RecipeAdapterMatch.Presentation presentation = new RecipeAdapterMatch.Presentation(
                         presentationKind,
                         1,
@@ -258,6 +267,7 @@ public final class RecipeFamily {
                     ingredient,
                     ingredient,
                     Arrays.asList(ingredient.getItems()),
+                    ingredient.isSimple(),
                     1);
             RecipeAdapterMatch.OutputResolver outputResolver = (allocations, crafts, level) -> {
                 if (level == null) return Optional.empty();
@@ -293,18 +303,24 @@ public final class RecipeFamily {
         @Override
         public List<RecipeAdapterMatch.Contract> resolveVariants(
                 RecipeHolder<?> holder,
+                RecipeAdapterMatch.Contract baseContract,
                 List<ItemStack> availableStacks,
                 Level level
         ) {
             Recipe<?> recipe = checkedRecipe(holder);
             if (isTyped()) {
                 if (level == null) return List.of();
+                if (typedPlan != null) {
+                    return List.of(typedContractCache.computeIfAbsent(recipe, ignored ->
+                            typedContract(recipe, typedPlanFor(
+                                    recipe, level.registryAccess()))));
+                }
                 return typedPlansFor(recipe, availableStacks, level.registryAccess()).stream()
                         .map(plan -> typedContract(recipe, plan))
                         .toList();
             }
             if (level == null || outputFor(recipe, level.registryAccess()).isEmpty()) return List.of();
-            return List.of(contract(holder));
+            return List.of(baseContract);
         }
 
         @Override
@@ -415,6 +431,7 @@ public final class RecipeFamily {
                 HolderLookup.Provider registries
         );
     }
+
 }
 
 record RecipeFamilyKey(Class<? extends Recipe<?>> recipeClass, RecipeType<?> recipeType) {

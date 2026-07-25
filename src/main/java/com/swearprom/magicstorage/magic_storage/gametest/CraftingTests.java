@@ -1603,6 +1603,35 @@ public class CraftingTests {
     }
 
     @GameTest(template = "platform")
+    public static void craftable_prefetch_tracks_player_inventory_setting(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            installAllRecipeStations(core);
+            var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+            player.getInventory().setItem(0, new ItemStack(Items.OAK_LOG));
+            var menu = new CraftingTerminalMenu(169, player.getInventory(), core);
+
+            menu.broadcastChanges();
+            menu.clickMenuButton(player, 7);
+            menu.clickMenuButton(player, CraftingTerminalMenu.CRAFTABLE_PAGE_BUTTON);
+
+            if (findDisplaySlot(menu, Items.OAK_PLANKS) < 0) {
+                helper.fail("Craftable cache ignored the enabled player inventory source");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform")
     public static void constructor_preserves_component_variants_without_compact_grid(GameTestHelper helper) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
