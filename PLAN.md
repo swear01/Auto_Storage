@@ -191,7 +191,7 @@ Crafting Terminal 配方詳情區使用deep blue-charcoal workspace，由上到�
 
 ### 5b. Crafting Terminal GUI（Tier 2）
 
-Crafting Terminal 由左側 rail 的第一群組切換 **Storage / Craftable / Fuel** 三頁，並用明顯間隔和 item-page 排序、搜尋 controls 分開。Storage只列已儲存物，Craftable列目前可合成outputs並顯示該output現有Core庫存。所有cycle controls統一left-next/right-previous/wheel-down-next/wheel-up-previous/middle-reset；defaults為Name、Ascending、normal search、Auto Fuel Target、Player Craft Output與既有player-source default。只有boolean on/off控制可畫彩色狀態燈；page tabs用neutral selection，Craft Output/sort/search/Fuel Target等value selectors不亮燈。Recipe client只讀server-synced exact presentation；empty prompt與有效diagram/typed ledger都使用compact dark card，footer的`×1 / ×8 / ×64 / Max`是同palette的單一segmented strip且依live craftable count整體dim。Fuel頁使用獨立target bar加Consumables/Timed Stations/Instant Stations三個left-label/right-flow rows。完整replacement見`docs/superpowers/specs/2026-07-14-connected-progression-fuel-guide-design.md`。
+Crafting Terminal 由左側 rail 的第一群組切換 **Storage / Craftable / Transform / Stations** 四頁，並用明顯間隔和 item-page 排序、搜尋 controls 分開。Storage只列已儲存物；Craftable列目前可合成outputs並顯示該output現有Core庫存，首個正常server tick預取最多81個visible entries，實際切頁不得同步重建全表。所有cycle controls統一left-next/right-previous/wheel-down-next/wheel-up-previous/middle-reset；defaults為Name、Ascending、Search Sync Off、Auto Focus On、Auto Transform Target、Player Craft Output與既有player-source default。只有boolean on/off控制可畫彩色狀態燈；page tabs用neutral selection，Craft Output/sort/search/Transform Target等value selectors不亮燈。Recipe client只讀server-synced exact presentation；empty prompt與有效diagram/typed ledger都使用compact dark card，footer的`×1 / ×8 / ×64 / Max`是同palette的單一segmented strip且依live craftable count整體dim。Transform提供明確input到typed resource的快捷轉換；Stations只分Processing與Instant兩區，各自支援前後頁與滾輪。
 
 Block/item材質固定為原版16×16與同一dark chassis/cyan-amethyst palette；T1→T6由copper cell、iron brace、gold/lapis lattice、diamond/quartz cross、prismarine/ender halo、netherite/amethyst crown逐級增加對稱ornament，Creative Storage Unit則使用同family的cyan-amethyst infinity cell。World casing預設使用ordinary 16×16 vanilla models；安裝可選 Fusion 1.2.12 時，client 會自動啟用內建 `fusion_connected_casing` resource-pack overlay，以 `pieced` 80×16 connected sheets覆寫world model。item models維持ordinary 16×16，bus front保留方向語意；overlay跨全部12種network blocks的model必須用釘選1.2.12支援的single-`block` predicate array，禁止誤用1.3的`blocks`或`true`/`false` schema。Published metadata不得要求Fusion；Gradle只在隔離的`fusionRuntime` source set供client/data runs載入，server/GameTest runs與Magic Storage jar不包含它。Magic Storage Wrench加入並接受`c:tools/wrench`：右鍵旋轉directional bus，Shift+右鍵安全拆除；含資料Core掉落物只取得指向既有server repository record的compact recovery token。生成候選/metadata/contact sheets只留在`art/texture-generation/`。
 
@@ -219,9 +219,9 @@ Block/item材質固定為原版16×16與同一dark chassis/cyan-amethyst palette
 | 點選網路物品 | 選取該物品，下方面板顯示其配方詳情 |
 | `[◀][▶]` | 同一產物的不同配方切換 |
 | `[×1] [×8] [×64] [Max]` | 精確按鈕不足量時變暗；Max 由 server 重新 preview 後合成當下最大合法量 |
-| 左側 `Storage / Craftable / Fuel` | 明確分頁；Craftable 的 zero-storage synthetic entries 可選 recipe 但不可抽取 |
+| 左側 `Storage / Craftable / Transform / Stations` | 明確分頁；Craftable 的 zero-storage synthetic entries 可選 recipe 但不可抽取 |
 | 左側玩家背包圖示（完整 tooltip） | 開啟後合成材料也計入玩家可見的 36 格主背包+快捷列（不含 armor/offhand，優先扣網路） |
-| 左側 Fuel 頁按鈕 | 切到 Fuel 頁；rail 只保留三頁籤，再用 Energy Reserves header 的 Fuel Target cycle selector或 list popup 選 Auto/Fuel/Brew Energy、安裝機器、放入或 Shift+燃料，並以 panel paging 查看目前所有 energy descriptors |
+| 左側 Transform / Stations 頁按鈕 | Transform 以 target selector/list popup 選 Auto 或明確typed resource並提交轉換；Stations 用兩個獨立paged sections管理 Processing與Instant stations |
 
 ### 同物品多配方與資源身分
 
