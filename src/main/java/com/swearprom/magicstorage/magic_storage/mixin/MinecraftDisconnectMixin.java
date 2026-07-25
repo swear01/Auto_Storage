@@ -24,9 +24,9 @@ abstract class MinecraftDisconnectMixin {
             boolean keepResourcePacks,
             CallbackInfo callback
     ) {
-        if (Minecraft.ON_OSX
-                && MacOsWindowMixin.CocoaWindow.isBorderlessFullscreen(window.getWindow())) {
-            ((MacOsWindowAccess) (Object) window).magicStorage$leaveBorderlessFullscreen();
+        Minecraft minecraft = (Minecraft) (Object) this;
+        if (Minecraft.ON_OSX && minecraft.level != null && window.isFullscreen()) {
+            window.toggleFullScreen();
         }
     }
 }

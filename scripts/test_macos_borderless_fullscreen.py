@@ -37,6 +37,8 @@ class MacOsBorderlessFullscreenTests(unittest.TestCase):
         self.assertIn("setLevel:", source)
         self.assertNotIn("toggleFullScreen", source)
         self.assertNotIn("MacosUtil", source)
+        self.assertNotIn("MacOsWindowAccess", source)
+        self.assertNotIn("@Shadow", source)
 
     def test_disconnect_leaves_borderless_fullscreen_before_the_forced_render_tick(self):
         source = (
@@ -46,14 +48,17 @@ class MacOsBorderlessFullscreenTests(unittest.TestCase):
         self.assertIn('method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V"', source)
         self.assertIn("@At(\"HEAD\")", source)
         self.assertIn("Minecraft.ON_OSX", source)
-        self.assertIn("CocoaWindow.isBorderlessFullscreen", source)
-        self.assertIn("magicStorage$leaveBorderlessFullscreen", source)
+        self.assertIn("minecraft.level != null", source)
+        self.assertIn("window.isFullscreen()", source)
+        self.assertIn("window.toggleFullScreen()", source)
+        self.assertNotIn("MacOsWindowMixin", source)
+        self.assertNotIn("MacOsWindowAccess", source)
 
         access = (
             ROOT
             / "src/main/java/com/swearprom/magicstorage/magic_storage/mixin/MacOsWindowAccess.java"
-        ).read_text()
-        self.assertIn("void magicStorage$leaveBorderlessFullscreen()", access)
+        )
+        self.assertFalse(access.exists())
 
 
 if __name__ == "__main__":

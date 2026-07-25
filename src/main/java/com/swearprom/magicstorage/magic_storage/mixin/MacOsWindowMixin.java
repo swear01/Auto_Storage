@@ -11,35 +11,11 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWNativeCocoa;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Window.class)
-abstract class MacOsWindowMixin implements MacOsWindowAccess {
-    @Shadow
-    private long window;
-
-    @Shadow
-    private boolean fullscreen;
-
-    @Shadow
-    private boolean actuallyFullscreen;
-
-    @Shadow
-    private void setMode() {
-    }
-
-    @Override
-    @Unique
-    public void magicStorage$leaveBorderlessFullscreen() {
-        if (!Minecraft.ON_OSX || !CocoaWindow.isBorderlessFullscreen(window)) return;
-        fullscreen = false;
-        actuallyFullscreen = false;
-        setMode();
-    }
-
+abstract class MacOsWindowMixin {
     @Redirect(
             method = "setMode",
             at = @At(
