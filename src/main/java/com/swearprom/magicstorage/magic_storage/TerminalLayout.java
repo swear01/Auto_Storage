@@ -62,8 +62,10 @@ final class TerminalLayout {
     private static final int TRANSFORM_TARGET_ROW_HEIGHT = 20;
     private static final int TRANSFORM_TARGET_COLUMN_MIN_WIDTH = 96;
     private static final int TRANSFORM_TARGET_COLUMN_MAX_WIDTH = 116;
-    private static final int TRANSFORM_CARD_HEIGHT = 28;
-    private static final int TRANSFORM_PREVIEW_HEIGHT = 32;
+    private static final int TRANSFORM_CARD_HEIGHT = 32;
+    private static final int PROCESSING_STATION_MAX_COLUMNS = 3;
+    private static final int PROCESSING_STATION_CELL_WIDTH = 68;
+    private static final int INSTANT_STATION_CELL_SIZE = 20;
 
     record Rect(int x, int y, int width, int height) {
         Rect {
@@ -120,7 +122,8 @@ final class TerminalLayout {
             int rows,
             int preferredCellWidth,
             int capacity,
-            int itemCount
+            int itemCount,
+            boolean compact
     ) {
         FlowGrid {
             cells = List.copyOf(cells);
@@ -140,13 +143,15 @@ final class TerminalLayout {
         }
 
         List<Rect> cells(int page) {
-            return flowCells(bounds, visibleCount(page), columns, rows, preferredCellWidth);
+            return flowCells(
+                    bounds, visibleCount(page), columns, rows, preferredCellWidth, compact);
         }
 
         List<Rect> cells(int page, int dynamicItemCount) {
             int first = Math.clamp(page, 0, pageCount(dynamicItemCount) - 1) * capacity;
             int visible = Math.max(0, Math.min(capacity, dynamicItemCount - first));
-            return flowCells(bounds, visible, columns, rows, preferredCellWidth);
+            return flowCells(
+                    bounds, visible, columns, rows, preferredCellWidth, compact);
         }
     }
 
@@ -225,7 +230,7 @@ final class TerminalLayout {
             PagedList transformTargetList,
             FuelPageControls transformTargetPageControls,
             Rect transformInput,
-            Rect transformPreview,
+            List<Rect> transformAmountButtons,
             Rect fuelStatus,
             Rect fuelSearchButton,
             Rect fuelSearchBox,
@@ -249,6 +254,7 @@ final class TerminalLayout {
             recipeInputSlots = List.copyOf(recipeInputSlots);
             recipeNavigationButtons = List.copyOf(recipeNavigationButtons);
             recipeCraftButtons = List.copyOf(recipeCraftButtons);
+            transformAmountButtons = List.copyOf(transformAmountButtons);
             railButtons = List.copyOf(railButtons);
             fuelRailButtons = List.copyOf(fuelRailButtons);
             exclusionRects = List.copyOf(exclusionRects);
@@ -340,7 +346,7 @@ final class TerminalLayout {
                 emptyList,
                 emptyPageControls,
                 empty,
-                empty,
+                List.of(),
                 empty,
                 empty,
                 empty,
@@ -477,7 +483,7 @@ final class TerminalLayout {
         Rect transformPanel = new Rect(
                 8, TOP_HEIGHT, imageWidth - 16, availablePanelHeight);
         int stationAreaWidth = imageWidth - 16 - FUEL_CATEGORY_GAP;
-        int timedStationsWidth = stationAreaWidth / 2;
+        int timedStationsWidth = stationAreaWidth * 5 / 8;
         Rect timedStationsPanel = new Rect(
                 8, TOP_HEIGHT, timedStationsWidth, availablePanelHeight);
         Rect instantStationsPanel = new Rect(
@@ -528,37 +534,57 @@ final class TerminalLayout {
                 transformPanel.y() + FUEL_PANEL_INSET,
                 SLOT_SIZE,
                 SLOT_SIZE);
+        int minimumAmountStripWidth = CONTROL_SIZE * 4;
+        boolean singleTransformActionRow = transformContentWidth
+                >= SLOT_SIZE + CONTROL_GAP + minimumAmountStripWidth;
+        int amountStripAvailable = singleTransformActionRow
+                ? transformContentWidth - SLOT_SIZE - CONTROL_GAP
+                : transformContentWidth;
+        int amountStripWidth = Math.max(
+                minimumAmountStripWidth,
+                Math.min(216, amountStripAvailable));
+        amountStripWidth -= amountStripWidth % 4;
+        Rect transformAmountStrip = new Rect(
+                singleTransformActionRow
+                        ? transformPanel.right() - FUEL_PANEL_INSET - amountStripWidth
+                        : transformContentX,
+                singleTransformActionRow
+                        ? transformInput.y()
+                        : transformInput.bottom() + CONTROL_GAP,
+                amountStripWidth,
+                CONTROL_SIZE);
+        List<Rect> transformAmountButtons =
+                contiguousSegmentRects(transformAmountStrip, 4);
+        int transformCardControlsY = Math.max(
+                transformInput.bottom(), transformAmountStrip.bottom()) + CONTROL_GAP;
         FuelPageControls transformCardPageControls = new FuelPageControls(
                 new Rect(
                         transformPanel.right() - FUEL_PANEL_INSET
                                 - CONTROL_SIZE * 2 - CONTROL_GAP,
-                        transformPanel.y() + FUEL_PANEL_INSET,
+                        transformCardControlsY,
                         CONTROL_SIZE,
                         CONTROL_SIZE),
                 new Rect(
                         transformPanel.right() - FUEL_PANEL_INSET - CONTROL_SIZE,
-                        transformPanel.y() + FUEL_PANEL_INSET,
+                        transformCardControlsY,
                         CONTROL_SIZE,
                         CONTROL_SIZE));
-        Rect transformPreview = new Rect(
-                transformContentX,
-                transformPanel.bottom() - FUEL_PANEL_INSET - TRANSFORM_PREVIEW_HEIGHT,
-                transformContentWidth,
-                TRANSFORM_PREVIEW_HEIGHT);
-        int transformCardsY = transformInput.bottom() + CONTROL_GAP;
+        int transformCardsY = transformCardPageControls.previous().bottom() + CONTROL_GAP;
         Rect transformCardBounds = new Rect(
                 transformContentX,
                 transformCardsY,
                 transformContentWidth,
                 Math.max(TRANSFORM_CARD_HEIGHT,
-                        transformPreview.y() - CONTROL_GAP - transformCardsY));
+                        transformPanel.bottom() - FUEL_PANEL_INSET - transformCardsY));
         FlowGrid transformCards = pagedSingleColumnGrid(
                 transformCardBounds,
                 fuelDescriptors.consumableCount(),
                 TRANSFORM_CARD_HEIGHT);
-        FlowGrid timedStationsGrid = pagedFlowGrid(categoryFlowBounds(
-                        timedStationsPanel, false, true),
-                fuelDescriptors.timedStationCount());
+        FlowGrid timedStationsGrid = pagedFlowGrid(
+                categoryFlowBounds(timedStationsPanel, false, true),
+                fuelDescriptors.timedStationCount(),
+                PROCESSING_STATION_MAX_COLUMNS,
+                PROCESSING_STATION_CELL_WIDTH);
         Rect instantFlow = categoryFlowBounds(
                 instantStationsPanel, false, true);
         int statusX = playerInventory.right() + CONTROL_GAP;
@@ -592,7 +618,10 @@ final class TerminalLayout {
         int fuelSearchItemCount = fuelDescriptors.timedStationCount()
                 + fuelDescriptors.instantStationCount();
         FlowGrid fuelSearchGrid = pagedFlowGrid(
-                fuelSearchFlowBounds, fuelSearchItemCount);
+                fuelSearchFlowBounds,
+                fuelSearchItemCount,
+                PROCESSING_STATION_MAX_COLUMNS,
+                PROCESSING_STATION_CELL_WIDTH);
         FuelPageControls fuelSearchPageControls = new FuelPageControls(
                 new Rect(
                         fuelSearchPanel.right() - FUEL_PANEL_INSET
@@ -605,7 +634,7 @@ final class TerminalLayout {
                         fuelSearchPanel.y() + FUEL_PANEL_INSET,
                         CONTROL_SIZE,
                         CONTROL_SIZE));
-        FlowGrid instantStationsGrid = pagedFlowGrid(instantFlow,
+        FlowGrid instantStationsGrid = pagedCompactGrid(instantFlow,
                 fuelDescriptors.instantStationCount());
         FuelPageControls timedStationsPageControls = fuelPageControls(
                 fuelCategoryLabel(timedStationsPanel, timedStationsGrid),
@@ -643,7 +672,7 @@ final class TerminalLayout {
                 transformTargetList,
                 transformTargetPageControls,
                 transformInput,
-                transformPreview,
+                transformAmountButtons,
                 fuelStatus,
                 fuelSearchButton,
                 fuelSearchBox,
@@ -914,9 +943,14 @@ final class TerminalLayout {
                 panel.bottom() - FUEL_PANEL_INSET - rowY);
     }
 
-    private static FlowGrid pagedFlowGrid(Rect bounds, int itemCount) {
+    private static FlowGrid pagedFlowGrid(
+            Rect bounds,
+            int itemCount,
+            int maxColumns,
+            int preferredCellWidth
+    ) {
         int columns = Math.max(1, Math.min(
-                2, bounds.width() / CATEGORY_CELL_PREFERRED_WIDTH));
+                maxColumns, bounds.width() / preferredCellWidth));
         int rows = Math.max(1, bounds.height() / FUEL_CATEGORY_CELL_HEIGHT);
         int capacity = columns * rows;
         int visible = Math.min(itemCount, capacity);
@@ -925,15 +959,40 @@ final class TerminalLayout {
                 visible,
                 columns,
                 rows,
-                CATEGORY_CELL_PREFERRED_WIDTH);
+                preferredCellWidth,
+                false);
         return new FlowGrid(
                 bounds,
                 cells,
                 columns,
                 rows,
-                CATEGORY_CELL_PREFERRED_WIDTH,
+                preferredCellWidth,
                 capacity,
-                itemCount);
+                itemCount,
+                false);
+    }
+
+    private static FlowGrid pagedCompactGrid(Rect bounds, int itemCount) {
+        int columns = Math.max(1, bounds.width() / INSTANT_STATION_CELL_SIZE);
+        int rows = Math.max(1, bounds.height() / INSTANT_STATION_CELL_SIZE);
+        int capacity = columns * rows;
+        int visible = Math.min(itemCount, capacity);
+        List<Rect> cells = flowCells(
+                bounds,
+                visible,
+                columns,
+                rows,
+                INSTANT_STATION_CELL_SIZE,
+                true);
+        return new FlowGrid(
+                bounds,
+                cells,
+                columns,
+                rows,
+                INSTANT_STATION_CELL_SIZE,
+                capacity,
+                itemCount,
+                true);
     }
 
     private static FlowGrid pagedSingleColumnGrid(
@@ -948,7 +1007,8 @@ final class TerminalLayout {
                 visible,
                 1,
                 rows,
-                bounds.width());
+                bounds.width(),
+                false);
         return new FlowGrid(
                 bounds,
                 cells,
@@ -956,7 +1016,8 @@ final class TerminalLayout {
                 rows,
                 bounds.width(),
                 rows,
-                itemCount);
+                itemCount,
+                false);
     }
 
     private static List<Rect> flowCells(
@@ -964,7 +1025,8 @@ final class TerminalLayout {
             int visible,
             int maxColumns,
             int maxRows,
-            int preferredCellWidth
+            int preferredCellWidth,
+            boolean compact
     ) {
         if (visible <= 0) return List.of();
         int largestColumns = Math.min(maxColumns, visible);
@@ -977,10 +1039,18 @@ final class TerminalLayout {
             int column = index % columns;
             int row = index / columns;
             int columnsInRow = Math.min(columns, visible - row * columns);
-            int left = bounds.x() + column * bounds.width() / columnsInRow;
-            int right = bounds.x() + (column + 1) * bounds.width() / columnsInRow;
-            int top = bounds.y() + row * bounds.height() / maxRows;
-            int bottom = bounds.y() + (row + 1) * bounds.height() / maxRows;
+            int left = compact
+                    ? bounds.x() + column * preferredCellWidth
+                    : bounds.x() + column * bounds.width() / columnsInRow;
+            int right = compact
+                    ? Math.min(bounds.right(), left + preferredCellWidth)
+                    : bounds.x() + (column + 1) * bounds.width() / columnsInRow;
+            int top = compact
+                    ? bounds.y() + row * preferredCellWidth
+                    : bounds.y() + row * bounds.height() / maxRows;
+            int bottom = compact
+                    ? Math.min(bounds.bottom(), top + preferredCellWidth)
+                    : bounds.y() + (row + 1) * bounds.height() / maxRows;
             cells.add(new Rect(
                     left,
                     top,
@@ -992,7 +1062,7 @@ final class TerminalLayout {
 
     private static FlowGrid emptyFlow() {
         return new FlowGrid(
-                new Rect(0, 0, 0, 0), List.of(), 1, 1, 1, 1, 0);
+                new Rect(0, 0, 0, 0), List.of(), 1, 1, 1, 1, 0, false);
     }
 
     private static RailGeometry profileRails(TerminalProfile profile, int imageHeight) {

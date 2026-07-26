@@ -10,11 +10,11 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Processing Stations include Furnace, Blast Furnace, Smoker, Campfire, Brewing Stand, and supported modded machines. Installed totals can exceed one normal stack. Hover anywhere on a row to see its name, installed count, combined rate per tick, and stored work in the lower detail area."
+      "text": "Processing Stations use the larger group and up to three readable columns. Each installed aggregate count is drawn on its item, while the separate value beside it is accumulated station work. Furnace, Blast Furnace, Smoker, Campfire, Brewing Stand, and supported modded machines can exceed one normal stack. Hover the cell for exact name, count, combined rate, and stored work."
     },
     {
       "type": "patchouli:text",
-      "text": "Instant Stations include Crafting Table, Stonecutter, and Smithing Table. Each accepts at most one, can be removed, and unlocks matching recipes without a made-up energy amount. Modded instant stations appear when their recipe family is supported."
+      "text": "Instant Stations use a dense icon grid because they have no accumulated-work value. Crafting Table, Stonecutter, and Smithing Table each accept at most one, can be removed, and unlock matching recipes without made-up energy. Supported modded instant stations appear the same way."
     },
     {
       "type": "patchouli:text",

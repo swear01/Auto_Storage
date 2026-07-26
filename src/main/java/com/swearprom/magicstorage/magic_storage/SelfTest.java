@@ -1651,9 +1651,9 @@ class SelfTest {
                 overflow.transformTargetList().capacity() > 0
                         && overflow.transformTargetList().pageCount() > 1
                         && overflow.transformTargetList().itemCount() == 61);
-        assertFullWidthLastPage("transform cards", overflow.transformCards());
-        assertFullWidthLastPage("timed stations", overflow.timedStationsGrid());
-        assertFullWidthLastPage("instant stations", overflow.instantStationsGrid());
+        assertLastPageLayout("transform cards", overflow.transformCards());
+        assertLastPageLayout("timed stations", overflow.timedStationsGrid());
+        assertLastPageLayout("instant stations", overflow.instantStationsGrid());
         assertTrue("descriptor growth preserves the inventory-side type-capacity panel",
                 overflow.fuelStatus().equals(sideBySide.fuelStatus())
                         && overflow.instantStationsGrid().bounds().equals(
@@ -1670,6 +1670,14 @@ class SelfTest {
 
         var fullscreen = TerminalLayout.forProfile(
                 TerminalProfile.CRAFTING, 640, 416, overflowCounts);
+        assertTrue("fullscreen Processing Stations receive the larger workspace share",
+                fullscreen.timedStationsPanel().width()
+                        > fullscreen.instantStationsPanel().width());
+        assertTrue("fullscreen Processing Stations use three readable work-value columns",
+                fullscreen.timedStationsGrid().columns() == 3);
+        assertTrue("fullscreen Instant Stations use a denser icon grid",
+                fullscreen.instantStationsGrid().columns()
+                        > fullscreen.timedStationsGrid().columns());
         for (TerminalLayout.FlowGrid grid : List.of(
                 fullscreen.timedStationsGrid(),
                 fullscreen.instantStationsGrid())) {
@@ -1824,11 +1832,13 @@ class SelfTest {
                         <= geometry.transformTargetList().bounds().y()
                         && geometry.transformTargetList().bounds().right()
                         < geometry.transformCards().bounds().x());
-        assertTrue(label + " Transform cards remain above the selected recipe preview",
+        assertTrue(label + " Transform amount actions stay in the upper input band",
+                geometry.transformAmountButtons().stream().allMatch(button ->
+                        button.y() >= geometry.transformInput().y()
+                                && button.bottom() <= geometry.transformCards().bounds().y()));
+        assertTrue(label + " Transform cards use the old empty preview space",
                 geometry.transformCards().bounds().bottom()
-                        <= geometry.transformPreview().y()
-                        && !geometry.transformCards().bounds().overlaps(
-                        geometry.transformPreview()));
+                        == geometry.transformPanel().bottom() - 2);
         assertTrue(label + " type capacity is an independent panel right of player inventory",
                 geometry.fuelStatus().x() == geometry.playerInventory().right() + 2
                         && geometry.fuelStatus().right() == geometry.imageWidth() - 8
@@ -1872,16 +1882,20 @@ class SelfTest {
             for (TerminalLayout.Rect cell : grid.cells()) {
                 TerminalLayout.Rect slot = TerminalLayout.fuelSlot(cell);
                 TerminalLayout.Rect icon = TerminalLayout.fuelIcon(cell);
-                TerminalLayout.Rect amount = TerminalLayout.fuelAmountBounds(cell);
-                assertTrue(label + " Fuel slot and icon stay left of amount",
-                        slot.right() <= amount.x() && icon.right() <= amount.x());
-                assertTrue(label + " Fuel horizontal content stays inside its cell",
+                assertTrue(label + " Fuel item content stays inside its cell",
                         slot.x() >= cell.x() && slot.y() >= cell.y()
                                 && slot.right() <= cell.right() && slot.bottom() <= cell.bottom()
                                 && icon.x() >= cell.x() && icon.y() >= cell.y()
-                                && icon.right() <= cell.right() && icon.bottom() <= cell.bottom()
-                                && amount.x() >= cell.x() && amount.y() >= cell.y()
-                                && amount.right() <= cell.right() && amount.bottom() <= cell.bottom());
+                                && icon.right() <= cell.right() && icon.bottom() <= cell.bottom());
+                if (!grid.compact()) {
+                    TerminalLayout.Rect amount = TerminalLayout.fuelAmountBounds(cell);
+                    assertTrue(label + " Fuel slot and icon stay left of amount",
+                            slot.right() <= amount.x() && icon.right() <= amount.x());
+                    assertTrue(label + " Processing work stays inside its cell",
+                            amount.x() >= cell.x() && amount.y() >= cell.y()
+                                    && amount.right() <= cell.right()
+                                    && amount.bottom() <= cell.bottom());
+                }
             }
         }
     }
@@ -1896,7 +1910,7 @@ class SelfTest {
                 grid.columns() >= 1 && grid.rows() >= 1
                         && grid.capacity() == grid.columns() * grid.rows());
         assertTrue(label + " visible cells do not overlap", rectanglesDoNotOverlap(grid.cells()));
-        if (!grid.cells().isEmpty()) {
+        if (!grid.compact() && !grid.cells().isEmpty()) {
             assertTrue(label + " sparse cells span complete width",
                     grid.cells().getFirst().x() == grid.bounds().x()
                             && grid.cells().getLast().right() == grid.bounds().right());
@@ -1910,13 +1924,15 @@ class SelfTest {
         }
     }
 
-    private static void assertFullWidthLastPage(String label, TerminalLayout.FlowGrid grid) {
+    private static void assertLastPageLayout(String label, TerminalLayout.FlowGrid grid) {
         List<TerminalLayout.Rect> last = grid.cells(grid.pageCount() - 1);
         assertTrue(label + " overflow creates at least two pages", grid.pageCount() >= 2);
-        assertTrue(label + " last page spans complete width",
-                !last.isEmpty()
-                        && last.getFirst().x() == grid.bounds().x()
-                        && last.getLast().right() == grid.bounds().right());
+        assertTrue(label + " last page starts at the grid origin",
+                !last.isEmpty() && last.getFirst().x() == grid.bounds().x());
+        if (!grid.compact()) {
+            assertTrue(label + " last page spans complete width",
+                    last.getLast().right() == grid.bounds().right());
+        }
     }
 
     private static void assertRecipeGeometry(String label, TerminalLayout.Geometry geometry) {

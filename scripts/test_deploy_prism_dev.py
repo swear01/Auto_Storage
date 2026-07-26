@@ -2,6 +2,7 @@ import hashlib
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import deploy_prism_dev
 
@@ -24,6 +25,20 @@ class DeployPrismDevTests(unittest.TestCase):
         "titanium-gui-test.jar": b"titanium gui test artifact",
         "create-gui-test.jar": b"create gui test artifact",
     }
+
+    def test_gradle_build_uses_single_use_daemon(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            jdk = project / "jdk"
+            jdk.mkdir()
+            with mock.patch.object(deploy_prism_dev, "DEFAULT_JAVA_HOME", jdk):
+                with mock.patch.object(deploy_prism_dev.subprocess, "run") as run:
+                    deploy_prism_dev.run_gradle_build(project, "0.1.49")
+
+            command = run.call_args.args[0]
+            self.assertIn("--no-daemon", command)
+            self.assertEqual(project, run.call_args.kwargs["cwd"])
+            self.assertEqual(str(jdk), run.call_args.kwargs["env"]["JAVA_HOME"])
 
     def stage_support(self, project_dir: Path) -> None:
         support_dir = project_dir / "build" / "prism-gui-mods"

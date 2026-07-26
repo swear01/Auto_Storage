@@ -47,6 +47,33 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void transform_quick_move_click_keeps_input_visible_until_conversion(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            player.getInventory().setItem(0, new ItemStack(Items.COAL, 2));
+            var menu = new CraftingTerminalMenu(174, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            int playerSlot = findPlayerMenuSlot(menu, Items.COAL);
+
+            menu.clicked(playerSlot, 0, ClickType.QUICK_MOVE, player);
+
+            ItemStack input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
+            if (!menu.getSlot(playerSlot).getItem().isEmpty()
+                    || !input.is(Items.COAL)
+                    || input.getCount() != 2
+                    || menu.getVisibleTransformUses().isEmpty()
+                    || menu.getSelectedTransformUse() != null
+                    || core.getEnergy(EnergyType.FURNACE_FUEL) != 0) {
+                helper.fail("Shift-click must move Coal into the visible transient input "
+                        + "without selecting or converting it: " + input);
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
     public static void transform_accepts_items_with_no_use_and_rejects_actions_neutrally(
             GameTestHelper helper
     ) {
@@ -181,7 +208,9 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void fullscreen_stations_workspace_uses_two_top_aligned_groups(GameTestHelper helper) {
+    public static void fullscreen_stations_workspace_uses_processing_and_compact_instant_groups(
+            GameTestHelper helper
+    ) {
         var counts = currentFuelDescriptorCounts();
         var geometry = TerminalLayout.forProfile(
                 TerminalProfile.CRAFTING,
@@ -194,10 +223,16 @@ public class FuelPageTests {
                 || geometry.instantStationsGrid().cells().size() != counts.instantStationCount()
                 || geometry.timedStationsPanel().y() != geometry.instantStationsPanel().y()
                 || geometry.timedStationsPanel().overlaps(geometry.instantStationsPanel())
-                || geometry.timedStationsGrid().columns() != 2
-                || geometry.instantStationsGrid().columns() != 2) {
-            helper.fail("Stations must show top-aligned Processing and Instant groups with two columns each: "
-                    + geometry);
+                || geometry.timedStationsPanel().width()
+                <= geometry.instantStationsPanel().width()
+                || geometry.timedStationsGrid().columns() != 3
+                || geometry.instantStationsGrid().columns()
+                <= geometry.timedStationsGrid().columns()) {
+            helper.fail("Stations geometry mismatch: processingWidth="
+                    + geometry.timedStationsPanel().width()
+                    + ", instantWidth=" + geometry.instantStationsPanel().width()
+                    + ", processingColumns=" + geometry.timedStationsGrid().columns()
+                    + ", instantColumns=" + geometry.instantStationsGrid().columns());
             return;
         }
         helper.succeed();
@@ -273,8 +308,9 @@ public class FuelPageTests {
         }
         if (geometry.transformTargetList().bounds().right()
                 >= geometry.transformCards().bounds().x()
-                || geometry.transformCards().bounds().overlaps(geometry.transformPreview())) {
-            helper.fail("Transform sidebar, cards, and selected preview must remain separate");
+                || geometry.transformCards().bounds().bottom()
+                != geometry.transformPanel().bottom() - 2) {
+            helper.fail("Transform sidebar and cards must remain separate while cards fill the workspace");
             return;
         }
         helper.succeed();

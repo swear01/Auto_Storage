@@ -55,7 +55,7 @@ def run_gradle_build(project_dir: Path, version: str) -> None:
     env = os.environ.copy()
     env["JAVA_HOME"] = str(DEFAULT_JAVA_HOME)
     subprocess.run(
-        ["./gradlew", "build", "stagePrismGuiSupportMods", "--console=plain"],
+        ["./gradlew", "build", "stagePrismGuiSupportMods", "--console=plain", "--no-daemon"],
         cwd=project_dir,
         env=env,
         check=True,

@@ -129,9 +129,9 @@ This design originally specified one-time migration from the old persisted axe s
 
 GitHub #23 replaces the old target cycle and popup with a persistent left target list. Auto is exact-input Show Uses only: it lists every compatible use but never preselects, consumes, or executes one. Explicit targets filter uses of that same inserted item by produced target. The list has localized target labels independent of representative item names, search, paging, full-row hit boxes, selected state, wheel navigation, and middle-click reset.
 
-Each visible use is a whole horizontal card. Clicking it selects a server-validated stable use ID; amount actions remain disabled until selection. The lower preview shows the selected output and station/work cost. Search, list page, card page, and selected card are session presentation state; only the existing validated Transform target preference persists.
+Each visible use is a whole horizontal card. Clicking it selects a server-validated stable use ID; amount actions remain disabled until selection. The transient input and shared amount strip stay in the upper band. Every card uses its second line for Direct or the required station/work source, so there is no detached lower selected preview. Search, list page, card page, and selected card are session presentation state; only the existing validated Transform target preference persists.
 
-Station hover and click regions use the whole horizontal cell. Processing and Instant remain separate, but each grid derives its rows from available height and the shared readable row height instead of a fixed count. The lower detail panel shows the hovered station name, installed count, rate, and stored work; otherwise it shows type capacity.
+Station hover and click regions use the whole cell. Processing and Instant remain separate and derive rows from available height. Processing receives the larger workspace and up to three readable columns; the installed aggregate count overlays the item while the separate horizontal value is accumulated work. Instant has no work value and uses a compact icon grid. The inventory-side detail panel shows the hovered station name, installed count, rate, and stored work; otherwise it shows type capacity.
 
 ## Retired Bottle Energy migration
 

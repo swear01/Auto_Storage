@@ -653,7 +653,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertEqual("No transformations", lang["gui.magic_storage.no_transformations"])
         self.assertEqual("Station Work", lang["gui.magic_storage.resource_view.station_work"])
         self.assertIn("gui.magic_storage.transform_search", lang)
-        self.assertIn("gui.magic_storage.transform_select_recipe", lang)
+        self.assertIn("gui.magic_storage.transform_source_direct", lang)
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
@@ -895,7 +895,7 @@ class StaticRegressionTests(unittest.TestCase):
     def test_all_gametest_gates_reject_any_selftest_failure(self):
         build = self.read_required("build.gradle")
         expected = {
-            "runGameTestServer": 395,
+            "runGameTestServer": 396,
             "runRecipeAddonGameTestServer": 17,
             "runMekanismGameTestServer": 47,
             "runBotaniaGameTestServer": 14,
@@ -921,7 +921,7 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(f"All {count} required tests passed", body, task)
             self.assertIn("expectedSelfTestSummary", body, task)
             self.assertIn("TESTS FAILED!", body, task)
-        self.assertIn("SelfTest: 210337 passed, 0 failed, 210337 total", build)
+        self.assertIn("SelfTest: 214653 passed, 0 failed, 214653 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
@@ -2393,7 +2393,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("gui.magic_storage.fuel_target_list", en_us)
         self.assertIn("gui.magic_storage.fuel_target_list", zh_tw)
 
-    def test_transform_cards_require_explicit_full_card_selection_and_show_preview(self):
+    def test_transform_cards_require_explicit_selection_and_show_their_source_inline(self):
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
@@ -2418,15 +2418,10 @@ class StaticRegressionTests(unittest.TestCase):
             r"\bprivate\s+void\s+renderTransformCards\s*\(",
             "CraftingTerminalScreen.renderTransformCards",
         )
-        preview = self.java_block(
+        source = self.java_block(
             screen,
-            r"\bprivate\s+void\s+renderTransformPreview\s*\(",
-            "CraftingTerminalScreen.renderTransformPreview",
-        )
-        station_work = self.java_block(
-            screen,
-            r"\bprivate\s+Component\s+transformStationWork\s*\(",
-            "CraftingTerminalScreen.transformStationWork",
+            r"\bprivate\s+Component\s+transformSource\s*\(",
+            "CraftingTerminalScreen.transformSource",
         )
 
         self.assertIn("menu.getVisibleTransformUses()", card_hit)
@@ -2438,19 +2433,38 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("drawInsetPanel", card_render)
         self.assertIn("cell.contains(mouseX - leftPos, mouseY - topPos)", card_render)
         self.assertIn("graphics.fill", card_render)
-        self.assertIn("use.stationId()", card_render)
-        self.assertIn("use.stationWorkPerItem()", card_render)
-        self.assertIn("geometry.transformPreview()", preview)
-        self.assertIn("menu.getSelectedTransformUse()", preview)
-        self.assertIn("gui.magic_storage.transform_select_recipe", preview)
-        self.assertIn("use.stationId()", preview)
-        self.assertIn("use.stationWorkPerItem()", preview)
-        self.assertIn("transformStationWork(use)", preview)
-        self.assertIn("menu.getMachineDescriptors()", station_work)
-        self.assertIn("use.stationId()", station_work)
-        self.assertIn("use.stationWorkPerItem()", station_work)
+        self.assertIn("transformSource(use)", card_render)
+        self.assertIn("menu.getMachineDescriptors()", source)
+        self.assertIn("use.stationId()", source)
+        self.assertIn("use.stationWorkPerItem()", source)
+        self.assertNotIn("renderTransformPreview", screen)
+        self.assertNotIn("gui.magic_storage.transform_select_recipe", en_us)
+        self.assertNotIn("gui.magic_storage.transform_select_recipe", zh_tw)
+        self.assertIn("gui.magic_storage.transform_source_direct", en_us)
+        self.assertIn("gui.magic_storage.transform_source_direct", zh_tw)
         self.assertIn("gui.magic_storage.transform_station_work", en_us)
         self.assertIn("gui.magic_storage.transform_station_work", zh_tw)
+
+    def test_station_stack_counts_overlay_items_and_only_processing_shows_stored_work(self):
+        screen = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
+        )
+        slot_render = self.java_block(
+            screen,
+            r"\bprotected\s+void\s+renderSlotContents\s*\(",
+            "CraftingTerminalScreen.renderSlotContents",
+        )
+        category_render = self.java_block(
+            screen,
+            r"\bprivate\s+void\s+renderMachineCategoryCells\s*\(",
+            "CraftingTerminalScreen.renderMachineCategoryCells",
+        )
+
+        self.assertIn("graphics.renderItemDecorations", slot_render)
+        self.assertIn("formatAmount(stack.getCount())", slot_render)
+        self.assertIn("category == MachineEnergyTable.Category.PROCESS", category_render)
+        self.assertIn("machineStoredAmount(entry)", category_render)
+        self.assertNotIn("formatAmount(installed.getCount())", category_render)
 
     def test_station_rows_and_transform_cards_use_whole_cell_hit_targets(self):
         layout = self.read_required(
@@ -3469,7 +3483,7 @@ class StaticRegressionTests(unittest.TestCase):
             "Rect transformTargetSearch",
             "PagedList transformTargetList",
             "Rect transformInput",
-            "Rect transformPreview",
+            "List<Rect> transformAmountButtons",
             "FlowGrid transformCards",
             "FlowGrid timedStationsGrid",
             "FlowGrid instantStationsGrid",
@@ -3490,7 +3504,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("renderConsumablesPanel", screen)
         self.assertIn("renderTransformTargetList", screen)
         self.assertIn("renderTransformCards", screen)
-        self.assertIn("renderTransformPreview", screen)
+        self.assertNotIn("renderTransformPreview", screen)
         self.assertIn("renderTimedStationsPanel", screen)
         self.assertIn("renderInstantStationsPanel", screen)
         self.assertIn("CraftingTerminalPage.TRANSFORM", screen)
@@ -3623,7 +3637,7 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(key, en_us)
         self.assertEqual(set(en_us), set(zh_tw))
 
-    def test_station_slots_render_one_icon_and_the_horizontal_installed_count_only(self):
+    def test_station_slots_overlay_installed_count_and_processing_search_shows_work(self):
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
@@ -3634,16 +3648,16 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("CraftingTerminalMenu.MACHINE_SLOT_START", render_slot_contents)
         self.assertIn("stack.copyWithCount(1)", render_slot_contents)
-        self.assertNotIn("renderItemDecorations", render_slot_contents)
+        self.assertIn("renderItemDecorations", render_slot_contents)
+        self.assertIn("formatAmount(stack.getCount())", render_slot_contents)
 
         search_results = self.java_block(
             screen,
             r"\bprivate\s+void\s+renderFuelSearchResults\s*\(",
             "CraftingTerminalScreen.renderFuelSearchResults",
         )
-        self.assertIn("installed.getCount()", search_results)
-        self.assertNotIn("machineStoredAmount", search_results)
-        self.assertNotIn("getDescriptorAmount", search_results)
+        self.assertIn("descriptor.category() == MachineEnergyTable.Category.PROCESS", search_results)
+        self.assertIn("machineStoredAmount(descriptor)", search_results)
 
     def test_fuel_descriptor_rows_have_explicit_previous_next_buttons_and_keep_wheel_paging(self):
         layout = self.read_required(
@@ -3880,7 +3894,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertEqual(4, amount_controls.count("addRecipeAmountButton("))
         self.assertIn("contiguousSegmentRects", layout)
 
-    def test_transform_sidebar_and_preview_render_in_the_normal_container_pass(self):
+    def test_transform_sidebar_and_cards_render_in_the_normal_container_pass(self):
         screen = self.read_required(
             "src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java"
         )
@@ -3893,7 +3907,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("renderTransformTargetList", panel)
         self.assertIn("renderTransformCards", panel)
-        self.assertIn("renderTransformPreview", panel)
+        self.assertNotIn("renderTransformPreview", panel)
 
     def test_terminal_control_name_icon_is_even_grid_centered(self):
         atlas = ROOT / "src/main/resources/assets/magic_storage/textures/gui/terminal_controls.png"

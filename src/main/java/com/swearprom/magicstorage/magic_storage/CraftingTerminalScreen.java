@@ -499,6 +499,9 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         setWidgetVisible(prevRecipeBtn, itemPage);
         setWidgetVisible(nextRecipeBtn, itemPage);
         boolean amountActions = itemPage || page == CraftingTerminalPage.TRANSFORM;
+        positionAmountButtons(page == CraftingTerminalPage.TRANSFORM
+                ? geometry.transformAmountButtons()
+                : geometry.recipeCraftButtons());
         setWidgetVisible(craft1Btn, amountActions);
         setWidgetVisible(craft8Btn, amountActions);
         setWidgetVisible(craft64Btn, amountActions);
@@ -520,6 +523,17 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         updateCraftButtonState();
         lastPage = page;
         lastTransformTarget = target;
+    }
+
+    private void positionAmountButtons(List<TerminalLayout.Rect> bounds) {
+        List<Button> buttons = List.of(craft1Btn, craft8Btn, craft64Btn, craftMaxBtn);
+        for (int index = 0; index < buttons.size(); index++) {
+            Button button = buttons.get(index);
+            TerminalLayout.Rect rectangle = bounds.get(index);
+            button.setX(leftPos + rectangle.x());
+            button.setY(topPos + rectangle.y());
+            button.setWidth(rectangle.width());
+        }
     }
 
     private void updateSidebarState() {
@@ -757,7 +771,12 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             if (installed.isEmpty()) {
                 renderDimmedItem(graphics, descriptor.representativeStack(), slot);
             }
-            drawFlowAmount(graphics, cell, formatAmount(installed.getCount()));
+            if (descriptor.category() == MachineEnergyTable.Category.PROCESS) {
+                drawFlowAmount(
+                        graphics,
+                        cell,
+                        formatAmount(machineStoredAmount(descriptor)));
+            }
         }
     }
 
@@ -767,8 +786,22 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         renderTransformTargetList(graphics);
         TerminalLayout.Rect input = geometry.transformInput();
         drawSlotFrame(graphics, leftPos + input.x(), topPos + input.y());
+        ItemStack inputStack = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
+        Component inputLabel = inputStack.isEmpty()
+                ? Component.translatable("gui.magic_storage.fuel_input")
+                : inputStack.getHoverName();
+        int labelRight = geometry.transformAmountButtons().getFirst().x() - 3;
+        if (labelRight > input.right()) {
+            graphics.drawString(
+                    font,
+                    font.plainSubstrByWidth(
+                            inputLabel.getString(), labelRight - input.right() - 3),
+                    leftPos + input.right() + 3,
+                    topPos + input.y() + (input.height() - font.lineHeight) / 2,
+                    0xFF404040,
+                    false);
+        }
         renderTransformCards(graphics, mouseX, mouseY);
-        renderTransformPreview(graphics);
     }
 
     private void renderTransformTargetList(GuiGraphics graphics) {
@@ -855,24 +888,21 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             Component label = fuelTargetOption(use.targetId()).label();
             String text = label.getString() + "  "
                     + (use.infinite() ? "∞" : formatAmount(use.amountPerItem()));
-            boolean timed = use.stationId() != null && use.stationWorkPerItem() > 0;
             graphics.drawString(
                     font,
                     font.plainSubstrByWidth(text, Math.max(1, cell.width() - 54)),
                     leftPos + cell.x() + 52,
-                    topPos + cell.y() + (timed ? 3 : (cell.height() - font.lineHeight) / 2),
+                    topPos + cell.y() + 4,
                     0xFF404040,
                     false);
-            if (timed) {
-                Component work = transformStationWork(use);
-                graphics.drawString(
-                        font,
-                        font.plainSubstrByWidth(work.getString(), Math.max(1, cell.width() - 54)),
-                        leftPos + cell.x() + 52,
-                        topPos + cell.bottom() - font.lineHeight - 3,
-                        0xFF606060,
-                        false);
-            }
+            Component source = transformSource(use);
+            graphics.drawString(
+                    font,
+                    font.plainSubstrByWidth(source.getString(), Math.max(1, cell.width() - 54)),
+                    leftPos + cell.x() + 52,
+                    topPos + cell.bottom() - font.lineHeight - 4,
+                    0xFF606060,
+                    false);
         }
         if (!input.isEmpty() && uses.isEmpty()) {
             Component empty = Component.translatable("gui.magic_storage.no_transformations");
@@ -886,58 +916,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         }
     }
 
-    private void renderTransformPreview(GuiGraphics graphics) {
-        TerminalLayout.Rect preview = geometry.transformPreview();
-        drawRaisedPanel(graphics, leftPos, topPos, preview);
-        TransformProviderApi.Use use = menu.getSelectedTransformUse();
-        if (use == null) {
-            Component prompt = Component.translatable("gui.magic_storage.transform_select_recipe");
-            graphics.drawString(
-                    font,
-                    font.plainSubstrByWidth(prompt.getString(), preview.width() - 8),
-                    leftPos + preview.x() + 4,
-                    topPos + preview.y() + (preview.height() - font.lineHeight) / 2,
-                    0xFF606060,
-                    false);
-            return;
+    private Component transformSource(TransformProviderApi.Use use) {
+        if (use.stationId() == null) {
+            return Component.translatable("gui.magic_storage.transform_source_direct");
         }
-        ItemStack input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
-        if (!input.isEmpty()) {
-            graphics.renderItem(input.copyWithCount(1),
-                    leftPos + preview.x() + 4,
-                    topPos + preview.y() + (preview.height() - 16) / 2);
-        }
-        graphics.drawString(font, "→",
-                leftPos + preview.x() + 24,
-                topPos + preview.y() + (preview.height() - font.lineHeight) / 2,
-                0xFF606060, false);
-        graphics.renderItem(use.representative(),
-                leftPos + preview.x() + 36,
-                topPos + preview.y() + (preview.height() - 16) / 2);
-        Component label = fuelTargetOption(use.targetId()).label();
-        String text = label.getString() + " × "
-                + (use.infinite() ? "∞" : formatAmount(use.amountPerItem()));
-        boolean timed = use.stationId() != null && use.stationWorkPerItem() > 0;
-        graphics.drawString(
-                font,
-                font.plainSubstrByWidth(text, Math.max(1, preview.width() - 60)),
-                leftPos + preview.x() + 56,
-                topPos + preview.y() + (timed ? 4 : (preview.height() - font.lineHeight) / 2),
-                0xFF404040,
-                false);
-        if (timed) {
-            Component work = transformStationWork(use);
-            graphics.drawString(
-                    font,
-                    font.plainSubstrByWidth(work.getString(), Math.max(1, preview.width() - 60)),
-                    leftPos + preview.x() + 56,
-                    topPos + preview.bottom() - font.lineHeight - 4,
-                    0xFF606060,
-                    false);
-        }
-    }
-
-    private Component transformStationWork(TransformProviderApi.Use use) {
         Component station = Component.literal(use.stationId().toString());
         for (MachineDescriptor descriptor : menu.getMachineDescriptors()) {
             if (descriptor.id().equals(use.stationId())) {
@@ -945,10 +927,12 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 break;
             }
         }
-        return Component.translatable(
-                "gui.magic_storage.transform_station_work",
-                station,
-                formatAmount(use.stationWorkPerItem()));
+        return use.stationWorkPerItem() > 0
+                ? Component.translatable(
+                        "gui.magic_storage.transform_station_work",
+                        station,
+                        formatAmount(use.stationWorkPerItem()))
+                : station;
     }
 
     private void renderTimedStationsPanel(GuiGraphics graphics) {
@@ -1080,12 +1064,12 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 renderDimmedItem(graphics, entry.representativeStack(), slot);
             }
             if (entry != null) {
-                ItemStack installed = menu.getSlot(
-                        CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).getItem();
-                drawFlowAmount(
-                        graphics,
-                        cell,
-                        formatAmount(installed.getCount()));
+                if (category == MachineEnergyTable.Category.PROCESS) {
+                    drawFlowAmount(
+                            graphics,
+                            cell,
+                            formatAmount(machineStoredAmount(entry)));
+                }
             }
         }
     }
@@ -1100,7 +1084,12 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         if (slot.index >= CraftingTerminalMenu.MACHINE_SLOT_START
                 && slot.index < CraftingTerminalMenu.MACHINE_SLOT_START
                 + CraftingTerminalMenu.MACHINE_SLOT_COUNT) {
-            if (!stack.isEmpty()) graphics.renderItem(stack.copyWithCount(1), slot.x, slot.y);
+            if (!stack.isEmpty()) {
+                ItemStack icon = stack.copyWithCount(1);
+                graphics.renderItem(icon, slot.x, slot.y);
+                graphics.renderItemDecorations(
+                        font, icon, slot.x, slot.y, formatAmount(stack.getCount()));
+            }
             return;
         }
         super.renderSlotContents(graphics, stack, slot, countString);
@@ -1462,6 +1451,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 tooltip.add(Component.translatable(
                         "tooltip.magic_storage.transform_output",
                         use.infinite() ? "∞" : formatAmount(use.amountPerItem())));
+                tooltip.add(transformSource(use));
                 graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY);
                 return true;
             }

@@ -44,7 +44,7 @@ The later dark-workspace replacement was also rejected. The current visual contr
 
 The recipe body is a compact card above the fixed footer. Its diagram remains above its resource ledger. Ledger resources are top-aligned, use at most four columns, and add a third row when more than eight resources are present; current wire bounds allow up to twelve total item/energy/tool rows. Narrow layouts reserve the same three-row capacity while preserving the diagram, footer gap, and non-overlap guarantees.
 
-The current replacement separates two different actions. Transform owns one transient input, Auto/exact target selection, and explicit ×1/×8/×64/Max conversion into typed resources. Stations owns exactly two top-aligned groups—Processing and Instant—with horizontal representative item plus installed amount, independent previous/next controls, and panel-local wheel paging. Empty station slots show a dim representative item behind the real slot. Stored types over total type capacity remains in the independent panel beside the player inventory.
+The current replacement separates two different actions. Transform owns one visibly retained upper transient input, Auto/exact target selection, an upper ×1/×8/×64/Max strip, and source-aware cards that fill the remaining workspace without a detached preview. Stations owns exactly two top-aligned groups—Processing and Instant—with independent previous/next controls and panel-local wheel paging. Processing uses the larger, up-to-three-column area: installed aggregate count overlays the representative item and accumulated work sits beside it. Instant has no work value and uses a compact icon grid. Empty station slots show a dim representative item behind the real slot. Stored types over total type capacity remains in the independent panel beside the player inventory.
 
 ## Fullscreen execution contract
 
@@ -128,7 +128,7 @@ The Crafting Terminal has four pages: Storage, Craftable, Transform, and Station
 
 ### Transform
 
-Transform is a deterministic resource-conversion shortcut, not a machine inventory and not an automatic background job. It has one server-owned transient input, the persistent searchable Auto/exact target sidebar defined by GitHub #23, exact-input use cards, and the shared ×1/×8/×64/Max strip. Auto discovers every compatible use but never preselects or consumes one. Closing or leaving the page returns every unconverted input.
+Transform is a deterministic resource-conversion shortcut, not a machine inventory and not an automatic background job. It has one server-owned transient input that remains visibly in the upper slot, the persistent searchable Auto/exact target sidebar defined by GitHub #23, exact-input use cards, and the shared upper ×1/×8/×64/Max strip. Every card names Direct or its required station/work inline. Auto discovers every compatible use but never preselects or consumes one. Closing or leaving the page returns every unconverted input.
 
 Fuel, Brew Energy, Axe Energy, FE, Mana, and addon-defined resources are ordinary typed ledger entries visible through Storage resource groups. Runtime Fuel uses current burn time; tool transforms use exact remaining durability; optional providers may require installed Processing work before conversion. Every conversion simulates input, typed output, work, capacity, container remainder, and overflow before one atomic commit.
 
@@ -138,6 +138,8 @@ Stations has exactly two groups:
 
 - **Processing Stations** are stackable exact variants with provider-derived rational work rates. The persisted item prototype remains count one while the aggregate installed count is stored separately up to `Integer.MAX_VALUE`.
 - **Instant Stations** accept at most one per descriptor and only unlock matching recipes. They do not display made-up work or energy.
+
+Processing receives more than half of the station workspace and up to three readable columns. Its aggregate installed count is the item overlay; the adjacent value is accumulated workstation work. Instant uses the remaining width as a dense icon grid because it has no separate work value. Both grids derive rows from the available height rather than a fixed row target.
 
 Each group uses a horizontal representative item plus installed amount, explicit previous/next controls, and panel-local wheel paging. Search Stations replaces both groups with one result grid containing stations only; clearing search restores the two paged groups. Hovering an installed row reports the exact variant and combined decimal rate. Shift-click routing uses the exact descriptor regardless of the current group page. A dim representative behind an empty real slot explains what belongs there without pretending it is installed.
 
