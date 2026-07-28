@@ -32,6 +32,27 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 
 GitHub public repo:https://github.com/swear01/Magic_Storage 。目前版本以 `gradle.properties` 的唯一 `mod_version` 為準；release tag 必須是同值的 `v<mod_version>`，不可在文件硬編某個 patch。CI/CD 會保存 `build/ci-logs/**`、`run/logs/**`、`run/crash-reports/**`、`build/reports/**` 方便遠端失敗排查。`client-smoke.yml` 是 workflow_dispatch-only 的 client boot/resource smoke；必須把metadata required的Patchouli、資源測試需要的Fusion與exact EMI一起放入，不能只啟Magic Storage + EMI後把missing dependency畫面誤當smoke。HeadlessMC未自行退出時由10分鐘step timeout明確失敗。GUI/Patchouli/視覺變更仍必須跑下方 Prism dev / manual handoff session runner;CI/GameTest/client-smoke 都不能替代目視 GUI 驗證。
 
+### Cursor Cloud full-repo audit
+
+手動全庫審查使用 repo 內的 `.cursor/skills/full-repo-audit/SKILL.md`。先確認
+`main` 已包含該 Skill。Cursor Cloud 預設 sandbox token 目前有
+[不含 Issues 權限的已知限制](https://forum.cursor.com/t/cloud-agent-gh-git-token-missing-issues-write-despite-github-app-being-granted-issues-read-write/163389)；
+建立只限此 repo、Issues: Read and write 的 dedicated fine-grained GitHub PAT，
+並在 Cursor Dashboard → Cloud Agents → Secrets 存為 **Personal** runtime secret
+`GH_TOKEN`。不要用 environment-scoped secret；目前另有
+[未注入 runtime 的已知問題](https://forum.cursor.com/t/cloud-agent-environment-secrets-exist-but-are-never-injected-into-the-vm/166083)。
+確認 token 具有 `issues:write` 後，在 repo 根目錄啟動 `cursor-agent`；接著在互動式輸入框輸入：
+
+```text
+& /full-repo-audit
+```
+
+`&` 是 Cursor CLI 的 Cloud handoff，不是 shell 背景符號。Agent 必須維持唯讀，
+並把同一 base SHA 的結果 deduplicate 後發布為 exactly one GitHub issue；成功只回傳
+已用 `gh issue view` 驗證的 Issue URL。執行狀態可在
+`https://cursor.com/agents` 查看。若 Cloud token 無法建立 Issue，該次 audit 必須
+回報 `BLOCKED` 與原始權限錯誤，不可改用 commit、PR 或本機報告假裝成功。
+
 Prism runner 的 Python unittest 必須與 host 安裝狀態無關。測 `verify_prism_version` 時要在 temporary directory 建立假的 `.app/Contents/MacOS/prismlauncher` 並 mock subprocess output；不可直接依賴 macOS 的 `/Applications/Prism Launcher.app`，否則本機會綠、Linux GitHub runner會在版本斷言前因 executable 不存在而失敗。
 
 2026-07-22 Terminal preference gotcha：以 RS2 的 client-global grid config 為主，不採AE2的per-player/per-terminal方向。終端偏好不是per-player、per-world或per-block NBT，而是physical client的單一NeoForge CLIENT config（`config/magic_storage-client.toml`），同一Minecraft profile開啟任何Storage/Crafting/Remote Terminal都共用。持久化共用sort mode/order、search mode、resource view，以及Crafting專用page、use-player-inventory、output destination、Fuel Target；不保存search query、scroll offset、selected item/recipe或adaptive visible rows。畫面開啟時client只送偏好值，server menu仍驗證、套用並透過既有data slots回傳；`TerminalPreferenceSession`在完整server acknowledgement前以磁碟偏好作**純畫面 presentation overlay**，避免client menu逐格收到data slots前先顯示預設頁/按鈕再跳動，ack後立即只呈現server menu值；它同時等ack後才保存後續變更，禁止用開啟瞬間的menu defaults覆寫config。overlay不可寫menu、Core、resource或network state，server仍是唯一權威。`TerminalSettingsPacket`新增偏好wire欄位後，NeoForge payload protocol必須維持`1.1`；不可退回`1.0`讓舊client/server誤解封包。`defineInList`的候選清單必須允許NeoForge首次建立空config時用`null`做validation；不可換回拒絕`contains(null)`的JDK immutable list，SelfTest以`SPEC.correct(CommentedConfig.inMemory())`守住第一次啟動不崩潰且`fuelTarget=auto`。採用模式核對RS2 [`ConfigImpl`](https://github.com/refinedmods/refinedstorage2/blob/0643e6f4bc25f12dc01893916c53d393ecdc08d0/refinedstorage-neoforge/src/main/java/com/refinedmods/refinedstorage/neoforge/ConfigImpl.java#L460-L615) 與 [`AbstractGridContainerMenu`](https://github.com/refinedmods/refinedstorage2/blob/0643e6f4bc25f12dc01893916c53d393ecdc08d0/refinedstorage-common/src/main/java/com/refinedmods/refinedstorage/common/grid/AbstractGridContainerMenu.java#L212-L254)，只取設計模式、不照抄程式。
