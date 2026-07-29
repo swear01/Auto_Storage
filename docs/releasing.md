@@ -18,10 +18,17 @@ The release run accepted the same `build/libs/magic_storage-0.2.0.jar` upload
 for CurseForge, Modrinth, and GitHub. Public Modrinth and CurseForge downloads
 can remain unavailable until their listing reviews finish.
 
+The 2026-07-30 listing audit completed the missing platform metadata. Modrinth
+now has the long description, MIT license, categories and featured tags,
+source/issues links, and corrected `0.2.0` Minecraft 1.21.1 + NeoForge
+metadata; the project is submitted for moderation. CurseForge now has the same
+long description, public GitHub source, comments enabled, MIT/open-distribution
+settings, and its `0.2.0` file remains under review.
+
 ## Public project metadata
 
 - Name: **Auto Storage**
-- Modrinth: <https://modrinth.com/project/auto-storage>
+- Modrinth: <https://modrinth.com/mod/auto-storage>
 - Modrinth project ID/slug: `auto-storage`
 - CurseForge author project: <https://authors.curseforge.com/#/projects/1630575/files>
 - CurseForge project ID: `1630575`
@@ -34,14 +41,23 @@ can remain unavailable until their listing reviews finish.
 - License: **MIT**
 - Source: <https://github.com/swear01/Magic_Storage>
 - Issues: <https://github.com/swear01/Magic_Storage/issues>
+- Modrinth categories: Storage, Technology, Utility, Management
+- Modrinth featured tags: Storage, Technology, Utility
+- CurseForge categories: Storage; Utility & QoL; Processing; Automation
+- CurseForge comments: enabled
 - Icon: `art/release/magic-storage-project-icon.png`
 - Icon SHA-256:
   `5bbd61d561cf5f6f3f3b87bbfc439c05b1f48b4a650d76e8e3ca665a5847945c`
 
-Use the current README as the long description. EMI is client-required with the
-supported range `[1.1.24,2)`; Patchouli is required; Fusion is optional and must
-not be declared as required. Optional compatibility fixtures are CI evidence,
-not player-facing exact dependency pins.
+Keep both platform long descriptions aligned with the current README feature and
+requirement facts. EMI is client-required with the supported range
+`[1.1.24,2)`; Patchouli is required; Fusion is optional and must not be declared
+as required. Optional compatibility fixtures are CI evidence, not player-facing
+exact dependency pins.
+
+Do not feature an old development capture merely to clear a platform suggestion.
+The Modrinth gallery and CurseForge media remain empty until a clean current
+fullscreen release screenshot exists.
 
 ## One-time platform setup
 
@@ -113,6 +129,11 @@ only the uploaded workflow artifact is release evidence. Also verify alpha
 status, Minecraft 1.21.1, NeoForge, Java 21, client/server environment,
 EMI/Patchouli dependencies, changelog, source/issues links, and the project
 icon.
+
+This dashboard verification is mandatory even when `mc-publish` is green. The
+initial `v0.2.0` Modrinth upload was accepted while its dashboard still showed
+no game version and no loader; both fields were corrected manually on
+2026-07-30 before moderation submission.
 
 ## Retry and rollback
 

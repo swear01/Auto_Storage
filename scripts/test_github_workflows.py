@@ -281,7 +281,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         guide = self.read_required("docs/releasing.md")
         for required in (
             "Auto Storage",
-            "https://modrinth.com/project/auto-storage",
+            "https://modrinth.com/mod/auto-storage",
             "1630575",
             "MIT",
             "MODRINTH_TOKEN",
