@@ -2939,10 +2939,20 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             StorageCoreBlockEntity core,
             RecipeAdapterMatch match
     ) {
+        return isStationAvailable(
+                core,
+                match.stationDescriptorId(),
+                match.cost().toolCost().orElse(null));
+    }
+
+    private static boolean isStationAvailable(
+            StorageCoreBlockEntity core,
+            ResourceLocation stationDescriptorId,
+            RecipeAdapterMatch.ToolCost toolCost
+    ) {
         if (core == null) return false;
-        MachineDescriptor station = MachineEnergyTable.get(match.stationDescriptorId());
+        MachineDescriptor station = MachineEnergyTable.get(stationDescriptorId);
         if (station == null) return false;
-        RecipeAdapterMatch.ToolCost toolCost = match.cost().toolCost().orElse(null);
         if (station.category() == MachineEnergyTable.Category.TRANSFORM) {
             return toolCost != null
                     && toolCost.descriptorId().equals(station.id())
@@ -3613,14 +3623,22 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         long variantResolutionNanos = 0;
         long previewSimulationNanos = 0;
         int variants = 0;
+        Map<ResourceLocation, Boolean> stationAvailability = new HashMap<>();
         for (CraftableRecipeCatalog.Candidate candidate : candidates) {
             long variantStarted = System.nanoTime();
-            RecipeHolder<?> holder =
-                    level.getRecipeManager().byKey(candidate.id()).orElse(null);
-            RecipeAdapterMatch baseMatch = holder == null ? null : candidate.match(holder);
-            if (baseMatch != null && !isStationAvailable(core, baseMatch)) {
-                baseMatch = null;
+            boolean stationAvailable = candidate.toolCost() == null
+                    ? stationAvailability.computeIfAbsent(
+                            candidate.stationDescriptorId(),
+                            id -> isStationAvailable(core, id, null))
+                    : isStationAvailable(
+                            core,
+                            candidate.stationDescriptorId(),
+                            candidate.toolCost());
+            if (!stationAvailable) {
+                variantResolutionNanos += System.nanoTime() - variantStarted;
+                continue;
             }
+            RecipeAdapterMatch baseMatch = candidate.match();
             if (baseMatch != null && !hasPotentialRecipeInputs(
                     baseMatch, core, availability)) {
                 baseMatch = null;

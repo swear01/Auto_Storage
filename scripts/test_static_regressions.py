@@ -4352,6 +4352,18 @@ class StaticRegressionTests(unittest.TestCase):
             "syncNanos",
         ]:
             self.assertIn(phase, menu)
+        craftable = self.java_block(
+            menu,
+            r"\bprivate\s+CraftableBuildResult\s+buildCraftableDisplayStacks\s*\(",
+            "CraftingTerminalMenu.buildCraftableDisplayStacks",
+        )
+        self.assertNotIn("getRecipeManager().byKey", craftable)
+        self.assertIn("candidate.match()", craftable)
+        self.assertIn("stationAvailability.computeIfAbsent", craftable)
+        self.assertLess(
+            craftable.index("stationAvailability.computeIfAbsent"),
+            craftable.index("candidate.match()"),
+        )
         self.assertIn("candidateIndex(RecipeHolder<?> holder, Level level)", adapter)
         self.assertIn("typedCandidateIndex", family)
 

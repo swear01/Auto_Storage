@@ -105,8 +105,10 @@ final class CraftableRecipeCatalog {
             int[][] requirements = requiredItemGroups(match, level);
             boolean fullVariantSnapshot = !match.candidateIndex().isExhaustive();
             entries.add(new CatalogEntry(
-                    holder.id(),
+                    holder,
                     match.adapter(),
+                    match.stationDescriptorId(),
+                    match.cost().toolCost().orElse(null),
                     requirements));
             java.util.Set<Item> indexedItems = new java.util.LinkedHashSet<>();
             if (fullVariantSnapshot) unindexed.add(index);
@@ -191,8 +193,16 @@ final class CraftableRecipeCatalog {
             RecipeAdapter adapter,
             CatalogEntry entry
     ) {
-        RecipeAdapterMatch match(RecipeHolder<?> holder) {
-            return entry.match(holder);
+        ResourceLocation stationDescriptorId() {
+            return entry.stationDescriptorId();
+        }
+
+        RecipeAdapterMatch.ToolCost toolCost() {
+            return entry.toolCost();
+        }
+
+        RecipeAdapterMatch match() {
+            return entry.match();
         }
 
         List<RecipeAdapterMatch> resolveVariants(
@@ -207,17 +217,25 @@ final class CraftableRecipeCatalog {
     private static final class CatalogEntry {
         private final ResourceLocation id;
         private final RecipeAdapter adapter;
+        private final RecipeHolder<?> holder;
+        private final ResourceLocation stationDescriptorId;
+        private final RecipeAdapterMatch.ToolCost toolCost;
         private final int[][] requiredItemGroups;
         private RecipeAdapterMatch match;
         private List<RecipeAdapterMatch> fixedVariants;
 
         private CatalogEntry(
-                ResourceLocation id,
+                RecipeHolder<?> holder,
                 RecipeAdapter adapter,
+                ResourceLocation stationDescriptorId,
+                RecipeAdapterMatch.ToolCost toolCost,
                 int[][] requiredItemGroups
         ) {
-            this.id = id;
+            this.id = holder.id();
             this.adapter = adapter;
+            this.holder = holder;
+            this.stationDescriptorId = stationDescriptorId;
+            this.toolCost = toolCost;
             this.requiredItemGroups = requiredItemGroups;
         }
 
@@ -233,8 +251,16 @@ final class CraftableRecipeCatalog {
             return requiredItemGroups;
         }
 
-        private RecipeAdapterMatch match(RecipeHolder<?> holder) {
-            if (match == null || !match.isCurrentHolder(holder)) {
+        private ResourceLocation stationDescriptorId() {
+            return stationDescriptorId;
+        }
+
+        private RecipeAdapterMatch.ToolCost toolCost() {
+            return toolCost;
+        }
+
+        private RecipeAdapterMatch match() {
+            if (match == null) {
                 match = new RecipeAdapterMatch(
                         adapter,
                         holder,
