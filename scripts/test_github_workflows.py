@@ -276,6 +276,33 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn('git push origin main "v${version}"', readme)
         self.assertIn("目前版本以 `gradle.properties` 的唯一 `mod_version` 為準", notes)
 
+    def test_release_guide_and_project_icon_are_complete(self):
+        guide = self.read_required("docs/releasing.md")
+        for required in (
+            "Magic Storage for NeoForge",
+            "magic-storage-neoforge",
+            "All Rights Reserved",
+            "MODRINTH_TOKEN",
+            "CURSEFORGE_TOKEN",
+            "MODRINTH_PROJECT_ID",
+            "CURSEFORGE_PROJECT_ID",
+            "publishing",
+            "gh run rerun",
+            "SHA-256",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
+        icon = ROOT / "art/release/magic-storage-project-icon.png"
+        self.assertTrue(icon.exists(), "missing release project icon")
+        data = icon.read_bytes()
+        self.assertEqual(b"\x89PNG\r\n\x1a\n", data[:8])
+        self.assertEqual((512, 512), (
+            int.from_bytes(data[16:20], "big"),
+            int.from_bytes(data[20:24], "big"),
+        ))
+        self.assertLess(len(data), 2 * 1024 * 1024)
+
     def test_current_manual_gui_log_check_does_not_pin_historical_version_or_selftest_total(self):
         notes = self.read_required("docs/notes.md")
         manual_section = notes.split("GUI 測試項目仍由當次變更動態決定", 1)[1].split("## Reference Source", 1)[0]

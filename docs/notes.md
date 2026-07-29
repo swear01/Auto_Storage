@@ -1,5 +1,7 @@
 # Notes
 
+2026-07-29 public alpha publishing runbook：Modrinth/CurseForge/GitHub共用名稱、slug、summary、All Rights Reserved、512×512 icon與SHA固定於[`docs/releasing.md`](releasing.md)；同一文件是`publishing` environment、project IDs、tokens、annotated tag、三平台jar SHA-256、partial failure、roll-forward與secret rotation的active maintainer contract。Token只可經GitHub secret prompt輸入，不能進chat、commit、log或shell argument。
+
 2026-07-29 Linux cold-Craftable correction：NeoForge `DataComponentIngredient` 雖然 `isSimple=false`，其 `HolderSet<Item>` 仍完整列出所有可接受的item type；候選索引因此可按item type視為exhaustive，但實際可用量仍必須逐exact component variant執行原predicate，且絕不能誤用simple ingredient的item-total捷徑。其他無法證明item coverage完整的custom ingredient仍保留non-exhaustive full scan。這修正GitHub Actions同一cold gate連續出現的56.481/73.663 ms：本機三個針對性10k cold process為6.842/7.769/11.922 ms，完整release gate另為21.647 ms，30k為9.952 ms，皆保留83個Craftable outputs；worst observed shared index 7,864,824 bytes、per-menu 114,384 bytes，仍通過`<8 MiB`/`<128 KiB`。
 
 2026-07-29 final-review data-conservation correction：Smithing component canonical identity cache的provider與`DataComponentMap`兩層key都必須是weak；只讓外層provider為weak、內層使用`HashMap`仍會在長生命server中永久累積玩家曾出現的component variants。Typed Export在external insert後若endpoint identity已更換，必須先嘗試從captured handler反向取回；舊handler拒絕時，`inserted - reversed`已無法由live endpoint取得，exact差額與Core未能還原的remainder一併進目前Bus escrow/recovery。若endpoint identity仍相同則不可複製仍可到達的accepted amount。

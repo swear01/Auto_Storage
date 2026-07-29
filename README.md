@@ -61,6 +61,9 @@ GitHub Actions runs on pushes to `main`, pull requests, and manual dispatch:
 - `.github/workflows/client-smoke.yml` is manual-only (`workflow_dispatch`); it stages required Patchouli, pinned Fusion, and the exact NeoForge 1.21.1 Modrinth runtime matching the newest compatible EMI release before launching HeadlessMC / MC-Runtime-Test. The client step is capped at 10 minutes; it catches client boot/resource crashes but is not GUI layout approval.
 - `.github/workflows/release.yml` runs when a tag `v<mod_version>` is pushed, verifies the tag matches `gradle.properties`, repeats every CI gate including all fifteen GameTest runs, generates release notes, and publishes one alpha jar to GitHub, Modrinth, and CurseForge. The `publishing` environment must provide secrets `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`, plus variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_ID`; missing configuration fails closed before publication.
 
+Maintainer setup, publication, hash verification, retry, rollback, and secret
+rotation are documented in [`docs/releasing.md`](docs/releasing.md).
+
 Release example:
 
 ```bash
