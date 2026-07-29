@@ -102,6 +102,13 @@ final class FixtureManaBlockStrategy implements StorageResourceBlockStrategy {
         if (handlers != null) handlers.remove(pos.immutable());
     }
 
+    static synchronized void rejectExtraction(Level level, BlockPos pos) {
+        Map<BlockPos, Handler> handlers = HANDLERS.get(level);
+        Handler handler = handlers == null ? null : handlers.get(pos.immutable());
+        if (handler == null) throw new IllegalStateException("Missing fixture resource handler");
+        handler.rejectExtraction = true;
+    }
+
     private static synchronized boolean isolated(Level level, BlockPos pos) {
         java.util.Set<BlockPos> positions = ISOLATED_HANDLERS.get(level);
         return positions != null && positions.contains(pos);
@@ -162,6 +169,7 @@ final class FixtureManaBlockStrategy implements StorageResourceBlockStrategy {
         private final BlockPos pos;
         private final Behavior behavior;
         private final Map<StorageResourceKey, Long> storage;
+        private boolean rejectExtraction;
 
         private Handler(
                 Level level,
@@ -220,6 +228,7 @@ final class FixtureManaBlockStrategy implements StorageResourceBlockStrategy {
                 Runnable callback = takeSimulationCallback(level, pos);
                 if (callback != null) callback.run();
             }
+            if (!simulate && rejectExtraction) return 0;
             long stored = getAmount(key);
             long requested = behavior == Behavior.OVERDRAWING_SOURCE && !simulate
                     ? Math.addExact(amount, 500)

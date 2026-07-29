@@ -887,6 +887,13 @@ class StaticRegressionTests(unittest.TestCase):
             r"recipe::is(?:Template|Base|Addition)Ingredient",
             smithing_inputs,
         )))
+        component_identity = self.java_block(
+            adapters,
+            r"private static Optional<String> componentIdentity\(",
+            "component identity cache",
+        )
+        self.assertIn("ignored -> new WeakHashMap<>()", component_identity)
+        self.assertNotIn("ignored -> new HashMap<>()", component_identity)
 
     def test_emi_sends_context_amount_and_destination_for_exact_backing_recipe(self):
         text = self.read_required("src/main/java/com/swearprom/magicstorage/magic_storage/compat/MagicStorageEmiPlugin.java")

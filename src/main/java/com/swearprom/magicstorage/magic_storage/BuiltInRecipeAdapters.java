@@ -607,7 +607,7 @@ final class BuiltInRecipeAdapters {
     private static Optional<String> componentIdentity(ItemKey key, Level level) {
         synchronized (COMPONENT_IDENTITY_CACHE) {
             return COMPONENT_IDENTITY_CACHE
-                    .computeIfAbsent(level.registryAccess(), ignored -> new HashMap<>())
+                    .computeIfAbsent(level.registryAccess(), ignored -> new WeakHashMap<>())
                     .computeIfAbsent(
                             key.components(),
                             ignored -> canonicalComponents(

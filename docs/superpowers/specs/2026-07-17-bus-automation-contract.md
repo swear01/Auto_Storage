@@ -336,7 +336,7 @@ changed field cancels the plan without mutation and lets the next cooldown retry
 5. Insert into the target using actual returned remainders.
 6. After the external insertion callback, revalidate the endpoint. If it was
    replaced, reverse-extract the exact accepted amount from the old target before
-   restoring it to Core. Any accepted item amount the detached target refuses to
+   restoring it to Core. Any accepted item or typed amount the detached target refuses to
    return is conserved through the exact recovery path rather than counted as a
    successful delivery. If conflict or another re-entrant mutation makes typed
    restoration impossible, preserve that exact remainder in Bus escrow/recovery.
@@ -370,7 +370,7 @@ changed field cancels the plan without mutation and lets the next cooldown retry
   the detached source; every item or typed amount already extracted is preserved in
   current Bus escrow or a recovery drop. If Export's target is replaced, reversible
   accepted amount is first reclaimed from the old endpoint and returned to Core;
-  an exact item deficit the detached endpoint refuses to return is emitted through
+  an exact item or typed deficit the detached endpoint refuses to return is emitted through
   the recovery path before any remaining amount enters escrow/recovery.
 - Normal/Wrench/Creative/no-drop/explosion/replacement removal first recovers escrow
   to Core or preserves it in an owner-stripped Bus recovery drop. Every live Bus
@@ -531,7 +531,7 @@ item capability but no dedicated present-mod CI job yet.
   escrows exact typed remainder after re-entrant target refusal;
 - active Import and Export reject an endpoint replaced during simulation or execute;
   Import preserves the already-extracted exact stack without touching the detached
-  source, while Export reverse-reclaims accepted items and emits the exact deficit
+  source, while Export reverse-reclaims accepted item/typed resources and emits the exact deficit
   when the detached target refuses reclaim;
 - directionless Import has no active pull and only accepts configured sides/null;
 - directionless Export has no active push and exposes only filtered extraction;

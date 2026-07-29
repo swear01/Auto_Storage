@@ -125,7 +125,9 @@ final class BusTypedResourceTransfer {
                             key, inserted, false)));
                     long unrestored = restoreToCore(
                             plan, key, Math.addExact(extracted - inserted, reversed), actor);
-                    preserve(plan, escrow, key, unrestored, "Export stale target rollback");
+                    long unreclaimed = plan.sameEndpointIdentity() ? 0 : inserted - reversed;
+                    preserve(plan, escrow, key, Math.addExact(unreclaimed, unrestored),
+                            "Export stale target rollback");
                     return false;
                 }
                 long unrestored = restoreToCore(plan, key, extracted - inserted, actor);
@@ -288,12 +290,10 @@ final class BusTypedResourceTransfer {
                     || core.getTopologyRevision() != topologyRevision
                     || !core.getConnectedBlocks().contains(busPos)
                     || !MagicStorage.hasLoadedNetworkPath(level, path, busPos, corePos)
-                    || !level.hasChunkAt(endpointPos)
-                    || !level.getBlockState(endpointPos).equals(endpointState)) {
+                    || !sameEndpointIdentity()) {
                 return false;
             }
-            return StorageResourceBlockStrategies.find(level, endpointPos, endpointSide).stream()
-                    .anyMatch(endpoint::sameIdentity);
+            return true;
         }
 
         private boolean sameBusIdentity() {
@@ -308,6 +308,14 @@ final class BusTypedResourceTransfer {
                     && level.getBlockEntity(corePos) == core
                     && !core.isConflicted()
                     && networkId.equals(core.getNetworkId());
+        }
+
+        private boolean sameEndpointIdentity() {
+            return level.hasChunkAt(endpointPos)
+                    && level.getBlockState(endpointPos).equals(endpointState)
+                    && StorageResourceBlockStrategies.find(
+                            level, endpointPos, endpointSide).stream()
+                            .anyMatch(endpoint::sameIdentity);
         }
     }
 }

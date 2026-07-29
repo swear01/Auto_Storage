@@ -490,12 +490,16 @@ public final class BusTypedRollbackIntegrationTests {
             FixtureManaBlockStrategy.runOnNextTargetInsert(
                     level,
                     sourcePos,
-                    () -> FixtureManaBlockStrategy.replaceHandler(level, sourcePos));
+                    () -> {
+                        FixtureManaBlockStrategy.rejectExtraction(level, sourcePos);
+                        FixtureManaBlockStrategy.replaceHandler(level, sourcePos);
+                    });
             exporter.tick();
-            if (core.getResourceAmount(executeEndpointStale) != TRANSFER_BATCH
+            if (core.getResourceAmount(executeEndpointStale) != 0
                     || FixtureManaBlockStrategy.handler(
                     level, sourcePos).getAmount(executeEndpointStale) != 0
-                    || exporter.getPendingResourceAmount(executeEndpointStale) != 0) {
+                    || exporter.getPendingResourceAmount(
+                    executeEndpointStale) != TRANSFER_BATCH) {
                 helper.fail("Export lost resources in a detached target after execute: core="
                         + core.getResourceAmount(executeEndpointStale)
                         + ", live=" + FixtureManaBlockStrategy.handler(
