@@ -59,6 +59,10 @@ class GitHubWorkflowTests(unittest.TestCase):
             "./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log",
         ),
         (
+            "Run Extended Crafting GameTest server",
+            "./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log",
+        ),
+        (
             "Run optional compatibility matrix GameTest server",
             "./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/compatibility-matrix-gametest.log",
         ),
@@ -118,6 +122,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("./gradlew runEvilCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/evilcraft-gametest.log", text)
         self.assertIn("./gradlew runPowahGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/powah-gametest.log", text)
         self.assertIn("./gradlew runIndustrialForegoingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/industrial-foregoing-gametest.log", text)
+        self.assertIn("./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log", text)
         self.assertIn("./gradlew runCreateGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/create-gametest.log", text)
         self.assertIn("./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log", text)
         self.assertIn("PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts 2>&1 | tee build/ci-logs/python-unittest.log", text)
@@ -154,10 +159,19 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("name: Release", text)
         self.assertIn("'v*.*.*'", text)
         self.assertIn("contents: write", text)
-        self.assertIn("actions/checkout@v7", text)
+        self.assertIn(
+            "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            text,
+        )
         self.assertIn("fetch-depth: 0", text)
-        self.assertIn("actions/setup-java@v5", text)
-        self.assertIn("gradle/actions/setup-gradle@v6", text)
+        self.assertIn(
+            "actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95",
+            text,
+        )
+        self.assertIn(
+            "gradle/actions/setup-gradle@90ddb51e90a5fd9ba75f40cf85156b7b41bf76a3",
+            text,
+        )
         self.assertIn("grep '^mod_version=' gradle.properties", text)
         self.assertIn('"v${VERSION}" != "$TAG"', text)
         self.assertIn("./gradlew build --console=plain --no-daemon 2>&1 | tee build/ci-logs/build.log", text)
@@ -176,11 +190,31 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("git status --porcelain -- src/generated/resources src/main/resources", text)
         self.assertIn("Generate release notes", text)
         self.assertIn("git log --pretty='- %s (%h)'", text)
-        self.assertIn("gh release create", text)
-        self.assertIn("--notes-file build/release-notes.md", text)
+        self.assertIn("environment: publishing", text)
+        self.assertIn("Check publisher configuration", text)
+        self.assertIn("MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}", text)
+        self.assertIn("CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}", text)
+        self.assertIn("MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}", text)
+        self.assertIn("CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}", text)
+        self.assertIn(
+            "uses: Kira-NT/mc-publish@52307b03863581dec6b652b83e597aec02ebb075",
+            text,
+        )
+        self.assertIn("github-prerelease: true", text)
+        self.assertIn("version-type: alpha", text)
+        self.assertIn("loaders: neoforge", text)
+        self.assertIn("game-versions: 1.21.1", text)
+        self.assertIn("fRiHVvU7", text)
+        self.assertIn("580555", text)
+        self.assertIn("nU0bVIaL", text)
+        self.assertIn("306770", text)
+        self.assertIn("changelog-file: build/release-notes.md", text)
         self.assertIn("name: magic-storage-release-logs", text)
-        self.assertIn("build/libs/magic_storage-*.jar", text)
-        self.assertIn("GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}", text)
+        self.assertIn(
+            "files: build/libs/magic_storage-${{ steps.release-meta.outputs.version }}.jar",
+            text,
+        )
+        self.assertIn("github-token: ${{ secrets.GITHUB_TOKEN }}", text)
         self.assertIn("Verify minimum and latest compatible EMI releases", text)
         self.assertIn('MIN_EMI="$(sed -n \'s/^emi_version=//p\' gradle.properties)"', text)
         self.assertIn('MIN_EMI_RUNTIME="$(sed -n \'s/^emi_runtime_version=//p\' gradle.properties)"', text)
@@ -194,10 +228,24 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn('MIN_EMI_RUNTIME="$(python3 scripts/resolve_emi_runtime.py "$MIN_EMI")"', text)
         self.assertIn('bash scripts/stage_emi_runtime.sh "$MIN_EMI" "$MIN_EMI_RUNTIME"', text)
         self.assertIn("build/ci-logs/emi-runtime.log", text)
-        self.assertNotIn("modrinth-publish", text.lower())
-        self.assertNotIn("curseforge", text.lower())
         self.assertNotIn("runClient", text)
         self.assertNotIn("xvfb-run", text)
+
+    def test_release_pins_actions_and_gradle_distribution(self):
+        text = self.read_required(".github/workflows/release.yml")
+        action_lines = [
+            line.strip()
+            for line in text.splitlines()
+            if line.strip().startswith("uses:")
+        ]
+        for line in action_lines:
+            with self.subTest(action=line):
+                self.assertRegex(line, r"^uses: [^@]+@[0-9a-f]{40}$")
+        wrapper = self.read_required("gradle/wrapper/gradle-wrapper.properties")
+        self.assertIn(
+            "distributionSha256Sum=72f44c9f8ebcb1af43838f45ee5c4aa9c5444898b3468ab3f4af7b6076c5bc3f",
+            wrapper,
+        )
 
     def test_public_repo_docs_explain_ci_cd_and_manual_gui_gate(self):
         readme = self.read_required("README.md")
