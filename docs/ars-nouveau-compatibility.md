@@ -2,7 +2,7 @@
 
 ## Status and version policy
 
-Ars Nouveau is optional. Magic Storage registers Source, stations, and recipe
+Ars Nouveau is optional. Auto Storage registers Source, stations, and recipe
 families only when the mod is loaded; the normal dedicated server does not link
 Ars Nouveau classes.
 
@@ -44,7 +44,7 @@ and reset damage to zero.
   eight pedestal ingredients are rejected.
 - Any plan above the shared nine-input contract is rejected.
 - A pedestal alternative set that mixes retained and consumed items is rejected.
-- Magic Storage does not drive external Ars Nouveau machines or register
+- Auto Storage does not drive external Ars Nouveau machines or register
   third-party EMI workstation metadata.
 
 ## Verification

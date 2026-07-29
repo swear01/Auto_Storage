@@ -1,6 +1,6 @@
 # Recipe Family API
 
-Magic Storage automatically supports recipes from any namespace when their concrete recipe class is one of the built-in exact families. Addons only need this API for a custom `RecipeType` plus custom concrete recipe class.
+Auto Storage automatically supports recipes from any namespace when their concrete recipe class is one of the built-in exact families. Addons only need this API for a custom `RecipeType` plus custom concrete recipe class.
 
 ## Registration
 
@@ -37,11 +37,11 @@ The first public factory is intentionally narrow:
 - exact recipe class and exact `RecipeType` identity;
 - one non-empty `Ingredient`, consumed once per craft;
 - one deterministic output stack; item components and count are preserved exactly;
-- free cost, an existing Magic Storage `EnergyCost`, descriptor-keyed station work, or station work plus Fuel through `RecipeFamilyCost.energy(...)`, `stationWork(...)`, or `stationWorkAndEnergy(...)`; amounts must be non-negative, required work must be positive, at least one energy amount must be positive, and two positive energy amounts cannot target the same pool (`free()` represents zero cost);
+- free cost, an existing Auto Storage `EnergyCost`, descriptor-keyed station work, or station work plus Fuel through `RecipeFamilyCost.energy(...)`, `stationWork(...)`, or `stationWorkAndEnergy(...)`; amounts must be non-negative, required work must be positive, at least one energy amount must be positive, and two positive energy amounts cannot target the same pool (`free()` represents zero cost);
 - one existing `RecipePresentationKind`;
 - no crafting remainder, chance output, source-dependent output, fluid, player/world/event callback, or arbitrary mutation hook.
 
-The input, output, and cost functions must be deterministic and must not mutate their recipe, arguments, registries, storage, player, or world. Magic Storage owns candidate indexing, current-holder validation, checked count multiplication, station checks, simulate-then-commit, delivery, capacity planning, and rollback. Empty input/output or invalid registration is rejected; there is no generic reflection, serializer-name, `Recipe#getIngredients()`, or EMI-widget fallback.
+The input, output, and cost functions must be deterministic and must not mutate their recipe, arguments, registries, storage, player, or world. Auto Storage owns candidate indexing, current-holder validation, checked count multiplication, station checks, simulate-then-commit, delivery, capacity planning, and rollback. Empty input/output or invalid registration is rejected; there is no generic reflection, serializer-name, `Recipe#getIngredients()`, or EMI-widget fallback.
 
 If a custom family does not fit this complete contract, do not approximate it with this factory. A new reusable factory must first model all inputs, outputs, components, remainders, costs, and side effects server-authoritatively. External-machine send-and-wait processing is outside this mod's installed-station magic-crafting scope.
 
@@ -90,7 +90,7 @@ The overload without an eligibility predicate retains the global fail-closed rul
 
 ## Current optional integrations
 
-- **Iron Furnaces:** contributes concrete Furnace station variants; recipes remain the existing exact smelting family while rate comes from live configured cook time. Recipe-viewer ownership stays with Iron Furnaces: its JEI plugin registers Smelting catalysts and the GUI support pack uses TMRV to expose them to EMI without installing JEI. Magic Storage never registers third-party EMI workstations.
+- **Iron Furnaces:** contributes concrete Furnace station variants; recipes remain the existing exact smelting family while rate comes from live configured cook time. Recipe-viewer ownership stays with Iron Furnaces: its JEI plugin registers Smelting catalysts and the GUI support pack uses TMRV to expose them to EMI without installing JEI. Auto Storage never registers third-party EMI workstations.
 - **Farmer's Delight:** Cooking Pot plans include 1–6 ingredients, exact serving container, alternative-specific container remainders, `cookTime` station work, matching Furnace Fuel, and one fixed item output.
 - **Mekanism:** all nine factory-backed families are present. Crushing, Enriching, and Smelting use sized one-item inputs; Combining uses two sized item inputs; Compressing, Purifying, Injecting, and Infusing use sized item + chemical inputs; deterministic Sawing accepts no random secondary output, or an exact 100% secondary remainder. Per-tick chemical use is normalized across the basic machine's 200-tick work cost with checked multiplication. Pressurized Reaction uses sized item/fluid/chemical inputs, checked `energyRequired × duration` FE, duration station work, and deterministic item-primary, item-plus-chemical, or chemical-only output. The deterministic single-block extension adds Chemical Oxidizer, Chemical Infuser, Electrolytic Separator, Chemical Dissolution Chamber, Chemical Washer, Chemical Crystallizer, Isotopic Centrifuge, Antiprotonic Nucleosynthesizer, Pigment Extractor, Pigment Mixer, and Painting Machine. Their exact Mekanism ingredient amounts and item/fluid/chemical outputs use one typed transaction. The 5-second/10-second machine durations, recipe-specific Nucleosynthesizer duration, checked per-tick chemical multiplication, one-operation-per-tick families, and Electrolysis energy multiplier are preserved as descriptor work costs. Electrolysis commits both chemical outputs atomically; one is the selectable primary and the second is a deterministic remainder output. Chemical/fluid-only selection preserves the exact resource key and amount and is Storage-only. Probabilistic Sawing and unsupported output shapes remain fail closed. The owning Mekanism mod remains responsible for EMI workstation metadata.
 - **Botania:** exact common Mana Infusion, Runic Altar, Terrestrial Agglomeration, Petal Apothecary, and Elven Trade classes each require their matching installed instant station. Mana Infusion retains its supported block catalyst; Runic Altar retains catalyst ingredients and returns exact crafting remainders; Petal Apothecary consumes 1000 units of stored water; Elven Trade commits every fixed output. Mana, water, items, catalysts, remainders, and outputs use one typed transaction. The plan stays within the shared nine-input contract and rejects unsupported custom ingredient/state semantics rather than approximating them.
@@ -108,7 +108,7 @@ Every optional recipe compatibility module loads only after `ModList` confirms t
 
 ## Lifecycle and sides
 
-- Register on the mod event bus before NeoForge registries freeze. Magic Storage freezes and validates its immutable adapter snapshot at common setup; runtime hot registration is unsupported.
+- Register on the mod event bus before NeoForge registries freeze. Auto Storage freezes and validates its immutable adapter snapshot at common setup; runtime hot registration is unsupported.
 - The recipe-family registry is server policy. Dedicated servers never load EMI or screen classes through this API.
 - External families are ordered after built-ins and then by full registry ID. Addons cannot supply a priority or shadow a built-in exact class/type pair.
 - A CI-tested addon version is representative evidence only. Addon metadata should use the compatibility range it actually supports rather than copying a single CI artifact version as an exact player-facing pin.

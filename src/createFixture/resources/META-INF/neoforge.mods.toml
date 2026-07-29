@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="magic_storage_create_fixture"
 version="1.0.0"
-displayName="Magic Storage Create Fixture"
+displayName="Auto Storage Create Fixture"
 description='''Repository-owned Create recipe compatibility fixture.'''
 
 [[dependencies.magic_storage_create_fixture]]

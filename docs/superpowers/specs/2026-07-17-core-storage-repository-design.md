@@ -32,7 +32,7 @@ Relevant upstream source:
 - [`AEComponents.STORAGE_CELL_INV`](https://github.com/AppliedEnergistics/Applied-Energistics-2/blob/fd8b717a405672ce4f65ba540f1db8c91317daa4/src/main/java/appeng/api/ids/AEComponents.java#L248-L253)
 - [`DriveBlockEntity` persistence of its cell stacks](https://github.com/AppliedEnergistics/Applied-Energistics-2/blob/fd8b717a405672ce4f65ba540f1db8c91317daa4/src/main/java/appeng/blockentity/storage/DriveBlockEntity.java#L416-L423)
 
-Literal AE2-style cells are not sufficient here: putting a large Magic Storage payload into an ItemStack component inside the Core chunk would still grow that chunk. Magic Storage adopts the bounded-segment and delayed-encoding ideas, not the chunk ownership model.
+Literal AE2-style cells are not sufficient here: putting a large Auto Storage payload into an ItemStack component inside the Core chunk would still grow that chunk. Auto Storage adopts the bounded-segment and delayed-encoding ideas, not the chunk ownership model.
 
 ### Refined Storage 2
 
@@ -43,7 +43,7 @@ Relevant upstream source:
 - [`StorageRepositoryImpl` UUID-to-storage SavedData repository](https://github.com/refinedmods/refinedstorage2/blob/0643e6f4bc25f12dc01893916c53d393ecdc08d0/refinedstorage-common/src/main/java/com/refinedmods/refinedstorage/common/storage/StorageRepositoryImpl.java#L24-L100)
 - [`StorageBlockBlockEntity` UUID reference](https://github.com/refinedmods/refinedstorage2/blob/0643e6f4bc25f12dc01893916c53d393ecdc08d0/refinedstorage-common/src/main/java/com/refinedmods/refinedstorage/common/storage/storageblock/StorageBlockBlockEntity.java#L49-L120)
 
-Magic Storage adopts this world-repository ownership model, then adds bounded inventory segments, explicit runtime attachment ownership, and recovery-token indirection.
+Auto Storage adopts this world-repository ownership model, then adds bounded inventory segments, explicit runtime attachment ownership, and recovery-token indirection.
 
 ## Goals
 

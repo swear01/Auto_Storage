@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="magic_storage_powah_fixture"
 version="1.0.0"
-displayName="Magic Storage Powah Fixture"
+displayName="Auto Storage Powah Fixture"
 description='''Repository-owned Powah Energizing and FE compatibility fixture.'''
 
 [[dependencies.magic_storage_powah_fixture]]

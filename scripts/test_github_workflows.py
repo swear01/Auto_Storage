@@ -346,6 +346,30 @@ class GitHubWorkflowTests(unittest.TestCase):
             with self.subTest(path=path.relative_to(ROOT)):
                 self.assertNotIn("All Rights Reserved", path.read_text())
 
+    def test_current_public_name_reaches_active_docs_and_runtime_diagnostics(self):
+        for path in ROOT.joinpath("docs").rglob("*.md"):
+            for line_number, line in enumerate(path.read_text().splitlines(), 1):
+                if "Magic Storage" in line and "Terraria" not in line:
+                    self.fail(
+                        f"stale public name in {path.relative_to(ROOT)}:{line_number}"
+                    )
+
+        for path in ROOT.joinpath("src").rglob("*"):
+            if path.is_file() and path.suffix in {".java", ".json", ".mcmeta", ".toml"}:
+                with self.subTest(path=path.relative_to(ROOT)):
+                    self.assertNotIn("Magic Storage", path.read_text())
+
+        for path in ROOT.joinpath("scripts").glob("*.py"):
+            if path.name.startswith("test_"):
+                continue
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertNotIn("Magic Storage", path.read_text())
+
+    def test_current_release_evidence_uses_latest_python_total(self):
+        for relative_path in ("docs/notes.md", "docs/plan.md"):
+            with self.subTest(path=relative_path):
+                self.assertIn("Python 302", self.read_required(relative_path))
+
     def test_current_manual_gui_log_check_does_not_pin_historical_version_or_selftest_total(self):
         notes = self.read_required("docs/notes.md")
         manual_section = notes.split("GUI 測試項目仍由當次變更動態決定", 1)[1].split("## Reference Source", 1)[0]

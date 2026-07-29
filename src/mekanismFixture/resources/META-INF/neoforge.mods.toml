@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="magic_storage_mekanism_fixture"
 version="1.0.0"
-displayName="Magic Storage Mekanism Fixture"
+displayName="Auto Storage Mekanism Fixture"
 description='''Repository-owned integration fixture for optional chemical storage.'''
 
 [[dependencies.magic_storage_mekanism_fixture]]

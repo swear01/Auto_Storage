@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="magic_storage_evilcraft_fixture"
 version="1.0.0"
-displayName="Magic Storage EvilCraft Fixture"
+displayName="Auto Storage EvilCraft Fixture"
 description='''Repository-owned integration fixture for optional EvilCraft Blood and recipes.'''
 
 [[dependencies.magic_storage_evilcraft_fixture]]

@@ -6,7 +6,7 @@
 
 **Goal:** Make Storage Terminal and Crafting Terminal share one adaptive UI platform, correct server-owned grid quantities and sorting, render exact recipes through EMI's public widgets with an explicit native fallback, add atomic output routing, and replace installed axes with finite-or-infinite Axe Energy.
 
-**Architecture:** Preserve separate menu registrations but introduce shared profile-driven terminal geometry, controls, display metadata, and comparators. The server remains authoritative for inventory, recipe identity, recipe presentation, destination, station state, and tool energy. Client-only EMI code is isolated behind a Magic Storage renderer interface and a guarded compatibility bootstrap.
+**Architecture:** Preserve separate menu registrations but introduce shared profile-driven terminal geometry, controls, display metadata, and comparators. The server remains authoritative for inventory, recipe identity, recipe presentation, destination, station state, and tool energy. Client-only EMI code is isolated behind a Auto Storage renderer interface and a guarded compatibility bootstrap.
 
 **Tech Stack:** Java 21, Minecraft 1.21.1, NeoForge 21.1, Gradle ModDev, EMI public API with minimum baseline 1.1.24 and release range `[1.1.24,2)`, NeoForge GameTest, project SelfTest, Python static regression tests, Replicate texture workflow.
 
@@ -39,7 +39,7 @@
 - Modify: `docs/overview.md`
 - Modify: `docs/notes.md`
 
-**RED:** Add tests proving Name, Quantity, Mod, and full-ID ordering share deterministic tie-breakers; synthetic display metadata round-trips `0`, `64`, values above `Integer.MAX_VALUE`, and `Long.MAX_VALUE`; stripping only the Magic Storage marker preserves the stack's original components; `ItemKey` never contains the marker; synthetic zero-count entries remain visible and non-extractable; and Craftable overlays report the exact Core amount rather than potential craft yield. Run `./gradlew runGameTestServer` and confirm failures are caused by missing Mod sorting/display metadata and old Craftable count semantics.
+**RED:** Add tests proving Name, Quantity, Mod, and full-ID ordering share deterministic tie-breakers; synthetic display metadata round-trips `0`, `64`, values above `Integer.MAX_VALUE`, and `Long.MAX_VALUE`; stripping only the Auto Storage marker preserves the stack's original components; `ItemKey` never contains the marker; synthetic zero-count entries remain visible and non-extractable; and Craftable overlays report the exact Core amount rather than potential craft yield. Run `./gradlew runGameTestServer` and confirm failures are caused by missing Mod sorting/display metadata and old Craftable count semantics.
 
 **GREEN:** Add the one display-stack helper and one comparator source, route Storage and Craftable sorting through it, and make Craftable entries carry exact stored amounts while remaining server-owned synthetic stacks. Strip metadata before all identity, insertion, output, and recipe comparisons. Run `./gradlew runGameTestServer`.
 

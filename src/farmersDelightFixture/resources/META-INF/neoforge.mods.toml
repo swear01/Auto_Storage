@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="magic_storage_farmers_delight_fixture"
 version="1.0.0"
-displayName="Magic Storage Farmer's Delight Fixture"
+displayName="Auto Storage Farmer's Delight Fixture"
 description='''Repository-owned Cooking Pot compatibility fixture.'''
 
 [[dependencies.magic_storage_farmers_delight_fixture]]

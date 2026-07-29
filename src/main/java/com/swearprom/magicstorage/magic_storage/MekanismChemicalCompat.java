@@ -221,7 +221,7 @@ public final class MekanismChemicalCompat {
 
         @Override
         public void setChemicalInTank(int tank, ChemicalStack chemicalStack) {
-            throw new UnsupportedOperationException("Magic Storage chemical tanks are transactional");
+            throw new UnsupportedOperationException("Auto Storage chemical tanks are transactional");
         }
 
         @Override

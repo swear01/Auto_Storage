@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="magic_storage_iron_furnaces_fixture"
 version="1.0.0"
-displayName="Magic Storage Iron Furnaces Fixture"
+displayName="Auto Storage Iron Furnaces Fixture"
 description='''Repository-owned integration fixture for optional Iron Furnaces workstation variants.'''
 
 [[dependencies.magic_storage_iron_furnaces_fixture]]

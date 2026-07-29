@@ -4,7 +4,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a transactionally regenerated true-void Prism test world with a deterministic Magic Storage laboratory, preloaded Core baseline, fixed navigation hotbar, and reusable reset.
+**Goal:** Build a transactionally regenerated true-void Prism test world with a deterministic Auto Storage laboratory, preloaded Core baseline, fixed navigation hotbar, and reusable reset.
 
 **Architecture:** Keep `New World/level.dat` as a compatibility metadata source, but rewrite only the overworld generator to the exact vanilla flat-void codec shape and strip all copied runtime state before installing the generated datapack. Keep layout, preload, player kit, commands, and manifest generated from immutable Python data so coordinates and documentation cannot drift independently.
 

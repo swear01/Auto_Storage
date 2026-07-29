@@ -1,6 +1,6 @@
 # Extended Crafting Compatibility
 
-Magic Storage conditionally loads this adapter only when Extended Crafting is present.
+Auto Storage conditionally loads this adapter only when Extended Crafting is present.
 
 ## Supported
 
@@ -15,7 +15,7 @@ Magic Storage conditionally loads this adapter only when Extended Crafting is pr
 - Alternative items, exact counts, crafting remainders, output components, destination capacity,
   and rollback use the normal server-owned simulate-then-commit transaction.
 - EMI/TMRV remains responsible for the full visual 9×9 recipe diagram and workstation metadata.
-- Before the server Craftable catalog is prewarmed, Magic Storage reloads Extended Crafting's
+- Before the server Craftable catalog is prewarmed, Auto Storage reloads Extended Crafting's
   public Singularity registry after item tags are available. This prevents tag-backed
   Singularities from remaining cached as empty on the server while EMI sees them on the client.
 
@@ -45,7 +45,7 @@ that combined tag set.
 The `crafting-fuel-page` Prism scenario preloads an Ultimate Crafting Table and one of each
 of Extended Crafting's 19 default Singularity variants in the production repository format.
 Its scenario-owned datapack supplies the same test-only common-ingot tag values; these values are
-not shipped as Magic Storage gameplay data.
+not shipped as Auto Storage gameplay data.
 Fullscreen validation selects the real Ultimate Singularity, requires the complete EMI/TMRV 9×9
 public widget instead of the native 3×3 summary, checks inline `1/1` for every material, and
 wheels through the complete readable ledger.

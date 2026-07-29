@@ -1026,7 +1026,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "/200",
                 "TMRV",
                 "Iron Furnaces owns",
-                "Magic Storage does not register",
+                "Auto Storage does not register",
                 "Mekanism",
                 "Gases appears because",
                 "Other contains Axe Uses",

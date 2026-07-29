@@ -5,7 +5,7 @@ license="MIT"
 [[mods]]
 modId="magic_storage_recipe_fixture"
 version="1.0.0"
-displayName="Magic Storage Recipe Family Fixture"
+displayName="Auto Storage Recipe Family Fixture"
 description='''Repository-owned integration fixture for the public recipe-family API.'''
 
 [[dependencies.magic_storage_recipe_fixture]]

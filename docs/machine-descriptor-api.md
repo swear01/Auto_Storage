@@ -1,6 +1,6 @@
 # Machine Descriptor API
 
-Magic Storage exposes a NeoForge custom registry at `magic_storage:machine_descriptor` for addon-owned station and Transform descriptors. Registration is performed during the normal mod registry lifecycle; descriptor order, persistence, deterministic conversion, and live values remain server-owned.
+Auto Storage exposes a NeoForge custom registry at `magic_storage:machine_descriptor` for addon-owned station and Transform descriptors. Registration is performed during the normal mod registry lifecycle; descriptor order, persistence, deterministic conversion, and live values remain server-owned.
 
 ## Register from an addon
 
@@ -26,7 +26,7 @@ public AddonMod(IEventBus modBus) {
 }
 ```
 
-The registry key and `MachineDescriptor.id()` must be identical. IDs are persistent data keys and must never be reused for a different machine. All installed descriptors share a fixed bank of 256 menu/Core slots; Magic Storage refuses to start if the combined registry exceeds that limit.
+The registry key and `MachineDescriptor.id()` must be identical. IDs are persistent data keys and must never be reused for a different machine. All installed descriptors share a fixed bank of 256 menu/Core slots; Auto Storage refuses to start if the combined registry exceeds that limit.
 
 ## Descriptor kinds
 
@@ -85,7 +85,7 @@ The recipe preview always starts with the actually installed variant, then cycle
 - Menu slot count always remains fixed at 256, so adding or removing addon descriptors cannot produce client/server container-index drift.
 - This is registry-time addon registration, not runtime hot registration after NeoForge registries freeze. Any representative or accepted addon item must still exist on the client like other player-visible mod content.
 
-Registering a descriptor only adds its installation or Transform behavior and terminal presentation. A recipe from any namespace that resolves to one of Magic Storage's exact supported vanilla recipe classes automatically reuses that family's built-in station descriptor; no per-recipe or per-mod station registration is needed, although the player must still install the corresponding station in the system. Descriptors and recipe families are registered once per station/family, not once per recipe ID.
+Registering a descriptor only adds its installation or Transform behavior and terminal presentation. A recipe from any namespace that resolves to one of Auto Storage's exact supported vanilla recipe classes automatically reuses that family's built-in station descriptor; no per-recipe or per-mod station registration is needed, although the player must still install the corresponding station in the system. Descriptors and recipe families are registered once per station/family, not once per recipe ID.
 
 Current built-in optional integrations use this boundary in four ways: Iron Furnaces contributes supported furnace blocks and derives `200 / configuredCookTicks` live rates; Farmer's Delight registers one Cooking Pot descriptor/family; Mekanism registers all nine factory-backed families—Smelting, Enriching, Crushing, Compressing, Combining, Purifying, Injecting, Infusing, and Sawing—plus Pressurized Reaction and twelve deterministic single-block fluid/chemical station descriptors; Botania registers Mana Pool, Runic Altar, Terrestrial Agglomeration Plate, Petal Apothecary, and Elven Gateway as max-one instant stations. Each factory-backed Mekanism descriptor accepts its basic machine and Basic/Advanced/Elite/Ultimate Factory at the loaded tier's 1/3/5/7/9 parallel-process rate, and uses Mekanism's own `FactoryType` translation key for the shared family label instead of a base-machine or tier-specific item name. Representative optional-mod CI artifacts are evidence only and are not player-facing version pins.
 

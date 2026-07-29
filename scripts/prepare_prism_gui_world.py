@@ -1697,7 +1697,7 @@ def install_datapack(
         items_per_type,
     )
     install_core_repository_baseline(world_dir, profile)
-    _write_text(datapack / "pack.mcmeta", json.dumps({"pack": {"pack_format": PACK_FORMAT, "description": "Magic Storage true-void GUI test lab"}}, indent=2))
+    _write_text(datapack / "pack.mcmeta", json.dumps({"pack": {"pack_format": PACK_FORMAT, "description": "Auto Storage true-void GUI test lab"}}, indent=2))
     _write_text(datapack / "data/minecraft/tags/function/load.json", json.dumps({"values": [f"{DATAPACK_NAME}:load"]}, indent=2))
     _write_text(datapack / "data/minecraft/tags/function/tick.json", json.dumps({"values": [f"{DATAPACK_NAME}:tick"]}, indent=2))
     if scenario_name == "crafting-fuel-page":
@@ -1870,7 +1870,7 @@ def prepare_world(
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description="Prepare the Prism dev Magic Storage GUI test world.")
+    parser = argparse.ArgumentParser(description="Prepare the Prism dev Auto Storage GUI test world.")
     parser.add_argument("--minecraft-dir", type=Path, default=DEFAULT_PRISM_MINECRAFT_DIR)
     parser.add_argument("--source-world", default=DEFAULT_SOURCE_WORLD)
     parser.add_argument("--world", default=DEFAULT_WORLD_NAME)

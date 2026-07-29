@@ -278,7 +278,7 @@ public class MagicStorage {
             registrar.playToClient(MachineDescriptorStatePacket.TYPE, MachineDescriptorStatePacket.STREAM_CODEC,
                     this::handleMachineDescriptorState);
         });
-        LOGGER.info("Magic Storage initialized.");
+        LOGGER.info("Auto Storage initialized.");
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
