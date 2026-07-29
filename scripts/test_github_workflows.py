@@ -370,6 +370,21 @@ class GitHubWorkflowTests(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self.assertIn("Python 302", self.read_required(relative_path))
 
+    def test_0_2_0_release_evidence_is_recorded(self):
+        release_url = "https://github.com/swear01/Magic_Storage/releases/tag/v0.2.0"
+        release_hash = "64cbe2705f2a1d20f83eb1bf848c1df7b74ffe9dab0e4fb958cfde498457b43c"
+        for relative_path in (
+            "docs/notes.md",
+            "docs/plan.md",
+            "docs/roadmap.md",
+            "docs/releasing.md",
+        ):
+            text = self.read_required(relative_path)
+            with self.subTest(path=relative_path):
+                self.assertIn(release_url, text)
+                self.assertIn(release_hash, text)
+                self.assertIn("30468162688", text)
+
     def test_current_manual_gui_log_check_does_not_pin_historical_version_or_selftest_total(self):
         notes = self.read_required("docs/notes.md")
         manual_section = notes.split("GUI 測試項目仍由當次變更動態決定", 1)[1].split("## Reference Source", 1)[0]

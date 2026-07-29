@@ -3,6 +3,21 @@
 This is the maintainer runbook for the tag-driven alpha publisher in
 `.github/workflows/release.yml`.
 
+## Current release evidence
+
+- Version: `v0.2.0`
+- Source commit: `dd2f254707654dca03ec615be5da6bc64dd8479c`
+- Main CI: `30467153149`
+- Release run: `30468162688`
+- GitHub prerelease:
+  <https://github.com/swear01/Magic_Storage/releases/tag/v0.2.0>
+- Canonical jar SHA-256:
+  `64cbe2705f2a1d20f83eb1bf848c1df7b74ffe9dab0e4fb958cfde498457b43c`
+
+The release run accepted the same `build/libs/magic_storage-0.2.0.jar` upload
+for CurseForge, Modrinth, and GitHub. Public Modrinth and CurseForge downloads
+can remain unavailable until their listing reviews finish.
+
 ## Public project metadata
 
 - Name: **Auto Storage**
@@ -83,20 +98,21 @@ failure keeps the workflow red.
 
 ## Verify
 
-Download the jar from all three public targets and compare it with the release
-artifact:
+After the external listings become public, download the jar from all three
+targets and compare them with the immutable GitHub release asset:
 
 ```bash
 shasum -a 256 \
-  build/libs/magic_storage-*.jar \
   path/to/github-jar \
   path/to/modrinth-jar \
   path/to/curseforge-jar
 ```
 
-All four SHA-256 values must match. Also verify alpha status, Minecraft 1.21.1,
-NeoForge, Java 21, client/server environment, EMI/Patchouli dependencies,
-changelog, source/issues links, and the project icon.
+All three SHA-256 values must match. Do not substitute a later local rebuild;
+only the uploaded workflow artifact is release evidence. Also verify alpha
+status, Minecraft 1.21.1, NeoForge, Java 21, client/server environment,
+EMI/Patchouli dependencies, changelog, source/issues links, and the project
+icon.
 
 ## Retry and rollback
 
