@@ -76,14 +76,14 @@ All resource rows use vanilla light raised panels. Availability controls the gre
 
 EMI is a required client-only dependency in released metadata with Maven range `[1.1.24,2)`. The exact `1.1.24+1.21.1` coordinate remains only the reproducible minimum compile/development baseline; dedicated servers do not require EMI. CI compiles against that minimum and the newest compatible Minecraft 1.21.1 EMI release, while client smoke stages the newest compatible full jar.
 
-The base screen references only a Magic Storage client renderer interface. A guarded EMI compatibility bootstrap is loaded only when NeoForge reports EMI present, keeping dedicated-server classloading free of EMI references and preserving an explicit failure boundary during development.
+The base screen references only a Auto Storage client renderer interface. A guarded EMI compatibility bootstrap is loaded only when NeoForge reports EMI present, keeping dedicated-server classloading free of EMI references and preserving an explicit failure boundary during development.
 
 For a selected standard recipe:
 
 1. the server-synced exact recipe ID is used to locate the corresponding client EMI recipe;
-2. Magic Storage supplies a public-API `WidgetHolder` implementation;
+2. Auto Storage supplies a public-API `WidgetHolder` implementation;
 3. `EmiRecipe#addWidgets` populates the top recipe diagram;
-4. Magic Storage translates and renders those widgets, forwards bounded mouse/key input, and renders their tooltips;
+4. Auto Storage translates and renders those widgets, forwards bounded mouse/key input, and renders their tooltips;
 5. the native server-synced resource ledger and craft controls remain authoritative.
 
 The native renderer is selected only when the exact selected recipe has no compatible EMI representation, including internal synthetic axe recipes. A released client missing EMI is rejected by NeoForge dependency validation rather than silently changing product behavior. Runtime exceptions do not silently switch renderers; they surface through the normal client error path. No EMI internal screen or `WidgetGroup` class is linked.
@@ -184,7 +184,7 @@ Final gates are compileJava, build, dedicated GameTest server, all Python tests,
 ## Out of scope
 
 - RS2 recursive pattern trees, crafting jobs, or crafting monitors.
-- Bundling EMI in the Magic Storage jar or requiring it on dedicated servers.
+- Bundling EMI in the Auto Storage jar or requiring it on dedicated servers.
 - Client-side storage authority or a complete client mirror of the network inventory.
 - Arbitrary modded durability-effect valuation without a future server-owned descriptor API.
 - Hot descriptor registration after the NeoForge registry has frozen.

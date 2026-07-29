@@ -48,7 +48,7 @@ public class ClientSetup {
         event.addPackFinders(
                 ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "resourcepacks/fusion_connected_casing"),
                 PackType.CLIENT_RESOURCES,
-                Component.literal("Magic Storage: Fusion connected casing"),
+                Component.literal("Auto Storage: Fusion connected casing"),
                 PackSource.DEFAULT,
                 true,
                 Pack.Position.TOP);

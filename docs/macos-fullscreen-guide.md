@@ -23,7 +23,7 @@ python3 scripts/run_prism_gui_session.py --scenario terminal-scale --scale-types
 runner 會：
 
 1. 先從明確的 `/Applications/Prism Launcher.app` 讀版本並要求11.0.3+。
-2. `crafting-fuel-page`先驗證Prism dev中的18份support jars各只有一份，且SHA-256和`./gradlew stagePrismGuiSupportMods`產生的`build/prism-gui-mods`完全一致；其中包含MacFix 0.1.0，以及各一份GuideME、Curios、Extended Crafting與Cucumber。PneumaticCraft因零accepted production contract不加入；EvilCraft/Cyclops Core因TMRV 0.9.0 JEI stub會讓EvilCraft 1.2.91 Spirit Furnace packet在registrar建立前造成client FATAL，也不加入combined pack。任何JEI jar都會因與TMRV不相容而fail。`python3 scripts/deploy_prism_dev.py`會把全部support jars與Magic Storage、Fusion放在同一transaction部署/rollback，成功時移除舊JEI、EvilCraft與Cyclops Core。
+2. `crafting-fuel-page`先驗證Prism dev中的18份support jars各只有一份，且SHA-256和`./gradlew stagePrismGuiSupportMods`產生的`build/prism-gui-mods`完全一致；其中包含MacFix 0.1.0，以及各一份GuideME、Curios、Extended Crafting與Cucumber。PneumaticCraft因零accepted production contract不加入；EvilCraft/Cyclops Core因TMRV 0.9.0 JEI stub會讓EvilCraft 1.2.91 Spirit Furnace packet在registrar建立前造成client FATAL，也不加入combined pack。任何JEI jar都會因與TMRV不相容而fail。`python3 scripts/deploy_prism_dev.py`會把全部support jars與Auto Storage、Fusion放在同一transaction部署/rollback，成功時移除舊JEI、EvilCraft與Cyclops Core。
 3. runner固定將dev instance的`LowMemWarning`設為`false`。Prism 11.0.3在macOS memory pressure不是Normal時會開一個parentless `High memory pressure` modal；CLI無法回答時，launch會永久停在`EnsureAvailableMemory`而沒有Minecraft process。測試runner只略過這個launcher確認框，不關閉其他應用程式，也不降低Minecraft配置；若舊run已卡在該modal，先由使用者在Prism取消該launch，再重跑runner。
 4. 要求一般Prism Launcher已開啟且account initialization完成；若沒有warm normal-root process，runner在改世界與啟client前fail。這避免Prism cold start即使帶`-o`仍刷新Microsoft/Xbox ownership。runner不建立`-d` data root，也不建立或改寫`accounts.json`。Offline-only root沒有owning account，Prism會進Demo/account-selection，不能拿來啟動完整遊戲。
 5. 對該已執行process送出 `"/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher" -l dev -w MagicStorageGuiTest -o MagicStorageBot`。這是Prism官方CLI的既有instance離線launch路徑，不透過`open -n`。
@@ -48,12 +48,12 @@ READY 後先確認完整遊戲內容、左下版本文字、底部 hotbar 與 GU
 
 使用者指定的是[`macfix`](https://modrinth.com/mod/macfix)，不是同名的macOS輸入修正模組。它是自有的NeoForge 1.21.1 client-only修復：在GLFW的Cocoa `NSWindowDelegate`缺少`windowWillReturnFieldEditor:toObject:`時安裝回傳`nil`的stub，避免macOS 26+在borderless/F11視窗切換`styleMask`或關閉時以unrecognized selector終止。
 
-Modrinth project目前仍在審核、公開API回404，所以本輪依使用者明確同意，`stagePrismGuiSupportMods`從相鄰repo的`../macfix/build/libs/macfix-0.1.0.jar`stage，並固定驗證SHA-256 `79904d59892c4c5384811a384f3ce88aa5b3d6e8224dbde1b78dc2f80020080c`。缺檔或hash不符直接失敗；Modrinth公開後改用immutable version ID。MacFix只屬macOS Prism GUI support transaction，不進dedicated server、GameTest、Magic Storage release metadata或玩家required dependency。
+Modrinth project目前仍在審核、公開API回404，所以本輪依使用者明確同意，`stagePrismGuiSupportMods`從相鄰repo的`../macfix/build/libs/macfix-0.1.0.jar`stage，並固定驗證SHA-256 `79904d59892c4c5384811a384f3ce88aa5b3d6e8224dbde1b78dc2f80020080c`。缺檔或hash不符直接失敗；Modrinth公開後改用immutable version ID。MacFix只屬macOS Prism GUI support transaction，不進dedicated server、GameTest、Auto Storage release metadata或玩家required dependency。
 
 目前驗收必須確認：
 
 1. current-run log同時包含`macfix 0.1.0 loaded`與`macfix: installed windowWillReturnFieldEditor stub`。
-2. Minecraft F11仍由Magic Storage的borderless mixin控制，不變成GLFW monitor fullscreen，desktop mode完全不變。
+2. Minecraft F11仍由Auto Storage的borderless mixin控制，不變成GLFW monitor fullscreen，desktop mode完全不變。
 3. 仍依F11 → bordered window → Command-Q關閉，沒有`windowWillReturnFieldEditor:toObject:` unrecognized-selector crash，且`shutdown.json`為graceful。
 
 在這個current GUI gate由使用者通過前，仍禁止直接從F11 fullscreen按Command-Q；MacFix不能成為放寬display safety或跳過watchdog證據的理由。

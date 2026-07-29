@@ -11,7 +11,7 @@
 
 ## Current boundary
 
-- A mod recipe that uses vanilla shaped, shapeless, cooking, stonecutting, Smithing Transform, or Smithing Trim serializers already produces the exact vanilla recipe classes accepted by Magic Storage; a non-`minecraft` recipe namespace alone does not make it unsupported.
+- A mod recipe that uses vanilla shaped, shapeless, cooking, stonecutting, Smithing Transform, or Smithing Trim serializers already produces the exact vanilla recipe classes accepted by Auto Storage; a non-`minecraft` recipe namespace alone does not make it unsupported.
 - The initial **A + B** slice is complete: supported standard exact class/type families keep zero-configuration discovery, while addons can register one bounded `singleItemToItem` family through the public `magic_storage:recipe_family` registry. One family registration covers all its recipe IDs.
 - Custom recipe classes/types outside that registered one-input deterministic contract remain fail-closed today. Fluids and chemicals are approved future explicit resource roles through GitHub #9; dynamic/chance outputs and world/player/event-dependent side effects remain out of scope.
 - `CraftableRecipeCatalog` now consumes exact built-in adapter classifications and an explicit candidate coverage result. Simple ingredient representatives are exhaustive; non-simple/custom representatives and Smithing predicate scans are conservatively non-exhaustive and therefore remain in the unindexed candidate set so a valid recipe is not omitted before its real predicate is reached.
@@ -36,7 +36,7 @@ Sources:
 - [NeoForge 1.21.1 recipe model](https://docs.neoforged.net/docs/1.21.1/resources/server/recipes/)
 - [NeoForge 1.21.1 ingredient contract](https://docs.neoforged.net/docs/1.21.1/resources/server/recipes/ingredients/)
 
-**Decision:** EMI's tree is useful immediately as a player-facing planning/reference screen, but it is not a supported library API for exporting a craft graph or seeding a goal. Magic Storage must not link `dev.emi.emi.bom`, reflect into it, serialize its client tree, or trust it for execution. If EMI later exposes a public tree/goal API, the client bridge may consume it; the server still rebuilds and validates its own plan.
+**Decision:** EMI's tree is useful immediately as a player-facing planning/reference screen, but it is not a supported library API for exporting a craft graph or seeding a goal. Auto Storage must not link `dev.emi.emi.bom`, reflect into it, serialize its client tree, or trust it for execution. If EMI later exposes a public tree/goal API, the client bridge may consume it; the server still rebuilds and validates its own plan.
 
 ## Proposed architecture
 
@@ -95,7 +95,7 @@ Keep EMI required on clients, absent from dedicated-server requirements, and lim
 - add an **Open in EMI** action only through public `EmiApi` calls, so players can inspect/select recipes and use EMI's own recipe tree UI;
 - distinguish those actions precisely: public `focusRecipe(...)` can open/focus the selected recipe, while public `viewRecipeTree()` can only open EMI's existing tree screen and cannot seed the selected recipe as a new goal;
 - accept only exact backing recipe IDs that the server adapter registry supports;
-- when Magic Storage gains its own multi-step request, send only `{containerId, recipeId, amount, destination}` and let the server build the graph;
+- when Auto Storage gains its own multi-step request, send only `{containerId, recipeId, amount, destination}` and let the server build the graph;
 - never transmit an EMI `MaterialTree`, default-resolution map, or client-calculated material cost as authority.
 
 ## TDD implementation phases
@@ -148,7 +148,7 @@ Keep EMI required on clients, absent from dedicated-server requirements, and lim
 
 1. Show a concise plan summary: final amount, missing base resources, required stations/energy, and step count.
 2. Use a separate details view for the full tree; do not overload the current one-recipe ledger.
-3. Use EMI as the client recipe-browser/tree view and keep a Magic Storage-owned summary for server-planned costs and unsupported synthetic presentations.
+3. Use EMI as the client recipe-browser/tree view and keep a Auto Storage-owned summary for server-planned costs and unsupported synthetic presentations.
 4. Run complete automated gates, then the current fullscreen Prism checklist owned by the user.
 
 ## First target selection gate
@@ -157,12 +157,12 @@ Before any real-mod Phase 2 compatibility module, record the chosen family, repr
 
 ## 2026-07-20 external compatibility policy
 
-Optional external integrations such as AE2, Sophisticated Storage, and Mekanism are best-effort interoperability targets. Releases do not require them or restrict players to the version exercised by CI. Each dedicated compatibility job loads one representative version of one target mod and must execute present-mod behavior assertions; the normal build proves absent-mod safety. Passing that one version is treated as representative family-level evidence, not a technical proof for every version, and incompatibilities in untested player combinations are handled from player reports. Main CI also keeps repository-owned addon fixtures and adversarial synthetic handlers for Magic Storage's own contracts. This policy does not replace declared compatibility ranges or reproducible development baselines for Magic Storage's actual build/runtime dependencies.
+Optional external integrations such as AE2, Sophisticated Storage, and Mekanism are best-effort interoperability targets. Releases do not require them or restrict players to the version exercised by CI. Each dedicated compatibility job loads one representative version of one target mod and must execute present-mod behavior assertions; the normal build proves absent-mod safety. Passing that one version is treated as representative family-level evidence, not a technical proof for every version, and incompatibilities in untested player combinations are handled from player reports. Main CI also keeps repository-owned addon fixtures and adversarial synthetic handlers for Auto Storage's own contracts. This policy does not replace declared compatibility ranges or reproducible development baselines for Auto Storage's actual build/runtime dependencies.
 
 | Target family | Intended interoperability | Boundary |
 |---|---|---|
-| Applied Energistics 2 | Items in `c:tools/wrench` should rotate and safely remove Magic Storage blocks; recipes using exact vanilla classes should remain craftable. Charger remains the second custom-family candidate because it is one item input to one fixed output. | Inscriber is deferred: PRESS consumes optional plates while INSCRIBE retains them, so it needs explicit catalyst/remainder semantics rather than Charger assumptions. |
-| Sophisticated Storage | Directional Import, passive Import, and Export should interoperate through the registered `Capabilities.ItemHandler.BLOCK` contract without duplication, loss, slot-order drift, or bypassing Magic Storage filters. | This is bus capability interoperability, not recipe-adapter support. Do not bundle or require Sophisticated Storage or Sophisticated Core. |
+| Applied Energistics 2 | Items in `c:tools/wrench` should rotate and safely remove Auto Storage blocks; recipes using exact vanilla classes should remain craftable. Charger remains the second custom-family candidate because it is one item input to one fixed output. | Inscriber is deferred: PRESS consumes optional plates while INSCRIBE retains them, so it needs explicit catalyst/remainder semantics rather than Charger assumptions. |
+| Sophisticated Storage | Directional Import, passive Import, and Export should interoperate through the registered `Capabilities.ItemHandler.BLOCK` contract without duplication, loss, slot-order drift, or bypassing Auto Storage filters. | This is bus capability interoperability, not recipe-adapter support. Do not bundle or require Sophisticated Storage or Sophisticated Core. |
 | Mekanism | First custom recipe adapter candidate: bounded deterministic Enriching/Crushing and later explicit fluid/chemical families, exact typed inputs/outputs, station/energy, capacity, reload, and rollback. | Chemical/fluid roles require GitHub #9 first. Chance output and machine-world side effects remain unsupported. |
 
 Main CI now independently loads a repository-owned recipe addon fixture that registers a custom `RecipeType` and public family, then executes exact discovery/preview/commit/rollback assertions. The separate machine-descriptor fixture continues to cover process, instant, and consumable descriptor registration. Real-mod compatibility jobs are added only after corresponding integration code and present-mod behavior assertions exist; they fail if the target did not load or the assertions did not run. A recorded test artifact is not a player-facing version pin or compatibility guarantee.
@@ -173,6 +173,6 @@ Main CI now independently loads a repository-owned recipe addon fixture that reg
 - Automatic support for every registered `RecipeType`.
 - Fluid/chemical/network side effects without an explicit transaction adapter.
 - Chance recipes whose probability/remainder semantics cannot be simulated exactly.
-- External-machine orchestration, processing patterns, pattern export/import, or asynchronous send-and-wait crafting. These do not match Magic Storage's installed-station magic-crafting model and are not a fallback for unsupported recipe families.
+- External-machine orchestration, processing patterns, pattern export/import, or asynchronous send-and-wait crafting. These do not match Auto Storage's installed-station magic-crafting model and are not a fallback for unsupported recipe families.
 - Persistent asynchronous jobs, crafting CPUs, monitors, or chunk-loading workers.
 - Client-owned storage snapshots or client-authoritative craft plans.

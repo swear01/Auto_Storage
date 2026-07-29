@@ -1,6 +1,6 @@
 # Powah compatibility
 
-Magic Storage conditionally loads this module only when `powah` is present.
+Auto Storage conditionally loads this module only when `powah` is present.
 Powah, Cloth Config, and GuideME remain optional player dependencies.
 
 ## Supported contract
@@ -19,12 +19,12 @@ set throughput. A separate Energizing Orb item is not consumed or retained.
 
 ## Fail-closed boundary
 
-Magic Storage rejects recipes with zero or negative raw energy, more than six
+Auto Storage rejects recipes with zero or negative raw energy, more than six
 ingredients, custom/dynamic ingredients, or an empty output. It does not model
 the physical rod's one-time 20-tick warm-up, world links, reactors, generators,
 or external-machine send-and-wait.
 
-Powah owns its EMI category and workstation metadata. Magic Storage does not
+Powah owns its EMI category and workstation metadata. Auto Storage does not
 register Powah workstations into EMI.
 
 ## Verification

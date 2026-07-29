@@ -45,11 +45,11 @@ public class WrenchTests {
         var registry = helper.getLevel().registryAccess().registryOrThrow(Registries.ITEM);
         var wrench = registry.get(ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "wrench"));
         if (wrench == null || wrench != MagicStorage.WRENCH.get()) {
-            helper.fail("Magic Storage wrench is not registered");
+            helper.fail("Auto Storage wrench is not registered");
             return;
         }
         if (!new ItemStack(wrench).is(Tags.Items.TOOLS_WRENCH)) {
-            helper.fail("Magic Storage wrench is not in c:tools/wrench");
+            helper.fail("Auto Storage wrench is not in c:tools/wrench");
             return;
         }
         helper.succeed();

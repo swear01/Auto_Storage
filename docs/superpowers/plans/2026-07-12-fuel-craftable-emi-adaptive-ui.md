@@ -10,7 +10,7 @@
 2. Every furnace-compatible stack accepted by NeoForge/vanilla can enter the Fuel input; an oak log is the minimum acceptance example.
 3. Cooking recipes consume their own current datapack `cookingtime`, not a hardcoded per-type number.
 4. Craftable mode lists currently craftable recipe outputs even when the output count in storage is zero; stored logs can therefore expose charcoal.
-5. EMI can select and execute one-level Magic Storage crafting by exact recipe identity without requiring the output to be stored or visible.
+5. EMI can select and execute one-level Auto Storage crafting by exact recipe identity without requiring the output to be stored or visible.
 6. The Crafting Terminal uses one adaptive geometry source and a restrained vanilla-container visual language instead of scattered fixed coordinates.
 7. A selected recipe always shows every required item plus any process/Fuel requirement as **available / required for one craft**; the overall ready count remains visible.
 8. Remove Compact Grid completely. Grid identity remains full `ItemKey`, and screen size adapts automatically without a user mode toggle.
@@ -46,7 +46,7 @@ Patterns are references only; no source is copied verbatim.
 - Every user-facing label for that pool becomes **Fuel**. The Fuel-page target is `Auto / Fuel / Brew / Bottle`.
 - The authoritative Fuel value for an `ItemStack` is `stack.getBurnTime(null)` at the moment of server validation.
 - A positive runtime burn time yields exactly that many `FURNACE_FUEL` ticks per item. A zero value is rejected. Negative values are not expected from the API and fail closed if encountered.
-- This automatically supports logs, tags/data maps, modded fuels, and stack-sensitive NeoForge overrides without a Magic Storage whitelist.
+- This automatically supports logs, tags/data maps, modded fuels, and stack-sensitive NeoForge overrides without a Auto Storage whitelist.
 - Explicit Brew/Bottle mappings remain isolated overlays until production brewing exists; they must not replace or suppress a valid runtime Fuel value.
 - Auto retains the scarcity rule. Runtime Fuel supplier breadth is evaluated from current registered default stacks when Auto must compare pools; explicit purpose pools keep their registered supplier counts. Ties remain current stored amount, then stable `EnergyType` order.
 - Slot acceptance is only an early UX check. `StorageCoreBlockEntity.addFuel` re-resolves the current stack/value server-side immediately before exact overflow validation and consumption.
@@ -78,12 +78,12 @@ Patterns are references only; no source is copied verbatim.
 - Selection is recipe/output identity based. It is not cleared merely because Core output count is zero or the player visits another terminal tab; Fuel simply hides the recipe workspace. It is cleared when the recipe disappears, becomes unsupported, or no longer matches the output.
 - Minimum acceptance scenario: with logs plus enough matching machine energy and Fuel, charcoal appears at zero stored charcoal, selects the exact smelting recipe, and one craft consumes one log plus that recipe's exact cooking time from both pools.
 
-### 4. EMI one-level Magic Storage crafting
+### 4. EMI one-level Auto Storage crafting
 
 - Scope is the user's requested **automatic-crafting action**, not full RS2 pattern scheduling.
 - No recursive dependency tree, pattern provider, crafting CPU, queued job, or intermediate autocrafting is introduced.
 - EMI no longer searches for the output in visible terminal slots. A request carries exact `{containerId, recipeId, amount, destination}`.
-- `Destination.NONE` selects the exact recipe and opens the server-synced Magic Storage preview without consuming resources.
+- `Destination.NONE` selects the exact recipe and opens the server-synced Auto Storage preview without consuming resources.
 - `Destination.CURSOR` and `Destination.INVENTORY` request immediate one-level crafting. `amount` is an upper bound; the server chooses the largest legal amount not exceeding current ingredients, energy, and destination capacity, then commits that exact amount atomically.
 - The server revalidates active menu/page, Core identity/connectivity/conflict, current recipe ID/class/output, ingredients, actual recipe-derived energy, amount bounds, and destination capacity. Zero legal crafts is a no-op with no consumption.
 - Cursor delivery never overwrites an incompatible carried stack. Inventory delivery fills the post-consumption player inventory first and plans overflow back to the Core; if both destinations cannot hold every output/remainder, the whole craft rejects before mutation. Requested output is never silently dropped or voided.
@@ -222,8 +222,8 @@ Only after confirmed RED, change `RecipeEnergyTable` and its callers.
 
 - Update `PLAN.md`, `README.md`, `docs/overview.md`, `docs/structure.md`, `docs/notes.md`, `docs/plan.md`, `docs/roadmap.md`, `docs/rs2-design-gap.md`, Patchouli entries, and `en_us.json` with the final behavior.
 - Task 6 deployment produced the rejected 0.1.10 baseline. Task 7 reused the automatic patch bump, then transactionally refreshed the same exact `magic_storage-0.1.11.jar` after the Max/overflow review fixes; build/deployed SHA-256 is `09fd5ca4e2b2d41c1163daa255da58232be021f1a131f30e53d80748f37b6d1d`.
-- Task 8 automatic deployment bumped 0.1.11 to 0.1.12; build/deployed SHA-256 is `f7b0e78e630c03f77331fa9aad4c4d3f04512d069b327c9bad6942a0c8844309`, with exactly one Prism dev Magic Storage jar.
-- Task 9's final test-strengthened deployment is 0.1.14; the 0.1.13 intermediate was replaced. Build/deployed SHA-256 is `97069ca985797ce237b421df2fc5c08c44cc2ca4dedf1957d0f756c2c92dae75`, with exactly one Prism dev Magic Storage jar.
+- Task 8 automatic deployment bumped 0.1.11 to 0.1.12; build/deployed SHA-256 is `f7b0e78e630c03f77331fa9aad4c4d3f04512d069b327c9bad6942a0c8844309`, with exactly one Prism dev Auto Storage jar.
+- Task 9's final test-strengthened deployment is 0.1.14; the 0.1.13 intermediate was replaced. Build/deployed SHA-256 is `97069ca985797ce237b421df2fc5c08c44cc2ca4dedf1957d0f756c2c92dae75`, with exactly one Prism dev Auto Storage jar.
 - Task 9 automated evidence: SelfTest 40406, GameTest 210, Python 70/70, build, runData, 77 JSON parses, and datagen no-new-drift all passed. Do not use these historical counts as the 0.1.15 release gate.
 - Required automated gates:
 

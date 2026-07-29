@@ -185,7 +185,7 @@ jobs:
           TAG_COMMIT="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
           PREVIOUS_TAG="$(git describe --tags --abbrev=0 "${TAG_COMMIT}^" 2>/dev/null || true)"
           {
-            echo "## Magic Storage ${GITHUB_REF_NAME}"
+            echo "## Auto Storage ${GITHUB_REF_NAME}"
             echo
             if [ -n "$PREVIOUS_TAG" ]; then
               echo "Changes since ${PREVIOUS_TAG}:"
@@ -221,7 +221,7 @@ jobs:
           curseforge-id: ${{ vars.CURSEFORGE_PROJECT_ID }}
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           files: build/libs/magic_storage-${{ steps.release-meta.outputs.version }}.jar
-          name: Magic Storage ${{ steps.release-meta.outputs.version }} Alpha
+          name: Auto Storage ${{ steps.release-meta.outputs.version }} Alpha
           version: ${{ steps.release-meta.outputs.version }}
           version-type: alpha
           changelog-file: build/release-notes.md

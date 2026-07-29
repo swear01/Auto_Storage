@@ -1,11 +1,11 @@
 modLoader="javafml"
 loaderVersion="[4,)"
-license="All Rights Reserved"
+license="MIT"
 
 [[mods]]
 modId="magic_storage_botania_fixture"
 version="1.0.0"
-displayName="Magic Storage Botania Fixture"
+displayName="Auto Storage Botania Fixture"
 description='''Repository-owned Botania Mana and deterministic recipe compatibility fixture.'''
 
 [[dependencies.magic_storage_botania_fixture]]

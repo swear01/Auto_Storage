@@ -393,7 +393,7 @@ def deploy(
         jars = magic_storage_jars(mods_dir)
         if jars != [destination]:
             names = ", ".join(str(p) for p in jars)
-            raise RuntimeError(f"Expected exactly one Magic Storage jar in {mods_dir}, found: {names}")
+            raise RuntimeError(f"Expected exactly one Auto Storage jar in {mods_dir}, found: {names}")
         installed_fusion = fusion_jars(mods_dir)
         if installed_fusion != [fusion_destination]:
             names = ", ".join(str(path) for path in installed_fusion)
@@ -491,7 +491,7 @@ def main() -> int:
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    print(f"Deployed Magic Storage {result.version}")
+    print(f"Deployed Auto Storage {result.version}")
     print(f"Jar: {result.jar}")
     print(f"Destination: {result.destination}")
     print(f"Fusion: {result.fusion_destination}")

@@ -75,7 +75,7 @@ Current behavior is:
   [`StorageBlockEntity`](https://github.com/P3pp3rF1y/SophisticatedStorage/blob/9aa6ad5170f8615a192d96c0607d3e4c0dc7e54c/src/main/java/net/p3pp3rf1y/sophisticatedstorage/block/StorageBlockEntity.java) and
   [`ControllerBlockEntity`](https://github.com/P3pp3rF1y/SophisticatedStorage/blob/9aa6ad5170f8615a192d96c0607d3e4c0dc7e54c/src/main/java/net/p3pp3rf1y/sophisticatedstorage/block/ControllerBlockEntity.java).
 
-These references are patterns only. Magic Storage keeps its own code, data model,
+These references are patterns only. Auto Storage keeps its own code, data model,
 transactions, and license obligations.
 
 ## Non-negotiable invariants
@@ -246,7 +246,7 @@ back into itself during `insertItem`/`extractItem`. Directionless mode has no ac
 scan, and directional mode rejects network blocks as targets, so neither mode can
 create an autonomous unbounded self-loop. A player can still deliberately build a
 bounded cross-tick ping-pong using two buses and an external inventory; each leg is
-limited to one stack per cooldown and is visible in configuration. Magic Storage
+limited to one stack per cooldown and is visible in configuration. Auto Storage
 does not guess player intent or tag items with provenance.
 
 ## Multiplayer access policy

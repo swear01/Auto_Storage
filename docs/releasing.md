@@ -1,19 +1,22 @@
-# Releasing Magic Storage
+# Releasing Auto Storage
 
 This is the maintainer runbook for the tag-driven alpha publisher in
 `.github/workflows/release.yml`.
 
 ## Public project metadata
 
-- Name: **Magic Storage for NeoForge**
-- Modrinth slug: `magic-storage-neoforge`
+- Name: **Auto Storage**
+- Modrinth: <https://modrinth.com/project/auto-storage>
+- Modrinth project ID/slug: `auto-storage`
+- CurseForge author project: <https://authors.curseforge.com/#/projects/1630575/files>
+- CurseForge project ID: `1630575`
 - Summary: Server-authoritative storage, terminals, deterministic crafting, typed
   resources, and automation for NeoForge 1.21.1.
 - Project type: Mod
 - Minecraft: 1.21.1
 - Loader: NeoForge
 - Environment: Client and server
-- License: **All Rights Reserved**
+- License: **MIT**
 - Source: <https://github.com/swear01/Magic_Storage>
 - Issues: <https://github.com/swear01/Magic_Storage/issues>
 - Icon: `art/release/magic-storage-project-icon.png`
@@ -27,13 +30,10 @@ not player-facing exact dependency pins.
 
 ## One-time platform setup
 
-1. Create the Modrinth project with the metadata above and the requested slug.
-   Modrinth documents project creation and personal access tokens in its
-   [API documentation](https://docs.modrinth.com/api/) and
-   [project endpoint](https://docs.modrinth.com/api/operations/createproject/).
-2. Create the Minecraft mod project in the
-   [CurseForge author console](https://authors.curseforge.com/) with the same
-   metadata. The project ID is shown in the project URL. Generate an author
+1. The Modrinth and CurseForge projects above must remain public, MIT-licensed,
+   and allow third-party distribution.
+2. Generate a Modrinth personal access token using its
+   [API documentation](https://docs.modrinth.com/api/), and generate an author
    upload token from CurseForge's
    [API Tokens page](https://legacy.curseforge.com/account/api-tokens).
 3. In the GitHub `publishing` environment, set variables
@@ -72,7 +72,7 @@ Create an annotated immutable tag from the verified `main` commit:
 git switch main
 git pull --ff-only
 version="$(sed -n 's/^mod_version=//p' gradle.properties)"
-git tag -a "v${version}" -m "Magic Storage v${version}"
+git tag -a "v${version}" -m "Auto Storage v${version}"
 git push origin main "v${version}"
 gh run list --workflow Release --limit 1
 ```

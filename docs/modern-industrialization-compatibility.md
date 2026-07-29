@@ -2,7 +2,7 @@
 
 ## Status and version policy
 
-Modern Industrialization is optional. Magic Storage registers its stations and
+Modern Industrialization is optional. Auto Storage registers its stations and
 recipe families only when the mod is loaded; the normal dedicated server does
 not link Modern Industrialization classes.
 
@@ -37,7 +37,7 @@ and 8 work per tick per installed block.
 
 The official `2.5.4` data contains 1,793 direct single-block recipes in these
 families. Thirty recipes use probabilistic outputs. Of the remaining 1,763,
-Magic Storage accepts 1,738 whose EU requirement fits every listed station
+Auto Storage accepts 1,738 whose EU requirement fits every listed station
 variant; the other 25 require a higher tier than that family's lowest accepted
 variant and therefore fail closed.
 
@@ -59,7 +59,7 @@ recipes, overflow, or missing representatives are rejected before mutation.
   adapter.
 - Steam efficiency, warm-machine overclocking, and installed electric upgrades
   are live machine behavior, not deterministic cold stored-resource recipes.
-- Magic Storage does not drive an external machine or register third-party EMI
+- Auto Storage does not drive an external machine or register third-party EMI
   workstation metadata.
 
 ## Verification

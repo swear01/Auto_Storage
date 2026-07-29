@@ -2,7 +2,7 @@
 
 ## Status and version policy
 
-Mekanism is an optional server-side integration. Magic Storage registers the
+Mekanism is an optional server-side integration. Auto Storage registers the
 Mekanism-linked resource, station, and recipe adapters only when Mekanism is
 loaded; the normal dedicated server remains independent of Mekanism classes.
 
@@ -14,7 +14,7 @@ reports rather than by restricting the player version.
 
 ## Registered recipe-type inventory
 
-Mekanism `10.7.19.85` registers 26 server `RecipeType`s. Magic Storage supports
+Mekanism `10.7.19.85` registers 26 server `RecipeType`s. Auto Storage supports
 22 of them through exact loaded recipe classes and explicitly excludes four.
 
 ### Nine factory-backed families

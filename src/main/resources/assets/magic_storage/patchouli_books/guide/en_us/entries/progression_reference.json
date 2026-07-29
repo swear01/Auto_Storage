@@ -6,7 +6,7 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "$(thing)Glossary:$() Network means all face-connected Magic Storage blocks. Core means the one block carrying items and energy. Type means one exact item identity. Type capacity means how many distinct identities the attached Units can support."
+      "text": "$(thing)Glossary:$() Network means all face-connected Auto Storage blocks. Core means the one block carrying items and energy. Type means one exact item identity. Type capacity means how many distinct identities the attached Units can support."
     },
     {
       "type": "patchouli:text",

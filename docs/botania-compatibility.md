@@ -2,7 +2,7 @@
 
 ## Status
 
-GitHub [#13](https://github.com/swear01/Magic_Storage/issues/13) has one safe server-side compatibility slice for Botania on NeoForge 1.21.1. Botania remains optional. Magic Storage loads its Botania-linked class only after `ModList` confirms `botania`; the normal absent-mod dedicated server does not link Botania classes.
+GitHub [#13](https://github.com/swear01/Magic_Storage/issues/13) has one safe server-side compatibility slice for Botania on NeoForge 1.21.1. Botania remains optional. Auto Storage loads its Botania-linked class only after `ModList` confirms `botania`; the normal absent-mod dedicated server does not link Botania classes.
 
 The player dependency is not pinned to one Botania build. CI uses official timestamped build `vazkii.botania:botania-neoforge-1.21.1:455-20260723.172746-31` from the upstream `455-SNAPSHOT` series as representative evidence. `verifyBotaniaFixtureArtifact` also requires that build31 jar to match SHA-256:
 
@@ -10,7 +10,7 @@ The player dependency is not pinned to one Botania build. CI uses official times
 cfba1589f25d317b2a99b5b5c7b7a3966d5f18999535392d62fcf28b1f2b8908
 ```
 
-The fixture coordinate is timestamped so a newer upstream snapshot cannot silently replace it; the SHA gate also rejects mutation of that artifact. Modrinth still has no Botania 1.21.1 release. The fixture excludes Botania's JEI and Patchouli transitive runtime dependencies, retains Curios, and uses Magic Storage's existing Patchouli. This keeps the server fixture independent from the player GUI support pack's EMI + TMRV contract.
+The fixture coordinate is timestamped so a newer upstream snapshot cannot silently replace it; the SHA gate also rejects mutation of that artifact. Modrinth still has no Botania 1.21.1 release. The fixture excludes Botania's JEI and Patchouli transitive runtime dependencies, retains Curios, and uses Auto Storage's existing Patchouli. This keeps the server fixture independent from the player GUI support pack's EMI + TMRV contract.
 
 ## Mana storage
 

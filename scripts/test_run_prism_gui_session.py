@@ -213,6 +213,17 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             },
         }
 
+    def test_patchouli_handoff_uses_current_preloaded_guide_name(self):
+        mod = self.load_script()
+        checks = "\n".join(mod.SCENARIOS["patchouli-guide"]["checks"])
+        self.assertIn("hotbar `1`", checks)
+        self.assertIn("Auto Storage Guide", checks)
+        self.assertNotIn("Magic Storage Guide", checks)
+
+        notes = (ROOT / "docs" / "notes.md").read_text()
+        self.assertIn("Auto Storage Guide", notes)
+        self.assertNotIn("Magic Storage Guide", notes)
+
     def test_run_session_passes_scenario_into_world_preparation(self):
         mod = self.load_script()
         with tempfile.TemporaryDirectory() as tmp:
@@ -1015,7 +1026,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "/200",
                 "TMRV",
                 "Iron Furnaces owns",
-                "Magic Storage does not register",
+                "Auto Storage does not register",
                 "Mekanism",
                 "Gases appears because",
                 "Other contains Axe Uses",

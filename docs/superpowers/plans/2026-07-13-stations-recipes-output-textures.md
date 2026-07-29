@@ -17,7 +17,7 @@
 
 ## Reference decisions
 
-- Terraria Magic Storage stores crafting stations in its crafting interface and exposes recipes through installed stations. Magic Storage adopts that gate, while keeping all inventory and recipe authority on the server.
+- Terraria Magic Storage stores crafting stations in its crafting interface and exposes recipes through installed stations. Auto Storage adopts that gate, while keeping all inventory and recipe authority on the server.
 - EMI was an optional compile-time API integration when this plan was written; the 2026-07-15 policy now requires EMI on clients with `[1.1.24,2)` while keeping dedicated servers independent. Its public handler carries exact recipe intent, amount, and destination; the terminal renders its own server-synced recipe panel and never depends on EMI internals.
 - NeoForge's exact recipe classes and `ItemAbilities.AXE_STRIP`, `AXE_SCRAPE`, and `AXE_WAX_OFF` define the supported deterministic scope. Event-only, player-context, or arbitrary-world-state transformations fail closed.
 - Refined Storage's destination-capacity pattern informs the output transaction: simulate the destination before consuming anything, then commit or reject the entire craft.

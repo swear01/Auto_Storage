@@ -4,7 +4,7 @@
 
 PneumaticCraft 8.2.22 currently contributes **zero production recipe families** and no Air resource kind. This is a deliberate fail-closed result of the upstream API audit, not an absent-mod fallback.
 
-PneumaticCraft remains optional. The representative CI artifact proves that Magic Storage and a normal dedicated server load safely with the mod present; it is not an exact player dependency pin.
+PneumaticCraft remains optional. The representative CI artifact proves that Auto Storage and a normal dedicated server load safely with the mod present; it is not an exact player dependency pin.
 
 ## Audited representative version
 
@@ -16,9 +16,9 @@ Other installed versions are handled from player reports rather than a multi-ver
 
 ## Why Air is not stored
 
-`IAirHandler` exposes `getAir()` and `void addAir(int)`, permits negative air for vacuum, and has no simulate or accepted-amount result. Pressure is derived from air divided by mutable volume. Magic Storage therefore cannot provide its required simulate-then-commit guarantee for blocks or containers without guessing external mutation.
+`IAirHandler` exposes `getAir()` and `void addAir(int)`, permits negative air for vacuum, and has no simulate or accepted-amount result. Pressure is derived from air divided by mutable volume. Auto Storage therefore cannot provide its required simulate-then-commit guarantee for blocks or containers without guessing external mutation.
 
-Magic Storage does not register `pneumaticcraft:air`, does not expose an Air Bus bridge, and does not reinterpret Air or pressure as FE, Fluid, Fuel, or station work.
+Auto Storage does not register `pneumaticcraft:air`, does not expose an Air Bus bridge, and does not reinterpret Air or pressure as FE, Fluid, Fuel, or station work.
 
 ## Recipe-family audit
 

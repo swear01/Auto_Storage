@@ -171,7 +171,7 @@ SCENARIOS = {
             "Confirm Stations shows no permanent rate formula, per-tile explanatory labels, or duplicate side-panel hover summary. Hovering a station item shows that exact item's normal tooltip. Hovering a Processing value shows its localized logical family name—such as Crusher, Energizing Rod, or Furnator—and current aggregate increase rate; it does not fall back to the generic Station Work name and does not repeat installed/stored totals.",
             "On Transform and Stations, confirm stored types / total type capacity appears in an independent information box immediately to the right of the player inventory, aligned to the inventory's top and bottom, readable without hover, and matching the Storage Core. The active network must show localized unlimited type capacity with the Creative Storage Unit icon; finite networks continue to use the Tier 1 icon. This panel never changes on hover.",
             "Open the Charcoal recipe and confirm its dim representative station item starts with the installed variant first, advances exactly once per real-time second like EMI/JEI, then returns to Iron Furnace after one complete station-icon cycle.",
-            "Open EMI's Smelting category and confirm TMRV imports the workstation catalysts that Iron Furnaces owns through JEI. Magic Storage does not register third-party EMI workstations.",
+            "Open EMI's Smelting category and confirm TMRV imports the workstation catalysts that Iron Furnaces owns through JEI. Auto Storage does not register third-party EMI workstations.",
             "Open the Craftable tab and confirm the already installed Crafting Table exposes an Oak Log recipe, Stonecutter exposes a Cobblestone result, Smithing Table exposes the Netherite Smithing Transform, and preloaded Axe Uses exposes the Oak Log strip transformation.",
             "Confirm Charcoal is present in Craftable even though its zero stored count is not rendered, then select it to open the exact smelting Available / Required preview.",
             "Select the preloaded Cooking Pot Mushroom Stew recipe. Confirm EMI renders the third-party recipe, the station badge is Cooking Pot, and the ledger separates brown mushroom, red mushroom, and bowl from Cooking Pot work and Fuel.",
@@ -209,7 +209,7 @@ SCENARIOS = {
         "hotbar_keys": [],
         "checks": [
             "Pass the fullscreen gate before any GUI action.",
-            "Open the Magic Storage Guide and confirm categories/entries render, not No Entries.",
+            "Use the preloaded Auto Storage Guide in hotbar `1` and confirm categories/entries render, not No Entries.",
             "Confirm log-excerpt.log includes Patchouli preloading when Patchouli is installed in the Prism dev instance.",
         ],
     },
@@ -710,21 +710,21 @@ def verify_deployed_magic_storage_jar(project_dir: Path, minecraft_dir: Path) ->
 
     build_jar = project_dir / "build" / "libs" / f"magic_storage-{versions[0]}.jar"
     if not build_jar.is_file():
-        raise RuntimeError(f"Current Magic Storage build jar not found: {build_jar}. {DEPLOY_REQUIRED_MESSAGE}")
+        raise RuntimeError(f"Current Auto Storage build jar not found: {build_jar}. {DEPLOY_REQUIRED_MESSAGE}")
 
     mods_dir = minecraft_dir / "mods"
     deployed_jars = sorted(mods_dir.glob("magic_storage-*.jar")) if mods_dir.is_dir() else []
     if len(deployed_jars) != 1:
         found = ", ".join(path.name for path in deployed_jars) or "none"
         raise RuntimeError(
-            f"Expected exactly one Magic Storage jar in Prism dev mods at {mods_dir}, found {len(deployed_jars)}: {found}. "
+            f"Expected exactly one Auto Storage jar in Prism dev mods at {mods_dir}, found {len(deployed_jars)}: {found}. "
             f"{DEPLOY_REQUIRED_MESSAGE}"
         )
 
     deployed_jar = deployed_jars[0]
     if deployed_jar.name != build_jar.name:
         raise RuntimeError(
-            f"Prism dev Magic Storage jar version does not match the current build: expected {build_jar.name}, "
+            f"Prism dev Auto Storage jar version does not match the current build: expected {build_jar.name}, "
             f"found {deployed_jar.name}. {DEPLOY_REQUIRED_MESSAGE}"
         )
 
@@ -732,7 +732,7 @@ def verify_deployed_magic_storage_jar(project_dir: Path, minecraft_dir: Path) ->
     deployed_hash = sha256_file(deployed_jar)
     if build_hash != deployed_hash:
         raise RuntimeError(
-            f"Magic Storage jar contents differ for {build_jar.name}: build SHA-256 {build_hash}, "
+            f"Auto Storage jar contents differ for {build_jar.name}: build SHA-256 {build_hash}, "
             f"Prism dev SHA-256 {deployed_hash}. {DEPLOY_REQUIRED_MESSAGE}"
         )
 

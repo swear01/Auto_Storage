@@ -69,7 +69,7 @@ The animation is display-only. Recipe selection, station availability, work amou
 
 ## Optional compatibility loading
 
-The normal bootstrap contains no direct third-party types. During the mod constructor, before Magic Storage's deferred descriptor/family registers bind to the event bus, it checks `ModList` and reflectively invokes a named isolated compatibility registrar. That registrar is compile-only against one representative artifact.
+The normal bootstrap contains no direct third-party types. During the mod constructor, before Auto Storage's deferred descriptor/family registers bind to the event bus, it checks `ModList` and reflectively invokes a named isolated compatibility registrar. That registrar is compile-only against one representative artifact.
 
 Absent mod: no class load and no descriptor/family registration.  
 Present supported mod: descriptors and families register once.  
@@ -79,7 +79,7 @@ Present incompatible mod: startup fails with the mod ID and compatibility module
 
 ### Iron Furnaces
 
-The existing furnace logical descriptor includes vanilla Furnace and normal Iron Furnaces furnace items. The compatibility module derives each configured cook time through the mod's live config surface and converts it to `200/configuredTicks`. It does not embed tier speed numbers. AllTheModium, Vibranium, and Unobtainium variants are excluded because their multi-output behavior is not equivalent to a faster vanilla furnace. Recipe-viewer metadata remains owned by Iron Furnaces: its JEI plugin registers Smelting catalysts and the GUI support pack uses TMRV to expose them to EMI without installing JEI. Magic Storage does not call EMI `addWorkstation` for third-party variants.
+The existing furnace logical descriptor includes vanilla Furnace and normal Iron Furnaces furnace items. The compatibility module derives each configured cook time through the mod's live config surface and converts it to `200/configuredTicks`. It does not embed tier speed numbers. AllTheModium, Vibranium, and Unobtainium variants are excluded because their multi-output behavior is not equivalent to a faster vanilla furnace. Recipe-viewer metadata remains owned by Iron Furnaces: its JEI plugin registers Smelting catalysts and the GUI support pack uses TMRV to expose them to EMI without installing JEI. Auto Storage does not call EMI `addWorkstation` for third-party variants.
 
 ### Farmer's Delight Cooking Pot
 

@@ -6,7 +6,7 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "Magic Storage keeps many item types behind one shared interface. Your $(thing)starter shopping list$() is a $(l:magic_storage:storage_core)Storage Core$(), a $(l:magic_storage:storage_terminal)Storage Terminal$(), and two $(l:magic_storage:unit_tiers)T1 Storage Units$(). The starter set uses one Diamond total plus black concrete powder, obsidian, copper, redstone, glass, wood, and a Barrel; T1 needs no amethyst."
+      "text": "Auto Storage keeps many item types behind one shared interface. Your $(thing)starter shopping list$() is a $(l:magic_storage:storage_core)Storage Core$(), a $(l:magic_storage:storage_terminal)Storage Terminal$(), and two $(l:magic_storage:unit_tiers)T1 Storage Units$(). The starter set uses one Diamond total plus black concrete powder, obsidian, copper, redstone, glass, wood, and a Barrel; T1 needs no amethyst."
     },
     {
       "type": "patchouli:text",

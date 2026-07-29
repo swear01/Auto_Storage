@@ -6,11 +6,11 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "Adjacent Magic Storage blocks share a connected outer casing. Their center symbols stay separate, so the Core, Units, Terminals, and the inward or outward Bus faces remain easy to recognize."
+      "text": "Adjacent Auto Storage blocks share a connected outer casing. Their center symbols stay separate, so the Core, Units, Terminals, and the inward or outward Bus faces remain easy to recognize."
     },
     {
       "type": "patchouli:text",
-      "text": "Connected casing is an optional visual enhancement from $(thing)Fusion 1.2.12 for Minecraft 1.21.1$(). Without it, every Magic Storage block still works with its ordinary casing. When Fusion is installed, the connected edges enable automatically."
+      "text": "Connected casing is an optional visual enhancement from $(thing)Fusion 1.2.12 for Minecraft 1.21.1$(). Without it, every Auto Storage block still works with its ordinary casing. When Fusion is installed, the connected edges enable automatically."
     },
     {
       "type": "patchouli:text",

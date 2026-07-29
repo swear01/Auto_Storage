@@ -54,26 +54,26 @@ The visual runner enables Minecraft F11 automatically through prepared `options.
 
 ### Connected textures
 
-Vanilla/NeoForge JSON models do not derive a face texture from adjacent block state. Implementing a project-owned custom model loader would add a large client rendering subsystem solely for this visual feature. Fusion already provides a documented connecting model/texture format and supports a five-tile `pieced` layout, so Magic Storage will use Fusion as an optional client enhancement instead of reimplementing that renderer.
+Vanilla/NeoForge JSON models do not derive a face texture from adjacent block state. Implementing a project-owned custom model loader would add a large client rendering subsystem solely for this visual feature. Fusion already provides a documented connecting model/texture format and supports a five-tile `pieced` layout, so Auto Storage will use Fusion as an optional client enhancement instead of reimplementing that renderer.
 
-The supported dependency is pinned to Fusion `1.2.12-neoforge-mc1.21.1`. Fusion 1.3.x requires a newer NeoForge build than the project and current Prism instance. Fusion is absent from both required client and dedicated-server requirements. The Prism deployment flow downloads the exact official Modrinth artifact, verifies its SHA-512, installs it atomically, and installs the exact version for visual validation, while released clients without Fusion use the vanilla fallback. The Fusion jar is never copied into this repository or bundled inside the Magic Storage jar.
+The supported dependency is pinned to Fusion `1.2.12-neoforge-mc1.21.1`. Fusion 1.3.x requires a newer NeoForge build than the project and current Prism instance. Fusion is absent from both required client and dedicated-server requirements. The Prism deployment flow downloads the exact official Modrinth artifact, verifies its SHA-512, installs it atomically, and installs the exact version for visual validation, while released clients without Fusion use the vanilla fallback. The Fusion jar is never copied into this repository or bundled inside the Auto Storage jar.
 
 The pinned 1.2.12 source and jar, not the current 1.3 wiki/examples, define the model schema. Its `match_block` predicate accepts exactly one `block` string. Cross-role casing therefore uses an array of eleven single-block predicates, which Fusion combines with OR. The 1.3-only `blocks` field and `true`/`false` predicates are forbidden. Bus top and side faces receive the predicate; their ordinary front texture needs no false predicate. The generated NeoForge metadata does not declare Fusion as a requirement. Main resources remain vanilla; a client-only built-in resource-pack overlay, registered only when `ModList` finds Fusion, supplies the connecting models and sheets. Development uses an isolated `fusionRuntime` source set only for the Gradle client and data runs; the normal main runtime, server, and GameTest runs remain Fusion-free. A mod jar must not be placed in ModDevGradle's `AdditionalRuntimeClasspath`, because that legacy path is for ordinary libraries and does not make Fusion discoverable as a mod.
 
 Connected faces use Fusion's `pieced` layout. Item models keep ordinary 16x16 textures so inventory rendering never depends on neighboring blocks. Functional faces remain readable:
 
-- Core, Storage Units, and terminal casing borders connect to any Magic Storage network block;
+- Core, Storage Units, and terminal casing borders connect to any Auto Storage network block;
 - Import/Export Bus side and top casing connect, while their directional front keeps the inward/outward flow motif;
 - center motifs do not merge across blocks and continue to identify each role and tier.
 
 ### Wrench interoperability
 
-AE2 and Refined Storage 2 both use the conventional `c:tools/wrench` item tag. Magic Storage therefore adds its own early-game Wrench and also accepts every item in that tag. Players who already have a compatible mod wrench do not need to craft another one.
+AE2 and Refined Storage 2 both use the conventional `c:tools/wrench` item tag. Auto Storage therefore adds its own early-game Wrench and also accepts every item in that tag. Players who already have a compatible mod wrench do not need to craft another one.
 
 Interaction grammar:
 
-- main-hand right-click on a directional Magic Storage block rotates it around the clicked face;
-- main-hand sneak-right-click on any Magic Storage network block dismantles it;
+- main-hand right-click on a directional Auto Storage block rotates it around the clicked face;
+- main-hand sneak-right-click on any Auto Storage network block dismantles it;
 - non-directional blocks return `PASS` for ordinary wrench use instead of inventing a fake orientation;
 - Export Bus wrench use is handled before filter assignment;
 - spectator/off-hand/client-side execution never mutates the world.
@@ -189,7 +189,7 @@ The guide is rewritten as a player manual rather than a collection of implementa
 Book structure:
 
 1. **Getting Started**
-   - what Magic Storage does;
+   - what Auto Storage does;
    - starter shopping list and first network walkthrough;
    - adjacency, one-Core rule, and the first storage/terminal test;
    - Wrench controls and safe moving.
@@ -220,7 +220,7 @@ Book structure:
    - output capacity and atomic no-op behavior;
    - concise glossary and progression table.
 
-Where an in-game recipe exists, the guide uses Patchouli recipe pages referencing the actual Magic Storage recipe ID. Player text does not mention BFS, packets, hidden slots, implementation class names, wire parity, or test totals.
+Where an in-game recipe exists, the guide uses Patchouli recipe pages referencing the actual Auto Storage recipe ID. Player text does not mention BFS, packets, hidden slots, implementation class names, wire parity, or test totals.
 
 ## Testing and delivery
 

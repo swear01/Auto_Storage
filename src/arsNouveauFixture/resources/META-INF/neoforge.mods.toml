@@ -1,11 +1,11 @@
 modLoader="javafml"
 loaderVersion="[4,)"
-license="All Rights Reserved"
+license="MIT"
 
 [[mods]]
 modId="magic_storage_ars_nouveau_fixture"
 version="1.0.0"
-displayName="Magic Storage Ars Nouveau Fixture"
+displayName="Auto Storage Ars Nouveau Fixture"
 description='''Repository-owned integration fixture for optional Ars Nouveau resources and recipes.'''
 
 [[dependencies.magic_storage_ars_nouveau_fixture]]

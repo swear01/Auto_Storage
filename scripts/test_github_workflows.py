@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -265,7 +266,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("scripts/stage_emi_runtime.sh", combined)
         self.assertIn("same Gradle command once", combined)
         self.assertIn("Modrinth / CurseForge", self.read_required("docs/roadmap.md"))
-        self.assertIn("All Rights Reserved", readme)
+        self.assertIn("MIT License", readme)
         self.assertIn(".github/workflows/", structure)
 
     def test_release_examples_derive_current_mod_version(self):
@@ -279,9 +280,10 @@ class GitHubWorkflowTests(unittest.TestCase):
     def test_release_guide_and_project_icon_are_complete(self):
         guide = self.read_required("docs/releasing.md")
         for required in (
-            "Magic Storage for NeoForge",
-            "magic-storage-neoforge",
-            "All Rights Reserved",
+            "Auto Storage",
+            "https://modrinth.com/project/auto-storage",
+            "1630575",
+            "MIT",
             "MODRINTH_TOKEN",
             "CURSEFORGE_TOKEN",
             "MODRINTH_PROJECT_ID",
@@ -302,6 +304,71 @@ class GitHubWorkflowTests(unittest.TestCase):
             int.from_bytes(data[20:24], "big"),
         ))
         self.assertLess(len(data), 2 * 1024 * 1024)
+
+    def test_public_name_and_mit_license_are_consistent(self):
+        properties = self.read_required("gradle.properties")
+        self.assertIn("mod_id=magic_storage", properties)
+        self.assertIn("mod_name=Auto Storage", properties)
+        self.assertIn("mod_license=MIT", properties)
+
+        license_text = self.read_required("LICENSE")
+        self.assertIn("MIT License", license_text)
+        self.assertIn("Copyright (c) 2026 swear01", license_text)
+
+        readme = self.read_required("README.md")
+        self.assertTrue(readme.startswith("# Auto Storage\n"))
+        self.assertIn("## License\n\nMIT License.", readme)
+        self.assertNotIn("Magic Storage", readme)
+
+        build = self.read_required("build.gradle")
+        self.assertIn("tasks.named('jar', Jar).configure", build)
+        self.assertIn("from(rootProject.file('LICENSE'))", build)
+
+        release = self.read_required(".github/workflows/release.yml")
+        self.assertIn("name: Auto Storage ${{ steps.release-meta.outputs.version }} Alpha", release)
+        self.assertIn('echo "## Auto Storage ${GITHUB_REF_NAME}"', release)
+
+        player_facing = "\n".join([
+            self.read_required("src/main/resources/assets/magic_storage/lang/en_us.json"),
+            self.read_required("src/main/resources/assets/magic_storage/lang/zh_tw.json"),
+            self.read_required("src/main/resources/data/magic_storage/patchouli_books/guide/book.json"),
+            self.read_required("src/main/templates/META-INF/neoforge.mods.toml"),
+        ])
+        self.assertIn("Auto Storage", player_facing)
+        self.assertNotIn("Magic Storage", player_facing)
+        for locale in ("en_us", "zh_tw"):
+            lang = json.loads(self.read_required(
+                f"src/main/resources/assets/magic_storage/lang/{locale}.json"
+            ))
+            self.assertEqual("Auto Storage", lang["itemGroup.magic_storage"])
+
+        for path in ROOT.glob("src/*/resources/META-INF/neoforge.mods.toml"):
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertNotIn("All Rights Reserved", path.read_text())
+
+    def test_current_public_name_reaches_active_docs_and_runtime_diagnostics(self):
+        for path in ROOT.joinpath("docs").rglob("*.md"):
+            for line_number, line in enumerate(path.read_text().splitlines(), 1):
+                if "Magic Storage" in line and "Terraria" not in line:
+                    self.fail(
+                        f"stale public name in {path.relative_to(ROOT)}:{line_number}"
+                    )
+
+        for path in ROOT.joinpath("src").rglob("*"):
+            if path.is_file() and path.suffix in {".java", ".json", ".mcmeta", ".toml"}:
+                with self.subTest(path=path.relative_to(ROOT)):
+                    self.assertNotIn("Magic Storage", path.read_text())
+
+        for path in ROOT.joinpath("scripts").glob("*.py"):
+            if path.name.startswith("test_"):
+                continue
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertNotIn("Magic Storage", path.read_text())
+
+    def test_current_release_evidence_uses_latest_python_total(self):
+        for relative_path in ("docs/notes.md", "docs/plan.md"):
+            with self.subTest(path=relative_path):
+                self.assertIn("Python 302", self.read_required(relative_path))
 
     def test_current_manual_gui_log_check_does_not_pin_historical_version_or_selftest_total(self):
         notes = self.read_required("docs/notes.md")

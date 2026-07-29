@@ -84,7 +84,7 @@
 - Scan every active doc that describes changed behavior; archive completed/superseded design plans with `agents_rule archive` only after replacement links are current.
 - Run `compileJava`, `build`, `runGameTestServer`, all Python tests, `runData`, datagen drift, resource/model/texture checks, `runClient --dry-run`, and `git diff --check`.
 - Stop the Gradle daemon after verification.
-- Run the transactional patch-version deployment; verify exactly one Magic Storage jar and the exact Fusion jar in Prism dev.
+- Run the transactional patch-version deployment; verify exactly one Auto Storage jar and the exact Fusion jar in Prism dev.
 - Rebuild the fixed void world with an updated connected-texture/wrench/Fuel gallery.
 - Launch the current visual scenario offline in automatic Minecraft F11 fullscreen, wait for READY and unchanged-desktop-mode verification, then leave only the Minecraft client open for the user. On macOS this is borderless Cocoa F11, never monitor-attached GLFW fullscreen; never use macOS native fullscreen or combine the two modes.
 - The user must pass fullscreen and inspect all dynamic checklist items. Close only F11 → visible titled windowed window → Command-Q, then inspect `shutdown.json`; do not claim GUI verification from automated tests.
