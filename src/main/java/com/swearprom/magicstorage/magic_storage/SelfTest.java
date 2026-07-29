@@ -952,10 +952,16 @@ class SelfTest {
         assertTrue("simple ingredient representatives are explicitly exhaustive",
                 simpleIndex.coverage() == RecipeCandidateIndex.Coverage.EXHAUSTIVE
                         && simpleIndex.representatives().stream().anyMatch(stack -> stack.is(Items.DIRT)));
-        assertTrue("non-simple ingredient representatives are explicitly non-exhaustive",
-                componentIndex.coverage() == RecipeCandidateIndex.Coverage.NON_EXHAUSTIVE
+        RecipeAdapterMatch.Input componentInput = BuiltInRecipeAdapters.registry()
+                .classify(componentExact).orElseThrow().orderedInputs().getFirst();
+        assertTrue("data-component ingredients have exhaustive item coverage without matching every variant",
+                componentIndex.coverage() == RecipeCandidateIndex.Coverage.EXHAUSTIVE
                         && componentIndex.representatives().stream()
-                        .anyMatch(stack -> ItemStack.isSameItemSameComponents(stack, exactStone)));
+                        .anyMatch(stack -> ItemStack.isSameItemSameComponents(stack, exactStone))
+                        && componentInput.representativeItemsExhaustive()
+                        && !componentInput.matchesAllItemVariants()
+                        && componentInput.test(exactStone)
+                        && !componentInput.test(new ItemStack(Items.STONE)));
     }
 
     private static void testRecipeAdapterReloadIdentity() {

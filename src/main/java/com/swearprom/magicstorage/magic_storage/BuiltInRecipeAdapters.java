@@ -27,6 +27,7 @@ import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -683,13 +684,14 @@ final class BuiltInRecipeAdapters {
     private static List<RecipeAdapterMatch.Input> ingredientInputs(List<Ingredient> ingredients) {
         List<RecipeAdapterMatch.Input> inputs = new ArrayList<>(ingredients.size());
         for (Ingredient ingredient : ingredients) {
+            boolean exhaustiveItemCoverage = hasExhaustiveItemCoverage(ingredient);
             inputs.add(ingredient.isEmpty()
                     ? RecipeAdapterMatch.Input.empty(ingredient)
                     : RecipeAdapterMatch.Input.of(
                             ingredient,
                             ingredient,
                             Arrays.asList(ingredient.getItems()),
-                            ingredient.isSimple(),
+                            exhaustiveItemCoverage,
                             ingredient.isSimple(),
                             1));
         }
@@ -701,7 +703,7 @@ final class BuiltInRecipeAdapters {
         List<ItemStack> representatives = new ArrayList<>();
         for (Ingredient ingredient : ingredients) {
             if (ingredient.isEmpty()) continue;
-            exhaustive &= ingredient.isSimple();
+            exhaustive &= hasExhaustiveItemCoverage(ingredient);
             for (ItemStack stack : ingredient.getItems()) {
                 if (!stack.isEmpty()) representatives.add(stack.copyWithCount(1));
             }
@@ -709,6 +711,11 @@ final class BuiltInRecipeAdapters {
         return exhaustive
                 ? RecipeCandidateIndex.exhaustive(representatives)
                 : RecipeCandidateIndex.nonExhaustive(representatives);
+    }
+
+    private static boolean hasExhaustiveItemCoverage(Ingredient ingredient) {
+        return ingredient.isSimple()
+                || ingredient.getCustomIngredient() instanceof DataComponentIngredient;
     }
 
     private static List<RecipeAdapterMatch.Input> smithingInputs(SmithingRecipe recipe) {
