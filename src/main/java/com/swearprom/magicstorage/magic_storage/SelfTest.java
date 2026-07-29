@@ -1361,9 +1361,14 @@ class SelfTest {
                 new ItemStack(Items.REDSTONE),
                 ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "energy"),
                 Component.literal("Energy"));
+        StorageResourceKey processing = StorageResourceBridge.stationWorkKey(
+                ResourceLocation.fromNamespaceAndPath(
+                        MagicStorage.MODID, "minecraft_furnace"));
         assertTrue("non-grid scopes reuse name and mod-prefix search semantics",
                 TerminalSearchQuery.compile("energy @magic_storage").matches(scoped)
-                        && TerminalSearchQuery.compile("@magic_stor").matches(scoped));
+                        && TerminalSearchQuery.compile("@magic_stor").matches(scoped)
+                        && TerminalSearchQuery.compile("@minecraft")
+                        .matches(processing, new ItemStack(Items.FURNACE)));
     }
 
     private static void testFuelSearchModel() {

@@ -1241,7 +1241,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
             ItemStack representative = StorageResourceKinds.representative(
                     key, level.registryAccess());
             if (!matchesResourceFilter(key, representative, query)) continue;
-            result.add(TerminalResourceDisplay.create(representative, key, entry.getValue()));
+            result.add(key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
+                    ? TerminalDisplayStack.create(representative, entry.getValue())
+                    : TerminalResourceDisplay.create(representative, key, entry.getValue()));
         }
         result.sort(TerminalEntryComparator.forMode(mode, order));
         return result;

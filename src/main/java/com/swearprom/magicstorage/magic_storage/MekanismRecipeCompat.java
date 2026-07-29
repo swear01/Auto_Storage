@@ -38,6 +38,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -417,7 +418,7 @@ public final class MekanismRecipeCompat {
     ) {
         machineDescriptors.register(registryPath, () -> MachineDescriptor.installableVariants(
                 descriptorId,
-                new ItemStack(factoryType.getBaseBlock().asItem()).getHoverName(),
+                Component.translatable(factoryType.getTranslationKey()),
                 () -> factoryVariants(factoryType),
                 MachineEnergyTable.Category.PROCESS,
                 MachineDescriptorApi.MAX_INSTALLED_COUNT,

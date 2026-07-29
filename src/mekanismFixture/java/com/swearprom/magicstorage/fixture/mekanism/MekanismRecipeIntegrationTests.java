@@ -47,6 +47,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -178,6 +179,15 @@ public final class MekanismRecipeIntegrationTests {
                     || descriptor.variants().size() != FACTORY_TIERS.size() + 1) {
                 helper.fail("Factory-backed descriptor did not expose exactly one basic machine "
                         + "and four factory tiers: " + family.station().descriptorId());
+                return;
+            }
+            Component expectedLabel = Component.translatable(
+                    "factory.mekanism." + family.factoryTypePath());
+            if (!descriptor.stationLabel().equals(expectedLabel)) {
+                helper.fail("Factory-backed descriptor does not use its shared recipe family label: "
+                        + family.station().descriptorId() + ", expected="
+                        + expectedLabel.getString() + ", actual="
+                        + descriptor.stationLabel().getString());
                 return;
             }
             if (!assertVariantRate(

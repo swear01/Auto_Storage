@@ -3445,8 +3445,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         totalItemTypes = displayStacks.size();
         refreshDisplayMetadata(core);
         int vRows = getVisibleRows();
-        int maxOffset = Math.max(0, totalItemTypes - vRows * DISPLAY_COLS);
-        scrollOffset = Math.min(scrollOffset, maxOffset);
+        scrollTo(scrollOffset);
         long syncStarted = System.nanoTime();
         replaceVisibleDisplayStacks(displayStacks, vRows);
         long syncNanos = System.nanoTime() - syncStarted;
@@ -3543,9 +3542,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 .toList();
         totalItemTypes = updated.size();
         refreshDisplayMetadata(core);
-        int maxOffset = Math.max(
-                0, totalItemTypes - getVisibleRows() * DISPLAY_COLS);
-        scrollOffset = Math.min(scrollOffset, maxOffset);
+        scrollTo(scrollOffset);
         replaceVisibleDisplayStacks(updated, getVisibleRows());
         return true;
     }

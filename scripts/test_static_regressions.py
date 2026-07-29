@@ -2235,6 +2235,24 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("menu.applySettings(packet, player)", entrypoint)
         self.assertNotIn("menu.refreshDisplayItemsFiltered(core, packet.filter())", entrypoint)
 
+    def test_craftable_refresh_reuses_the_row_aligned_scroll_clamp(self):
+        menu = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/"
+            "CraftingTerminalMenu.java"
+        )
+        self.assertGreaterEqual(menu.count("scrollTo(scrollOffset);"), 2)
+        self.assertNotIn(
+            "totalItemTypes - vRows * DISPLAY_COLS",
+            menu,
+        )
+
+    def test_wrench_recovery_drop_uses_the_post_recovery_escrow(self):
+        wrench = self.read_required(
+            "src/main/java/com/swearprom/magicstorage/magic_storage/WrenchActions.java"
+        )
+        self.assertNotIn("spawnIfMissing(level, pos, expected)", wrench)
+        self.assertEqual(4, wrench.count("createRecoveryDrop(level.registryAccess())"))
+
     def test_terminal_open_buffers_use_core_access_remote_contract(self):
         menu = self.read_required("src/main/java/com/swearprom/magicstorage/magic_storage/StorageTerminalMenu.java")
         self.assertGreaterEqual(menu.count("buf.readBlockPos()"), 2)

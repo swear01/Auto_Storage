@@ -313,34 +313,36 @@ public class WrenchTests {
     }
 
     @GameTest(template = "persistencetests.platform")
-    public static void canceled_wrench_drop_event_preserves_plain_bus_item(GameTestHelper helper) {
+    public static void replaced_wrench_drop_event_does_not_restore_plain_bus_without_escrow(
+            GameTestHelper helper
+    ) {
         var level = helper.getLevel();
         BlockPos busPos = helper.absolutePos(new BlockPos(2, 3, 2));
         level.setBlock(busPos, MagicStorage.IMPORT_BUS.get().defaultBlockState(), Block.UPDATE_ALL);
         if (!(level.getBlockEntity(busPos) instanceof ImportBusBlockEntity bus)) {
-            helper.fail("Plain canceled-drop Import Bus is missing");
+            helper.fail("Plain replaced-drop Import Bus is missing");
             return;
         }
         var player = FakePlayerFactory.get(
-                level, new GameProfile(UUID.randomUUID(), "plain-canceled-wrench"));
+                level, new GameProfile(UUID.randomUUID(), "plain-replaced-wrench"));
         player.setGameMode(GameType.SURVIVAL);
         player.setPos(busPos.getX() + 0.5, busPos.getY() + 0.5, busPos.getZ() + 0.5);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
         player.setShiftKeyDown(true);
         bus.assignOwnerOnPlacement(player.getUUID());
 
-        Consumer<BlockDropsEvent> cancelDrop = event -> {
+        Consumer<BlockDropsEvent> replaceDrops = event -> {
             if (event.getLevel() == level && event.getPos().equals(busPos)) {
-                event.setCanceled(true);
+                event.getDrops().clear();
             }
         };
-        NeoForge.EVENT_BUS.addListener(BlockDropsEvent.class, cancelDrop);
+        NeoForge.EVENT_BUS.addListener(BlockDropsEvent.class, replaceDrops);
         InteractionResult result;
         try {
             result = WrenchActions.tryUse(
                     level, player, InteractionHand.MAIN_HAND, hit(busPos, Direction.UP));
         } finally {
-            NeoForge.EVENT_BUS.unregister(cancelDrop);
+            NeoForge.EVENT_BUS.unregister(replaceDrops);
         }
         int busItems = 0;
         for (ItemStack stack : player.getInventory().items) {
@@ -352,8 +354,9 @@ public class WrenchTests {
                 busItems += entity.getItem().getCount();
             }
         }
-        if (!result.consumesAction() || !level.getBlockState(busPos).isAir() || busItems != 1) {
-            helper.fail("Canceled BlockDropsEvent lost or duplicated a plain Wrench Bus: " + busItems);
+        if (!result.consumesAction() || !level.getBlockState(busPos).isAir() || busItems != 0) {
+            helper.fail("Replaced BlockDropsEvent restored a plain Wrench Bus without escrow: "
+                    + busItems);
             return;
         }
         helper.succeed();

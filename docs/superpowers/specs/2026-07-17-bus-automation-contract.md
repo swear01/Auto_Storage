@@ -378,9 +378,10 @@ changed field cancels the plan without mutation and lets the next cooldown retry
   `BlockDropsEvent` handler removes escrow-bearing drops from the mutable event list
   and conserves them before later listeners; emergency recovery therefore ignores
   event cancellation and `doTileDrops=false`. The UUID deduplicates loot-first and
-  `onRemove` for one Bus without merging two same-position/same-escrow removals, and
-  a canceled Wrench drop event still preserves plain Bus hardware. If neither path
-  can conserve the resource, removal is refused.
+  `onRemove` for one Bus without merging two same-position/same-escrow removals.
+  Ordinary Bus hardware follows the final event result; only escrow conservation
+  bypasses cancellation or replacement. If neither path can conserve the resource,
+  removal is refused.
 - Unknown-kind entries remain exact ledger data. Malformed future escrow NBT remains
   raw and disables transfer; it is never reset to empty.
 
@@ -562,7 +563,8 @@ item capability but no dedicated present-mod CI job yet.
   including two same-position removals with identical escrow;
 - failed Wrench conservation preflight and no-op rotation do not claim a legacy
   owner or increment revision, while successful Wrench removal emits exactly one
-  exact escrow drop and a canceled Wrench drop event still preserves a plain Bus.
+  exact escrow drop without restoring ordinary Bus hardware removed by a later
+  drop-event listener.
 
 ### Repository gates
 

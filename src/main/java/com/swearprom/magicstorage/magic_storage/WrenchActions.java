@@ -190,9 +190,10 @@ final class WrenchActions {
                     && BusRecoveryDrops.containsMatchingEscrowDrop(dropEvent.getDrops(), expected)) {
                 return;
             }
-            importer.recoverPendingResources();
-            BusRecoveryDrops.spawnIfMissing(
-                    level, pos, importer.createRecoveryDrop(level.registryAccess()));
+            if (!importer.recoverPendingResources()) {
+                BusRecoveryDrops.spawnIfMissing(
+                        level, pos, importer.createRecoveryDrop(level.registryAccess()));
+            }
             return;
         }
         if (blockEntity instanceof ExportBusBlockEntity exporter) {
@@ -201,9 +202,10 @@ final class WrenchActions {
                     && BusRecoveryDrops.containsMatchingEscrowDrop(dropEvent.getDrops(), expected)) {
                 return;
             }
-            exporter.recoverPendingResources();
-            BusRecoveryDrops.spawnIfMissing(
-                    level, pos, exporter.createRecoveryDrop(level.registryAccess()));
+            if (!exporter.recoverPendingResources()) {
+                BusRecoveryDrops.spawnIfMissing(
+                        level, pos, exporter.createRecoveryDrop(level.registryAccess()));
+            }
         }
     }
 }

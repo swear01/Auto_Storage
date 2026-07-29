@@ -21,7 +21,9 @@ Mekanism `10.7.19.85` registers 26 server `RecipeType`s. Magic Storage supports
 
 Each logical station accepts its basic machine and Basic, Advanced, Elite, and
 Ultimate Factory variants. Their exact parallel rates are 1, 3, 5, 7, and 9
-work per tick per installed block.
+work per tick per installed block. The player-facing label uses Mekanism's
+shared `FactoryType` translation, such as `Crushing`, rather than the base
+machine item name (`Crusher`) or a tier-specific Factory name.
 
 | Recipe type | Basic station | Typed shape |
 |---|---|---|

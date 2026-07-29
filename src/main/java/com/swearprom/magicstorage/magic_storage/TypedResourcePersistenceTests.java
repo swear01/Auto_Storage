@@ -407,7 +407,7 @@ public final class TypedResourcePersistenceTests {
             core.rebuildNetwork(level);
             StorageResourceKey water = StorageResourceBridge.fluidKey(
                     new FluidStack(Fluids.WATER, 1), level.registryAccess());
-            if (core.insertItem(new ItemStack(Items.STONE)) != 1
+            if (core.insertItem(new ItemStack(Items.OAK_PLANKS)) != 1
                     || core.insertResource(water, 1_000, Action.EXECUTE) != 1_000
                     || core.insertResource(StorageResourceBridge.ENERGY_KEY, 2_000, Action.EXECUTE) != 2_000) {
                 helper.fail("Could not seed terminal typed resources");
@@ -427,7 +427,8 @@ public final class TypedResourcePersistenceTests {
             }
             var player = helper.makeMockPlayer(GameType.SURVIVAL);
             var menu = new StorageTerminalMenu(902, player.getInventory(), core);
-            if (menu.getTotalItemTypes() != 1 || !menu.getSlot(0).getItem().is(Items.STONE)) {
+            if (menu.getTotalItemTypes() != 1
+                    || !menu.getSlot(0).getItem().is(Items.OAK_PLANKS)) {
                 helper.fail("Default Item view did not isolate stored items");
                 return;
             }
@@ -472,17 +473,63 @@ public final class TypedResourcePersistenceTests {
                 return;
             }
 
+            menu.clickMenuButton(player, StorageTerminalMenu.RESET_RESOURCE_VIEW_BUTTON);
+            menu.clickMenuButton(player, StorageTerminalMenu.PREVIOUS_RESOURCE_VIEW_BUTTON);
+            menu.applyFilter(core, "#minecraft:planks");
+            ItemStack allViewPlanks = menu.getSlot(0).getItem();
+            if (menu.getResourceView() != TerminalResourceView.ALL
+                    || menu.getTotalItemTypes() != 1
+                    || !allViewPlanks.is(Items.OAK_PLANKS)
+                    || TerminalResourceDisplay.isTyped(allViewPlanks)) {
+                helper.fail("All view did not retain the ordinary tagged item display path");
+                return;
+            }
+            menu.clicked(0, 0, ClickType.PICKUP, player);
+            if (!menu.getCarried().is(Items.OAK_PLANKS)
+                    || core.getItemCount(ItemKey.of(new ItemStack(Items.OAK_PLANKS))) != 0) {
+                helper.fail("All view item entry did not use ordinary item withdrawal");
+                return;
+            }
+            menu.setCarried(ItemStack.EMPTY);
+            if (core.insertItem(new ItemStack(Items.OAK_PLANKS)) != 1) {
+                helper.fail("Could not restore the All-view item");
+                return;
+            }
+
             var craftingMenu = new CraftingTerminalMenu(903, player.getInventory(), core);
-            craftingMenu.clickMenuButton(player, StorageTerminalMenu.NEXT_RESOURCE_VIEW_BUTTON);
+            craftingMenu.clickMenuButton(
+                    player, StorageTerminalMenu.PREVIOUS_RESOURCE_VIEW_BUTTON);
+            craftingMenu.applyFilter(core, "#minecraft:planks");
+            ItemStack craftingAllPlanks = craftingMenu.getSlot(0).getItem();
+            if (craftingMenu.getResourceView() != TerminalResourceView.ALL
+                    || craftingMenu.getTotalItemTypes() != 1
+                    || !craftingAllPlanks.is(Items.OAK_PLANKS)
+                    || TerminalResourceDisplay.isTyped(craftingAllPlanks)) {
+                helper.fail("Crafting Terminal All view did not retain the ordinary item path");
+                return;
+            }
+            craftingMenu.clicked(0, 0, ClickType.PICKUP, player);
+            if (!craftingMenu.getSelectedStack().is(Items.OAK_PLANKS)
+                    || !craftingMenu.getCarried().isEmpty()) {
+                helper.fail("Crafting Terminal All view item did not select normally");
+                return;
+            }
+            ItemStack selectedPlanks = craftingMenu.getSelectedStack().copy();
+            craftingMenu.applyFilter(core, "");
+            craftingMenu.clickMenuButton(
+                    player, StorageTerminalMenu.RESET_RESOURCE_VIEW_BUTTON);
+            craftingMenu.clickMenuButton(
+                    player, StorageTerminalMenu.NEXT_RESOURCE_VIEW_BUTTON);
             if (craftingMenu.getResourceView() != TerminalResourceView.FLUID
                     || craftingMenu.getTotalItemTypes() != 1) {
                 helper.fail("Crafting Terminal Storage page did not share the fluid view");
                 return;
             }
             craftingMenu.clicked(0, 0, ClickType.PICKUP, player);
-            if (!craftingMenu.getSelectedStack().isEmpty()
+            if (!ItemStack.isSameItemSameComponents(
+                    craftingMenu.getSelectedStack(), selectedPlanks)
                     || !craftingMenu.getCarried().isEmpty()) {
-                helper.fail("Crafting Terminal treated a typed representative as an item recipe");
+                helper.fail("Crafting Terminal typed entry changed the ordinary item selection");
                 return;
             }
             craftingMenu.clickMenuButton(player, CraftingTerminalMenu.CRAFTABLE_PAGE_BUTTON);

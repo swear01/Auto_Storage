@@ -62,7 +62,7 @@ final class TerminalSearchQuery {
         String identity = (key.kindId() + " " + key.resourceId() + " "
                 + representative.getHoverName().getString()).toLowerCase(Locale.ROOT);
         for (Term term : terms) {
-            if (!term.matches(key, identity)) return false;
+            if (!term.matches(key, representative, identity)) return false;
         }
         return true;
     }
@@ -70,7 +70,7 @@ final class TerminalSearchQuery {
     private sealed interface Term permits NameTerm, ModTerm, TagTerm, InvalidTerm {
         boolean matches(TerminalSearchEntry entry);
 
-        boolean matches(StorageResourceKey key, String identity);
+        boolean matches(StorageResourceKey key, ItemStack representative, String identity);
     }
 
     private record NameTerm(String value) implements Term {
@@ -80,7 +80,11 @@ final class TerminalSearchQuery {
         }
 
         @Override
-        public boolean matches(StorageResourceKey key, String identity) {
+        public boolean matches(
+                StorageResourceKey key,
+                ItemStack representative,
+                String identity
+        ) {
             return identity.contains(value);
         }
     }
@@ -92,7 +96,15 @@ final class TerminalSearchQuery {
         }
 
         @Override
-        public boolean matches(StorageResourceKey key, String identity) {
+        public boolean matches(
+                StorageResourceKey key,
+                ItemStack representative,
+                String identity
+        ) {
+            if (StorageResourceBridge.stationWorkDescriptorId(key).isPresent()) {
+                return representative.getItem().builtInRegistryHolder().key().location()
+                        .getNamespace().contains(value);
+            }
             return key.resourceId().getNamespace().contains(value);
         }
     }
@@ -104,8 +116,13 @@ final class TerminalSearchQuery {
         }
 
         @Override
-        public boolean matches(StorageResourceKey key, String identity) {
-            return false;
+        public boolean matches(
+                StorageResourceKey key,
+                ItemStack representative,
+                String identity
+        ) {
+            return key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
+                    && representative.is(tag);
         }
     }
 
@@ -118,7 +135,11 @@ final class TerminalSearchQuery {
         }
 
         @Override
-        public boolean matches(StorageResourceKey key, String identity) {
+        public boolean matches(
+                StorageResourceKey key,
+                ItemStack representative,
+                String identity
+        ) {
             return false;
         }
     }
