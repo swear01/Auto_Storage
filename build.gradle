@@ -30,6 +30,54 @@ sourceSets {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
     }
+    botaniaFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    ironFurnacesFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    farmersDelightFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    modernIndustrializationFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    arsNouveauFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    evilCraftFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    powahFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    industrialForegoingFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    createFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    pneumaticCraftFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    extendedCraftingFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
+    compatibilityMatrixFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
 }
 
 base {
@@ -43,6 +91,18 @@ neoForge {
     addModdingDependenciesTo sourceSets.fusionRuntime
     addModdingDependenciesTo sourceSets.recipeAddonFixture
     addModdingDependenciesTo sourceSets.mekanismFixture
+    addModdingDependenciesTo sourceSets.botaniaFixture
+    addModdingDependenciesTo sourceSets.ironFurnacesFixture
+    addModdingDependenciesTo sourceSets.farmersDelightFixture
+    addModdingDependenciesTo sourceSets.modernIndustrializationFixture
+    addModdingDependenciesTo sourceSets.arsNouveauFixture
+    addModdingDependenciesTo sourceSets.evilCraftFixture
+    addModdingDependenciesTo sourceSets.powahFixture
+    addModdingDependenciesTo sourceSets.industrialForegoingFixture
+    addModdingDependenciesTo sourceSets.createFixture
+    addModdingDependenciesTo sourceSets.pneumaticCraftFixture
+    addModdingDependenciesTo sourceSets.extendedCraftingFixture
+    addModdingDependenciesTo sourceSets.compatibilityMatrixFixture
 
     mods {
         "${mod_id}" {
@@ -53,6 +113,42 @@ neoForge {
         }
         magic_storage_mekanism_fixture {
             sourceSet(sourceSets.mekanismFixture)
+        }
+        magic_storage_botania_fixture {
+            sourceSet(sourceSets.botaniaFixture)
+        }
+        magic_storage_iron_furnaces_fixture {
+            sourceSet(sourceSets.ironFurnacesFixture)
+        }
+        magic_storage_farmers_delight_fixture {
+            sourceSet(sourceSets.farmersDelightFixture)
+        }
+        magic_storage_modern_industrialization_fixture {
+            sourceSet(sourceSets.modernIndustrializationFixture)
+        }
+        magic_storage_ars_nouveau_fixture {
+            sourceSet(sourceSets.arsNouveauFixture)
+        }
+        magic_storage_evilcraft_fixture {
+            sourceSet(sourceSets.evilCraftFixture)
+        }
+        magic_storage_powah_fixture {
+            sourceSet(sourceSets.powahFixture)
+        }
+        magic_storage_industrial_foregoing_fixture {
+            sourceSet(sourceSets.industrialForegoingFixture)
+        }
+        magic_storage_create_fixture {
+            sourceSet(sourceSets.createFixture)
+        }
+        magic_storage_pneumaticcraft_fixture {
+            sourceSet(sourceSets.pneumaticCraftFixture)
+        }
+        magic_storage_extended_crafting_fixture {
+            sourceSet(sourceSets.extendedCraftingFixture)
+        }
+        magic_storage_compatibility_matrix_fixture {
+            sourceSet(sourceSets.compatibilityMatrixFixture)
         }
     }
 
@@ -96,6 +192,101 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_mekanism_fixture'
         }
 
+        botaniaGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.botaniaFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_botania_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_botania_fixture'
+        }
+
+        ironFurnacesGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.ironFurnacesFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_iron_furnaces_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_iron_furnaces_fixture'
+        }
+
+        farmersDelightGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.farmersDelightFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_farmers_delight_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_farmers_delight_fixture'
+        }
+
+        modernIndustrializationGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.modernIndustrializationFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_modern_industrialization_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_modern_industrialization_fixture'
+        }
+
+        arsNouveauGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.arsNouveauFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_ars_nouveau_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_ars_nouveau_fixture'
+        }
+
+        evilCraftGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.evilCraftFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_evilcraft_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_evilcraft_fixture'
+        }
+
+        powahGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.powahFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_powah_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_powah_fixture'
+        }
+
+        industrialForegoingGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.industrialForegoingFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_industrial_foregoing_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_industrial_foregoing_fixture'
+        }
+
+        createGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.createFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_create_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_create_fixture'
+        }
+
+        pneumaticCraftGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.pneumaticCraftFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_pneumaticcraft_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_pneumaticcraft_fixture'
+        }
+
+        extendedCraftingGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.extendedCraftingFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_extended_crafting_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_extended_crafting_fixture'
+        }
+
+        compatibilityMatrixGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.compatibilityMatrixFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_compatibility_matrix_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_compatibility_matrix_fixture'
+            systemProperty 'magic_storage.terminalScaleTypes',
+                    providers.gradleProperty('terminalScaleTypes').orElse('10000').get()
+        }
+
         data {
             data()
             sourceSet = sourceSets.fusionRuntime
@@ -129,6 +320,91 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    prismGuiIronFurnaces {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiFarmersDelight {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiTmrv {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiMekanism {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiBotania {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiCurios {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiModernIndustrialization {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiGuideMe {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiArsNouveau {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiGeckoLib {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiPowah {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiClothConfig {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiIndustrialForegoing {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiTitanium {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiCreate {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiExtendedCrafting {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiCucumber {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
 }
 
 repositories {
@@ -146,6 +422,10 @@ repositories {
     maven {
         url = 'https://maven.blamejared.com'
     }
+    maven {
+        name = "C4"
+        url = "https://maven.theillusivec4.top/"
+    }
 }
 
 dependencies {
@@ -153,15 +433,138 @@ dependencies {
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     compileOnly "maven.modrinth:emi:${emi_runtime_version}"
     compileOnly "maven.modrinth:mekanism:${mekanism_ci_version}"
+    compileOnly "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"
+    compileOnly "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
+    compileOnly "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
+    compileOnly "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}"
+    compileOnly "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}"
+    compileOnly "maven.modrinth:evilcraft:${evilcraft_ci_version}"
+    compileOnly "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"
+    compileOnly "maven.modrinth:powah:${powah_ci_version}"
+    compileOnly "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}"
+    compileOnly "maven.modrinth:titanium:${titanium_ci_version}"
+    compileOnly "maven.modrinth:create:${create_ci_version}"
+    compileOnly "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}"
+    compileOnly "maven.modrinth:extended-crafting:${extended_crafting_ci_version}"
+    compileOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
     mekanismFixtureRuntimeOnly "maven.modrinth:mekanism:${mekanism_ci_version}"
+    botaniaFixtureRuntimeOnly(
+            "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}") {
+        exclude group: "vazkii.patchouli", module: "Patchouli"
+        exclude group: "mezz.jei", module: "jei-1.21.1-neoforge"
+    }
+    ironFurnacesFixtureRuntimeOnly "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
+    farmersDelightFixtureRuntimeOnly "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
+    modernIndustrializationFixtureRuntimeOnly(
+            "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}")
+    modernIndustrializationFixtureRuntimeOnly "maven.modrinth:guideme:${guideme_ci_version}"
+    arsNouveauFixtureRuntimeOnly "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}"
+    arsNouveauFixtureRuntimeOnly "maven.modrinth:geckolib:${geckolib_ci_version}"
+    arsNouveauFixtureRuntimeOnly "maven.modrinth:curios:${ars_curios_ci_version}"
+    evilCraftFixtureRuntimeOnly "maven.modrinth:evilcraft:${evilcraft_ci_version}"
+    evilCraftFixtureRuntimeOnly "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"
+    powahFixtureRuntimeOnly "maven.modrinth:powah:${powah_ci_version}"
+    powahFixtureRuntimeOnly "maven.modrinth:cloth-config:${powah_cloth_config_ci_version}"
+    powahFixtureRuntimeOnly "maven.modrinth:guideme:${guideme_ci_version}"
+    industrialForegoingFixtureRuntimeOnly(
+            "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}")
+    industrialForegoingFixtureRuntimeOnly "maven.modrinth:titanium:${titanium_ci_version}"
+    createFixtureRuntimeOnly "maven.modrinth:create:${create_ci_version}"
+    pneumaticCraftFixtureRuntimeOnly "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}"
+    extendedCraftingFixtureRuntimeOnly(
+            "maven.modrinth:extended-crafting:${extended_crafting_ci_version}")
+    extendedCraftingFixtureRuntimeOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:mekanism:${mekanism_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly(
+            "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}") {
+        exclude group: "vazkii.patchouli", module: "Patchouli"
+        exclude group: "mezz.jei", module: "jei-1.21.1-neoforge"
+    }
+    compatibilityMatrixFixtureRuntimeOnly(
+            "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly(
+            "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:guideme:${guideme_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:geckolib:${geckolib_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:evilcraft:${evilcraft_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:powah:${powah_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly(
+            "maven.modrinth:cloth-config:${powah_cloth_config_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly(
+            "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:titanium:${titanium_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:create:${create_ci_version}"
+    compatibilityMatrixFixtureRuntimeOnly(
+            "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly(
+            "maven.modrinth:extended-crafting:${extended_crafting_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
     fusionRuntimeRuntimeOnly "maven.modrinth:emi:${emi_runtime_version}"
     emiRuntime "maven.modrinth:emi:${emi_runtime_version}"
-    fusionRuntimeRuntimeOnly "maven.modrinth:fusion-connected-textures:h2GrA0Ku"
+    fusionRuntimeRuntimeOnly "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
     clientSmokePatchouli "vazkii.patchouli:Patchouli:${patchouli_version}"
-    clientSmokeFusion "maven.modrinth:fusion-connected-textures:h2GrA0Ku"
+    clientSmokeFusion "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
+    prismGuiIronFurnaces "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
+    prismGuiFarmersDelight "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
+    prismGuiTmrv "maven.modrinth:tmrv:${tmrv_ci_version}"
+    prismGuiMekanism "maven.modrinth:mekanism:${mekanism_ci_version}"
+    prismGuiBotania "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"
+    prismGuiCurios "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}"
+    prismGuiModernIndustrialization "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}"
+    prismGuiGuideMe "maven.modrinth:guideme:${guideme_ci_version}"
+    prismGuiArsNouveau "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}"
+    prismGuiGeckoLib "maven.modrinth:geckolib:${geckolib_ci_version}"
+    prismGuiPowah "maven.modrinth:powah:${powah_ci_version}"
+    prismGuiClothConfig "maven.modrinth:cloth-config:${powah_cloth_config_ci_version}"
+    prismGuiIndustrialForegoing "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}"
+    prismGuiTitanium "maven.modrinth:titanium:${titanium_ci_version}"
+    prismGuiCreate "maven.modrinth:create:${create_ci_version}"
+    prismGuiExtendedCrafting "maven.modrinth:extended-crafting:${extended_crafting_ci_version}"
+    prismGuiCucumber "maven.modrinth:cucumber:${cucumber_ci_version}"
+}
+
+def botaniaFixtureRuntime = configurations.named("botaniaFixtureRuntimeClasspath")
+def expectedBotaniaFixtureSha256 = botania_ci_sha256.toString()
+tasks.register("verifyBotaniaFixtureArtifact") {
+    inputs.files(botaniaFixtureRuntime)
+    inputs.property("expectedSha256", expectedBotaniaFixtureSha256)
+    doLast {
+        def artifacts = inputs.files.files.findAll {
+                    it.name.startsWith("botania-neoforge-1.21.1-")
+                            && it.name.endsWith(".jar")
+                }
+        if (artifacts.size() != 1) {
+            throw new GradleException(
+                    "Botania CI fixture verification expected one resolved Botania jar, found ${artifacts.size()}")
+        }
+        def digest = java.security.MessageDigest.getInstance("SHA-256")
+        artifacts.iterator().next().withInputStream { input ->
+            byte[] buffer = new byte[8192]
+            for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        def actual = digest.digest().encodeHex().toString()
+        def expected = inputs.properties.expectedSha256.toString()
+        if (actual != expected) {
+            throw new GradleException(
+                    "Botania CI fixture SHA-256 mismatch: expected ${expected}, got ${actual}")
+        }
+    }
+}
+
+tasks.named("compileBotaniaFixtureJava").configure {
+    dependsOn tasks.named("verifyBotaniaFixtureArtifact")
 }
 
 def stagedEmiVersion = project.emi_version.toString()
+def macfixGuiArtifact = layout.projectDirectory.file(
+        "../macfix/build/libs/macfix-${macfix_gui_version}.jar")
+def expectedMacfixGuiSha256 = macfix_gui_sha256.toString()
 tasks.register("stageEmiRuntime", Copy) {
     from configurations.emiRuntime
     into layout.buildDirectory.dir("client-smoke-mods")
@@ -175,6 +578,85 @@ tasks.register("stageClientSmokeSupportMods", Copy) {
     }
     from(configurations.clientSmokeFusion) {
         rename { "fusion-connected-textures.jar" }
+    }
+}
+
+tasks.register("stagePrismGuiSupportMods", Sync) {
+    dependsOn tasks.named("verifyBotaniaFixtureArtifact")
+    inputs.file(macfixGuiArtifact)
+    inputs.property("macfixSha256", expectedMacfixGuiSha256)
+    into layout.buildDirectory.dir("prism-gui-mods")
+    doFirst {
+        def artifact = macfixGuiArtifact.asFile
+        if (!artifact.isFile()) {
+            throw new GradleException("MacFix GUI artifact not found: ${artifact}")
+        }
+        def digest = java.security.MessageDigest.getInstance("SHA-256")
+        artifact.withInputStream { input ->
+            byte[] buffer = new byte[8192]
+            for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        def actual = digest.digest().encodeHex().toString()
+        if (actual != expectedMacfixGuiSha256) {
+            throw new GradleException(
+                    "MacFix GUI artifact SHA-256 mismatch: expected ${expectedMacfixGuiSha256}, got ${actual}")
+        }
+    }
+    from(macfixGuiArtifact) {
+        rename { "macfix-gui-test.jar" }
+    }
+    from(configurations.prismGuiIronFurnaces) {
+        rename { "iron-furnaces-gui-test.jar" }
+    }
+    from(configurations.prismGuiFarmersDelight) {
+        rename { "farmers-delight-gui-test.jar" }
+    }
+    from(configurations.prismGuiTmrv) {
+        rename { "tmrv-gui-test.jar" }
+    }
+    from(configurations.prismGuiMekanism) {
+        rename { "mekanism-gui-test.jar" }
+    }
+    from(configurations.prismGuiBotania) {
+        rename { "botania-gui-test.jar" }
+    }
+    from(configurations.prismGuiCurios) {
+        rename { "curios-gui-test.jar" }
+    }
+    from(configurations.prismGuiModernIndustrialization) {
+        rename { "modern-industrialization-gui-test.jar" }
+    }
+    from(configurations.prismGuiGuideMe) {
+        rename { "guideme-gui-test.jar" }
+    }
+    from(configurations.prismGuiArsNouveau) {
+        rename { "ars-nouveau-gui-test.jar" }
+    }
+    from(configurations.prismGuiGeckoLib) {
+        rename { "geckolib-gui-test.jar" }
+    }
+    from(configurations.prismGuiPowah) {
+        rename { "powah-gui-test.jar" }
+    }
+    from(configurations.prismGuiClothConfig) {
+        rename { "cloth-config-gui-test.jar" }
+    }
+    from(configurations.prismGuiIndustrialForegoing) {
+        rename { "industrial-foregoing-gui-test.jar" }
+    }
+    from(configurations.prismGuiTitanium) {
+        rename { "titanium-gui-test.jar" }
+    }
+    from(configurations.prismGuiCreate) {
+        rename { "create-gui-test.jar" }
+    }
+    from(configurations.prismGuiExtendedCrafting) {
+        rename { "extended-crafting-gui-test.jar" }
+    }
+    from(configurations.prismGuiCucumber) {
+        rename { "cucumber-gui-test.jar" }
     }
 }
 
@@ -220,13 +702,15 @@ tasks.named('check').configure {
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+def expectedSelfTestSummary = 'SelfTest: 204908 passed, 0 failed, 204908 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {
             throw new GradleException('Base GameTest did not produce run/logs/latest.log')
         }
         def text = baseGameTestLatestLog.getText('UTF-8')
-        if (!text.contains('All 337 required tests passed')
+        if (!text.contains('All 405 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Base GameTest or SelfTest did not pass; inspect run/logs/latest.log')
         }
@@ -240,7 +724,8 @@ tasks.named('runRecipeAddonGameTestServer').configure {
             throw new GradleException('Recipe addon GameTest did not produce run/logs/latest.log')
         }
         def text = recipeAddonLatestLog.getText('UTF-8')
-        if (!text.contains('All 5 required tests passed')
+        if (!text.contains('All 17 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Recipe addon GameTest or SelfTest did not pass; inspect run/logs/latest.log')
         }
@@ -254,9 +739,215 @@ tasks.named('runMekanismGameTestServer').configure {
             throw new GradleException('Mekanism GameTest did not produce run/logs/latest.log')
         }
         def text = mekanismLatestLog.getText('UTF-8')
-        if (!text.contains('All 2 required tests passed')
+        if (!text.contains('All 47 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Mekanism GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def botaniaLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runBotaniaGameTestServer').configure {
+    doLast {
+        if (!botaniaLatestLog.exists()) {
+            throw new GradleException('Botania GameTest did not produce run/logs/latest.log')
+        }
+        def text = botaniaLatestLog.getText('UTF-8')
+        if (!text.contains('All 14 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException('Botania GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def ironFurnacesLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runIronFurnacesGameTestServer').configure {
+    doLast {
+        if (!ironFurnacesLatestLog.exists()) {
+            throw new GradleException('Iron Furnaces GameTest did not produce run/logs/latest.log')
+        }
+        def text = ironFurnacesLatestLog.getText('UTF-8')
+        if (!text.contains('All 3 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException('Iron Furnaces GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def farmersDelightLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runFarmersDelightGameTestServer').configure {
+    doLast {
+        if (!farmersDelightLatestLog.exists()) {
+            throw new GradleException("Farmer's Delight GameTest did not produce run/logs/latest.log")
+        }
+        def text = farmersDelightLatestLog.getText('UTF-8')
+        if (!text.contains('All 7 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException("Farmer's Delight GameTest or SelfTest did not pass; inspect run/logs/latest.log")
+        }
+    }
+}
+
+def modernIndustrializationLatestLog =
+        layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runModernIndustrializationGameTestServer').configure {
+    doLast {
+        if (!modernIndustrializationLatestLog.exists()) {
+            throw new GradleException(
+                    'Modern Industrialization GameTest did not produce run/logs/latest.log')
+        }
+        def text = modernIndustrializationLatestLog.getText('UTF-8')
+        if (!text.contains('All 7 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'Modern Industrialization GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def arsNouveauLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runArsNouveauGameTestServer').configure {
+    doLast {
+        if (!arsNouveauLatestLog.exists()) {
+            throw new GradleException('Ars Nouveau GameTest did not produce run/logs/latest.log')
+        }
+        def text = arsNouveauLatestLog.getText('UTF-8')
+        if (!text.contains('All 11 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'Ars Nouveau GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def evilCraftLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runEvilCraftGameTestServer').configure {
+    doLast {
+        if (!evilCraftLatestLog.exists()) {
+            throw new GradleException('EvilCraft GameTest did not produce run/logs/latest.log')
+        }
+        def text = evilCraftLatestLog.getText('UTF-8')
+        if (!text.contains('All 10 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'EvilCraft GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def powahLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runPowahGameTestServer').configure {
+    doLast {
+        if (!powahLatestLog.exists()) {
+            throw new GradleException('Powah GameTest did not produce run/logs/latest.log')
+        }
+        def text = powahLatestLog.getText('UTF-8')
+        if (!text.contains('All 11 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'Powah GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def industrialForegoingLatestLog =
+        layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runIndustrialForegoingGameTestServer').configure {
+    doLast {
+        if (!industrialForegoingLatestLog.exists()) {
+            throw new GradleException(
+                    'Industrial Foregoing GameTest did not produce run/logs/latest.log')
+        }
+        def text = industrialForegoingLatestLog.getText('UTF-8')
+        if (!text.contains('All 9 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'Industrial Foregoing GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def createLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runCreateGameTestServer').configure {
+    doLast {
+        if (!createLatestLog.exists()) {
+            throw new GradleException('Create GameTest did not produce run/logs/latest.log')
+        }
+        def text = createLatestLog.getText('UTF-8')
+        if (!text.contains('All 13 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'Create GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def pneumaticCraftLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runPneumaticCraftGameTestServer').configure {
+    doLast {
+        if (!pneumaticCraftLatestLog.exists()) {
+            throw new GradleException(
+                    'PneumaticCraft GameTest did not produce run/logs/latest.log')
+        }
+        def text = pneumaticCraftLatestLog.getText('UTF-8')
+        if (!text.contains('All 9 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'PneumaticCraft GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def extendedCraftingLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runExtendedCraftingGameTestServer').configure {
+    doLast {
+        if (!extendedCraftingLatestLog.exists()) {
+            throw new GradleException(
+                    'Extended Crafting GameTest did not produce run/logs/latest.log')
+        }
+        def text = extendedCraftingLatestLog.getText('UTF-8')
+        if (!text.contains('All 4 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'Extended Crafting GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
+def compatibilityMatrixLatestLog =
+        layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runCompatibilityMatrixGameTestServer').configure {
+    dependsOn tasks.named('verifyBotaniaFixtureArtifact')
+    doLast {
+        if (!compatibilityMatrixLatestLog.exists()) {
+            throw new GradleException(
+                    'Compatibility matrix GameTest did not produce run/logs/latest.log')
+        }
+        def text = compatibilityMatrixLatestLog.getText('UTF-8')
+        def warmStart = text.indexOf('TERMINAL_SCALE_WARM_INTERACTIONS_BEGIN')
+        def warmEnd = text.indexOf('TERMINAL_SCALE_WARM_INTERACTIONS_END', warmStart + 1)
+        def warmLog = warmStart >= 0 && warmEnd > warmStart
+                ? text.substring(warmStart, warmEnd)
+                : ''
+        if (!text.contains('All 3 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')
+                || warmLog.isEmpty()
+                || warmLog.contains("Can't keep up!")) {
+            throw new GradleException(
+                    'Compatibility matrix GameTest or SelfTest did not pass; inspect run/logs/latest.log')
         }
     }
 }

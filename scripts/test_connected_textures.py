@@ -116,8 +116,10 @@ class ConnectedTextureTests(unittest.TestCase):
         metadata = (ROOT / "src/main/templates/META-INF/neoforge.mods.toml").read_text()
         self.assertNotIn('modId="fusion"', metadata)
 
+        properties = (ROOT / "gradle.properties").read_text()
+        self.assertIn("fusion_runtime_version=h2GrA0Ku", properties)
         build = (ROOT / "build.gradle").read_text()
-        coordinate = 'maven.modrinth:fusion-connected-textures:h2GrA0Ku'
+        coordinate = 'maven.modrinth:fusion-connected-textures:${fusion_runtime_version}'
         self.assertIn('url = "https://api.modrinth.com/maven"', build)
         self.assertIn('includeGroup "maven.modrinth"', build)
         self.assertIn('fusionRuntime', build)
@@ -139,6 +141,7 @@ class ConnectedTextureTests(unittest.TestCase):
             build,
             re.compile(r'^\s*runtimeOnly\s+"maven\.modrinth:fusion-connected-textures:', re.MULTILINE),
         )
+        self.assertNotIn("h2GrA0Ku", build)
         self.assertNotIn('implementation "maven.modrinth:fusion-connected-textures:', build)
 
     def test_vanilla_base_models_do_not_require_fusion(self):

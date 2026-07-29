@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
@@ -50,6 +51,20 @@ record RecipeAdapterMatch(
 
     Optional<TypedRecipePlan> typedRecipePlan() {
         return Optional.ofNullable(contract.typedRecipePlan());
+    }
+
+    Optional<StorageResourceKey> selectionOutputKey(Level level) {
+        if (level == null) return Optional.empty();
+        return selectionOutputKey(level, presentationOutput(List.of(), level));
+    }
+
+    Optional<StorageResourceKey> selectionOutputKey(Level level, ItemStack presentationOutput) {
+        if (level == null) return Optional.empty();
+        TypedRecipePlan plan = contract.typedRecipePlan();
+        if (plan != null) return Optional.of(plan.selectionOutputKey());
+        return presentationOutput.isEmpty()
+                ? Optional.empty()
+                : Optional.of(StorageResourceKey.item(presentationOutput, level.registryAccess()));
     }
 
     boolean isCurrentHolder(RecipeHolder<?> currentHolder) {
@@ -111,7 +126,14 @@ record RecipeAdapterMatch(
                 .filter(stack -> !stack.isEmpty())
                 .map(stack -> stack.copyWithCount(1))
                 .toList();
-        return adapter.resolveVariants(holder, snapshot, level).stream()
+        return resolveVariantsFromSnapshot(snapshot, level);
+    }
+
+    List<RecipeAdapterMatch> resolveVariantsFromSnapshot(
+            List<ItemStack> availableStacks,
+            Level level
+    ) {
+        return adapter.resolveVariants(holder, contract, availableStacks, level).stream()
                 .map(variantContract -> {
                     Objects.requireNonNull(variantContract, "variantContract");
                     return new RecipeAdapterMatch(adapter, holder, candidateIndex, variantContract);
@@ -196,6 +218,9 @@ record RecipeAdapterMatch(
         private final Object identity;
         private final Predicate<ItemStack> matcher;
         private final List<ItemStack> representatives;
+        private final List<Item> representativeItems;
+        private final boolean representativeItemsExhaustive;
+        private final boolean matchesAllItemVariants;
         private final int multiplicity;
         private final boolean empty;
 
@@ -203,6 +228,8 @@ record RecipeAdapterMatch(
                 Object identity,
                 Predicate<ItemStack> matcher,
                 List<ItemStack> representatives,
+                boolean representativeItemsExhaustive,
+                boolean matchesAllItemVariants,
                 int multiplicity,
                 boolean empty
         ) {
@@ -213,6 +240,16 @@ record RecipeAdapterMatch(
                     .filter(stack -> !stack.isEmpty())
                     .map(stack -> stack.copyWithCount(1))
                     .toList();
+            this.representativeItems = this.representatives.stream()
+                    .map(ItemStack::getItem)
+                    .distinct()
+                    .toList();
+            this.representativeItemsExhaustive = representativeItemsExhaustive;
+            if (matchesAllItemVariants && !representativeItemsExhaustive) {
+                throw new IllegalArgumentException(
+                        "All-item-variant inputs require exhaustive representative items");
+            }
+            this.matchesAllItemVariants = matchesAllItemVariants;
             if (empty != (multiplicity == 0)) {
                 throw new IllegalArgumentException("Empty inputs require zero multiplicity");
             }
@@ -229,11 +266,41 @@ record RecipeAdapterMatch(
                 List<ItemStack> representatives,
                 int multiplicity
         ) {
-            return new Input(identity, matcher, representatives, multiplicity, false);
+            return of(identity, matcher, representatives, false, false, multiplicity);
+        }
+
+        static Input of(
+                Object identity,
+                Predicate<ItemStack> matcher,
+                List<ItemStack> representatives,
+                boolean representativeItemsExhaustive,
+                int multiplicity
+        ) {
+            return of(
+                    identity, matcher, representatives,
+                    representativeItemsExhaustive, false, multiplicity);
+        }
+
+        static Input of(
+                Object identity,
+                Predicate<ItemStack> matcher,
+                List<ItemStack> representatives,
+                boolean representativeItemsExhaustive,
+                boolean matchesAllItemVariants,
+                int multiplicity
+        ) {
+            return new Input(
+                    identity,
+                    matcher,
+                    representatives,
+                    representativeItemsExhaustive,
+                    matchesAllItemVariants,
+                    multiplicity,
+                    false);
         }
 
         static Input empty(Object identity) {
-            return new Input(identity, stack -> false, List.of(), 0, true);
+            return new Input(identity, stack -> false, List.of(), true, false, 0, true);
         }
 
         boolean test(ItemStack stack) {
@@ -242,6 +309,18 @@ record RecipeAdapterMatch(
 
         List<ItemStack> representatives() {
             return representatives.stream().map(ItemStack::copy).toList();
+        }
+
+        List<Item> representativeItems() {
+            return representativeItems;
+        }
+
+        boolean representativeItemsExhaustive() {
+            return representativeItemsExhaustive;
+        }
+
+        boolean matchesAllItemVariants() {
+            return matchesAllItemVariants;
         }
 
         int multiplicity() {
@@ -263,22 +342,41 @@ record RecipeAdapterMatch(
         }
     }
 
-    record Cost(Optional<EnergyCost> energyCost, Optional<ToolCost> toolCost) {
+    record Cost(
+            Optional<EnergyCost> energyCost,
+            Optional<ToolCost> toolCost,
+            Optional<StationWorkCost> stationWorkCost
+    ) {
         Cost {
             Objects.requireNonNull(energyCost, "energyCost");
             Objects.requireNonNull(toolCost, "toolCost");
+            Objects.requireNonNull(stationWorkCost, "stationWorkCost");
         }
 
         static Cost free() {
-            return new Cost(Optional.empty(), Optional.empty());
+            return new Cost(Optional.empty(), Optional.empty(), Optional.empty());
         }
 
         static Cost energy(EnergyCost energyCost) {
-            return new Cost(Optional.of(Objects.requireNonNull(energyCost, "energyCost")), Optional.empty());
+            return new Cost(Optional.of(Objects.requireNonNull(energyCost, "energyCost")),
+                    Optional.empty(), Optional.empty());
         }
 
         static Cost tool(ToolCost toolCost) {
-            return new Cost(Optional.empty(), Optional.of(Objects.requireNonNull(toolCost, "toolCost")));
+            return new Cost(Optional.empty(), Optional.of(Objects.requireNonNull(toolCost, "toolCost")),
+                    Optional.empty());
+        }
+
+        static Cost stationWork(StationWorkCost stationWorkCost) {
+            return new Cost(Optional.empty(), Optional.empty(),
+                    Optional.of(Objects.requireNonNull(stationWorkCost, "stationWorkCost")));
+        }
+    }
+
+    record StationWorkCost(ResourceLocation descriptorId, long amountPerCraft) {
+        StationWorkCost {
+            Objects.requireNonNull(descriptorId, "descriptorId");
+            if (amountPerCraft <= 0) throw new IllegalArgumentException("Station work cost must be positive");
         }
     }
 
@@ -309,17 +407,21 @@ record RecipeAdapterMatch(
     record CheckedOutput(
             Map<ItemKey, Long> primaryOutputs,
             Map<ItemKey, Long> remainders,
-            Map<StorageResourceKey, Long> resourceOutputs
+            Map<StorageResourceKey, Long> resourcePrimaryOutputs,
+            Map<StorageResourceKey, Long> resourceRemainders
     ) {
         CheckedOutput(Map<ItemKey, Long> primaryOutputs, Map<ItemKey, Long> remainders) {
-            this(primaryOutputs, remainders, Map.of());
+            this(primaryOutputs, remainders, Map.of(), Map.of());
         }
 
         CheckedOutput {
             primaryOutputs = checkedAmounts(primaryOutputs, "primaryOutputs");
             remainders = checkedAmounts(remainders, "remainders");
-            resourceOutputs = checkedResourceAmounts(resourceOutputs);
-            if (primaryOutputs.isEmpty()) {
+            resourcePrimaryOutputs = checkedResourceAmounts(
+                    resourcePrimaryOutputs, "resourcePrimaryOutputs");
+            resourceRemainders = checkedResourceAmounts(
+                    resourceRemainders, "resourceRemainders");
+            if (primaryOutputs.isEmpty() && resourcePrimaryOutputs.isEmpty()) {
                 throw new IllegalArgumentException("Checked output requires a primary output");
             }
         }
@@ -336,13 +438,14 @@ record RecipeAdapterMatch(
         }
 
         private static Map<StorageResourceKey, Long> checkedResourceAmounts(
-                Map<StorageResourceKey, Long> amounts
+                Map<StorageResourceKey, Long> amounts,
+                String name
         ) {
-            Objects.requireNonNull(amounts, "resourceOutputs");
+            Objects.requireNonNull(amounts, name);
             for (Map.Entry<StorageResourceKey, Long> entry : amounts.entrySet()) {
-                Objects.requireNonNull(entry.getKey(), "resourceOutputs.key");
+                Objects.requireNonNull(entry.getKey(), name + ".key");
                 if (entry.getValue() == null || entry.getValue() <= 0) {
-                    throw new IllegalArgumentException("resourceOutputs amounts must be positive");
+                    throw new IllegalArgumentException(name + " amounts must be positive");
                 }
             }
             return Map.copyOf(amounts);

@@ -2,6 +2,7 @@ package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public final class NativeRecipeDiagramRenderer implements RecipeDiagramRenderer 
             int mouseY,
             float partialTick
     ) {
-        renderInputs(graphics, presentation, geometry, left, top);
+        renderInputs(graphics, font, presentation, geometry, left, top, partialTick);
         drawArrow(
                 graphics, geometry.arrow(), left, top,
                 0xFF606060);
@@ -38,8 +39,21 @@ public final class NativeRecipeDiagramRenderer implements RecipeDiagramRenderer 
         ItemStack output = presentation.output();
         int outputX = left + outputBounds.x() + (outputBounds.width() - 16) / 2;
         int outputY = top + outputBounds.y() + (outputBounds.height() - 16) / 2;
-        graphics.renderItem(output, outputX, outputY);
-        graphics.renderItemDecorations(font, output, outputX, outputY);
+        StorageTerminalScreen.renderTerminalIcon(
+                graphics, output, outputX, outputY, partialTick);
+        if (TerminalResourceDisplay.isTyped(output)) {
+            String amount = TerminalAmountFormatter.formatCompact(
+                    TerminalDisplayStack.amount(output));
+            graphics.drawString(
+                    font,
+                    amount,
+                    outputX + 17 - font.width(amount),
+                    outputY + 9,
+                    0xFFFFFFFF,
+                    false);
+        } else {
+            graphics.renderItemDecorations(font, output, outputX, outputY);
+        }
     }
 
     @Override
@@ -56,7 +70,17 @@ public final class NativeRecipeDiagramRenderer implements RecipeDiagramRenderer 
         double localX = mouseX - left;
         double localY = mouseY - top;
         if (geometry.output().contains(localX, localY)) {
-            graphics.renderTooltip(font, presentation.output(), mouseX, mouseY);
+            ItemStack output = presentation.output();
+            if (TerminalResourceDisplay.isTyped(output)) {
+                graphics.renderComponentTooltip(font, List.of(
+                        output.getHoverName(),
+                        Component.translatable(
+                                "gui.magic_storage.output_amount",
+                                TerminalDisplayStack.amount(output))
+                ), mouseX, mouseY);
+            } else {
+                graphics.renderTooltip(font, output, mouseX, mouseY);
+            }
             return true;
         }
         ItemStack input = inputAt(presentation, geometry, localX, localY);
@@ -69,25 +93,29 @@ public final class NativeRecipeDiagramRenderer implements RecipeDiagramRenderer 
 
     private static void renderInputs(
             GuiGraphics graphics,
+            Font font,
             RecipePresentation presentation,
             Geometry geometry,
             int left,
-            int top
+            int top,
+            float partialTick
     ) {
         List<ItemStack> inputs = presentation.inputs();
         if (presentation.kind() == RecipePresentationKind.CRAFTING) {
             for (Rect slot : geometry.inputSlots()) {
-                drawInputSlot(graphics, slot, ItemStack.EMPTY, left, top);
+                drawInputSlot(graphics, font, slot, ItemStack.EMPTY, left, top, partialTick);
             }
         }
         int positions = presentation.width() * presentation.height();
         for (int input = 0; input < positions; input++) {
             drawInputSlot(
                     graphics,
+                    font,
                     inputSlot(presentation, geometry, input),
                     inputs.get(input),
                     left,
-                    top);
+                    top,
+                    partialTick);
         }
     }
 
@@ -121,15 +149,34 @@ public final class NativeRecipeDiagramRenderer implements RecipeDiagramRenderer 
 
     private static void drawInputSlot(
             GuiGraphics graphics,
+            Font font,
             Rect slot,
             ItemStack stack,
             int left,
-            int top
+            int top,
+            float partialTick
     ) {
         int itemX = left + slot.x() + 1;
         int itemY = top + slot.y() + 1;
         drawSlotFrame(graphics, itemX, itemY);
-        if (!stack.isEmpty()) graphics.renderItem(stack, itemX, itemY);
+        if (stack.isEmpty()) return;
+        StorageTerminalScreen.renderTypedResourceBackground(
+                graphics, stack, itemX, itemY);
+        StorageTerminalScreen.renderTerminalIcon(
+                graphics, stack, itemX, itemY, partialTick);
+        if (TerminalDisplayStack.isDisplay(stack)) {
+            String amount = TerminalAmountFormatter.formatCompact(
+                    TerminalDisplayStack.amount(stack));
+            graphics.drawString(
+                    font,
+                    amount,
+                    itemX + 17 - font.width(amount),
+                    itemY + 9,
+                    0xFFFFFFFF,
+                    false);
+        } else {
+            graphics.renderItemDecorations(font, stack, itemX, itemY);
+        }
     }
 
     private static void drawSlotFrame(GuiGraphics graphics, int x, int y) {

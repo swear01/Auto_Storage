@@ -1,5 +1,6 @@
 package com.swearprom.magicstorage.magic_storage;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -15,15 +16,52 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @GameTestHolder(MagicStorage.MODID)
 public class PersistenceTests {
+
+    @GameTest(template = "platform")
+    public static void processing_tick_commits_all_station_work_once(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)
+                    || !core.isStorageAvailable()) {
+                helper.fail("Fresh Core did not attach to world storage");
+                return;
+            }
+            core.getMachineContainer().setItem(
+                    MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE));
+            core.getMachineContainer().setItem(
+                    MachineEnergyTable.SMOKER_SLOT, new ItemStack(Items.SMOKER));
+            AtomicInteger dirtyCalls = new AtomicInteger();
+            core.storageRecordForTesting().setDirtyCallback(dirtyCalls::incrementAndGet);
+
+            core.tick();
+
+            if (core.getEnergy(EnergyType.SMELTING_ENERGY) != 1
+                    || core.getEnergy(EnergyType.SMOKING_ENERGY) != 1
+                    || dirtyCalls.get() != 1) {
+                helper.fail("One processing tick must atomically persist every station once: "
+                        + "smelt=" + core.getEnergy(EnergyType.SMELTING_ENERGY)
+                        + ", smoke=" + core.getEnergy(EnergyType.SMOKING_ENERGY)
+                        + ", dirty=" + dirtyCalls.get());
+                return;
+            }
+            helper.succeed();
+        });
+    }
 
     @GameTest(template = "platform")
     public static void core_persistence_contract_is_repository_owned_and_segmented(GameTestHelper helper) {
@@ -105,13 +143,19 @@ public class PersistenceTests {
         CoreStorageRecord source = CoreStorageRecord.fresh(storageId);
         UUID networkId = source.networkId();
         for (EnergyType type : EnergyType.values()) {
-            source.energy().put(type, 101L + type.ordinal());
+            source.setEnergyAmount(type, 101L + type.ordinal());
         }
         ItemStack namedDiamond = new ItemStack(Items.DIAMOND);
         namedDiamond.set(DataComponents.CUSTOM_NAME, Component.literal("Repository Diamond"));
         source.putItem(ItemKey.of(namedDiamond), Long.MAX_VALUE - 7, registries);
         source.machines().setItem(MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE, 3));
-        source.descriptorAmounts().put(MachineEnergyTable.AXE_ID, 37L);
+        source.setDescriptorAmount(MachineEnergyTable.AXE_ID, 37L);
+        source.machineWorkRemainders().put(
+                MachineEnergyTable.FURNACE_ID,
+                new MachineWorkAccumulator.Remainder(
+                        ResourceLocation.withDefaultNamespace("furnace"),
+                        MachineWorkRate.of(5, 18),
+                        7));
         source.infiniteDescriptors().add(ResourceLocation.fromNamespaceAndPath(
                 MagicStorage.MODID, "round_trip_infinite"));
 
@@ -139,14 +183,15 @@ public class PersistenceTests {
             return;
         }
         for (EnergyType type : EnergyType.values()) {
-            if (restored.energy().getOrDefault(type, 0L) != 101L + type.ordinal()) {
+            if (restored.energyAmount(type) != 101L + type.ordinal()) {
                 helper.fail("Energy did not round trip for " + type);
                 return;
             }
         }
         if (restored.getItemCount(ItemKey.of(namedDiamond), registries) != Long.MAX_VALUE - 7
                 || restored.machines().getItem(MachineEnergyTable.FURNACE_SLOT).getCount() != 3
-                || restored.descriptorAmounts().getOrDefault(MachineEnergyTable.AXE_ID, 0L) != 37
+                || restored.descriptorAmount(MachineEnergyTable.AXE_ID) != 37
+                || restored.machineWorkRemainders().get(MachineEnergyTable.FURNACE_ID).remainder() != 7
                 || restored.unresolvedInventoryEntries().size() != 1
                 || restored.unresolvedMachineEntries().size() != 1
                 || restored.unresolvedDescriptorEntries().size() != 2) {
@@ -156,6 +201,22 @@ public class PersistenceTests {
         if (!restored.unresolvedInventoryEntries().getFirst().equals(unresolvedInventory)
                 || !restored.unresolvedMachineEntries().getFirst().equals(unresolvedMachine)) {
             helper.fail("Unavailable addon NBT changed during repository round trip");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "platform")
+    public static void legacy_record_without_machine_work_payload_still_loads(GameTestHelper helper) {
+        var registries = helper.getLevel().registryAccess();
+        CoreStorageRecord source = CoreStorageRecord.fresh(UUID.randomUUID());
+        CompoundTag encoded = source.save(registries);
+        encoded.remove(CoreStorageRecord.TAG_MACHINE_WORK);
+        CoreStorageRecord.LoadResult decoded = CoreStorageRecord.load(encoded, registries);
+        if (!decoded.success()
+                || decoded.record().hasStationWork()
+                || !decoded.record().machineWorkRemainders().isEmpty()) {
+            helper.fail("Legacy record without optional machine work payload did not load empty");
             return;
         }
         helper.succeed();
@@ -724,6 +785,47 @@ public class PersistenceTests {
     }
 
     @GameTest(template = "platform")
+    public static void command_loaded_core_reference_replaces_temporary_storage_without_leak(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var commandPos = helper.absolutePos(new BlockPos(1, 3, 1));
+        var sourcePos = helper.absolutePos(new BlockPos(4, 3, 1));
+        level.setBlock(commandPos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(sourcePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(commandPos) instanceof StorageCoreBlockEntity commandCore)
+                    || !(level.getBlockEntity(sourcePos) instanceof StorageCoreBlockEntity sourceCore)) {
+                helper.fail("Core block entities not found");
+                return;
+            }
+            CoreStorageRepository repository = CoreStorageRepository.get(level);
+            UUID temporaryStorageId = commandCore.getStorageId().orElseThrow();
+            UUID sourceStorageId = sourceCore.getStorageId().orElseThrow();
+            int recordsBeforeLoad = repository.recordCountForTesting();
+            sourceCore.getMachineContainer().setItem(
+                    MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE, 7));
+            CompoundTag sourceReference = new CompoundTag();
+            sourceCore.saveAdditional(sourceReference, level.registryAccess());
+            sourceCore.removeStorageForBlockRemoval(level);
+            level.removeBlock(sourcePos, false);
+
+            commandCore.loadAdditional(sourceReference, level.registryAccess());
+            if (!commandCore.isStorageAvailable()
+                    || !commandCore.getStorageId().orElseThrow().equals(sourceStorageId)
+                    || commandCore.getMachineContainer().getItem(
+                    MachineEnergyTable.FURNACE_SLOT).getCount() != 7
+                    || repository.hasRecord(temporaryStorageId)
+                    || repository.recordCountForTesting() != recordsBeforeLoad - 1) {
+                helper.fail("Command-loaded Core reference leaked its temporary record or stayed detached");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform")
     public static void latest_recovery_prefers_last_mapping_created_in_same_tick(GameTestHelper helper) {
         var level = helper.getLevel();
         var repository = CoreStorageRepository.get(level);
@@ -748,6 +850,126 @@ public class PersistenceTests {
             return;
         }
         helper.succeed();
+    }
+
+    @GameTest(template = "platform")
+    public static void recovery_commands_keep_owned_and_ownerless_records_separate(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var repository = CoreStorageRepository.get(level);
+        var player = FakePlayerFactory.get(level, new GameProfile(
+                UUID.randomUUID(), "magic-storage-recovery-test"));
+        var ownedLocation = new CoreStorageRepository.CoreLocation(
+                level.dimension(), helper.absolutePos(new BlockPos(1, 3, 1)));
+        var ownerlessLocation = new CoreStorageRepository.CoreLocation(
+                level.dimension(), helper.absolutePos(new BlockPos(4, 3, 1)));
+        UUID ownedToken = UUID.randomUUID();
+        UUID ownerlessToken = UUID.randomUUID();
+        CoreStorageRecord owned = repository.createFresh(ownedLocation, ownedToken);
+        CoreStorageRecord ownerless = repository.createFresh(ownerlessLocation, ownerlessToken);
+        UUID ownedRecovery = repository.prepareRecovery(
+                owned.storageId(), ownedLocation, ownedToken, player.getUUID(), Long.MAX_VALUE - 1)
+                .orElseThrow().id();
+        UUID ownerlessRecovery = repository.prepareRecovery(
+                ownerless.storageId(), ownerlessLocation, ownerlessToken, null, Long.MAX_VALUE)
+                .orElseThrow().id();
+
+        level.getServer().getCommands().performPrefixedCommand(
+                player.createCommandSourceStack().withPermission(0),
+                "magic_storage recover_core");
+        if (!inventoryContainsRecovery(player, ownedRecovery)
+                || inventoryContainsRecovery(player, ownerlessRecovery)) {
+            helper.fail("Public recovery command crossed the owner boundary");
+            return;
+        }
+
+        level.getServer().getCommands().performPrefixedCommand(
+                player.createCommandSourceStack().withPermission(0),
+                "magic_storage recover_core ownerless");
+        if (inventoryContainsRecovery(player, ownerlessRecovery)) {
+            helper.fail("Non-operator recovered an ownerless Core record");
+            return;
+        }
+
+        level.getServer().getCommands().performPrefixedCommand(
+                player.createCommandSourceStack().withPermission(2),
+                "magic_storage recover_core ownerless");
+        if (!inventoryContainsRecovery(player, ownerlessRecovery)) {
+            helper.fail("Operator could not recover the latest ownerless Core record");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "platform")
+    public static void ownerless_non_player_removals_preserve_core_recovery_records(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos commandCorePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        BlockPos explosionCorePos = helper.absolutePos(new BlockPos(4, 3, 1));
+        level.setBlock(commandCorePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(explosionCorePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(commandCorePos) instanceof StorageCoreBlockEntity commandCore)
+                    || !(level.getBlockEntity(explosionCorePos) instanceof StorageCoreBlockEntity explosionCore)) {
+                helper.fail("Core missing before non-player removal recovery test");
+                return;
+            }
+            commandCore.storageRecordForTesting().putItem(
+                    ItemKey.of(new ItemStack(Items.DIAMOND)), 1, level.registryAccess());
+            explosionCore.storageRecordForTesting().putItem(
+                    ItemKey.of(new ItemStack(Items.EMERALD)), 2, level.registryAccess());
+            UUID explosionOwner = UUID.randomUUID();
+            UUID explosionRecoveryId = explosionCore.prepareRecoveryDrop(level, explosionOwner);
+
+            level.setBlock(commandCorePos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+            level.explode(
+                    null,
+                    explosionCorePos.getX() + 0.5,
+                    explosionCorePos.getY() + 0.5,
+                    explosionCorePos.getZ() + 0.5,
+                    8.0F,
+                    Level.ExplosionInteraction.BLOCK);
+
+            ListTag recoveries = CoreStorageRepository.get(level)
+                    .save(new CompoundTag(), level.registryAccess())
+                    .getList("recoveries", Tag.TAG_COMPOUND);
+            int commandRecoveries = 0;
+            int explosionRecoveries = 0;
+            for (int index = 0; index < recoveries.size(); index++) {
+                CompoundTag recovery = recoveries.getCompound(index);
+                if (recovery.getLong("originPos") == commandCorePos.asLong()
+                        && recovery.getLong("itemCount") == 1L
+                        && !recovery.contains("owner")) {
+                    commandRecoveries++;
+                }
+                if (recovery.getLong("originPos") == explosionCorePos.asLong()
+                        && recovery.getLong("itemCount") == 2L
+                        && recovery.hasUUID("owner")
+                        && recovery.getUUID("owner").equals(explosionOwner)
+                        && recovery.getUUID("id").equals(explosionRecoveryId)) {
+                    explosionRecoveries++;
+                }
+            }
+            if (commandRecoveries != 1 || explosionRecoveries != 1) {
+                helper.fail("Non-player removal recovery mappings were missing, duplicated, or reassigned: "
+                        + "command=" + commandRecoveries + ", explosion=" + explosionRecoveries);
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static boolean inventoryContainsRecovery(
+            net.minecraft.world.entity.player.Player player,
+            UUID recoveryId
+    ) {
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            if (StorageCoreBlockItem.getRecoveryId(player.getInventory().getItem(slot))
+                    .filter(recoveryId::equals)
+                    .isPresent()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @GameTest(template = "platform")
@@ -863,10 +1085,10 @@ public class PersistenceTests {
     public static void record_machine_components_and_descriptor_state_round_trip(GameTestHelper helper) {
         var registries = helper.getLevel().registryAccess();
         CoreStorageRecord record = CoreStorageRecord.fresh(UUID.randomUUID());
-        ItemStack namedFurnaces = new ItemStack(Items.FURNACE, 7);
+        ItemStack namedFurnaces = new ItemStack(Items.FURNACE, Integer.MAX_VALUE);
         namedFurnaces.set(DataComponents.CUSTOM_NAME, Component.literal("Arc Furnaces"));
         record.machines().setItem(MachineEnergyTable.FURNACE_SLOT, namedFurnaces.copy());
-        record.descriptorAmounts().put(MachineEnergyTable.AXE_ID, 74L);
+        record.setDescriptorAmount(MachineEnergyTable.AXE_ID, 74L);
         record.infiniteDescriptors().add(ResourceLocation.fromNamespaceAndPath(
                 MagicStorage.MODID, "test_infinite_descriptor"));
         CoreStorageRecord.LoadResult loaded = CoreStorageRecord.load(record.save(registries), registries);
@@ -875,8 +1097,9 @@ public class PersistenceTests {
             return;
         }
         ItemStack restored = loaded.record().machines().getItem(MachineEnergyTable.FURNACE_SLOT);
-        if (!ItemStack.isSameItemSameComponents(restored, namedFurnaces) || restored.getCount() != 7
-                || loaded.record().descriptorAmounts().getOrDefault(MachineEnergyTable.AXE_ID, 0L) != 74
+        if (!ItemStack.isSameItemSameComponents(restored, namedFurnaces)
+                || restored.getCount() != Integer.MAX_VALUE
+                || loaded.record().descriptorAmount(MachineEnergyTable.AXE_ID) != 74
                 || loaded.record().unresolvedDescriptorEntries().size() != 1) {
             helper.fail("Record lost machine components or descriptor state");
             return;
@@ -895,8 +1118,8 @@ public class PersistenceTests {
                 return;
             }
             CoreStorageRecord record = core.storageRecordForTesting();
-            record.energy().put(EnergyType.SMELTING_ENERGY, Long.MAX_VALUE);
-            record.energy().put(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
+            record.setEnergyAmount(EnergyType.SMELTING_ENERGY, Long.MAX_VALUE);
+            record.setEnergyAmount(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
             record.machines().setItem(MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE));
             core.tick();
             ItemStack coal = new ItemStack(Items.COAL);

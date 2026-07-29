@@ -72,7 +72,7 @@ Patterns are references only; no source is copied verbatim.
 - The catalog stores recipe IDs/output identities only. Every preview/select/execute resolves the ID against the current `RecipeManager`.
 - The catalog is rebuilt when the `RecipeManager` instance changes. It indexes supported recipes by possible ingredient item so current Core/player resources seed a bounded candidate set instead of rescanning and simulating every recipe on each machine-energy tick.
 - Each candidate still passes the full existing joint-reservation preview with current Core items, optional player inventory, conflict/topology state, machine energy, and Fuel.
-- Outputs are deduplicated by full `ItemKey`. Search, search mode, sort mode/order, scrolling, and current 81-slot paging still apply. Component variants are never collapsed by a Compact Grid mode.
+- Outputs are deduplicated by full `ItemKey`. Search, Search Sync, sort mode/order, scrolling, and current 81-slot paging still apply. Component variants are never collapsed by a Compact Grid mode.
 - A zero-storage output appears only when at least one exact recipe currently has `craftableCount > 0`. Its displayed amount represents currently craftable output, not stored quantity.
 - A synthetic Craftable entry can be selected but can never be extracted, Shift-moved, cloned, thrown, or treated as stored inventory.
 - Selection is recipe/output identity based. It is not cleared merely because Core output count is zero or the player visits another terminal tab; Fuel simply hides the recipe workspace. It is cleared when the recipe disappears, becomes unsupported, or no longer matches the output.
@@ -125,10 +125,10 @@ Patterns are references only; no source is copied verbatim.
 - `CraftingTerminalPage` has exactly `STORAGE`, `CRAFTABLE`, and `FUEL`. There is no `showOnlyCraftable` boolean, toggle button, or dual-meaning Items page.
 - The first rail group is always the three page buttons. On item pages, a larger geometry-defined group gap follows before sort/order/search controls and Use Player Inventory remains a final separate group. On Fuel, the rail ends after the three page buttons.
 - Storage entries remain extractable. Craftable entries remain synthetic and selectable but cannot be extracted, quick-moved, cloned, or thrown. EMI exact-recipe selection is accepted on either item page and rejected on Fuel.
-- Search mode continues to cycle Name / Tag / Mod, but the icon itself communicates the syntax: magnifier for Name, standalone `#` for Tag, and standalone `@` for Mod. Localized tooltips name the current mode.
+- Superseded 2026-07-23: the search field now parses Name / `#tag` / `@mod` syntax directly. The rail selector cycles Auto / EMI / EMI two-way synchronization, using magnifier, one-way, and two-way icons; localized tooltips name only the current sync mode.
 - The recipe footer has `×1`, `×8`, `×64`, and `Max`. Exact buttons are active only when the latest server-synced `craftableCount` meets their amount. Max is active for any positive count.
 - Max is not a trusted client amount. The server re-resolves the selected recipe and computes the current legal maximum independently of the 9,999 wire/display preview cap, then commits exactly that amount through the existing simulate-then-commit path. A stale or forged request with no legal craft is a no-op.
-- Fuel target uses one current-value vanilla `CycleButton` in the Energy Reserves header. This revision originally used normal-click forward and Shift-click/hovered-wheel reverse. The server receives only Auto or exact target IDs; retired previous/next IDs are no-ops. Descriptor growth changes panel pages, not rail width; a 60-descriptor layout remains onscreen. The current contract supersedes those client controls with the shared left-next/right-previous/wheel direction model and adds the bounded list popup in `2026-07-14-terminal-platform-emi-recipe-axe.md`.
+- Fuel target historically used one current-value vanilla `CycleButton` in the Energy Reserves header, followed by a bounded popup revision. The server still receives only Auto or exact target IDs and retired previous/next IDs remain no-ops. GitHub #23 supersedes both client presentations with a persistent searchable Transform target sidebar, whole-card exact-input uses, and middle-click reset.
 - Button active state is only feedback; every server handler independently revalidates page, recipe, ingredients, energy, topology, and output delivery.
 
 ## Strict TDD Work Order
@@ -247,7 +247,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts
   8. EMI overlays do not cover the adaptive frame or rail;
   9. `latest.log` contains the expected SelfTest count and no container-sync, packet, ERROR, FATAL, or unexpected auth-console failure.
   10. the selected recipe shows all item/process/Fuel rows as available/required-for-one, no Compact Grid control exists, and every rail icon has the same visual canvas;
-  11. page tabs form a clearly separated rail group, Fuel has no permanent rate formula or shadowed values, and Name/Tag/Mod use magnifier/`#`/`@` glyphs;
+  11. page tabs form a clearly separated rail group, Fuel has no permanent rate formula or shadowed values, and raw Name/`#tag`/`@mod` queries work directly and Auto Focus is independent and Search Sync uses Off/one-way/two-way icons;
   12. `×8` and `×64` are dim when unavailable, `Max` is present, and every currently registered Fuel tile is reachable without clipping at the tested fullscreen size.
   13. every Energy Reserve and explicit target uses its representative item, large grid amounts stay compact/right-aligned inside their own slot, and Fuel shows stored/max type capacity.
   14. Fuel rail contains only Storage/Craftable/Fuel; Energy Reserves has one clearly labeled current-value selector, and sparse machine/reserve entries distribute across the available panel width instead of clustering left.

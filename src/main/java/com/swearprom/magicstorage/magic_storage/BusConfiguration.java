@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -16,7 +17,8 @@ public final class BusConfiguration {
     public static final String TAG_BUS_CONFIG = "busConfig";
     public static final int ALL_SIDES_MASK = 0b111111;
     public static final int MAX_FILTER_RULES = 9;
-    private static final int CURRENT_SCHEMA = 1;
+    private static final int CURRENT_SCHEMA = 2;
+    private static final int ITEM_FILTER_SCHEMA = 1;
     private static final String TAG_SCHEMA = "schema";
     private static final String TAG_MODE = "mode";
     private static final String TAG_SIDE_MASK = "sideMask";
@@ -120,7 +122,9 @@ public final class BusConfiguration {
         Tag raw = root.get(TAG_BUS_CONFIG);
         if (raw == null) return migrateLegacy(root, kind, registries);
         if (!(raw instanceof CompoundTag tag)) return unsupported(raw);
-        if (!tag.contains(TAG_SCHEMA, Tag.TAG_INT) || tag.getInt(TAG_SCHEMA) != CURRENT_SCHEMA) {
+        if (!tag.contains(TAG_SCHEMA, Tag.TAG_INT)
+                || tag.getInt(TAG_SCHEMA) != CURRENT_SCHEMA
+                && tag.getInt(TAG_SCHEMA) != ITEM_FILTER_SCHEMA) {
             return unsupported(tag);
         }
         if (!hasCurrentShape(tag)) return unsupported(tag);
@@ -303,6 +307,13 @@ public final class BusConfiguration {
 
     public boolean automationEnabled() {
         return automationEnabled;
+    }
+
+    public boolean allowsCapability(Direction side) {
+        if (!supported() || !automationEnabled) return false;
+        return side == null
+                ? unsidedAccess
+                : (sideMask & 1 << side.ordinal()) != 0;
     }
 
     public BusFilterMode filterMode() {

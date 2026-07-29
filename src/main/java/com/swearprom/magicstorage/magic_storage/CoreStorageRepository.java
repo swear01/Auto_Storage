@@ -287,6 +287,19 @@ final class CoreStorageRepository extends SavedData {
         return latest == null ? Optional.empty() : Optional.of(latest.summary());
     }
 
+    Optional<RecoverySummary> reissueLatestOwnerless() {
+        Recovery latest = null;
+        for (Recovery recovery : recoveries.values()) {
+            if (recovery.owner() != null) {
+                continue;
+            }
+            if (latest == null || recovery.createdAt() >= latest.createdAt()) {
+                latest = recovery;
+            }
+        }
+        return latest == null ? Optional.empty() : Optional.of(latest.summary());
+    }
+
     boolean canClaim(UUID recoveryId) {
         Recovery recovery = recoveries.get(recoveryId);
         return recovery != null

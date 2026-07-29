@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Comparator;
+import java.util.function.Function;
 
 final class TerminalEntryComparator {
     private TerminalEntryComparator() {
@@ -28,6 +29,14 @@ final class TerminalEntryComparator {
         return order == SortOrder.DESCENDING ? comparator.reversed() : comparator;
     }
 
+    static <T> Comparator<T> forMode(
+            SortMode mode,
+            SortOrder order,
+            Function<T, ItemStack> displayStack
+    ) {
+        return Comparator.comparing(displayStack, forMode(mode, order));
+    }
+
     private static String displayName(ItemStack stack) {
         return stack.getHoverName().getString();
     }
@@ -49,6 +58,8 @@ final class TerminalEntryComparator {
     }
 
     private static ResourceLocation id(ItemStack stack) {
-        return BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return TerminalResourceDisplay.key(stack)
+                .map(StorageResourceKey::resourceId)
+                .orElseGet(() -> BuiltInRegistries.ITEM.getKey(stack.getItem()));
     }
 }

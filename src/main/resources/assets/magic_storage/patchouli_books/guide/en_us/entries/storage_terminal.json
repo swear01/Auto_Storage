@@ -15,15 +15,15 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Use the left resource selector for Items, Fluids, Energy, Gases, or Other registered addon kinds. Item view supports normal extraction and inventory insertion. Other views use display-only representatives and never give you the icon item."
+      "text": "Use the left resource selector for Items, Fluids, Energy, Gases, Processing, or Other registered addon kinds. All shows every available group together. Energy includes FE, Fuel/Brew, Mana, and Source; Processing contains only accumulated station work; Other contains Axe Uses and unclassified addon values. Fluids use teal frames, Energy violet, Gas/Other blue, and Processing amber. Item view supports normal extraction and inventory insertion. Other views use display-only representatives."
     },
     {
       "type": "patchouli:text",
-      "text": "The search field matches names by default. Switch search mode for #tag or @mod queries. Hover a result for its exact stored amount and full details; compact numbers in the grid never replace the exact tooltip value."
+      "text": "The search field parses ordinary names, @mod, and #tag. A bare @, #, or $ behaves like an empty search. Click outside to release Search without clearing its filter. Auto Focus gives Search initial focus only when the terminal opens; Search Sync separately controls EMI."
     },
     {
       "type": "patchouli:text",
-      "text": "Sort by Name, Quantity, Mod, or ID and choose ascending or descending order. Variants with different properties stay separate. Middle-click the resource selector to return to Items. For recipes and Fuel, upgrade to the $(l:magic_storage:crafting_terminal)Crafting Terminal$()."
+      "text": "Sort by Name, Quantity, Mod, or ID and choose ascending or descending order. Variants with different properties stay separate. Middle-click the resource selector to return to Items. For Craftable recipes, Transform conversions, and Stations, upgrade to the $(l:magic_storage:crafting_terminal)Crafting Terminal$()."
     }
   ]
 }

@@ -3,11 +3,13 @@ package com.swearprom.magicstorage.magic_storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -22,6 +24,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private static final int STORAGE_SCHEMA = 1;
 
     private final Set<BlockPos> connectedBlocks = new HashSet<>();
+    private final Set<BlockPos> connectedBlocksView =
+            Collections.unmodifiableSet(connectedBlocks);
     private final UUID attachmentToken = UUID.randomUUID();
     private UUID storageId;
     private int storageSchema;
@@ -29,19 +33,30 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private StorageAvailability storageAvailability = StorageAvailability.UNINITIALIZED;
     private UUID networkId;
     private boolean conflicted = false;
+    private boolean networkCapped;
     private long topologyRevision;
     private StorageTypeCapacity typeCapacity = StorageTypeCapacity.zero();
     private int typeCount = 0;
+    private long craftableRevision;
     private long machineRevision;
-    private Map<ResourceLocation, Long> descriptorAmounts = new HashMap<>();
     private Set<ResourceLocation> infiniteDescriptors = new HashSet<>();
+    private Map<ResourceLocation, MachineWorkAccumulator.Remainder> machineWorkRemainders =
+            new HashMap<>();
     private UUID preparedRecoveryId;
 
-    private Map<EnergyType, Long> energy = new EnumMap<>(EnergyType.class);
     private SimpleContainer machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
 
     private StorageResourceLedger resourceLedger = new StorageResourceLedger();
-    private final Map<ItemKey, Long> flatCache = new HashMap<>();
+    private final Map<ItemKey, IndexedItem> itemIndex = new HashMap<>();
+    private final Map<Item, List<IndexedItem>> itemIndexByItem = new HashMap<>();
+    private final Map<Item, Long> itemAmountIndex = new HashMap<>();
+    private final List<IndexedItem> sortedNameIndex = new ArrayList<>();
+    private final EnumMap<SortMode, List<IndexedItem>> sortedItemIndex =
+            new EnumMap<>(SortMode.class);
+    private List<IngredientSource> ingredientSourceSnapshot;
+    private Map<ItemKey, Long> ingredientAmountSnapshot;
+    private Map<Item, Long> ingredientAmountByItemSnapshot;
+    private Map<Item, List<IngredientSource>> ingredientSourcesByItemSnapshot;
     private final CoreStorageResourceHandler resourceHandler = new CoreStorageResourceHandler(this);
     private final CoreFluidHandler fluidHandler = new CoreFluidHandler(this);
     private final CoreEnergyStorage energyStorage = new CoreEnergyStorage(this);
@@ -51,28 +66,99 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private boolean storageChangedInBatch;
     private boolean cacheDirty = true;
 
+    private static final class IndexedItem {
+        private final ItemKey key;
+        private final ItemStack identity;
+        private final ResourceLocation id;
+        private final String idString;
+        private TerminalSearchEntry search;
+        private IngredientSource ingredientSource;
+        private final String displayName;
+        private final String componentIdentity;
+        private long amount;
+
+        private IndexedItem(ItemKey key, long amount) {
+            this.key = key;
+            ItemStack stack = key.toStack(1);
+            this.identity = stack;
+            this.id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            this.idString = id.toString();
+            this.displayName = identity.getHoverName().getString();
+            this.componentIdentity = key.components().toString();
+            this.amount = amount;
+        }
+
+        private TerminalSearchEntry search() {
+            if (search == null) search = TerminalSearchEntry.create(identity);
+            return search;
+        }
+
+        private IngredientSource ingredientSource() {
+            if (ingredientSource == null) {
+                ingredientSource = new IngredientSource(key, -1, identity, amount);
+            }
+            return ingredientSource;
+        }
+
+        private String displayName() {
+            return displayName;
+        }
+
+        private String componentIdentity() {
+            return componentIdentity;
+        }
+    }
+
     public StorageCoreBlockEntity(BlockPos pos, BlockState state) {
         super(MagicStorage.STORAGE_CORE_BE.get(), pos, state);
     }
 
     public void tick() {
         if (level == null || level.isClientSide() || conflicted || !isStorageAvailable()) return;
-        boolean changed = false;
+        boolean remainderChanged = false;
+        Map<StorageResourceKey, Long> workDeltas = new HashMap<>();
         List<MachineDescriptor> descriptors = MachineEnergyTable.entries();
         for (int slot = 0; slot < descriptors.size(); slot++) {
             MachineDescriptor entry = MachineEnergyTable.get(slot);
             ItemStack machineStack = machines.getItem(slot);
-            if (entry == null || !entry.generatesEnergy() || !entry.accepts(machineStack)) continue;
-            long increment = (long) machineStack.getCount() * entry.energyPerTick();
-            long current = getEnergy(entry.energyType());
-            long updated = current > Long.MAX_VALUE - increment ? Long.MAX_VALUE : current + increment;
-            if (updated != current) {
-                energy.put(entry.energyType(), updated);
-                fireEnergyChanged(entry.energyType(), updated);
-                changed = true;
+            if (entry == null || entry.category() != MachineEnergyTable.Category.PROCESS
+                    || !entry.accepts(machineStack)) {
+                if (entry != null && machineWorkRemainders.remove(entry.id()) != null) {
+                    remainderChanged = true;
+                }
+                continue;
             }
+            MachineWorkRate rate = entry.rateFor(machineStack).orElse(null);
+            if (rate == null || rate.isZero()) {
+                if (machineWorkRemainders.remove(entry.id()) != null) remainderChanged = true;
+                continue;
+            }
+            MachineWorkAccumulator.Remainder previous = machineWorkRemainders.get(entry.id());
+            MachineWorkAccumulator.Advance advance = MachineWorkAccumulator.advance(
+                    previous,
+                    BuiltInRegistries.ITEM.getKey(machineStack.getItem()),
+                    rate,
+                    machineStack.getCount());
+            if (advance.remainder().remainder() == 0) {
+                if (machineWorkRemainders.remove(entry.id()) != null) remainderChanged = true;
+            } else if (!advance.remainder().equals(previous)) {
+                machineWorkRemainders.put(entry.id(), advance.remainder());
+                remainderChanged = true;
+            }
+            if (advance.wholeWork() <= 0) continue;
+            StorageResourceKey workKey = entry.energyType() != null
+                    ? StorageResourceBridge.energyKey(entry.energyType())
+                    : StorageResourceBridge.stationWorkKey(entry.id());
+            long current = resourceLedger.amount(workKey);
+            long pending = workDeltas.getOrDefault(workKey, 0L);
+            long delta = Math.min(advance.wholeWork(), Long.MAX_VALUE - current - pending);
+            if (delta > 0) workDeltas.put(workKey, pending + delta);
         }
-        if (changed) markStorageChanged();
+        boolean workChanged = !workDeltas.isEmpty()
+                && applyResourceTransaction(workDeltas, Action.EXECUTE, Actor.EMPTY);
+        if (remainderChanged && !workChanged) {
+            markStorageChanged();
+        }
     }
 
     Container getMachineContainer() {
@@ -81,6 +167,10 @@ public class StorageCoreBlockEntity extends BlockEntity {
 
     public long getMachineRevision() {
         return machineRevision;
+    }
+
+    public long getCraftableRevision() {
+        return craftableRevision;
     }
 
     public long getAxeEnergy() {
@@ -96,11 +186,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     public boolean canAddAxeEnergy(ItemStack stack) {
-        return canAddDescriptorConsumable(MachineEnergyTable.AXE_ID, stack);
+        return canAddDescriptorTransform(MachineEnergyTable.AXE_ID, stack);
     }
 
     public boolean addAxeEnergy(ItemStack stack) {
-        return addDescriptorConsumable(MachineEnergyTable.AXE_ID, stack);
+        return addDescriptorTransform(MachineEnergyTable.AXE_ID, stack);
     }
 
     public boolean consumeAxeEnergy(long amount) {
@@ -109,7 +199,87 @@ public class StorageCoreBlockEntity extends BlockEntity {
 
     public long getDescriptorAmount(ResourceLocation descriptorId) {
         if (!isStorageAvailable()) return 0;
-        return descriptorAmounts.getOrDefault(descriptorId, 0L);
+        return resourceLedger.amount(StorageResourceBridge.descriptorKey(descriptorId));
+    }
+
+    public long getStationWork(ResourceLocation descriptorId) {
+        if (!isStorageAvailable()) return 0;
+        return resourceLedger.amount(StorageResourceBridge.stationWorkKey(descriptorId));
+    }
+
+    public boolean isMachineInstalled(ResourceLocation descriptorId) {
+        int slot = MachineEnergyTable.findSlot(descriptorId);
+        MachineDescriptor descriptor = slot < 0 ? null : MachineEnergyTable.get(slot);
+        return descriptor != null
+                && descriptor.maxInstalledCount() > 0
+                && descriptor.accepts(machines.getItem(slot));
+    }
+
+    public boolean consumeStationWork(ResourceLocation descriptorId, long amount) {
+        if (amount <= 0 || conflicted || !isStorageAvailable()) return false;
+        return applyResourceTransaction(
+                Map.of(StorageResourceBridge.stationWorkKey(descriptorId), -amount),
+                Action.EXECUTE,
+                Actor.EMPTY);
+    }
+
+    boolean consumeCraftCosts(RecipeAdapterMatch.Cost cost, long crafts) {
+        if (cost == null || crafts <= 0 || conflicted || !isStorageAvailable()) return false;
+        EnergyCost energyCost = cost.energyCost().orElse(null);
+        RecipeAdapterMatch.StationWorkCost stationCost = cost.stationWorkCost().orElse(null);
+        RecipeAdapterMatch.ToolCost toolCost = cost.toolCost().orElse(null);
+        long processNeed = 0;
+        long fuelNeed = 0;
+        long stationNeed = 0;
+        long toolNeed = 0;
+        try {
+            if (energyCost != null) {
+                processNeed = Math.multiplyExact(energyCost.processAmount(), crafts);
+                fuelNeed = Math.multiplyExact(energyCost.fuelAmount(), crafts);
+            }
+            if (stationCost != null) {
+                stationNeed = Math.multiplyExact(stationCost.amountPerCraft(), crafts);
+            }
+            if (toolCost != null) {
+                toolNeed = Math.multiplyExact(toolCost.amountPerCraft(), crafts);
+            }
+        } catch (ArithmeticException exception) {
+            return false;
+        }
+        if (energyCost != null
+                && (getEnergy(energyCost.processType()) < processNeed
+                || getEnergy(energyCost.fuelType()) < fuelNeed)) return false;
+        if (stationCost != null
+                && getStationWork(stationCost.descriptorId()) < stationNeed) return false;
+        if (toolCost != null && !hasDescriptorAmount(toolCost.descriptorId(), toolNeed)) return false;
+
+        Map<StorageResourceKey, Long> deltas = new HashMap<>();
+        if (energyCost != null) {
+            if (processNeed > 0) {
+                deltas.merge(
+                        StorageResourceBridge.energyKey(energyCost.processType()),
+                        -processNeed,
+                        Math::addExact);
+            }
+            if (fuelNeed > 0) {
+                deltas.merge(
+                        StorageResourceBridge.energyKey(energyCost.fuelType()),
+                        -fuelNeed,
+                        Math::addExact);
+            }
+        }
+        if (stationCost != null) {
+            deltas.put(
+                    StorageResourceBridge.stationWorkKey(stationCost.descriptorId()),
+                    -stationNeed);
+        }
+        if (toolCost != null && !hasInfiniteDescriptor(toolCost.descriptorId())) {
+            deltas.put(
+                    StorageResourceBridge.descriptorKey(toolCost.descriptorId()),
+                    -toolNeed);
+        }
+        return deltas.isEmpty() || applyResourceTransaction(
+                deltas, Action.EXECUTE, Actor.EMPTY);
     }
 
     public boolean hasInfiniteDescriptor(ResourceLocation descriptorId) {
@@ -121,46 +291,57 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 || getDescriptorAmount(descriptorId) >= amount);
     }
 
-    public boolean canAddDescriptorConsumable(ResourceLocation descriptorId, ItemStack stack) {
+    public boolean canAddDescriptorTransform(ResourceLocation descriptorId, ItemStack stack) {
         if (stack.isEmpty() || conflicted || !isStorageAvailable()
                 || hasInfiniteDescriptor(descriptorId)) return false;
         MachineDescriptor descriptor = MachineEnergyTable.get(descriptorId);
-        if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.CONSUMABLE
+        if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.TRANSFORM
                 || !descriptor.accepts(stack)) return false;
-        MachineDescriptor.ConsumableAmount value = descriptor.valueOf(stack);
+        MachineDescriptor.TransformAmount value = descriptor.valueOf(stack);
         return value.infinite() || value.amount() > 0
                 && getDescriptorAmount(descriptorId) <= Long.MAX_VALUE - value.amount();
     }
 
-    public boolean addDescriptorConsumable(ResourceLocation descriptorId, ItemStack stack) {
-        if (!canAddDescriptorConsumable(descriptorId, stack)) return false;
-        MachineDescriptor.ConsumableAmount value = MachineEnergyTable.get(descriptorId).valueOf(stack);
+    public boolean addDescriptorTransform(ResourceLocation descriptorId, ItemStack stack) {
+        if (!canAddDescriptorTransform(descriptorId, stack)) return false;
+        MachineDescriptor.TransformAmount value = MachineEnergyTable.get(descriptorId).valueOf(stack);
         if (value.infinite()) {
-            descriptorAmounts.remove(descriptorId);
+            long current = getDescriptorAmount(descriptorId);
+            if (current > 0 && !applyResourceTransaction(
+                    Map.of(StorageResourceBridge.descriptorKey(descriptorId), -current),
+                    Action.EXECUTE,
+                    Actor.EMPTY)) {
+                return false;
+            }
             infiniteDescriptors.add(descriptorId);
+            machineRevision++;
+            markStorageChanged();
         } else {
-            descriptorAmounts.merge(descriptorId, value.amount(), Math::addExact);
+            if (!applyResourceTransaction(
+                    Map.of(StorageResourceBridge.descriptorKey(descriptorId), value.amount()),
+                    Action.EXECUTE,
+                    Actor.EMPTY)) {
+                return false;
+            }
         }
         stack.setCount(0);
-        machineRevision++;
-        markStorageChanged();
         return true;
     }
 
     public boolean consumeDescriptor(ResourceLocation descriptorId, long amount) {
         if (!hasDescriptorAmount(descriptorId, amount)) return false;
         if (!hasInfiniteDescriptor(descriptorId)) {
-            long remaining = getDescriptorAmount(descriptorId) - amount;
-            if (remaining == 0) descriptorAmounts.remove(descriptorId);
-            else descriptorAmounts.put(descriptorId, remaining);
+            return applyResourceTransaction(
+                    Map.of(StorageResourceBridge.descriptorKey(descriptorId), -amount),
+                    Action.EXECUTE,
+                    Actor.EMPTY);
         }
-        machineRevision++;
-        markStorageChanged();
         return true;
     }
 
     public long getEnergy(EnergyType type) {
-        return isStorageAvailable() ? energy.getOrDefault(type, 0L) : 0;
+        return isStorageAvailable()
+                ? resourceLedger.amount(StorageResourceBridge.energyKey(type)) : 0;
     }
 
     public boolean consumeEnergy(EnergyCost cost, long multiplier) {
@@ -175,14 +356,21 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
         if (getEnergy(cost.processType()) < processNeed) return false;
         if (getEnergy(cost.fuelType()) < fuelNeed) return false;
-        energy.merge(cost.processType(), -processNeed, Long::sum);
-        energy.merge(cost.fuelType(), -fuelNeed, Long::sum);
-        fireEnergyChanged(cost.processType(), getEnergy(cost.processType()));
-        if (cost.fuelType() != cost.processType()) {
-            fireEnergyChanged(cost.fuelType(), getEnergy(cost.fuelType()));
+        Map<StorageResourceKey, Long> deltas = new HashMap<>();
+        if (processNeed > 0) {
+            deltas.merge(
+                    StorageResourceBridge.energyKey(cost.processType()),
+                    -processNeed,
+                    Math::addExact);
         }
-        markStorageChanged();
-        return true;
+        if (fuelNeed > 0) {
+            deltas.merge(
+                    StorageResourceBridge.energyKey(cost.fuelType()),
+                    -fuelNeed,
+                    Math::addExact);
+        }
+        return deltas.isEmpty() || applyResourceTransaction(
+                deltas, Action.EXECUTE, Actor.EMPTY);
     }
 
     public boolean addFuel(ItemStack stack, EnergyType targetPool) {
@@ -198,10 +386,13 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 }
                 long current = getEnergy(targetPool);
                 if (amount <= 0 || current > Long.MAX_VALUE - amount) return false;
-                energy.put(targetPool, current + amount);
+                if (!applyResourceTransaction(
+                        Map.of(StorageResourceBridge.energyKey(targetPool), amount),
+                        Action.EXECUTE,
+                        Actor.EMPTY)) {
+                    return false;
+                }
                 stack.setCount(0);
-                fireEnergyChanged(targetPool, current + amount);
-                markStorageChanged();
                 return true;
             }
         }
@@ -304,10 +495,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
             }
             storageRecord = null;
             networkId = null;
-            energy = new EnumMap<>(EnergyType.class);
             machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
-            descriptorAmounts = new HashMap<>();
             infiniteDescriptors = new HashSet<>();
+            machineWorkRemainders = new HashMap<>();
             resourceLedger = new StorageResourceLedger();
             typeCount = 0;
             cacheDirty = true;
@@ -354,13 +544,14 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
         storageRecord = record;
         networkId = record.networkId();
-        energy = record.energy();
         machines = record.machines();
-        descriptorAmounts = record.descriptorAmounts();
         infiniteDescriptors = record.infiniteDescriptors();
+        machineWorkRemainders = record.machineWorkRemainders();
         resourceLedger = record.resourceLedger();
         typeCount = record.typeCount();
+        craftableRevision++;
         cacheDirty = true;
+        rebuildCache();
         record.setMachineMutationCallback(this::onMachineChanged);
         updateStorageAvailability(StorageAvailability.AVAILABLE);
     }
@@ -377,6 +568,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
             return;
         }
         storageRecord.markChanged();
+    }
+
+    private static long saturatingAdd(long left, long right) {
+        if (right <= 0) return left;
+        return left > Long.MAX_VALUE - right ? Long.MAX_VALUE : left + right;
     }
 
     private CoreStorageRepository.CoreLocation location(ServerLevel serverLevel) {
@@ -399,14 +595,155 @@ public class StorageCoreBlockEntity extends BlockEntity {
 
     private void rebuildCache() {
         if (!cacheDirty) return;
-        flatCache.clear();
+        itemIndex.clear();
+        itemIndexByItem.clear();
+        itemAmountIndex.clear();
+        sortedNameIndex.clear();
+        sortedItemIndex.clear();
+        invalidateIngredientSourceSnapshot();
         if (level == null) return;
         for (StorageResourceKey resourceKey : resourceLedger.keys(StorageResourceBridge.ITEM_KIND)) {
             StorageResourceBridge.itemKey(resourceKey, level.registryAccess())
-                    .ifPresent(key -> flatCache.merge(
-                            key, resourceLedger.amount(resourceKey), Long::sum));
+                    .ifPresent(key -> itemIndex.compute(key, (ignored, existing) -> {
+                        long amount = resourceLedger.amount(resourceKey);
+                        if (existing == null) return new IndexedItem(key, amount);
+                        existing.amount = saturatingAdd(existing.amount, amount);
+                        return existing;
+                    }));
         }
+        sortedNameIndex.addAll(itemIndex.values());
+        sortedNameIndex.sort(StorageCoreBlockEntity::compareByName);
         cacheDirty = false;
+        for (IndexedItem item : sortedItems(SortMode.ID)) {
+            itemIndexByItem.computeIfAbsent(
+                    item.identity.getItem(), ignored -> new ArrayList<>()).add(item);
+            itemAmountIndex.merge(
+                    item.identity.getItem(), item.amount, StorageCoreBlockEntity::saturatingAdd);
+        }
+    }
+
+    private List<IndexedItem> sortedItems(SortMode mode) {
+        rebuildCache();
+        if (mode == SortMode.NAME) return sortedNameIndex;
+        return sortedItemIndex.computeIfAbsent(mode, this::buildSortedItems);
+    }
+
+    void prewarmTerminalIndexes() {
+        for (SortMode mode : SortMode.values()) sortedItems(mode);
+        for (IndexedItem item : itemIndex.values()) item.search();
+        storedItemSources();
+    }
+
+    private List<IndexedItem> buildSortedItems(SortMode mode) {
+        Comparator<IndexedItem> comparator = switch (mode) {
+            case NAME -> StorageCoreBlockEntity::compareByName;
+            case QUANTITY -> StorageCoreBlockEntity::compareByQuantity;
+            case MOD -> StorageCoreBlockEntity::compareByMod;
+            case ID -> StorageCoreBlockEntity::compareById;
+        };
+        IndexedItem[] sorted = itemIndex.values().toArray(IndexedItem[]::new);
+        Arrays.sort(sorted, comparator);
+        return List.of(sorted);
+    }
+
+    private static int compareByName(IndexedItem left, IndexedItem right) {
+        int compared = left.displayName.compareTo(right.displayName);
+        if (compared != 0) return compared;
+        compared = left.idString.compareTo(right.idString);
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private static int compareByQuantity(IndexedItem left, IndexedItem right) {
+        int compared = Long.compare(left.amount, right.amount);
+        if (compared != 0) return compared;
+        compared = left.idString.compareTo(right.idString);
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private static int compareByMod(IndexedItem left, IndexedItem right) {
+        int compared = left.id.getNamespace().compareTo(right.id.getNamespace());
+        if (compared != 0) return compared;
+        compared = left.displayName.compareTo(right.displayName);
+        if (compared != 0) return compared;
+        compared = left.id.getPath().compareTo(right.id.getPath());
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private static int compareById(IndexedItem left, IndexedItem right) {
+        int compared = left.idString.compareTo(right.idString);
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private void updateItemIndex(ItemKey key, long newAmount) {
+        if (cacheDirty) return;
+        IndexedItem existing = itemIndex.get(key);
+        if (newAmount <= 0) {
+            if (existing != null) {
+                itemIndex.remove(key);
+                Item item = existing.identity.getItem();
+                List<IndexedItem> matching = itemIndexByItem.get(item);
+                if (matching != null) {
+                    matching.remove(existing);
+                    if (matching.isEmpty()) itemIndexByItem.remove(item);
+                }
+                updateItemAmount(item, existing.amount, 0);
+                sortedNameIndex.remove(existing);
+                sortedItemIndex.clear();
+                invalidateIngredientSourceSnapshot();
+            }
+            return;
+        }
+        if (existing == null) {
+            IndexedItem inserted = new IndexedItem(key, newAmount);
+            itemIndex.put(key, inserted);
+            Item item = inserted.identity.getItem();
+            List<IndexedItem> matching =
+                    itemIndexByItem.computeIfAbsent(item, ignored -> new ArrayList<>());
+            int itemIndex = Collections.binarySearch(
+                    matching, inserted, StorageCoreBlockEntity::compareById);
+            matching.add(itemIndex < 0 ? -itemIndex - 1 : itemIndex, inserted);
+            updateItemAmount(item, 0, newAmount);
+            int index = Collections.binarySearch(
+                    sortedNameIndex, inserted, StorageCoreBlockEntity::compareByName);
+            // ponytail: O(n) insertion keeps terminal opens O(1); use a tree only if
+            // random bulk new-type imports are measured as the bottleneck.
+            sortedNameIndex.add(index < 0 ? -index - 1 : index, inserted);
+            sortedItemIndex.remove(SortMode.QUANTITY);
+            sortedItemIndex.remove(SortMode.MOD);
+            sortedItemIndex.remove(SortMode.ID);
+            invalidateIngredientSourceSnapshot();
+            return;
+        }
+        if (existing.amount != newAmount) {
+            updateItemAmount(existing.identity.getItem(), existing.amount, newAmount);
+            existing.amount = newAmount;
+            existing.ingredientSource = null;
+            sortedItemIndex.remove(SortMode.QUANTITY);
+            invalidateIngredientSourceSnapshot();
+        }
+    }
+
+    private void updateItemAmount(Item item, long oldAmount, long newAmount) {
+        long total = itemAmountIndex.getOrDefault(item, 0L);
+        total = oldAmount > total ? 0 : total - oldAmount;
+        total = saturatingAdd(total, newAmount);
+        if (total == 0) itemAmountIndex.remove(item);
+        else itemAmountIndex.put(item, total);
+    }
+
+    private void invalidateIngredientSourceSnapshot() {
+        ingredientSourceSnapshot = null;
+        ingredientAmountSnapshot = null;
+        ingredientAmountByItemSnapshot = null;
+        ingredientSourcesByItemSnapshot = null;
     }
 
     public void addListener(StorageListener listener) {
@@ -469,6 +806,29 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
     }
 
+    private void fireStationWorkChanged(
+            ResourceLocation descriptorId,
+            long delta,
+            long newAmount
+    ) {
+        if (mutationBatchDepth > 0) {
+            deferredListenerEvents.add(() ->
+                    notifyStationWorkChanged(descriptorId, delta, newAmount));
+            return;
+        }
+        notifyStationWorkChanged(descriptorId, delta, newAmount);
+    }
+
+    private void notifyStationWorkChanged(
+            ResourceLocation descriptorId,
+            long delta,
+            long newAmount
+    ) {
+        for (StorageListener listener : List.copyOf(listeners)) {
+            listener.onStationWorkChanged(descriptorId, delta, newAmount);
+        }
+    }
+
     void beginMutationBatch() {
         mutationBatchDepth++;
     }
@@ -495,20 +855,30 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     public long insertResource(StorageResourceKey key, long amount, Action action) {
+        return insertResource(key, amount, action, Actor.EMPTY);
+    }
+
+    long insertResource(StorageResourceKey key, long amount, Action action, Actor actor) {
         if (amount <= 0 || conflicted || !isStorageAvailable()) return 0;
         long existing = resourceLedger.amount(key);
-        if (existing == 0 && !ledgerCapacity().canAcceptNewType(resourceLedger.typeCount())) return 0;
+        if (existing == 0
+                && !key.kindId().equals(StorageResourceBridge.WORK_KIND)
+                && !ledgerCapacity().canAcceptNewType(capacityTypeCount())) return 0;
         long inserted = Math.min(amount, Long.MAX_VALUE - existing);
         if (inserted <= 0 || !applyResourceTransaction(
-                Map.of(key, inserted), action, Actor.EMPTY)) return 0;
+                Map.of(key, inserted), action, actor)) return 0;
         return inserted;
     }
 
     public long extractResource(StorageResourceKey key, long amount, Action action) {
+        return extractResource(key, amount, action, Actor.EMPTY);
+    }
+
+    long extractResource(StorageResourceKey key, long amount, Action action, Actor actor) {
         if (amount <= 0 || conflicted || !isStorageAvailable()) return 0;
         long extracted = Math.min(amount, resourceLedger.amount(key));
         if (extracted <= 0 || !applyResourceTransaction(
-                Map.of(key, -extracted), action, Actor.EMPTY)) return 0;
+                Map.of(key, -extracted), action, actor)) return 0;
         return extracted;
     }
 
@@ -522,19 +892,38 @@ public class StorageCoreBlockEntity extends BlockEntity {
         Objects.requireNonNull(actor, "actor");
         if (deltas.isEmpty() || conflicted || !isStorageAvailable() || level == null) return false;
         Map<StorageResourceKey, ItemKey> itemKeys = new HashMap<>();
+        boolean capacityTypesChanged = false;
+        boolean invalidatesCraftableCache = false;
         for (StorageResourceKey key : deltas.keySet()) {
             if (!StorageResourceKinds.accepts(key)) return false;
+            if (!key.kindId().equals(StorageResourceBridge.WORK_KIND)) {
+                capacityTypesChanged = true;
+            }
+            long delta = deltas.get(key);
+            if (delta != 0 && (!key.kindId().equals(StorageResourceBridge.WORK_KIND)
+                    || delta < 0
+                    || StorageResourceBridge.energyType(key).isEmpty()
+                    && StorageResourceBridge.stationWorkDescriptorId(key).isEmpty())) {
+                invalidatesCraftableCache = true;
+            }
             if (!key.kindId().equals(StorageResourceBridge.ITEM_KIND)) continue;
             var itemKey = StorageResourceBridge.itemKey(key, level.registryAccess());
             if (itemKey.isEmpty()) return false;
             itemKeys.put(key, itemKey.get());
         }
-        if (!resourceLedger.applyExact(deltas, ledgerCapacity(), action)) return false;
+        if (!resourceLedger.applyExact(deltas, ledgerCapacity(deltas), action)) return false;
         if (action == Action.EXECUTE) {
-            refreshTypeCount();
-            if (!itemKeys.isEmpty()) cacheDirty = true;
+            if (invalidatesCraftableCache) craftableRevision++;
+            if (capacityTypesChanged) refreshTypeCount();
+            if (deltas.keySet().stream().anyMatch(
+                    key -> StorageResourceBridge.descriptorId(key).isPresent())) {
+                machineRevision++;
+            }
             markStorageChanged();
             for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
+                updateItemIndex(
+                        entry.getValue(),
+                        resourceLedger.amount(entry.getKey()));
                 fireChanged(
                         entry.getValue(),
                         deltas.get(entry.getKey()),
@@ -548,6 +937,13 @@ public class StorageCoreBlockEntity extends BlockEntity {
                         entry.getValue(),
                         resourceLedger.amount(entry.getKey()),
                         actor);
+                StorageResourceBridge.energyType(entry.getKey()).ifPresent(
+                        type -> fireEnergyChanged(type, resourceLedger.amount(entry.getKey())));
+                StorageResourceBridge.stationWorkDescriptorId(entry.getKey()).ifPresent(
+                        descriptorId -> fireStationWorkChanged(
+                                descriptorId,
+                                entry.getValue(),
+                                resourceLedger.amount(entry.getKey())));
             }
         }
         return true;
@@ -594,9 +990,36 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 0, typeCapacity.finiteTypeSlots() - unresolvedTypes));
     }
 
+    private StorageTypeCapacity ledgerCapacity(Map<StorageResourceKey, Long> deltas) {
+        StorageTypeCapacity base = ledgerCapacity();
+        if (base.unlimited()) return base;
+        int projectedWorkTypes = resourceLedger.typeCount(StorageResourceBridge.WORK_KIND);
+        for (Map.Entry<StorageResourceKey, Long> entry : deltas.entrySet()) {
+            if (!entry.getKey().kindId().equals(StorageResourceBridge.WORK_KIND)) continue;
+            long current = resourceLedger.amount(entry.getKey());
+            long updated;
+            try {
+                updated = Math.addExact(current, entry.getValue());
+            } catch (ArithmeticException exception) {
+                return base;
+            }
+            if (current == 0 && updated > 0) projectedWorkTypes++;
+            else if (current > 0 && updated == 0) projectedWorkTypes--;
+        }
+        long adjusted = (long) base.finiteTypeSlots() + projectedWorkTypes;
+        return StorageTypeCapacity.finite((int) Math.min(Integer.MAX_VALUE, adjusted));
+    }
+
+    private int capacityTypeCount() {
+        return resourceLedger.typeCount() - resourceLedger.typeCount(StorageResourceBridge.WORK_KIND);
+    }
+
     private void refreshTypeCount() {
-        typeCount = storageRecord == null
-                ? resourceLedger.typeCount() : storageRecord.typeCount();
+        long unresolved = storageRecord == null
+                ? 0 : storageRecord.unresolvedInventoryEntries().size();
+        long resolved = capacityTypeCount();
+        typeCount = unresolved + resolved >= Integer.MAX_VALUE
+                ? Integer.MAX_VALUE : (int) (unresolved + resolved);
     }
 
     public long insertItemCount(ItemKey key, long amount, Action action, Actor actor) {
@@ -604,7 +1027,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (level == null) return 0;
         StorageResourceKey resourceKey = StorageResourceBridge.itemKey(key, level.registryAccess());
         long existing = resourceLedger.amount(resourceKey);
-        if (existing == 0 && !ledgerCapacity().canAcceptNewType(resourceLedger.typeCount())) return 0;
+        if (existing == 0 && !ledgerCapacity().canAcceptNewType(capacityTypeCount())) return 0;
         long inserted = Math.min(amount, Long.MAX_VALUE - existing);
         if (inserted <= 0) return 0;
         return applyResourceTransaction(Map.of(resourceKey, inserted), action, actor)
@@ -653,14 +1076,13 @@ public class StorageCoreBlockEntity extends BlockEntity {
     public List<ItemStack> getDisplayStacks(String filter) {
         if (!isStorageAvailable()) return List.of();
         rebuildCache();
+        TerminalSearchQuery query = TerminalSearchQuery.compile(filter);
         List<ItemStack> result = new ArrayList<>();
-        for (var entry : flatCache.entrySet()) {
-            ItemKey key = entry.getKey();
-            long count = entry.getValue();
-            if (matchesFilter(key, filter, level)) {
-                ItemStack stack = key.toStack(1);
+        for (IndexedItem item : itemIndex.values()) {
+            if (query.matches(item.search())) {
+                ItemStack stack = item.key.toStack(1);
                 if (!stack.isEmpty()) {
-                    result.add(TerminalDisplayStack.create(stack, count));
+                    result.add(TerminalDisplayStack.create(stack, item.amount));
                 }
             }
         }
@@ -668,9 +1090,136 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     public List<ItemStack> getDisplayStacks(String filter, SortMode mode, SortOrder order) {
-        List<ItemStack> result = getDisplayStacks(filter);
-        result.sort(TerminalEntryComparator.forMode(mode, order));
+        if (!isStorageAvailable()) return List.of();
+        TerminalSearchQuery query = TerminalSearchQuery.compile(filter);
+        List<IndexedItem> sorted = sortedItems(mode);
+        List<ItemStack> result = new ArrayList<>();
+        for (int index = 0; index < sorted.size(); index++) {
+            IndexedItem item = sorted.get(order == SortOrder.ASCENDING
+                    ? index : sorted.size() - 1 - index);
+            if (query.matches(item.search())) {
+                result.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+            }
+        }
         return result;
+    }
+
+    public TerminalDisplayPage getTerminalDisplayPage(
+            String filter,
+            SortMode mode,
+            SortOrder order,
+            TerminalResourceView resourceView,
+            int requestedOffset,
+            int limit
+    ) {
+        if (!isStorageAvailable() || limit <= 0) {
+            return new TerminalDisplayPage(0, 0, List.of());
+        }
+        int offset = Math.max(0, requestedOffset);
+        if (resourceView != TerminalResourceView.ITEM) {
+            List<ItemStack> all = getTerminalDisplayStacks(filter, mode, order, resourceView);
+            offset = Math.min(offset, Math.max(0, all.size() - 1));
+            return new TerminalDisplayPage(
+                    all.size(),
+                    offset,
+                    all.subList(offset, Math.min(all.size(), offset + limit)));
+        }
+        TerminalSearchQuery query = TerminalSearchQuery.compile(filter);
+        List<IndexedItem> sorted = sortedItems(mode);
+        if (query.isEmpty()) {
+            offset = Math.min(offset, Math.max(0, sorted.size() - 1));
+            List<ItemStack> visible = new ArrayList<>(Math.min(limit, sorted.size()));
+            for (int index = offset; index < Math.min(sorted.size(), offset + limit); index++) {
+                IndexedItem item = sorted.get(order == SortOrder.ASCENDING
+                        ? index : sorted.size() - 1 - index);
+                visible.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+            }
+            return new TerminalDisplayPage(sorted.size(), offset, visible);
+        }
+        int total = 0;
+        for (IndexedItem item : sorted) {
+            if (query.matches(item.search())) total++;
+        }
+        offset = Math.min(offset, Math.max(0, total - 1));
+        List<ItemStack> visible = new ArrayList<>(Math.min(limit, total));
+        int matchIndex = 0;
+        for (int index = 0; index < sorted.size() && visible.size() < limit; index++) {
+            IndexedItem item = sorted.get(order == SortOrder.ASCENDING
+                    ? index : sorted.size() - 1 - index);
+            if (!query.matches(item.search())) continue;
+            if (matchIndex++ < offset) continue;
+            visible.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+        }
+        return new TerminalDisplayPage(total, offset, visible);
+    }
+
+    List<IngredientSource> storedItemSources() {
+        List<IndexedItem> sorted = sortedItems(SortMode.ID);
+        if (ingredientSourceSnapshot == null) {
+            List<IngredientSource> sources = new ArrayList<>(sorted.size());
+            Map<ItemKey, Long> amounts = new HashMap<>();
+            Map<Item, Long> amountsByItem = new HashMap<>();
+            Map<Item, List<IngredientSource>> byItem = new HashMap<>();
+            for (IndexedItem item : sorted) {
+                IngredientSource source = item.ingredientSource();
+                sources.add(source);
+                amounts.put(item.key, item.amount);
+                amountsByItem.merge(
+                        item.identity.getItem(),
+                        item.amount,
+                        (left, right) -> left > Long.MAX_VALUE - right
+                                ? Long.MAX_VALUE : left + right);
+                byItem.computeIfAbsent(
+                        item.identity.getItem(), ignored -> new ArrayList<>()).add(source);
+            }
+            byItem.replaceAll((item, matching) -> List.copyOf(matching));
+            ingredientSourceSnapshot = List.copyOf(sources);
+            ingredientAmountSnapshot = Map.copyOf(amounts);
+            ingredientAmountByItemSnapshot = Map.copyOf(amountsByItem);
+            ingredientSourcesByItemSnapshot = Map.copyOf(byItem);
+        }
+        return ingredientSourceSnapshot;
+    }
+
+    Collection<Item> storedItems() {
+        rebuildCache();
+        return Collections.unmodifiableSet(itemIndexByItem.keySet());
+    }
+
+    long storedItemAmount(Item item) {
+        rebuildCache();
+        return itemAmountIndex.getOrDefault(item, 0L);
+    }
+
+    List<IngredientSource> storedItemSources(Item item) {
+        rebuildCache();
+        List<IndexedItem> matching = itemIndexByItem.get(item);
+        if (matching == null) return List.of();
+        return matching.stream().map(IndexedItem::ingredientSource).toList();
+    }
+
+    List<IngredientSource> storedItemSources(Predicate<ItemStack> predicate) {
+        rebuildCache();
+        List<IngredientSource> matching = new ArrayList<>();
+        for (IndexedItem item : sortedItems(SortMode.ID)) {
+            if (predicate.test(item.identity)) matching.add(item.ingredientSource());
+        }
+        return List.copyOf(matching);
+    }
+
+    Map<ItemKey, Long> storedItemAmounts() {
+        storedItemSources();
+        return ingredientAmountSnapshot;
+    }
+
+    Map<Item, List<IngredientSource>> storedItemSourcesByItem() {
+        storedItemSources();
+        return ingredientSourcesByItemSnapshot;
+    }
+
+    Map<Item, Long> storedItemAmountsByItem() {
+        storedItemSources();
+        return ingredientAmountByItemSnapshot;
     }
 
     public List<ItemStack> getTerminalDisplayStacks(
@@ -684,14 +1233,17 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
         List<ItemStack> result = new ArrayList<>();
         if (level == null) return result;
+        TerminalSearchQuery query = TerminalSearchQuery.compile(filter);
         for (Map.Entry<StorageResourceKey, Long> entry : resourceLedger.snapshot().entrySet()) {
             StorageResourceKey key = entry.getKey();
             if (!resourceView.matches(key)) continue;
             if (!StorageResourceKinds.isRegistered(key)) continue;
             ItemStack representative = StorageResourceKinds.representative(
                     key, level.registryAccess());
-            if (!matchesResourceFilter(key, representative, filter)) continue;
-            result.add(TerminalResourceDisplay.create(representative, key, entry.getValue()));
+            if (!matchesResourceFilter(key, representative, query)) continue;
+            result.add(key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
+                    ? TerminalDisplayStack.create(representative, entry.getValue())
+                    : TerminalResourceDisplay.create(representative, key, entry.getValue()));
         }
         result.sort(TerminalEntryComparator.forMode(mode, order));
         return result;
@@ -700,15 +1252,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private static boolean matchesResourceFilter(
             StorageResourceKey key,
             ItemStack representative,
-            String filter
+            TerminalSearchQuery query
     ) {
-        if (filter == null || filter.isBlank()) return true;
-        String identity = (key.kindId() + " " + key.resourceId() + " "
-                + representative.getHoverName().getString()).toLowerCase(Locale.ROOT);
-        for (String token : filter.toLowerCase(Locale.ROOT).split("\\s+")) {
-            if (!token.isEmpty() && !identity.contains(token)) return false;
-        }
-        return true;
+        return query.matches(key, representative);
     }
 
     public long getItemCount(ItemKey key) {
@@ -720,9 +1266,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (!isStorageAvailable()) return 0;
         rebuildCache();
         long total = 0;
-        for (var entry : flatCache.entrySet()) {
-            if (!pred.test(entry.getKey().toStack(1))) continue;
-            long amount = entry.getValue();
+        for (IndexedItem item : itemIndex.values()) {
+            if (!pred.test(item.key.toStack(1))) continue;
+            long amount = item.amount;
             if (total > Long.MAX_VALUE - amount) return Long.MAX_VALUE;
             total += amount;
         }
@@ -733,8 +1279,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (amount <= 0 || conflicted || !isStorageAvailable()) return 0;
         rebuildCache();
         List<ItemKey> matches = new ArrayList<>();
-        for (var entry : flatCache.entrySet()) {
-            if (pred.test(entry.getKey().toStack(1))) matches.add(entry.getKey());
+        for (IndexedItem item : itemIndex.values()) {
+            if (pred.test(item.key.toStack(1))) matches.add(item.key);
         }
         long extracted = 0;
         for (ItemKey key : matches) {
@@ -749,38 +1295,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     static boolean matchesFilter(ItemKey key, String filterText, Level level) {
-        if (filterText == null || filterText.isBlank()) return true;
-        ItemStack stack = key.toStack(1);
-
-        for (String token : filterText.toLowerCase(Locale.ROOT).split("\\s+")) {
-            if (token.isEmpty()) continue;
-            if (token.startsWith("@")) {
-                String modid = token.substring(1);
-                if (!stack.getItem().builtInRegistryHolder().key().location().getNamespace().equals(modid))
-                    return false;
-            } else if (token.startsWith("#")) {
-                String tagName = token.substring(1);
-                var tagId = net.minecraft.resources.ResourceLocation.tryParse(tagName);
-                if (tagId == null) return false;
-                boolean found = false;
-                var tags = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ITEM)
-                        .getTag(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM, tagId));
-                if (tags.isPresent()) {
-                    for (var holder : tags.get()) {
-                        if (holder.value() == stack.getItem()) { found = true; break; }
-                    }
-                }
-                if (!found) return false;
-            } else if (token.startsWith("$")) {
-                String keyword = token.substring(1);
-                if (!stack.getHoverName().getString().toLowerCase(Locale.ROOT).contains(keyword))
-                    return false;
-            } else {
-                if (!stack.getHoverName().getString().toLowerCase(Locale.ROOT).contains(token))
-                    return false;
-            }
-        }
-        return true;
+        return TerminalSearchQuery.compile(filterText).matches(TerminalSearchEntry.create(key));
     }
 
     // ===== NBT =====
@@ -797,20 +1312,43 @@ public class StorageCoreBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        storageId = tag.hasUUID(TAG_STORAGE_ID) ? tag.getUUID(TAG_STORAGE_ID) : null;
-        storageSchema = tag.getInt(TAG_STORAGE_SCHEMA);
+        UUID loadedStorageId = tag.hasUUID(TAG_STORAGE_ID)
+                ? tag.getUUID(TAG_STORAGE_ID) : null;
+        int loadedStorageSchema = tag.getInt(TAG_STORAGE_SCHEMA);
+        ServerLevel serverLevel = level instanceof ServerLevel current ? current : null;
+        boolean replaceLiveStorage = serverLevel != null && storageRecord != null;
+        if (replaceLiveStorage) {
+            if (Objects.equals(storageId, loadedStorageId)) {
+                storageSchema = loadedStorageSchema;
+                return;
+            }
+            CoreStorageRepository repository = CoreStorageRepository.get(serverLevel);
+            if (!repository.removeIfEmpty(
+                    storageId, location(serverLevel), attachmentToken)) {
+                MagicStorage.LOGGER.error(
+                        "Refusing to replace non-empty live Core storage {} with {}",
+                        storageId,
+                        loadedStorageId);
+                return;
+            }
+            storageRecord.clearMachineMutationCallback();
+        }
+        storageId = loadedStorageId;
+        storageSchema = loadedStorageSchema;
         storageRecord = null;
         networkId = null;
-        energy = new EnumMap<>(EnergyType.class);
         machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
-        descriptorAmounts = new HashMap<>();
         infiniteDescriptors = new HashSet<>();
+        machineWorkRemainders = new HashMap<>();
         resourceLedger = new StorageResourceLedger();
         typeCount = 0;
         cacheDirty = true;
         storageAvailability = storageId == null
                 ? StorageAvailability.MISSING_REFERENCE
                 : StorageAvailability.UNINITIALIZED;
+        if (replaceLiveStorage && storageId != null && serverLevel != null) {
+            attachExistingStorage(serverLevel);
+        }
     }
 
     // ===== Network =====
@@ -819,9 +1357,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
         Set<BlockPos> previousConnectedBlocks = Set.copyOf(connectedBlocks);
         StorageTypeCapacity previousTypeCapacity = typeCapacity;
         boolean wasConflicted = conflicted;
+        boolean wasNetworkCapped = networkCapped;
         connectedBlocks.clear();
         typeCapacity = StorageTypeCapacity.zero();
         conflicted = false;
+        networkCapped = false;
 
         Queue<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
@@ -829,10 +1369,19 @@ public class StorageCoreBlockEntity extends BlockEntity {
         visited.add(getBlockPos());
 
         int depth = 0;
-        while (!queue.isEmpty() && depth < MagicStorage.NETWORK_SCAN_DEPTH && visited.size() <= MagicStorage.MAX_NETWORK_BLOCKS) {
+        scan:
+        while (!queue.isEmpty()) {
+            if (depth >= MagicStorage.NETWORK_SCAN_DEPTH) {
+                networkCapped = true;
+                break;
+            }
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 BlockPos current = queue.poll();
+                if (connectedBlocks.size() >= MagicStorage.MAX_NETWORK_BLOCKS) {
+                    networkCapped = true;
+                    break scan;
+                }
 
                 BlockState state = level.getBlockState(current);
                 if (state.getBlock() instanceof IStorageNetworkBlock networkBlock) {
@@ -860,13 +1409,14 @@ public class StorageCoreBlockEntity extends BlockEntity {
             MagicStorage.LOGGER.warn("Storage network at {} has multiple cores; multi-core is unsupported, network disabled until extra cores removed.", getBlockPos());
         }
         if (wasConflicted != conflicted || !previousTypeCapacity.equals(typeCapacity)
+                || wasNetworkCapped != networkCapped
                 || !previousConnectedBlocks.equals(connectedBlocks)) {
             topologyRevision++;
         }
     }
 
     public boolean tryIncrementalAdd(Level level, BlockPos placedPos) {
-        if (conflicted) return false;
+        if (conflicted || networkCapped) return false;
         if (placedPos.equals(getBlockPos())) return false;
         if (connectedBlocks.contains(placedPos)) return false;
 
@@ -937,12 +1487,15 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     public void onBreak() {
-        if (!connectedBlocks.isEmpty() || !typeCapacity.equals(StorageTypeCapacity.zero())) topologyRevision++;
+        if (!connectedBlocks.isEmpty() || !typeCapacity.equals(StorageTypeCapacity.zero())
+                || networkCapped) topologyRevision++;
         connectedBlocks.clear();
         typeCapacity = StorageTypeCapacity.zero();
+        networkCapped = false;
     }
 
-    public Set<BlockPos> getConnectedBlocks() { return connectedBlocks; }
+    public Set<BlockPos> getConnectedBlocks() { return connectedBlocksView; }
+    public boolean isNetworkCapped() { return networkCapped; }
     public int getTotalTypeSlots() { return typeCapacity.finiteTypeSlots(); }
     public StorageTypeCapacity getTypeCapacity() { return typeCapacity; }
     public long getTopologyRevision() { return topologyRevision; }
@@ -972,4 +1525,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
             };
         }
     }
+}
+
+record IngredientSource(ItemKey key, int playerSlot, ItemStack stack, long amount) {
 }

@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,12 +24,17 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
+import java.util.function.Consumer;
 import java.util.UUID;
+import java.util.List;
+import java.util.Optional;
 
 @GameTestHolder(MagicStorage.MODID)
 @PrefixGameTestTemplate(false)
@@ -62,7 +68,24 @@ public class WrenchTests {
                 Block.UPDATE_ALL);
 
         var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setPos(importPos.getX() + 0.5, importPos.getY() + 0.5, importPos.getZ() + 0.5);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
+        InteractionResult noOpImport = WrenchActions.tryUse(
+                level, player, InteractionHand.MAIN_HAND, hit(importPos, Direction.NORTH));
+        InteractionResult noOpExport = WrenchActions.tryUse(
+                level, player, InteractionHand.MAIN_HAND, hit(exportPos, Direction.NORTH));
+        if (noOpImport != InteractionResult.PASS || noOpExport != InteractionResult.PASS
+                || !(level.getBlockEntity(importPos) instanceof ImportBusBlockEntity untouchedImporter)
+                || !(level.getBlockEntity(exportPos) instanceof ExportBusBlockEntity untouchedExporter)
+                || untouchedImporter.getBusConfiguration().owner().isPresent()
+                || untouchedExporter.getBusConfiguration().owner().isPresent()
+                || untouchedImporter.getBusConfiguration().configRevision() != 0
+                || untouchedExporter.getBusConfiguration().configRevision() != 0
+                || level.getBlockState(importPos).getValue(ImportBusBlock.FACING) != Direction.NORTH
+                || level.getBlockState(exportPos).getValue(ExportBusBlock.FACING) != Direction.NORTH) {
+            helper.fail("Same-axis no-op wrench rotation claimed or mutated a legacy Bus");
+            return;
+        }
         InteractionResult importResult = WrenchActions.tryUse(
                 level, player, InteractionHand.MAIN_HAND, hit(importPos, Direction.UP));
         InteractionResult exportResult = WrenchActions.tryUse(
@@ -77,6 +100,15 @@ public class WrenchTests {
         }
         if (level.getBlockState(exportPos).getValue(ExportBusBlock.FACING) != Direction.EAST) {
             helper.fail("Export Bus did not rotate NORTH -> EAST around the clicked top face");
+            return;
+        }
+        if (!(level.getBlockEntity(importPos) instanceof ImportBusBlockEntity importer)
+                || !(level.getBlockEntity(exportPos) instanceof ExportBusBlockEntity exporter)
+                || !importer.getBusConfiguration().owner().equals(Optional.of(player.getUUID()))
+                || !exporter.getBusConfiguration().owner().equals(Optional.of(player.getUUID()))
+                || importer.getBusConfiguration().configRevision() != 1
+                || exporter.getBusConfiguration().configRevision() != 1) {
+            helper.fail("First valid wrench rotations did not atomically claim both legacy Buses");
             return;
         }
 
@@ -98,6 +130,239 @@ public class WrenchTests {
     }
 
     @GameTest(template = "persistencetests.platform")
+    public static void directionless_bus_normal_wrench_passes_without_rotation(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var importPos = helper.absolutePos(new BlockPos(1, 3, 1));
+        var exportPos = helper.absolutePos(new BlockPos(3, 3, 1));
+        level.setBlock(importPos, MagicStorage.IMPORT_BUS.get().defaultBlockState()
+                .setValue(ImportBusBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
+        level.setBlock(exportPos, MagicStorage.EXPORT_BUS.get().defaultBlockState()
+                .setValue(ExportBusBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
+        if (!(level.getBlockEntity(importPos) instanceof ImportBusBlockEntity importer)
+                || !(level.getBlockEntity(exportPos) instanceof ExportBusBlockEntity exporter)) {
+            helper.fail("Directionless wrench test Buses are missing");
+            return;
+        }
+        var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setPos(importPos.getX() + 0.5, importPos.getY() + 0.5, importPos.getZ() + 0.5);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
+        BusConfiguration directionlessImport = BusConfiguration.current(
+                BusMode.DIRECTIONLESS,
+                BusConfiguration.ALL_SIDES_MASK,
+                true,
+                true,
+                BusFilterMode.DENY,
+                List.of(),
+                Optional.of(player.getUUID()),
+                1);
+        BusConfiguration directionlessExport = BusConfiguration.current(
+                BusMode.DIRECTIONLESS,
+                BusConfiguration.ALL_SIDES_MASK,
+                false,
+                true,
+                BusFilterMode.ALLOW,
+                List.of(),
+                Optional.of(player.getUUID()),
+                1);
+        importer.setBusConfiguration(directionlessImport);
+        exporter.setBusConfiguration(directionlessExport);
+
+        InteractionResult importResult = WrenchActions.tryUse(
+                level, player, InteractionHand.MAIN_HAND, hit(importPos, Direction.UP));
+        InteractionResult exportResult = WrenchActions.tryUse(
+                level, player, InteractionHand.MAIN_HAND, hit(exportPos, Direction.UP));
+        if (importResult != InteractionResult.PASS
+                || exportResult != InteractionResult.PASS
+                || level.getBlockState(importPos).getValue(ImportBusBlock.FACING) != Direction.NORTH
+                || level.getBlockState(exportPos).getValue(ExportBusBlock.FACING) != Direction.NORTH) {
+            helper.fail("Normal wrench use rotated or consumed a directionless Bus interaction");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "persistencetests.platform")
+    public static void bus_wrench_rotation_and_dismantle_require_owner(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 2));
+        var busPos = corePos.east();
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(busPos, MagicStorage.IMPORT_BUS.get().defaultBlockState()
+                .setValue(ImportBusBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)
+                    || !(level.getBlockEntity(busPos) instanceof ImportBusBlockEntity bus)) {
+                helper.fail("Owned wrench test Core or Import Bus is missing");
+                return;
+            }
+            core.rebuildNetwork(level);
+            var owner = FakePlayerFactory.get(
+                    level, new GameProfile(UUID.randomUUID(), "bus-wrench-owner"));
+            var intruder = FakePlayerFactory.get(
+                    level, new GameProfile(UUID.randomUUID(), "bus-wrench-intruder"));
+            owner.setGameMode(GameType.SURVIVAL);
+            intruder.setGameMode(GameType.SURVIVAL);
+            owner.setPos(busPos.getX() + 0.5, busPos.getY() + 0.5, busPos.getZ() + 0.5);
+            intruder.setPos(busPos.getX() + 0.5, busPos.getY() + 0.5, busPos.getZ() + 0.5);
+            owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
+            intruder.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
+            bus.assignOwnerOnPlacement(owner.getUUID());
+
+            if (WrenchActions.tryUse(
+                    level, intruder, InteractionHand.MAIN_HAND, hit(busPos, Direction.UP))
+                    != InteractionResult.FAIL
+                    || level.getBlockState(busPos).getValue(ImportBusBlock.FACING) != Direction.NORTH) {
+                helper.fail("Non-owner rotated an owned Bus");
+                return;
+            }
+            if (!WrenchActions.tryUse(
+                    level, owner, InteractionHand.MAIN_HAND, hit(busPos, Direction.UP)).consumesAction()
+                    || level.getBlockState(busPos).getValue(ImportBusBlock.FACING) != Direction.EAST) {
+                helper.fail("Owner could not rotate an owned Bus");
+                return;
+            }
+
+            CompoundTag escrowTag = bus.saveWithoutMetadata(level.registryAccess());
+            BusResourceEscrow escrow = BusResourceEscrow.empty();
+            escrow.add(StorageResourceKey.neoforgeEnergy(), 47);
+            escrow.save(escrowTag);
+            bus.loadAdditional(escrowTag, level.registryAccess());
+            BusConfiguration before = bus.getBusConfiguration();
+            intruder.setGameMode(GameType.CREATIVE);
+            intruder.setShiftKeyDown(true);
+            if (WrenchActions.tryUse(
+                    level, intruder, InteractionHand.MAIN_HAND, hit(busPos, Direction.UP))
+                    != InteractionResult.FAIL
+                    || level.getBlockState(busPos).isAir()
+                    || core.getResourceAmount(StorageResourceKey.neoforgeEnergy()) != 0
+                    || bus.getPendingResourceAmount(StorageResourceKey.neoforgeEnergy()) != 47
+                    || !bus.getBusConfiguration().equals(before)) {
+                helper.fail("Non-owner Creative wrench mutated Bus escrow, Core storage, owner, or revision");
+                return;
+            }
+            owner.setShiftKeyDown(true);
+            if (!WrenchActions.tryUse(
+                    level, owner, InteractionHand.MAIN_HAND, hit(busPos, Direction.UP)).consumesAction()
+                    || !level.getBlockState(busPos).isAir()) {
+                helper.fail("Owner could not dismantle an owned Bus");
+                return;
+            }
+
+            for (int slot = 0; slot < owner.getInventory().getContainerSize(); slot++) {
+                if (owner.getInventory().getItem(slot).is(MagicStorage.IMPORT_BUS_ITEM.get())) {
+                    owner.getInventory().setItem(slot, ItemStack.EMPTY);
+                }
+            }
+            for (ItemEntity entity : level.getEntitiesOfClass(
+                    ItemEntity.class, new AABB(busPos).inflate(3.0))) {
+                if (entity.getItem().is(MagicStorage.IMPORT_BUS_ITEM.get())) entity.discard();
+            }
+
+            BlockPos canceledBusPos = corePos.north();
+            level.setBlock(
+                    canceledBusPos, MagicStorage.IMPORT_BUS.get().defaultBlockState(), Block.UPDATE_ALL);
+            if (!(level.getBlockEntity(canceledBusPos) instanceof ImportBusBlockEntity canceledBus)) {
+                helper.fail("Canceled-drop Import Bus is missing");
+                return;
+            }
+            BusResourceEscrow canceledEscrow = BusResourceEscrow.empty();
+            canceledEscrow.add(StorageResourceKey.neoforgeEnergy(), 53);
+            CompoundTag canceledTag = canceledBus.saveWithoutMetadata(level.registryAccess());
+            canceledEscrow.save(canceledTag);
+            canceledBus.loadAdditional(canceledTag, level.registryAccess());
+            canceledBus.assignOwnerOnPlacement(owner.getUUID());
+            core.rebuildNetwork(level);
+
+            Consumer<BlockDropsEvent> cancelDrop = event -> {
+                if (event.getLevel() == level && event.getPos().equals(canceledBusPos)) {
+                    event.setCanceled(true);
+                }
+            };
+            NeoForge.EVENT_BUS.addListener(BlockDropsEvent.class, cancelDrop);
+            InteractionResult canceledResult;
+            try {
+                canceledResult = WrenchActions.tryUse(
+                        level, owner, InteractionHand.MAIN_HAND, hit(canceledBusPos, Direction.UP));
+            } finally {
+                NeoForge.EVENT_BUS.unregister(cancelDrop);
+            }
+            if (!canceledResult.consumesAction() || !level.getBlockState(canceledBusPos).isAir()) {
+                helper.fail("Canceled BlockDropsEvent prevented Bus dismantle without preserving it");
+                return;
+            }
+
+            long conserved = core.getResourceAmount(StorageResourceKey.neoforgeEnergy());
+            for (ItemStack stack : owner.getInventory().items) {
+                if (stack.is(MagicStorage.IMPORT_BUS_ITEM.get())) conserved += stackEscrow(stack);
+            }
+            for (ItemEntity entity : level.getEntitiesOfClass(
+                    ItemEntity.class, new AABB(canceledBusPos).inflate(2.0))) {
+                if (entity.getItem().is(MagicStorage.IMPORT_BUS_ITEM.get())) {
+                    conserved += stackEscrow(entity.getItem());
+                }
+            }
+            if (conserved != 53) {
+                helper.fail("Canceled BlockDropsEvent lost or duplicated Bus escrow: " + conserved);
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "persistencetests.platform")
+    public static void replaced_wrench_drop_event_does_not_restore_plain_bus_without_escrow(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        BlockPos busPos = helper.absolutePos(new BlockPos(2, 3, 2));
+        level.setBlock(busPos, MagicStorage.IMPORT_BUS.get().defaultBlockState(), Block.UPDATE_ALL);
+        if (!(level.getBlockEntity(busPos) instanceof ImportBusBlockEntity bus)) {
+            helper.fail("Plain replaced-drop Import Bus is missing");
+            return;
+        }
+        var player = FakePlayerFactory.get(
+                level, new GameProfile(UUID.randomUUID(), "plain-replaced-wrench"));
+        player.setGameMode(GameType.SURVIVAL);
+        player.setPos(busPos.getX() + 0.5, busPos.getY() + 0.5, busPos.getZ() + 0.5);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
+        player.setShiftKeyDown(true);
+        bus.assignOwnerOnPlacement(player.getUUID());
+
+        Consumer<BlockDropsEvent> replaceDrops = event -> {
+            if (event.getLevel() == level && event.getPos().equals(busPos)) {
+                event.getDrops().clear();
+            }
+        };
+        NeoForge.EVENT_BUS.addListener(BlockDropsEvent.class, replaceDrops);
+        InteractionResult result;
+        try {
+            result = WrenchActions.tryUse(
+                    level, player, InteractionHand.MAIN_HAND, hit(busPos, Direction.UP));
+        } finally {
+            NeoForge.EVENT_BUS.unregister(replaceDrops);
+        }
+        int busItems = 0;
+        for (ItemStack stack : player.getInventory().items) {
+            if (stack.is(MagicStorage.IMPORT_BUS_ITEM.get())) busItems += stack.getCount();
+        }
+        for (ItemEntity entity : level.getEntitiesOfClass(
+                ItemEntity.class, new AABB(busPos).inflate(2.0))) {
+            if (entity.getItem().is(MagicStorage.IMPORT_BUS_ITEM.get())) {
+                busItems += entity.getItem().getCount();
+            }
+        }
+        if (!result.consumesAction() || !level.getBlockState(busPos).isAir() || busItems != 0) {
+            helper.fail("Replaced BlockDropsEvent restored a plain Wrench Bus without escrow: "
+                    + busItems);
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "persistencetests.platform")
     public static void ordinary_wrench_passes_non_directional_blocks_and_rejects_wrong_context(GameTestHelper helper) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
@@ -108,6 +373,7 @@ public class WrenchTests {
                 Block.UPDATE_ALL);
 
         var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setPos(busPos.getX() + 0.5, busPos.getY() + 0.5, busPos.getZ() + 0.5);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
         if (WrenchActions.tryUse(level, player, InteractionHand.MAIN_HAND, hit(corePos, Direction.UP)) != InteractionResult.PASS) {
             helper.fail("Ordinary wrench use on a non-directional network block must pass");
@@ -150,6 +416,7 @@ public class WrenchTests {
         ItemKey before = bus.getFilter();
 
         var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setPos(busPos.getX() + 0.5, busPos.getY() + 0.5, busPos.getZ() + 0.5);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(MagicStorage.WRENCH.get()));
         var event = new PlayerInteractEvent.RightClickBlock(
                 player, InteractionHand.MAIN_HAND, busPos, hit(busPos, Direction.UP));
@@ -355,5 +622,11 @@ public class WrenchTests {
             if (stack.is(item)) return stack;
         }
         return ItemStack.EMPTY;
+    }
+
+    private static long stackEscrow(ItemStack stack) {
+        var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data == null ? 0 : BusResourceEscrow.load(data.copyTag())
+                .amount(StorageResourceKey.neoforgeEnergy());
     }
 }

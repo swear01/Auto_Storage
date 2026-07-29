@@ -7,6 +7,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class MachineDescriptorApi {
     public static final int MAX_DESCRIPTORS = 256;
+    public static final int MAX_INSTALLED_COUNT = Integer.MAX_VALUE;
     public static final ResourceKey<Registry<MachineDescriptor>> REGISTRY_KEY =
             ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(
                     MagicStorage.MODID, "machine_descriptor"));

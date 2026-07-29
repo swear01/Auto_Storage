@@ -3,7 +3,8 @@ package com.swearprom.magicstorage.magic_storage;
 public enum CraftingDestination {
     NONE,
     CURSOR,
-    INVENTORY;
+    INVENTORY,
+    STORAGE;
 
     static CraftingDestination byId(int id) {
         if (id < 0 || id >= values().length) {

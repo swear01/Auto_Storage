@@ -1,0 +1,21 @@
+{
+  "type": "botania:runic_altar",
+  "catalysts": [
+    {
+      "item": "minecraft:quartz"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "minecraft:water_bucket"
+    }
+  ],
+  "mana": 200,
+  "output": {
+    "count": 2,
+    "id": "minecraft:gold_ingot"
+  },
+  "reagent": {
+    "item": "minecraft:clay_ball"
+  }
+}

@@ -65,7 +65,7 @@ abstract class MacOsWindowMixin {
         CocoaWindow.restorePresentationOptions();
     }
 
-    private static final class CocoaWindow {
+    static final class CocoaWindow {
         private static final int NORMAL_WINDOW_LEVEL_KEY = 4;
         private static final int MAIN_MENU_WINDOW_LEVEL_KEY = 8;
         private static final long AUTO_HIDE_DOCK_AND_MENU_BAR = (1L << 0) | (1L << 2);

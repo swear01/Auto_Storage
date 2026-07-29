@@ -1,5 +1,7 @@
 # Void GUI Test Lab Design
 
+> **Current revision (2026-07-23):** The fixed all-purpose network, gallery, nine-slot kit, and destructive hotbar reset below document the original lab. Schema 5 now generates one minimal profile per explicit scenario. In particular, `crafting-fuel-page` writes one production-format server Core repository record plus its matching block-entity reference, preloads every resource/station/reserve needed for visual inspection, leaves the player inventory empty apart from hotbar 1/2 navigation, and exposes no destructive reset. See `docs/notes.md` and the current `2026-07-23-polymorphic-stations-and-mod-recipes` plan/spec for the active contract.
+
 ## Goal
 
 Replace the mutable terrain-based `MagicStorageGuiTest` world with a deterministic, transactionally regenerated true-void laboratory that makes manual fullscreen GUI checks fast, spatially predictable, and repeatable.
@@ -27,7 +29,7 @@ The lab is built at Y=80 on a 37×25 neutral platform (`x=-18..18`, `z=-12..12`)
 |---|---:|---|
 | Storage Core | `(0,80,0)` | Single authoritative Core |
 | Storage Terminal | `(-1,80,0)` | Storage grid checks |
-| Crafting Terminal | `(1,80,0)` | Storage/Craftable/Fuel and recipe checks |
+| Crafting Terminal | `(1,80,0)` | Storage/Craftable/Transform/Stations and recipe checks |
 | T6 → T1 units | `(0,80,-1)` through `(0,80,-6)` | Connected capacity spine, total 785 types |
 | Import Bus | `(-1,80,-1)`, facing west | Functional import bay |
 | Import barrel | `(-2,80,-1)` | Bus source |

@@ -1,11 +1,14 @@
 package com.swearprom.magicstorage.magic_storage;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Registry;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkLevel;
@@ -62,6 +65,7 @@ public class MagicStorage {
 
     static final int NETWORK_SCAN_DEPTH = 64;
     static final int MAX_NETWORK_BLOCKS = 8192;
+    private static long datapackRevision;
     private static final Map<Level, Set<BlockPos>> PENDING_NETWORK_GROWTH = new WeakHashMap<>();
     private static final Map<Level, Set<ChunkPos>> PENDING_NETWORK_CHUNK_LOADS = new WeakHashMap<>();
     private static final Map<Level, Map<ChunkPos, LevelChunk>> PENDING_NETWORK_CHUNK_UNLOADS = new WeakHashMap<>();
@@ -89,9 +93,21 @@ public class MagicStorage {
             StorageResourceKindApi.createDeferredRegister(MODID);
     public static final Registry<StorageResourceKind> RESOURCE_KIND_REGISTRY =
             RESOURCE_KINDS.makeRegistry(builder -> builder.maxId(StorageResourceKindApi.MAX_KINDS - 1));
+    public static final DeferredRegister<StorageResourceContainerStrategy> RESOURCE_CONTAINER_STRATEGIES =
+            StorageResourceContainerApi.createDeferredRegister(MODID);
+    public static final Registry<StorageResourceContainerStrategy> RESOURCE_CONTAINER_STRATEGY_REGISTRY =
+            RESOURCE_CONTAINER_STRATEGIES.makeRegistry(
+                    builder -> builder.maxId(StorageResourceContainerApi.MAX_STRATEGIES - 1));
+    public static final DeferredRegister<StorageResourceBlockStrategy> RESOURCE_BLOCK_STRATEGIES =
+            StorageResourceBlockApi.createDeferredRegister(MODID);
+    public static final Registry<StorageResourceBlockStrategy> RESOURCE_BLOCK_STRATEGY_REGISTRY =
+            RESOURCE_BLOCK_STRATEGIES.makeRegistry(
+                    builder -> builder.maxId(StorageResourceBlockApi.MAX_STRATEGIES - 1));
     static {
         MachineEnergyTable.registerBuiltIns(MACHINE_DESCRIPTORS);
         StorageResourceKinds.registerBuiltIns(RESOURCE_KINDS);
+        StorageResourceContainerStrategies.registerBuiltIns(RESOURCE_CONTAINER_STRATEGIES);
+        StorageResourceBlockStrategies.registerBuiltIns(RESOURCE_BLOCK_STRATEGIES);
     }
 
     // === Core Block ===
@@ -178,6 +194,10 @@ public class MagicStorage {
             MENUS.register("crafting_terminal", () -> IMenuTypeExtension.create(
                     (windowId, inv, buf) -> new CraftingTerminalMenu(windowId, inv, buf)));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<BusConfigurationMenu>> BUS_CONFIGURATION_MENU =
+            MENUS.register("bus_configuration", () -> IMenuTypeExtension.create(
+                    BusConfigurationMenu::new));
+
     // === Core BlockEntity ===
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageCoreBlockEntity>> STORAGE_CORE_BE =
             BLOCK_ENTITIES.register("storage_core",
@@ -217,6 +237,7 @@ public class MagicStorage {
 
     public MagicStorage(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.CLIENT, TerminalClientPreferences.SPEC);
+        OptionalModRecipeCompatibility.register();
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
@@ -225,20 +246,33 @@ public class MagicStorage {
         MACHINE_DESCRIPTORS.register(modEventBus);
         RECIPE_FAMILIES.register(modEventBus);
         RESOURCE_KINDS.register(modEventBus);
+        RESOURCE_CONTAINER_STRATEGIES.register(modEventBus);
+        RESOURCE_BLOCK_STRATEGIES.register(modEventBus);
+        NeoForge.EVENT_BUS.addListener(
+                net.neoforged.bus.api.EventPriority.HIGHEST,
+                true,
+                net.neoforged.neoforge.event.level.BlockDropsEvent.class,
+                BusRecoveryDrops::protectEscrowDrop);
         NeoForge.EVENT_BUS.addListener(WrenchActions::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
         NeoForge.EVENT_BUS.addListener(this::onChunkTicketLevelUpdated);
+        NeoForge.EVENT_BUS.addListener(this::onServerStarted);
+        NeoForge.EVENT_BUS.addListener(this::onDatapackSync);
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::commonSetup);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             ClientSetup.register(modEventBus);
         }
         modEventBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) -> {
-            var registrar = event.registrar(MODID).versioned("1.1");
+            var registrar = event.registrar(MODID).versioned("1.5");
             registrar.playToServer(SearchFilterPacket.TYPE, SearchFilterPacket.STREAM_CODEC, this::handleSearchFilter);
             registrar.playToServer(TerminalSettingsPacket.TYPE, TerminalSettingsPacket.STREAM_CODEC, this::handleTerminalSettings);
             registrar.playToServer(TerminalScrollPacket.TYPE, TerminalScrollPacket.STREAM_CODEC, this::handleTerminalScroll);
+            registrar.playToServer(
+                    TerminalHeldContainerTransferPacket.TYPE,
+                    TerminalHeldContainerTransferPacket.STREAM_CODEC,
+                    this::handleTerminalHeldContainerTransfer);
             registrar.playToServer(CraftingRecipeSelectionPacket.TYPE, CraftingRecipeSelectionPacket.STREAM_CODEC,
                     this::handleCraftingRecipeSelection);
             registrar.playToClient(MachineDescriptorStatePacket.TYPE, MachineDescriptorStatePacket.STREAM_CODEC,
@@ -250,6 +284,8 @@ public class MagicStorage {
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             RecipeAdapters.snapshot();
+            StorageResourceContainerStrategies.snapshot();
+            StorageResourceBlockStrategies.snapshot();
             SelfTest.runAll();
         });
     }
@@ -263,15 +299,19 @@ public class MagicStorage {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 IMPORT_BUS_BE.get(),
-                (bus, side) -> bus.passiveItemHandler());
+                (bus, side) -> bus.passiveItemHandler(side));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                EXPORT_BUS_BE.get(),
+                (bus, side) -> bus.passiveItemHandler(side));
         event.registerBlockEntity(
                 StorageResourceCapabilities.BLOCK,
                 IMPORT_BUS_BE.get(),
-                (bus, side) -> bus.passiveResourceHandler());
+                (bus, side) -> bus.passiveResourceHandler(side));
         event.registerBlockEntity(
                 StorageResourceCapabilities.BLOCK,
                 EXPORT_BUS_BE.get(),
-                (bus, side) -> bus.passiveResourceHandler());
+                (bus, side) -> bus.passiveResourceHandler(side));
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
                 STORAGE_CORE_BE.get(),
@@ -280,11 +320,11 @@ public class MagicStorage {
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
                 IMPORT_BUS_BE.get(),
-                (bus, side) -> bus.passiveFluidHandler());
+                (bus, side) -> bus.passiveFluidHandler(side));
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
                 EXPORT_BUS_BE.get(),
-                (bus, side) -> bus.passiveFluidHandler());
+                (bus, side) -> bus.passiveFluidHandler(side));
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 STORAGE_CORE_BE.get(),
@@ -293,39 +333,89 @@ public class MagicStorage {
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 IMPORT_BUS_BE.get(),
-                (bus, side) -> bus.passiveEnergyStorage());
+                (bus, side) -> bus.passiveEnergyStorage(side));
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 EXPORT_BUS_BE.get(),
-                (bus, side) -> bus.passiveEnergyStorage());
+                (bus, side) -> bus.passiveEnergyStorage(side));
         OptionalModCapabilities.register(event);
     }
 
     private void registerCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(MODID)
                 .then(Commands.literal("recover_core")
-                        .executes(context -> {
-                            var player = context.getSource().getPlayerOrException();
-                            var summary = CoreStorageRepository.get(player.serverLevel())
-                                    .reissueLatest(player.getUUID());
-                            if (summary.isEmpty()) {
-                                context.getSource().sendFailure(Component.translatable(
-                                        "msg.magic_storage.core_recovery_none"));
-                                return 0;
-                            }
-                            ItemStack stack = StorageCoreBlockItem.createRecoveryStack(summary.get());
-                            if (!player.getInventory().add(stack)) {
-                                player.drop(stack, false);
-                            }
-                            player.inventoryMenu.broadcastChanges();
-                            context.getSource().sendSuccess(
-                                    () -> Component.translatable(
-                                            "msg.magic_storage.core_recovery_reissued",
-                                            summary.get().typeCount(),
-                                            summary.get().itemCount()),
-                                    false);
-                            return 1;
-                        })));
+                        .executes(context -> reissueCoreRecovery(context.getSource(), false))
+                        .then(Commands.literal("ownerless")
+                                .requires(source -> source.hasPermission(2))
+                                .executes(context -> reissueCoreRecovery(
+                                        context.getSource(), true))))
+                .then(Commands.literal("_gui_test_seed")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("core", BlockPosArgument.blockPos())
+                                .then(Commands.argument(
+                                                "items_per_type",
+                                                IntegerArgumentType.integer(1))
+                                        .executes(context -> GuiRuntimeFixture.run(
+                                                context.getSource(),
+                                                BlockPosArgument.getLoadedBlockPos(
+                                                        context, "core"),
+                                                IntegerArgumentType.getInteger(
+                                                        context, "items_per_type"))))))
+                .then(Commands.literal("_gui_test_warm_craftable")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("core", BlockPosArgument.blockPos())
+                                .executes(context -> GuiRuntimeFixture.warmCraftable(
+                                        context.getSource(),
+                                        BlockPosArgument.getLoadedBlockPos(
+                                                context, "core"))))));
+    }
+
+    private static int reissueCoreRecovery(CommandSourceStack source, boolean ownerless)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        var repository = CoreStorageRepository.get(player.serverLevel());
+        var summary = ownerless
+                ? repository.reissueLatestOwnerless()
+                : repository.reissueLatest(player.getUUID());
+        if (summary.isEmpty()) {
+            source.sendFailure(Component.translatable("msg.magic_storage.core_recovery_none"));
+            return 0;
+        }
+        ItemStack stack = StorageCoreBlockItem.createRecoveryStack(summary.get());
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false);
+        }
+        player.inventoryMenu.broadcastChanges();
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "msg.magic_storage.core_recovery_reissued",
+                        summary.get().typeCount(),
+                        summary.get().itemCount()),
+                false);
+        return 1;
+    }
+
+    private void onServerStarted(
+            net.neoforged.neoforge.event.server.ServerStartedEvent event
+    ) {
+        OptionalModRecipeCompatibility.refreshRuntimeData();
+        CraftableRecipeCatalog.prewarm(event.getServer().overworld());
+    }
+
+    private void onDatapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
+        if (event.getPlayer() == null) {
+            invalidateDatapackCaches();
+            OptionalModRecipeCompatibility.refreshRuntimeData();
+        }
+        CraftableRecipeCatalog.prewarm(event.getPlayerList().getServer().overworld());
+    }
+
+    public static void invalidateDatapackCaches() {
+        datapackRevision++;
+    }
+
+    static long datapackRevision() {
+        return datapackRevision;
     }
 
     private void handleSearchFilter(SearchFilterPacket packet, net.neoforged.neoforge.network.handling.IPayloadContext ctx) {
@@ -380,6 +470,17 @@ public class MagicStorage {
                 menu.refreshDisplayItems(core);
                 menu.broadcastChanges();
             }
+        });
+    }
+
+    private void handleTerminalHeldContainerTransfer(
+            TerminalHeldContainerTransferPacket packet,
+            net.neoforged.neoforge.network.handling.IPayloadContext ctx
+    ) {
+        ctx.enqueueWork(() -> {
+            var player = ctx.player();
+            if (player == null || !(player.containerMenu instanceof StorageTerminalMenu menu)) return;
+            menu.handleHeldContainerTransfer(packet, player);
         });
     }
 
@@ -720,6 +821,8 @@ public class MagicStorage {
 
     private static Set<BlockPos> bfsFindCorePositions(Level level, BlockPos start) {
         Set<BlockPos> cores = new HashSet<>();
+        if (!level.hasChunkAt(start)
+                || !(level.getBlockState(start).getBlock() instanceof IStorageNetworkBlock)) return cores;
         Queue<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
         queue.add(start);
@@ -740,12 +843,12 @@ public class MagicStorage {
 
                     for (Direction dir : Direction.values()) {
                         BlockPos next = current.relative(dir);
-                        if (!visited.contains(next) && level.hasChunkAt(next)) {
-                            visited.add(next);
-                            if (level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock) {
-                                queue.add(next);
-                            }
-                        }
+                        if (visited.size() >= MAX_NETWORK_BLOCKS
+                                || visited.contains(next)
+                                || !level.hasChunkAt(next)
+                                || !(level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock)) continue;
+                        visited.add(next);
+                        queue.add(next);
                     }
                 }
             }
@@ -755,6 +858,8 @@ public class MagicStorage {
     }
 
     static StorageCoreBlockEntity bfsFindCore(Level level, BlockPos start) {
+        if (!level.hasChunkAt(start)
+                || !(level.getBlockState(start).getBlock() instanceof IStorageNetworkBlock)) return null;
         Queue<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
         queue.add(start);
@@ -777,12 +882,12 @@ public class MagicStorage {
 
                     for (Direction dir : Direction.values()) {
                         BlockPos next = current.relative(dir);
-                        if (!visited.contains(next) && level.hasChunkAt(next)) {
-                            visited.add(next);
-                            if (level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock) {
-                                queue.add(next);
-                            }
-                        }
+                        if (visited.size() >= MAX_NETWORK_BLOCKS
+                                || visited.contains(next)
+                                || !level.hasChunkAt(next)
+                                || !(level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock)) continue;
+                        visited.add(next);
+                        queue.add(next);
                     }
                 }
             }
@@ -793,7 +898,8 @@ public class MagicStorage {
 
     static List<BlockPos> findLoadedNetworkPath(Level level, BlockPos start, BlockPos target) {
         if (level == null || start == null || target == null
-                || !level.hasChunkAt(start) || !level.hasChunkAt(target)) return List.of();
+                || !level.hasChunkAt(start) || !level.hasChunkAt(target)
+                || !(level.getBlockState(start).getBlock() instanceof IStorageNetworkBlock)) return List.of();
 
         Queue<BlockPos> queue = new ArrayDeque<>();
         Map<BlockPos, BlockPos> previous = new HashMap<>();
@@ -817,13 +923,13 @@ public class MagicStorage {
                 }
                 for (Direction direction : Direction.values()) {
                     BlockPos next = current.relative(direction);
-                    if (!visited.contains(next) && level.hasChunkAt(next)) {
-                        visited.add(next);
-                        if (level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock) {
-                            previous.put(next, current);
-                            queue.add(next);
-                        }
-                    }
+                    if (visited.size() >= MAX_NETWORK_BLOCKS
+                            || visited.contains(next)
+                            || !level.hasChunkAt(next)
+                            || !(level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock)) continue;
+                    visited.add(next);
+                    previous.put(next, current);
+                    queue.add(next);
                 }
             }
             depth++;

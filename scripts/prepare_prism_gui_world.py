@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import gzip
+import hashlib
 import json
 import re
 import shutil
@@ -17,7 +18,26 @@ DEFAULT_WORLD_NAME = "MagicStorageGuiTest"
 DEFAULT_OFFLINE_PLAYER = "MagicStorageBot"
 DATAPACK_NAME = "magic_storage_gui_test"
 MARKER_FILE = ".magic_storage_gui_test_world"
+RUNTIME_FIXTURE_MARKER_FILE = ".magic_storage_runtime_fixture_pending"
 PACK_FORMAT = 48
+WORLD_DATA_VERSION = 3955
+GUI_CORE_STORAGE_ID = [1297303379, -1689374253, -1229988241, 1836016741]
+GUI_CORE_NETWORK_ID = [-1483115547, 1063596744, -1848102033, 706652923]
+TERMINAL_SCALE_COUNTS = (10_000, 30_000)
+TERMINAL_SCALE_ITEMS_PER_TYPE = 64
+TERMINAL_SCALE_PROCESSING_COUNT = 130
+TERMINAL_SCALE_SEGMENT_LIMIT = 63
+TERMINAL_SCALE_COMPONENT = "minecraft:custom_name"
+TERMINAL_SCALE_BASE_ITEMS = (
+    "minecraft:oak_log",
+    "minecraft:spruce_log",
+    "minecraft:stone",
+    "minecraft:iron_ingot",
+    "magic_storage:storage_unit_t1",
+    "magic_storage:storage_unit_t2",
+    "magic_storage:storage_terminal",
+    "magic_storage:crafting_terminal",
+)
 
 OPTION_OVERRIDES = {
     "fullscreen": "true",
@@ -135,47 +155,20 @@ LAB = {
 
 TARGETS = {
     "storage_core": {"block": [0, 80, 0], "stand": [0.5, 80.0, 4.5], "face": [0.5, 80.5, 0.5]},
-    "storage_unit_t6": {"block": [0, 80, -1], "stand": [4.5, 80.0, -0.5], "face": [0.5, 80.5, -0.5]},
     "storage_terminal": {"block": [-1, 80, 0], "stand": [-0.5, 80.0, 4.5], "face": [-0.5, 80.5, 0.5]},
     "crafting_terminal": {"block": [1, 80, 0], "stand": [1.5, 80.0, 4.5], "face": [1.5, 80.5, 0.5]},
     "import_bus": {"block": [-1, 80, -1], "stand": [-4.5, 80.0, -0.5], "face": [-0.5, 80.5, -0.5]},
     "export_bus": {"block": [1, 80, -1], "stand": [4.5, 80.0, -0.5], "face": [1.5, 80.5, -0.5]},
-    "texture_gallery": {"block": [0, 80, -9], "stand": [0.5, 84.0, -3.5], "face": [0.5, 80.5, -8.5]},
     "overview": {"stand": [0.5, 85.0, 9.5], "face": [0.5, 80.0, -1.5]},
 }
 
-GALLERY = [
-    {"x": -10, "y": 80, "z": -9, "block": "magic_storage:storage_core"},
-    {"x": -8, "y": 80, "z": -9, "block": "magic_storage:storage_unit_t1"},
-    {"x": -6, "y": 80, "z": -9, "block": "magic_storage:storage_unit_t2"},
-    {"x": -4, "y": 80, "z": -9, "block": "magic_storage:storage_unit_t3"},
-    {"x": -2, "y": 80, "z": -9, "block": "magic_storage:storage_unit_t4"},
-    {"x": 0, "y": 80, "z": -9, "block": "magic_storage:storage_unit_t5"},
-    {"x": 2, "y": 80, "z": -9, "block": "magic_storage:storage_unit_t6"},
-    {"x": 4, "y": 80, "z": -9, "block": "magic_storage:creative_storage_unit"},
-    {"x": 6, "y": 80, "z": -9, "block": "magic_storage:storage_terminal"},
-    {"x": 8, "y": 80, "z": -9, "block": "magic_storage:crafting_terminal"},
-    {"x": 10, "y": 80, "z": -9, "block": "magic_storage:import_bus[facing=south]"},
-    {"x": 12, "y": 80, "z": -9, "block": "magic_storage:export_bus[facing=south]"},
-]
-
-CONNECTED_GALLERY = [
-    {"x": -5, "y": 80, "z": -11, "block": "magic_storage:storage_unit_t1"},
-    {"x": -4, "y": 80, "z": -11, "block": "magic_storage:storage_unit_t2"},
-    {"x": -3, "y": 80, "z": -11, "block": "magic_storage:storage_unit_t3"},
-    {"x": -2, "y": 80, "z": -11, "block": "magic_storage:storage_unit_t4"},
-    {"x": -1, "y": 80, "z": -11, "block": "magic_storage:storage_unit_t5"},
-    {"x": 0, "y": 80, "z": -11, "block": "magic_storage:storage_unit_t6"},
-    {"x": 1, "y": 80, "z": -11, "block": "magic_storage:creative_storage_unit"},
-    {"x": 2, "y": 80, "z": -11, "block": "magic_storage:storage_terminal"},
-    {"x": 3, "y": 80, "z": -11, "block": "magic_storage:crafting_terminal"},
-    {"x": 4, "y": 80, "z": -11, "block": "magic_storage:import_bus[facing=south]"},
-    {"x": 5, "y": 80, "z": -11, "block": "magic_storage:export_bus[facing=south]"},
-]
-
 BASELINE = {
     "stored_items": {},
+    "stored_stacks": [],
     "installed_stations": {},
+    "descriptor_consumables": {},
+    "station_work": {},
+    "typed_resources": [],
     "energy": {
         "smelting_energy": 0,
         "blasting_energy": 0,
@@ -191,61 +184,645 @@ BASELINE = {
     },
 }
 
-PLAYER_KIT = {
-    "hotbar": {
-        "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
-        "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
-        "3": {"slot": "hotbar.2", "item": "magic_storage:storage_core", "count": 1},
-        "4": {"slot": "hotbar.3", "item": "magic_storage:storage_unit_t6", "count": 1},
-        "5": {"slot": "hotbar.4", "item": "magic_storage:import_bus", "count": 1},
-        "6": {"slot": "hotbar.5", "item": "magic_storage:export_bus", "count": 1},
-        "7": {"slot": "hotbar.6", "item": "magic_storage:wrench", "count": 1},
-        "8": {"slot": "hotbar.7", "item": "minecraft:compass", "count": 1},
-        "9": {"slot": "hotbar.8", "item": "minecraft:barrier", "count": 1},
+EXTENDED_CRAFTING_SINGULARITIES = (
+    "aluminum",
+    "bronze",
+    "coal",
+    "copper",
+    "diamond",
+    "electrum",
+    "emerald",
+    "glowstone",
+    "gold",
+    "invar",
+    "iron",
+    "lapis_lazuli",
+    "lead",
+    "nickel",
+    "platinum",
+    "redstone",
+    "silver",
+    "steel",
+    "tin",
+)
+EXTENDED_CRAFTING_TEST_INGOT_TAGS = (
+    "aluminum", "bronze", "electrum", "invar", "lead",
+    "nickel", "platinum", "silver", "steel", "tin",
+)
+
+CRAFTING_FUEL_SCROLL_STRESS_ITEMS = tuple(
+    f"minecraft:{color}_{block}"
+    for block in ("wool", "terracotta")
+    for color in (
+        "white", "orange", "magenta", "light_blue",
+        "yellow", "lime", "pink", "gray",
+        "light_gray", "cyan", "purple", "blue",
+        "brown", "green", "red", "black",
+    )
+) + (
+    "minecraft:stone",
+    "minecraft:dirt",
+    "minecraft:sand",
+    "minecraft:gravel",
+    "minecraft:granite",
+    "minecraft:diorite",
+    "minecraft:andesite",
+    "minecraft:deepslate",
+    "minecraft:cobbled_deepslate",
+    "minecraft:tuff",
+    "minecraft:calcite",
+    "minecraft:dripstone_block",
+    "minecraft:grass_block",
+    "minecraft:podzol",
+    "minecraft:mycelium",
+    "minecraft:clay",
+    "minecraft:snow_block",
+    "minecraft:ice",
+    "minecraft:packed_ice",
+    "minecraft:blue_ice",
+    "minecraft:netherrack",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:end_stone",
+    "minecraft:obsidian",
+    "minecraft:crying_obsidian",
+)
+
+CRAFTING_FUEL_CORE_BASELINE = {
+    "storage_id": GUI_CORE_STORAGE_ID,
+    "network_id": GUI_CORE_NETWORK_ID,
+    "stored_items": {
+        **dict.fromkeys(CRAFTING_FUEL_SCROLL_STRESS_ITEMS, 1),
+        "minecraft:oak_log": 121_000,
+        "minecraft:cobblestone": 999_999,
+        "minecraft:redstone": 128,
+        "minecraft:glowstone_dust": 16,
+        "minecraft:coal": 16,
+        "minecraft:charcoal": 16,
+        "minecraft:copper_ingot": 16,
+        "minecraft:lapis_lazuli": 16,
+        "minecraft:quartz": 16,
+        "minecraft:brown_mushroom": 64,
+        "minecraft:red_mushroom": 64,
+        "minecraft:bowl": 64,
+        "minecraft:netherite_upgrade_smithing_template": 8,
+        "minecraft:diamond_sword": 8,
+        "minecraft:netherite_ingot": 64,
+        "minecraft:iron_ingot": 64,
+        "minecraft:gold_ingot": 64,
+        "minecraft:bone_meal": 64,
+        "minecraft:sugar_cane": 64,
+        "minecraft:fishing_rod": 1,
+        "minecraft:wheat_seeds": 64,
+        "minecraft:fermented_spider_eye": 64,
+        "minecraft:sugar": 64,
+        "minecraft:milk_bucket": 64,
+        "minecraft:amethyst_shard": 64,
+        "minecraft:mossy_cobblestone": 64,
+        "minecraft:glass_pane": 64,
+        "minecraft:glass_bottle": 64,
+        "minecraft:honey_bottle": 64,
+        "modern_industrialization:aluminum_blade": 64,
+        "ars_nouveau:source_gem": 64,
+        "create:andesite_alloy": 64,
+        "botania:mana_powder": 64,
+        "botania:manasteel_ingot": 64,
+        "botania:livingrock": 64,
+        "botania:mana_pearl": 64,
+        "botania:mana_diamond": 64,
+        "botania:white_mystical_petal": 64,
     },
-    "inventory": [
-        {"slot": "inventory.0", "item": "magic_storage:remote_terminal", "count": 1},
-        {"slot": "inventory.1", "item": "minecraft:cobblestone", "count": 64},
-        {"slot": "inventory.2", "item": "minecraft:oak_log", "count": 64},
-        {"slot": "inventory.3", "item": "minecraft:furnace", "count": 3},
-        {"slot": "inventory.4", "item": "minecraft:blast_furnace", "count": 1},
-        {"slot": "inventory.5", "item": "minecraft:smoker", "count": 1},
-        {"slot": "inventory.6", "item": "minecraft:campfire", "count": 1},
-        {"slot": "inventory.7", "item": "minecraft:brewing_stand", "count": 1},
-        {"slot": "inventory.8", "item": "minecraft:coal", "count": 64},
-        {"slot": "inventory.9", "item": "minecraft:blaze_rod", "count": 16},
-        {"slot": "inventory.10", "item": "minecraft:glass_bottle", "count": 16},
-        {"slot": "inventory.11", "item": "minecraft:crafting_table", "count": 2},
-        {"slot": "inventory.12", "item": "minecraft:stonecutter", "count": 2},
-        {"slot": "inventory.13", "item": "minecraft:smithing_table", "count": 2},
-        {"slot": "inventory.14", "item": "minecraft:iron_axe", "count": 1},
-        {"slot": "inventory.15", "item": "minecraft:netherite_upgrade_smithing_template", "count": 1},
-        {"slot": "inventory.16", "item": "minecraft:diamond_sword", "count": 1},
-        {"slot": "inventory.17", "item": "minecraft:netherite_ingot", "count": 4},
+    "stored_stacks": [
         {
-            "slot": "inventory.18",
-            "item": 'minecraft:iron_axe[minecraft:damage=100,minecraft:enchantments={levels:{"minecraft:unbreaking":2}}]',
-            "count": 1,
-        },
-        {
-            "slot": "inventory.19",
-            "item": "minecraft:iron_axe[minecraft:unbreakable={}]",
-            "count": 1,
-        },
-        {"slot": "inventory.20", "item": "magic_storage:creative_storage_unit", "count": 1},
+            "item": "extendedcrafting:singularity",
+            "amount": 1,
+            "components": {
+                "extendedcrafting:singularity_id": f"extendedcrafting:{singularity}",
+            },
+        }
+        for singularity in EXTENDED_CRAFTING_SINGULARITIES
     ],
+    "installed_stations": {
+        "magic_storage:furnace": {
+            "item": "ironfurnaces:iron_furnace",
+            "count": 3,
+        },
+        "magic_storage:blast_furnace": {
+            "item": "minecraft:blast_furnace",
+            "count": 1,
+        },
+        "magic_storage:smoker": {
+            "item": "minecraft:smoker",
+            "count": 1,
+        },
+        "magic_storage:campfire": {
+            "item": "minecraft:campfire",
+            "count": 1,
+        },
+        "magic_storage:brewing_stand": {
+            "item": "minecraft:brewing_stand",
+            "count": 1,
+        },
+        "magic_storage:crafting_table": {
+            "item": "minecraft:crafting_table",
+            "count": 1,
+        },
+        "magic_storage:stonecutter": {
+            "item": "minecraft:stonecutter",
+            "count": 1,
+        },
+        "magic_storage:smithing_table": {
+            "item": "minecraft:smithing_table",
+            "count": 1,
+        },
+        "magic_storage:extended_crafting_table": {
+            "item": "extendedcrafting:ultimate_table",
+            "count": 1,
+        },
+        "magic_storage:farmers_delight_cooking_pot": {
+            "item": "farmersdelight:cooking_pot",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_assembler": {
+            "item": "modern_industrialization:assembler",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_centrifuge": {
+            "item": "modern_industrialization:centrifuge",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_chemical_reactor": {
+            "item": "modern_industrialization:chemical_reactor",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_compressor": {
+            "item": "modern_industrialization:bronze_compressor",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_cutting_machine": {
+            "item": "modern_industrialization:bronze_cutting_machine",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_distillery": {
+            "item": "modern_industrialization:distillery",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_electrolyzer": {
+            "item": "modern_industrialization:electrolyzer",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_furnace": {
+            "item": "modern_industrialization:bronze_furnace",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_macerator": {
+            "item": "modern_industrialization:bronze_macerator",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_mixer": {
+            "item": "modern_industrialization:bronze_mixer",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_packer": {
+            "item": "modern_industrialization:steel_packer",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_polarizer": {
+            "item": "modern_industrialization:polarizer",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_unpacker": {
+            "item": "modern_industrialization:steel_unpacker",
+            "count": 1,
+        },
+        "magic_storage:modern_industrialization_wiremill": {
+            "item": "modern_industrialization:steel_wiremill",
+            "count": 1,
+        },
+        "magic_storage:ars_nouveau_imbuement_chamber": {
+            "item": "ars_nouveau:imbuement_chamber",
+            "count": 1,
+        },
+        "magic_storage:ars_nouveau_enchanting_apparatus": {
+            "item": "ars_nouveau:enchanting_apparatus",
+            "count": 1,
+        },
+        "magic_storage:powah_energizing": {
+            "item": "powah:energizing_rod_starter",
+            "count": 1,
+        },
+        "magic_storage:powah_furnator": {
+            "item": "powah:furnator_starter",
+            "count": 1,
+        },
+        "magic_storage:industrial_foregoing_dissolution_chamber": {
+            "item": "industrialforegoing:dissolution_chamber",
+            "count": 1,
+        },
+        "magic_storage:industrial_foregoing_material_stonework_factory": {
+            "item": "industrialforegoing:material_stonework_factory",
+            "count": 1,
+        },
+        "magic_storage:create_milling": {
+            "item": "create:millstone",
+            "count": 1,
+        },
+        "magic_storage:create_crushing": {
+            "item": "create:crushing_wheel",
+            "count": 1,
+        },
+        "magic_storage:create_cutting": {
+            "item": "create:mechanical_saw",
+            "count": 1,
+        },
+        "magic_storage:create_filling": {
+            "item": "create:spout",
+            "count": 1,
+        },
+        "magic_storage:create_emptying": {
+            "item": "create:item_drain",
+            "count": 1,
+        },
+        "magic_storage:mekanism_crusher": {
+            "item": "mekanism:ultimate_crushing_factory",
+            "count": 2_147_483_647,
+        },
+        "magic_storage:mekanism_enrichment_chamber": {
+            "item": "mekanism:enrichment_chamber",
+            "count": 1,
+        },
+        "magic_storage:mekanism_energized_smelter": {
+            "item": "mekanism:energized_smelter",
+            "count": 1,
+        },
+        "magic_storage:mekanism_combiner": {
+            "item": "mekanism:combiner",
+            "count": 1,
+        },
+        "magic_storage:mekanism_osmium_compressor": {
+            "item": "mekanism:osmium_compressor",
+            "count": 1,
+        },
+        "magic_storage:mekanism_purification_chamber": {
+            "item": "mekanism:purification_chamber",
+            "count": 1,
+        },
+        "magic_storage:mekanism_chemical_injection_chamber": {
+            "item": "mekanism:chemical_injection_chamber",
+            "count": 1,
+        },
+        "magic_storage:mekanism_metallurgic_infuser": {
+            "item": "mekanism:metallurgic_infuser",
+            "count": 1,
+        },
+        "magic_storage:mekanism_precision_sawmill": {
+            "item": "mekanism:precision_sawmill",
+            "count": 1,
+        },
+        "magic_storage:mekanism_pressurized_reaction_chamber": {
+            "item": "mekanism:pressurized_reaction_chamber",
+            "count": 1,
+        },
+        "magic_storage:mekanism_rotary_condensentrator": {
+            "item": "mekanism:rotary_condensentrator",
+            "count": 1,
+        },
+        "magic_storage:mekanism_chemical_oxidizer": {
+            "item": "mekanism:chemical_oxidizer",
+            "count": 1,
+        },
+        "magic_storage:mekanism_chemical_infuser": {
+            "item": "mekanism:chemical_infuser",
+            "count": 1,
+        },
+        "magic_storage:mekanism_electrolytic_separator": {
+            "item": "mekanism:electrolytic_separator",
+            "count": 1,
+        },
+        "magic_storage:mekanism_chemical_dissolution_chamber": {
+            "item": "mekanism:chemical_dissolution_chamber",
+            "count": 1,
+        },
+        "magic_storage:mekanism_chemical_washer": {
+            "item": "mekanism:chemical_washer",
+            "count": 1,
+        },
+        "magic_storage:mekanism_chemical_crystallizer": {
+            "item": "mekanism:chemical_crystallizer",
+            "count": 1,
+        },
+        "magic_storage:mekanism_isotopic_centrifuge": {
+            "item": "mekanism:isotopic_centrifuge",
+            "count": 1,
+        },
+        "magic_storage:mekanism_antiprotonic_nucleosynthesizer": {
+            "item": "mekanism:antiprotonic_nucleosynthesizer",
+            "count": 1,
+        },
+        "magic_storage:mekanism_pigment_extractor": {
+            "item": "mekanism:pigment_extractor",
+            "count": 1,
+        },
+        "magic_storage:mekanism_pigment_mixer": {
+            "item": "mekanism:pigment_mixer",
+            "count": 1,
+        },
+        "magic_storage:mekanism_painting_machine": {
+            "item": "mekanism:painting_machine",
+            "count": 1,
+        },
+        "magic_storage:botania_mana_pool": {
+            "item": "botania:mana_pool",
+            "count": 1,
+        },
+        "magic_storage:botania_runic_altar": {
+            "item": "botania:runic_altar",
+            "count": 1,
+        },
+        "magic_storage:botania_terrestrial_agglomeration_plate": {
+            "item": "botania:terrestrial_agglomeration_plate",
+            "count": 1,
+        },
+        "magic_storage:botania_petal_apothecary": {
+            "item": "botania:petal_apothecary",
+            "count": 1,
+        },
+        "magic_storage:botania_elven_gateway": {
+            "item": "botania:elven_gateway_core",
+            "count": 1,
+        },
+    },
+    "descriptor_consumables": {
+        "magic_storage:axe": {"amount": 1_561, "infinite": False},
+    },
+    "station_work": {
+        "magic_storage:farmers_delight_cooking_pot": 10_000,
+        "magic_storage:modern_industrialization_assembler": 100_000,
+        "magic_storage:modern_industrialization_centrifuge": 100_000,
+        "magic_storage:modern_industrialization_chemical_reactor": 100_000,
+        "magic_storage:modern_industrialization_compressor": 100_000,
+        "magic_storage:modern_industrialization_cutting_machine": 100_000,
+        "magic_storage:modern_industrialization_distillery": 100_000,
+        "magic_storage:modern_industrialization_electrolyzer": 100_000,
+        "magic_storage:modern_industrialization_furnace": 100_000,
+        "magic_storage:modern_industrialization_macerator": 100_000,
+        "magic_storage:modern_industrialization_mixer": 100_000,
+        "magic_storage:modern_industrialization_packer": 100_000,
+        "magic_storage:modern_industrialization_polarizer": 100_000,
+        "magic_storage:modern_industrialization_unpacker": 100_000,
+        "magic_storage:modern_industrialization_wiremill": 100_000,
+        "magic_storage:ars_nouveau_imbuement_chamber": 10_000,
+        "magic_storage:ars_nouveau_enchanting_apparatus": 10_000,
+        "magic_storage:powah_energizing": 100_000,
+        "magic_storage:powah_furnator": 100_000,
+        "magic_storage:industrial_foregoing_dissolution_chamber": 10_000,
+        "magic_storage:industrial_foregoing_material_stonework_factory": 10_000,
+        "magic_storage:create_milling": 10_000,
+        "magic_storage:create_crushing": 10_000,
+        "magic_storage:create_cutting": 10_000,
+        "magic_storage:create_filling": 10_000,
+        "magic_storage:create_emptying": 10_000,
+        "magic_storage:mekanism_crusher": 10_000,
+        "magic_storage:mekanism_enrichment_chamber": 10_000,
+        "magic_storage:mekanism_energized_smelter": 10_000,
+        "magic_storage:mekanism_combiner": 10_000,
+        "magic_storage:mekanism_osmium_compressor": 10_000,
+        "magic_storage:mekanism_purification_chamber": 10_000,
+        "magic_storage:mekanism_chemical_injection_chamber": 10_000,
+        "magic_storage:mekanism_metallurgic_infuser": 10_000,
+        "magic_storage:mekanism_precision_sawmill": 10_000,
+        "magic_storage:mekanism_pressurized_reaction_chamber": 10_000,
+        "magic_storage:mekanism_rotary_condensentrator": 10_000,
+        "magic_storage:mekanism_chemical_oxidizer": 10_000,
+        "magic_storage:mekanism_chemical_infuser": 10_000,
+        "magic_storage:mekanism_electrolytic_separator": 10_000,
+        "magic_storage:mekanism_chemical_dissolution_chamber": 10_000,
+        "magic_storage:mekanism_chemical_washer": 10_000,
+        "magic_storage:mekanism_chemical_crystallizer": 10_000,
+        "magic_storage:mekanism_isotopic_centrifuge": 10_000,
+        "magic_storage:mekanism_antiprotonic_nucleosynthesizer": 10_000,
+        "magic_storage:mekanism_pigment_extractor": 10_000,
+        "magic_storage:mekanism_pigment_mixer": 10_000,
+        "magic_storage:mekanism_painting_machine": 10_000,
+    },
+    "typed_resources": [
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "minecraft:water",
+            "amount": 16_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "minecraft:lava",
+            "amount": 4_000,
+        },
+        {
+            "kind": "magic_storage:neoforge_energy",
+            "resource": "neoforge:energy",
+            "amount": 500_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "modern_industrialization:sugar_solution",
+            "amount": 16_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "modern_industrialization:ethanol",
+            "amount": 16_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "modern_industrialization:benzene",
+            "amount": 16_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "modern_industrialization:liquid_air",
+            "amount": 16_000,
+        },
+        {
+            "kind": "ars_nouveau:source",
+            "resource": "ars_nouveau:source",
+            "amount": 50_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "industrialforegoing:pink_slime",
+            "amount": 16_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "industrialforegoing:essence",
+            "amount": 16_000,
+        },
+        {
+            "kind": "magic_storage:fluid",
+            "resource": "create:honey",
+            "amount": 16_000,
+        },
+        {
+            "kind": "mekanism:chemical",
+            "resource": "mekanism:oxygen",
+            "amount": 5_000_000,
+        },
+        {
+            "kind": "mekanism:chemical",
+            "resource": "mekanism:hydrogen",
+            "amount": 4_000_000,
+        },
+        {
+            "kind": "mekanism:chemical",
+            "resource": "mekanism:chlorine",
+            "amount": 3_000_000,
+        },
+        {
+            "kind": "botania:mana",
+            "resource": "botania:mana",
+            "amount": 2_000_000,
+        },
+    ],
+    "energy": {
+        "smelting_energy": 10_000,
+        "blasting_energy": 10_000,
+        "smoking_energy": 10_000,
+        "campfire_energy": 10_000,
+        "brew_energy": 10_000,
+        "furnace_fuel": 32_000,
+        "blaze_fuel": 9_600,
+    },
 }
 
-HOTBAR_VIEWS = {
-    "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
-    "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
-    "3": {"slot": 2, "function": "view_storage_core", "target": "storage_core"},
-    "4": {"slot": 3, "function": "view_storage_unit_t6", "target": "storage_unit_t6"},
-    "5": {"slot": 4, "function": "view_import_bus", "target": "import_bus"},
-    "6": {"slot": 5, "function": "view_export_bus", "target": "export_bus"},
-    "7": {"slot": 6, "function": "view_texture_gallery", "target": "texture_gallery"},
-    "8": {"slot": 7, "function": "home", "target": "overview"},
-    "9": {"slot": 8, "function": "reset_from_hotbar", "target": "reset"},
+SCENARIO_PROFILES = {
+    "boot-smoke": {
+        "start_target": "overview",
+        "target_names": (),
+        "setup_blocks": (),
+        "type_capacity": {"finite_type_slots": 0, "unlimited": False},
+        "player_kit": {"hotbar": {}, "inventory": []},
+        "hotbar_views": {},
+    },
+    "terminal-left-rail": {
+        "start_target": "storage_terminal",
+        "target_names": ("storage_core", "storage_terminal", "crafting_terminal"),
+        "setup_blocks": (
+            "setblock 0 80 0 magic_storage:storage_core",
+            "setblock -1 80 0 magic_storage:storage_terminal",
+            "setblock 1 80 0 magic_storage:crafting_terminal",
+            "setblock 0 80 -1 magic_storage:creative_storage_unit",
+        ),
+        "type_capacity": {"finite_type_slots": 0, "unlimited": True},
+        "player_kit": {
+            "hotbar": {
+                "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
+            },
+            "inventory": [],
+        },
+        "hotbar_views": {
+            "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
+            "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
+        },
+    },
+    "bus-configuration": {
+        "start_target": "import_bus",
+        "target_names": ("storage_core", "import_bus", "export_bus"),
+        "setup_blocks": (
+            "setblock 0 80 0 magic_storage:storage_core",
+            "setblock 0 80 -1 magic_storage:storage_unit_t1",
+            "setblock -1 80 -1 magic_storage:import_bus[facing=west]",
+            "setblock -2 80 -1 minecraft:barrel",
+            "setblock 1 80 -1 magic_storage:export_bus[facing=east]",
+            "setblock 2 80 -1 minecraft:barrel",
+        ),
+        "type_capacity": {"finite_type_slots": 10, "unlimited": False},
+        "player_kit": {
+            "hotbar": {
+                "5": {"slot": "hotbar.4", "item": "magic_storage:import_bus", "count": 1},
+                "6": {"slot": "hotbar.5", "item": "magic_storage:export_bus", "count": 1},
+                "7": {"slot": "hotbar.6", "item": "magic_storage:wrench", "count": 1},
+                "9": {"slot": "hotbar.8", "item": "minecraft:barrier", "count": 1},
+            },
+            "inventory": [
+                {"slot": "inventory.0", "item": "minecraft:cobblestone", "count": 64},
+            ],
+        },
+        "hotbar_views": {
+            "5": {"slot": 4, "function": "view_import_bus", "target": "import_bus"},
+            "6": {"slot": 5, "function": "view_export_bus", "target": "export_bus"},
+            "7": {"slot": 6, "function": "view_import_bus", "target": "import_bus"},
+            "9": {"slot": 8, "function": "reset_from_hotbar", "target": "reset"},
+        },
+    },
+    "crafting-fuel-page": {
+        "start_target": "crafting_terminal",
+        "target_names": ("storage_core", "storage_terminal", "crafting_terminal"),
+        "setup_blocks": (
+            "setblock 0 80 0 magic_storage:storage_core"
+            "{storageSchema:1,storageId:[I;"
+            + ",".join(str(value) for value in GUI_CORE_STORAGE_ID)
+            + "]}",
+            "setblock -1 80 0 magic_storage:storage_terminal",
+            "setblock 1 80 0 magic_storage:crafting_terminal",
+            "setblock 0 80 -1 magic_storage:creative_storage_unit",
+        ),
+        "type_capacity": {"finite_type_slots": 0, "unlimited": True},
+        "core_baseline": CRAFTING_FUEL_CORE_BASELINE,
+        "reset_world": False,
+        "player_kit": {
+            "hotbar": {
+                "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
+                "3": {"slot": "hotbar.2", "item": "minecraft:coal", "count": 1},
+            },
+            "inventory": [],
+        },
+        "hotbar_views": {
+            "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
+            "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
+        },
+    },
+    "terminal-scale": {
+        "start_target": "crafting_terminal",
+        "target_names": ("storage_core", "storage_terminal", "crafting_terminal"),
+        "setup_blocks": (
+            "setblock 0 80 0 magic_storage:storage_core"
+            "{storageSchema:1,storageId:[I;"
+            + ",".join(str(value) for value in GUI_CORE_STORAGE_ID)
+            + "]}",
+            "setblock -1 80 0 magic_storage:storage_terminal",
+            "setblock 1 80 0 magic_storage:crafting_terminal",
+            "setblock 0 80 -1 magic_storage:creative_storage_unit",
+        ),
+        "type_capacity": {"finite_type_slots": 0, "unlimited": True},
+        "reset_world": False,
+        "player_kit": {
+            "hotbar": {
+                "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
+            },
+            "inventory": [],
+        },
+        "hotbar_views": {
+            "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
+            "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
+        },
+    },
+    "patchouli-guide": {
+        "start_target": "overview",
+        "target_names": (),
+        "setup_blocks": (),
+        "type_capacity": {"finite_type_slots": 0, "unlimited": False},
+        "player_kit": {
+            "hotbar": {
+                "1": {"slot": "hotbar.0", "item": "magic_storage:guide_book", "count": 1},
+            },
+            "inventory": [],
+        },
+        "hotbar_views": {},
+    },
 }
 
 STATIC_FUNCTIONS = {
@@ -258,9 +835,6 @@ execute as @a[tag=!ms_gui_ready] unless score @s ms_gui_timer matches 0.. run sc
 scoreboard players add @a[tag=!ms_gui_ready] ms_gui_timer 1
 execute as @a[tag=!ms_gui_ready,scores={ms_gui_timer=3..}] run function magic_storage_gui_test:player_ready
 execute as @a[tag=ms_gui_ready] run function magic_storage_gui_test:hotbar_views
-""",
-    "reset_from_hotbar": """
-function magic_storage_gui_test:setup
 """,
 }
 
@@ -383,6 +957,7 @@ def _read_gzip_nbt(path: Path):
 
 
 def _write_gzip_nbt(path: Path, root) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(gzip.compress(_write_named_tag(*root)))
 
 
@@ -430,6 +1005,269 @@ def _require_item(compound: list, name: str, tag_type: int):
     if item is None or item[0] != tag_type:
         raise ValueError(f"level.dat is missing {name} tag type {tag_type}")
     return item[2]
+
+
+def _item_stack_nbt(
+        item_id: str,
+        count: int = 1,
+        components: dict[str, str] | None = None,
+) -> list:
+    if not item_id or count <= 0:
+        raise ValueError(f"invalid preloaded item stack: {item_id} x{count}")
+    result = [
+        (TAG_INT, "count", count),
+        (TAG_STRING, "id", item_id),
+    ]
+    if components:
+        if any(not key or not value for key, value in components.items()):
+            raise ValueError(f"invalid preloaded item components: {components}")
+        result.append((
+            TAG_COMPOUND,
+            "components",
+            [
+                (TAG_STRING, key, value)
+                for key, value in sorted(components.items())
+            ],
+        ))
+    return result
+
+
+def validate_scale_types(
+    scenario_name: str,
+    scale_types: int | None,
+    items_per_type: int | None = None,
+) -> None:
+    if scenario_name == "terminal-scale":
+        if scale_types is None:
+            raise ValueError(
+                "terminal-scale --scale-types is required and must be 10000 or 30000"
+            )
+        if scale_types not in TERMINAL_SCALE_COUNTS:
+            raise ValueError("--scale-types accepts only 10000 or 30000")
+    elif scale_types is not None:
+        raise ValueError("--scale-types is only valid for terminal-scale")
+    if scenario_name == "terminal-scale":
+        if items_per_type is not None and items_per_type <= 0:
+            raise ValueError("--items-per-type must be positive")
+    elif items_per_type is not None:
+        raise ValueError("--items-per-type is only valid for terminal-scale")
+
+
+def _terminal_scale_variant(index: int) -> tuple[str, str, int]:
+    item_id = TERMINAL_SCALE_BASE_ITEMS[index % len(TERMINAL_SCALE_BASE_ITEMS)]
+    custom_name = json.dumps(
+        {
+            "text": f"Terminal Scale {index:05d}",
+            "italic": False,
+        },
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    amount = ((index * 104_729) % 1_000_000) + 1
+    return item_id, custom_name, amount
+
+
+def _terminal_scale_core_baseline(scale_types: int) -> dict:
+    return {
+        "storage_id": list(GUI_CORE_STORAGE_ID),
+        "network_id": list(GUI_CORE_NETWORK_ID),
+        "stored_items": {},
+        "stored_stacks": [],
+        "installed_stations": {},
+        "descriptor_consumables": {},
+        "station_work": {},
+        "typed_resources": [],
+        "energy": dict(BASELINE["energy"]),
+        "scale_types": scale_types,
+    }
+
+
+def terminal_scale_summary(scale_types: int) -> dict:
+    digest = hashlib.sha256()
+    amount_sum = 0
+    for index in range(scale_types):
+        item_id, custom_name, amount = _terminal_scale_variant(index)
+        digest.update(f"{item_id}\0{custom_name}\0{amount}\n".encode())
+        amount_sum += amount
+    return {
+        "generator_schema": 1,
+        "type_count": scale_types,
+        "segment_limit": TERMINAL_SCALE_SEGMENT_LIMIT,
+        "segment_count": (
+            scale_types + TERMINAL_SCALE_SEGMENT_LIMIT - 1
+        ) // TERMINAL_SCALE_SEGMENT_LIMIT,
+        "repository_records": 1,
+        "base_item_ids": list(TERMINAL_SCALE_BASE_ITEMS),
+        "component": TERMINAL_SCALE_COMPONENT,
+        "key_sha256": digest.hexdigest(),
+        "amount_sum": amount_sum,
+    }
+
+
+def _core_repository_root(core_baseline: dict) -> tuple:
+    stored_items = core_baseline["stored_items"]
+    inventory_entries = [
+        [
+            (TAG_LONG, "count", amount),
+            (TAG_COMPOUND, "item", _item_stack_nbt(item_id)),
+        ]
+        for item_id, amount in sorted(stored_items.items())
+    ]
+    inventory_entries.extend(
+        [
+            (TAG_LONG, "count", stack["amount"]),
+            (
+                TAG_COMPOUND,
+                "item",
+                _item_stack_nbt(stack["item"], components=stack["components"]),
+            ),
+        ]
+        for stack in core_baseline.get("stored_stacks", [])
+    )
+    scale_types = core_baseline.get("scale_types")
+    if scale_types is not None:
+        validate_scale_types("terminal-scale", scale_types)
+        inventory_entries.extend(
+            [
+                (TAG_LONG, "count", amount),
+                (
+                    TAG_COMPOUND,
+                    "item",
+                    _item_stack_nbt(
+                        item_id,
+                        components={TERMINAL_SCALE_COMPONENT: custom_name},
+                    ),
+                ),
+            ]
+            for item_id, custom_name, amount in (
+                _terminal_scale_variant(index)
+                for index in range(scale_types)
+            )
+        )
+    inventory_segments = [
+        [
+            (
+                TAG_LIST,
+                "entries",
+                (
+                    TAG_COMPOUND,
+                    inventory_entries[
+                        offset:offset + TERMINAL_SCALE_SEGMENT_LIMIT
+                    ],
+                ),
+            )
+        ]
+        for offset in range(
+            0,
+            len(inventory_entries),
+            TERMINAL_SCALE_SEGMENT_LIMIT,
+        )
+    ]
+    descriptor_consumables = [
+        [
+            (TAG_STRING, "descriptorId", descriptor_id),
+            (TAG_LONG, "amount", value["amount"]),
+            (TAG_BYTE, "infinite", 1 if value["infinite"] else 0),
+        ]
+        for descriptor_id, value in sorted(
+            core_baseline["descriptor_consumables"].items()
+        )
+    ]
+    machine_descriptors = [
+        [
+            (TAG_STRING, "descriptorId", descriptor_id),
+            (
+                TAG_COMPOUND,
+                "item",
+                _item_stack_nbt(value["item"]),
+            ),
+            (TAG_LONG, "count", value["count"]),
+        ]
+        for descriptor_id, value in sorted(
+            core_baseline["installed_stations"].items()
+        )
+    ]
+    machine_work = [
+        [
+            (TAG_STRING, "descriptorId", descriptor_id),
+            (TAG_LONG, "amount", amount),
+        ]
+        for descriptor_id, amount in sorted(core_baseline["station_work"].items())
+    ]
+    resource_entries = [
+        [
+            (TAG_STRING, "kind", value["kind"]),
+            (TAG_STRING, "resource", value["resource"]),
+            (TAG_COMPOUND, "variant", []),
+            (TAG_LONG, "amount", value["amount"]),
+        ]
+        for value in sorted(
+            core_baseline["typed_resources"],
+            key=lambda entry: (entry["kind"], entry["resource"]),
+        )
+    ]
+    storage = [
+        (TAG_INT_ARRAY, "storageId", core_baseline["storage_id"]),
+        (TAG_INT_ARRAY, "networkId", core_baseline["network_id"]),
+        (
+            TAG_COMPOUND,
+            "energy",
+            [
+                (TAG_LONG, energy_id, amount)
+                for energy_id, amount in core_baseline["energy"].items()
+            ],
+        ),
+        (
+            TAG_LIST,
+            "descriptorConsumables",
+            (TAG_COMPOUND, descriptor_consumables),
+        ),
+        (
+            TAG_LIST,
+            "machineDescriptors",
+            (TAG_COMPOUND, machine_descriptors),
+        ),
+        (TAG_LIST, "machineWork", (TAG_COMPOUND, machine_work)),
+        (
+            TAG_LIST,
+            "inventorySegments",
+            (TAG_COMPOUND, inventory_segments),
+        ),
+        (
+            TAG_COMPOUND,
+            "resourceLedger",
+            [
+                (TAG_INT, "schema", 1),
+                (TAG_LIST, "entries", (TAG_COMPOUND, resource_entries)),
+            ],
+        ),
+    ]
+    return (
+        TAG_COMPOUND,
+        "",
+        [
+            (
+                TAG_COMPOUND,
+                "data",
+                [
+                    (TAG_INT, "schemaVersion", 1),
+                    (TAG_LIST, "storages", (TAG_COMPOUND, [storage])),
+                    (TAG_LIST, "recoveries", (TAG_COMPOUND, [])),
+                ],
+            ),
+            (TAG_INT, "DataVersion", WORLD_DATA_VERSION),
+        ],
+    )
+
+
+def install_core_repository_baseline(world_dir: Path, profile: dict) -> None:
+    core_baseline = profile.get("core_baseline")
+    if core_baseline is None:
+        return
+    _write_gzip_nbt(
+        world_dir / "data" / "magic_storage_core_storages.dat",
+        _core_repository_root(core_baseline),
+    )
 
 
 def _rewrite_overworld_as_true_void(data: list) -> None:
@@ -569,11 +1407,7 @@ def _write_text(path: Path, text: str) -> None:
     path.write_text(text.strip() + "\n")
 
 
-def build_core_command() -> str:
-    return "setblock 0 80 0 magic_storage:storage_core"
-
-
-def build_setup_function() -> str:
+def build_setup_function(profile: dict) -> str:
     lines = [
         "gamerule commandBlockOutput false",
         "gamerule sendCommandFeedback false",
@@ -589,53 +1423,19 @@ def build_setup_function() -> str:
         "kill @e[type=minecraft:item,x=-18,y=79,z=-12,dx=36,dy=11,dz=24]",
         "setworldspawn 0 80 7",
         "spawnpoint @a 0 80 7",
-        build_core_command(),
-        "setblock -1 80 0 magic_storage:storage_terminal",
-        "setblock 1 80 0 magic_storage:crafting_terminal",
     ]
-    for z, tier in zip(range(-1, -7, -1), range(6, 0, -1)):
-        lines.append(f"setblock 0 80 {z} magic_storage:storage_unit_t{tier}")
-    lines.append("setblock 0 80 -7 magic_storage:creative_storage_unit")
-    lines.extend([
-        "setblock -1 80 -1 magic_storage:import_bus[facing=west]",
-        "setblock -2 80 -1 minecraft:barrel",
-        "setblock 1 80 -1 magic_storage:export_bus[facing=east]",
-        "setblock 2 80 -1 minecraft:barrel",
-    ])
-    for entry in GALLERY:
-        lines.append(f"setblock {entry['x']} {entry['y']} {entry['z']} {entry['block']}")
-    for entry in CONNECTED_GALLERY:
-        lines.append(f"setblock {entry['x']} {entry['y']} {entry['z']} {entry['block']}")
+    lines.extend(profile["setup_blocks"])
+    if "runtime_items_per_type" in profile:
+        lines.append(
+            "magic_storage _gui_test_seed 0 80 0 "
+            f"{profile['runtime_items_per_type']}"
+        )
     lines.extend([
         "tag @a remove ms_gui_ready",
         "scoreboard players reset @a ms_gui_timer",
     ])
     for index in range(9):
         lines.append(f"tag @a remove ms_hotbar_{index}")
-    return "\n".join(lines) + "\n"
-
-
-def build_player_ready_function() -> str:
-    lines = [
-        "gamemode creative @s",
-        "effect give @s minecraft:night_vision infinite 0 true",
-        "clear @s",
-    ]
-    for entry in PLAYER_KIT["hotbar"].values():
-        lines.append(
-            f"item replace entity @s {entry['slot']} with {entry['item']} {entry['count']}"
-        )
-    for entry in PLAYER_KIT["inventory"]:
-        lines.append(
-            f"item replace entity @s {entry['slot']} with {entry['item']} {entry['count']}"
-        )
-    lines.extend([
-        "spawnpoint @s 0 80 7",
-        f"function {DATAPACK_NAME}:view_storage_terminal",
-        f"function {DATAPACK_NAME}:prime_hotbar_latch",
-        "tag @s add ms_gui_ready",
-        "say MS_GUI_TEST_READY",
-    ])
     return "\n".join(lines) + "\n"
 
 
@@ -646,24 +1446,105 @@ def _view_function(target_name: str) -> str:
     return f"tp @s {stand} facing {face}\n"
 
 
-def build_hotbar_views_function() -> str:
+def scenario_profile(
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict:
+    if scenario_name not in SCENARIO_PROFILES:
+        raise ValueError(f"unknown GUI scenario profile: {scenario_name}")
+    validate_scale_types(scenario_name, scale_types, items_per_type)
+    profile = SCENARIO_PROFILES[scenario_name]
+    if scenario_name != "terminal-scale":
+        return profile
+    return {
+        **profile,
+        "core_baseline": _terminal_scale_core_baseline(scale_types),
+        "runtime_items_per_type": (
+            TERMINAL_SCALE_ITEMS_PER_TYPE
+            if items_per_type is None
+            else items_per_type
+        ),
+    }
+
+
+def build_reset_player_function(player_kit: dict) -> str:
+    seen_slots = set()
+    for entry in player_kit["hotbar"].values():
+        slot = entry["slot"]
+        if slot not in {f"hotbar.{index}" for index in range(9)}:
+            raise ValueError(f"invalid player hotbar slot: {slot}")
+        if slot in seen_slots:
+            raise ValueError(f"duplicate player kit slot: {slot}")
+        seen_slots.add(slot)
+    for entry in player_kit["inventory"]:
+        slot = entry["slot"]
+        if slot not in {f"inventory.{index}" for index in range(27)}:
+            raise ValueError(f"invalid player inventory slot: {slot}")
+        if slot in seen_slots:
+            raise ValueError(f"duplicate player kit slot: {slot}")
+        seen_slots.add(slot)
+    lines = [
+        "gamemode creative @s",
+        "effect give @s minecraft:night_vision infinite 0 true",
+        "clear @s",
+    ]
+    for entry in player_kit["hotbar"].values():
+        lines.append(
+            f"item replace entity @s {entry['slot']} with {entry['item']} {entry['count']}"
+        )
+    for entry in player_kit["inventory"]:
+        lines.append(
+            f"item replace entity @s {entry['slot']} with {entry['item']} {entry['count']}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def build_player_ready_function(profile: dict) -> str:
+    lines = [
+        f"function {DATAPACK_NAME}:reset_player",
+        "spawnpoint @s 0 80 7",
+        f"function {DATAPACK_NAME}:view_{profile['start_target']}",
+        f"function {DATAPACK_NAME}:prime_hotbar_latch",
+    ]
+    if "runtime_items_per_type" in profile:
+        lines.append("magic_storage _gui_test_warm_craftable 0 80 0")
+    lines.extend([
+        "tag @s add ms_gui_ready",
+        "say MS_GUI_TEST_READY",
+    ])
+    return "\n".join(lines) + "\n"
+
+
+def build_reset_from_hotbar_function(profile: dict) -> str:
     lines = []
-    for view in HOTBAR_VIEWS.values():
+    if profile.get("reset_world", True):
+        lines.append(f"function {DATAPACK_NAME}:setup")
+    lines.extend([
+        f"function {DATAPACK_NAME}:reset_player",
+        f"function {DATAPACK_NAME}:view_{profile['start_target']}",
+    ])
+    return "\n".join(lines) + "\n"
+
+
+def build_hotbar_views_function(hotbar_views: dict) -> str:
+    lines = []
+    for view in hotbar_views.values():
         slot = view["slot"]
         lines.append(
             f"execute if entity @s[nbt={{SelectedItemSlot:{slot}}},tag=!ms_hotbar_{slot}] run function {DATAPACK_NAME}:{view['function']}"
         )
     for index in range(9):
         lines.append(f"tag @s remove ms_hotbar_{index}")
-    for view in HOTBAR_VIEWS.values():
+    for view in hotbar_views.values():
         slot = view["slot"]
         lines.append(f"execute if entity @s[nbt={{SelectedItemSlot:{slot}}}] run tag @s add ms_hotbar_{slot}")
     return "\n".join(lines) + "\n"
 
 
-def build_prime_hotbar_latch_function() -> str:
+def build_prime_hotbar_latch_function(hotbar_views: dict) -> str:
     lines = [f"tag @s remove ms_hotbar_{index}" for index in range(9)]
-    for view in HOTBAR_VIEWS.values():
+    for view in hotbar_views.values():
         slot = view["slot"]
         lines.append(
             f"execute if entity @s[nbt={{SelectedItemSlot:{slot}}}] run tag @s add ms_hotbar_{slot}"
@@ -671,29 +1552,87 @@ def build_prime_hotbar_latch_function() -> str:
     return "\n".join(lines) + "\n"
 
 
-def build_function_bodies() -> dict[str, str]:
+def build_function_bodies(
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict[str, str]:
+    profile = scenario_profile(scenario_name, scale_types, items_per_type)
+    hotbar_views = profile["hotbar_views"]
     bodies = dict(STATIC_FUNCTIONS)
     bodies.update({
-        "setup": build_setup_function(),
-        "player_ready": build_player_ready_function(),
-        "hotbar_views": build_hotbar_views_function(),
-        "prime_hotbar_latch": build_prime_hotbar_latch_function(),
-        "home": _view_function("overview"),
-        "view_storage_core": _view_function("storage_core"),
-        "view_storage_unit_t6": _view_function("storage_unit_t6"),
-        "view_storage_terminal": _view_function("storage_terminal"),
-        "view_crafting_terminal": _view_function("crafting_terminal"),
-        "view_import_bus": _view_function("import_bus"),
-        "view_export_bus": _view_function("export_bus"),
-        "view_texture_gallery": _view_function("texture_gallery"),
+        "setup": build_setup_function(profile),
+        "reset_player": build_reset_player_function(profile["player_kit"]),
+        "reset_from_hotbar": build_reset_from_hotbar_function(profile),
+        "player_ready": build_player_ready_function(profile),
+        "hotbar_views": build_hotbar_views_function(hotbar_views),
+        "prime_hotbar_latch": build_prime_hotbar_latch_function(hotbar_views),
     })
+    view_targets = {profile["start_target"]}
+    view_targets.update(
+        view["target"]
+        for view in hotbar_views.values()
+        if view["function"].startswith("view_")
+    )
+    for target_name in sorted(view_targets):
+        bodies[f"view_{target_name}"] = _view_function(target_name)
     return bodies
 
 
-def build_manifest(world_dir: Path) -> dict:
-    commands = {name: f"/function {DATAPACK_NAME}:{name}" for name in build_function_bodies()}
+def build_manifest(
+    world_dir: Path,
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict:
+    profile = scenario_profile(scenario_name, scale_types, items_per_type)
+    core_baseline = profile.get("core_baseline", {})
+    baseline = {
+        **BASELINE,
+        "storage_id": list(core_baseline.get("storage_id", [])),
+        "network_id": list(core_baseline.get("network_id", [])),
+        "stored_items": dict(core_baseline.get("stored_items", {})),
+        "stored_stacks": json.loads(json.dumps(
+            core_baseline.get("stored_stacks", [])
+        )),
+        "installed_stations": json.loads(json.dumps(
+            core_baseline.get("installed_stations", {})
+        )),
+        "descriptor_consumables": json.loads(json.dumps(
+            core_baseline.get("descriptor_consumables", {})
+        )),
+        "station_work": dict(core_baseline.get("station_work", {})),
+        "typed_resources": json.loads(json.dumps(
+            core_baseline.get("typed_resources", [])
+        )),
+        "energy": {
+            **BASELINE["energy"],
+            **core_baseline.get("energy", {}),
+        },
+        "type_capacity": dict(profile["type_capacity"]),
+    }
+    if scenario_name == "terminal-scale":
+        baseline["scale_fixture"] = terminal_scale_summary(scale_types)
+        baseline["runtime_fixture"] = {
+            "registry": "runtime",
+            "items_per_type": profile["runtime_items_per_type"],
+            "installable_descriptors": "all",
+            "processing_count": TERMINAL_SCALE_PROCESSING_COUNT,
+            "instant_count": 1,
+            "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+        }
+    commands = {
+        name: f"/function {DATAPACK_NAME}:{name}"
+        for name in build_function_bodies(
+            scenario_name,
+            scale_types,
+            items_per_type,
+        )
+    }
     return {
-        "schema_version": 4,
+        "schema_version": 5,
+        "scenario": scenario_name,
+        "start_target": profile["start_target"],
         "world_name": world_dir.name,
         "world_dir": str(world_dir),
         "datapack": DATAPACK_NAME,
@@ -701,37 +1640,91 @@ def build_manifest(world_dir: Path) -> dict:
         "world_generator": VOID_GENERATOR,
         "stripped_template_paths": list(COPIED_RUNTIME_PATHS),
         "lab": LAB,
-        "targets": TARGETS,
-        "gallery": GALLERY,
-        "connected_gallery": CONNECTED_GALLERY,
-        "baseline": BASELINE,
-        "player_kit": PLAYER_KIT,
+        "targets": {
+            name: TARGETS[name]
+            for name in profile["target_names"]
+        },
+        "baseline": baseline,
+        "player_kit": profile["player_kit"],
         "bootstrap": {
             "ready_delay_ticks": 3,
             "ready_log": "MS_GUI_TEST_READY",
-            "reset_function": "setup",
+            "reset_function": (
+                "reset_from_hotbar"
+                if any(
+                    view["function"] == "reset_from_hotbar"
+                    for view in profile["hotbar_views"].values()
+                )
+                else None
+            ),
+            "core_preloaded": bool(core_baseline),
+            **(
+                {
+                    "runtime_fixture_ready_log":
+                        "MS_GUI_RUNTIME_FIXTURE_READY",
+                }
+                if scenario_name == "terminal-scale"
+                else {}
+            ),
         },
         "commands": commands,
-        "hotbar_views": HOTBAR_VIEWS,
+        "hotbar_views": profile["hotbar_views"],
         "fullscreen_gate": FULLSCREEN_GATE,
         "open_key": "key.keyboard.u",
         "launch_command": f'"/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher" -l dev -w "{world_dir.name}" -o {DEFAULT_OFFLINE_PLAYER}',
     }
 
 
-def install_datapack(world_dir: Path) -> dict:
+def install_datapack(
+    world_dir: Path,
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict:
+    profile = scenario_profile(
+        scenario_name,
+        scale_types,
+        items_per_type,
+    )
     datapack = world_dir / "datapacks" / DATAPACK_NAME
     if datapack.exists():
         shutil.rmtree(datapack)
 
-    manifest = build_manifest(world_dir)
+    manifest = build_manifest(
+        world_dir,
+        scenario_name,
+        scale_types,
+        items_per_type,
+    )
+    install_core_repository_baseline(world_dir, profile)
     _write_text(datapack / "pack.mcmeta", json.dumps({"pack": {"pack_format": PACK_FORMAT, "description": "Magic Storage true-void GUI test lab"}}, indent=2))
     _write_text(datapack / "data/minecraft/tags/function/load.json", json.dumps({"values": [f"{DATAPACK_NAME}:load"]}, indent=2))
     _write_text(datapack / "data/minecraft/tags/function/tick.json", json.dumps({"values": [f"{DATAPACK_NAME}:tick"]}, indent=2))
-    function_bodies = build_function_bodies()
+    if scenario_name == "crafting-fuel-page":
+        for name in EXTENDED_CRAFTING_TEST_INGOT_TAGS:
+            _write_text(
+                datapack / "data/c/tags/item/ingots" / f"{name}.json",
+                json.dumps(
+                    {"replace": False, "values": ["minecraft:iron_ingot"]},
+                    indent=2,
+                ),
+            )
+    function_bodies = build_function_bodies(
+        scenario_name,
+        scale_types,
+        items_per_type,
+    )
     for name, body in function_bodies.items():
         _write_text(datapack / "data" / DATAPACK_NAME / "function" / f"{name}.mcfunction", body)
     _write_text(datapack / "magic_storage_gui_test_manifest.json", json.dumps(manifest, indent=2))
+    runtime_marker = world_dir / RUNTIME_FIXTURE_MARKER_FILE
+    if scenario_name == "terminal-scale":
+        _write_text(
+            runtime_marker,
+            "generated by scripts/prepare_prism_gui_world.py",
+        )
+    elif runtime_marker.exists():
+        runtime_marker.unlink()
     return manifest
 
 
@@ -813,8 +1806,13 @@ def prepare_world(
     minecraft_dir: Path = DEFAULT_PRISM_MINECRAFT_DIR,
     source_world: str = DEFAULT_SOURCE_WORLD,
     target_world: str = DEFAULT_WORLD_NAME,
+    *,
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
     display_mode_func=current_macos_main_display_mode,
 ) -> dict:
+    validate_scale_types(scenario_name, scale_types, items_per_type)
     minecraft_dir = minecraft_dir.expanduser().resolve()
     source = minecraft_dir / "saves" / source_world
     target = minecraft_dir / "saves" / target_world
@@ -829,7 +1827,15 @@ def prepare_world(
         if world_generator != VOID_GENERATOR:
             raise ValueError(f"generated overworld does not match the true-void contract: {world_generator}")
 
-        manifest = install_datapack(staging)
+        if scenario_name == "terminal-scale":
+            manifest = install_datapack(
+                staging,
+                scenario_name,
+                scale_types,
+                items_per_type,
+            )
+        else:
+            manifest = install_datapack(staging, scenario_name)
         options_path = minecraft_dir / "options.txt"
         options_changed = patch_options(options_path)
         manifest.update(
@@ -842,7 +1848,12 @@ def prepare_world(
                 "desktop_display_mode": display_mode.as_dict(),
                 "level": read_level_dat_summary(level_dat),
                 "world_generator": world_generator,
-                "launch_command": build_manifest(target)["launch_command"],
+                "launch_command": build_manifest(
+                    target,
+                    scenario_name,
+                    scale_types,
+                    items_per_type,
+                )["launch_command"],
             }
         )
         manifest_text = json.dumps(manifest, indent=2)
@@ -863,9 +1874,27 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--minecraft-dir", type=Path, default=DEFAULT_PRISM_MINECRAFT_DIR)
     parser.add_argument("--source-world", default=DEFAULT_SOURCE_WORLD)
     parser.add_argument("--world", default=DEFAULT_WORLD_NAME)
+    parser.add_argument(
+        "--scenario",
+        choices=sorted(SCENARIO_PROFILES),
+        default="boot-smoke",
+    )
+    parser.add_argument(
+        "--scale-types",
+        type=int,
+        choices=TERMINAL_SCALE_COUNTS,
+    )
+    parser.add_argument("--items-per-type", type=int)
     args = parser.parse_args(argv[1:])
     try:
-        result = prepare_world(args.minecraft_dir, args.source_world, args.world)
+        result = prepare_world(
+            args.minecraft_dir,
+            args.source_world,
+            args.world,
+            scenario_name=args.scenario,
+            scale_types=args.scale_types,
+            items_per_type=args.items_per_type,
+        )
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         return 1

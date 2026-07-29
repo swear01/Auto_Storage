@@ -1,0 +1,16 @@
+{
+  "type": "botania:terrestrial_agglomeration_plate",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:redstone"
+    }
+  ],
+  "mana": 1000,
+  "result": {
+    "count": 1,
+    "id": "minecraft:netherite_scrap"
+  }
+}

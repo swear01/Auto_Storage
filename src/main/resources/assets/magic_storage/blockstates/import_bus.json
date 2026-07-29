@@ -1,10 +1,45 @@
 {
   "variants": {
-    "facing=down":  { "model": "magic_storage:block/import_bus", "x": 90 },
-    "facing=up":    { "model": "magic_storage:block/import_bus", "x": 270 },
-    "facing=north": { "model": "magic_storage:block/import_bus" },
-    "facing=south": { "model": "magic_storage:block/import_bus", "y": 180 },
-    "facing=west":  { "model": "magic_storage:block/import_bus", "y": 270 },
-    "facing=east":  { "model": "magic_storage:block/import_bus", "y": 90 }
+    "directionless=false,facing=down": {
+      "model": "magic_storage:block/import_bus",
+      "x": 90
+    },
+    "directionless=true,facing=down": {
+      "model": "magic_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=up": {
+      "model": "magic_storage:block/import_bus",
+      "x": 270
+    },
+    "directionless=true,facing=up": {
+      "model": "magic_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=north": {
+      "model": "magic_storage:block/import_bus"
+    },
+    "directionless=true,facing=north": {
+      "model": "magic_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=south": {
+      "model": "magic_storage:block/import_bus",
+      "y": 180
+    },
+    "directionless=true,facing=south": {
+      "model": "magic_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=west": {
+      "model": "magic_storage:block/import_bus",
+      "y": 270
+    },
+    "directionless=true,facing=west": {
+      "model": "magic_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=east": {
+      "model": "magic_storage:block/import_bus",
+      "y": 90
+    },
+    "directionless=true,facing=east": {
+      "model": "magic_storage:block/import_bus_directionless"
+    }
   }
 }

@@ -1,0 +1,9 @@
+{
+  "type": "industrialforegoing:crusher",
+  "input": {
+    "item": "minecraft:cobblestone"
+  },
+  "output": {
+    "tag": "minecraft:planks"
+  }
+}

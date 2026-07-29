@@ -3,22 +3,24 @@ package com.swearprom.magicstorage.magic_storage;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 
 public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTerminalMenu> {
-
-    private static final List<FuelTargetOption> FUEL_TARGET_OPTIONS = buildFuelTargetOptions();
 
     private final NativeRecipeDiagramRenderer nativeRecipeDiagramRenderer;
     private final RecipeDiagramRenderer preferredRecipeDiagramRenderer;
@@ -30,20 +32,40 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     private Button craftMaxBtn;
     private TerminalIconButton storagePageBtn;
     private TerminalIconButton craftablePageBtn;
-    private TerminalIconButton fuelPageBtn;
+    private TerminalIconButton transformPageBtn;
+    private TerminalIconButton stationsPageBtn;
     private TerminalCycleButton playerInventoryRailBtn;
     private TerminalCycleButton outputDestinationRailBtn;
-    private TerminalCycleButton fuelTargetSelector;
-    private TerminalIconButton fuelTargetListBtn;
-    private FuelTargetPopup fuelTargetPopup;
+    private TerminalCycleButton stationDisplayModeBtn;
+    private EditBox transformTargetSearchBox;
+    private EditBox fuelSearchBox;
+    private FuelPageButtons transformTargetPageButtons;
+    private FuelPageButtons transformCardPageButtons;
+    private FuelPageButtons timedStationsPageButtons;
+    private FuelPageButtons instantStationsPageButtons;
+    private FuelPageButtons fuelSearchPageButtons;
     private CraftingTerminalPage lastPage;
-    private EnergyType lastFuelTarget;
-    private int consumablePage;
+    private ResourceLocation lastTransformTarget;
+    private int transformUsePage;
+    private int transformTargetPage;
     private int timedStationPage;
     private int instantStationPage;
+    private int fuelSearchPage;
+    private boolean fuelSearchActive;
+    private FuelSearchModel.Index fuelSearchIndex;
+    private List<FuelTargetOption> filteredTransformTargets = List.of();
+    private List<FuelSearchModel.Entry> filteredFuelEntries = List.of();
     private RecipeDiagramRenderer.Geometry recipeDiagramGeometry;
     private int lastRecipeMouseX;
     private int lastRecipeMouseY;
+    private ResourceLocation stationCycleRecipeId;
+    private ItemStack stationCycleInstalled = ItemStack.EMPTY;
+    private long stationCycleAnchorMillis;
+    private ResourceLocation recipeLedgerRecipeId;
+    private int recipeLedgerOffset;
+    private SortMode lastUtilitySortMode;
+    private SortOrder lastUtilitySortOrder;
+    private StationDisplayMode stationDisplayMode = StationDisplayMode.ALL;
 
     public CraftingTerminalScreen(CraftingTerminalMenu menu, Inventory playerInv, Component title) {
         super(menu, playerInv, title);
@@ -60,10 +82,9 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     protected TerminalLayout.FuelDescriptorCounts fuelDescriptorCounts() {
         int timedStations = machineSlotsForCategory(MachineEnergyTable.Category.PROCESS).size();
         int instantStations = machineSlotsForCategory(MachineEnergyTable.Category.INSTANT).size();
-        int consumables = 1 + CraftingTerminalMenu.fuelTargets().size()
-                + machineSlotsForCategory(MachineEnergyTable.Category.CONSUMABLE).size();
+        int transformUses = Math.max(1, menu.getVisibleTransformUses().size());
         return new TerminalLayout.FuelDescriptorCounts(
-                consumables,
+                transformUses,
                 timedStations,
                 instantStations,
                 fuelTargetOptions().size());
@@ -81,13 +102,18 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 Component.translatable("gui.magic_storage.page_craftable"),
                 geometry.railButtons().get(1),
                 button -> clickMenuButton(CraftingTerminalMenu.CRAFTABLE_PAGE_BUTTON));
-        fuelPageBtn = addItemButton(
+        transformPageBtn = addItemButton(
                 Items.COAL.getDefaultInstance(),
-                Component.translatable("gui.magic_storage.page_fuel"),
+                Component.translatable("gui.magic_storage.page_transform"),
                 geometry.railButtons().get(2),
-                button -> clickMenuButton(CraftingTerminalMenu.FUEL_PAGE_BUTTON));
+                button -> clickMenuButton(CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON));
+        stationsPageBtn = addItemButton(
+                Items.FURNACE.getDefaultInstance(),
+                Component.translatable("gui.magic_storage.page_stations"),
+                geometry.railButtons().get(3),
+                button -> clickMenuButton(CraftingTerminalMenu.STATIONS_PAGE_BUTTON));
         playerInventoryRailBtn = addItemCycleButton(
-                Items.CHEST.getDefaultInstance(),
+                Items.BUNDLE.getDefaultInstance(),
                 Component.translatable("gui.magic_storage.use_player_inv"),
                 geometry.railButtons().get(terminalProfile().playerInventorySourceIndex()),
                 direction -> clickMenuButton(7),
@@ -98,6 +124,12 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 geometry.railButtons().get(terminalProfile().outputDestinationIndex()),
                 direction -> clickMenuButton(CraftingTerminalMenu.OUTPUT_DESTINATION_BUTTON),
                 () -> clickMenuButton(CraftingTerminalMenu.RESET_OUTPUT_DESTINATION_BUTTON));
+        stationDisplayModeBtn = addItemCycleButton(
+                Items.CHEST.getDefaultInstance(),
+                Component.translatable("tooltip.magic_storage.station_display"),
+                geometry.fuelRailButtons().get(terminalProfile().viewControlStartIndex() + 2),
+                direction -> setStationDisplayMode(stationDisplayMode.next()),
+                () -> setStationDisplayMode(StationDisplayMode.ALL));
     }
 
     @Override
@@ -107,14 +139,20 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
 
     @Override
     protected boolean isResourceViewControlActive() {
-        return displayedPreferences().page() == CraftingTerminalPage.STORAGE;
+        return displayedPreferences().page().isItemPage();
     }
 
     @Override
     protected void init() {
+        String previousTransformSearch = transformTargetSearchBox == null
+                ? "" : transformTargetSearchBox.getValue();
+        boolean previousTransformSearchFocused = transformTargetSearchBox != null
+                && transformTargetSearchBox.isFocused();
+        String previousFuelSearch = fuelSearchBox == null ? "" : fuelSearchBox.getValue();
+        boolean previousFuelSearchFocused = fuelSearchBox != null && fuelSearchBox.isFocused();
+        fuelSearchActive = !TerminalSearchQuery.compile(previousFuelSearch).isEmpty();
         super.init();
         recipeDiagramGeometry = createRecipeDiagramGeometry();
-        repositionFuelSlots();
         List<TerminalLayout.Rect> navigationButtons = geometry.recipeNavigationButtons();
         prevRecipeBtn = addRecipeNavigationButton(
                 TerminalControlIcon.PREVIOUS,
@@ -142,25 +180,75 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 button -> clickMenuButton(CraftingTerminalMenu.MAX_CRAFT_BUTTON),
                 RecipeAmountSegment.LAST);
 
-        TerminalLayout.Rect targetBounds = geometry.fuelTargetSelector();
-        FuelTargetOption initialTarget = new FuelTargetOption(displayedPreferences().fuelTarget());
-        fuelTargetSelector = addTextCycleButton(
-                initialTarget.label(), targetBounds, this::selectAdjacentFuelTarget,
-                () -> clickMenuButton(CraftingTerminalMenu.AUTO_FUEL_TARGET_BUTTON));
-        fuelTargetListBtn = addItemButton(
-                Items.BOOK.getDefaultInstance(),
-                Component.translatable("gui.magic_storage.fuel_target_list"),
-                geometry.fuelTargetListButton(),
-                button -> toggleFuelTargetPopup());
-        TerminalLayout.PopupList popup = geometry.fuelTargetPopup();
-        fuelTargetPopup = new FuelTargetPopup(
-                leftPos + popup.bounds().x(), topPos + popup.bounds().y(), popup);
-        fuelTargetPopup.visible = false;
-        fuelTargetPopup.active = false;
-        addWidget(fuelTargetPopup);
+        TerminalLayout.Rect targetSearch = geometry.transformTargetSearch();
+        transformTargetSearchBox = new EditBox(
+                font,
+                leftPos + targetSearch.x(),
+                topPos + targetSearch.y(),
+                targetSearch.width(),
+                font.lineHeight,
+                Component.translatable("gui.magic_storage.transform_search"));
+        transformTargetSearchBox.setBordered(false);
+        transformTargetSearchBox.setTextColor(0xFFFFFF);
+        transformTargetSearchBox.setMaxLength(50);
+        transformTargetSearchBox.setValue(previousTransformSearch);
+        transformTargetSearchBox.setResponder(text -> refreshTransformTargets());
+        addRenderableWidget(transformTargetSearchBox);
+        TerminalLayout.Rect fuelSearch = geometry.fuelSearchBox();
+        fuelSearchBox = new EditBox(
+                font,
+                leftPos + fuelSearch.x(),
+                topPos + fuelSearch.y(),
+                fuelSearch.width(),
+                font.lineHeight,
+                Component.translatable("gui.magic_storage.fuel_search"));
+        fuelSearchBox.setBordered(false);
+        fuelSearchBox.setTextColor(0xFFFFFF);
+        fuelSearchBox.setMaxLength(50);
+        fuelSearchBox.setTooltip(Tooltip.create(
+                Component.translatable("tooltip.magic_storage.search_help")));
+        fuelSearchBox.setValue(previousFuelSearch);
+        fuelSearchBox.setResponder(this::setFuelSearchQuery);
+        addRenderableWidget(fuelSearchBox);
+        transformTargetPageButtons = addFuelPageControls(
+                geometry.transformTargetPageControls(),
+                () -> transformTargetPage,
+                page -> transformTargetPage = page,
+                this::transformTargetPageCount);
+        transformCardPageButtons = addFuelPageControls(
+                geometry.transformCardPageControls(),
+                () -> transformUsePage,
+                page -> transformUsePage = page,
+                this::transformPageCount);
+        timedStationsPageButtons = addFuelPageControls(
+                geometry.timedStationsPageControls(),
+                () -> timedStationPage,
+                page -> timedStationPage = page,
+                () -> geometry.timedStationsGrid().pageCount());
+        instantStationsPageButtons = addFuelPageControls(
+                geometry.instantStationsPageControls(),
+                () -> instantStationPage,
+                page -> instantStationPage = page,
+                () -> geometry.instantStationsGrid().pageCount());
+        fuelSearchPageButtons = addFuelPageControls(
+                geometry.fuelSearchPageControls(),
+                () -> fuelSearchPage,
+                page -> fuelSearchPage = page,
+                this::fuelSearchPageCount);
 
+        refreshTransformTargets();
+        fuelSearchIndex = FuelSearchModel.index(
+                CraftingTerminalMenu.fuelTargets(),
+                menu.getMachineDescriptors());
+        refreshFuelSearchResults();
         updatePageWidgets();
         updateSidebarState();
+        boolean previousActiveSearchFocused = switch (displayedPreferences().page()) {
+            case TRANSFORM -> previousTransformSearchFocused;
+            case STATIONS -> previousFuelSearchFocused;
+            default -> false;
+        };
+        focusActiveSearchBox(searchBoxAutoSelected() || previousActiveSearchFocused);
     }
 
     private RecipeDiagramRenderer.Geometry createRecipeDiagramGeometry() {
@@ -238,9 +326,102 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         return addIconButton(icon, narration, bounds, action);
     }
 
+    private FuelPageButtons addFuelPageControls(
+            TerminalLayout.FuelPageControls controls,
+            IntSupplier currentPage,
+            IntConsumer setPage,
+            IntSupplier pageCount
+    ) {
+        Component previousLabel = Component.translatable(
+                "gui.magic_storage.previous_fuel_page");
+        Component nextLabel = Component.translatable(
+                "gui.magic_storage.next_fuel_page");
+        TerminalIconButton previous = addIconButton(
+                TerminalControlIcon.PREVIOUS,
+                previousLabel,
+                controls.previous(),
+                button -> {
+                    setPage.accept(Math.max(0, currentPage.getAsInt() - 1));
+                    repositionFuelSlots();
+                    updateFuelPageButtonStates();
+                });
+        TerminalIconButton next = addIconButton(
+                TerminalControlIcon.NEXT,
+                nextLabel,
+                controls.next(),
+                button -> {
+                    setPage.accept(Math.min(
+                            pageCount.getAsInt() - 1, currentPage.getAsInt() + 1));
+                    repositionFuelSlots();
+                    updateFuelPageButtonStates();
+                });
+        previous.setTooltip(Tooltip.create(previousLabel));
+        next.setTooltip(Tooltip.create(nextLabel));
+        return new FuelPageButtons(previous, next);
+    }
+
+    private int fuelSearchPageCount() {
+        return geometry.fuelSearchGrid().pageCount(filteredFuelEntries.size());
+    }
+
+    private int transformPageCount() {
+        return geometry.transformCards().pageCount(
+                menu.getVisibleTransformUses().size());
+    }
+
+    private int transformTargetPageCount() {
+        return geometry.transformTargetList().pageCount(filteredTransformTargets.size());
+    }
+
+    private void refreshTransformTargets() {
+        TerminalSearchQuery query = TerminalSearchQuery.compile(
+                transformTargetSearchBox == null ? "" : transformTargetSearchBox.getValue());
+        filteredTransformTargets = fuelTargetOptions().stream()
+                .filter(option -> query.matches(option.searchEntry()))
+                .sorted(TerminalEntryComparator.forMode(
+                        displayedPreferences().sortMode(),
+                        displayedPreferences().sortOrder(),
+                        FuelTargetOption::sortStack))
+                .toList();
+        transformTargetPage = Math.clamp(
+                transformTargetPage, 0, transformTargetPageCount() - 1);
+        updateFuelPageButtonStates();
+    }
+
+    private void refreshFuelSearchResults() {
+        refreshFuelSearchResults(TerminalSearchQuery.compile(
+                fuelSearchBox == null ? "" : fuelSearchBox.getValue()));
+    }
+
+    private void refreshFuelSearchResults(TerminalSearchQuery query) {
+        filteredFuelEntries = FuelSearchModel.search(query, fuelSearchIndex).stream()
+                .filter(entry -> !entry.isEnergy()
+                        && entry.category() != MachineEnergyTable.Category.TRANSFORM)
+                .filter(entry -> stationDisplayMode.shows(
+                        isStationInstalled(entry.machineSlot())))
+                .sorted(TerminalEntryComparator.forMode(
+                        displayedPreferences().sortMode(),
+                        displayedPreferences().sortOrder(),
+                        entry -> machineSortStack(entry.machineSlot())))
+                .toList();
+        fuelSearchPage = Math.clamp(
+                fuelSearchPage, 0, fuelSearchPageCount() - 1);
+        repositionFuelSlots();
+        updateFuelPageButtonStates();
+    }
+
+    private void setFuelSearchQuery(String text) {
+        TerminalSearchQuery query = TerminalSearchQuery.compile(text);
+        boolean previousActive = fuelSearchActive;
+        fuelSearchActive = !query.isEmpty();
+        fuelSearchPage = 0;
+        refreshFuelSearchResults(query);
+        if (fuelSearchActive != previousActive) updatePageWidgets();
+    }
+
     private void repositionFuelSlots() {
-        consumablePage = Math.clamp(
-                consumablePage, 0, geometry.consumablesGrid().pageCount() - 1);
+        transformUsePage = Math.clamp(
+                transformUsePage, 0, transformPageCount() - 1);
         timedStationPage = Math.clamp(
                 timedStationPage, 0, geometry.timedStationsGrid().pageCount() - 1);
         instantStationPage = Math.clamp(
@@ -251,15 +432,30 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             replaceSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot, -9999, -9999);
         }
 
-        if (consumablePage == 0) {
-            TerminalLayout.Rect fuelInput = geometry.fuelInput();
+        CraftingTerminalPage page = displayedPreferences().page();
+        if (page == CraftingTerminalPage.TRANSFORM) {
+            TerminalLayout.Rect fuelInput = geometry.transformInput();
             replaceSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT, fuelInput.x(), fuelInput.y());
+            return;
         }
-        positionMachineCategory(
-                MachineEnergyTable.Category.CONSUMABLE,
-                geometry.consumablesGrid(),
-                consumablePage,
-                consumableMachineOffset());
+        if (page != CraftingTerminalPage.STATIONS) return;
+
+        if (fuelSearchActive) {
+            List<TerminalLayout.Rect> cells = geometry.fuelSearchGrid().cells(
+                    fuelSearchPage, filteredFuelEntries.size());
+            int first = fuelSearchPage * geometry.fuelSearchGrid().capacity();
+            for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
+                FuelSearchModel.Entry result = filteredFuelEntries.get(first + visibleIndex);
+                if (result.isEnergy()) continue;
+                TerminalLayout.Rect slot = TerminalLayout.fuelSlot(cells.get(visibleIndex));
+                replaceSlot(
+                        CraftingTerminalMenu.MACHINE_SLOT_START + result.machineSlot(),
+                        slot.x(),
+                        slot.y());
+            }
+            return;
+        }
+
         positionMachineCategory(
                 MachineEnergyTable.Category.PROCESS,
                 geometry.timedStationsGrid(),
@@ -298,103 +494,105 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         }
     }
 
-    private void selectAdjacentFuelTarget(TerminalCycleDirection direction) {
-        List<FuelTargetOption> options = fuelTargetOptions();
-        int current = options.indexOf(new FuelTargetOption(displayedPreferences().fuelTarget()));
-        if (current < 0) throw new IllegalStateException("Current Fuel target is not server-approved");
-        int offset = direction == TerminalCycleDirection.NEXT ? 1 : -1;
-        FuelTargetOption option = options.get(Math.floorMod(current + offset, options.size()));
-        clickMenuButton(option.target() == null
-                ? CraftingTerminalMenu.AUTO_FUEL_TARGET_BUTTON
-                : CraftingTerminalMenu.fuelTargetButtonId(option.target()));
-    }
-
-    private void toggleFuelTargetPopup() {
-        if (fuelTargetPopup.visible) {
-            closeFuelTargetPopup();
-            return;
-        }
-        int selected = fuelTargetOptions().indexOf(new FuelTargetOption(displayedPreferences().fuelTarget()));
-        if (selected < 0) throw new IllegalStateException("Current Fuel target is not server-approved");
-        fuelTargetPopup.reveal(selected);
-        fuelTargetPopup.visible = true;
-        fuelTargetPopup.active = true;
-        setFocused(null);
-    }
-
-    private void closeFuelTargetPopup() {
-        if (fuelTargetPopup == null) return;
-        fuelTargetPopup.visible = false;
-        fuelTargetPopup.active = false;
-        setFocused(null);
-    }
-
     private void selectFuelTarget(FuelTargetOption option) {
         clickMenuButton(option.target() == null
                 ? CraftingTerminalMenu.AUTO_FUEL_TARGET_BUTTON
-                : CraftingTerminalMenu.fuelTargetButtonId(option.target()));
-        closeFuelTargetPopup();
+                : TransformProviderApi.targetButtonId(
+                        option.target(), menu.getMachineDescriptors()));
     }
 
     private void updatePageWidgets() {
         TerminalPreferences preferences = displayedPreferences();
         CraftingTerminalPage page = preferences.page();
-        EnergyType target = preferences.fuelTarget();
+        ResourceLocation target = preferences.transformTarget();
         boolean itemPage = page.isItemPage();
         setItemViewControlsVisible(itemPage);
+        if (!itemPage) setSortControlsVisible(true);
+        repositionFuelSlots();
 
         setWidgetVisible(prevRecipeBtn, itemPage);
         setWidgetVisible(nextRecipeBtn, itemPage);
-        setWidgetVisible(craft1Btn, itemPage);
-        setWidgetVisible(craft8Btn, itemPage);
-        setWidgetVisible(craft64Btn, itemPage);
-        setWidgetVisible(craftMaxBtn, itemPage);
+        boolean amountActions = itemPage || page == CraftingTerminalPage.TRANSFORM;
+        positionAmountButtons(page == CraftingTerminalPage.TRANSFORM
+                ? geometry.transformAmountButtons()
+                : geometry.recipeCraftButtons());
+        setWidgetVisible(craft1Btn, amountActions);
+        setWidgetVisible(craft8Btn, amountActions);
+        setWidgetVisible(craft64Btn, amountActions);
+        setWidgetVisible(craftMaxBtn, amountActions);
         setWidgetVisible(playerInventoryRailBtn, itemPage);
         setWidgetVisible(outputDestinationRailBtn, itemPage);
+        setWidgetVisible(stationDisplayModeBtn,
+                page == CraftingTerminalPage.STATIONS);
 
         storagePageBtn.active = page != CraftingTerminalPage.STORAGE;
         craftablePageBtn.active = page != CraftingTerminalPage.CRAFTABLE;
-        fuelPageBtn.active = page != CraftingTerminalPage.FUEL;
+        transformPageBtn.active = page != CraftingTerminalPage.TRANSFORM;
+        stationsPageBtn.active = page != CraftingTerminalPage.STATIONS;
 
-        boolean fuel = page == CraftingTerminalPage.FUEL;
-        setWidgetVisible(fuelTargetSelector, fuel);
-        setWidgetVisible(fuelTargetListBtn, fuel);
-        if (!fuel) closeFuelTargetPopup();
-        if (fuel) {
-            fuelTargetSelector.active = fuelTargetOptions().size() > 1;
-            FuelTargetOption option = new FuelTargetOption(target);
-            fuelTargetSelector.setMessage(option.label());
-            fuelTargetSelector.setTooltip(createCycleTooltip(
-                    "gui.magic_storage.fuel_target", option.label()));
-        }
+        boolean transform = page == CraftingTerminalPage.TRANSFORM;
+        boolean stations = page == CraftingTerminalPage.STATIONS;
+        setWidgetVisible(transformTargetSearchBox, transform);
+        setWidgetVisible(fuelSearchBox, stations);
+        updateFuelPageButtonStates();
         updateCraftButtonState();
         lastPage = page;
-        lastFuelTarget = target;
+        lastTransformTarget = target;
+    }
+
+    private void positionAmountButtons(List<TerminalLayout.Rect> bounds) {
+        List<Button> buttons = List.of(craft1Btn, craft8Btn, craft64Btn, craftMaxBtn);
+        for (int index = 0; index < buttons.size(); index++) {
+            Button button = buttons.get(index);
+            TerminalLayout.Rect rectangle = bounds.get(index);
+            button.setX(leftPos + rectangle.x());
+            button.setY(topPos + rectangle.y());
+            button.setWidth(rectangle.width());
+        }
     }
 
     private void updateSidebarState() {
         TerminalPreferences preferences = displayedPreferences();
         storagePageBtn.setTooltip(Tooltip.create(Component.translatable("gui.magic_storage.page_storage")));
         craftablePageBtn.setTooltip(Tooltip.create(Component.translatable("gui.magic_storage.page_craftable")));
-        fuelPageBtn.setTooltip(Tooltip.create(Component.translatable("gui.magic_storage.page_fuel")));
-        fuelTargetListBtn.setTooltip(Tooltip.create(Component.translatable("gui.magic_storage.fuel_target_list")));
-
+        transformPageBtn.setTooltip(Tooltip.create(Component.translatable("gui.magic_storage.page_transform")));
+        stationsPageBtn.setTooltip(Tooltip.create(Component.translatable("gui.magic_storage.page_stations")));
         updateToggleButton(playerInventoryRailBtn, "gui.magic_storage.use_player_inv",
                 preferences.usePlayerInventory());
-        Component outputDestination = switch (preferences.outputDestination()) {
+        boolean storageOnly = menu.isSelectedOutputStorageOnly();
+        TerminalOutputDestination effectiveDestination = storageOnly
+                ? TerminalOutputDestination.STORAGE
+                : preferences.outputDestination();
+        Component outputDestination = switch (effectiveDestination) {
             case PLAYER -> Component.translatable("gui.magic_storage.output_destination.player");
             case STORAGE -> Component.translatable("gui.magic_storage.output_destination.storage");
         };
-        outputDestinationRailBtn.setItemIcon(switch (preferences.outputDestination()) {
+        outputDestinationRailBtn.setItemIcon(switch (effectiveDestination) {
             case PLAYER -> Items.PLAYER_HEAD.getDefaultInstance();
             case STORAGE -> MagicStorage.STORAGE_CORE_ITEM.get().getDefaultInstance();
         });
+        outputDestinationRailBtn.active = outputDestinationRailBtn.visible && !storageOnly;
         updateCycleTooltip(outputDestinationRailBtn, "gui.magic_storage.output_destination",
                 outputDestination);
+        stationDisplayModeBtn.setItemIcon(stationDisplayMode == StationDisplayMode.ALL
+                ? Items.CHEST.getDefaultInstance()
+                : Items.FURNACE.getDefaultInstance());
+        updateCycleTooltip(
+                stationDisplayModeBtn,
+                "tooltip.magic_storage.station_display",
+                Component.translatable(stationDisplayMode.translationKey()));
     }
 
     private void updateCraftButtonState() {
         if (craft1Btn == null) return;
+        if (displayedPreferences().page() == CraftingTerminalPage.TRANSFORM) {
+            int transformable = menu.getCraftableCount();
+            craft1Btn.active = transformable >= 1;
+            craft8Btn.active = transformable >= 8;
+            craft64Btn.active = transformable >= 64;
+            craftMaxBtn.active = transformable >= 1;
+            return;
+        }
         int craftable = menu.getCraftableCount();
         craft1Btn.active = craftable >= 1;
         craft8Btn.active = craftable >= 8;
@@ -402,6 +600,50 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         craftMaxBtn.active = craftable >= 1;
         prevRecipeBtn.active = menu.getRecipeCount() > 1;
         nextRecipeBtn.active = menu.getRecipeCount() > 1;
+    }
+
+    private void updateFuelPageButtonStates() {
+        boolean transform = displayedPreferences().page() == CraftingTerminalPage.TRANSFORM;
+        boolean stations = displayedPreferences().page() == CraftingTerminalPage.STATIONS;
+        updateFuelPageButtons(
+                transformTargetPageButtons,
+                transformTargetPage,
+                transformTargetPageCount(),
+                transform);
+        updateFuelPageButtons(
+                transformCardPageButtons,
+                transformUsePage,
+                transformPageCount(),
+                transform);
+        updateFuelPageButtons(
+                timedStationsPageButtons,
+                timedStationPage,
+                geometry.timedStationsGrid().pageCount(),
+                stations && !fuelSearchActive);
+        updateFuelPageButtons(
+                instantStationsPageButtons,
+                instantStationPage,
+                geometry.instantStationsGrid().pageCount(),
+                stations && !fuelSearchActive);
+        updateFuelPageButtons(
+                fuelSearchPageButtons,
+                fuelSearchPage,
+                fuelSearchPageCount(),
+                stations && fuelSearchActive);
+    }
+
+    private void updateFuelPageButtons(
+            FuelPageButtons buttons,
+            int page,
+            int pageCount,
+            boolean fuel
+    ) {
+        if (buttons == null) return;
+        boolean visible = fuel && pageCount > 1;
+        setWidgetVisible(buttons.previous(), visible);
+        setWidgetVisible(buttons.next(), visible);
+        buttons.previous().active = visible && page > 0;
+        buttons.next().active = visible && page + 1 < pageCount;
     }
 
     private void updateToggleButton(TerminalCycleButton button, String key, boolean enabled) {
@@ -420,7 +662,21 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     protected void containerTick() {
         super.containerTick();
         TerminalPreferences preferences = displayedPreferences();
-        if (lastPage != preferences.page() || lastFuelTarget != preferences.fuelTarget()) {
+        if (lastUtilitySortMode != preferences.sortMode()
+                || lastUtilitySortOrder != preferences.sortOrder()) {
+            lastUtilitySortMode = preferences.sortMode();
+            lastUtilitySortOrder = preferences.sortOrder();
+            transformTargetPage = 0;
+            transformUsePage = 0;
+            timedStationPage = 0;
+            instantStationPage = 0;
+            fuelSearchPage = 0;
+            refreshTransformTargets();
+            refreshFuelSearchResults();
+        }
+        if (lastPage != preferences.page()
+                || !Objects.equals(
+                lastTransformTarget, preferences.transformTarget())) {
             updatePageWidgets();
         }
         updateCraftButtonState();
@@ -429,8 +685,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        if (displayedPreferences().page() == CraftingTerminalPage.FUEL) {
-            renderFuelPage(graphics);
+        CraftingTerminalPage page = displayedPreferences().page();
+        if (page == CraftingTerminalPage.TRANSFORM
+                || page == CraftingTerminalPage.STATIONS) {
+            renderUtilityPage(graphics, page, mouseX, mouseY);
         } else {
             super.renderBg(graphics, partialTick, mouseX, mouseY);
             renderRecipePanel(graphics, partialTick, mouseX, mouseY);
@@ -438,24 +696,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         renderSideRail(graphics);
     }
 
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-        if (fuelTargetPopup == null || !fuelTargetPopup.visible) return;
-        graphics.pose().pushPose();
-        try {
-            graphics.pose().translate(0.0F, 0.0F, 400.0F);
-            fuelTargetPopup.render(graphics, mouseX, mouseY, partialTick);
-        } finally {
-            graphics.pose().popPose();
-        }
-    }
-
     private void renderSideRail(GuiGraphics graphics) {
         TerminalPreferences preferences = displayedPreferences();
         boolean itemPage = preferences.page().isItemPage();
-        boolean fuelPage = preferences.page() == CraftingTerminalPage.FUEL;
-        if (fuelPage) {
+        if (!itemPage) {
             drawRaisedPanel(graphics, leftPos, topPos, geometry.fuelRailPanel());
         }
         if (itemPage && preferences.usePlayerInventory()) {
@@ -473,80 +717,276 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         graphics.fill(x, y, x + 2, y + button.height() - 6, color);
     }
 
-    private void renderFuelPage(GuiGraphics graphics) {
+    private void renderUtilityPage(
+            GuiGraphics graphics,
+            CraftingTerminalPage page,
+            int mouseX,
+            int mouseY
+    ) {
         drawRaisedPanel(graphics, leftPos, topPos, geometry.frame());
         drawInsetPanel(graphics, leftPos, topPos, geometry.playerInventory());
-        renderConsumablesPanel(graphics);
-        renderTimedStationsPanel(graphics);
-        renderInstantStationsPanel(graphics);
-        renderFuelTypeCapacity(graphics);
+        drawInsetPanel(graphics, leftPos, topPos, geometry.searchBackground());
+        if (page == CraftingTerminalPage.TRANSFORM) {
+            renderConsumablesPanel(graphics, mouseX, mouseY);
+        } else if (fuelSearchActive) {
+            renderFuelSearchResults(graphics);
+        } else {
+            renderTimedStationsPanel(graphics);
+            renderInstantStationsPanel(graphics);
+        }
+        renderUtilityStatus(graphics);
     }
 
-    private void renderConsumablesPanel(GuiGraphics graphics) {
-        TerminalLayout.Rect panel = geometry.consumablesPanel();
-        TerminalLayout.FlowGrid grid = geometry.consumablesGrid();
-        renderFuelCategoryHeading(
-                graphics,
-                panel,
-                grid,
-                Component.translatable("gui.magic_storage.fuel_group.consumables"),
-                consumablePage,
-                grid.pageCount());
-        renderFuelTargetBar(graphics, panel);
+    private void renderFuelSearchResults(GuiGraphics graphics) {
+        TerminalLayout.Rect panel = geometry.fuelSearchPanel();
+        TerminalLayout.FlowGrid grid = geometry.fuelSearchGrid();
+        drawInsetPanel(graphics, leftPos, topPos, panel);
+        Component heading = Component.translatable("gui.magic_storage.fuel_search_results");
+        int controlsLeft = geometry.fuelSearchPageControls().previous().x();
+        int headingWidth = Math.max(1, controlsLeft - panel.x() - 32);
+        String visibleHeading = font.plainSubstrByWidth(heading.getString(), headingWidth);
+        int headerY = panel.y() + (TerminalLayout.CONTROL_SIZE - font.lineHeight) / 2 + 2;
+        graphics.drawString(
+                font,
+                visibleHeading,
+                leftPos + panel.x() + 4,
+                topPos + headerY,
+                0xFF404040,
+                false);
+        if (fuelSearchPageCount() > 1) {
+            String page = (fuelSearchPage + 1) + "/" + fuelSearchPageCount();
+            graphics.drawString(
+                    font,
+                    page,
+                    leftPos + controlsLeft - font.width(page) - 3,
+                    topPos + headerY,
+                    0xFF404040,
+                    false);
+        }
+        if (filteredFuelEntries.isEmpty()) {
+            Component empty = Component.translatable("gui.magic_storage.fuel_search_empty");
+            graphics.drawString(
+                    font,
+                    empty,
+                    leftPos + panel.x() + (panel.width() - font.width(empty)) / 2,
+                    topPos + panel.y() + (panel.height() - font.lineHeight) / 2,
+                    0xFF606060,
+                    false);
+            return;
+        }
 
-        int first = consumablePage * grid.capacity();
-        List<TerminalLayout.Rect> cells = grid.cells(consumablePage);
-        List<EnergyType> fuelTypes = CraftingTerminalMenu.fuelTargets();
-        List<Integer> consumableMachines = machineSlotsForCategory(
-                MachineEnergyTable.Category.CONSUMABLE);
+        int first = fuelSearchPage * grid.capacity();
+        List<TerminalLayout.Rect> cells = grid.cells(
+                fuelSearchPage, filteredFuelEntries.size());
         for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
-            int descriptorIndex = first + visibleIndex;
+            FuelSearchModel.Entry result = filteredFuelEntries.get(first + visibleIndex);
             TerminalLayout.Rect cell = cells.get(visibleIndex);
-            if (descriptorIndex == 0) {
-                TerminalLayout.Rect slot = TerminalLayout.fuelSlot(cell);
-                drawSlotFrame(graphics, leftPos + slot.x(), topPos + slot.y());
-                continue;
-            }
-            if (descriptorIndex <= fuelTypes.size()) {
-                EnergyType type = fuelTypes.get(descriptorIndex - 1);
-                TerminalLayout.Rect icon = TerminalLayout.fuelIcon(cell);
-                graphics.renderItem(
-                        type.representativeStack(), leftPos + icon.x(), topPos + icon.y());
-                drawFlowAmount(graphics, cell, formatAmount(menu.getEnergyAmount(type)));
-                continue;
-            }
-            int consumableIndex = descriptorIndex - consumableMachineOffset();
-            if (consumableIndex < 0 || consumableIndex >= consumableMachines.size()) continue;
+            MachineDescriptor descriptor = descriptorAt(result.machineSlot());
+            if (descriptor == null) continue;
             TerminalLayout.Rect slot = TerminalLayout.fuelSlot(cell);
             drawSlotFrame(graphics, leftPos + slot.x(), topPos + slot.y());
-            int machineSlot = consumableMachines.get(consumableIndex);
-            MachineDescriptor entry = descriptorAt(machineSlot);
-            if (entry != null && menu.getSlot(
-                    CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).getItem().isEmpty()) {
-                renderDimmedItem(graphics, entry.representativeStack(), slot);
+            ItemStack installed = menu.getSlot(
+                    CraftingTerminalMenu.MACHINE_SLOT_START
+                            + result.machineSlot()).getItem();
+            if (!installed.isEmpty()) {
+                ItemStack icon = installed.copyWithCount(1);
+                graphics.renderItem(icon, leftPos + slot.x(), topPos + slot.y());
+                if (descriptor.category() == MachineEnergyTable.Category.PROCESS) {
+                    renderNetworkAmount(
+                            graphics,
+                            leftPos + slot.x(),
+                            topPos + slot.y(),
+                            installed.getCount());
+                }
+            } else {
+                renderDimmedItem(graphics, descriptor.representativeStack(), slot);
             }
-            if (entry != null) {
-                drawFlowAmount(graphics, cell,
-                        menu.hasInfiniteDescriptor(entry.id())
-                                ? "∞"
-                                : formatAmount(menu.getDescriptorAmount(entry.id())));
+            if (descriptor.category() == MachineEnergyTable.Category.PROCESS) {
+                drawFlowAmount(
+                        graphics,
+                        cell,
+                        formatAmount(machineStoredAmount(descriptor)));
             }
         }
     }
 
-    private void renderFuelTargetBar(GuiGraphics graphics, TerminalLayout.Rect panel) {
-        TerminalLayout.Rect bar = TerminalLayout.fuelTargetBar(panel);
-        drawRaisedPanel(graphics, leftPos, topPos, bar);
-        Component label = Component.translatable("gui.magic_storage.fuel_target");
-        int availableWidth = Math.max(0, geometry.fuelTargetSelector().x() - bar.x() - 6);
-        String visible = font.plainSubstrByWidth(label.getString(), availableWidth);
-        graphics.drawString(
-                font,
-                visible,
-                leftPos + bar.x() + 4,
-                topPos + bar.y() + (bar.height() - font.lineHeight) / 2,
-                0xFF404040,
-                false);
+    private void renderConsumablesPanel(GuiGraphics graphics, int mouseX, int mouseY) {
+        drawInsetPanel(graphics, leftPos, topPos, geometry.transformPanel());
+        renderTransformTargetList(graphics);
+        TerminalLayout.Rect input = geometry.transformInput();
+        drawSlotFrame(graphics, leftPos + input.x(), topPos + input.y());
+        ItemStack inputStack = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
+        if (!inputStack.isEmpty()) {
+            ItemStack icon = inputStack.copyWithCount(1);
+            graphics.renderItem(icon, leftPos + input.x(), topPos + input.y());
+            graphics.renderItemDecorations(
+                    font,
+                    icon,
+                    leftPos + input.x(),
+                    topPos + input.y(),
+                    formatAmount(inputStack.getCount()));
+        }
+        Component inputLabel = inputStack.isEmpty()
+                ? Component.translatable("gui.magic_storage.fuel_input")
+                : inputStack.getHoverName();
+        int labelRight = geometry.transformAmountButtons().getFirst().x() - 3;
+        if (labelRight > input.right()) {
+            graphics.drawString(
+                    font,
+                    font.plainSubstrByWidth(
+                            inputLabel.getString(), labelRight - input.right() - 3),
+                    leftPos + input.right() + 3,
+                    topPos + input.y() + (input.height() - font.lineHeight) / 2,
+                    0xFF404040,
+                    false);
+        }
+        if (inputStack.isEmpty()) {
+            TerminalLayout.Rect cards = geometry.transformCards().bounds();
+            Component prompt = Component.translatable(
+                    "gui.magic_storage.transform_insert_item");
+            String visible = font.plainSubstrByWidth(
+                    prompt.getString(), Math.max(1, cards.width() - 8));
+            graphics.drawString(
+                    font,
+                    visible,
+                    leftPos + cards.x() + (cards.width() - font.width(visible)) / 2,
+                    topPos + cards.y() + 4,
+                    0xFF606060,
+                    false);
+        }
+        renderTransformCards(graphics, mouseX, mouseY);
+    }
+
+    private void renderTransformTargetList(GuiGraphics graphics) {
+        TerminalLayout.PagedList list = geometry.transformTargetList();
+        List<FuelTargetOption> options = filteredTransformTargets();
+        List<TerminalLayout.Rect> rows = list.rows(transformTargetPage, options.size());
+        int first = transformTargetPage * list.capacity();
+        for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+            FuelTargetOption option = options.get(first + rowIndex);
+            TerminalLayout.Rect row = rows.get(rowIndex);
+            boolean selected = Objects.equals(
+                    option.target(), displayedPreferences().transformTarget());
+            if (selected) {
+                drawInsetPanel(graphics, leftPos, topPos, row);
+            } else {
+                drawRaisedPanel(graphics, leftPos, topPos, row);
+            }
+            graphics.renderItem(
+                    option.icon(),
+                    leftPos + row.x() + 2,
+                    topPos + row.y() + (row.height() - 16) / 2);
+            String label = font.plainSubstrByWidth(
+                    option.label().getString(), Math.max(1, row.width() - 22));
+            graphics.drawString(
+                    font,
+                    label,
+                    leftPos + row.x() + 21,
+                    topPos + row.y() + (row.height() - font.lineHeight) / 2,
+                    selected ? 0xFF163C54 : 0xFF404040,
+                    false);
+        }
+        drawFlowPageIndicator(
+                graphics,
+                new TerminalLayout.Rect(
+                        list.bounds().x(),
+                        geometry.transformTargetPageControls().previous().y(),
+                        list.bounds().width(),
+                        TerminalLayout.CONTROL_SIZE),
+                transformTargetPage,
+                transformTargetPageCount(),
+                geometry.transformTargetPageControls().previous().y()
+                        + (TerminalLayout.CONTROL_SIZE - font.lineHeight) / 2);
+    }
+
+    private void renderTransformCards(GuiGraphics graphics, int mouseX, int mouseY) {
+        List<TransformProviderApi.Use> uses = menu.getVisibleTransformUses();
+        TransformProviderApi.Use selected = menu.getSelectedTransformUse();
+        TerminalLayout.FlowGrid grid = geometry.transformCards();
+        int first = transformUsePage * grid.capacity();
+        List<TerminalLayout.Rect> cells = grid.cells(transformUsePage, uses.size());
+        ItemStack input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
+        for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
+            TransformProviderApi.Use use = uses.get(first + visibleIndex);
+            TerminalLayout.Rect cell = cells.get(visibleIndex);
+            if (selected != null && selected.id().equals(use.id())) {
+                drawInsetPanel(graphics, leftPos, topPos, cell);
+            } else {
+                drawRaisedPanel(graphics, leftPos, topPos, cell);
+                if (cell.contains(mouseX - leftPos, mouseY - topPos)) {
+                    graphics.fill(
+                            leftPos + cell.x() + 1,
+                            topPos + cell.y() + 1,
+                            leftPos + cell.right() - 1,
+                            topPos + cell.bottom() - 1,
+                            0x28FFFFFF);
+                }
+            }
+            if (!input.isEmpty()) {
+                graphics.renderItem(input.copyWithCount(1),
+                        leftPos + cell.x() + 3,
+                        topPos + cell.y() + (cell.height() - 16) / 2);
+            }
+            graphics.drawString(
+                    font,
+                    "→",
+                    leftPos + cell.x() + 22,
+                    topPos + cell.y() + (cell.height() - font.lineHeight) / 2,
+                    0xFF606060,
+                    false);
+            graphics.renderItem(
+                    use.representative(),
+                    leftPos + cell.x() + 33,
+                    topPos + cell.y() + (cell.height() - 16) / 2);
+            Component label = fuelTargetOption(use.targetId()).label();
+            String text = label.getString() + "  "
+                    + (use.infinite() ? "∞" : formatAmount(use.amountPerItem()));
+            Component source = transformSource(use);
+            int textY = source.getString().isEmpty()
+                    ? cell.y() + (cell.height() - font.lineHeight) / 2
+                    : cell.y() + 4;
+            graphics.drawString(
+                    font,
+                    font.plainSubstrByWidth(text, Math.max(1, cell.width() - 54)),
+                    leftPos + cell.x() + 52,
+                    topPos + textY,
+                    0xFF404040,
+                    false);
+            if (!source.getString().isEmpty()) {
+                graphics.drawString(
+                        font,
+                        font.plainSubstrByWidth(
+                                source.getString(), Math.max(1, cell.width() - 54)),
+                        leftPos + cell.x() + 52,
+                        topPos + cell.bottom() - font.lineHeight - 4,
+                        0xFF606060,
+                        false);
+            }
+        }
+        if (!input.isEmpty() && uses.isEmpty()) {
+            Component empty = Component.translatable("gui.magic_storage.no_transformations");
+            graphics.drawString(
+                    font,
+                    font.plainSubstrByWidth(empty.getString(), grid.bounds().width() - 8),
+                    leftPos + grid.bounds().x() + 4,
+                    topPos + grid.bounds().y() + 4,
+                    0xFF606060,
+                    false);
+        }
+    }
+
+    private Component transformSource(TransformProviderApi.Use use) {
+        if (use.stationId() == null) {
+            return Component.empty();
+        }
+        Component station = TransformProviderApi.sourceLabel(use.id())
+                .orElseGet(() -> Component.literal(use.stationId().toString()));
+        return use.stationWorkPerItem() > 0
+                ? Component.translatable(
+                        "gui.magic_storage.transform_station_work",
+                        station,
+                        formatAmount(use.stationWorkPerItem()))
+                : station;
     }
 
     private void renderTimedStationsPanel(GuiGraphics graphics) {
@@ -556,6 +996,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 graphics,
                 panel,
                 grid,
+                geometry.timedStationsPageControls(),
                 Component.translatable("gui.magic_storage.fuel_group.timed_stations"),
                 timedStationPage,
                 grid.pageCount());
@@ -563,8 +1004,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 graphics,
                 MachineEnergyTable.Category.PROCESS,
                 grid,
-                timedStationPage,
-                true);
+                timedStationPage);
     }
 
     private void renderInstantStationsPanel(GuiGraphics graphics) {
@@ -574,6 +1014,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 graphics,
                 panel,
                 grid,
+                geometry.instantStationsPageControls(),
                 Component.translatable("gui.magic_storage.fuel_group.instant_stations"),
                 instantStationPage,
                 grid.pageCount());
@@ -581,14 +1022,14 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 graphics,
                 MachineEnergyTable.Category.INSTANT,
                 grid,
-                instantStationPage,
-                false);
+                instantStationPage);
     }
 
     private void renderFuelCategoryHeading(
             GuiGraphics graphics,
             TerminalLayout.Rect panel,
             TerminalLayout.FlowGrid grid,
+            TerminalLayout.FuelPageControls controls,
             Component heading,
             int page,
             int pageCount
@@ -596,8 +1037,48 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         drawInsetPanel(graphics, leftPos, topPos, panel);
         TerminalLayout.Rect label = TerminalLayout.fuelCategoryLabel(panel, grid);
         drawRaisedPanel(graphics, leftPos, topPos, label);
+        if (grid.bounds().x() == panel.x() + 2) {
+            int pageWidth = pageCount > 1
+                    ? font.width((page + 1) + "/" + pageCount) + 4 : 0;
+            int availableWidth = Math.max(
+                    1, controls.previous().x() - pageWidth - label.x() - 8);
+            String visible = font.plainSubstrByWidth(
+                    heading.getString(), availableWidth);
+            graphics.drawString(
+                    font,
+                    visible,
+                    leftPos + label.x() + 4,
+                    topPos + label.y()
+                            + (label.height() - font.lineHeight) / 2,
+                    0xFF404040,
+                    false);
+            if (pageCount > 1) {
+                String pageText = (page + 1) + "/" + pageCount;
+                graphics.drawString(
+                        font,
+                        pageText,
+                        leftPos + controls.previous().x()
+                                - font.width(pageText) - 3,
+                        topPos + label.y()
+                                + (label.height() - font.lineHeight) / 2,
+                        0xFF404040,
+                        false);
+            }
+            return;
+        }
         List<FormattedCharSequence> lines = font.split(
                 heading, Math.max(1, label.width() - 4));
+        if (pageCount > 1) {
+            FormattedCharSequence line = lines.getFirst();
+            graphics.drawString(
+                    font,
+                    line,
+                    leftPos + label.x() + (label.width() - font.width(line)) / 2,
+                    topPos + label.y(),
+                    0xFF404040,
+                    false);
+            return;
+        }
         int visibleLines = Math.min(2, lines.size());
         int lineCount = visibleLines + (pageCount > 1 ? 1 : 0);
         int y = label.y() + (label.height() - lineCount * font.lineHeight) / 2;
@@ -619,8 +1100,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             GuiGraphics graphics,
             MachineEnergyTable.Category category,
             TerminalLayout.FlowGrid grid,
-            int page,
-            boolean showEnergy
+            int page
     ) {
         List<Integer> machineSlots = machineSlotsForCategory(category);
         int first = page * grid.capacity();
@@ -633,15 +1113,46 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             TerminalLayout.Rect cell = cells.get(visibleIndex);
             TerminalLayout.Rect slot = TerminalLayout.fuelSlot(cell);
             drawSlotFrame(graphics, leftPos + slot.x(), topPos + slot.y());
-            if (entry != null && menu.getSlot(
-                    CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).getItem().isEmpty()) {
+            ItemStack installed = menu.getSlot(
+                    CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).getItem();
+            if (!installed.isEmpty()) {
+                ItemStack icon = installed.copyWithCount(1);
+                graphics.renderItem(icon, leftPos + slot.x(), topPos + slot.y());
+                if (category == MachineEnergyTable.Category.PROCESS) {
+                    renderNetworkAmount(
+                            graphics,
+                            leftPos + slot.x(),
+                            topPos + slot.y(),
+                            installed.getCount());
+                }
+            } else if (entry != null) {
                 renderDimmedItem(graphics, entry.representativeStack(), slot);
             }
-            if (showEnergy && entry != null && entry.energyType() != null) {
-                drawFlowAmount(graphics, cell,
-                        formatAmount(menu.getEnergyAmount(entry.energyType())));
+            if (entry != null) {
+                if (category == MachineEnergyTable.Category.PROCESS) {
+                    drawFlowAmount(
+                            graphics,
+                            cell,
+                            formatAmount(machineStoredAmount(entry)));
+                }
             }
         }
+    }
+
+    @Override
+    protected void renderSlotContents(
+            GuiGraphics graphics,
+            ItemStack stack,
+            net.minecraft.world.inventory.Slot slot,
+            String countString
+    ) {
+        if (slot.index == CraftingTerminalMenu.FUEL_INPUT_SLOT
+                || slot.index >= CraftingTerminalMenu.MACHINE_SLOT_START
+                && slot.index < CraftingTerminalMenu.MACHINE_SLOT_START
+                + CraftingTerminalMenu.MACHINE_SLOT_COUNT) {
+            return;
+        }
+        super.renderSlotContents(graphics, stack, slot, countString);
     }
 
     private void renderDimmedItem(
@@ -649,9 +1160,13 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             ItemStack stack,
             TerminalLayout.Rect bounds
     ) {
-        graphics.setColor(0.65F, 0.72F, 0.75F, 0.38F);
         graphics.renderItem(stack, leftPos + bounds.x(), topPos + bounds.y());
-        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        graphics.fill(
+                leftPos + bounds.x(),
+                topPos + bounds.y(),
+                leftPos + bounds.right(),
+                topPos + bounds.bottom(),
+                0xA05A6870);
     }
 
     private void drawFlowAmount(
@@ -673,9 +1188,12 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         graphics.pose().popPose();
     }
 
-    private void renderFuelTypeCapacity(GuiGraphics graphics) {
+    private void renderUtilityStatus(GuiGraphics graphics) {
         TerminalLayout.Rect status = geometry.fuelStatus();
         drawRaisedPanel(graphics, leftPos, topPos, status);
+        int capacityHeight = Math.max(
+                TerminalLayout.CONTROL_SIZE,
+                status.height() - TerminalLayout.CONTROL_SIZE - 2);
         Component label = menu.hasUnlimitedTypeCapacity()
                 ? Component.translatable(
                         "gui.magic_storage.type_capacity_unlimited",
@@ -690,7 +1208,8 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         float scale = Math.min(1.0F, (float) availableTextWidth / Math.max(1, textWidth));
         int contentWidth = iconSpace + Math.round(textWidth * scale);
         int contentX = status.x() + Math.max(2, (status.width() - contentWidth) / 2);
-        int contentY = status.y() + (status.height() - Math.round(font.lineHeight * scale)) / 2;
+        int contentY = status.y()
+                + (capacityHeight - Math.round(font.lineHeight * scale)) / 2;
         if (iconSpace > 0) {
             ItemStack capacityIcon = menu.hasUnlimitedTypeCapacity()
                     ? MagicStorage.CREATIVE_STORAGE_UNIT_ITEM.get().getDefaultInstance()
@@ -698,7 +1217,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             graphics.renderItem(
                     capacityIcon,
                     leftPos + contentX,
-                    topPos + status.y() + (status.height() - 16) / 2);
+                    topPos + status.y() + (capacityHeight - 16) / 2);
         }
         graphics.pose().pushPose();
         graphics.pose().translate(
@@ -735,8 +1254,6 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             int mouseX,
             int mouseY
     ) {
-        TerminalLayout.Rect panel = geometry.workspace();
-        drawInsetPanel(graphics, leftPos, topPos, panel);
         TerminalLayout.Rect diagram = geometry.recipeDiagram();
         TerminalLayout.Rect ledger = geometry.recipeLedger();
         TerminalLayout.Rect footer = geometry.recipeFooter();
@@ -774,19 +1291,26 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 partialTick);
         renderRecipeStationHint(graphics, presentation);
 
-        int recipeCount = menu.getRecipeCount();
-        String recipePosition = recipeCount <= 0 ? "" :
-                (Math.clamp(menu.getCurrentRecipeIndex(), 0, recipeCount - 1) + 1) + "/" + recipeCount;
-        if (!recipePosition.isEmpty()) {
-            graphics.drawString(font, recipePosition,
-                    leftPos + diagram.right() - font.width(recipePosition),
-                    topPos + diagram.y() + 1, 0xFF606060, false);
-        }
-
-        List<RecipePresentation.Resource> resources = presentation.resources();
+        List<RecipePresentation.Resource> resources = visibleRecipeResources(presentation);
         List<TerminalLayout.Rect> cells = geometry.recipeLedgerCells(resources.size());
         for (int index = 0; index < resources.size(); index++) {
             renderResourceRow(graphics, cells.get(index), resources.get(index));
+        }
+        int maxOffset = recipeLedgerMaxOffset(presentation);
+        if (maxOffset > 0) {
+            TerminalLayout.Rect scrollbar = new TerminalLayout.Rect(
+                    ledger.right() - 14, ledger.y(), 14, ledger.height());
+            drawInsetPanel(graphics, leftPos, topPos, scrollbar);
+            drawScrollbar(
+                    graphics,
+                    leftPos + scrollbar.x() + 1,
+                    topPos + scrollbar.y() + 1,
+                    scrollbar.height() - 2,
+                    recipeLedgerOffset,
+                    maxOffset,
+                    maxOffset > 0
+                            ? TerminalScrollbar.VisualState.ENABLED
+                            : TerminalScrollbar.VisualState.DISABLED);
         }
     }
 
@@ -813,8 +1337,22 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         TerminalLayout.Rect station = geometry.recipeStation();
         int x = leftPos + station.x() + (station.width() - 16) / 2;
         int y = topPos + station.y() + (station.height() - 16) / 2;
-        graphics.renderItem(presentation.station(), x, y);
+        graphics.renderItem(displayedRecipeStation(presentation), x, y);
         graphics.fill(x, y, x + 16, y + 16, 0x58000000);
+    }
+
+    private ItemStack displayedRecipeStation(RecipePresentation presentation) {
+        long now = System.currentTimeMillis();
+        ItemStack installed = presentation.station();
+        if (!Objects.equals(stationCycleRecipeId, presentation.recipeId())
+                || !ItemStack.isSameItemSameComponents(stationCycleInstalled, installed)
+                || now < stationCycleAnchorMillis) {
+            stationCycleRecipeId = presentation.recipeId();
+            stationCycleInstalled = installed.copyWithCount(1);
+            stationCycleAnchorMillis = now;
+        }
+        long cycle = RecipeStationCycle.cycle(now - stationCycleAnchorMillis);
+        return presentation.stationForCycle(cycle);
     }
 
     private void renderResourceRow(
@@ -830,15 +1368,22 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         int iconY = y + Math.max(0, (cell.height() - 16) / 2);
         ItemStack icon = resource.kind() == RecipePresentation.ResourceKind.ENERGY
                 ? resource.energyType().representativeStack() : resource.stack();
-        graphics.renderItem(icon, x + 1, iconY);
-        String available = resource.infinite() ? "∞" : formatAmount(resource.available());
-        String amount = available + "/" + formatAmount(resource.required());
+        renderTypedResourceBackground(graphics, icon, x + 1, iconY);
+        renderTerminalIcon(graphics, icon, x + 1, iconY, 0.0F);
+        RecipeResourceAmountFormatter amount = RecipeResourceAmountFormatter.format(
+                resource.available(), resource.required(), resource.infinite());
         int textX = x + 18;
-        String visible = font.plainSubstrByWidth(amount, Math.max(0, cell.width() - 20));
-        graphics.drawString(font, visible, textX,
-                y + Math.max(0, (cell.height() - font.lineHeight) / 2),
-                resource.infinite() || resource.available() >= resource.required()
-                        ? 0xFF176B2C : 0xFFFF7777, false);
+        int availableTextWidth = Math.max(0, cell.width() - 20);
+        int color = resource.infinite() || resource.available() >= resource.required()
+                ? 0xFF176B2C : 0xFFFF7777;
+        if (font.width(amount.inline()) <= availableTextWidth) {
+            int textY = y + Math.max(0, (cell.height() - font.lineHeight) / 2);
+            graphics.drawString(font, amount.inline(), textX, textY, color, false);
+            return;
+        }
+        int textY = y + Math.max(0, (cell.height() - font.lineHeight * 2) / 2);
+        graphics.drawString(font, amount.available(), textX, textY, color, false);
+        graphics.drawString(font, amount.required(), textX, textY + font.lineHeight, color, false);
     }
 
     @Override
@@ -846,109 +1391,160 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFF404040, false);
         graphics.drawString(font, playerInventoryTitle,
                 inventoryLabelX, inventoryLabelY, 0xFF404040, false);
+        renderRecipePosition(graphics);
     }
 
     @Override
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        if (fuelTargetPopup != null && fuelTargetPopup.visible
-                && fuelTargetPopup.isMouseOver(mouseX, mouseY)) return;
+        if (!displayedPreferences().page().isItemPage()) {
+            renderFuelTooltip(graphics, mouseX, mouseY);
+            return;
+        }
         super.renderTooltip(graphics, mouseX, mouseY);
-        if (displayedPreferences().page().isItemPage()) {
-            RecipePresentation presentation = menu.getRecipePresentation();
-            if (presentation.isEmpty()) return;
-            TerminalLayout.Rect station = geometry.recipeStation();
-            if (station.contains(mouseX - leftPos, mouseY - topPos)) {
-                graphics.renderTooltip(font, Component.translatable(
-                        "gui.magic_storage.recipe_station", presentation.station().getHoverName()),
-                        mouseX, mouseY);
-                return;
-            }
-            if (activeRecipeDiagramRenderer(presentation).renderTooltip(
-                    graphics,
-                    font,
-                    presentation,
-                    recipeDiagramGeometry,
-                    leftPos,
-                    topPos,
-                    mouseX,
-                    mouseY)) {
-                return;
-            }
-            RecipePresentation.Resource resource = recipeResourceAt(
-                    presentation, mouseX, mouseY);
-            if (resource != null) {
-                Component name = resource.kind() == RecipePresentation.ResourceKind.ENERGY
-                        ? energyLabel(resource.energyType()) : resource.stack().getHoverName();
-                graphics.renderComponentTooltip(font, List.of(
-                        name,
-                        Component.translatable("gui.magic_storage.available_amount",
-                                formatAmount(resource.available())),
-                        Component.translatable("gui.magic_storage.required_for_one",
-                                formatAmount(resource.required()))
-                ), mouseX, mouseY);
-            }
+        RecipePresentation presentation = menu.getRecipePresentation();
+        if (presentation.isEmpty()) return;
+        TerminalLayout.Rect station = geometry.recipeStation();
+        if (station.contains(mouseX - leftPos, mouseY - topPos)) {
+            graphics.renderTooltip(font, Component.translatable(
+                    "gui.magic_storage.recipe_station",
+                    displayedRecipeStation(presentation).getHoverName()),
+                    mouseX, mouseY);
             return;
         }
-
-        TerminalLayout.Rect fuelStatus = geometry.fuelStatus();
-        if (fuelStatus.contains(mouseX - leftPos, mouseY - topPos)) {
-            Component capacity = menu.hasUnlimitedTypeCapacity()
-                    ? Component.translatable(
-                            "gui.magic_storage.type_capacity_unlimited", menu.getTypeCount())
-                    : Component.translatable(
-                            "gui.magic_storage.type_capacity",
-                            menu.getTypeCount(),
-                            menu.getMaxTypes());
-            graphics.renderTooltip(font, capacity, mouseX, mouseY);
+        if (activeRecipeDiagramRenderer(presentation).renderTooltip(
+                graphics,
+                font,
+                presentation,
+                recipeDiagramGeometry,
+                leftPos,
+                topPos,
+                mouseX,
+                mouseY)) {
             return;
         }
-
-        int machineIndex = machineEnergyIndexAt(mouseX, mouseY);
-        if (machineIndex >= 0) {
-            ItemStack installed = menu.getSlot(
-                    CraftingTerminalMenu.MACHINE_SLOT_START + machineIndex).getItem();
-            MachineDescriptor entry = descriptorAt(machineIndex);
-            if (entry == null) return;
-            Component machineName = installed.isEmpty()
-                    ? entry.representativeStack().getHoverName()
-                    : installed.getHoverName();
-            List<Component> tooltip = new ArrayList<>();
-            tooltip.add(machineName);
-            if (entry.generatesEnergy()) {
-                int rate = installed.isEmpty() || !entry.accepts(installed)
-                        ? 0 : installed.getCount() * entry.energyPerTick();
-                tooltip.add(Component.translatable("tooltip.magic_storage.machine_rate", rate));
-                tooltip.add(Component.translatable("tooltip.magic_storage.energy_stored",
-                        menu.getEnergyAmount(entry.energyType())));
-            } else if (entry.category() == MachineEnergyTable.Category.CONSUMABLE) {
-                if (entry.id().equals(MachineEnergyTable.AXE_ID)) {
-                    tooltip.set(0, Component.translatable("gui.magic_storage.axe_energy"));
-                }
-                Object amount = menu.hasInfiniteDescriptor(entry.id())
-                        ? "∞"
-                        : menu.getDescriptorAmount(entry.id());
-                tooltip.add(Component.translatable("tooltip.magic_storage.energy_stored", amount));
-            }
-            graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY);
-            return;
-        }
-
-        int fuelIndex = storedFuelIndexAt(mouseX, mouseY);
-        if (fuelIndex >= 0) {
-            EnergyType type = CraftingTerminalMenu.fuelTargets().get(fuelIndex);
+        RecipePresentation.Resource resource = recipeResourceAt(
+                presentation, mouseX, mouseY);
+        if (resource != null) {
+            Component name = resource.kind() == RecipePresentation.ResourceKind.ENERGY
+                    ? energyLabel(resource.energyType()) : resource.stack().getHoverName();
             graphics.renderComponentTooltip(font, List.of(
-                    energyLabel(type),
-                    Component.translatable("tooltip.magic_storage.energy_stored",
-                            menu.getEnergyAmount(type))
+                    name,
+                    Component.translatable("gui.magic_storage.available_amount",
+                            formatAmount(resource.available())),
+                    Component.translatable("gui.magic_storage.required_for_one",
+                            formatAmount(resource.required()))
             ), mouseX, mouseY);
-            return;
         }
+    }
 
-        TerminalLayout.Rect input = geometry.fuelInput();
-        if (menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().isEmpty()
-                && input.contains(mouseX - leftPos, mouseY - topPos)) {
-            graphics.renderTooltip(font, Component.translatable("gui.magic_storage.fuel_input"), mouseX, mouseY);
+    private boolean renderFuelTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        CraftingTerminalPage page = displayedPreferences().page();
+        if (page == CraftingTerminalPage.TRANSFORM) {
+            TerminalLayout.Rect input = geometry.transformInput();
+            if (menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().isEmpty()
+                    && input.contains(mouseX - leftPos, mouseY - topPos)) {
+                graphics.renderTooltip(
+                        font,
+                        Component.translatable("gui.magic_storage.fuel_input"),
+                        mouseX,
+                        mouseY);
+                return true;
+            }
+            return false;
         }
+        if (page != CraftingTerminalPage.STATIONS) return false;
+        if (fuelSearchActive) {
+            return renderStationGridTooltip(
+                    graphics,
+                    mouseX,
+                    mouseY,
+                    filteredFuelEntries.stream()
+                            .map(FuelSearchModel.Entry::machineSlot)
+                            .toList(),
+                    geometry.fuelSearchGrid(),
+                    fuelSearchPage);
+        }
+        return renderStationGridTooltip(
+                graphics,
+                mouseX,
+                mouseY,
+                machineSlotsForCategory(MachineEnergyTable.Category.PROCESS),
+                geometry.timedStationsGrid(),
+                timedStationPage)
+                || renderStationGridTooltip(
+                        graphics,
+                        mouseX,
+                        mouseY,
+                        machineSlotsForCategory(MachineEnergyTable.Category.INSTANT),
+                        geometry.instantStationsGrid(),
+                        instantStationPage);
+    }
+
+    private boolean renderStationGridTooltip(
+            GuiGraphics graphics,
+            int mouseX,
+            int mouseY,
+            List<Integer> machineSlots,
+            TerminalLayout.FlowGrid grid,
+            int page
+    ) {
+        int first = page * grid.capacity();
+        List<TerminalLayout.Rect> cells = grid.cells(page, machineSlots.size());
+        int localX = mouseX - leftPos;
+        int localY = mouseY - topPos;
+        for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
+            int machineSlot = machineSlots.get(first + visibleIndex);
+            MachineDescriptor descriptor = descriptorAt(machineSlot);
+            if (descriptor == null) continue;
+            TerminalLayout.Rect cell = cells.get(visibleIndex);
+            ItemStack installed = menu.getSlot(
+                    CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).getItem();
+            ItemStack displayStack = installed.isEmpty()
+                    ? descriptor.representativeStack()
+                    : installed.copyWithCount(1);
+            if (TerminalLayout.fuelSlot(cell).contains(localX, localY)) {
+                graphics.renderTooltip(font, displayStack, mouseX, mouseY);
+                return true;
+            }
+            if (descriptor.category() != MachineEnergyTable.Category.PROCESS
+                    || !TerminalLayout.fuelAmountBounds(cell).contains(localX, localY)) {
+                continue;
+            }
+            Component valueName = descriptor.energyType() == null
+                    ? descriptor.stationLabel()
+                    : energyLabel(descriptor.energyType());
+            MachineWorkRate rate = installed.isEmpty()
+                    ? MachineWorkRate.ZERO
+                    : descriptor.rateFor(installed).orElse(MachineWorkRate.ZERO);
+            graphics.renderComponentTooltip(font, List.of(
+                    valueName,
+                    Component.translatable(
+                            "tooltip.magic_storage.machine_rate",
+                            MachineRateFormatter.format(rate, installed.getCount()))
+            ), mouseX, mouseY);
+            return true;
+        }
+        return false;
+    }
+
+    private long machineStoredAmount(MachineDescriptor descriptor) {
+        EnergyType energyType = descriptor.energyType();
+        return energyType == null
+                ? menu.getDescriptorAmount(descriptor.id())
+                : menu.getEnergyAmount(energyType);
+    }
+
+    private int transformUseIndexAt(int mouseX, int mouseY) {
+        List<TransformProviderApi.Use> uses = menu.getVisibleTransformUses();
+        TerminalLayout.FlowGrid grid = geometry.transformCards();
+        int first = transformUsePage * grid.capacity();
+        List<TerminalLayout.Rect> cells = grid.cells(
+                transformUsePage, uses.size());
+        for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
+            TerminalLayout.Rect cell = cells.get(visibleIndex);
+            if (cell.contains(mouseX - leftPos, mouseY - topPos)) return first + visibleIndex;
+        }
+        return -1;
     }
 
     private RecipePresentation.Resource recipeResourceAt(
@@ -956,7 +1552,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             int mouseX,
             int mouseY
     ) {
-        List<RecipePresentation.Resource> resources = presentation.resources();
+        List<RecipePresentation.Resource> resources = visibleRecipeResources(presentation);
         List<TerminalLayout.Rect> cells = geometry.recipeLedgerCells(resources.size());
         for (int index = 0; index < resources.size(); index++) {
             TerminalLayout.Rect cell = cells.get(index);
@@ -965,70 +1561,24 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         return null;
     }
 
-    private int machineEnergyIndexAt(int mouseX, int mouseY) {
-        int process = machineEnergyIndexAt(
-                MachineEnergyTable.Category.PROCESS,
-                geometry.timedStationsGrid(),
-                timedStationPage,
-                0,
-                mouseX,
-                mouseY);
-        if (process >= 0) return process;
-        int instant = machineEnergyIndexAt(
-                MachineEnergyTable.Category.INSTANT,
-                geometry.instantStationsGrid(),
-                instantStationPage,
-                0,
-                mouseX,
-                mouseY);
-        if (instant >= 0) return instant;
-        return machineEnergyIndexAt(
-                MachineEnergyTable.Category.CONSUMABLE,
-                geometry.consumablesGrid(),
-                consumablePage,
-                consumableMachineOffset(),
-                mouseX,
-                mouseY);
-    }
-
-    private int machineEnergyIndexAt(
-            MachineEnergyTable.Category category,
-            TerminalLayout.FlowGrid grid,
-            int page,
-            int descriptorOffset,
-            int mouseX,
-            int mouseY
+    private List<RecipePresentation.Resource> visibleRecipeResources(
+            RecipePresentation presentation
     ) {
-        List<Integer> machineSlots = machineSlotsForCategory(category);
-        int firstDescriptor = page * grid.capacity();
-        List<TerminalLayout.Rect> cells = grid.cells(page);
-        for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
-            int categoryIndex = firstDescriptor + visibleIndex - descriptorOffset;
-            if (categoryIndex < 0 || categoryIndex >= machineSlots.size()) continue;
-            if (TerminalLayout.fuelSlot(cells.get(visibleIndex)).contains(
-                    mouseX - leftPos, mouseY - topPos)) {
-                return machineSlots.get(categoryIndex);
-            }
+        if (!Objects.equals(recipeLedgerRecipeId, presentation.recipeId())) {
+            recipeLedgerRecipeId = presentation.recipeId();
+            recipeLedgerOffset = 0;
         }
-        return -1;
+        List<RecipePresentation.Resource> resources = presentation.resources();
+        recipeLedgerOffset = Math.clamp(recipeLedgerOffset, 0, recipeLedgerMaxOffset(presentation));
+        int end = Math.min(resources.size(), recipeLedgerOffset + geometry.recipeLedgerCapacity());
+        return resources.subList(recipeLedgerOffset, end);
     }
 
-    private int storedFuelIndexAt(int mouseX, int mouseY) {
-        TerminalLayout.FlowGrid grid = geometry.consumablesGrid();
-        int firstDescriptor = consumablePage * grid.capacity();
-        List<TerminalLayout.Rect> cells = grid.cells(consumablePage);
-        int fuelCount = CraftingTerminalMenu.fuelTargets().size();
-        for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
-            int descriptorIndex = firstDescriptor + visibleIndex;
-            if (descriptorIndex <= 0 || descriptorIndex > fuelCount) continue;
-            if (TerminalLayout.fuelIcon(cells.get(visibleIndex)).contains(
-                    mouseX - leftPos, mouseY - topPos)) return descriptorIndex - 1;
-        }
-        return -1;
-    }
-
-    private static int consumableMachineOffset() {
-        return 1 + CraftingTerminalMenu.fuelTargets().size();
+    private int recipeLedgerMaxOffset(RecipePresentation presentation) {
+        int overflow = presentation.resources().size() - geometry.recipeLedgerCapacity();
+        if (overflow <= 0) return 0;
+        int columns = geometry.recipeLedgerColumns();
+        return (overflow + columns - 1) / columns * columns;
     }
 
     private MachineDescriptor descriptorAt(int slot) {
@@ -1040,130 +1590,97 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         List<Integer> result = new ArrayList<>();
         List<MachineDescriptor> entries = menu.getMachineDescriptors();
         for (int slot = 0; slot < entries.size(); slot++) {
-            if (entries.get(slot).category() == category) result.add(slot);
+            if (entries.get(slot).category() == category
+                    && stationDisplayMode.shows(isStationInstalled(slot))) {
+                result.add(slot);
+            }
         }
+        result.sort(TerminalEntryComparator.forMode(
+                displayedPreferences().sortMode(),
+                displayedPreferences().sortOrder(),
+                this::machineSortStack));
         return List.copyOf(result);
     }
 
-    private static List<FuelTargetOption> buildFuelTargetOptions() {
+    private boolean isStationInstalled(int machineSlot) {
+        return machineSlot >= 0
+                && machineSlot < menu.getMachineDescriptors().size()
+                && menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
+                .hasItem();
+    }
+
+    private void setStationDisplayMode(StationDisplayMode mode) {
+        if (stationDisplayMode == mode) return;
+        stationDisplayMode = mode;
+        timedStationPage = 0;
+        instantStationPage = 0;
+        fuelSearchPage = 0;
+        rebuildWidgets();
+    }
+
+    private ItemStack machineSortStack(int machineSlot) {
+        MachineDescriptor descriptor = descriptorAt(machineSlot);
+        if (descriptor == null) return ItemStack.EMPTY;
+        ItemStack stack = descriptor.representativeStack();
+        stack.set(DataComponents.CUSTOM_NAME, descriptor.stationLabel());
+        return TerminalDisplayStack.create(
+                stack,
+                menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
+                        .getItem().getCount());
+    }
+
+    private List<FuelTargetOption> fuelTargetOptions() {
         List<FuelTargetOption> options = new ArrayList<>();
-        options.add(new FuelTargetOption(null));
-        for (EnergyType target : CraftingTerminalMenu.fuelTargets()) {
-            options.add(new FuelTargetOption(target));
+        options.add(new FuelTargetOption(
+                null,
+                Items.COMPARATOR.getDefaultInstance(),
+                Component.translatable("gui.magic_storage.fuel_target_auto")));
+        for (TransformProviderApi.Target target : menu.getTransformTargets()) {
+            options.add(new FuelTargetOption(
+                    target.id(),
+                    target.representative(),
+                    target.label()));
         }
         return List.copyOf(options);
     }
 
-    private static List<FuelTargetOption> fuelTargetOptions() {
-        return FUEL_TARGET_OPTIONS;
+    private List<FuelTargetOption> filteredTransformTargets() {
+        return filteredTransformTargets;
     }
 
-    private final class FuelTargetPopup extends Button {
-        private final TerminalLayout.PopupList popupGeometry;
-        private int scrollOffset;
+    private FuelTargetOption fuelTargetOption(ResourceLocation targetId) {
+        List<FuelTargetOption> options = fuelTargetOptions();
+        int index = indexOfFuelTarget(options, targetId);
+        if (index >= 0) return options.get(index);
+        return new FuelTargetOption(
+                targetId,
+                Items.BARRIER.getDefaultInstance(),
+                Component.literal(targetId.toString()));
+    }
 
-        private FuelTargetPopup(
-                int x,
-                int y,
-                TerminalLayout.PopupList popupGeometry
-        ) {
-            super(x, y, popupGeometry.bounds().width(), popupGeometry.bounds().height(),
-                    Component.translatable("gui.magic_storage.fuel_target_list"),
-                    button -> { }, DEFAULT_NARRATION);
-            this.popupGeometry = popupGeometry;
-        }
-
-        private void reveal(int optionIndex) {
-            if (optionIndex < scrollOffset) {
-                scrollOffset = optionIndex;
-            } else if (optionIndex >= scrollOffset + popupGeometry.capacity()) {
-                scrollOffset = optionIndex - popupGeometry.capacity() + 1;
-            }
-            scrollOffset = popupGeometry.clampScrollOffset(scrollOffset);
-        }
-
-        @Override
-        protected boolean isValidClickButton(int button) {
-            return button == 0;
-        }
-
-        @Override
-        public void onClick(double mouseX, double mouseY) {
-            int localX = (int) mouseX - leftPos;
-            int localY = (int) mouseY - topPos;
-            List<TerminalLayout.Rect> rows = popupGeometry.rows(scrollOffset);
-            for (int row = 0; row < rows.size(); row++) {
-                if (rows.get(row).contains(localX, localY)) {
-                    selectFuelTarget(fuelTargetOptions().get(scrollOffset + row));
-                    return;
-                }
+    private FuelTargetOption transformTargetAt(double mouseX, double mouseY) {
+        List<FuelTargetOption> options = filteredTransformTargets();
+        TerminalLayout.PagedList list = geometry.transformTargetList();
+        int first = transformTargetPage * list.capacity();
+        List<TerminalLayout.Rect> rows = list.rows(transformTargetPage, options.size());
+        for (int row = 0; row < rows.size(); row++) {
+            if (rows.get(row).contains(
+                    (int) mouseX - leftPos,
+                    (int) mouseY - topPos)) {
+                return options.get(first + row);
             }
         }
+        return null;
+    }
 
-        @Override
-        public boolean mouseScrolled(
-                double mouseX,
-                double mouseY,
-                double scrollX,
-                double scrollY
-        ) {
-            if (!active || !visible || !isMouseOver(mouseX, mouseY) || scrollY == 0.0) return false;
-            int direction = scrollY < 0 ? 1 : -1;
-            scrollOffset = popupGeometry.clampScrollOffset(scrollOffset + direction);
-            return true;
+    private static int indexOfFuelTarget(
+            List<FuelTargetOption> options,
+            ResourceLocation targetId
+    ) {
+        for (int index = 0; index < options.size(); index++) {
+            if (Objects.equals(options.get(index).target(), targetId)) return index;
         }
-
-        @Override
-        protected void renderWidget(
-                GuiGraphics graphics,
-                int mouseX,
-                int mouseY,
-                float partialTick
-        ) {
-            drawRaisedPanel(graphics, leftPos, topPos, popupGeometry.bounds());
-            List<FuelTargetOption> options = fuelTargetOptions();
-            List<TerminalLayout.Rect> rows = popupGeometry.rows(scrollOffset);
-            for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
-                FuelTargetOption option = options.get(scrollOffset + rowIndex);
-                TerminalLayout.Rect row = rows.get(rowIndex);
-                boolean selected = Objects.equals(option.target(), displayedPreferences().fuelTarget());
-                int left = leftPos + row.x();
-                int top = topPos + row.y();
-                int right = left + row.width();
-                int bottom = top + row.height();
-                TerminalLayout.Rect rowBounds = new TerminalLayout.Rect(
-                        row.x(), row.y(), row.width(), row.height());
-                if (selected) {
-                    drawInsetPanel(graphics, leftPos, topPos, rowBounds);
-                } else {
-                    drawRaisedPanel(graphics, leftPos, topPos, rowBounds);
-                }
-                ItemStack icon = option.icon();
-                graphics.renderItem(icon, left + 2, top + (row.height() - 16) / 2);
-                String label = font.plainSubstrByWidth(
-                        option.label().getString(), Math.max(0, row.width() - 24));
-                graphics.drawString(font, label, left + 21,
-                        top + Math.max(0, (row.height() - font.lineHeight) / 2),
-                        0xFF404040, false);
-            }
-
-            if (popupGeometry.maxScrollOffset() > 0) {
-                TerminalLayout.Rect bounds = popupGeometry.bounds();
-                int trackTop = topPos + bounds.y() + 2;
-                int trackHeight = bounds.height() - 4;
-                int thumbHeight = Math.max(6,
-                        trackHeight * popupGeometry.capacity() / popupGeometry.itemCount());
-                int travel = trackHeight - thumbHeight;
-                int thumbTop = trackTop + travel * scrollOffset / popupGeometry.maxScrollOffset();
-                int trackX = leftPos + bounds.right() - 2;
-                graphics.fill(
-                        trackX, trackTop, trackX + 1, trackTop + trackHeight,
-                        0xFF555555);
-                graphics.fill(
-                        trackX - 1, thumbTop, trackX + 1, thumbTop + thumbHeight,
-                        0xFFC6C6C6);
-            }
-        }
+        return -1;
     }
 
     private static Component energyLabel(EnergyType type) {
@@ -1174,39 +1691,127 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         return TerminalAmountFormatter.formatCompact(amount);
     }
 
-    private record FuelTargetOption(EnergyType target) {
+    private record FuelTargetOption(
+            ResourceLocation target,
+            ItemStack iconStack,
+            Component labelText
+    ) {
+        private FuelTargetOption {
+            iconStack = iconStack.copyWithCount(1);
+        }
+
         private ItemStack icon() {
-            return target == null
-                    ? Items.COMPARATOR.getDefaultInstance()
-                    : target.representativeStack().copyWithCount(1);
+            return iconStack.copy();
         }
 
         private Component label() {
-            return target == null
-                    ? Component.translatable("gui.magic_storage.fuel_target_auto")
-                    : energyLabel(target);
+            return labelText;
+        }
+
+        private TerminalSearchEntry searchEntry() {
+            ResourceLocation identity = target == null
+                    ? ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "auto")
+                    : target;
+            return TerminalSearchEntry.create(iconStack, identity, labelText);
+        }
+
+        private ItemStack sortStack() {
+            ItemStack stack = iconStack.copy();
+            stack.set(DataComponents.CUSTOM_NAME, labelText);
+            return TerminalDisplayStack.create(stack, 0);
         }
     }
 
-    public List<Rect2i> getEmiExclusionAreas() {
-        List<Rect2i> result = terminalExclusionAreas();
-        if (fuelTargetPopup != null && fuelTargetPopup.visible) {
-            TerminalLayout.Rect popup = geometry.fuelTargetPopup().bounds();
-            result.add(new Rect2i(
-                    leftPos + popup.x(), topPos + popup.y(), popup.width(), popup.height()));
+    private record FuelPageButtons(TerminalIconButton previous, TerminalIconButton next) {
+    }
+
+    private enum StationDisplayMode {
+        ALL("gui.magic_storage.station_display.all"),
+        INSTALLED("gui.magic_storage.station_display.installed");
+
+        private final String translationKey;
+
+        StationDisplayMode(String translationKey) {
+            this.translationKey = translationKey;
         }
-        return List.copyOf(result);
+
+        private boolean shows(boolean installed) {
+            return this == ALL || installed;
+        }
+
+        private StationDisplayMode next() {
+            return this == ALL ? INSTALLED : ALL;
+        }
+
+        private String translationKey() {
+            return translationKey;
+        }
+    }
+
+    private void renderRecipePosition(GuiGraphics graphics) {
+        if (!displayedPreferences().page().isItemPage()) return;
+        int recipeCount = menu.getRecipeCount();
+        if (recipeCount <= 0) return;
+        int craftableRecipeCount = menu.getCraftableRecipeCount();
+        String recipePosition = (Math.clamp(
+                menu.getCurrentRecipeIndex(), 0, recipeCount - 1) + 1)
+                + " / " + craftableRecipeCount + " (" + recipeCount + ")";
+        graphics.drawString(
+                font,
+                recipePosition,
+                imageWidth - 8 - font.width(recipePosition),
+                titleLabelY,
+                0xFF606060,
+                false);
+    }
+
+    public List<Rect2i> getEmiExclusionAreas() {
+        return List.copyOf(terminalExclusionAreas());
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (fuelTargetPopup != null && fuelTargetPopup.visible) {
-            if (fuelTargetPopup.isMouseOver(mouseX, mouseY)) {
-                if (button == 0) fuelTargetPopup.onClick(mouseX, mouseY);
+        unfocusSearchOnOutsideClick(mouseX, mouseY);
+        if (displayedPreferences().page() == CraftingTerminalPage.TRANSFORM) {
+            FuelTargetOption target = transformTargetAt(mouseX, mouseY);
+            if (button == 2 && (target != null
+                    || transformTargetPageButtons.previous().isMouseOver(mouseX, mouseY)
+                    || transformTargetPageButtons.next().isMouseOver(mouseX, mouseY))) {
+                transformTargetSearchBox.setValue("");
+                transformTargetPage = 0;
+                clickMenuButton(CraftingTerminalMenu.AUTO_FUEL_TARGET_BUTTON);
+                updateFuelPageButtonStates();
                 return true;
             }
-            if (!fuelTargetListBtn.isMouseOver(mouseX, mouseY)) {
-                closeFuelTargetPopup();
+            if (button == 0 && target != null) {
+                selectFuelTarget(target);
+                return true;
+            }
+            int useIndex = transformUseIndexAt((int) mouseX, (int) mouseY);
+            if (button == 0 && useIndex >= 0) {
+                clickMenuButton(CraftingTerminalMenu.transformUseButtonId(useIndex));
+                return true;
+            }
+            if (button == 2 && (transformCardPageButtons.previous().isMouseOver(mouseX, mouseY)
+                    || transformCardPageButtons.next().isMouseOver(mouseX, mouseY))) {
+                transformUsePage = 0;
+                updateFuelPageButtonStates();
+                return true;
+            }
+        }
+        if (button == 2 && displayedPreferences().page() == CraftingTerminalPage.STATIONS) {
+            if (timedStationsPageButtons.previous().isMouseOver(mouseX, mouseY)
+                    || timedStationsPageButtons.next().isMouseOver(mouseX, mouseY)) {
+                timedStationPage = 0;
+                repositionFuelSlots();
+                updateFuelPageButtonStates();
+                return true;
+            }
+            if (instantStationsPageButtons.previous().isMouseOver(mouseX, mouseY)
+                    || instantStationsPageButtons.next().isMouseOver(mouseX, mouseY)) {
+                instantStationPage = 0;
+                repositionFuelSlots();
+                updateFuelPageButtonStates();
                 return true;
             }
         }
@@ -1232,11 +1837,16 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (fuelTargetPopup != null && fuelTargetPopup.visible && keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            closeFuelTargetPopup();
-            return true;
-        }
+    protected EditBox activeSearchBox() {
+        return switch (displayedPreferences().page()) {
+            case TRANSFORM -> transformTargetSearchBox;
+            case STATIONS -> fuelSearchBox;
+            default -> super.activeSearchBox();
+        };
+    }
+
+    @Override
+    protected boolean keyPressedOutsideSearch(int keyCode, int scanCode, int modifiers) {
         if (displayedPreferences().page().isItemPage()) {
             RecipePresentation presentation = menu.getRecipePresentation();
             if (!presentation.isEmpty()
@@ -1253,29 +1863,59 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressedOutsideSearch(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (displayedPreferences().page() == CraftingTerminalPage.FUEL && scrollY != 0) {
-            if (fuelTargetPopup.visible && fuelTargetPopup.isMouseOver(mouseX, mouseY)) {
-                return fuelTargetPopup.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        if (displayedPreferences().page().isItemPage() && scrollY != 0
+                && geometry.recipeLedger().contains(
+                (int) mouseX - leftPos, (int) mouseY - topPos)) {
+            RecipePresentation presentation = menu.getRecipePresentation();
+            int maxOffset = presentation.isEmpty() ? 0 : recipeLedgerMaxOffset(presentation);
+            if (maxOffset > 0) {
+                int direction = scrollY < 0 ? 1 : -1;
+                recipeLedgerOffset = Math.clamp(
+                        recipeLedgerOffset + direction * geometry.recipeLedgerColumns(),
+                        0,
+                        maxOffset);
             }
-            if (fuelTargetSelector.visible && fuelTargetSelector.active
-                    && fuelTargetSelector.isMouseOver(mouseX, mouseY)) {
-                return fuelTargetSelector.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
-            }
+            return true;
+        }
+        if (displayedPreferences().page() == CraftingTerminalPage.TRANSFORM && scrollY != 0) {
             int localX = (int) mouseX - leftPos;
             int localY = (int) mouseY - topPos;
             int direction = scrollY < 0 ? 1 : -1;
-            if (geometry.consumablesPanel().contains(localX, localY)
-                    && geometry.consumablesGrid().pageCount() > 1) {
-                consumablePage = Math.clamp(
-                        consumablePage + direction,
+            if (geometry.transformTargetList().bounds().contains(localX, localY)) {
+                transformTargetPage = Math.clamp(
+                        transformTargetPage + direction,
                         0,
-                        geometry.consumablesGrid().pageCount() - 1);
-                repositionFuelSlots();
+                        transformTargetPageCount() - 1);
+                updateFuelPageButtonStates();
+                return true;
+            }
+            if (geometry.transformCards().bounds().contains(localX, localY)) {
+                transformUsePage = Math.clamp(
+                        transformUsePage + direction,
+                        0,
+                        transformPageCount() - 1);
+                updateFuelPageButtonStates();
+                return true;
+            }
+        }
+        if (displayedPreferences().page() == CraftingTerminalPage.STATIONS && scrollY != 0) {
+            int localX = (int) mouseX - leftPos;
+            int localY = (int) mouseY - topPos;
+            int direction = scrollY < 0 ? 1 : -1;
+            if (fuelSearchActive && geometry.fuelSearchPanel().contains(localX, localY)) {
+                if (fuelSearchPageCount() > 1) {
+                    fuelSearchPage = Math.clamp(
+                            fuelSearchPage + direction,
+                            0,
+                            fuelSearchPageCount() - 1);
+                    repositionFuelSlots();
+                    updateFuelPageButtonStates();
+                }
                 return true;
             }
             if (geometry.timedStationsPanel().contains(localX, localY)
@@ -1285,6 +1925,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                         0,
                         geometry.timedStationsGrid().pageCount() - 1);
                 repositionFuelSlots();
+                updateFuelPageButtonStates();
                 return true;
             }
             if (geometry.instantStationsPanel().contains(localX, localY)
@@ -1294,6 +1935,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                         0,
                         geometry.instantStationsGrid().pageCount() - 1);
                 repositionFuelSlots();
+                updateFuelPageButtonStates();
                 return true;
             }
         }

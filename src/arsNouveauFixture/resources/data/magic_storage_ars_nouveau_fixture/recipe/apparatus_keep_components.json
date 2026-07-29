@@ -1,0 +1,17 @@
+{
+  "type": "ars_nouveau:enchanting_apparatus",
+  "keepNbtOfReagent": true,
+  "pedestalItems": [
+    {
+      "item": "minecraft:diamond"
+    }
+  ],
+  "reagent": {
+    "item": "minecraft:iron_sword"
+  },
+  "result": {
+    "count": 1,
+    "id": "minecraft:iron_sword"
+  },
+  "sourceCost": 100
+}

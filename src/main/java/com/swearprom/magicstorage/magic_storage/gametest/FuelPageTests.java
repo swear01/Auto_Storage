@@ -5,7 +5,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Unbreakable;
@@ -19,24 +21,218 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 public class FuelPageTests {
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void fullscreen_fuel_workspace_uses_three_semantic_rows(GameTestHelper helper) {
+    public static void transform_discovers_compatible_uses_without_consuming_input(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(170, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            Slot input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
+            input.set(new ItemStack(Items.BLAZE_ROD));
+
+            var uses = menu.getTransformUses();
+            if (uses.size() != 2
+                    || !uses.get(0).id().equals(
+                    TransformProviderApi.energyTargetId(EnergyType.FURNACE_FUEL))
+                    || !uses.get(1).id().equals(
+                    TransformProviderApi.energyTargetId(EnergyType.BLAZE_FUEL))
+                    || input.getItem().getCount() != 1
+                    || core.getEnergy(EnergyType.FURNACE_FUEL) != 0
+                    || core.getEnergy(EnergyType.BLAZE_FUEL) != 0) {
+                helper.fail("Transform discovery must be stable and non-consuming: " + uses);
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void transform_quick_move_click_keeps_input_visible_until_conversion(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            player.getInventory().setItem(0, new ItemStack(Items.COAL, 2));
+            var menu = new CraftingTerminalMenu(174, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            int playerSlot = findPlayerMenuSlot(menu, Items.COAL);
+
+            menu.clicked(playerSlot, 0, ClickType.QUICK_MOVE, player);
+
+            ItemStack input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
+            if (!menu.getSlot(playerSlot).getItem().isEmpty()
+                    || !input.is(Items.COAL)
+                    || input.getCount() != 2
+                    || menu.getVisibleTransformUses().isEmpty()
+                    || menu.getSelectedTransformUse() != null
+                    || core.getEnergy(EnergyType.FURNACE_FUEL) != 0) {
+                helper.fail("Shift-click must move Coal into the visible transient input "
+                        + "without selecting or converting it: " + input);
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void transform_accepts_items_with_no_use_and_rejects_actions_neutrally(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(171, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            Slot input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
+            ItemStack cobblestone = new ItemStack(Items.COBBLESTONE);
+            if (!input.mayPlace(cobblestone)) {
+                helper.fail("Transform input must accept an item so its uses can be inspected");
+                return;
+            }
+            input.set(cobblestone);
+            if (!menu.getTransformUses().isEmpty()
+                    || menu.clickMenuButton(player, 2)
+                    || !input.getItem().is(Items.COBBLESTONE)
+                    || input.getItem().getCount() != 1) {
+                helper.fail("An item with no transformations must remain untouched");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void transform_input_waits_for_explicit_amount_action(GameTestHelper helper) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(168, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            Slot input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
+            input.set(new ItemStack(Items.COAL, 2));
+            if (core.getEnergy(EnergyType.FURNACE_FUEL) != 0
+                    || !input.getItem().is(Items.COAL)
+                    || input.getItem().getCount() != 2
+                    || menu.getSelectedTransformUse() != null
+                    || menu.getCraftableCount() != 0
+                    || menu.clickMenuButton(player, 2)) {
+                helper.fail("Auto must only show uses until the player selects a Transform card");
+                return;
+            }
+            if (!menu.clickMenuButton(
+                    player, CraftingTerminalMenu.transformUseButtonId(0))
+                    || menu.getSelectedTransformUse() == null
+                    || menu.getCraftableCount() != 2) {
+                helper.fail("The first full Transform card must select the exact compatible use");
+                return;
+            }
+            menu.clickMenuButton(player, 2);
+            if (core.getEnergy(EnergyType.FURNACE_FUEL) != 1_600
+                    || !input.getItem().is(Items.COAL)
+                    || input.getItem().getCount() != 1) {
+                helper.fail("Transform x1 did not consume exactly one input");
+                return;
+            }
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
+            if (core.getEnergy(EnergyType.FURNACE_FUEL) != 3_200
+                    || !input.getItem().isEmpty()) {
+                helper.fail("Transform Max did not consume the remaining compatible input");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void transform_target_filters_exact_input_uses_without_preselecting(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(172, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .set(new ItemStack(Items.BLAZE_ROD));
+            menu.clickMenuButton(
+                    player,
+                    CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL));
+
+            var uses = menu.getVisibleTransformUses();
+            if (uses.size() != 1
+                    || !uses.getFirst().targetId().equals(
+                    TransformProviderApi.energyTargetId(EnergyType.BLAZE_FUEL))
+                    || menu.getSelectedTransformUse() != null
+                    || menu.getCraftableCount() != 0) {
+                helper.fail("Exact targets must filter only this input's matching uses: " + uses);
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void changing_transform_input_clears_the_selected_card(GameTestHelper helper) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(173, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            Slot input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
+            input.set(new ItemStack(Items.COAL));
+            menu.clickMenuButton(player, CraftingTerminalMenu.transformUseButtonId(0));
+            if (menu.getSelectedTransformUse() == null) {
+                helper.fail("Transform card selection was not retained");
+                return;
+            }
+            input.set(new ItemStack(Items.BLAZE_ROD));
+            if (menu.getSelectedTransformUse() != null
+                    || menu.getCraftableCount() != 0) {
+                helper.fail("Changing the exact input stack must clear Transform selection");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void stations_page_exposes_only_installable_machine_slots(GameTestHelper helper) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(169, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            if (!menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).isActive()
+                    || menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START).isActive()) {
+                helper.fail("Transform page must expose only its transient input");
+                return;
+            }
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            if (menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).isActive()
+                    || !menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START).isActive()
+                    || menu.getPage() != CraftingTerminalPage.STATIONS) {
+                helper.fail("Stations page must expose installable machines without Transform input");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void fullscreen_stations_workspace_uses_processing_and_compact_instant_groups(
+            GameTestHelper helper
+    ) {
         var counts = currentFuelDescriptorCounts();
         var geometry = TerminalLayout.forProfile(
                 TerminalProfile.CRAFTING,
                 423, 291, counts);
 
         if (!geometry.wide()
-                || geometry.consumablesGrid().pageCount() != 1
                 || geometry.timedStationsGrid().pageCount() != 1
                 || geometry.instantStationsGrid().pageCount() != 1
-                || geometry.consumablesGrid().cells().size() != counts.consumableCount()
                 || geometry.timedStationsGrid().cells().size() != counts.timedStationCount()
                 || geometry.instantStationsGrid().cells().size() != counts.instantStationCount()
-                || geometry.consumablesGrid().rows() != 1
-                || geometry.timedStationsGrid().rows() != 1
-                || geometry.instantStationsGrid().rows() != 1) {
-            helper.fail("Fullscreen Fuel workspace must show Consumables, Timed Stations, and Instant Stations "
-                    + "as three complete one-row category flows: " + geometry);
+                || geometry.timedStationsPanel().y() != geometry.instantStationsPanel().y()
+                || geometry.timedStationsPanel().overlaps(geometry.instantStationsPanel())
+                || geometry.timedStationsPanel().width()
+                <= geometry.instantStationsPanel().width()
+                || geometry.timedStationsGrid().columns() != 3
+                || geometry.instantStationsGrid().columns()
+                <= geometry.timedStationsGrid().columns()) {
+            helper.fail("Stations geometry mismatch: processingWidth="
+                    + geometry.timedStationsPanel().width()
+                    + ", instantWidth=" + geometry.instantStationsPanel().width()
+                    + ", processingColumns=" + geometry.timedStationsGrid().columns()
+                    + ", instantColumns=" + geometry.instantStationsGrid().columns());
             return;
         }
         helper.succeed();
@@ -48,18 +244,93 @@ public class FuelPageTests {
                 TerminalProfile.CRAFTING,
                 423, 291, currentFuelDescriptorCounts());
         TerminalLayout.Rect playerInventory = geometry.playerInventory();
-        var panels = java.util.List.of(
-                geometry.consumablesPanel(),
+        var stations = java.util.List.of(
                 geometry.timedStationsPanel(),
                 geometry.instantStationsPanel());
-        if (panels.stream().anyMatch(panel -> panel.x() != 8
-                || panel.width() != geometry.imageWidth() - 16
-                || panel.overlaps(playerInventory))
-                || geometry.consumablesPanel().bottom() > geometry.timedStationsPanel().y()
-                || geometry.timedStationsPanel().bottom() > geometry.instantStationsPanel().y()
-                || geometry.instantStationsPanel().bottom() > playerInventory.y()) {
-            helper.fail("Fullscreen Fuel category rows must fill the inner frame and end before inventory: "
-                    + panels + ", inventory=" + playerInventory);
+        if (geometry.transformPanel().x() != 8
+                || geometry.transformPanel().width() != geometry.imageWidth() - 16
+                || geometry.transformPanel().overlaps(playerInventory)
+                || stations.stream().anyMatch(panel -> panel.overlaps(playerInventory))
+                || stations.get(0).y() != stations.get(1).y()
+                || stations.get(0).right() >= stations.get(1).x()
+                || stations.get(1).bottom() > playerInventory.y()) {
+            helper.fail("Transform must fill the workspace and Stations must split it left/right: "
+                    + stations + ", inventory=" + playerInventory);
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void fullscreen_fuel_rows_use_horizontal_headers_and_full_width_content(
+            GameTestHelper helper
+    ) {
+        var geometry = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING,
+                423, 291, new TerminalLayout.FuelDescriptorCounts(64, 64, 64, 3));
+        var panels = java.util.List.of(
+                geometry.timedStationsPanel(),
+                geometry.instantStationsPanel());
+        var grids = java.util.List.of(
+                geometry.timedStationsGrid(),
+                geometry.instantStationsGrid());
+        var controls = java.util.List.of(
+                geometry.timedStationsPageControls(),
+                geometry.instantStationsPageControls());
+
+        for (int category = 0; category < controls.size(); category++) {
+            TerminalLayout.Rect label = TerminalLayout.fuelCategoryLabel(
+                    panels.get(category), grids.get(category));
+            TerminalLayout.Rect previous = controls.get(category).previous();
+            TerminalLayout.Rect next = controls.get(category).next();
+            if (label.x() != panels.get(category).x() + 2
+                    || label.width() != panels.get(category).width() - 4
+                    || label.y() != panels.get(category).y() + 2
+                    || label.bottom() > grids.get(category).bounds().y()
+                    || grids.get(category).bounds().x() != panels.get(category).x() + 2
+                    || grids.get(category).bounds().right()
+                    != panels.get(category).right() - 2
+                    || !contains(label, previous)
+                    || !contains(label, next)
+                    || previous.overlaps(next)
+                    || previous.overlaps(grids.get(category).bounds())
+                    || next.overlaps(grids.get(category).bounds())
+                    || previous.width() != TerminalLayout.CONTROL_SIZE
+                    || previous.height() != TerminalLayout.CONTROL_SIZE
+                    || next.width() != TerminalLayout.CONTROL_SIZE
+                    || next.height() != TerminalLayout.CONTROL_SIZE) {
+                helper.fail("Fuel row " + category
+                        + " must use one horizontal header above a full-width content row: "
+                        + controls.get(category) + ", label=" + label
+                        + ", grid=" + grids.get(category).bounds());
+                return;
+            }
+        }
+        if (geometry.transformTargetList().bounds().right()
+                >= geometry.transformCards().bounds().x()
+                || geometry.transformCards().bounds().bottom()
+                >= geometry.transformCardPageControls().previous().y()) {
+            helper.fail("Transform sidebar and cards must remain separate while paging follows compact cards");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void fullscreen_transform_header_keeps_input_name_readable(
+            GameTestHelper helper
+    ) {
+        var geometry = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING,
+                423, 291, new TerminalLayout.FuelDescriptorCounts(64, 64, 64, 5));
+        TerminalLayout.Rect input = geometry.transformInput();
+        java.util.List<TerminalLayout.Rect> actions = geometry.transformAmountButtons();
+        int inputNameWidth = actions.getFirst().x() - input.right();
+        if (inputNameWidth < 48
+                || actions.stream().anyMatch(action -> action.width() > 36)
+                || actions.getLast().right() > geometry.transformPanel().right() - 2) {
+            helper.fail("Transform actions must leave a readable input name: inputNameWidth="
+                    + inputNameWidth + ", actions=" + actions);
             return;
         }
         helper.succeed();
@@ -74,11 +345,16 @@ public class FuelPageTests {
                 .count();
         int consumable = CraftingTerminalMenu.fuelTargets().size()
                 + (int) MachineEnergyTable.entries().stream()
-                .filter(entry -> entry.category() == MachineEnergyTable.Category.CONSUMABLE)
+                .filter(entry -> entry.category() == MachineEnergyTable.Category.TRANSFORM)
                 .count()
                 + 1;
         return new TerminalLayout.FuelDescriptorCounts(
                 consumable, timed, instant, CraftingTerminalMenu.fuelTargets().size() + 1);
+    }
+
+    private static boolean contains(TerminalLayout.Rect outer, TerminalLayout.Rect inner) {
+        return outer.contains(inner.x(), inner.y())
+                && outer.contains(inner.right() - 1, inner.bottom() - 1);
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
@@ -109,7 +385,7 @@ public class FuelPageTests {
     public static void retired_bottle_inputs_are_not_accepted_as_fuel(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
             var menu = new CraftingTerminalMenu(124, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
             var fuelInput = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
             ItemStack[] retiredInputs = {
                     new ItemStack(Items.GLASS_BOTTLE),
@@ -192,20 +468,23 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void retired_previous_next_target_button_ids_are_noops(GameTestHelper helper) {
+    public static void utility_sort_reuses_retired_target_cycle_id_without_changing_target(
+            GameTestHelper helper
+    ) {
         withCore(helper, (core, player) -> {
             var menu = new CraftingTerminalMenu(123, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL));
 
-            if (menu.clickMenuButton(player, 17)
+            if (!menu.clickMenuButton(player, StorageTerminalMenu.PREVIOUS_SORT_MODE_BUTTON)
+                    || menu.getSortMode() != SortMode.ID
                     || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
-                helper.fail("Retired previous-target button id must not mutate the explicit target");
+                helper.fail("Utility previous-sort must not mutate the explicit Transform target");
                 return;
             }
             if (menu.clickMenuButton(player, 18)
                     || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
-                helper.fail("Retired next-target button id must not mutate the explicit target");
+                helper.fail("Unassigned utility button 18 must remain a no-op");
                 return;
             }
             helper.succeed();
@@ -213,7 +492,9 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void fuel_target_ids_keep_fuel_and_brew_while_retired_bottle_is_rejected(GameTestHelper helper) {
+    public static void fuel_target_ids_keep_fuel_and_brew_while_21_resets_sort(
+            GameTestHelper helper
+    ) {
         withCore(helper, (core, player) -> {
             int fuelTargetId = CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL);
             int brewTargetId = CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL);
@@ -224,7 +505,7 @@ public class FuelPageTests {
             }
 
             var menu = new CraftingTerminalMenu(125, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             if (!menu.clickMenuButton(player, fuelTargetId)
                     || menu.getSelectedFuelTarget() != EnergyType.FURNACE_FUEL) {
                 helper.fail("Fuel target ID 19 must select Fuel");
@@ -235,10 +516,45 @@ public class FuelPageTests {
                 helper.fail("Brew target ID 20 must select Brew");
                 return;
             }
-            boolean retiredAccepted = menu.clickMenuButton(player, 21);
-            if (retiredAccepted || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
-                helper.fail("Retired Bottle target ID 21 must be rejected without changing Brew: accepted="
-                        + retiredAccepted + " selected=" + menu.getSelectedFuelTarget());
+            menu.clickMenuButton(player, StorageTerminalMenu.SORT_ORDER_BUTTON);
+            boolean resetAccepted = menu.clickMenuButton(
+                    player, StorageTerminalMenu.RESET_SORT_ORDER_BUTTON);
+            if (!resetAccepted
+                    || menu.getSortOrder() != SortOrder.ASCENDING
+                    || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
+                helper.fail("Utility sort reset must not change the Brew target: accepted="
+                        + resetAccepted + " selected=" + menu.getSelectedFuelTarget());
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void forged_transform_target_setting_normalizes_to_auto(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(174, player.getInventory(), core);
+            TerminalPreferences current = menu.getTerminalPreferences();
+            ResourceLocation forged =
+                    ResourceLocation.fromNamespaceAndPath("example", "forged_target");
+            var preferences = new TerminalPreferences(
+                    current.sortMode(),
+                    current.sortOrder(),
+                    current.searchMode(),
+                    current.resourceView(),
+                    CraftingTerminalPage.TRANSFORM,
+                    current.usePlayerInventory(),
+                    current.outputDestination(),
+                    null,
+                    forged);
+            menu.applySettings(
+                    new TerminalSettingsPacket(
+                            menu.containerId, menu.getVisibleRows(), preferences),
+                    player);
+            if (menu.getSelectedTransformTarget() != null) {
+                helper.fail("Unknown client Transform targets must normalize to Auto");
                 return;
             }
             helper.succeed();
@@ -255,8 +571,27 @@ public class FuelPageTests {
 
             if (menu.getSortMode() != SortMode.QUANTITY
                     || menu.getSortOrder() != SortOrder.DESCENDING
-                    || menu.getSearchMode() != SearchMode.TAG) {
+                    || menu.getSearchMode() != SearchMode.EMI) {
                 helper.fail("Crafting Items page must delegate sort, order, and search controls");
+                return;
+            }
+
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            if (!menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_MODE_BUTTON)
+                    || !menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_ORDER_BUTTON)
+                    || !menu.clickMenuButton(player, StorageTerminalMenu.PREVIOUS_SORT_MODE_BUTTON)
+                    || menu.getSortMode() != SortMode.ID
+                    || menu.getSortOrder() != SortOrder.ASCENDING) {
+                helper.fail("Transform must reuse shared sort method and order controls");
+                return;
+            }
+
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            if (!menu.clickMenuButton(player, StorageTerminalMenu.SORT_ORDER_BUTTON)
+                    || !menu.clickMenuButton(player, StorageTerminalMenu.NEXT_SORT_MODE_BUTTON)
+                    || menu.getSortMode() != SortMode.NAME
+                    || menu.getSortOrder() != SortOrder.DESCENDING) {
+                helper.fail("Stations must reuse shared sort method and order controls");
                 return;
             }
             helper.succeed();
@@ -266,17 +601,18 @@ public class FuelPageTests {
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
     public static void auto_overflow_does_not_fallback_to_second_pool(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
-            core.storageRecordForTesting().energy().put(EnergyType.BLAZE_FUEL, Long.MAX_VALUE);
+            core.storageRecordForTesting().setEnergyAmount(EnergyType.BLAZE_FUEL, Long.MAX_VALUE);
             core.insertItem(new ItemStack(Items.STONE));
             core.insertItem(new ItemStack(Items.DIRT));
 
             player.getInventory().setItem(0, new ItemStack(Items.BLAZE_ROD));
             var menu = new CraftingTerminalMenu(112, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             int rodSlot = findPlayerMenuSlot(menu, Items.BLAZE_ROD);
             menu.quickMoveStack(player, rodSlot);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
 
-            if (!menu.getSlot(rodSlot).getItem().is(Items.BLAZE_ROD)) {
+            if (!menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().is(Items.BLAZE_ROD)) {
                 helper.fail("Auto overflow must preserve the complete source stack");
                 return;
             }
@@ -287,8 +623,9 @@ public class FuelPageTests {
             }
 
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
-            menu.quickMoveStack(player, rodSlot);
-            if (!menu.getSlot(rodSlot).getItem().isEmpty()
+            selectFirstTransformUse(menu, player);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
+            if (!menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().isEmpty()
                     || core.getEnergy(EnergyType.FURNACE_FUEL) != 2400) {
                 helper.fail("Explicit Furnace target should convert the preserved Blaze Rod");
                 return;
@@ -308,7 +645,7 @@ public class FuelPageTests {
             }
 
             var menu = new CraftingTerminalMenu(120, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             var input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
             if (!input.mayPlace(oakLogs)) {
@@ -317,6 +654,8 @@ public class FuelPageTests {
             }
 
             input.set(oakLogs.copy());
+            selectFirstTransformUse(menu, player);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             long expected = Math.multiplyExact((long) burnTime, oakLogs.getCount());
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != expected) {
                 helper.fail("Three Oak Logs must add runtime burn time per item: expected "
@@ -325,6 +664,45 @@ public class FuelPageTests {
             }
             if (!input.getItem().isEmpty()) {
                 helper.fail("Successful Fuel-page conversion must consume the complete Oak Log stack");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void transform_preview_and_max_stop_at_exact_output_capacity(GameTestHelper helper) {
+        withCore(helper, (core, player) -> {
+            ItemStack logs = new ItemStack(Items.OAK_LOG, 3);
+            int burnTime = logs.getBurnTime(null);
+            if (burnTime <= 0) {
+                helper.fail("Test setup requires Oak Logs to have a positive runtime burn time");
+                return;
+            }
+            core.storageRecordForTesting().setEnergyAmount(
+                    EnergyType.FURNACE_FUEL,
+                    Long.MAX_VALUE - Math.multiplyExact((long) burnTime, 2L));
+
+            var menu = new CraftingTerminalMenu(128, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            menu.clickMenuButton(
+                    player,
+                    CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
+            Slot input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
+            input.set(logs.copy());
+            selectFirstTransformUse(menu, player);
+
+            if (menu.getCraftableCount() != 2) {
+                helper.fail("Transform preview must expose the exact two-item output capacity, got "
+                        + menu.getCraftableCount());
+                return;
+            }
+            if (!menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON)
+                    || core.getEnergy(EnergyType.FURNACE_FUEL) != Long.MAX_VALUE
+                    || !input.getItem().is(Items.OAK_LOG)
+                    || input.getItem().getCount() != 1
+                    || menu.getCraftableCount() != 0) {
+                helper.fail("Transform Max must fill the output exactly and preserve the rejected remainder");
                 return;
             }
             helper.succeed();
@@ -343,10 +721,12 @@ public class FuelPageTests {
 
             player.getInventory().setItem(0, oakLogs.copy());
             var menu = new CraftingTerminalMenu(121, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             int playerSlot = findPlayerMenuSlot(menu, Items.OAK_LOG);
             ItemStack moved = menu.quickMoveStack(player, playerSlot);
+            selectFirstTransformUse(menu, player);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
 
             if (moved.isEmpty()) {
                 helper.fail("Fuel-page Shift-click must convert Oak Logs; hardcoded whitelist rejected them");
@@ -367,7 +747,46 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void fuel_page_rejects_zero_runtime_burn_time_item(GameTestHelper helper) {
+    public static void runtime_fuel_accepts_multiple_vanilla_fuel_shapes_at_exact_burn_time(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            ItemStack[] fuels = {
+                    new ItemStack(Items.STICK, 4),
+                    new ItemStack(Items.CHARCOAL, 2),
+                    new ItemStack(Items.COAL_BLOCK),
+                    new ItemStack(Items.DRIED_KELP_BLOCK)
+            };
+            long expected = 0;
+            for (ItemStack fuel : fuels) {
+                int burnTime = fuel.getBurnTime(null);
+                if (burnTime <= 0) {
+                    helper.fail("Representative runtime fuel has no burn time: " + fuel);
+                    return;
+                }
+                expected = Math.addExact(
+                        expected,
+                        Math.multiplyExact((long) burnTime, fuel.getCount()));
+                ItemStack input = fuel.copy();
+                if (!core.addFuel(input, EnergyType.FURNACE_FUEL) || !input.isEmpty()) {
+                    helper.fail("Runtime Fuel rejected or partially consumed " + fuel);
+                    return;
+                }
+                if (core.getEnergy(EnergyType.FURNACE_FUEL) != expected) {
+                    helper.fail("Runtime Fuel total drifted after " + fuel
+                            + ": expected " + expected
+                            + " got " + core.getEnergy(EnergyType.FURNACE_FUEL));
+                    return;
+                }
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void transform_keeps_zero_runtime_burn_time_item_unconverted(
+            GameTestHelper helper
+    ) {
         withCore(helper, (core, player) -> {
             ItemStack stone = new ItemStack(Items.STONE, 2);
             if (stone.getBurnTime(null) != 0) {
@@ -376,19 +795,22 @@ public class FuelPageTests {
             }
 
             var menu = new CraftingTerminalMenu(122, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             var input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
-            if (input.mayPlace(stone)) {
-                helper.fail("Fuel-page input must reject a zero-burn-time item");
+            if (!input.mayPlace(stone)) {
+                helper.fail("Transform input must accept an item before discovering its uses");
                 return;
             }
 
             menu.setCarried(stone.copy());
             menu.clicked(CraftingTerminalMenu.FUEL_INPUT_SLOT, 0, ClickType.PICKUP, player);
-            if (!menu.getCarried().is(Items.STONE) || menu.getCarried().getCount() != 2
-                    || !input.getItem().isEmpty()) {
-                helper.fail("Rejected non-fuel must remain carried and leave the Fuel input empty");
+            if (!menu.getCarried().isEmpty()
+                    || !input.getItem().is(Items.STONE)
+                    || input.getItem().getCount() != 2
+                    || !menu.getTransformUses().isEmpty()
+                    || menu.clickMenuButton(player, 2)) {
+                helper.fail("Zero-use Transform input must stay visible and unconverted");
                 return;
             }
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 0) {
@@ -420,7 +842,7 @@ public class FuelPageTests {
             ItemStack overflowStack = new ItemStack(Items.OAK_LOG, 2);
             long stackValue = Math.multiplyExact((long) burnTime, overflowStack.getCount());
             long originalEnergy = Long.MAX_VALUE - stackValue + 1;
-            core.storageRecordForTesting().energy().put(EnergyType.FURNACE_FUEL, originalEnergy);
+            core.storageRecordForTesting().setEnergyAmount(EnergyType.FURNACE_FUEL, originalEnergy);
 
             if (core.addFuel(overflowStack, EnergyType.FURNACE_FUEL)) {
                 helper.fail("Runtime Fuel addition must fail closed when the exact stack value overflows the pool");
@@ -442,21 +864,23 @@ public class FuelPageTests {
     public static void dedicated_input_converts_and_keeps_stacked_container_remainders(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
             var menu = new CraftingTerminalMenu(102, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
 
             ItemStack lavaBuckets = new ItemStack(Items.LAVA_BUCKET);
             lavaBuckets.set(DataComponents.MAX_STACK_SIZE, 3);
             lavaBuckets.setCount(3);
             menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(lavaBuckets);
+            selectFirstTransformUse(menu, player);
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
 
             if (core.getEnergy(EnergyType.FURNACE_FUEL) != 60000) {
                 helper.fail("Dedicated input should convert all three Lava Buckets");
                 return;
             }
-            ItemStack remainder = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
-            if (!remainder.is(Items.BUCKET) || remainder.getCount() != 3) {
-                helper.fail("Dedicated input should keep three empty bucket remainders, got " + remainder);
+            int buckets = player.getInventory().countItem(Items.BUCKET);
+            if (buckets != 3) {
+                helper.fail("Dedicated input should return three empty bucket remainders, got " + buckets);
                 return;
             }
             helper.succeed();
@@ -464,25 +888,35 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void dedicated_input_rejects_nonfuel_incompatible_target_and_overflow(GameTestHelper helper) {
+    public static void transform_input_preserves_no_use_incompatible_and_overflow_inputs(
+            GameTestHelper helper
+    ) {
         withCore(helper, (core, player) -> {
             var menu = new CraftingTerminalMenu(103, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             var input = menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT);
-            if (input.mayPlace(new ItemStack(Items.STONE))) {
-                helper.fail("Auto fuel input must reject non-fuel items");
+            if (!input.mayPlace(new ItemStack(Items.STONE))) {
+                helper.fail("Transform input must accept non-matching items for use inspection");
                 return;
             }
 
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL));
-            if (input.mayPlace(new ItemStack(Items.COAL))) {
-                helper.fail("Blaze target must reject Furnace-only fuel");
+            input.set(new ItemStack(Items.COAL));
+            if (!input.mayPlace(new ItemStack(Items.COAL))
+                    || menu.clickMenuButton(player, 2)
+                    || !input.getItem().is(Items.COAL)) {
+                helper.fail("An incompatible explicit transform must preserve its input");
                 return;
             }
 
-            core.storageRecordForTesting().energy().put(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
+            core.storageRecordForTesting().setEnergyAmount(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             input.set(new ItemStack(Items.COAL));
+            selectFirstTransformUse(menu, player);
+            if (menu.clickMenuButton(player, 2)) {
+                helper.fail("Overflowing transform must fail");
+                return;
+            }
             if (!input.getItem().is(Items.COAL) || input.getItem().getCount() != 1) {
                 helper.fail("Overflow failure must preserve fuel in the dedicated input");
                 return;
@@ -498,10 +932,10 @@ public class FuelPageTests {
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
     public static void menu_close_returns_leftover_fuel_input_to_player(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
-            core.storageRecordForTesting().energy().put(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
+            core.storageRecordForTesting().setEnergyAmount(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
 
             var menu = new CraftingTerminalMenu(104, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(new ItemStack(Items.COAL, 2));
             menu.removed(player);
@@ -521,10 +955,10 @@ public class FuelPageTests {
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
     public static void leaving_fuel_page_returns_unconverted_input_before_hiding_slot(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
-            core.storageRecordForTesting().energy().put(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
+            core.storageRecordForTesting().setEnergyAmount(EnergyType.FURNACE_FUEL, Long.MAX_VALUE);
 
             var menu = new CraftingTerminalMenu(108, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(new ItemStack(Items.COAL, 2));
             menu.clickMenuButton(player, CraftingTerminalMenu.STORAGE_PAGE_BUTTON);
@@ -559,9 +993,9 @@ public class FuelPageTests {
                     Long.MAX_VALUE
             };
             for (EnergyType type : EnergyType.values()) {
-                core.storageRecordForTesting().energy().put(type, expectedAmounts[type.ordinal()]);
+                core.storageRecordForTesting().setEnergyAmount(type, expectedAmounts[type.ordinal()]);
             }
-            core.storageRecordForTesting().descriptorAmounts().put(
+            core.storageRecordForTesting().setDescriptorAmount(
                     MachineEnergyTable.AXE_ID, Long.MAX_VALUE - 2);
             long stoneInserted = core.insertItem(new ItemStack(Items.STONE));
             long dirtInserted = core.insertItem(new ItemStack(Items.DIRT));
@@ -571,7 +1005,7 @@ public class FuelPageTests {
             }
 
             var serverMenu = new CraftingTerminalMenu(105, player.getInventory(), core);
-            serverMenu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            serverMenu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             serverMenu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL));
 
             var byteBuf = new net.minecraft.network.RegistryFriendlyByteBuf(
@@ -584,8 +1018,8 @@ public class FuelPageTests {
 
             var serverData = dataSlots(serverMenu);
             var clientData = dataSlots(clientMenu);
-            if (serverData.size() != 102 || clientData.size() != 102) {
-                helper.fail("Crafting fuel/resource/output/Axe Energy/unlimited-capacity/resource-view sync requires exact 102-slot compatibility parity, server="
+            if (serverData.size() != 392 || clientData.size() != 392) {
+                helper.fail("Crafting fuel/resource/output/Axe Energy/unlimited-capacity/resource-view/Transform-card/craftable-variant sync requires exact 392-slot compatibility parity, server="
                         + serverData.size() + " client=" + clientData.size());
                 return;
             }
@@ -601,7 +1035,7 @@ public class FuelPageTests {
                 }
                 clientData.get(decoded.getId()).set(decoded.getValue());
             }
-            if (clientMenu.getPage() != CraftingTerminalPage.FUEL
+            if (clientMenu.getPage() != CraftingTerminalPage.TRANSFORM
                     || clientMenu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
                 helper.fail("Client menu did not receive page and selected target");
                 return;
@@ -637,8 +1071,8 @@ public class FuelPageTests {
                     available, Action.EXECUTE, Actor.EMPTY);
             core.insertItemCount(ItemKey.of(new ItemStack(Items.STONE)),
                     1, Action.EXECUTE, Actor.EMPTY);
-            core.storageRecordForTesting().energy().put(EnergyType.SMELTING_ENERGY, available);
-            core.storageRecordForTesting().energy().put(EnergyType.FURNACE_FUEL, available);
+            core.storageRecordForTesting().setEnergyAmount(EnergyType.SMELTING_ENERGY, available);
+            core.storageRecordForTesting().setEnergyAmount(EnergyType.FURNACE_FUEL, available);
             core.getMachineContainer().setItem(
                     MachineEnergyTable.FURNACE_SLOT, new ItemStack(Items.FURNACE));
 
@@ -722,7 +1156,7 @@ public class FuelPageTests {
     public static void open_fuel_page_tracks_live_energy_listener_updates(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
             var menu = new CraftingTerminalMenu(107, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             ItemStack coal = new ItemStack(Items.COAL, 2);
             if (!core.addFuel(coal, EnergyType.FURNACE_FUEL)) {
                 helper.fail("Test setup could not add coal fuel");
@@ -741,7 +1175,7 @@ public class FuelPageTests {
     public static void open_fuel_page_tracks_live_type_count_and_capacity(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
             var menu = new CraftingTerminalMenu(120, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             int initialCapacity = core.getTotalTypeSlots();
 
             if (core.insertItem(new ItemStack(Items.STONE)) != 1) {
@@ -780,7 +1214,7 @@ public class FuelPageTests {
         withCore(helper, (core, player) -> {
             player.getInventory().setItem(0, new ItemStack(Items.FURNACE, 3));
             var menu = new CraftingTerminalMenu(114, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
             int playerSlot = findPlayerMenuSlot(menu, Items.FURNACE);
             int furnaceMachineSlot = CraftingTerminalMenu.FUEL_INPUT_SLOT + 1;
             menu.quickMoveStack(player, playerSlot);
@@ -813,11 +1247,167 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void fuel_page_shift_move_routes_later_entries_in_all_three_categories_by_descriptor(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            ItemStack axe = new ItemStack(Items.IRON_AXE);
+            axe.setDamageValue(axe.getMaxDamage() - 7);
+            player.getInventory().setItem(0, new ItemStack(Items.SMOKER, 3));
+            player.getInventory().setItem(1, new ItemStack(Items.SMITHING_TABLE));
+            player.getInventory().setItem(2, axe);
+
+            var menu = new CraftingTerminalMenu(129, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            int smokerSource = findPlayerMenuSlot(menu, Items.SMOKER);
+            int smithingSource = findPlayerMenuSlot(menu, Items.SMITHING_TABLE);
+            int axeSource = findPlayerMenuSlot(menu, Items.IRON_AXE);
+
+            menu.quickMoveStack(player, smokerSource);
+            menu.quickMoveStack(player, smithingSource);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            menu.quickMoveStack(player, axeSource);
+            selectFirstTransformUse(menu, player);
+            menu.clickMenuButton(player, 2);
+
+            ItemStack installedSmokers = menu.getSlot(
+                    CraftingTerminalMenu.MACHINE_SLOT_START + MachineEnergyTable.SMOKER_SLOT).getItem();
+            ItemStack installedSmithingTable = menu.getSlot(
+                    CraftingTerminalMenu.MACHINE_SLOT_START + MachineEnergyTable.SMITHING_TABLE_SLOT).getItem();
+            if (!installedSmokers.is(Items.SMOKER) || installedSmokers.getCount() != 3
+                    || !installedSmithingTable.is(Items.SMITHING_TABLE)
+                    || installedSmithingTable.getCount() != 1
+                    || core.getAxeEnergy() != 7) {
+                helper.fail("Stations and Transform must route machines and consumables to their own domains: "
+                        + installedSmokers + ", " + installedSmithingTable
+                        + ", axe=" + core.getAxeEnergy());
+                return;
+            }
+            if (!menu.getSlot(smokerSource).getItem().isEmpty()
+                    || !menu.getSlot(smithingSource).getItem().isEmpty()
+                    || !menu.getSlot(axeSource).getItem().isEmpty()) {
+                helper.fail("Descriptor routing must consume each accepted player source exactly once");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void timed_station_shift_move_accumulates_past_one_stack_without_loss(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            var menu = new CraftingTerminalMenu(130, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            int machineSlot = CraftingTerminalMenu.MACHINE_SLOT_START
+                    + MachineEnergyTable.FURNACE_SLOT;
+            int[] batches = {64, 64, 2};
+
+            for (int batch : batches) {
+                player.getInventory().setItem(0, new ItemStack(Items.FURNACE, batch));
+                int source = findPlayerMenuSlot(menu, Items.FURNACE);
+                menu.quickMoveStack(player, source);
+                if (!menu.getSlot(source).getItem().isEmpty()) {
+                    helper.fail("Timed station must accept repeated Shift-click batches past 64; "
+                            + "rejected source " + menu.getSlot(source).getItem()
+                            + " after installed=" + menu.getSlot(machineSlot).getItem().getCount());
+                    return;
+                }
+            }
+
+            ItemStack installed = menu.getSlot(machineSlot).getItem();
+            if (!installed.is(Items.FURNACE) || installed.getCount() != 130) {
+                helper.fail("Three lossless batches of 64 + 64 + 2 must install exactly 130 Furnaces: "
+                        + installed);
+                return;
+            }
+            long before = core.getEnergy(EnergyType.SMELTING_ENERGY);
+            core.tick();
+            if (core.getEnergy(EnergyType.SMELTING_ENERGY) - before != 130) {
+                helper.fail("130 installed Furnaces must contribute exactly +130 per tick");
+                return;
+            }
+
+            menu.quickMoveStack(player, machineSlot);
+            if (!menu.getSlot(machineSlot).getItem().isEmpty()
+                    || player.getInventory().countItem(Items.FURNACE) != 130) {
+                helper.fail("Removing an over-64 timed station stack must return all 130 machines");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void timed_station_shift_move_stops_at_integer_max_without_overflow_or_loss(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (core, player) -> {
+            int machineSlot = CraftingTerminalMenu.MACHINE_SLOT_START
+                    + MachineEnergyTable.FURNACE_SLOT;
+            core.getMachineContainer().setItem(
+                    MachineEnergyTable.FURNACE_SLOT,
+                    new ItemStack(Items.FURNACE, Integer.MAX_VALUE - 32));
+            if (core.getMachineContainer().getItem(
+                    MachineEnergyTable.FURNACE_SLOT).getCount() != Integer.MAX_VALUE - 32) {
+                helper.fail("Test setup could not seed the near-cap workstation aggregate");
+                return;
+            }
+
+            player.getInventory().setItem(0, new ItemStack(Items.FURNACE, 64));
+            var menu = new CraftingTerminalMenu(183, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            int source = findPlayerMenuSlot(menu, Items.FURNACE);
+            ItemStack moved = menu.quickMoveStack(player, source);
+
+            ItemStack installed = menu.getSlot(machineSlot).getItem();
+            ItemStack remainder = menu.getSlot(source).getItem();
+            if (moved.isEmpty()
+                    || !installed.is(Items.FURNACE)
+                    || installed.getCount() != Integer.MAX_VALUE
+                    || !remainder.is(Items.FURNACE)
+                    || remainder.getCount() != 32) {
+                helper.fail("Near-cap Shift-click must install exactly the available 32 slots "
+                        + "and preserve the other 32 machines: installed=" + installed
+                        + ", remainder=" + remainder + ", moved=" + moved);
+                return;
+            }
+            long workBefore = core.getEnergy(EnergyType.SMELTING_ENERGY);
+            core.tick();
+            if (core.getEnergy(EnergyType.SMELTING_ENERGY) - workBefore != Integer.MAX_VALUE) {
+                helper.fail("Integer.MAX_VALUE installed Furnaces must contribute exact work "
+                        + "without overflow");
+                return;
+            }
+
+            ItemStack returned = menu.quickMoveStack(player, machineSlot);
+            ItemStack stillInstalled = menu.getSlot(machineSlot).getItem();
+            int inventoryCount = player.getInventory().countItem(Items.FURNACE);
+            int expectedInventoryCount = StorageTerminalMenu.PLAYER_INVENTORY_SLOTS * 64;
+            int expectedInstalledCount = Integer.MAX_VALUE - (expectedInventoryCount - 32);
+            long conserved = (long) inventoryCount
+                    + (stillInstalled.is(Items.FURNACE) ? stillInstalled.getCount() : 0);
+            if (returned.isEmpty()
+                    || inventoryCount != expectedInventoryCount
+                    || !stillInstalled.is(Items.FURNACE)
+                    || stillInstalled.getCount() != expectedInstalledCount
+                    || conserved != (long) Integer.MAX_VALUE + 32) {
+                helper.fail("Near-cap removal must fill player slots without signed overflow or loss: "
+                        + "installed=" + stillInstalled + ", inventory=" + inventoryCount
+                        + ", returned=" + returned + ", conserved=" + conserved);
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
     public static void instant_station_accepts_one_and_rejects_second_without_consuming(GameTestHelper helper) {
         withCore(helper, (core, player) -> {
             player.getInventory().setItem(0, new ItemStack(Items.CRAFTING_TABLE, 2));
             var menu = new CraftingTerminalMenu(122, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
             int playerSlot = findPlayerMenuSlot(menu, Items.CRAFTING_TABLE);
             int stationSlot = CraftingTerminalMenu.MACHINE_SLOT_START
                     + MachineEnergyTable.CRAFTING_TABLE_SLOT;
@@ -853,11 +1443,13 @@ public class FuelPageTests {
                     .getHolderOrThrow(Enchantments.UNBREAKING), 2);
             player.getInventory().setItem(0, axe);
             var menu = new CraftingTerminalMenu(123, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             int playerSlot = findPlayerMenuSlot(menu, Items.IRON_AXE);
             int axeSlot = CraftingTerminalMenu.MACHINE_SLOT_START + MachineEnergyTable.AXE_SLOT;
 
             menu.quickMoveStack(player, playerSlot);
+            selectFirstTransformUse(menu, player);
+            menu.clickMenuButton(player, 2);
             if (core.getAxeEnergy() != 15 || core.hasInfiniteAxeEnergy()) {
                 helper.fail("Five remaining durability with Unbreaking II must become exactly 15 Axe Energy");
                 return;
@@ -874,7 +1466,9 @@ public class FuelPageTests {
             mendingOnly.enchant(helper.getLevel().registryAccess().registryOrThrow(Registries.ENCHANTMENT)
                     .getHolderOrThrow(Enchantments.MENDING), 1);
             menu.setCarried(mendingOnly);
-            menu.clicked(axeSlot, 0, ClickType.PICKUP, player);
+            menu.clicked(CraftingTerminalMenu.FUEL_INPUT_SLOT, 0, ClickType.PICKUP, player);
+            selectFirstTransformUse(menu, player);
+            menu.clickMenuButton(player, 2);
             if (core.getAxeEnergy() != 19 || !menu.getCarried().isEmpty()
                     || !menu.getSlot(axeSlot).getItem().isEmpty()) {
                 helper.fail("Mending and unrelated enchantments must not multiply Axe Energy: "
@@ -898,7 +1492,7 @@ public class FuelPageTests {
                 return;
             }
 
-            core.storageRecordForTesting().descriptorAmounts().put(
+            core.storageRecordForTesting().setDescriptorAmount(
                     MachineEnergyTable.AXE_ID, Long.MAX_VALUE - 1);
             ItemStack rejected = new ItemStack(Items.IRON_AXE);
             rejected.setDamageValue(rejected.getMaxDamage() - 2);
@@ -982,11 +1576,11 @@ public class FuelPageTests {
             }
             menu.setCarried(ItemStack.EMPTY);
 
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
-            for (int i = 0; i < expected.length; i++) {
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            for (int i = 0; i < MachineEnergyTable.AXE_SLOT; i++) {
                 var slot = menu.getSlot(start + i);
                 if (!slot.isActive() || !slot.mayPlace(expected[i])) {
-                    helper.fail("Fuel machine slot " + i + " must accept its exact machine");
+                    helper.fail("Station slot " + i + " must accept its exact machine");
                     return;
                 }
                 ItemStack wrong = expected[(i + 1) % expected.length];
@@ -995,9 +1589,18 @@ public class FuelPageTests {
                     return;
                 }
             }
-            if (!menu.getSlot(start + 8).mayPlace(new ItemStack(Items.DIAMOND_AXE))
-                    || menu.getSlot(start + 8).mayPlace(new ItemStack(Items.DIAMOND_PICKAXE))) {
-                helper.fail("Tool slot must accept mod-compatible axes but reject unrelated tools");
+            if (menu.getSlot(start + MachineEnergyTable.AXE_SLOT).isActive()
+                    || menu.getSlot(start + MachineEnergyTable.AXE_SLOT)
+                    .mayPlace(new ItemStack(Items.DIAMOND_AXE))) {
+                helper.fail("Consumable descriptors must not appear as installable stations");
+                return;
+            }
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            if (!menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .mayPlace(new ItemStack(Items.DIAMOND_AXE))
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .mayPlace(new ItemStack(Items.DIAMOND_PICKAXE))) {
+                helper.fail("Transform input must accept every item before use discovery");
                 return;
             }
             helper.succeed();
@@ -1009,7 +1612,7 @@ public class FuelPageTests {
         withCore(helper, (core, player) -> {
             player.getInventory().setItem(0, new ItemStack(Items.BREWING_STAND, 2));
             var localMenu = new CraftingTerminalMenu(116, player.getInventory(), core);
-            localMenu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            localMenu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
             int playerSlot = findPlayerMenuSlot(localMenu, Items.BREWING_STAND);
             int brewingMachineSlot = CraftingTerminalMenu.FUEL_INPUT_SLOT + 5;
             localMenu.quickMoveStack(player, playerSlot);
@@ -1023,7 +1626,7 @@ public class FuelPageTests {
 
             var remotePlayer = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             var remoteMenu = new CraftingTerminalMenu(117, remotePlayer.getInventory(), core, core.getBlockPos(), true);
-            remoteMenu.clickMenuButton(remotePlayer, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            remoteMenu.clickMenuButton(remotePlayer, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
             ItemStack reopened = remoteMenu.getSlot(brewingMachineSlot).getItem();
             if (!reopened.is(Items.BREWING_STAND) || reopened.getCount() != 2) {
                 helper.fail("Remote reopen must see the same Core-owned installed machines, got " + reopened);
@@ -1071,7 +1674,7 @@ public class FuelPageTests {
             core.getMachineContainer().setItem(0, new ItemStack(Items.FURNACE, 2));
             var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             var menu = new CraftingTerminalMenu(119, player.getInventory(), core);
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
             var machineSlot = menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START);
             if (machineSlot.mayPlace(new ItemStack(Items.FURNACE))) {
                 helper.fail("Conflicted Core must reject new machine installation");
@@ -1114,6 +1717,17 @@ public class FuelPageTests {
             if (menu.getSlot(i).getItem().is(item)) return i;
         }
         return -1;
+    }
+
+    private static void selectFirstTransformUse(
+            CraftingTerminalMenu menu,
+            net.minecraft.world.entity.player.Player player
+    ) {
+        if (menu.getVisibleTransformUses().isEmpty()
+                || !menu.clickMenuButton(
+                player, CraftingTerminalMenu.transformUseButtonId(0))) {
+            throw new IllegalStateException("No compatible Transform card");
+        }
     }
 
     @SuppressWarnings("unchecked")

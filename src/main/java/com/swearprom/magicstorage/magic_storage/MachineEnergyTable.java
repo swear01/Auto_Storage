@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -17,7 +18,7 @@ public final class MachineEnergyTable {
     public enum Category {
         PROCESS,
         INSTANT,
-        CONSUMABLE
+        TRANSFORM
     }
 
     public static final int FURNACE_SLOT = 0;
@@ -56,23 +57,35 @@ public final class MachineEnergyTable {
     }
 
     static void registerBuiltIns(DeferredRegister<MachineDescriptor> descriptors) {
-        descriptors.register(FURNACE_ID.getPath(), () -> installable(
-                FURNACE_ID, new ItemStack(Items.FURNACE), EnergyType.SMELTING_ENERGY, 1, Category.PROCESS, 64));
+        descriptors.register(FURNACE_ID.getPath(), () -> MachineDescriptor.installableVariants(
+                FURNACE_ID,
+                Items.FURNACE.getDescription(),
+                () -> MachineVariantContributors.combine(
+                        FURNACE_ID,
+                        List.of(MachineVariant.of(
+                                new ItemStack(Items.FURNACE), MachineWorkRate.ONE))),
+                Category.PROCESS,
+                MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                EnergyType.SMELTING_ENERGY));
         descriptors.register(BLAST_FURNACE_ID.getPath(), () -> installable(
-                BLAST_FURNACE_ID, new ItemStack(Items.BLAST_FURNACE), EnergyType.BLASTING_ENERGY, 1, Category.PROCESS, 64));
+                BLAST_FURNACE_ID, new ItemStack(Items.BLAST_FURNACE), EnergyType.BLASTING_ENERGY, 1,
+                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(SMOKER_ID.getPath(), () -> installable(
-                SMOKER_ID, new ItemStack(Items.SMOKER), EnergyType.SMOKING_ENERGY, 1, Category.PROCESS, 64));
+                SMOKER_ID, new ItemStack(Items.SMOKER), EnergyType.SMOKING_ENERGY, 1,
+                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(CAMPFIRE_ID.getPath(), () -> installable(
-                CAMPFIRE_ID, new ItemStack(Items.CAMPFIRE), EnergyType.CAMPFIRE_ENERGY, 1, Category.PROCESS, 64));
+                CAMPFIRE_ID, new ItemStack(Items.CAMPFIRE), EnergyType.CAMPFIRE_ENERGY, 1,
+                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(BREWING_STAND_ID.getPath(), () -> installable(
-                BREWING_STAND_ID, new ItemStack(Items.BREWING_STAND), EnergyType.BREW_ENERGY, 1, Category.PROCESS, 64));
+                BREWING_STAND_ID, new ItemStack(Items.BREWING_STAND), EnergyType.BREW_ENERGY, 1,
+                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(CRAFTING_TABLE_ID.getPath(), () -> installable(
                 CRAFTING_TABLE_ID, new ItemStack(Items.CRAFTING_TABLE), null, 0, Category.INSTANT, 1));
         descriptors.register(STONECUTTER_ID.getPath(), () -> installable(
                 STONECUTTER_ID, new ItemStack(Items.STONECUTTER), null, 0, Category.INSTANT, 1));
         descriptors.register(SMITHING_TABLE_ID.getPath(), () -> installable(
                 SMITHING_TABLE_ID, new ItemStack(Items.SMITHING_TABLE), null, 0, Category.INSTANT, 1));
-        descriptors.register(AXE_ID.getPath(), () -> MachineDescriptor.consumable(
+        descriptors.register(AXE_ID.getPath(), () -> MachineDescriptor.transform(
                 AXE_ID,
                 new ItemStack(Items.IRON_AXE),
                 Ingredient.of(
@@ -83,8 +96,8 @@ public final class MachineEnergyTable {
                         Items.DIAMOND_AXE,
                         Items.NETHERITE_AXE),
                 stack -> AxeEnergy.isInfinite(stack)
-                        ? new MachineDescriptor.ConsumableAmount(0, true)
-                        : new MachineDescriptor.ConsumableAmount(AxeEnergy.finiteValue(stack), false)));
+                        ? new MachineDescriptor.TransformAmount(0, true)
+                        : new MachineDescriptor.TransformAmount(AxeEnergy.finiteValue(stack), false)));
     }
 
     public static int size() {
@@ -175,10 +188,22 @@ public final class MachineEnergyTable {
             ItemStack.STREAM_CODEC.encode(buf, descriptor.representativeStack());
             Ingredient.CONTENTS_STREAM_CODEC.encode(buf, descriptor.acceptedItems());
             buf.writeEnum(descriptor.category());
+            if (descriptor.category() != Category.TRANSFORM) {
+                ComponentSerialization.STREAM_CODEC.encode(buf, descriptor.stationLabel());
+            }
             buf.writeVarInt(descriptor.maxInstalledCount());
             buf.writeBoolean(descriptor.energyType() != null);
             if (descriptor.energyType() != null) buf.writeEnum(descriptor.energyType());
             buf.writeVarInt(descriptor.energyPerTick());
+            buf.writeBoolean(descriptor.isPolymorphic());
+            List<MachineVariant> variants = descriptor.isPolymorphic()
+                    ? descriptor.variants() : List.of();
+            buf.writeVarInt(variants.size());
+            for (MachineVariant variant : variants) {
+                ItemStack.STREAM_CODEC.encode(buf, variant.stack());
+                buf.writeVarLong(variant.rate().numerator());
+                buf.writeVarLong(variant.rate().denominator());
+            }
         }
     }
 
@@ -195,17 +220,28 @@ public final class MachineEnergyTable {
             ItemStack representative = ItemStack.STREAM_CODEC.decode(buf);
             Ingredient acceptedItems = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
             Category category = buf.readEnum(Category.class);
+            var stationLabel = category == Category.TRANSFORM
+                    ? null : ComponentSerialization.STREAM_CODEC.decode(buf);
             int maxInstalledCount = buf.readVarInt();
             EnergyType energyType = buf.readBoolean() ? buf.readEnum(EnergyType.class) : null;
             int energyPerTick = buf.readVarInt();
-            descriptors.add(MachineDescriptor.clientSynced(
-                    id,
-                    representative,
-                    acceptedItems,
-                    category,
-                    maxInstalledCount,
-                    energyType,
-                    energyPerTick));
+            boolean polymorphic = buf.readBoolean();
+            int variantCount = buf.readVarInt();
+            if (variantCount < 0 || variantCount > 64) {
+                throw new IllegalArgumentException("Invalid machine variant count: " + variantCount);
+            }
+            List<MachineVariant> variants = new ArrayList<>(variantCount);
+            for (int variant = 0; variant < variantCount; variant++) {
+                variants.add(MachineVariant.of(
+                        ItemStack.STREAM_CODEC.decode(buf),
+                        MachineWorkRate.of(buf.readVarLong(), buf.readVarLong())));
+            }
+            descriptors.add(!polymorphic
+                    ? MachineDescriptor.clientSynced(
+                            id, stationLabel, representative, acceptedItems, category,
+                            maxInstalledCount, energyType, energyPerTick)
+                    : MachineDescriptor.clientSyncedVariants(
+                            id, stationLabel, variants, category, maxInstalledCount, energyType));
         }
         return List.copyOf(descriptors);
     }

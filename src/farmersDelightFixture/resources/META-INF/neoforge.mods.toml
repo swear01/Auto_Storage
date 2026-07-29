@@ -1,0 +1,37 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="magic_storage_farmers_delight_fixture"
+version="1.0.0"
+displayName="Magic Storage Farmer's Delight Fixture"
+description='''Repository-owned Cooking Pot compatibility fixture.'''
+
+[[dependencies.magic_storage_farmers_delight_fixture]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.magic_storage_farmers_delight_fixture]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.magic_storage_farmers_delight_fixture]]
+modId="magic_storage"
+type="required"
+versionRange="[0.1,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.magic_storage_farmers_delight_fixture]]
+modId="farmersdelight"
+type="required"
+versionRange="[1.3.2,)"
+ordering="AFTER"
+side="BOTH"

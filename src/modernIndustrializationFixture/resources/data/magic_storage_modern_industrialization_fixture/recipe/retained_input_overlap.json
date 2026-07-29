@@ -1,0 +1,22 @@
+{
+  "type": "modern_industrialization:mixer",
+  "duration": 20,
+  "eu": 2,
+  "item_inputs": [
+    {
+      "amount": 1,
+      "item": "minecraft:stone"
+    },
+    {
+      "amount": 1,
+      "item": "minecraft:stone",
+      "probability": 0.0
+    }
+  ],
+  "item_outputs": [
+    {
+      "amount": 1,
+      "item": "minecraft:diamond"
+    }
+  ]
+}

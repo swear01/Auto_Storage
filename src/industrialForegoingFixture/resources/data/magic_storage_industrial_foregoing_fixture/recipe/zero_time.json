@@ -1,0 +1,16 @@
+{
+  "type": "industrialforegoing:dissolution_chamber",
+  "input": [
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "inputFluid": {
+    "amount": 100,
+    "fluid": "minecraft:water"
+  },
+  "output": {
+    "id": "minecraft:gold_ingot"
+  },
+  "processingTime": 0
+}

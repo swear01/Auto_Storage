@@ -1,0 +1,14 @@
+{
+  "type": "evilcraft:blood_infuser",
+  "input_item": {
+    "item": "minecraft:charcoal"
+  },
+  "input_fluid": {
+    "id": "evilcraft:blood",
+    "amount": 100
+  },
+  "output_item": {
+    "tag": "minecraft:coals"
+  },
+  "duration": 10
+}

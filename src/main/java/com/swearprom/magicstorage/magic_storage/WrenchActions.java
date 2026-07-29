@@ -60,12 +60,25 @@ final class WrenchActions {
                     : InteractionResult.FAIL;
         }
 
+        if (isDirectionlessBus(state)) return InteractionResult.PASS;
         BlockState rotated = rotate(state, hit.getDirection());
-        if (rotated == null) return InteractionResult.PASS;
+        if (rotated == null || rotated.equals(state)) return InteractionResult.PASS;
         if (level.isClientSide()) return InteractionResult.SUCCESS;
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (!(blockEntity instanceof BusConfigurationHost host)
+                || !BusConfigurationAccess.authorizeMutation(host, player)) {
+            return InteractionResult.FAIL;
+        }
         return level.setBlock(pos, rotated, Block.UPDATE_ALL)
                 ? InteractionResult.CONSUME
                 : InteractionResult.FAIL;
+    }
+
+    private static boolean isDirectionlessBus(BlockState state) {
+        return (state.getBlock() instanceof ImportBusBlock
+                && state.getValue(ImportBusBlock.DIRECTIONLESS))
+                || (state.getBlock() instanceof ExportBusBlock
+                && state.getValue(ExportBusBlock.DIRECTIONLESS));
     }
 
     private static BlockState rotate(BlockState state, Direction clickedFace) {
@@ -86,6 +99,26 @@ final class WrenchActions {
         if (breakEvent.isCanceled()) return false;
 
         BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof BusConfigurationHost host
+                && !BusConfigurationAccess.canConfigure(host, player)) {
+            return false;
+        }
+        boolean preservesBusEscrowDrop = !player.hasInfiniteMaterials()
+                && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS);
+        if (!preservesBusEscrowDrop
+                && blockEntity instanceof ImportBusBlockEntity importer
+                && !importer.recoverPendingResources()) {
+            return false;
+        }
+        if (!preservesBusEscrowDrop
+                && blockEntity instanceof ExportBusBlockEntity exporter
+                && !exporter.recoverPendingResources()) {
+            return false;
+        }
+        if (blockEntity instanceof BusConfigurationHost host
+                && !BusConfigurationAccess.authorizeMutation(host, player)) {
+            return false;
+        }
         if (blockEntity instanceof StorageCoreBlockEntity core) {
             if (!core.isStorageAvailable()) {
                 player.displayClientMessage(
@@ -126,6 +159,7 @@ final class WrenchActions {
 
         var dropEvent = new BlockDropsEvent(level, pos, state, blockEntity, entities, player, tool);
         NeoForge.EVENT_BUS.post(dropEvent);
+        preserveBusEscrowAfterDropEvent(level, pos, blockEntity, dropEvent);
         if (!dropEvent.isCanceled()) {
             for (ItemEntity entity : dropEvent.getDrops()) {
                 ItemStack remaining = entity.getItem().copy();
@@ -142,5 +176,36 @@ final class WrenchActions {
             player.inventoryMenu.broadcastChanges();
         }
         return true;
+    }
+
+    private static void preserveBusEscrowAfterDropEvent(
+            ServerLevel level,
+            BlockPos pos,
+            BlockEntity blockEntity,
+            BlockDropsEvent dropEvent
+    ) {
+        if (blockEntity instanceof ImportBusBlockEntity importer) {
+            ItemStack expected = importer.createRecoveryDrop(level.registryAccess());
+            if (!dropEvent.isCanceled()
+                    && BusRecoveryDrops.containsMatchingEscrowDrop(dropEvent.getDrops(), expected)) {
+                return;
+            }
+            if (!importer.recoverPendingResources()) {
+                BusRecoveryDrops.spawnIfMissing(
+                        level, pos, importer.createRecoveryDrop(level.registryAccess()));
+            }
+            return;
+        }
+        if (blockEntity instanceof ExportBusBlockEntity exporter) {
+            ItemStack expected = exporter.createRecoveryDrop(level.registryAccess());
+            if (!dropEvent.isCanceled()
+                    && BusRecoveryDrops.containsMatchingEscrowDrop(dropEvent.getDrops(), expected)) {
+                return;
+            }
+            if (!exporter.recoverPendingResources()) {
+                BusRecoveryDrops.spawnIfMissing(
+                        level, pos, exporter.createRecoveryDrop(level.registryAccess()));
+            }
+        }
     }
 }

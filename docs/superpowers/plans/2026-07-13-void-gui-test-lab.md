@@ -1,5 +1,7 @@
 # Void GUI Test Lab Implementation Plan
 
+> **Current revision (2026-07-23):** This completed plan preserves the original fixed-lab implementation history. The active schema-5 runner is scenario-scoped; `crafting-fuel-page` now preloads one matching server repository/Core reference and gives the player only hotbar 1/2 navigation, with no destructive reset or manual setup queue. Follow `docs/notes.md` and `docs/superpowers/plans/2026-07-23-polymorphic-stations-and-mod-recipes.md` for current behavior.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build a transactionally regenerated true-void Prism test world with a deterministic Magic Storage laboratory, preloaded Core baseline, fixed navigation hotbar, and reusable reset.

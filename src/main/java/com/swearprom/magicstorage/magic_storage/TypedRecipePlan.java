@@ -1,5 +1,6 @@
 package com.swearprom.magicstorage.magic_storage;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -9,8 +10,11 @@ import java.util.Objects;
 import java.util.Set;
 
 public final class TypedRecipePlan {
+    public static final int MAX_INPUTS = 81;
+
     private final List<TypedRecipeInput> inputs;
     private final List<TypedRecipeOutput> outputs;
+    private final TypedRecipeOutput selectionOutput;
     private final ItemStack presentationOutput;
     private final int width;
     private final int height;
@@ -19,30 +23,49 @@ public final class TypedRecipePlan {
     private TypedRecipePlan(Builder builder) {
         inputs = List.copyOf(builder.inputs);
         outputs = List.copyOf(builder.outputs);
+        List<TypedRecipeOutput> primaryOutputs = outputs.stream()
+                .filter(output -> output.role() == TypedRecipeOutput.Role.PRIMARY)
+                .toList();
+        List<TypedRecipeOutput> primaryItems = primaryOutputs.stream()
+                .filter(output -> output.key().kindId().equals(StorageResourceKindApi.ITEM_KIND))
+                .toList();
+        selectionOutput = primaryItems.size() == 1
+                ? primaryItems.getFirst()
+                : primaryItems.isEmpty() && primaryOutputs.size() == 1
+                        ? primaryOutputs.getFirst()
+                        : null;
         presentationOutput = builder.presentationOutput.copy();
         width = builder.width;
         height = builder.height;
         shapeless = builder.shapeless;
-        if (inputs.isEmpty() || inputs.size() > RecipePresentation.MAX_INPUTS) {
-            throw new IllegalArgumentException("Typed recipe plan requires one to nine inputs");
+        if (inputs.isEmpty() || inputs.size() > MAX_INPUTS) {
+            throw new IllegalArgumentException("Typed recipe plan requires one to 81 inputs");
         }
-        if (outputs.isEmpty()
-                || outputs.stream().noneMatch(output -> output.role() == TypedRecipeOutput.Role.PRIMARY)) {
+        if (primaryOutputs.isEmpty()) {
             throw new IllegalArgumentException("Typed recipe plan requires a primary output");
         }
-        if (outputs.stream().noneMatch(output ->
-                output.role() == TypedRecipeOutput.Role.PRIMARY
-                        && output.key().kindId().equals(StorageResourceKindApi.ITEM_KIND))) {
+        if (selectionOutput == null) {
             throw new IllegalArgumentException(
-                    "Typed recipe plan requires an item primary output for terminal selection");
+                    "Typed recipe plan requires one unambiguous terminal selection output");
         }
         if (presentationOutput.isEmpty()) {
             throw new IllegalArgumentException("Typed recipe plan requires a presentation output");
         }
-        if (width < 1 || width > 3 || height < 1 || height > 3 || width * height < inputs.size()) {
-            throw new IllegalArgumentException("Typed recipe layout must fit one to nine inputs");
+        if (selectionOutput.key().kindId().equals(StorageResourceKindApi.ITEM_KIND)
+                && !selectionOutput.key().resourceId().equals(
+                BuiltInRegistries.ITEM.getKey(presentationOutput.getItem()))) {
+            throw new IllegalArgumentException(
+                    "Typed item selection output must match its presentation item");
         }
-        requireUniqueKeys(inputs.stream().map(TypedRecipeInput::key).toList(), "input");
+        if (width < 1 || width > 3 || height < 1 || height > 3
+                || (inputs.size() <= RecipePresentation.MAX_INPUTS
+                && width * height < inputs.size())
+                || (inputs.size() > RecipePresentation.MAX_INPUTS
+                && (!shapeless || width != 3 || height != 3))) {
+            throw new IllegalArgumentException(
+                    "Typed recipe layout must fit its inputs or use a 3x3 shapeless summary");
+        }
+        requireCompatibleInputKeys(inputs);
         requireUniqueKeys(outputs.stream().map(TypedRecipeOutput::key).toList(), "output");
     }
 
@@ -56,6 +79,14 @@ public final class TypedRecipePlan {
 
     public List<TypedRecipeOutput> outputs() {
         return outputs;
+    }
+
+    public StorageResourceKey selectionOutputKey() {
+        return selectionOutput.key();
+    }
+
+    public TypedRecipeOutput selectionOutput() {
+        return selectionOutput;
     }
 
     public ItemStack presentationOutput() {
@@ -79,6 +110,21 @@ public final class TypedRecipePlan {
         for (StorageResourceKey key : keys) {
             if (!unique.add(key)) {
                 throw new IllegalArgumentException("Typed recipe " + name + " keys must be unique");
+            }
+        }
+    }
+
+    private static void requireCompatibleInputKeys(List<TypedRecipeInput> inputs) {
+        java.util.Map<StorageResourceKey, TypedRecipeInput.Role> roles = new java.util.HashMap<>();
+        for (TypedRecipeInput input : inputs) {
+            for (StorageResourceKey key : input.alternatives()) {
+                TypedRecipeInput.Role previous = roles.putIfAbsent(key, input.role());
+                if (previous != null
+                        && (previous != TypedRecipeInput.Role.CONSUME
+                        || input.role() != TypedRecipeInput.Role.CONSUME)) {
+                    throw new IllegalArgumentException(
+                            "Retained typed recipe input keys cannot overlap");
+                }
             }
         }
     }

@@ -1,0 +1,15 @@
+{
+  "type": "evilcraft:blood_infuser",
+  "input_item": {
+    "item": "minecraft:stone"
+  },
+  "input_fluid": {
+    "id": "evilcraft:blood",
+    "amount": 100
+  },
+  "tier": 4,
+  "output_item": {
+    "id": "minecraft:diamond"
+  },
+  "duration": 10
+}

@@ -1,0 +1,16 @@
+{
+  "type": "evilcraft:blood_infuser",
+  "input_item": {
+    "item": "minecraft:clay_ball"
+  },
+  "input_fluid": {
+    "id": "evilcraft:blood",
+    "amount": 250
+  },
+  "tier": 2,
+  "output_item": {
+    "id": "minecraft:brick",
+    "count": 3
+  },
+  "duration": 40
+}

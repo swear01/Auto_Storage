@@ -10,19 +10,19 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Reset defaults are Name sort, Ascending order, normal name search, Items resource view, $(thing)Auto target$(), and Player craft output. Use Player Inventory is a separate on/off choice for recipe ingredients and returns to its usual default when reset."
+      "text": "Reset defaults are Name sort, Ascending order, Search Sync Off, Items resource view, $(thing)Auto Transform target$(), and Player craft output. Auto Focus is a separate on/off control and starts enabled."
     },
     {
       "type": "patchouli:text",
-      "text": "Sorting offers $(thing)Name, Quantity, Mod, and ID$(). Search offers normal names, #tag, and @mod. Use the exact tooltip amount when compact grid labels look similar at very large quantities."
+      "text": "Sorting offers $(thing)Name, Quantity, Mod, and ID$(). Type names normally, or begin a term with $(thing)@mod$() or $(thing)#tag$(). Auto Focus gives Search initial keyboard focus when a terminal opens; clicking outside releases focus without clearing the query. Search Sync separately offers Off, terminal-to-EMI, and EMI two-way."
     },
     {
       "type": "patchouli:text",
-      "text": "A colored light means a true on/off control such as Use Player Inventory. Resource view, sort, search, Fuel Target, and Craft Output are selected values, so they use labels or icons instead. The active page uses a neutral selected-tab frame."
+      "text": "A colored light means a true on/off control such as Auto Focus or Use Player Inventory. Resource view, sort, Search Sync, Transform Target, and Craft Output are selected values, so they use labels or icons instead. The active page uses a neutral selected-tab frame."
     },
     {
       "type": "patchouli:text",
-      "text": "Your sort, order, search mode, resource view, Crafting tab, ingredient source, output destination, and Fuel Target are remembered for every terminal on this Minecraft client. Search text, scroll position, and selected recipes reset when the screen closes."
+      "text": "Your Auto Focus choice, sort, order, Search Sync mode, resource view, Crafting tab, ingredient source, output destination, and Transform Target are remembered for every terminal on this Minecraft client. Search text, target/card pages, scroll position, and selected recipes reset when the screen closes."
     }
   ]
 }

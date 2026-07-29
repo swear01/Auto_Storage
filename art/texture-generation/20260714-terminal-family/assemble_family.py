@@ -402,11 +402,14 @@ def control_atlas():
               (3, 6), (4, 7), (5, 8), (6, 8), (7, 8), (8, 7), (9, 6),
               (9, 5), (9, 4), (9, 7), (10, 8), (11, 9), (12, 10), (13, 11)}
     points(6, search)
-    points(7, tag)
-    at = {(x, 3) for x in range(5, 10)} | {(x, 11) for x in range(5, 10)}
-    at |= {(4, y) for y in range(4, 11)} | {(10, y) for y in range(4, 10)}
-    at |= {(7, 6), (8, 6), (6, 7), (8, 7), (6, 8), (7, 8), (8, 8), (9, 8), (10, 8)}
-    points(8, at)
+    one_way = {(2, y) for y in range(4, 12)} | {(13, y) for y in range(4, 12)}
+    one_way |= {(x, 7) for x in range(4, 12)}
+    one_way |= {(10, 5), (11, 6), (12, 7), (11, 8), (10, 9)}
+    points(7, one_way)
+    two_way = {(x, 5) for x in range(3, 12)} | {(x, 10) for x in range(4, 13)}
+    two_way |= {(10, 3), (11, 4), (12, 5), (11, 6), (10, 7)}
+    two_way |= {(5, 8), (4, 9), (3, 10), (4, 11), (5, 12)}
+    points(8, two_way)
     previous = {(3, 7), (4, 6), (4, 8), (5, 5), (5, 9), (6, 4), (6, 10)}
     previous |= {(x, 7) for x in range(4, 13)}
     points(9, previous)
@@ -644,7 +647,7 @@ def main():
         }
     icons = [
         "SORT_ASCENDING", "SORT_DESCENDING", "SORT_NAME", "SORT_QUANTITY", "SORT_MOD",
-        "SORT_ID", "SEARCH", "SEARCH_TAG", "SEARCH_MOD", "PREVIOUS", "NEXT",
+        "SORT_ID", "SEARCH_OFF", "SEARCH_EMI", "SEARCH_EMI_TWO_WAY", "PREVIOUS", "NEXT",
     ]
     manifest = {
         "schema": 2,

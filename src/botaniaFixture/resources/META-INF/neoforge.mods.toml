@@ -1,0 +1,37 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="magic_storage_botania_fixture"
+version="1.0.0"
+displayName="Magic Storage Botania Fixture"
+description='''Repository-owned Botania Mana and deterministic recipe compatibility fixture.'''
+
+[[dependencies.magic_storage_botania_fixture]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.229,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.magic_storage_botania_fixture]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.magic_storage_botania_fixture]]
+modId="magic_storage"
+type="required"
+versionRange="[0.1,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.magic_storage_botania_fixture]]
+modId="botania"
+type="required"
+versionRange="[455-SNAPSHOT,)"
+ordering="AFTER"
+side="BOTH"

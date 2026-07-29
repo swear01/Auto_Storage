@@ -5,10 +5,101 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class GitHubWorkflowTests(unittest.TestCase):
+    GAME_TEST_STEPS = (
+        (
+            "Run GameTest server",
+            "./gradlew runGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/gametest.log",
+        ),
+        (
+            "Run recipe addon GameTest server",
+            "./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log",
+        ),
+        (
+            "Run Mekanism GameTest server",
+            "./gradlew runMekanismGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/mekanism-gametest.log",
+        ),
+        (
+            "Run Botania GameTest server",
+            "./gradlew runBotaniaGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/botania-gametest.log",
+        ),
+        (
+            "Run Iron Furnaces GameTest server",
+            "./gradlew runIronFurnacesGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/iron-furnaces-gametest.log",
+        ),
+        (
+            "Run Farmer's Delight GameTest server",
+            "./gradlew runFarmersDelightGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/farmers-delight-gametest.log",
+        ),
+        (
+            "Run Modern Industrialization GameTest server",
+            "./gradlew runModernIndustrializationGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/modern-industrialization-gametest.log",
+        ),
+        (
+            "Run Ars Nouveau GameTest server",
+            "./gradlew runArsNouveauGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ars-nouveau-gametest.log",
+        ),
+        (
+            "Run EvilCraft GameTest server",
+            "./gradlew runEvilCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/evilcraft-gametest.log",
+        ),
+        (
+            "Run Powah GameTest server",
+            "./gradlew runPowahGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/powah-gametest.log",
+        ),
+        (
+            "Run Industrial Foregoing GameTest server",
+            "./gradlew runIndustrialForegoingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/industrial-foregoing-gametest.log",
+        ),
+        (
+            "Run Create GameTest server",
+            "./gradlew runCreateGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/create-gametest.log",
+        ),
+        (
+            "Run PneumaticCraft GameTest server",
+            "./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log",
+        ),
+        (
+            "Run Extended Crafting GameTest server",
+            "./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log",
+        ),
+        (
+            "Run optional compatibility matrix GameTest server",
+            "./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/compatibility-matrix-gametest.log",
+        ),
+    )
+    CLEAR_GAME_TEST_WORLD = (
+        "python3 -c 'import shutil; shutil.rmtree(\"run/world\", ignore_errors=True)'"
+    )
+
     def read_required(self, relative_path: str) -> str:
         path = ROOT / relative_path
         self.assertTrue(path.exists(), f"missing {relative_path}")
         return path.read_text()
+
+    def assert_isolated_sequential_game_test_steps(self, text: str):
+        previous_end = -1
+        for name, command in self.GAME_TEST_STEPS:
+            marker = f"      - name: {name}\n        run: |\n"
+            start = text.find(marker)
+            self.assertGreater(start, previous_end, f"missing or out-of-order step: {name}")
+            body_start = start + len(marker)
+            body_end = text.find("\n      - name:", body_start)
+            if body_end == -1:
+                body_end = len(text)
+            body = [line.strip() for line in text[body_start:body_end].splitlines()]
+            self.assertEqual(
+                ["set -o pipefail", self.CLEAR_GAME_TEST_WORLD, command],
+                body,
+                f"{name} must be an isolated step that clears only run/world first",
+            )
+            previous_end = body_end
+
+    def test_ci_and_release_run_all_game_test_fixtures_in_isolated_sequential_steps(self):
+        for relative_path in (".github/workflows/ci.yml", ".github/workflows/release.yml"):
+            with self.subTest(workflow=relative_path):
+                self.assert_isolated_sequential_game_test_steps(
+                    self.read_required(relative_path)
+                )
 
     def test_ci_workflow_runs_full_project_verification_and_uploads_jar(self):
         text = self.read_required(".github/workflows/ci.yml")
@@ -25,6 +116,15 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("./gradlew runGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/gametest.log", text)
         self.assertIn("./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log", text)
         self.assertIn("./gradlew runMekanismGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/mekanism-gametest.log", text)
+        self.assertIn("./gradlew runBotaniaGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/botania-gametest.log", text)
+        self.assertIn("./gradlew runModernIndustrializationGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/modern-industrialization-gametest.log", text)
+        self.assertIn("./gradlew runArsNouveauGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ars-nouveau-gametest.log", text)
+        self.assertIn("./gradlew runEvilCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/evilcraft-gametest.log", text)
+        self.assertIn("./gradlew runPowahGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/powah-gametest.log", text)
+        self.assertIn("./gradlew runIndustrialForegoingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/industrial-foregoing-gametest.log", text)
+        self.assertIn("./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log", text)
+        self.assertIn("./gradlew runCreateGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/create-gametest.log", text)
+        self.assertIn("./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log", text)
         self.assertIn("PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts 2>&1 | tee build/ci-logs/python-unittest.log", text)
         self.assertIn("./gradlew runData --console=plain --no-daemon 2>&1 | tee build/ci-logs/datagen.log", text)
         self.assertIn("git status --porcelain -- src/generated/resources src/main/resources", text)
@@ -59,26 +159,62 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("name: Release", text)
         self.assertIn("'v*.*.*'", text)
         self.assertIn("contents: write", text)
-        self.assertIn("actions/checkout@v7", text)
+        self.assertIn(
+            "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            text,
+        )
         self.assertIn("fetch-depth: 0", text)
-        self.assertIn("actions/setup-java@v5", text)
-        self.assertIn("gradle/actions/setup-gradle@v6", text)
+        self.assertIn(
+            "actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95",
+            text,
+        )
+        self.assertIn(
+            "gradle/actions/setup-gradle@90ddb51e90a5fd9ba75f40cf85156b7b41bf76a3",
+            text,
+        )
         self.assertIn("grep '^mod_version=' gradle.properties", text)
         self.assertIn('"v${VERSION}" != "$TAG"', text)
         self.assertIn("./gradlew build --console=plain --no-daemon 2>&1 | tee build/ci-logs/build.log", text)
         self.assertIn("./gradlew runGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/gametest.log", text)
         self.assertIn("./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log", text)
         self.assertIn("./gradlew runMekanismGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/mekanism-gametest.log", text)
+        self.assertIn("./gradlew runBotaniaGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/botania-gametest.log", text)
+        self.assertIn("./gradlew runModernIndustrializationGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/modern-industrialization-gametest.log", text)
+        self.assertIn("./gradlew runEvilCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/evilcraft-gametest.log", text)
+        self.assertIn("./gradlew runPowahGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/powah-gametest.log", text)
+        self.assertIn("./gradlew runIndustrialForegoingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/industrial-foregoing-gametest.log", text)
+        self.assertIn("./gradlew runCreateGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/create-gametest.log", text)
+        self.assertIn("./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log", text)
         self.assertIn("PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts 2>&1 | tee build/ci-logs/python-unittest.log", text)
         self.assertIn("./gradlew runData --console=plain --no-daemon 2>&1 | tee build/ci-logs/datagen.log", text)
         self.assertIn("git status --porcelain -- src/generated/resources src/main/resources", text)
         self.assertIn("Generate release notes", text)
         self.assertIn("git log --pretty='- %s (%h)'", text)
-        self.assertIn("gh release create", text)
-        self.assertIn("--notes-file build/release-notes.md", text)
+        self.assertIn("environment: publishing", text)
+        self.assertIn("Check publisher configuration", text)
+        self.assertIn("MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}", text)
+        self.assertIn("CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}", text)
+        self.assertIn("MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}", text)
+        self.assertIn("CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}", text)
+        self.assertIn(
+            "uses: Kira-NT/mc-publish@52307b03863581dec6b652b83e597aec02ebb075",
+            text,
+        )
+        self.assertIn("github-prerelease: true", text)
+        self.assertIn("version-type: alpha", text)
+        self.assertIn("loaders: neoforge", text)
+        self.assertIn("game-versions: 1.21.1", text)
+        self.assertIn("fRiHVvU7", text)
+        self.assertIn("580555", text)
+        self.assertIn("nU0bVIaL", text)
+        self.assertIn("306770", text)
+        self.assertIn("changelog-file: build/release-notes.md", text)
         self.assertIn("name: magic-storage-release-logs", text)
-        self.assertIn("build/libs/magic_storage-*.jar", text)
-        self.assertIn("GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}", text)
+        self.assertIn(
+            "files: build/libs/magic_storage-${{ steps.release-meta.outputs.version }}.jar",
+            text,
+        )
+        self.assertIn("github-token: ${{ secrets.GITHUB_TOKEN }}", text)
         self.assertIn("Verify minimum and latest compatible EMI releases", text)
         self.assertIn('MIN_EMI="$(sed -n \'s/^emi_version=//p\' gradle.properties)"', text)
         self.assertIn('MIN_EMI_RUNTIME="$(sed -n \'s/^emi_runtime_version=//p\' gradle.properties)"', text)
@@ -92,10 +228,24 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn('MIN_EMI_RUNTIME="$(python3 scripts/resolve_emi_runtime.py "$MIN_EMI")"', text)
         self.assertIn('bash scripts/stage_emi_runtime.sh "$MIN_EMI" "$MIN_EMI_RUNTIME"', text)
         self.assertIn("build/ci-logs/emi-runtime.log", text)
-        self.assertNotIn("modrinth-publish", text.lower())
-        self.assertNotIn("curseforge", text.lower())
         self.assertNotIn("runClient", text)
         self.assertNotIn("xvfb-run", text)
+
+    def test_release_pins_actions_and_gradle_distribution(self):
+        text = self.read_required(".github/workflows/release.yml")
+        action_lines = [
+            line.strip()
+            for line in text.splitlines()
+            if line.strip().startswith("uses:")
+        ]
+        for line in action_lines:
+            with self.subTest(action=line):
+                self.assertRegex(line, r"^uses: [^@]+@[0-9a-f]{40}$")
+        wrapper = self.read_required("gradle/wrapper/gradle-wrapper.properties")
+        self.assertIn(
+            "distributionSha256Sum=72f44c9f8ebcb1af43838f45ee5c4aa9c5444898b3468ab3f4af7b6076c5bc3f",
+            wrapper,
+        )
 
     def test_public_repo_docs_explain_ci_cd_and_manual_gui_gate(self):
         readme = self.read_required("README.md")
@@ -125,6 +275,33 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn('git tag "v${version}"', readme)
         self.assertIn('git push origin main "v${version}"', readme)
         self.assertIn("目前版本以 `gradle.properties` 的唯一 `mod_version` 為準", notes)
+
+    def test_release_guide_and_project_icon_are_complete(self):
+        guide = self.read_required("docs/releasing.md")
+        for required in (
+            "Magic Storage for NeoForge",
+            "magic-storage-neoforge",
+            "All Rights Reserved",
+            "MODRINTH_TOKEN",
+            "CURSEFORGE_TOKEN",
+            "MODRINTH_PROJECT_ID",
+            "CURSEFORGE_PROJECT_ID",
+            "publishing",
+            "gh run rerun",
+            "SHA-256",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, guide)
+
+        icon = ROOT / "art/release/magic-storage-project-icon.png"
+        self.assertTrue(icon.exists(), "missing release project icon")
+        data = icon.read_bytes()
+        self.assertEqual(b"\x89PNG\r\n\x1a\n", data[:8])
+        self.assertEqual((512, 512), (
+            int.from_bytes(data[16:20], "big"),
+            int.from_bytes(data[20:24], "big"),
+        ))
+        self.assertLess(len(data), 2 * 1024 * 1024)
 
     def test_current_manual_gui_log_check_does_not_pin_historical_version_or_selftest_total(self):
         notes = self.read_required("docs/notes.md")

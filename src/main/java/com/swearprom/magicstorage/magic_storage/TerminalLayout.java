@@ -11,12 +11,14 @@ final class TerminalLayout {
     static final int TOP_HEIGHT = 19;
     static final int MIN_STORAGE_ROWS = 3;
     static final int MIN_CRAFTING_ROWS = 1;
-    static final int MAX_ROWS = 9;
+    static final int MAX_ROWS = StorageTerminalMenu.MAX_DISPLAY_ROWS;
     static final int RAIL_GROUP_GAP = 6;
 
     private static final int NARROW_WIDTH = 210;
-    private static final int SIDE_BY_SIDE_MIN_WIDTH = 360;
+    private static final int SIDE_BY_SIDE_MIN_WIDTH = 367;
     private static final int SIDE_BY_SIDE_MAX_WIDTH = 390;
+    private static final int SIDE_BY_SIDE_WORKSPACE_X = 187;
+    private static final int SIDE_BY_SIDE_RIGHT_MARGIN = 4;
     private static final int STORAGE_BOTTOM_HEIGHT = 99;
     private static final int PLAYER_INVENTORY_HEIGHT = 4 * SLOT_SIZE + 4;
     private static final int OUTER_MARGIN = 16;
@@ -29,11 +31,14 @@ final class TerminalLayout {
     private static final int FUEL_TARGET_BAR_HEIGHT = CONTROL_SIZE;
     private static final int FUEL_TARGET_BAR_GAP = 1;
     private static final int FUEL_CATEGORY_LABEL_WIDTH = 64;
-    private static final int FUEL_CATEGORY_CELL_HEIGHT = 28;
+    private static final int FUEL_CATEGORY_HEADER_GAP = 1;
+    private static final int FUEL_CATEGORY_CELL_HEIGHT = 20;
     private static final int FUEL_CONSUMABLE_PANEL_HEIGHT = FUEL_PANEL_INSET * 2
             + FUEL_TARGET_BAR_HEIGHT + FUEL_TARGET_BAR_GAP + FUEL_CATEGORY_CELL_HEIGHT;
     private static final int FUEL_STATION_PANEL_HEIGHT = FUEL_PANEL_INSET * 2
             + FUEL_CATEGORY_CELL_HEIGHT;
+    private static final int FUEL_STATION_TALL_PANEL_HEIGHT = FUEL_PANEL_INSET * 2
+            + CONTROL_SIZE + FUEL_CATEGORY_HEADER_GAP + FUEL_CATEGORY_CELL_HEIGHT;
     private static final int FUEL_CATEGORY_GAP = 2;
     private static final int FUEL_AMOUNT_HEIGHT = 9;
     private static final int RAIL_BUTTON_SIZE = CONTROL_SIZE;
@@ -45,18 +50,18 @@ final class TerminalLayout {
     private static final int RECIPE_INSET = 4;
     private static final int CONTROL_GAP = 2;
     private static final int RECIPE_DIAGRAM_MIN_HEIGHT = SLOT_SIZE * 3;
-    private static final int RECIPE_DIAGRAM_MAX_HEIGHT = SLOT_SIZE * 4;
     private static final int RECIPE_LEDGER_MIN_ROW_HEIGHT = 16;
     private static final int RECIPE_LEDGER_MAX_COLUMNS = 4;
-    private static final int RECIPE_LEDGER_MIN_CELL_WIDTH = 48;
+    private static final int RECIPE_LEDGER_MIN_CELL_WIDTH = 56;
     private static final int RECIPE_LEDGER_MAX_HEIGHT = SLOT_SIZE * 3;
-    private static final int RECIPE_BODY_MAX_HEIGHT = RECIPE_DIAGRAM_MAX_HEIGHT
-            + RECIPE_LEDGER_MAX_HEIGHT;
     private static final int RECIPE_BODY_FOOTER_GAP = 4;
-    private static final int MAX_RECIPE_LEDGER_ROWS = RecipePresentation.MAX_ITEM_RESOURCES + 3;
-    private static final int FUEL_TARGET_POPUP_ROW_HEIGHT = 20;
-    private static final int FUEL_TARGET_POPUP_MAX_ROWS = 6;
-    private static final int FUEL_TARGET_POPUP_INSET = 2;
+    private static final int TRANSFORM_TARGET_ROW_HEIGHT = 20;
+    private static final int TRANSFORM_TARGET_COLUMN_MIN_WIDTH = 96;
+    private static final int TRANSFORM_TARGET_COLUMN_MAX_WIDTH = 116;
+    private static final int TRANSFORM_CARD_HEIGHT = 32;
+    private static final int PROCESSING_STATION_MAX_COLUMNS = 3;
+    private static final int PROCESSING_STATION_CELL_WIDTH = 68;
+    private static final int INSTANT_STATION_CELL_SIZE = 20;
 
     record Rect(int x, int y, int width, int height) {
         Rect {
@@ -113,14 +118,19 @@ final class TerminalLayout {
             int rows,
             int preferredCellWidth,
             int capacity,
-            int itemCount
+            int itemCount,
+            boolean compact
     ) {
         FlowGrid {
             cells = List.copyOf(cells);
         }
 
         int pageCount() {
-            return Math.max(1, (itemCount + capacity - 1) / capacity);
+            return pageCount(itemCount);
+        }
+
+        int pageCount(int dynamicItemCount) {
+            return Math.max(1, (dynamicItemCount + capacity - 1) / capacity);
         }
 
         int visibleCount(int page) {
@@ -129,39 +139,58 @@ final class TerminalLayout {
         }
 
         List<Rect> cells(int page) {
-            return flowCells(bounds, visibleCount(page), columns, rows, preferredCellWidth);
+            return flowCells(
+                    bounds, visibleCount(page), columns, rows, preferredCellWidth, compact);
+        }
+
+        List<Rect> cells(int page, int dynamicItemCount) {
+            int first = Math.clamp(page, 0, pageCount(dynamicItemCount) - 1) * capacity;
+            int visible = Math.max(0, Math.min(capacity, dynamicItemCount - first));
+            return flowCells(
+                    bounds, visible, columns, rows, preferredCellWidth, compact);
         }
     }
 
-    record PopupList(
+    record FuelPageControls(Rect previous, Rect next) {
+    }
+
+    record PagedList(
             Rect bounds,
             int rowHeight,
             int capacity,
             int itemCount
     ) {
-        PopupList {
+        PagedList {
             if (rowHeight <= 0 || capacity <= 0 || itemCount < 0) {
-                throw new IllegalArgumentException("Popup list dimensions are out of bounds");
+                throw new IllegalArgumentException("Paged list dimensions are out of bounds");
             }
         }
 
-        int maxScrollOffset() {
-            return Math.max(0, itemCount - capacity);
+        int pageCount() {
+            return pageCount(itemCount);
         }
 
-        int clampScrollOffset(int scrollOffset) {
-            return Math.clamp(scrollOffset, 0, maxScrollOffset());
+        int pageCount(int dynamicItemCount) {
+            return Math.max(1, (dynamicItemCount + capacity - 1) / capacity);
         }
 
-        List<Rect> rows(int scrollOffset) {
-            int first = clampScrollOffset(scrollOffset);
-            int visible = Math.min(capacity, itemCount - first);
+        int firstIndex(int page) {
+            return Math.clamp(page, 0, pageCount() - 1) * capacity;
+        }
+
+        List<Rect> rows(int page) {
+            return rows(page, itemCount);
+        }
+
+        List<Rect> rows(int page, int dynamicItemCount) {
+            int first = Math.clamp(page, 0, pageCount(dynamicItemCount) - 1) * capacity;
+            int visible = Math.max(0, Math.min(capacity, dynamicItemCount - first));
             List<Rect> result = new ArrayList<>(visible);
             for (int row = 0; row < visible; row++) {
                 result.add(new Rect(
-                        bounds.x() + FUEL_TARGET_POPUP_INSET,
-                        bounds.y() + FUEL_TARGET_POPUP_INSET + row * rowHeight,
-                        bounds.width() - FUEL_TARGET_POPUP_INSET * 2,
+                        bounds.x(),
+                        bounds.y() + row * rowHeight,
+                        bounds.width(),
                         rowHeight));
             }
             return List.copyOf(result);
@@ -190,17 +219,25 @@ final class TerminalLayout {
             Rect recipeShapelessMarker,
             List<Rect> recipeNavigationButtons,
             List<Rect> recipeCraftButtons,
-            Rect consumablesPanel,
+            Rect transformPanel,
             Rect timedStationsPanel,
             Rect instantStationsPanel,
-            Rect fuelTargetSelector,
-            Rect fuelTargetListButton,
-            PopupList fuelTargetPopup,
-            Rect fuelInput,
+            Rect transformTargetSearch,
+            PagedList transformTargetList,
+            FuelPageControls transformTargetPageControls,
+            Rect transformInput,
+            List<Rect> transformAmountButtons,
             Rect fuelStatus,
-            FlowGrid consumablesGrid,
+            Rect fuelSearchBox,
+            Rect fuelSearchPanel,
+            FlowGrid transformCards,
             FlowGrid timedStationsGrid,
             FlowGrid instantStationsGrid,
+            FlowGrid fuelSearchGrid,
+            FuelPageControls transformCardPageControls,
+            FuelPageControls timedStationsPageControls,
+            FuelPageControls instantStationsPageControls,
+            FuelPageControls fuelSearchPageControls,
             List<Rect> railButtons,
             List<Rect> fuelRailButtons,
             Rect railBounds,
@@ -212,6 +249,7 @@ final class TerminalLayout {
             recipeInputSlots = List.copyOf(recipeInputSlots);
             recipeNavigationButtons = List.copyOf(recipeNavigationButtons);
             recipeCraftButtons = List.copyOf(recipeCraftButtons);
+            transformAmountButtons = List.copyOf(transformAmountButtons);
             railButtons = List.copyOf(railButtons);
             fuelRailButtons = List.copyOf(fuelRailButtons);
             exclusionRects = List.copyOf(exclusionRects);
@@ -219,6 +257,15 @@ final class TerminalLayout {
 
         List<Rect> recipeLedgerCells(int resourceCount) {
             return TerminalLayout.recipeLedgerCells(recipeLedger, resourceCount);
+        }
+
+        int recipeLedgerColumns() {
+            return TerminalLayout.recipeLedgerColumns(recipeLedger);
+        }
+
+        int recipeLedgerCapacity() {
+            return recipeLedgerColumns()
+                    * Math.max(1, recipeLedger.height() / SLOT_SIZE);
         }
 
         Rect recipeContent() {
@@ -272,7 +319,8 @@ final class TerminalLayout {
         RailGeometry rails = profileRails(profile, imageHeight);
         Rect empty = new Rect(0, 0, 0, 0);
         FlowGrid emptyFlow = emptyFlow();
-        PopupList emptyPopup = new PopupList(empty, FUEL_TARGET_POPUP_ROW_HEIGHT, 1, 0);
+        FuelPageControls emptyPageControls = new FuelPageControls(empty, empty);
+        PagedList emptyList = new PagedList(empty, TRANSFORM_TARGET_ROW_HEIGHT, 1, 0);
         return new Geometry(
                 profile,
                 false,
@@ -282,7 +330,7 @@ final class TerminalLayout {
                 itemGrid,
                 new Rect(102, 6, 70, 9),
                 new Rect(100, 4, 72, 12),
-                new Rect(174, TOP_HEIGHT, 12, rows * SLOT_SIZE),
+                new Rect(173, TOP_HEIGHT, 14, rows * SLOT_SIZE),
                 playerInventory,
                 empty,
                 empty,
@@ -299,13 +347,21 @@ final class TerminalLayout {
                 empty,
                 empty,
                 empty,
+                emptyList,
+                emptyPageControls,
                 empty,
-                emptyPopup,
+                List.of(),
+                empty,
                 empty,
                 empty,
                 emptyFlow,
                 emptyFlow,
                 emptyFlow,
+                emptyFlow,
+                emptyPageControls,
+                emptyPageControls,
+                emptyPageControls,
+                emptyPageControls,
                 rails.itemButtons(),
                 rails.fuelButtons(),
                 rails.bounds(),
@@ -321,11 +377,13 @@ final class TerminalLayout {
             int screenHeight,
             FuelDescriptorCounts fuelDescriptors
     ) {
+        boolean horizontalFuelHeaders = supportsHorizontalFuelHeaders(screenHeight);
+        int fuelGroupHeight = fuelGroupHeight(horizontalFuelHeaders);
         int wideRows = fixedBandRows(screenHeight, STORAGE_BOTTOM_HEIGHT, MIN_STORAGE_ROWS);
         int wideItemBottom = TOP_HEIGHT + wideRows * SLOT_SIZE;
         int widePlayerY = Math.max(
                 wideItemBottom + 14,
-                TOP_HEIGHT + fuelGroupHeight() + INVENTORY_LABEL_BAND_HEIGHT);
+                TOP_HEIGHT + fuelGroupHeight + INVENTORY_LABEL_BAND_HEIGHT);
         int wideHeight = widePlayerY + PLAYER_INVENTORY_HEIGHT + 8;
         RailGeometry wideRails = profileRails(profile, wideHeight);
         int availableSideBySideWidth = screenWidth - 2 * OUTER_MARGIN
@@ -337,23 +395,32 @@ final class TerminalLayout {
         int rows = wide ? wideRows : narrowRows(screenHeight);
 
         Rect itemGrid = new Rect(8, TOP_HEIGHT, 9 * SLOT_SIZE, rows * SLOT_SIZE);
-        Rect scrollbar = new Rect(174, TOP_HEIGHT, 12, rows * SLOT_SIZE);
+        Rect scrollbar = new Rect(173, TOP_HEIGHT, 14, rows * SLOT_SIZE);
         Rect playerInventory;
         Rect workspace;
         int imageHeight;
         if (wide) {
-            int playerY = Math.max(
+            int basePlayerY = Math.max(
                     itemGrid.bottom() + 14,
-                    TOP_HEIGHT + fuelGroupHeight() + INVENTORY_LABEL_BAND_HEIGHT);
+                    TOP_HEIGHT + fuelGroupHeight + INVENTORY_LABEL_BAND_HEIGHT);
+            int unusedHeight = Math.max(
+                    0,
+                    screenHeight - (basePlayerY + PLAYER_INVENTORY_HEIGHT + 8)
+                            - 2 * PREFERRED_VERTICAL_MARGIN);
+            int playerY = basePlayerY + unusedHeight / 4;
             playerInventory = new Rect(
                     8, playerY, 9 * SLOT_SIZE, PLAYER_INVENTORY_HEIGHT);
             imageHeight = playerInventory.bottom() + 8;
-            workspace = new Rect(190, TOP_HEIGHT, imageWidth - 198, imageHeight - TOP_HEIGHT - 8);
+            workspace = new Rect(
+                    SIDE_BY_SIDE_WORKSPACE_X,
+                    TOP_HEIGHT,
+                    imageWidth - SIDE_BY_SIDE_WORKSPACE_X - SIDE_BY_SIDE_RIGHT_MARGIN,
+                    imageHeight - TOP_HEIGHT - 8);
         } else {
             int workspaceY = itemGrid.bottom() + 4;
             int playerY = Math.max(
                     workspaceY + NARROW_WORKSPACE_HEIGHT + WORKSPACE_PLAYER_GAP,
-                    TOP_HEIGHT + fuelGroupHeight() + INVENTORY_LABEL_BAND_HEIGHT);
+                    TOP_HEIGHT + fuelGroupHeight + INVENTORY_LABEL_BAND_HEIGHT);
             playerInventory = new Rect(8, playerY, 9 * SLOT_SIZE, PLAYER_INVENTORY_HEIGHT);
             imageHeight = playerInventory.bottom() + 8;
             workspace = new Rect(8, workspaceY, imageWidth - 16, NARROW_WORKSPACE_HEIGHT);
@@ -364,33 +431,40 @@ final class TerminalLayout {
             int exactAvailableWidth = screenWidth - 2 * OUTER_MARGIN
                     - railReservedWidth(rails.panel());
             if (exactAvailableWidth < SIDE_BY_SIDE_MIN_WIDTH) {
-                return craftingNarrow(profile, screenHeight, fuelDescriptors);
+                return craftingNarrow(
+                        profile, screenHeight, fuelDescriptors, horizontalFuelHeaders);
             }
             imageWidth = Math.min(SIDE_BY_SIDE_MAX_WIDTH, exactAvailableWidth);
-            workspace = new Rect(190, TOP_HEIGHT, imageWidth - 198, imageHeight - TOP_HEIGHT - 8);
+            workspace = new Rect(
+                    SIDE_BY_SIDE_WORKSPACE_X,
+                    TOP_HEIGHT,
+                    imageWidth - SIDE_BY_SIDE_WORKSPACE_X - SIDE_BY_SIDE_RIGHT_MARGIN,
+                    imageHeight - TOP_HEIGHT - 8);
         }
 
         return assembleCraftingGeometry(profile, wide, imageWidth, imageHeight, rows, itemGrid, scrollbar,
-                playerInventory, workspace, rails, fuelDescriptors);
+                playerInventory, workspace, rails, fuelDescriptors, horizontalFuelHeaders);
     }
 
     private static Geometry craftingNarrow(
             TerminalProfile profile,
             int screenHeight,
-            FuelDescriptorCounts fuelDescriptors
+            FuelDescriptorCounts fuelDescriptors,
+            boolean horizontalFuelHeaders
     ) {
         int rows = narrowRows(screenHeight);
         Rect itemGrid = new Rect(8, TOP_HEIGHT, 9 * SLOT_SIZE, rows * SLOT_SIZE);
         int workspaceY = itemGrid.bottom() + 4;
         int playerY = Math.max(
                 workspaceY + NARROW_WORKSPACE_HEIGHT + WORKSPACE_PLAYER_GAP,
-                TOP_HEIGHT + fuelGroupHeight() + INVENTORY_LABEL_BAND_HEIGHT);
+                TOP_HEIGHT + fuelGroupHeight(horizontalFuelHeaders)
+                        + INVENTORY_LABEL_BAND_HEIGHT);
         Rect playerInventory = new Rect(8, playerY, 9 * SLOT_SIZE, PLAYER_INVENTORY_HEIGHT);
         int imageHeight = playerInventory.bottom() + 8;
         Rect workspace = new Rect(8, workspaceY, NARROW_WIDTH - 16, NARROW_WORKSPACE_HEIGHT);
         return assembleCraftingGeometry(profile, false, NARROW_WIDTH, imageHeight, rows, itemGrid,
-                new Rect(174, TOP_HEIGHT, 12, rows * SLOT_SIZE), playerInventory, workspace,
-                profileRails(profile, imageHeight), fuelDescriptors);
+                new Rect(173, TOP_HEIGHT, 14, rows * SLOT_SIZE), playerInventory, workspace,
+                profileRails(profile, imageHeight), fuelDescriptors, horizontalFuelHeaders);
     }
 
     private static Geometry assembleCraftingGeometry(
@@ -404,75 +478,178 @@ final class TerminalLayout {
             Rect playerInventory,
             Rect workspace,
             RailGeometry rails,
-            FuelDescriptorCounts fuelDescriptors
+            FuelDescriptorCounts fuelDescriptors,
+            boolean horizontalFuelHeaders
     ) {
         int fuelAreaBottom = playerInventory.y() - INVENTORY_LABEL_BAND_HEIGHT;
-        int availablePanelHeight = fuelAreaBottom - TOP_HEIGHT - FUEL_CATEGORY_GAP * 2;
-        int minimumPanelHeight = FUEL_CONSUMABLE_PANEL_HEIGHT + FUEL_STATION_PANEL_HEIGHT * 2;
-        int extraPanelHeight = Math.max(0, availablePanelHeight - minimumPanelHeight);
-        int sharedExtraHeight = extraPanelHeight / 3;
-        int remainderHeight = extraPanelHeight % 3;
-        int consumablesHeight = FUEL_CONSUMABLE_PANEL_HEIGHT + sharedExtraHeight
-                + (remainderHeight > 0 ? 1 : 0);
-        int timedStationsHeight = FUEL_STATION_PANEL_HEIGHT + sharedExtraHeight
-                + (remainderHeight > 1 ? 1 : 0);
-        int instantStationsHeight = fuelAreaBottom - TOP_HEIGHT - FUEL_CATEGORY_GAP * 2
-                - consumablesHeight - timedStationsHeight;
-        Rect consumablesPanel = new Rect(
-                8, TOP_HEIGHT, imageWidth - 16, consumablesHeight);
+        Rect searchBox = new Rect(102, 6, 70, 9);
+        Rect searchBackground = new Rect(100, 4, 72, 12);
+        if (wide) {
+            itemGrid = new Rect(
+                    itemGrid.x(),
+                    itemGrid.y(),
+                    itemGrid.width(),
+                    fuelAreaBottom - itemGrid.y());
+            scrollbar = new Rect(
+                    scrollbar.x(),
+                    scrollbar.y(),
+                    scrollbar.width(),
+                    fuelAreaBottom - scrollbar.y());
+            rows = Math.clamp(
+                    itemGrid.height() / SLOT_SIZE,
+                    MIN_STORAGE_ROWS,
+                    MAX_ROWS);
+        }
+        int availablePanelHeight = fuelAreaBottom - TOP_HEIGHT;
+        Rect transformPanel = new Rect(
+                8, TOP_HEIGHT, imageWidth - 16, availablePanelHeight);
+        int stationAreaWidth = imageWidth - 16 - FUEL_CATEGORY_GAP;
+        int timedStationsWidth = stationAreaWidth * 5 / 8;
         Rect timedStationsPanel = new Rect(
-                8, consumablesPanel.bottom() + FUEL_CATEGORY_GAP,
-                imageWidth - 16, timedStationsHeight);
+                8, TOP_HEIGHT, timedStationsWidth, availablePanelHeight);
         Rect instantStationsPanel = new Rect(
-                8, timedStationsPanel.bottom() + FUEL_CATEGORY_GAP,
-                imageWidth - 16, instantStationsHeight);
+                timedStationsPanel.right() + FUEL_CATEGORY_GAP,
+                TOP_HEIGHT,
+                stationAreaWidth - timedStationsWidth,
+                availablePanelHeight);
 
-        Rect fuelTargetBar = fuelTargetBar(consumablesPanel);
-        int selectorWidth = Math.clamp(fuelTargetBar.width() / 3, 72, 96);
-        Rect fuelTargetListButton = new Rect(
-                fuelTargetBar.right() - CONTROL_SIZE,
-                fuelTargetBar.y(),
-                CONTROL_SIZE,
-                CONTROL_SIZE);
-        Rect fuelTargetSelector = new Rect(
-                fuelTargetListButton.x() - CONTROL_GAP - selectorWidth,
-                fuelTargetBar.y(),
-                selectorWidth,
-                CONTROL_SIZE);
+        int targetColumnWidth = Math.clamp(
+                transformPanel.width() / 3,
+                TRANSFORM_TARGET_COLUMN_MIN_WIDTH,
+                TRANSFORM_TARGET_COLUMN_MAX_WIDTH);
+        Rect transformTargetSearch = searchBox;
+        int targetColumnX = transformPanel.x() + FUEL_PANEL_INSET;
+        FuelPageControls transformTargetPageControls = new FuelPageControls(
+                new Rect(
+                        targetColumnX,
+                        transformPanel.bottom() - FUEL_PANEL_INSET - CONTROL_SIZE,
+                        CONTROL_SIZE,
+                        CONTROL_SIZE),
+                new Rect(
+                        targetColumnX + targetColumnWidth - CONTROL_SIZE,
+                        transformPanel.bottom() - FUEL_PANEL_INSET - CONTROL_SIZE,
+                        CONTROL_SIZE,
+                        CONTROL_SIZE));
         int fuelTargetCount = fuelDescriptors.fuelTargetCount();
-        int popupCapacity = Math.min(FUEL_TARGET_POPUP_MAX_ROWS, Math.max(1, fuelTargetCount));
-        int popupHeight = FUEL_TARGET_POPUP_INSET * 2
-                + popupCapacity * FUEL_TARGET_POPUP_ROW_HEIGHT;
-        int popupWidth = fuelTargetListButton.right() - fuelTargetSelector.x();
-        int popupBelow = fuelTargetSelector.bottom() + CONTROL_GAP;
-        int popupY = popupBelow + popupHeight <= imageHeight - FUEL_TARGET_POPUP_INSET
-                ? popupBelow
-                : Math.max(FUEL_TARGET_POPUP_INSET,
-                        fuelTargetSelector.y() - CONTROL_GAP - popupHeight);
-        PopupList fuelTargetPopup = new PopupList(
-                new Rect(fuelTargetSelector.x(), popupY, popupWidth, popupHeight),
-                FUEL_TARGET_POPUP_ROW_HEIGHT,
-                popupCapacity,
+        int targetListY = transformPanel.y() + FUEL_PANEL_INSET;
+        int targetListHeight = Math.max(
+                TRANSFORM_TARGET_ROW_HEIGHT,
+                transformTargetPageControls.previous().y() - CONTROL_GAP - targetListY);
+        int targetCapacity = Math.max(1, targetListHeight / TRANSFORM_TARGET_ROW_HEIGHT);
+        PagedList transformTargetList = new PagedList(
+                new Rect(
+                        targetColumnX,
+                        targetListY,
+                        targetColumnWidth,
+                        targetCapacity * TRANSFORM_TARGET_ROW_HEIGHT),
+                TRANSFORM_TARGET_ROW_HEIGHT,
+                targetCapacity,
                 fuelTargetCount);
-        FlowGrid consumablesGrid = pagedFlowGrid(categoryFlowBounds(
-                        consumablesPanel, true),
-                fuelDescriptors.consumableCount());
-        FlowGrid timedStationsGrid = pagedFlowGrid(categoryFlowBounds(
-                        timedStationsPanel, false),
-                fuelDescriptors.timedStationCount());
-        Rect instantFlow = categoryFlowBounds(instantStationsPanel, false);
+        int transformContentX = targetColumnX + targetColumnWidth + CONTROL_GAP;
+        int transformContentWidth = transformPanel.right() - FUEL_PANEL_INSET - transformContentX;
+        Rect transformInput = new Rect(
+                transformContentX + 1,
+                transformPanel.y() + FUEL_PANEL_INSET,
+                SLOT_SIZE,
+                SLOT_SIZE);
+        int minimumAmountStripWidth = CONTROL_SIZE * 4;
+        boolean singleTransformActionRow = transformContentWidth
+                >= SLOT_SIZE + CONTROL_GAP + minimumAmountStripWidth;
+        int amountStripAvailable = singleTransformActionRow
+                ? transformContentWidth - SLOT_SIZE - CONTROL_GAP
+                : transformContentWidth;
+        int amountStripWidth = Math.max(
+                minimumAmountStripWidth,
+                Math.min(minimumAmountStripWidth * 2, amountStripAvailable));
+        amountStripWidth -= amountStripWidth % 4;
+        Rect transformAmountStrip = new Rect(
+                singleTransformActionRow
+                        ? transformPanel.right() - FUEL_PANEL_INSET - amountStripWidth
+                        : transformContentX,
+                singleTransformActionRow
+                        ? transformInput.y()
+                        : transformInput.bottom() + CONTROL_GAP,
+                amountStripWidth,
+                CONTROL_SIZE);
+        List<Rect> transformAmountButtons =
+                contiguousSegmentRects(transformAmountStrip, 4);
+        int transformCardsY = Math.max(
+                transformInput.bottom(), transformAmountStrip.bottom()) + CONTROL_GAP;
+        int transformCardControlsY =
+                transformPanel.bottom() - FUEL_PANEL_INSET - CONTROL_SIZE;
+        FuelPageControls transformCardPageControls = new FuelPageControls(
+                new Rect(
+                        transformPanel.right() - FUEL_PANEL_INSET
+                                - CONTROL_SIZE * 2 - CONTROL_GAP,
+                        transformCardControlsY,
+                        CONTROL_SIZE,
+                        CONTROL_SIZE),
+                new Rect(
+                        transformPanel.right() - FUEL_PANEL_INSET - CONTROL_SIZE,
+                        transformCardControlsY,
+                        CONTROL_SIZE,
+                        CONTROL_SIZE));
+        Rect transformCardBounds = new Rect(
+                transformContentX,
+                transformCardsY,
+                transformContentWidth,
+                Math.max(TRANSFORM_CARD_HEIGHT,
+                        transformCardControlsY - CONTROL_GAP - transformCardsY));
+        FlowGrid transformCards = pagedSingleColumnGrid(
+                transformCardBounds,
+                fuelDescriptors.consumableCount(),
+                TRANSFORM_CARD_HEIGHT);
+        FlowGrid timedStationsGrid = pagedFlowGrid(
+                categoryFlowBounds(timedStationsPanel, false, true),
+                fuelDescriptors.timedStationCount(),
+                PROCESSING_STATION_MAX_COLUMNS,
+                PROCESSING_STATION_CELL_WIDTH);
+        Rect instantFlow = categoryFlowBounds(
+                instantStationsPanel, false, true);
         int statusX = playerInventory.right() + CONTROL_GAP;
         Rect fuelStatus = new Rect(
                 statusX,
                 playerInventory.y(),
                 imageWidth - 8 - statusX,
                 playerInventory.height());
-        FlowGrid instantStationsGrid = pagedFlowGrid(instantFlow,
+        Rect fuelSearchBox = searchBox;
+        Rect fuelSearchPanel = new Rect(
+                transformPanel.x(),
+                transformPanel.y(),
+                transformPanel.width(),
+                transformPanel.height());
+        Rect fuelSearchFlowBounds = new Rect(
+                fuelSearchPanel.x() + FUEL_PANEL_INSET,
+                fuelSearchPanel.y() + FUEL_PANEL_INSET + CONTROL_SIZE + CONTROL_GAP,
+                fuelSearchPanel.width() - FUEL_PANEL_INSET * 2,
+                fuelSearchPanel.height() - FUEL_PANEL_INSET * 2 - CONTROL_SIZE - CONTROL_GAP);
+        int fuelSearchItemCount = fuelDescriptors.timedStationCount()
+                + fuelDescriptors.instantStationCount();
+        FlowGrid fuelSearchGrid = pagedFlowGrid(
+                fuelSearchFlowBounds,
+                fuelSearchItemCount,
+                PROCESSING_STATION_MAX_COLUMNS,
+                PROCESSING_STATION_CELL_WIDTH);
+        FuelPageControls fuelSearchPageControls = new FuelPageControls(
+                new Rect(
+                        fuelSearchPanel.right() - FUEL_PANEL_INSET
+                                - CONTROL_SIZE * 2 - CONTROL_GAP,
+                        fuelSearchPanel.y() + FUEL_PANEL_INSET,
+                        CONTROL_SIZE,
+                        CONTROL_SIZE),
+                new Rect(
+                        fuelSearchPanel.right() - FUEL_PANEL_INSET - CONTROL_SIZE,
+                        fuelSearchPanel.y() + FUEL_PANEL_INSET,
+                        CONTROL_SIZE,
+                        CONTROL_SIZE));
+        FlowGrid instantStationsGrid = pagedCompactGrid(instantFlow,
                 fuelDescriptors.instantStationCount());
-        if (consumablesGrid.cells().isEmpty()) {
-            throw new IllegalArgumentException("Crafting terminals require a consumable Fuel input cell");
-        }
-        Rect fuelInput = fuelSlot(consumablesGrid.cells().getFirst());
+        FuelPageControls timedStationsPageControls = fuelPageControls(
+                fuelCategoryLabel(timedStationsPanel, timedStationsGrid),
+                timedStationsPanel.right() - FUEL_PANEL_INSET);
+        FuelPageControls instantStationsPageControls = fuelPageControls(
+                fuelCategoryLabel(instantStationsPanel, instantStationsGrid),
+                instantStationsPanel.right() - FUEL_PANEL_INSET);
         RecipeGeometry recipe = recipeGeometry(workspace);
         return new Geometry(
                 profile,
@@ -481,8 +658,8 @@ final class TerminalLayout {
                 imageHeight,
                 rows,
                 itemGrid,
-                new Rect(102, 6, 70, 9),
-                new Rect(100, 4, 72, 12),
+                searchBox,
+                searchBackground,
                 scrollbar,
                 playerInventory,
                 workspace,
@@ -496,17 +673,25 @@ final class TerminalLayout {
                 recipe.shapelessMarker(),
                 recipe.navigationButtons(),
                 recipe.craftButtons(),
-                consumablesPanel,
+                transformPanel,
                 timedStationsPanel,
                 instantStationsPanel,
-                fuelTargetSelector,
-                fuelTargetListButton,
-                fuelTargetPopup,
-                fuelInput,
+                transformTargetSearch,
+                transformTargetList,
+                transformTargetPageControls,
+                transformInput,
+                transformAmountButtons,
                 fuelStatus,
-                consumablesGrid,
+                fuelSearchBox,
+                fuelSearchPanel,
+                transformCards,
                 timedStationsGrid,
                 instantStationsGrid,
+                fuelSearchGrid,
+                transformCardPageControls,
+                timedStationsPageControls,
+                instantStationsPageControls,
+                fuelSearchPageControls,
                 rails.itemButtons(),
                 rails.fuelButtons(),
                 rails.bounds(),
@@ -523,47 +708,58 @@ final class TerminalLayout {
     }
 
     static Rect fuelSlot(Rect cell) {
-        return upperCenteredSquare(cell, SLOT_SIZE);
+        return leftCenteredSquare(cell, SLOT_SIZE, 1);
     }
 
     static Rect fuelIcon(Rect cell) {
-        return upperCenteredSquare(cell, ICON_CANVAS_SIZE);
+        return leftCenteredSquare(cell, ICON_CANVAS_SIZE, 2);
     }
 
     static Rect fuelAmountBounds(Rect cell) {
         return new Rect(
-                cell.x() + 1,
-                cell.bottom() - FUEL_AMOUNT_HEIGHT,
-                Math.max(0, cell.width() - 2),
+                cell.x() + 22,
+                cell.y() + Math.max(0, (cell.height() - FUEL_AMOUNT_HEIGHT) / 2),
+                Math.max(0, cell.width() - 23),
                 FUEL_AMOUNT_HEIGHT);
     }
 
-    private static Rect upperCenteredSquare(Rect cell, int size) {
+    private static Rect leftCenteredSquare(Rect cell, int size, int inset) {
         return new Rect(
-                cell.x() + (cell.width() - size) / 2,
-                cell.y() + 1,
+                cell.x() + inset,
+                cell.y() + Math.max(0, (cell.height() - size) / 2),
                 size,
                 size);
     }
 
     private static int narrowRows(int screenHeight) {
         int maximumHeight = screenHeight - 2 * NARROW_MIN_VERTICAL_MARGIN;
+        boolean horizontalFuelHeaders = supportsHorizontalFuelHeaders(screenHeight);
         for (int rows = MAX_ROWS; rows >= MIN_CRAFTING_ROWS; rows--) {
-            if (narrowImageHeight(rows) <= maximumHeight) return rows;
+            if (narrowImageHeight(rows, horizontalFuelHeaders) <= maximumHeight) return rows;
         }
         return MIN_CRAFTING_ROWS;
     }
 
-    private static int narrowImageHeight(int rows) {
+    private static int narrowImageHeight(int rows, boolean horizontalFuelHeaders) {
         int itemBottom = TOP_HEIGHT + rows * SLOT_SIZE;
         int workspaceBottom = itemBottom + 4 + NARROW_WORKSPACE_HEIGHT;
-        int fuelGroupBottom = TOP_HEIGHT + fuelGroupHeight() + INVENTORY_LABEL_BAND_HEIGHT;
+        int fuelGroupBottom = TOP_HEIGHT + fuelGroupHeight(horizontalFuelHeaders)
+                + INVENTORY_LABEL_BAND_HEIGHT;
         int playerY = Math.max(workspaceBottom + WORKSPACE_PLAYER_GAP, fuelGroupBottom);
         return playerY + PLAYER_INVENTORY_HEIGHT + 8;
     }
 
-    private static int fuelGroupHeight() {
-        return FUEL_CONSUMABLE_PANEL_HEIGHT + FUEL_STATION_PANEL_HEIGHT * 2
+    private static boolean supportsHorizontalFuelHeaders(int screenHeight) {
+        return screenHeight >= TOP_HEIGHT
+                + FUEL_CONSUMABLE_PANEL_HEIGHT + FUEL_STATION_TALL_PANEL_HEIGHT * 2
+                + FUEL_CATEGORY_GAP * 2 + INVENTORY_LABEL_BAND_HEIGHT
+                + PLAYER_INVENTORY_HEIGHT + 8;
+    }
+
+    private static int fuelGroupHeight(boolean horizontalHeaders) {
+        int stationPanelHeight = horizontalHeaders
+                ? FUEL_STATION_TALL_PANEL_HEIGHT : FUEL_STATION_PANEL_HEIGHT;
+        return FUEL_CONSUMABLE_PANEL_HEIGHT + stationPanelHeight * 2
                 + FUEL_CATEGORY_GAP * 2;
     }
 
@@ -576,7 +772,7 @@ final class TerminalLayout {
         int bodyTopLimit = workspace.y() + RECIPE_INSET;
         int bodyBottomLimit = footer.y() - RECIPE_BODY_FOOTER_GAP;
         int availableBodyHeight = bodyBottomLimit - bodyTopLimit;
-        int bodyHeight = Math.min(RECIPE_BODY_MAX_HEIGHT, availableBodyHeight);
+        int bodyHeight = availableBodyHeight;
         if (bodyHeight < RECIPE_DIAGRAM_MIN_HEIGHT + RECIPE_LEDGER_MIN_ROW_HEIGHT) {
             throw new IllegalArgumentException("Recipe workspace is too short for its compact body");
         }
@@ -585,7 +781,7 @@ final class TerminalLayout {
                 Math.max(RECIPE_LEDGER_MIN_ROW_HEIGHT,
                         bodyHeight - RECIPE_DIAGRAM_MIN_HEIGHT));
         int diagramHeight = bodyHeight - ledgerHeight;
-        int bodyY = bodyTopLimit + (availableBodyHeight - bodyHeight) / 2;
+        int bodyY = bodyTopLimit;
         Rect diagram = new Rect(
                 workspace.x() + RECIPE_INSET,
                 bodyY,
@@ -606,7 +802,7 @@ final class TerminalLayout {
         int chainWidth = inputGridSize + CONTROL_GAP + CONTROL_SIZE
                 + CONTROL_GAP + outputSize;
         int chainX = diagram.x() + Math.max(0, (diagram.width() - chainWidth) / 2);
-        int inputY = diagram.y() + Math.max(0, (diagram.height() - inputGridSize) / 2);
+        int inputY = diagram.y() + 2;
         List<Rect> inputSlots = new ArrayList<>(RecipePresentation.MAX_INPUTS);
         for (int input = 0; input < RecipePresentation.MAX_INPUTS; input++) {
             inputSlots.add(new Rect(
@@ -617,12 +813,12 @@ final class TerminalLayout {
         }
         Rect arrow = new Rect(
                 chainX + inputGridSize + CONTROL_GAP,
-                diagram.y() + (diagram.height() - CONTROL_SIZE) / 2,
+                inputY + (inputGridSize - CONTROL_SIZE) / 2,
                 CONTROL_SIZE,
                 CONTROL_SIZE);
         Rect output = new Rect(
                 arrow.right() + CONTROL_GAP,
-                diagram.y() + (diagram.height() - outputSize) / 2,
+                inputY + (inputGridSize - outputSize) / 2,
                 outputSize,
                 outputSize);
         Rect station = new Rect(
@@ -666,12 +862,12 @@ final class TerminalLayout {
     }
 
     private static List<Rect> recipeLedgerCells(Rect bounds, int resourceCount) {
-        if (resourceCount < 0 || resourceCount > MAX_RECIPE_LEDGER_ROWS) {
+        int columns = Math.min(recipeLedgerColumns(bounds), Math.max(1, resourceCount));
+        int capacity = recipeLedgerColumns(bounds) * Math.max(1, bounds.height() / SLOT_SIZE);
+        if (resourceCount < 0 || resourceCount > capacity) {
             throw new IllegalArgumentException("Recipe ledger resource count is out of bounds");
         }
         if (resourceCount == 0) return List.of();
-        int availableColumns = Math.max(1, bounds.width() / RECIPE_LEDGER_MIN_CELL_WIDTH);
-        int columns = Math.min(Math.min(RECIPE_LEDGER_MAX_COLUMNS, availableColumns), resourceCount);
         int rows = (resourceCount + columns - 1) / columns;
         int cellHeight = Math.min(SLOT_SIZE, bounds.height() / rows);
         int top = bounds.y();
@@ -690,6 +886,12 @@ final class TerminalLayout {
         return List.copyOf(result);
     }
 
+    private static int recipeLedgerColumns(Rect bounds) {
+        return Math.min(
+                RECIPE_LEDGER_MAX_COLUMNS,
+                Math.max(1, bounds.width() / RECIPE_LEDGER_MIN_CELL_WIDTH));
+    }
+
     private static List<Rect> contiguousSegmentRects(Rect bounds, int segmentCount) {
         if (segmentCount <= 0 || bounds.width() % segmentCount != 0) {
             throw new IllegalArgumentException("Segment strip must divide into equal positive widths");
@@ -706,15 +908,14 @@ final class TerminalLayout {
         return List.copyOf(result);
     }
 
-    static Rect fuelTargetBar(Rect consumablesPanel) {
-        return new Rect(
-                consumablesPanel.x() + FUEL_PANEL_INSET,
-                consumablesPanel.y() + FUEL_PANEL_INSET,
-                consumablesPanel.width() - FUEL_PANEL_INSET * 2,
-                FUEL_TARGET_BAR_HEIGHT);
-    }
-
     static Rect fuelCategoryLabel(Rect panel, FlowGrid grid) {
+        if (grid.bounds().x() == panel.x() + FUEL_PANEL_INSET) {
+            return new Rect(
+                    panel.x() + FUEL_PANEL_INSET,
+                    panel.y() + FUEL_PANEL_INSET,
+                    panel.width() - FUEL_PANEL_INSET * 2,
+                    CONTROL_SIZE);
+        }
         return new Rect(
                 panel.x() + FUEL_PANEL_INSET,
                 grid.bounds().y(),
@@ -722,21 +923,47 @@ final class TerminalLayout {
                 grid.bounds().height());
     }
 
-    private static Rect categoryFlowBounds(Rect panel, boolean belowTargetBar) {
+    private static FuelPageControls fuelPageControls(Rect label, int rightLimit) {
+        int width = CONTROL_SIZE * 2 + CONTROL_GAP;
+        boolean horizontal = label.height() == CONTROL_SIZE
+                && label.width() > FUEL_CATEGORY_LABEL_WIDTH;
+        int left = horizontal
+                ? Math.max(label.x(), Math.min(label.right(), rightLimit) - width)
+                : label.x() + Math.max(0, (label.width() - width) / 2);
+        int top = horizontal ? label.y() : label.bottom() - CONTROL_SIZE;
+        return new FuelPageControls(
+                new Rect(left, top, CONTROL_SIZE, CONTROL_SIZE),
+                new Rect(left + CONTROL_SIZE + CONTROL_GAP,
+                        top, CONTROL_SIZE, CONTROL_SIZE));
+    }
+
+    private static Rect categoryFlowBounds(
+            Rect panel,
+            boolean belowTargetBar,
+            boolean horizontalHeader
+    ) {
         int rowY = panel.y() + FUEL_PANEL_INSET;
-        if (belowTargetBar) {
+        if (belowTargetBar || horizontalHeader) {
             rowY += FUEL_TARGET_BAR_HEIGHT + FUEL_TARGET_BAR_GAP;
         }
+        int leftInset = horizontalHeader
+                ? FUEL_PANEL_INSET
+                : FUEL_PANEL_INSET + FUEL_CATEGORY_LABEL_WIDTH + CONTROL_GAP;
         return new Rect(
-                panel.x() + FUEL_PANEL_INSET + FUEL_CATEGORY_LABEL_WIDTH + CONTROL_GAP,
+                panel.x() + leftInset,
                 rowY,
-                panel.width() - FUEL_PANEL_INSET * 2
-                        - FUEL_CATEGORY_LABEL_WIDTH - CONTROL_GAP,
+                panel.width() - leftInset - FUEL_PANEL_INSET,
                 panel.bottom() - FUEL_PANEL_INSET - rowY);
     }
 
-    private static FlowGrid pagedFlowGrid(Rect bounds, int itemCount) {
-        int columns = Math.max(1, bounds.width() / CATEGORY_CELL_MIN_WIDTH);
+    private static FlowGrid pagedFlowGrid(
+            Rect bounds,
+            int itemCount,
+            int maxColumns,
+            int preferredCellWidth
+    ) {
+        int columns = Math.max(1, Math.min(
+                maxColumns, bounds.width() / preferredCellWidth));
         int rows = Math.max(1, bounds.height() / FUEL_CATEGORY_CELL_HEIGHT);
         int capacity = columns * rows;
         int visible = Math.min(itemCount, capacity);
@@ -745,15 +972,70 @@ final class TerminalLayout {
                 visible,
                 columns,
                 rows,
-                CATEGORY_CELL_PREFERRED_WIDTH);
+                preferredCellWidth,
+                false);
         return new FlowGrid(
                 bounds,
                 cells,
                 columns,
                 rows,
-                CATEGORY_CELL_PREFERRED_WIDTH,
+                preferredCellWidth,
                 capacity,
-                itemCount);
+                itemCount,
+                false);
+    }
+
+    private static FlowGrid pagedCompactGrid(Rect bounds, int itemCount) {
+        int columns = Math.max(1, bounds.width() / INSTANT_STATION_CELL_SIZE);
+        int rows = Math.max(1, bounds.height() / INSTANT_STATION_CELL_SIZE);
+        int capacity = columns * rows;
+        int visible = Math.min(itemCount, capacity);
+        List<Rect> cells = flowCells(
+                bounds,
+                visible,
+                columns,
+                rows,
+                INSTANT_STATION_CELL_SIZE,
+                true);
+        return new FlowGrid(
+                bounds,
+                cells,
+                columns,
+                rows,
+                INSTANT_STATION_CELL_SIZE,
+                capacity,
+                itemCount,
+                true);
+    }
+
+    private static FlowGrid pagedSingleColumnGrid(
+            Rect bounds,
+            int itemCount,
+            int cellHeight
+    ) {
+        int rows = Math.max(1, bounds.height() / cellHeight);
+        bounds = new Rect(
+                bounds.x(),
+                bounds.y(),
+                bounds.width(),
+                rows * cellHeight);
+        int visible = Math.min(itemCount, rows);
+        List<Rect> cells = flowCells(
+                bounds,
+                visible,
+                1,
+                rows,
+                bounds.width(),
+                false);
+        return new FlowGrid(
+                bounds,
+                cells,
+                1,
+                rows,
+                bounds.width(),
+                rows,
+                itemCount,
+                false);
     }
 
     private static List<Rect> flowCells(
@@ -761,23 +1043,27 @@ final class TerminalLayout {
             int visible,
             int maxColumns,
             int maxRows,
-            int preferredCellWidth
+            int preferredCellWidth,
+            boolean compact
     ) {
         if (visible <= 0) return List.of();
-        int largestColumns = Math.min(maxColumns, visible);
-        int minimumColumns = (visible + maxRows - 1) / maxRows;
-        int preferredColumns = Math.max(1, bounds.width() / preferredCellWidth);
-        int columns = Math.clamp(preferredColumns, minimumColumns, largestColumns);
-        int rows = (visible + columns - 1) / columns;
+        int columns = Math.max(1, maxColumns);
         List<Rect> cells = new ArrayList<>(visible);
         for (int index = 0; index < visible; index++) {
             int column = index % columns;
             int row = index / columns;
-            int columnsInRow = Math.min(columns, visible - row * columns);
-            int left = bounds.x() + column * bounds.width() / columnsInRow;
-            int right = bounds.x() + (column + 1) * bounds.width() / columnsInRow;
-            int top = bounds.y() + row * bounds.height() / rows;
-            int bottom = bounds.y() + (row + 1) * bounds.height() / rows;
+            int left = compact
+                    ? bounds.x() + column * preferredCellWidth
+                    : bounds.x() + column * bounds.width() / columns;
+            int right = compact
+                    ? Math.min(bounds.right(), left + preferredCellWidth)
+                    : bounds.x() + (column + 1) * bounds.width() / columns;
+            int top = compact
+                    ? bounds.y() + row * preferredCellWidth
+                    : bounds.y() + row * bounds.height() / maxRows;
+            int bottom = compact
+                    ? Math.min(bounds.bottom(), top + preferredCellWidth)
+                    : bounds.y() + (row + 1) * bounds.height() / maxRows;
             cells.add(new Rect(
                     left,
                     top,
@@ -789,7 +1075,7 @@ final class TerminalLayout {
 
     private static FlowGrid emptyFlow() {
         return new FlowGrid(
-                new Rect(0, 0, 0, 0), List.of(), 1, 1, 1, 1, 0);
+                new Rect(0, 0, 0, 0), List.of(), 1, 1, 1, 1, 0, false);
     }
 
     private static RailGeometry profileRails(TerminalProfile profile, int imageHeight) {

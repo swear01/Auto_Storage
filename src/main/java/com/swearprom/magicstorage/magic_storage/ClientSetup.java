@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import com.swearprom.magicstorage.magic_storage.compat.EmiRecipeDiagramBootstrap;
+import com.swearprom.magicstorage.magic_storage.compat.EmiTerminalSearchSynchronizer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -25,6 +26,13 @@ public class ClientSetup {
         return new NativeRecipeDiagramRenderer();
     }
 
+    static TerminalSearchSynchronizer createTerminalSearchSynchronizer() {
+        if (ModList.get().isLoaded("emi")) {
+            return new EmiTerminalSearchSynchronizer();
+        }
+        return TerminalSearchSynchronizer.NONE;
+    }
+
     private static void registerScreens(RegisterMenuScreensEvent event) {
         event.<StorageTerminalMenu, StorageTerminalScreen<StorageTerminalMenu>>register(
                 MagicStorage.STORAGE_TERMINAL_MENU.get(),
@@ -32,6 +40,7 @@ public class ClientSetup {
         event.<CraftingTerminalMenu, CraftingTerminalScreen>register(
                 MagicStorage.CRAFTING_TERMINAL_MENU.get(),
                 (menu, inv, title) -> new CraftingTerminalScreen(menu, inv, title));
+        event.register(MagicStorage.BUS_CONFIGURATION_MENU.get(), BusConfigurationScreen::new);
     }
 
     private static void addFusionConnectedCasingPack(AddPackFindersEvent event) {

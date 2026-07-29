@@ -53,15 +53,7 @@ ENTRIES = {
         "storage_system",
         1,
         "magic_storage:storage_unit_t1",
-        (
-            "patchouli:spotlight",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-        ),
+        ("patchouli:spotlight",) + ("patchouli:text",) * 6,
     ),
     "connected_casing": (
         "storage_system",
@@ -85,15 +77,7 @@ ENTRIES = {
         "terminals",
         1,
         "magic_storage:crafting_terminal",
-        (
-            "patchouli:spotlight",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-            "patchouli:text",
-        ),
+        ("patchouli:spotlight",) + ("patchouli:text",) * 7,
     ),
     "terminal_controls": (
         "terminals",
@@ -111,7 +95,7 @@ ENTRIES = {
         "energy",
         1,
         "minecraft:coal",
-        ("patchouli:text",) * 4,
+        ("patchouli:text",) * 6,
     ),
     "recipe_costs": (
         "energy",
@@ -183,14 +167,18 @@ REQUIRED_TOPICS = {
         "Fusion",
         "Storage tab",
         "Craftable tab",
-        "Fuel tab",
+        "All",
+        "bare @",
+        "click outside",
+        "initial focus",
+        "Transform",
+        "Stations tab",
         "Name, Quantity, Mod, and ID",
         "middle-click",
-        "Consumables",
-        "Timed Stations",
+        "Processing Stations",
         "Instant Stations",
         "runtime burn time",
-        "Auto target",
+        "Auto",
         "Unbreaking",
         "Unbreakable",
         "passive input",
@@ -213,14 +201,18 @@ REQUIRED_TOPICS = {
         "Fusion",
         "儲存分頁",
         "可合成分頁",
-        "燃料分頁",
+        "全部",
+        "只有 @",
+        "點擊欄外",
+        "初始焦點",
+        "轉換",
+        "工作站分頁",
         "名稱、數量、模組與 ID",
         "中鍵",
-        "消耗品",
-        "計時工作站",
+        "處理工作站",
         "即時工作站",
         "燃燒時間",
-        "自動目標",
+        "自動",
         "耐久",
         "無法破壞",
         "被動輸入",
@@ -240,6 +232,10 @@ BANNED_PLAYER_TEXT = (
     "Stations & Axe Energy",
     "Energy Reserves",
     "Bottle Energy",
+    "Fuel Workspace",
+    "recipes and Fuel",
+    "燃料工作區",
+    "配方與燃料分頁",
     "two adaptive flow rows",
     "two flow rows",
     "two-row",
@@ -433,6 +429,19 @@ class PatchouliGuideTests(unittest.TestCase):
             text = self.localized_text(categories, entries)
             for topic in topics:
                 self.assertIn(topic.casefold(), text.casefold(), f"{locale} missing topic {topic!r}")
+
+    def test_processing_resource_group_uses_player_facing_name_in_both_locales(self):
+        expected = {"en_us": "Processing", "zh_tw": "加工"}
+        retired = {"en_us": "Station Work", "zh_tw": "工作站作業"}
+        for locale in expected:
+            _, entries = self.load_locale(locale)
+            text = " ".join(
+                page.get("text", "")
+                for entry_id in ("storage_terminal", "energy_overview")
+                for page in entries[entry_id]["pages"]
+            )
+            self.assertIn(expected[locale], text)
+            self.assertNotIn(retired[locale], text)
 
     def test_traditional_chinese_localizes_every_player_text_field(self):
         en_categories, en_entries = self.load_locale("en_us")

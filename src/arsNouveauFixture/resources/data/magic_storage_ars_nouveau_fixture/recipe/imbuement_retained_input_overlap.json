@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:imbuement",
+  "input": {
+    "item": "minecraft:diamond"
+  },
+  "output": {
+    "count": 1,
+    "id": "minecraft:emerald"
+  },
+  "pedestalItems": [
+    {
+      "item": "minecraft:diamond"
+    }
+  ],
+  "source": 500
+}

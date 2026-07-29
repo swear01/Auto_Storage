@@ -1,0 +1,36 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    {
+      "item": "minecraft:poppy"
+    },
+    {
+      "item": "minecraft:dandelion"
+    },
+    {
+      "item": "minecraft:blue_orchid"
+    },
+    {
+      "item": "minecraft:allium"
+    },
+    {
+      "item": "minecraft:azure_bluet"
+    },
+    {
+      "item": "minecraft:red_tulip"
+    },
+    {
+      "item": "minecraft:orange_tulip"
+    },
+    {
+      "item": "minecraft:white_tulip"
+    }
+  ],
+  "output": {
+    "count": 1,
+    "id": "minecraft:amethyst_shard"
+  },
+  "reagent": {
+    "item": "minecraft:wheat_seeds"
+  }
+}

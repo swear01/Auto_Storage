@@ -1,6 +1,6 @@
 # Shared Terminal Platform, EMI-First Recipes, and Axe Energy Design
 
-> Partial replacement: visual assets, Fuel-page layout, cycle reset/status grammar, progression recipes, wrench/connected casing, and Patchouli guide are now specified by `2026-07-14-connected-progression-fuel-guide-design.md`. Server-authoritative crafting/storage/EMI/Axe transaction contracts below remain current.
+> Partial replacement: visual assets, Transform/Stations layout, cycle reset/status grammar, progression recipes, wrench/connected casing, and Patchouli guide are now specified by `2026-07-14-connected-progression-fuel-guide-design.md`. Server-authoritative crafting/storage/EMI/Axe transaction contracts below remain current.
 
 ## Goal
 
@@ -11,7 +11,7 @@ Replace the split Storage/Crafting Terminal presentation with one capability-dri
 Storage Terminal and Crafting Terminal remain distinct menu/screen registrations, but both use one shared terminal shell. The shell owns adaptive geometry, panel rendering, the item grid, search, scrolling, amount overlays, left-rail controls, focus cleanup, hit testing, and EMI exclusion bounds. A terminal profile enables only the capabilities that terminal exposes:
 
 - Storage Terminal: Storage page plus shared search, sorting, order, extraction, and player inventory.
-- Crafting Terminal: Storage, Craftable, and Fuel pages plus recipe selection, resource preview, ingredient-source toggle, output-destination toggle, stations, fuel targets, and craft actions.
+- Crafting Terminal: Storage, Craftable, Transform, and Stations pages plus recipe selection, resource preview, ingredient-source toggle, output-destination toggle, deterministic resource targets, stations, and craft actions.
 - Future terminals: compose a profile from the same capabilities instead of copying a screen or creating then hiding inherited widgets.
 
 `TerminalLayout` has one profile-driven entry point. Rendering, widgets, reconstructed slots, mouse regions, tooltips, scrolling, popups, and EMI exclusions consume the same immutable geometry. The old separate Storage layout/control path and Crafting-only replacement rail are removed.
@@ -125,15 +125,13 @@ An item carrying the Unbreakable component sets an explicit infinite Axe Energy 
 
 This design originally specified one-time migration from the old persisted axe station and stacked instant stations. The 2026-07-17 Core repository design supersedes that compatibility path: the current early-development schema does not read old inline machine slots. New transient axe input is still converted atomically, rejected stacks remain unchanged, and installable descriptors accept only their current maximum.
 
-## Fuel target selector and station hit boxes
+## Transform target selector and station hit boxes
 
-The current target cycle remains available and gains a separate list button. The anchored popup is generated from the ordered server-approved target descriptors and shows representative item, localized name, and selected state. It supports bounded scrolling, outside-click close, Escape close, page-leave focus cleanup, and an EMI exclusion rectangle. While open, its rectangle consumes pointer/scroll input and suppresses covered container-slot tooltips instead of clicking or describing the UI underneath it.
+GitHub #23 replaces the old target cycle and popup with a persistent left target list. Auto is exact-input Show Uses only: it lists every compatible use but never preselects, consumes, or executes one. Explicit targets filter uses of that same inserted item by produced target. The list has localized target labels independent of representative item names, search, paging, full-row hit boxes, selected state, wheel navigation, and middle-click reset.
 
-The popup is an input widget but renders exactly once in a foreground layer above the container screen, slots, and ordinary tooltips. It must not be registered as a second independently rendered screen child.
+Each visible use is a whole horizontal card. Clicking it selects a server-validated stable use ID; amount actions remain disabled until selection. The transient input and shared amount strip stay in the upper band. Direct Fuel cards omit the redundant `Direct` line and vertically center their produced resource/amount; timed cards use the second line for the required station/work source. There is no detached lower selected preview. Search, list page, card page, and selected card are session presentation state; only the existing validated Transform target preference persists.
 
-Station tooltips trigger only over the actual station slot or representative icon bounds. Hovering unused padding in a flow cell produces no station tooltip. Paging and future descriptor growth continue to use panel-local flow geometry.
-
-Every Fuel descriptor cell uses a compact vertical grammar: the 18-pixel station slot or 16-pixel representative icon is centered in the upper area, and its amount is centered and width-scaled in a separate lower line. Current panel filling, multi-row paging, and the inventory-side type-capacity information panel are defined by the replacement Fuel-layout design linked at the top of this document; Instant Stations no longer reserves a status cell.
+Processing and Instant remain separate and derive rows from available height. Processing receives the larger workspace and up to three readable columns; every page keeps fixed column widths and left/top order even when the last row is incomplete. The installed aggregate count overlays the item while the separate horizontal value is accumulated work. Instant is a binary unlock: it has no installed-count decoration or work value and uses a compact icon grid. The inventory-side panel always shows type capacity and never changes on hover. Each station item keeps its normal item tooltip; hovering a Processing value shows only its localized resource name and current aggregate rate, never duplicated installed/stored totals. Transform and Stations keep separate session queries, render blank search fields in the shared top header position, and show only the entered query.
 
 ## Retired Bottle Energy migration
 

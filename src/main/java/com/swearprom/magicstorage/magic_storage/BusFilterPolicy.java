@@ -85,7 +85,21 @@ public final class BusFilterPolicy {
 
     public boolean allows(ItemKey key) {
         Objects.requireNonNull(key, "key");
-        if (!supported) return false;
+        if (!supported || denyHasUnavailableRule()) return false;
+        boolean matched = ruleSlots.stream()
+                .filter(slot -> slot.state() == RuleState.ACTIVE)
+                .anyMatch(slot -> matches(slot.rule(), key));
+        return mode == BusFilterMode.ALLOW ? matched : !matched;
+    }
+
+    public boolean allows(StorageResourceKey key) {
+        Objects.requireNonNull(key, "key");
+        if (!supported || denyHasUnavailableRule()) return false;
+        if (key.kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
+            return StorageResourceBridge.itemKey(key, registries)
+                    .map(this::allows)
+                    .orElse(false);
+        }
         boolean matched = ruleSlots.stream()
                 .filter(slot -> slot.state() == RuleState.ACTIVE)
                 .anyMatch(slot -> matches(slot.rule(), key));
@@ -94,7 +108,7 @@ public final class BusFilterPolicy {
 
     public List<ItemKey> orderedCandidates(Collection<ItemKey> candidates) {
         Objects.requireNonNull(candidates, "candidates");
-        if (!supported || candidates.isEmpty()) return List.of();
+        if (!supported || denyHasUnavailableRule() || candidates.isEmpty()) return List.of();
         List<ItemKey> ordered = new ArrayList<>(new LinkedHashSet<>(candidates));
         Map<ItemKey, String> componentIdentities = new HashMap<>();
         ordered.sort(Comparator
@@ -114,8 +128,33 @@ public final class BusFilterPolicy {
         return List.copyOf(result);
     }
 
+    public List<StorageResourceKey> orderedResourceCandidates(
+            Collection<StorageResourceKey> candidates
+    ) {
+        Objects.requireNonNull(candidates, "candidates");
+        if (!supported || denyHasUnavailableRule() || candidates.isEmpty()) return List.of();
+        List<StorageResourceKey> ordered = new ArrayList<>(new LinkedHashSet<>(candidates));
+        ordered.sort(Comparator.naturalOrder());
+        if (mode == BusFilterMode.DENY) {
+            return ordered.stream().filter(this::allows).toList();
+        }
+        LinkedHashSet<StorageResourceKey> result = new LinkedHashSet<>();
+        for (RuleSlot slot : ruleSlots) {
+            if (slot.state() != RuleState.ACTIVE) continue;
+            for (StorageResourceKey key : ordered) {
+                if (matches(slot.rule(), key)) result.add(key);
+            }
+        }
+        return List.copyOf(result);
+    }
+
     public List<RuleSlot> ruleSlots() {
         return ruleSlots;
+    }
+
+    private boolean denyHasUnavailableRule() {
+        return mode == BusFilterMode.DENY && ruleSlots.stream()
+                .anyMatch(slot -> slot.state() == RuleState.UNAVAILABLE);
     }
 
     private boolean matches(BusFilterRule rule, ItemKey key) {
@@ -125,8 +164,13 @@ public final class BusFilterPolicy {
             case TAG -> key.toStack(1).is(TagKey.create(Registries.ITEM, rule.id().orElseThrow()));
             case MOD -> BuiltInRegistries.ITEM.getKey(key.item()).getNamespace()
                     .equals(rule.namespace().orElseThrow());
-            case UNAVAILABLE -> false;
+            case RESOURCE, UNAVAILABLE -> false;
         };
+    }
+
+    private boolean matches(BusFilterRule rule, StorageResourceKey key) {
+        return rule.type() == BusFilterRule.Type.RESOURCE
+                && rule.resourceKey().orElseThrow().equals(key);
     }
 
     private String canonicalComponents(DataComponentMap components) {

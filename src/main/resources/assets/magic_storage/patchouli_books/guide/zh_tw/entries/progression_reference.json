@@ -22,7 +22,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)快速路線：$()先完成$(l:magic_storage:first_network)你的第一個網路$()，熟悉$(l:magic_storage:terminal_controls)終端機控制$()，透過$(l:magic_storage:energy_overview)燃料工作區$()安裝工作站，再依需要加入$(l:magic_storage:import_bus)自動化$()與$(l:magic_storage:remote_terminal)遠端存取$()。"
+      "text": "$(thing)快速路線：$()先完成$(l:magic_storage:first_network)你的第一個網路$()，熟悉$(l:magic_storage:terminal_controls)終端機控制$()，透過$(l:magic_storage:energy_overview)工作站分頁$()安裝工作站，再依需要加入$(l:magic_storage:import_bus)自動化$()與$(l:magic_storage:remote_terminal)遠端存取$()。"
     }
   ]
 }

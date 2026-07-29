@@ -4,7 +4,8 @@
   "package": "com.swearprom.magicstorage.magic_storage.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "MacOsWindowMixin"
+    "MacOsWindowMixin",
+    "MinecraftDisconnectMixin"
   ],
   "injectors": {
     "defaultRequire": 1

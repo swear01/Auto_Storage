@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -26,16 +27,19 @@ import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -66,6 +70,9 @@ final class BuiltInRecipeAdapters {
             RecipeType.SMITHING
     );
     private static final Map<Recipe<?>, SmithingRepresentatives> SMITHING_INPUT_CACHE =
+            Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<HolderLookup.Provider, Map<DataComponentMap, Optional<String>>>
+            COMPONENT_IDENTITY_CACHE =
             Collections.synchronizedMap(new WeakHashMap<>());
     private static final List<RecipeAdapter> BUILT_IN_ADAPTERS = List.of(
             exact(SHAPED_ID, 0, ShapedRecipe.class, RecipeType.CRAFTING,
@@ -449,6 +456,7 @@ final class BuiltInRecipeAdapters {
             Level level
     ) {
         if (level == null) return List.of();
+        if (smithingVariantLimitExceeded(recipe, availableStacks)) return List.of();
         Optional<List<ItemStack>> orderedStacks = uniqueExactStacks(availableStacks, level);
         if (orderedStacks.isEmpty()) return List.of();
         List<ItemStack> unique = orderedStacks.get();
@@ -480,6 +488,35 @@ final class BuiltInRecipeAdapters {
             }
         }
         return List.copyOf(variants.values());
+    }
+
+    private static boolean smithingVariantLimitExceeded(
+            SmithingRecipe recipe,
+            List<ItemStack> availableStacks
+    ) {
+        Set<ItemKey> templates = new HashSet<>();
+        Set<ItemKey> bases = new HashSet<>();
+        Set<ItemKey> additions = new HashSet<>();
+        for (ItemStack stack : availableStacks) {
+            if (stack.isEmpty()) continue;
+            ItemKey key = null;
+            if (recipe.isTemplateIngredient(stack)) {
+                key = ItemKey.of(stack);
+                templates.add(key);
+            }
+            if (recipe.isBaseIngredient(stack)) {
+                if (key == null) key = ItemKey.of(stack);
+                bases.add(key);
+            }
+            if (recipe.isAdditionIngredient(stack)) {
+                if (key == null) key = ItemKey.of(stack);
+                additions.add(key);
+            }
+            if (!templates.isEmpty() && !bases.isEmpty() && !additions.isEmpty()
+                    && templates.size() > MAX_SMITHING_VARIANT_COMBINATIONS
+                    / bases.size() / additions.size()) return true;
+        }
+        return false;
     }
 
     private static RecipeAdapterMatch.Contract smithingVariantContract(
@@ -522,6 +559,7 @@ final class BuiltInRecipeAdapters {
                 new SmithingVariantInputIdentity(recipe, role, key),
                 stack -> recipePredicate.test(stack) && key.equals(ItemKey.of(stack)),
                 List.of(key.toStack(1)),
+                true,
                 1);
     }
 
@@ -556,7 +594,7 @@ final class BuiltInRecipeAdapters {
         }
         Map<ItemKey, String> componentIdentities = new HashMap<>();
         for (ItemKey key : unique.keySet()) {
-            Optional<String> identity = canonicalComponents(key.components(), level);
+            Optional<String> identity = componentIdentity(key, level);
             if (identity.isEmpty()) return Optional.empty();
             componentIdentities.put(key, identity.get());
         }
@@ -567,12 +605,23 @@ final class BuiltInRecipeAdapters {
         return Optional.of(List.copyOf(ordered));
     }
 
+    private static Optional<String> componentIdentity(ItemKey key, Level level) {
+        synchronized (COMPONENT_IDENTITY_CACHE) {
+            return COMPONENT_IDENTITY_CACHE
+                    .computeIfAbsent(level.registryAccess(), ignored -> new WeakHashMap<>())
+                    .computeIfAbsent(
+                            key.components(),
+                            ignored -> canonicalComponents(
+                                    key.components(), level.registryAccess()));
+        }
+    }
+
     private static Optional<String> canonicalComponents(
             DataComponentMap components,
-            Level level
+            HolderLookup.Provider registries
     ) {
         return DataComponentMap.CODEC.encodeStart(
-                        RegistryOps.create(NbtOps.INSTANCE, level.registryAccess()), components)
+                        RegistryOps.create(NbtOps.INSTANCE, registries), components)
                 .result()
                 .map(BuiltInRecipeAdapters::canonicalTag);
     }
@@ -635,12 +684,15 @@ final class BuiltInRecipeAdapters {
     private static List<RecipeAdapterMatch.Input> ingredientInputs(List<Ingredient> ingredients) {
         List<RecipeAdapterMatch.Input> inputs = new ArrayList<>(ingredients.size());
         for (Ingredient ingredient : ingredients) {
+            boolean exhaustiveItemCoverage = hasExhaustiveItemCoverage(ingredient);
             inputs.add(ingredient.isEmpty()
                     ? RecipeAdapterMatch.Input.empty(ingredient)
                     : RecipeAdapterMatch.Input.of(
                             ingredient,
                             ingredient,
                             Arrays.asList(ingredient.getItems()),
+                            exhaustiveItemCoverage,
+                            ingredient.isSimple(),
                             1));
         }
         return List.copyOf(inputs);
@@ -651,7 +703,7 @@ final class BuiltInRecipeAdapters {
         List<ItemStack> representatives = new ArrayList<>();
         for (Ingredient ingredient : ingredients) {
             if (ingredient.isEmpty()) continue;
-            exhaustive &= ingredient.isSimple();
+            exhaustive &= hasExhaustiveItemCoverage(ingredient);
             for (ItemStack stack : ingredient.getItems()) {
                 if (!stack.isEmpty()) representatives.add(stack.copyWithCount(1));
             }
@@ -661,6 +713,11 @@ final class BuiltInRecipeAdapters {
                 : RecipeCandidateIndex.nonExhaustive(representatives);
     }
 
+    private static boolean hasExhaustiveItemCoverage(Ingredient ingredient) {
+        return ingredient.isSimple()
+                || ingredient.getCustomIngredient() instanceof DataComponentIngredient;
+    }
+
     private static List<RecipeAdapterMatch.Input> smithingInputs(SmithingRecipe recipe) {
         SmithingRepresentatives representatives = smithingRepresentatives(recipe);
         return List.of(
@@ -668,16 +725,19 @@ final class BuiltInRecipeAdapters {
                         new SmithingInputIdentity(recipe, 0),
                         recipe::isTemplateIngredient,
                         representatives.templates(),
+                        true,
                         1),
                 RecipeAdapterMatch.Input.of(
                         new SmithingInputIdentity(recipe, 1),
                         recipe::isBaseIngredient,
                         representatives.bases(),
+                        true,
                         1),
                 RecipeAdapterMatch.Input.of(
                         new SmithingInputIdentity(recipe, 2),
                         recipe::isAdditionIngredient,
                         representatives.additions(),
+                        true,
                         1));
     }
 
@@ -820,6 +880,7 @@ final class BuiltInRecipeAdapters {
         @Override
         public List<RecipeAdapterMatch.Contract> resolveVariants(
                 RecipeHolder<?> holder,
+                RecipeAdapterMatch.Contract baseContract,
                 List<ItemStack> availableStacks,
                 Level level
         ) {
@@ -828,7 +889,12 @@ final class BuiltInRecipeAdapters {
             }
             R recipe = recipeClass.cast(holder.value());
             return List.copyOf(variantContractFactory.resolve(
-                    recipe, contract(holder), availableStacks, level));
+                    recipe, baseContract, availableStacks, level));
+        }
+
+        @Override
+        public boolean requiresAvailableStacksForVariants() {
+            return id.equals(SMITHING_TRANSFORM_ID) || id.equals(SMITHING_TRIM_ID);
         }
 
         @Override

@@ -2,6 +2,7 @@ package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,7 +15,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.UUID;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StorageTerminalMenu extends AbstractContainerMenu {
     static final int SORT_ORDER_BUTTON = 11;
@@ -29,7 +32,8 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     static final int PREVIOUS_RESOURCE_VIEW_BUTTON = 27;
     static final int RESET_RESOURCE_VIEW_BUTTON = 28;
 
-    public static final int MAX_DISPLAY_ROWS = 9;
+    public static final int MAX_DISPLAY_ROWS = 18;
+    public static final int INITIAL_DISPLAY_ROWS = 9;
     public static final int DISPLAY_COLS = 9;
     public static final int DISPLAY_SLOTS = MAX_DISPLAY_ROWS * DISPLAY_COLS;
     public static final int PLAYER_INVENTORY_SLOTS = 36;
@@ -46,15 +50,17 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     protected int displayTypeCount = 0;
     protected int displayMaxTypes = 0;
     protected boolean displayUnlimitedTypeCapacity;
-    private int visibleRows = 6;
+    private int visibleRows = INITIAL_DISPLAY_ROWS;
     private SortMode sortMode = SortMode.NAME;
     private SortOrder sortOrder = SortOrder.ASCENDING;
-    private SearchMode searchMode = SearchMode.NORMAL;
+    private SearchMode searchMode = SearchMode.OFF;
     private TerminalResourceView resourceView = TerminalResourceView.ITEM;
     private StorageCoreBlockEntity observedCore;
     private long observedTopologyRevision;
     private boolean storageDirty;
     private boolean energyDirty;
+    private final Map<ResourceLocation, Long> stationWorkIncreases = new HashMap<>();
+    private boolean stationWorkDecreased;
     private final StorageListener storageListener = new StorageListener() {
         @Override
         public void onChanged(ItemKey key, long delta, long newAmount, Actor actor) {
@@ -67,13 +73,25 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         }
 
         @Override
+        public void onStationWorkChanged(
+                ResourceLocation descriptorId,
+                long delta,
+                long newAmount
+        ) {
+            if (delta < 0) stationWorkDecreased = true;
+            else stationWorkIncreases.merge(descriptorId, newAmount, Math::max);
+        }
+
+        @Override
         public void onResourceChanged(
                 StorageResourceKey key,
                 long delta,
                 long newAmount,
                 Actor actor
         ) {
-            storageDirty = true;
+            if (StorageResourceBridge.stationWorkDescriptorId(key).isPresent()) return;
+            if (key.kindId().equals(StorageResourceBridge.WORK_KIND)) energyDirty = true;
+            else storageDirty = true;
         }
     };
 
@@ -271,20 +289,52 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
 
     public void refreshDisplayItemsFiltered(StorageCoreBlockEntity core, String filter) {
         this.currentFilter = filter != null ? filter : "";
-        displayInventory.clearContent();
-        if (core == null) { totalItemTypes = 0; return; }
-        java.util.List<ItemStack> stacks = core.getTerminalDisplayStacks(
-                currentFilter, sortMode, sortOrder, resourceView);
-        totalItemTypes = stacks.size();
+        if (core == null) {
+            totalItemTypes = 0;
+            replaceVisibleDisplayStacks(List.of(), visibleRows);
+            return;
+        }
+        int limit = visibleRows * DISPLAY_COLS;
+        TerminalDisplayPage page = core.getTerminalDisplayPage(
+                currentFilter, sortMode, sortOrder, resourceView, scrollOffset, limit);
+        totalItemTypes = page.totalTypes();
+        refreshDisplayMetadata(core);
+        int alignedOffset = rowAlignedScrollOffset(page.offset());
+        if (alignedOffset != page.offset()) {
+            page = core.getTerminalDisplayPage(
+                    currentFilter, sortMode, sortOrder, resourceView, alignedOffset, limit);
+        }
+        scrollOffset = page.offset();
+        replaceVisiblePageStacks(page.stacks(), visibleRows);
+    }
+
+    protected final void refreshDisplayMetadata(StorageCoreBlockEntity core) {
         displayTypeCount = core.getTypeCount();
         displayMaxTypes = core.getTotalTypeSlots();
         displayUnlimitedTypeCapacity = core.getTypeCapacity().unlimited();
-        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
-        scrollOffset = Math.min(scrollOffset, maxOffset);
+    }
+
+    protected final void replaceVisibleDisplayStacks(List<ItemStack> stacks, int rows) {
         for (int i = 0; i < DISPLAY_SLOTS; i++) {
             int idx = scrollOffset + i;
-            if (idx < stacks.size() && i < visibleRows * DISPLAY_COLS) {
-                displayInventory.setItem(i, stacks.get(idx).copy());
+            ItemStack next = idx < stacks.size() && i < rows * DISPLAY_COLS
+                    ? stacks.get(idx) : ItemStack.EMPTY;
+            ItemStack current = displayInventory.getItem(i);
+            if (current.getCount() != next.getCount()
+                    || !ItemStack.isSameItemSameComponents(current, next)) {
+                displayInventory.setItem(i, next);
+            }
+        }
+    }
+
+    protected final void replaceVisiblePageStacks(List<ItemStack> stacks, int rows) {
+        for (int i = 0; i < DISPLAY_SLOTS; i++) {
+            ItemStack next = i < stacks.size() && i < rows * DISPLAY_COLS
+                    ? stacks.get(i) : ItemStack.EMPTY;
+            ItemStack current = displayInventory.getItem(i);
+            if (current.getCount() != next.getCount()
+                    || !ItemStack.isSameItemSameComponents(current, next)) {
+                displayInventory.setItem(i, next);
             }
         }
     }
@@ -297,13 +347,26 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     public void scrollBy(int delta) {
-        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
-        scrollOffset = Math.clamp(scrollOffset + delta, 0, maxOffset);
+        scrollTo((int) Math.clamp(
+                (long) scrollOffset + delta, Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     public void scrollTo(int offset) {
-        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
-        scrollOffset = Math.clamp(offset, 0, maxOffset);
+        scrollOffset = rowAlignedScrollOffset(offset);
+    }
+
+    int getMaxScrollOffset() {
+        long totalRows = ((long) totalItemTypes + DISPLAY_COLS - 1) / DISPLAY_COLS;
+        long offset = Math.max(0L, totalRows - visibleRows) * DISPLAY_COLS;
+        int largestAlignedInt = Integer.MAX_VALUE - Integer.MAX_VALUE % DISPLAY_COLS;
+        return (int) Math.min(offset, largestAlignedInt);
+    }
+
+    private int rowAlignedScrollOffset(int offset) {
+        int maxOffset = getMaxScrollOffset();
+        int clamped = Math.clamp(offset, 0, maxOffset);
+        long rounded = ((long) clamped + DISPLAY_COLS / 2) / DISPLAY_COLS * DISPLAY_COLS;
+        return (int) Math.min(rounded, maxOffset);
     }
 
     public int getScrollOffset() {
@@ -359,6 +422,134 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             return;
         }
         super.clicked(slotIndex, button, clickType, player);
+    }
+
+    public boolean handleHeldContainerTransfer(
+            TerminalHeldContainerTransferPacket packet,
+            Player player
+    ) {
+        if (player.level().isClientSide()
+                || player.isSpectator()
+                || !stillValid(player)
+                || packet.containerId() != containerId
+                || packet.stateId() != getStateId()
+                || packet.expectedView() != resourceView
+                || resourceView == TerminalResourceView.ITEM
+                || packet.slotIndex() < 0
+                || packet.slotIndex() >= visibleRows * DISPLAY_COLS
+                || packet.slotIndex() >= DISPLAY_SLOTS
+                || getCarried().isEmpty()
+                || this instanceof CraftingTerminalMenu crafting
+                && crafting.getPage() != CraftingTerminalPage.STORAGE) return false;
+        if (packet.direction() == TerminalContainerTransferDirection.DEPOSIT) {
+            return depositHeldResourceContainer(player);
+        }
+        ItemStack displayStack = getSlot(packet.slotIndex()).getItem();
+        return fillHeldResourceContainer(displayStack, player);
+    }
+
+    private boolean fillHeldResourceContainer(ItemStack displayStack, Player player) {
+        ItemStack carried = getCarried();
+        if (carried.isEmpty()) return false;
+        StorageResourceKey key = TerminalResourceDisplay.key(displayStack).orElse(null);
+        if (key == null || !resourceView.matches(key)) return false;
+        StorageCoreBlockEntity core = getCore(player.level());
+        if (core == null) return false;
+
+        long stored = core.getResourceAmount(key);
+        if (stored <= 0) return false;
+        var transfer = StorageResourceContainerStrategies.find(key.kindId())
+                .flatMap(strategy -> strategy.planWithdraw(
+                        carried.copyWithCount(1), key, stored, player.level().registryAccess()))
+                .filter(candidate -> candidate.key().equals(key))
+                .orElse(null);
+        return transfer != null && commitContainerTransfer(core, transfer, false, player);
+    }
+
+    private boolean depositHeldResourceContainer(Player player) {
+        if (resourceView == TerminalResourceView.ITEM) return false;
+        ItemStack carried = getCarried();
+        if (carried.isEmpty()) return false;
+        StorageCoreBlockEntity core = getCore(player.level());
+        if (core == null) return false;
+        ItemStack singleContainer = carried.copyWithCount(1);
+        for (StorageResourceContainerStrategy strategy : StorageResourceContainerStrategies.all()) {
+            var transfer = strategy.planDeposit(
+                    singleContainer.copy(), player.level().registryAccess()).orElse(null);
+            if (transfer == null || !transfer.key().kindId().equals(strategy.kindId())
+                    || !resourceView.matches(transfer.key())) continue;
+            return commitContainerTransfer(core, transfer, true, player);
+        }
+        return false;
+    }
+
+    private boolean commitContainerTransfer(
+            StorageCoreBlockEntity core,
+            StorageResourceContainerStrategy.Transfer transfer,
+            boolean deposit,
+            Player player
+    ) {
+        if (!StorageResourceKinds.accepts(transfer.key())) return false;
+        ContainerResultPlacement placement = planContainerResultPlacement(
+                getCarried(), transfer.resultContainer(), player);
+        if (placement == null) return false;
+        long delta = deposit ? transfer.amount() : -transfer.amount();
+        StorageResourceTransaction transaction = StorageResourceTransaction.builder()
+                .add(transfer.key(), delta)
+                .build();
+        Actor actor = Actor.player(player);
+        if (!core.applyResourceTransaction(transaction, Action.SIMULATE, actor)) return false;
+
+        core.beginMutationBatch();
+        try {
+            if (!core.applyResourceTransaction(transaction, Action.EXECUTE, actor)) return false;
+            placement.apply(this, player);
+        } finally {
+            core.endMutationBatch();
+        }
+        refreshDisplayItemsFiltered(core, currentFilter);
+        broadcastChanges();
+        return true;
+    }
+
+    private ContainerResultPlacement planContainerResultPlacement(
+            ItemStack carried,
+            ItemStack result,
+            Player player
+    ) {
+        if (carried.isEmpty()) return null;
+        if (carried.getCount() == 1) {
+            return new ContainerResultPlacement(result.copy(), -1, ItemStack.EMPTY);
+        }
+        ItemStack remaining = carried.copyWithCount(carried.getCount() - 1);
+        if (result.isEmpty()) return new ContainerResultPlacement(remaining, -1, ItemStack.EMPTY);
+        for (int slot = 0; slot < player.getInventory().items.size(); slot++) {
+            ItemStack existing = player.getInventory().items.get(slot);
+            if (!existing.isEmpty() && ItemStack.isSameItemSameComponents(existing, result)
+                    && existing.getCount() + result.getCount() <= existing.getMaxStackSize()) {
+                ItemStack updated = existing.copyWithCount(existing.getCount() + result.getCount());
+                return new ContainerResultPlacement(remaining, slot, updated);
+            }
+        }
+        for (int slot = 0; slot < player.getInventory().items.size(); slot++) {
+            if (player.getInventory().items.get(slot).isEmpty()) {
+                return new ContainerResultPlacement(remaining, slot, result.copy());
+            }
+        }
+        return null;
+    }
+
+    private record ContainerResultPlacement(
+            ItemStack carried,
+            int inventorySlot,
+            ItemStack inventoryResult
+    ) {
+        private void apply(StorageTerminalMenu menu, Player player) {
+            menu.setCarried(carried.copy());
+            if (inventorySlot >= 0) {
+                player.getInventory().setItem(inventorySlot, inventoryResult.copy());
+            }
+        }
     }
 
     @Override
@@ -447,9 +638,9 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                     case PREVIOUS_SEARCH_MODE_BUTTON -> searchMode = searchMode.previous();
                     case RESET_SORT_ORDER_BUTTON -> sortOrder = SortOrder.ASCENDING;
                     case RESET_SORT_MODE_BUTTON -> sortMode = SortMode.NAME;
-                    case RESET_SEARCH_MODE_BUTTON -> searchMode = SearchMode.NORMAL;
-                    case NEXT_RESOURCE_VIEW_BUTTON -> resourceView = resourceView.next();
-                    case PREVIOUS_RESOURCE_VIEW_BUTTON -> resourceView = resourceView.previous();
+                    case RESET_SEARCH_MODE_BUTTON -> searchMode = SearchMode.OFF;
+                    case NEXT_RESOURCE_VIEW_BUTTON -> resourceView = resourceView.nextAvailable();
+                    case PREVIOUS_RESOURCE_VIEW_BUTTON -> resourceView = resourceView.previousAvailable();
                     case RESET_RESOURCE_VIEW_BUTTON -> resourceView = TerminalResourceView.ITEM;
                 }
                 refreshDisplayItems(core);
@@ -459,19 +650,24 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     public boolean applySettings(TerminalSettingsPacket packet, Player player) {
-        int rows = Math.clamp(packet.visibleRows(), 3, MAX_DISPLAY_ROWS);
+        int rows = Math.clamp(packet.visibleRows(), minimumVisibleRows(), MAX_DISPLAY_ROWS);
         TerminalPreferences preferences = packet.preferences();
+        TerminalResourceView requestedView = preferences.resourceView().availableOrItem();
         boolean changed = rows != visibleRows
                 || sortMode != preferences.sortMode()
                 || sortOrder != preferences.sortOrder()
                 || searchMode != preferences.searchMode()
-                || resourceView != preferences.resourceView();
+                || resourceView != requestedView;
         visibleRows = rows;
         sortMode = preferences.sortMode();
         sortOrder = preferences.sortOrder();
         searchMode = preferences.searchMode();
-        resourceView = preferences.resourceView();
+        resourceView = requestedView;
         return changed;
+    }
+
+    protected int minimumVisibleRows() {
+        return TerminalLayout.MIN_STORAGE_ROWS;
     }
 
     public int getVisibleRows() {
@@ -508,6 +704,13 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             energyDirty = false;
             onObservedEnergyChanged(observedCore);
         }
+        if ((stationWorkDecreased || !stationWorkIncreases.isEmpty()) && observedCoreValid) {
+            boolean decreased = stationWorkDecreased;
+            Map<ResourceLocation, Long> increases = Map.copyOf(stationWorkIncreases);
+            stationWorkDecreased = false;
+            stationWorkIncreases.clear();
+            onObservedStationWorkChanged(observedCore, increases, decreased);
+        }
         super.broadcastChanges();
     }
 
@@ -515,6 +718,17 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     protected void onObservedEnergyChanged(StorageCoreBlockEntity core) {
+        if (resourceView == TerminalResourceView.ENERGY
+                || resourceView == TerminalResourceView.ALL) refreshDisplayItems(core);
+    }
+
+    protected void onObservedStationWorkChanged(
+            StorageCoreBlockEntity core,
+            Map<ResourceLocation, Long> increases,
+            boolean decreased
+    ) {
+        if (resourceView == TerminalResourceView.STATION_WORK
+                || resourceView == TerminalResourceView.ALL) refreshDisplayItems(core);
     }
 
     @Override

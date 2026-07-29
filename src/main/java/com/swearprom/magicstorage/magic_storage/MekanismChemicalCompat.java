@@ -5,21 +5,30 @@ import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.minecraft.world.level.Level;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.WeakHashMap;
 
 public final class MekanismChemicalCompat {
     private static final ResourceLocation CHEMICAL_KIND = StorageResourceKindApi.CHEMICAL_KIND;
     private static final BlockCapability<IChemicalHandler, Direction> CHEMICAL_CAPABILITY =
             BlockCapability.createSided(
+                    ResourceLocation.fromNamespaceAndPath("mekanism", "chemical_handler"),
+                    IChemicalHandler.class);
+    private static final ItemCapability<IChemicalHandler, Void> CHEMICAL_ITEM_CAPABILITY =
+            ItemCapability.createVoid(
                     ResourceLocation.fromNamespaceAndPath("mekanism", "chemical_handler"),
                     IChemicalHandler.class);
     private static final Map<Object, WeakReference<IChemicalHandler>> HANDLERS =
@@ -33,44 +42,161 @@ public final class MekanismChemicalCompat {
                 CHEMICAL_CAPABILITY,
                 MagicStorage.STORAGE_CORE_BE.get(),
                 (core, side) -> core.getLevel() == null || core.getLevel().isClientSide()
-                        ? null : handler(core, core.resourceHandler()));
+                        ? null : handler(core.resourceHandler()));
         event.registerBlockEntity(
                 CHEMICAL_CAPABILITY,
                 MagicStorage.IMPORT_BUS_BE.get(),
                 (bus, side) -> bus.getLevel() == null || bus.getLevel().isClientSide()
-                        ? null : handler(bus, bus.passiveResourceHandler()));
+                        || bus.passiveResourceHandler(side) == null
+                        ? null : handler(bus.passiveResourceHandler(side)));
         event.registerBlockEntity(
                 CHEMICAL_CAPABILITY,
                 MagicStorage.EXPORT_BUS_BE.get(),
                 (bus, side) -> bus.getLevel() == null || bus.getLevel().isClientSide()
-                        ? null : handler(bus, bus.passiveResourceHandler()));
+                        || bus.passiveResourceHandler(side) == null
+                        ? null : handler(bus.passiveResourceHandler(side)));
     }
 
-    private static synchronized IChemicalHandler handler(
-            Object owner,
-            StorageResourceHandler resources
+    public static Optional<StorageResourceContainerStrategy.Transfer> planContainerDeposit(
+            net.minecraft.world.item.ItemStack singleContainer,
+            HolderLookup.Provider registries
     ) {
-        WeakReference<IChemicalHandler> reference = HANDLERS.get(owner);
+        if (singleContainer.isEmpty() || singleContainer.getCount() != 1) return Optional.empty();
+        net.minecraft.world.item.ItemStack copy = singleContainer.copy();
+        IChemicalHandler handler = copy.getCapability(CHEMICAL_ITEM_CAPABILITY);
+        if (handler == null) return Optional.empty();
+        ChemicalStack simulated = handler.extractChemical(Long.MAX_VALUE, Action.SIMULATE);
+        if (simulated.isEmpty()) return Optional.empty();
+        long before = amountOf(handler, simulated);
+        ChemicalStack executed = handler.extractChemical(simulated, Action.EXECUTE);
+        if (!ChemicalStack.isSameChemical(executed, simulated)
+                || executed.getAmount() != simulated.getAmount()
+                || amountOf(handler, simulated) != before - executed.getAmount()) {
+            return Optional.empty();
+        }
+        return Optional.of(new StorageResourceContainerStrategy.Transfer(
+                key(executed), executed.getAmount(), copy));
+    }
+
+    public static Optional<StorageResourceHandler> findBlockHandler(
+            Level level,
+            BlockPos pos,
+            Direction side
+    ) {
+        IChemicalHandler handler = level.getCapability(CHEMICAL_CAPABILITY, pos, side);
+        return handler == null
+                ? Optional.empty()
+                : Optional.of(new BlockChemicalHandler(handler));
+    }
+
+    public static Optional<StorageResourceContainerStrategy.Transfer> planContainerWithdraw(
+            net.minecraft.world.item.ItemStack singleContainer,
+            StorageResourceKey key,
+            long maxAmount,
+            HolderLookup.Provider registries
+    ) {
+        if (singleContainer.isEmpty() || singleContainer.getCount() != 1
+                || !key.kindId().equals(CHEMICAL_KIND) || maxAmount <= 0) {
+            return Optional.empty();
+        }
+        ChemicalStack requested = stack(key, maxAmount);
+        if (requested.isEmpty()) return Optional.empty();
+        net.minecraft.world.item.ItemStack copy = singleContainer.copy();
+        IChemicalHandler handler = copy.getCapability(CHEMICAL_ITEM_CAPABILITY);
+        if (handler == null) return Optional.empty();
+        ChemicalStack simulatedRemainder = handler.insertChemical(requested, Action.SIMULATE);
+        long accepted = requested.getAmount() - simulatedRemainder.getAmount();
+        if (accepted <= 0) return Optional.empty();
+        long before = amountOf(handler, requested);
+        ChemicalStack exact = requested.copyWithAmount(accepted);
+        ChemicalStack executedRemainder = handler.insertChemical(exact, Action.EXECUTE);
+        if (!executedRemainder.isEmpty()
+                || amountOf(handler, requested) != before + accepted) {
+            return Optional.empty();
+        }
+        return Optional.of(new StorageResourceContainerStrategy.Transfer(key, accepted, copy));
+    }
+
+    private static synchronized IChemicalHandler handler(StorageResourceHandler resources) {
+        WeakReference<IChemicalHandler> reference = HANDLERS.get(resources);
         IChemicalHandler existing = reference == null ? null : reference.get();
         if (existing != null) return existing;
         IChemicalHandler created = new ResourceChemicalHandler(resources);
-        HANDLERS.put(owner, new WeakReference<>(created));
+        HANDLERS.put(resources, new WeakReference<>(created));
         return created;
     }
 
-    private static StorageResourceKey key(ChemicalStack stack) {
+    static StorageResourceKey key(ChemicalStack stack) {
         ResourceLocation chemicalId = stack.getChemicalHolder().unwrapKey()
                 .orElseThrow(() -> new IllegalArgumentException("Unregistered chemical cannot be stored"))
                 .location();
         return StorageResourceKey.of(CHEMICAL_KIND, chemicalId, new CompoundTag());
     }
 
-    private static ChemicalStack stack(StorageResourceKey key, long amount) {
+    static ChemicalStack stack(StorageResourceKey key, long amount) {
         if (!key.kindId().equals(CHEMICAL_KIND) || amount <= 0) return ChemicalStack.EMPTY;
         return MekanismAPI.CHEMICAL_REGISTRY.getHolder(ResourceKey.create(
                         MekanismAPI.CHEMICAL_REGISTRY_NAME, key.resourceId()))
                 .map(holder -> new ChemicalStack(holder, amount))
                 .orElse(ChemicalStack.EMPTY);
+    }
+
+    private static long amountOf(IChemicalHandler handler, ChemicalStack chemical) {
+        long result = 0;
+        for (int tank = 0; tank < handler.getChemicalTanks(); tank++) {
+            ChemicalStack stored = handler.getChemicalInTank(tank);
+            if (ChemicalStack.isSameChemical(stored, chemical)) {
+                result = Math.addExact(result, stored.getAmount());
+            }
+        }
+        return result;
+    }
+
+    private record BlockChemicalHandler(IChemicalHandler chemicals)
+            implements StorageResourceHandler {
+        @Override
+        public List<StorageResourceKey> getStoredResources() {
+            java.util.TreeSet<StorageResourceKey> result = new java.util.TreeSet<>();
+            for (int tank = 0; tank < chemicals.getChemicalTanks(); tank++) {
+                ChemicalStack stored = chemicals.getChemicalInTank(tank);
+                if (!stored.isEmpty()) result.add(key(stored));
+            }
+            return List.copyOf(result);
+        }
+
+        @Override
+        public long getAmount(StorageResourceKey key) {
+            if (!key.kindId().equals(CHEMICAL_KIND)) return 0;
+            long amount = 0;
+            for (int tank = 0; tank < chemicals.getChemicalTanks(); tank++) {
+                ChemicalStack stored = chemicals.getChemicalInTank(tank);
+                if (!stored.isEmpty() && key(stored).equals(key)) {
+                    amount = Math.addExact(amount, stored.getAmount());
+                }
+            }
+            return amount;
+        }
+
+        @Override
+        public long insert(StorageResourceKey key, long amount, boolean simulate) {
+            ChemicalStack requested = stack(key, amount);
+            if (requested.isEmpty()) return 0;
+            ChemicalStack remainder = chemicals.insertChemical(
+                    requested, simulate ? Action.SIMULATE : Action.EXECUTE);
+            if (!remainder.isEmpty() && !ChemicalStack.isSameChemical(remainder, requested)) return 0;
+            return requested.getAmount() - remainder.getAmount();
+        }
+
+        @Override
+        public long extract(StorageResourceKey key, long amount, boolean simulate) {
+            ChemicalStack requested = stack(key, amount);
+            if (requested.isEmpty()) return 0;
+            ChemicalStack extracted = chemicals.extractChemical(
+                    requested, simulate ? Action.SIMULATE : Action.EXECUTE);
+            return !extracted.isEmpty() && ChemicalStack.isSameChemical(extracted, requested)
+                    ? extracted.getAmount()
+                    : 0;
+        }
     }
 
     private static final class ResourceChemicalHandler implements IChemicalHandler {
@@ -115,6 +241,10 @@ public final class MekanismChemicalCompat {
                 Action action
         ) {
             if (!isValid(tank, chemicalStack)) return chemicalStack.copy();
+            ChemicalStack stored = getChemicalInTank(tank);
+            if (!stored.isEmpty() && !ChemicalStack.isSameChemical(stored, chemicalStack)) {
+                return chemicalStack.copy();
+            }
             return insertChemical(chemicalStack, action);
         }
 

@@ -1432,15 +1432,15 @@
         "atlas_index": 5
       },
       {
-        "name": "SEARCH",
+        "name": "SEARCH_OFF",
         "atlas_index": 6
       },
       {
-        "name": "SEARCH_TAG",
+        "name": "SEARCH_EMI",
         "atlas_index": 7
       },
       {
-        "name": "SEARCH_MOD",
+        "name": "SEARCH_EMI_TWO_WAY",
         "atlas_index": 8
       },
       {
@@ -1452,7 +1452,7 @@
         "atlas_index": 10
       }
     ],
-    "sha256": "3239d31eb5fe4878828d61d426de06029a99f1df02a8f2d062f5be6bdffa92d0"
+    "sha256": "f122407f39c727af8024cc46356c016e7241e4df8b67b273415df8a7446a457d"
   },
   "contact_sheets": [
     "chassis-contact-sheet.png",

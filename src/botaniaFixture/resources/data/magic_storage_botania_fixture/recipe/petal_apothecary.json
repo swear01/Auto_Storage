@@ -1,0 +1,18 @@
+{
+  "type": "botania:petal_apothecary",
+  "ingredients": [
+    {
+      "item": "minecraft:poppy"
+    },
+    {
+      "item": "minecraft:dandelion"
+    }
+  ],
+  "output": {
+    "count": 1,
+    "id": "minecraft:honeycomb"
+  },
+  "reagent": {
+    "item": "minecraft:wheat_seeds"
+  }
+}

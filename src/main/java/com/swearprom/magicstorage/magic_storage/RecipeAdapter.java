@@ -17,13 +17,22 @@ interface RecipeAdapter {
 
     RecipeCandidateIndex candidateIndex(RecipeHolder<?> holder);
 
+    default RecipeCandidateIndex candidateIndex(RecipeHolder<?> holder, Level level) {
+        return candidateIndex(holder);
+    }
+
     RecipeAdapterMatch.Contract contract(RecipeHolder<?> holder);
 
     List<RecipeAdapterMatch.Contract> resolveVariants(
             RecipeHolder<?> holder,
+            RecipeAdapterMatch.Contract baseContract,
             List<ItemStack> availableStacks,
             Level level
     );
+
+    default boolean requiresAvailableStacksForVariants() {
+        return true;
+    }
 
     boolean matchesLookupOutput(
             RecipeHolder<?> holder,
@@ -35,4 +44,5 @@ interface RecipeAdapter {
     default Optional<RecipeFamilyKey> exactFamilyKey() {
         return Optional.empty();
     }
+
 }

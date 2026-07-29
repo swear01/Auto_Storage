@@ -1,24 +1,24 @@
 {
-  "name": "Fuel Workspace",
+  "name": "Stations",
   "category": "magic_storage:energy",
   "icon": "minecraft:furnace",
   "sortnum": 0,
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "Open the Crafting Terminal's third page. $(thing)Consumables$(), $(thing)Timed Stations$(), and $(thing)Instant Stations$() fill the area down to Inventory. Each group can use multiple rows and pages independently when more entries are added."
+      "text": "Open the Crafting Terminal's $(thing)Stations tab$(). It has exactly two groups: $(thing)Processing Stations$() and $(thing)Instant Stations$(). Their readable rows grow with available screen height. Each group has its own arrows and mouse-wheel paging, and Search Stations filters both groups together."
     },
     {
       "type": "patchouli:text",
-      "text": "Timed Stations are Furnace, Blast Furnace, Smoker, Campfire, and Brewing Stand. Installed stack count controls how quickly each matching process reserve grows. Removing a machine stops new generation but keeps the energy already accumulated."
+      "text": "Processing Stations use the larger group and up to three readable columns. Each installed aggregate count is drawn on its item, while the separate value beside it is accumulated station work. Furnace, Blast Furnace, Smoker, Campfire, Brewing Stand, and supported modded machines can exceed one normal stack. Hover the cell for exact name, count, combined rate, and stored work."
     },
     {
       "type": "patchouli:text",
-      "text": "Instant Stations are Crafting Table, Stonecutter, and Smithing Table. Each accepts at most one, can be removed, and unlocks matching recipes without showing a made-up energy amount. Stored types over total type capacity is shown separately to the right of Inventory."
+      "text": "Instant Stations use a dense icon grid because they have no accumulated-work value. Crafting Table, Stonecutter, and Smithing Table each accept at most one, can be removed, and unlock matching recipes without made-up energy. Supported modded instant stations appear the same way."
     },
     {
       "type": "patchouli:text",
-      "text": "Consumables holds Fuel Target, the input, Fuel, Brew Energy, and Axe Energy. Cooking uses both its matching timed reserve and Fuel. Follow $(l:magic_storage:fuel_conversion)Fuel and Axe Energy$() for values, then check $(l:magic_storage:recipe_costs)Recipe Costs and Support$()."
+      "text": "The $(thing)Transform tab$() is separate from Stations. It converts real input items into stored typed resources such as Fuel, Brew Energy, Axe Uses, or FE. Energy groups FE, Fuel/Brew, Mana, and Source; Other holds Axe Uses and unclassified addon values; Processing lists only accumulated station work."
     }
   ]
 }

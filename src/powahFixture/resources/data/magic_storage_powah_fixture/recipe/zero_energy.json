@@ -1,0 +1,12 @@
+{
+  "type": "powah:energizing",
+  "energy": 0,
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "result": {
+    "id": "minecraft:lapis_lazuli"
+  }
+}

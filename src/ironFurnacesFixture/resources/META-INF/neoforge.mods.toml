@@ -1,0 +1,37 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="magic_storage_iron_furnaces_fixture"
+version="1.0.0"
+displayName="Magic Storage Iron Furnaces Fixture"
+description='''Repository-owned integration fixture for optional Iron Furnaces workstation variants.'''
+
+[[dependencies.magic_storage_iron_furnaces_fixture]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.magic_storage_iron_furnaces_fixture]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.magic_storage_iron_furnaces_fixture]]
+modId="magic_storage"
+type="required"
+versionRange="[0.1,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.magic_storage_iron_furnaces_fixture]]
+modId="ironfurnaces"
+type="required"
+versionRange="[4.3.2,)"
+ordering="AFTER"
+side="BOTH"

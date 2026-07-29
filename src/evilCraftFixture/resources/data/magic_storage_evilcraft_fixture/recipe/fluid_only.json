@@ -1,0 +1,12 @@
+{
+  "type": "evilcraft:blood_infuser",
+  "input_fluid": {
+    "id": "evilcraft:blood",
+    "amount": 125
+  },
+  "output_item": {
+    "id": "minecraft:redstone",
+    "count": 2
+  },
+  "duration": 20
+}

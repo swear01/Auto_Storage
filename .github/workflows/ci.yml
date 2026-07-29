@@ -53,17 +53,92 @@ jobs:
       - name: Run GameTest server
         run: |
           set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/gametest.log
 
       - name: Run recipe addon GameTest server
         run: |
           set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log
 
-      - name: Run Mekanism chemical GameTest server
+      - name: Run Mekanism GameTest server
         run: |
           set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runMekanismGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/mekanism-gametest.log
+
+      - name: Run Botania GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runBotaniaGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/botania-gametest.log
+
+      - name: Run Iron Furnaces GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runIronFurnacesGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/iron-furnaces-gametest.log
+
+      - name: Run Farmer's Delight GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runFarmersDelightGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/farmers-delight-gametest.log
+
+      - name: Run Modern Industrialization GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runModernIndustrializationGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/modern-industrialization-gametest.log
+
+      - name: Run Ars Nouveau GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runArsNouveauGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ars-nouveau-gametest.log
+
+      - name: Run EvilCraft GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runEvilCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/evilcraft-gametest.log
+
+      - name: Run Powah GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runPowahGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/powah-gametest.log
+
+      - name: Run Industrial Foregoing GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runIndustrialForegoingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/industrial-foregoing-gametest.log
+
+      - name: Run Create GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runCreateGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/create-gametest.log
+
+      - name: Run PneumaticCraft GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log
+
+      - name: Run Extended Crafting GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log
+
+      - name: Run optional compatibility matrix GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/compatibility-matrix-gametest.log
 
       - name: Run script tests
         run: |

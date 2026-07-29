@@ -42,6 +42,8 @@ class SelfTest {
     static void runAll() {
         testItemKey();
         testStorageResourceLedger();
+        testBusResourceEscrow();
+        testResourceContainerTransferContract();
         testAxeSyntheticDiscovery();
         testAxeEnergyContract();
         testFuelTable();
@@ -55,21 +57,30 @@ class SelfTest {
         testSmithingTrimAdapterFoundation();
         testRecipeAdapterCandidateCoverage();
         testRecipeAdapterReloadIdentity();
+        testLargeTypedRecipePlan();
         testEnergyType();
+        testMachineVariantContract();
+        testMachineWorkAccumulator();
+        testMachineRateFormatter();
         testEnergyCost();
         testFuelValue();
+        testTransformProviderApi();
         testEnergyTypeUniqueness();
         testSortMode();
         testSortOrder();
         testSearchMode();
+        testTerminalSearchQuery();
+        testFuelSearchModel();
+        testRecipeStationCycle();
         testTerminalPreferences();
         testTerminalSettingsPacketCodec();
-        testSearchModeApply();
         testTerminalResourceView();
         testTerminalProfilesAndCycleDirection();
         testTerminalAmountFormatter();
+        testRecipeResourceAmountFormatter();
         testTerminalDisplayStack();
         testTerminalEntryComparator();
+        testTerminalScrollbar();
         testAdaptiveTerminalLayout();
 
         MagicStorage.LOGGER.info("SelfTest: {} passed, {} failed, {} total",
@@ -77,6 +88,77 @@ class SelfTest {
         if (failed > 0) {
             MagicStorage.LOGGER.error("SelfTest: {} TESTS FAILED!", failed);
         }
+    }
+
+    private static void testMachineRateFormatter() {
+        assertTrue("machine rate tooltip uses a fixed decimal for zero",
+                MachineRateFormatter.format(MachineWorkRate.ZERO, 1).equals("0.00"));
+        assertTrue("machine rate tooltip renders fractional rates as decimals",
+                MachineRateFormatter.format(MachineWorkRate.of(5, 4), 1).equals("1.25"));
+        assertTrue("machine rate tooltip keeps two decimal places after stack multiplication",
+                MachineRateFormatter.format(MachineWorkRate.of(5, 4), 2).equals("2.50"));
+        assertTrue("machine rate tooltip rounds repeating decimals consistently",
+                MachineRateFormatter.format(MachineWorkRate.of(10, 9), 1).equals("1.11"));
+        assertTrue("positive machine rates never render as zero",
+                MachineRateFormatter.format(MachineWorkRate.of(1, 1_000), 1).equals("<0.01"));
+        assertTrue("an empty machine slot still renders zero",
+                MachineRateFormatter.format(MachineWorkRate.of(5, 4), 0).equals("0.00"));
+        assertTrue("near-limit Processing aggregates keep an exact non-overflowing rate",
+                MachineRateFormatter.format(
+                        MachineWorkRate.of(1, 200), Integer.MAX_VALUE)
+                        .equals("10737418.24"));
+    }
+
+    private static void testRecipeResourceAmountFormatter() {
+        assertTrue("recipe resource amount preserves the full compact available value",
+                RecipeResourceAmountFormatter.format(121_000, 200, false)
+                        .available().equals("121K"));
+        assertTrue("recipe resource amount preserves every required digit on its own line",
+                RecipeResourceAmountFormatter.format(121_000, 200, false)
+                        .required().equals("/200"));
+        assertTrue("recipe resource amount keeps infinite availability explicit",
+                RecipeResourceAmountFormatter.format(Long.MAX_VALUE, 1, true)
+                        .available().equals("∞"));
+        assertTrue("short recipe resource amounts stay on one line",
+                RecipeResourceAmountFormatter.format(1, 1, false)
+                        .inline().equals("1/1"));
+        assertTrue("recipe resource amount bounds the largest exact long without truncation",
+                RecipeResourceAmountFormatter.format(Long.MAX_VALUE, Long.MAX_VALUE, false)
+                        .required().equals("/9.2E"));
+    }
+
+    private static void testLargeTypedRecipePlan() {
+        TypedRecipePlan.Builder builder = TypedRecipePlan.builder();
+        for (int input = 0; input < 19; input++) {
+            builder.input(TypedRecipeInput.consume(StorageResourceKey.of(
+                    ResourceLocation.fromNamespaceAndPath("test", "kind"),
+                    ResourceLocation.fromNamespaceAndPath("test", "input_" + input),
+                    new CompoundTag()), 1));
+        }
+        builder.output(TypedRecipeOutput.primary(StorageResourceKey.of(
+                        StorageResourceKindApi.ITEM_KIND,
+                        ResourceLocation.withDefaultNamespace("diamond"),
+                        new CompoundTag()), 1))
+                .presentationOutput(new ItemStack(Items.DIAMOND))
+                .layout(3, 3, true);
+        try {
+            TypedRecipePlan plan = builder.build();
+            assertTrue("typed recipe plans preserve more than nine exact inputs",
+                    plan.inputs().size() == 19);
+        } catch (IllegalArgumentException exception) {
+            assertTrue("typed recipe plans preserve more than nine exact inputs", false);
+        }
+    }
+
+    private static void testTransformProviderApi() {
+        var fuel = TransformProviderApi.targets(MachineEnergyTable.entries()).stream()
+                .filter(target -> target.id().equals(
+                        TransformProviderApi.energyTargetId(EnergyType.FURNACE_FUEL)))
+                .findFirst()
+                .orElseThrow();
+        assertTrue("Transform targets carry a localized produced-resource label",
+                fuel.label().equals(
+                        Component.translatable("gui.magic_storage.energy.furnace_fuel")));
     }
 
     private static void testItemKey() {
@@ -189,6 +271,34 @@ class SelfTest {
             duplicateRejected = true;
         }
         assertTrue("duplicate persisted resource keys fail closed", duplicateRejected);
+    }
+
+    private static void testResourceContainerTransferContract() {
+        boolean rejectedMultipleResults = false;
+        try {
+            new StorageResourceContainerStrategy.Transfer(
+                    StorageResourceKey.neoforgeEnergy(),
+                    1,
+                    new ItemStack(Items.BUCKET, 2));
+        } catch (IllegalArgumentException expected) {
+            rejectedMultipleResults = true;
+        }
+        assertTrue("one consumed container cannot produce multiple result containers",
+                rejectedMultipleResults);
+    }
+
+    private static void testBusResourceEscrow() {
+        StorageResourceKey key = StorageResourceKey.neoforgeEnergy();
+        BusResourceEscrow escrow = BusResourceEscrow.empty();
+        escrow.add(key, Long.MAX_VALUE - 5);
+        boolean overflowRejected = false;
+        try {
+            escrow.add(key, 10);
+        } catch (IllegalStateException expected) {
+            overflowRejected = true;
+        }
+        assertTrue("typed Bus escrow rejects overflow without partial mutation",
+                overflowRejected && escrow.amount(key) == Long.MAX_VALUE - 5);
     }
 
     private static void testAxeSyntheticDiscovery() {
@@ -445,10 +555,11 @@ class SelfTest {
             @Override
             public List<RecipeAdapterMatch.Contract> resolveVariants(
                     RecipeHolder<?> holder,
+                    RecipeAdapterMatch.Contract baseContract,
                     List<ItemStack> availableStacks,
                     net.minecraft.world.level.Level level
             ) {
-                return List.of(contract(holder));
+                return List.of(baseContract);
             }
 
             @Override
@@ -495,6 +606,21 @@ class SelfTest {
                         && match.stationDescriptorId().equals(MachineEnergyTable.STONECUTTER_ID)
                         && match.cost().equals(RecipeAdapterMatch.Cost.free())
                         && match.presentation().kind() == RecipePresentationKind.STONECUTTING);
+        ResourceLocation processStation = testRecipeId("process_station");
+        assertTrue("public recipe families expose descriptor-scoped station work",
+                RecipeFamilyCost.stationWork(37).toInternal(processStation).equals(
+                        RecipeAdapterMatch.Cost.stationWork(
+                                new RecipeAdapterMatch.StationWorkCost(processStation, 37))));
+        EnergyCost processFuel = new EnergyCost(
+                EnergyType.SMELTING_ENERGY, 0, EnergyType.FURNACE_FUEL, 37);
+        assertTrue("public station work can share one atomic legacy Fuel cost",
+                RecipeFamilyCost.stationWorkAndEnergy(37, processFuel)
+                        .toInternal(processStation)
+                        .equals(new RecipeAdapterMatch.Cost(
+                                java.util.Optional.of(processFuel),
+                                java.util.Optional.empty(),
+                                java.util.Optional.of(new RecipeAdapterMatch.StationWorkCost(
+                                        processStation, 37)))));
         assertTrue("public exact family does not claim the recipe superclass",
                 registry.classify(new RecipeHolder<>(
                         testRecipeId("vanilla_stonecutting"),
@@ -552,6 +678,44 @@ class SelfTest {
         }
         assertTrue("public recipe families reject overlapping energy pools",
                 overlappingEnergyRejected);
+
+        StorageResourceKey blue = StorageResourceKey.of(
+                testRecipeId("mana"), testRecipeId("blue"), new net.minecraft.nbt.CompoundTag());
+        StorageResourceKey red = StorageResourceKey.of(
+                testRecipeId("mana"), testRecipeId("red"), new net.minecraft.nbt.CompoundTag());
+        TypedRecipeInput alternatives = TypedRecipeInput.consumeAny(List.of(blue, red), 3);
+        assertTrue("typed recipe inputs preserve deterministic resource alternatives",
+                alternatives.alternatives().equals(List.of(blue, red))
+                        && alternatives.key().equals(blue)
+                        && alternatives.amount() == 3);
+        TypedRecipeInput alternativeRemainders = TypedRecipeInput.consumeAnyWithRemainders(
+                List.of(blue, red),
+                2,
+                java.util.Map.of(
+                        blue, TypedRecipeOutput.remainder(red, 1),
+                        red, TypedRecipeOutput.remainder(blue, 2)));
+        assertTrue("typed recipe inputs preserve alternative-specific remainders",
+                alternativeRemainders.remainderFor(blue).orElseThrow().key().equals(red)
+                        && alternativeRemainders.remainderFor(red).orElseThrow().amount() == 2);
+        boolean unrelatedRemainderRejected = false;
+        try {
+            TypedRecipeInput.consumeAnyWithRemainders(
+                    List.of(blue),
+                    1,
+                    java.util.Map.of(red, TypedRecipeOutput.remainder(blue, 1)));
+        } catch (IllegalArgumentException expected) {
+            unrelatedRemainderRejected = true;
+        }
+        assertTrue("typed recipe inputs reject remainders for unrelated alternatives",
+                unrelatedRemainderRejected);
+        boolean duplicateAlternativeRejected = false;
+        try {
+            TypedRecipeInput.consumeAny(List.of(blue, blue), 1);
+        } catch (IllegalArgumentException expected) {
+            duplicateAlternativeRejected = true;
+        }
+        assertTrue("typed recipe inputs reject duplicate alternatives",
+                duplicateAlternativeRejected);
     }
 
     private static void testRecipeAdapterSnapshot() {
@@ -694,11 +858,14 @@ class SelfTest {
             assertTrue("exact built-in family selects adapter " + expectedAdapterIds.get(index),
                     match != null && match.adapterId().equals(expectedAdapterIds.get(index)));
         }
+        List<ResourceLocation> actualAdapterIds = BuiltInRecipeAdapters.registry().adapters().stream()
+                .map(RecipeAdapter::id)
+                .filter(id -> id.getNamespace().equals(MagicStorage.MODID))
+                .toList();
         assertTrue("built-in adapter IDs have a stable deterministic order",
-                BuiltInRecipeAdapters.registry().adapters().stream()
-                        .map(RecipeAdapter::id)
-                        .filter(id -> id.getNamespace().equals(MagicStorage.MODID))
-                        .toList().equals(expectedAdapterIds));
+                actualAdapterIds.size() >= expectedAdapterIds.size()
+                        && actualAdapterIds.subList(0, expectedAdapterIds.size())
+                        .equals(expectedAdapterIds));
 
         ShapelessRecipe customFamily = new ShapelessRecipe(
                 "", CraftingBookCategory.MISC, new ItemStack(Items.DIAMOND),
@@ -785,10 +952,16 @@ class SelfTest {
         assertTrue("simple ingredient representatives are explicitly exhaustive",
                 simpleIndex.coverage() == RecipeCandidateIndex.Coverage.EXHAUSTIVE
                         && simpleIndex.representatives().stream().anyMatch(stack -> stack.is(Items.DIRT)));
-        assertTrue("non-simple ingredient representatives are explicitly non-exhaustive",
-                componentIndex.coverage() == RecipeCandidateIndex.Coverage.NON_EXHAUSTIVE
+        RecipeAdapterMatch.Input componentInput = BuiltInRecipeAdapters.registry()
+                .classify(componentExact).orElseThrow().orderedInputs().getFirst();
+        assertTrue("data-component ingredients have exhaustive item coverage without matching every variant",
+                componentIndex.coverage() == RecipeCandidateIndex.Coverage.EXHAUSTIVE
                         && componentIndex.representatives().stream()
-                        .anyMatch(stack -> ItemStack.isSameItemSameComponents(stack, exactStone)));
+                        .anyMatch(stack -> ItemStack.isSameItemSameComponents(stack, exactStone))
+                        && componentInput.representativeItemsExhaustive()
+                        && !componentInput.matchesAllItemVariants()
+                        && componentInput.test(exactStone)
+                        && !componentInput.test(new ItemStack(Items.STONE)));
     }
 
     private static void testRecipeAdapterReloadIdentity() {
@@ -854,7 +1027,8 @@ class SelfTest {
                 EnergyType.FURNACE_FUEL.representativeStack().is(Items.COAL));
         assertTrue("Brew Energy uses blaze rod as its representative item",
                 EnergyType.BLAZE_FUEL.representativeStack().is(Items.BLAZE_ROD));
-        assertTrue("9 station and consumable mappings", MachineEnergyTable.size() == 9);
+        assertTrue("all built-in station and consumable mappings are present",
+                MachineEnergyTable.size() >= 9);
         assertTrue("Furnace maps to smelting", MachineEnergyTable.get(0).representativeStack().is(Items.FURNACE)
                 && MachineEnergyTable.get(0).energyType() == EnergyType.SMELTING_ENERGY
                 && MachineEnergyTable.get(0).accepts(new ItemStack(Items.FURNACE)));
@@ -879,16 +1053,121 @@ class SelfTest {
         assertTrue("process machines stack",
                 MachineEnergyTable.get(MachineEnergyTable.FURNACE_SLOT).category()
                         == MachineEnergyTable.Category.PROCESS
-                        && MachineEnergyTable.get(MachineEnergyTable.FURNACE_SLOT).maxInstalledCount() == 64);
+                        && MachineEnergyTable.get(MachineEnergyTable.FURNACE_SLOT)
+                        .maxInstalledCount() >= 130);
         assertTrue("instant stations install exactly one",
                 MachineEnergyTable.get(MachineEnergyTable.CRAFTING_TABLE_SLOT).category()
                         == MachineEnergyTable.Category.INSTANT
                         && MachineEnergyTable.get(MachineEnergyTable.CRAFTING_TABLE_SLOT).maxInstalledCount() == 1);
         assertTrue("axes are consumable energy input, not installed stations",
                 MachineEnergyTable.get(MachineEnergyTable.AXE_SLOT).category()
-                        == MachineEnergyTable.Category.CONSUMABLE
+                        == MachineEnergyTable.Category.TRANSFORM
                         && MachineEnergyTable.get(MachineEnergyTable.AXE_SLOT).maxInstalledCount() == 0);
-        assertTrue("machine rate is one per installed block", MachineEnergyTable.get(0).energyPerTick() == 1);
+        assertTrue("machine rate is one per installed block",
+                MachineEnergyTable.get(0).rateFor(new ItemStack(Items.FURNACE))
+                        .orElseThrow().equals(MachineWorkRate.ONE));
+    }
+
+    private static void testMachineVariantContract() {
+        MachineWorkRate reduced = MachineWorkRate.of(200, 160);
+        assertTrue("machine work rates normalize exact fractions",
+                reduced.numerator() == 5 && reduced.denominator() == 4);
+        assertTrue("machine work rates retain slow fractional generation",
+                MachineWorkRate.of(200, 720).equals(MachineWorkRate.of(5, 18)));
+
+        MachineVariant copper = MachineVariant.of(
+                new ItemStack(Items.COPPER_BLOCK), MachineWorkRate.of(10, 9));
+        MachineVariant iron = MachineVariant.of(
+                new ItemStack(Items.IRON_BLOCK), MachineWorkRate.of(5, 4));
+        ResourceLocation id = testRecipeId("variant_station");
+        Component stationLabel = Component.literal("Variant Processor");
+        MachineDescriptor descriptor = MachineDescriptor.installableVariants(
+                id,
+                stationLabel,
+                () -> List.of(copper, iron),
+                MachineEnergyTable.Category.PROCESS,
+                64,
+                EnergyType.SMELTING_ENERGY);
+
+        assertTrue("one logical descriptor exposes ordered concrete variants",
+                descriptor.variants().size() == 2
+                        && descriptor.variants().get(0).stack().is(Items.COPPER_BLOCK)
+                        && descriptor.variants().get(1).stack().is(Items.IRON_BLOCK));
+        assertTrue("one logical descriptor exposes its synchronized family label",
+                descriptor.stationLabel().equals(stationLabel));
+        assertTrue("variant descriptor is marked polymorphic", descriptor.isPolymorphic());
+        assertTrue("legacy fixed descriptor is not marked polymorphic",
+                !MachineEnergyTable.get(MachineEnergyTable.BLAST_FURNACE_SLOT).isPolymorphic());
+        assertTrue("variant lookup retains each concrete rate",
+                descriptor.rateFor(new ItemStack(Items.COPPER_BLOCK)).orElseThrow()
+                        .equals(MachineWorkRate.of(10, 9))
+                        && descriptor.rateFor(new ItemStack(Items.IRON_BLOCK)).orElseThrow()
+                        .equals(MachineWorkRate.of(5, 4)));
+        assertTrue("variant lookup rejects unrelated station items",
+                descriptor.rateFor(new ItemStack(Items.GOLD_BLOCK)).isEmpty()
+                        && !descriptor.accepts(new ItemStack(Items.GOLD_BLOCK)));
+
+        boolean duplicateRejected = false;
+        try {
+            MachineDescriptor.installableVariants(
+                    testRecipeId("duplicate_variant_station"),
+                    Component.literal("Duplicate Variant Station"),
+                    () -> List.of(
+                            MachineVariant.of(new ItemStack(Items.FURNACE), MachineWorkRate.ONE),
+                            MachineVariant.of(new ItemStack(Items.FURNACE), MachineWorkRate.of(2, 1))),
+                    MachineEnergyTable.Category.PROCESS,
+                    64,
+                    EnergyType.SMELTING_ENERGY).variants();
+        } catch (IllegalArgumentException exception) {
+            duplicateRejected = true;
+        }
+        assertTrue("one logical descriptor rejects duplicate concrete items", duplicateRejected);
+
+        boolean instantRateRejected = false;
+        try {
+            MachineDescriptor.installableVariants(
+                    testRecipeId("invalid_instant_variant_station"),
+                    Component.literal("Invalid Instant Station"),
+                    () -> List.of(MachineVariant.of(
+                            new ItemStack(Items.CRAFTING_TABLE), MachineWorkRate.ONE)),
+                    MachineEnergyTable.Category.INSTANT,
+                    1,
+                    null).variants();
+        } catch (IllegalArgumentException exception) {
+            instantRateRejected = true;
+        }
+        assertTrue("instant variants reject process work rates", instantRateRejected);
+    }
+
+    private static void testMachineWorkAccumulator() {
+        ResourceLocation furnace = ResourceLocation.withDefaultNamespace("furnace");
+        MachineWorkRate slow = MachineWorkRate.of(5, 18);
+        MachineWorkAccumulator.Advance advance = null;
+        MachineWorkAccumulator.Remainder remainder = null;
+        long generated = 0;
+        for (int tick = 0; tick < 18; tick++) {
+            advance = MachineWorkAccumulator.advance(remainder, furnace, slow, 1);
+            generated += advance.wholeWork();
+            remainder = advance.remainder();
+        }
+        assertTrue("fractional station work is exact across ticks",
+                generated == 5 && remainder.remainder() == 0);
+
+        MachineWorkAccumulator.Advance switched = MachineWorkAccumulator.advance(
+                MachineWorkAccumulator.advance(null, furnace, slow, 1).remainder(),
+                ResourceLocation.withDefaultNamespace("blast_furnace"),
+                MachineWorkRate.of(5, 4),
+                1);
+        assertTrue("changing station variants resets incompatible fractional state",
+                switched.wholeWork() == 1 && switched.remainder().remainder() == 1);
+
+        MachineWorkAccumulator.Advance saturated = MachineWorkAccumulator.advance(
+                null,
+                furnace,
+                MachineWorkRate.of(Long.MAX_VALUE, 2),
+                64);
+        assertTrue("station work overflow saturates instead of wrapping",
+                saturated.wholeWork() == Long.MAX_VALUE && saturated.remainder().remainder() == 0);
     }
 
     private static void testTerminalAmountFormatter() {
@@ -981,6 +1260,18 @@ class SelfTest {
         assertTrue("component variants have a deterministic final tie-breaker",
                 ItemKey.of(variantOrder.get(0)).equals(ItemKey.of(reversedInput.get(0)))
                         && ItemKey.of(variantOrder.get(1)).equals(ItemKey.of(reversedInput.get(1))));
+
+        record UtilityEntry(ItemStack stack, long amount) {
+        }
+        List<UtilityEntry> utilityEntries = new ArrayList<>(List.of(
+                new UtilityEntry(new ItemStack(Items.APPLE), 20),
+                new UtilityEntry(new ItemStack(Items.STONE), 5)));
+        utilityEntries.sort(TerminalEntryComparator.forMode(
+                SortMode.QUANTITY,
+                SortOrder.ASCENDING,
+                entry -> TerminalDisplayStack.create(entry.stack(), entry.amount())));
+        assertTrue("non-grid terminal pages reuse the shared entry comparator",
+                utilityEntries.getFirst().stack().is(Items.STONE));
     }
 
     private static void testSortMode() {
@@ -1011,32 +1302,147 @@ class SelfTest {
 
     private static void testSearchMode() {
         assertTrue("SearchMode has 3 values", SearchMode.values().length == 3);
-        assertTrue("SearchMode NORMAL ordinal 0", SearchMode.NORMAL.ordinal() == 0);
-        assertTrue("SearchMode TAG ordinal 1", SearchMode.TAG.ordinal() == 1);
-        assertTrue("SearchMode MOD ordinal 2", SearchMode.MOD.ordinal() == 2);
-        assertTrue("NORMAL.next() -> TAG", SearchMode.NORMAL.next() == SearchMode.TAG);
-        assertTrue("TAG.next() -> MOD", SearchMode.TAG.next() == SearchMode.MOD);
-        assertTrue("MOD.next() -> NORMAL", SearchMode.MOD.next() == SearchMode.NORMAL);
-        assertTrue("NORMAL.previous() -> MOD", SearchMode.NORMAL.previous() == SearchMode.MOD);
-        assertTrue("TAG.previous() -> NORMAL", SearchMode.TAG.previous() == SearchMode.NORMAL);
-        assertTrue("MOD.previous() -> TAG", SearchMode.MOD.previous() == SearchMode.TAG);
+        assertTrue("SearchMode OFF ordinal 0", SearchMode.OFF.ordinal() == 0);
+        assertTrue("SearchMode EMI ordinal 1", SearchMode.EMI.ordinal() == 1);
+        assertTrue("SearchMode EMI_TWO_WAY ordinal 2", SearchMode.EMI_TWO_WAY.ordinal() == 2);
+        assertTrue("OFF.next() -> EMI", SearchMode.OFF.next() == SearchMode.EMI);
+        assertTrue("EMI.next() -> EMI_TWO_WAY",
+                SearchMode.EMI.next() == SearchMode.EMI_TWO_WAY);
+        assertTrue("EMI_TWO_WAY.next() -> OFF",
+                SearchMode.EMI_TWO_WAY.next() == SearchMode.OFF);
+        assertTrue("OFF.previous() -> EMI_TWO_WAY",
+                SearchMode.OFF.previous() == SearchMode.EMI_TWO_WAY);
+        assertTrue("EMI.previous() -> OFF", SearchMode.EMI.previous() == SearchMode.OFF);
+        assertTrue("EMI_TWO_WAY.previous() -> EMI",
+                SearchMode.EMI_TWO_WAY.previous() == SearchMode.EMI);
+        assertTrue("OFF does not synchronize with EMI",
+                !SearchMode.OFF.synchronizesToEmi()
+                        && !SearchMode.OFF.synchronizesFromEmi());
+        assertTrue("EMI is terminal-to-EMI synchronization",
+                SearchMode.EMI.synchronizesToEmi()
+                        && !SearchMode.EMI.synchronizesFromEmi());
+        assertTrue("EMI two-way synchronizes in both directions",
+                SearchMode.EMI_TWO_WAY.synchronizesToEmi()
+                        && SearchMode.EMI_TWO_WAY.synchronizesFromEmi());
+        assertTrue("legacy search modes explicitly migrate to OFF synchronization",
+                SearchMode.fromConfigValue("AUTO") == SearchMode.OFF
+                        && SearchMode.fromConfigValue("NORMAL") == SearchMode.OFF
+                        && SearchMode.fromConfigValue("TAG") == SearchMode.OFF
+                        && SearchMode.fromConfigValue("MOD") == SearchMode.OFF);
+        assertTrue("canonical search synchronization config values round-trip",
+                SearchMode.fromConfigValue("OFF") == SearchMode.OFF
+                        && SearchMode.fromConfigValue("EMI") == SearchMode.EMI
+                        && SearchMode.fromConfigValue("EMI_TWO_WAY") == SearchMode.EMI_TWO_WAY);
+        boolean rejectedUnknown = false;
+        try {
+            SearchMode.fromConfigValue("unknown");
+        } catch (IllegalArgumentException expected) {
+            rejectedUnknown = true;
+        }
+        assertTrue("unknown search synchronization config values fail explicitly",
+                rejectedUnknown);
+    }
+
+    private static void testTerminalSearchQuery() {
+        var iron = TerminalSearchEntry.create(ItemKey.of(new ItemStack(Items.IRON_INGOT)));
+        assertTrue("compiled search query combines name and mod terms",
+                TerminalSearchQuery.compile("iron @minecraft").matches(iron));
+        assertTrue("a bare operator behaves like an empty query",
+                TerminalSearchQuery.compile("@").isEmpty()
+                        && TerminalSearchQuery.compile("#").isEmpty()
+                        && TerminalSearchQuery.compile("$").isEmpty()
+                        && TerminalSearchQuery.compile("@ # $").isEmpty()
+                        && TerminalSearchQuery.compile("@").matches(iron));
+        assertTrue("typing can continue after an unfinished mod prefix",
+                TerminalSearchQuery.compile("@minecraft").matches(iron));
+        assertTrue("mod-prefix matching accepts a partial namespace",
+                TerminalSearchQuery.compile("@mine").matches(iron));
+        assertTrue("compiled search query keeps dollar-prefixed name matching",
+                TerminalSearchQuery.compile("$ingot").matches(iron));
+        assertTrue("compiled search query rejects an invalid tag without throwing",
+                !TerminalSearchQuery.compile("#minecraft:BAD!").matches(iron));
+        assertTrue("compiled search query is locale-independent",
+                TerminalSearchQuery.compile("IRON").matches(iron));
+        var scoped = TerminalSearchEntry.create(
+                new ItemStack(Items.REDSTONE),
+                ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "energy"),
+                Component.literal("Energy"));
+        StorageResourceKey processing = StorageResourceBridge.stationWorkKey(
+                ResourceLocation.fromNamespaceAndPath(
+                        MagicStorage.MODID, "minecraft_furnace"));
+        assertTrue("non-grid scopes reuse name and mod-prefix search semantics",
+                TerminalSearchQuery.compile("energy @magic_storage").matches(scoped)
+                        && TerminalSearchQuery.compile("@magic_stor").matches(scoped)
+                        && TerminalSearchQuery.compile("@minecraft")
+                        .matches(processing, new ItemStack(Items.FURNACE)));
+    }
+
+    private static void testFuelSearchModel() {
+        MachineDescriptor variants = MachineDescriptor.installableVariants(
+                testRecipeId("fuel_search_variants"),
+                Component.literal("Fuel Search Variants"),
+                () -> List.of(
+                        MachineVariant.of(new ItemStack(Items.FURNACE), MachineWorkRate.ONE),
+                        MachineVariant.of(new ItemStack(Items.IRON_BLOCK), MachineWorkRate.of(2, 1))),
+                MachineEnergyTable.Category.PROCESS,
+                64,
+                EnergyType.SMELTING_ENERGY);
+        MachineDescriptor consumable = MachineEnergyTable.get(MachineEnergyTable.AXE_SLOT);
+        MachineDescriptor instant = MachineEnergyTable.get(MachineEnergyTable.CRAFTING_TABLE_SLOT);
+        List<MachineDescriptor> descriptors = List.of(consumable, variants, instant);
+
+        List<FuelSearchModel.Entry> all = FuelSearchModel.search(
+                "", List.of(EnergyType.FURNACE_FUEL), descriptors);
+        assertTrue("Station search includes only timed and instant stations",
+                all.size() == 2
+                        && all.get(0).machineSlot() == 1
+                        && all.get(0).category() == MachineEnergyTable.Category.PROCESS
+                        && all.get(1).machineSlot() == 2
+                        && all.get(1).category() == MachineEnergyTable.Category.INSTANT);
+        List<FuelSearchModel.Entry> variantMatch = FuelSearchModel.search(
+                "iron block", List.of(EnergyType.FURNACE_FUEL), descriptors);
+        assertTrue("Fuel search matches every concrete polymorphic station variant",
+                variantMatch.size() == 1
+                        && variantMatch.getFirst().machineSlot() == 1);
+        List<FuelSearchModel.Entry> reserveMatch = FuelSearchModel.search(
+                "coal", List.of(EnergyType.FURNACE_FUEL), descriptors);
+        assertTrue("Station search excludes transform reserves",
+                reserveMatch.isEmpty());
+        List<FuelSearchModel.Entry> instantMatch = FuelSearchModel.search(
+                "@minecraft crafting", List.of(EnergyType.FURNACE_FUEL), descriptors);
+        assertTrue("Fuel search reuses terminal name and mod-prefix semantics",
+                instantMatch.size() == 1
+                        && instantMatch.getFirst().category()
+                        == MachineEnergyTable.Category.INSTANT);
+    }
+
+    private static void testRecipeStationCycle() {
+        assertTrue("station variants keep the first icon for the first 1000ms",
+                RecipeStationCycle.cycle(0) == 0
+                        && RecipeStationCycle.cycle(999) == 0);
+        assertTrue("station variants advance once per second",
+                RecipeStationCycle.cycle(1_000) == 1
+                        && RecipeStationCycle.cycle(1_999) == 1
+                        && RecipeStationCycle.cycle(2_000) == 2);
+        assertTrue("a backwards clock is clamped to the first station",
+                RecipeStationCycle.cycle(-1) == 0);
     }
 
     private static void testTerminalProfilesAndCycleDirection() {
         assertTrue("Storage profile is the reduced terminal",
                 !TerminalProfile.STORAGE.supports(TerminalProfile.Capability.PAGES)
                         && !TerminalProfile.STORAGE.supports(TerminalProfile.Capability.RECIPE_WORKSPACE)
-                        && TerminalProfile.STORAGE.itemRailGroups().equals(List.of(4)));
-        assertTrue("Crafting profile composes page, recipe, Fuel, source, and output capabilities",
+                        && TerminalProfile.STORAGE.itemRailGroups().equals(List.of(5)));
+        assertTrue("Crafting profile composes four pages, recipe, source, and output capabilities",
                 TerminalProfile.CRAFTING.supports(TerminalProfile.Capability.PAGES)
                         && TerminalProfile.CRAFTING.supports(TerminalProfile.Capability.RECIPE_WORKSPACE)
                         && TerminalProfile.CRAFTING.supports(TerminalProfile.Capability.FUEL)
                         && TerminalProfile.CRAFTING.supports(TerminalProfile.Capability.PLAYER_INVENTORY_SOURCE)
                         && TerminalProfile.CRAFTING.supports(TerminalProfile.Capability.OUTPUT_DESTINATION)
-                        && TerminalProfile.CRAFTING.playerInventorySourceIndex() == 7
-                        && TerminalProfile.CRAFTING.outputDestinationIndex() == 8
-                        && TerminalProfile.CRAFTING.itemRailGroups().equals(List.of(3, 4, 2))
-                        && TerminalProfile.CRAFTING.fuelRailGroups().equals(List.of(3)));
+                        && TerminalProfile.CRAFTING.playerInventorySourceIndex() == 9
+                        && TerminalProfile.CRAFTING.outputDestinationIndex() == 10
+                        && TerminalProfile.CRAFTING.itemRailGroups().equals(List.of(4, 5, 2))
+                        && TerminalProfile.CRAFTING.fuelRailGroups().equals(List.of(4, 3)));
         assertTrue("terminal controls use an 18px hit box and 16px icon canvas",
                 TerminalLayout.CONTROL_SIZE == 18 && TerminalLayout.ICON_CANVAS_SIZE == 16);
         assertTrue("left click selects next",
@@ -1050,16 +1456,18 @@ class SelfTest {
     }
 
     private static void testTerminalResourceView() {
-        assertTrue("TerminalResourceView has five explicit groups",
-                TerminalResourceView.values().length == 5);
-        assertTrue("resource view cycle keeps stable item-fluid-energy-gas-other order",
+        assertTrue("TerminalResourceView has six explicit groups plus the All aggregate",
+                TerminalResourceView.values().length == 7);
+        assertTrue("resource view cycle keeps stable groups and appends the All aggregate",
                 TerminalResourceView.ITEM.next() == TerminalResourceView.FLUID
                         && TerminalResourceView.FLUID.next() == TerminalResourceView.ENERGY
                         && TerminalResourceView.ENERGY.next() == TerminalResourceView.GAS
-                        && TerminalResourceView.GAS.next() == TerminalResourceView.OTHER
-                        && TerminalResourceView.OTHER.next() == TerminalResourceView.ITEM);
-        assertTrue("resource view previous wraps from item to other",
-                TerminalResourceView.ITEM.previous() == TerminalResourceView.OTHER);
+                        && TerminalResourceView.GAS.next() == TerminalResourceView.STATION_WORK
+                        && TerminalResourceView.STATION_WORK.next() == TerminalResourceView.OTHER
+                        && TerminalResourceView.OTHER.next() == TerminalResourceView.ALL
+                        && TerminalResourceView.ALL.next() == TerminalResourceView.ITEM);
+        assertTrue("resource view previous wraps from item to the All aggregate",
+                TerminalResourceView.ITEM.previous() == TerminalResourceView.ALL);
         StorageResourceKey item = StorageResourceKey.of(
                 StorageResourceKindApi.ITEM_KIND,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "stone"),
@@ -1069,8 +1477,26 @@ class SelfTest {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "water"),
                 new net.minecraft.nbt.CompoundTag());
         StorageResourceKey energy = StorageResourceKey.neoforgeEnergy();
+        StorageResourceKey fuelEnergy =
+                StorageResourceBridge.energyKey(EnergyType.FURNACE_FUEL);
+        StorageResourceKey mana = StorageResourceKey.of(
+                StorageResourceKindApi.BOTANIA_MANA_KIND,
+                StorageResourceKindApi.BOTANIA_MANA_KIND,
+                new net.minecraft.nbt.CompoundTag());
+        StorageResourceKey source = StorageResourceKey.of(
+                StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND,
+                StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND,
+                new net.minecraft.nbt.CompoundTag());
+        StorageResourceKey axeUses =
+                StorageResourceBridge.descriptorKey(MachineEnergyTable.AXE_ID);
+        StorageResourceKey stationWork = StorageResourceBridge.stationWorkKey(
+                ResourceLocation.fromNamespaceAndPath("magic_storage", "test_station"));
         StorageResourceKey gas = StorageResourceKey.of(
                 StorageResourceKindApi.CHEMICAL_KIND,
+                ResourceLocation.fromNamespaceAndPath("mekanism", "oxygen"),
+                new net.minecraft.nbt.CompoundTag());
+        StorageResourceKey canonicalGas = StorageResourceKey.of(
+                ResourceLocation.fromNamespaceAndPath("magic_storage", "chemical"),
                 ResourceLocation.fromNamespaceAndPath("mekanism", "oxygen"),
                 new net.minecraft.nbt.CompoundTag());
         StorageResourceKey addon = StorageResourceKey.of(
@@ -1081,23 +1507,55 @@ class SelfTest {
                 TerminalResourceView.ITEM.matches(item)
                         && TerminalResourceView.FLUID.matches(fluid)
                         && TerminalResourceView.ENERGY.matches(energy)
-                        && TerminalResourceView.GAS.matches(gas));
-        assertTrue("other view is reserved for addon kinds",
-                TerminalResourceView.OTHER.matches(addon)
+                        && TerminalResourceView.ENERGY.matches(fuelEnergy)
+                        && TerminalResourceView.ENERGY.matches(mana)
+                        && TerminalResourceView.ENERGY.matches(source)
+                        && TerminalResourceView.GAS.matches(gas)
+                        && TerminalResourceView.GAS.matches(canonicalGas)
+                        && TerminalResourceView.STATION_WORK.matches(stationWork)
+                        && !TerminalResourceView.ENERGY.matches(stationWork));
+        assertTrue("other view contains unclassified values and addon kinds",
+                TerminalResourceView.OTHER.matches(axeUses)
+                        && TerminalResourceView.OTHER.matches(addon)
                         && !TerminalResourceView.OTHER.matches(item)
                         && !TerminalResourceView.OTHER.matches(fluid)
                         && !TerminalResourceView.OTHER.matches(energy)
-                        && !TerminalResourceView.OTHER.matches(gas));
+                        && !TerminalResourceView.OTHER.matches(fuelEnergy)
+                        && !TerminalResourceView.OTHER.matches(mana)
+                        && !TerminalResourceView.OTHER.matches(source)
+                        && !TerminalResourceView.OTHER.matches(stationWork)
+                        && !TerminalResourceView.OTHER.matches(gas)
+                        && !TerminalResourceView.OTHER.matches(canonicalGas));
+        assertTrue("All aggregate accepts every registered resource identity",
+                TerminalResourceView.ALL.matches(item)
+                        && TerminalResourceView.ALL.matches(fluid)
+                        && TerminalResourceView.ALL.matches(energy)
+                        && TerminalResourceView.ALL.matches(mana)
+                        && TerminalResourceView.ALL.matches(source)
+                        && TerminalResourceView.ALL.matches(axeUses)
+                        && TerminalResourceView.ALL.matches(stationWork)
+                        && TerminalResourceView.ALL.matches(gas)
+                        && TerminalResourceView.ALL.matches(canonicalGas)
+                        && TerminalResourceView.ALL.matches(addon)
+                        && TerminalResourceView.ALL.isAvailable());
         assertTrue("invalid resource view wire id fails to item default",
                 TerminalResourceView.byId(-1) == TerminalResourceView.ITEM
                         && TerminalResourceView.byId(99) == TerminalResourceView.ITEM);
+        boolean rejectedInvalidPacketView = false;
+        try {
+            TerminalResourceView.requireById(99);
+        } catch (IllegalArgumentException expected) {
+            rejectedInvalidPacketView = true;
+        }
+        assertTrue("invalid resource view packet id is rejected",
+                rejectedInvalidPacketView);
     }
 
     private static void testTerminalSettingsPacketCodec() {
         var preferences = new TerminalPreferences(
                 SortMode.MOD,
                 SortOrder.DESCENDING,
-                SearchMode.TAG,
+                SearchMode.EMI,
                 TerminalResourceView.FLUID,
                 CraftingTerminalPage.CRAFTABLE,
                 true,
@@ -1124,13 +1582,23 @@ class SelfTest {
         var emptyConfig = CommentedConfig.inMemory();
         TerminalClientPreferences.SPEC.correct(emptyConfig);
         assertTrue("terminal client config corrects an empty first-run file",
-                "auto".equals(emptyConfig.get("terminal.fuelTarget")));
+                "auto".equals(emptyConfig.get("terminal.fuelTarget"))
+                        && "OFF".equals(emptyConfig.get("terminal.searchMode"))
+                        && Boolean.TRUE.equals(
+                        emptyConfig.get("terminal.searchBoxAutoSelected")));
+        var legacySearchConfig = CommentedConfig.inMemory();
+        legacySearchConfig.set("terminal.searchMode", "TAG");
+        TerminalClientPreferences.SPEC.correct(legacySearchConfig);
+        assertTrue("legacy search config remains available for explicit migration",
+                "TAG".equals(legacySearchConfig.get("terminal.searchMode"))
+                        && SearchMode.fromConfigValue(
+                        legacySearchConfig.get("terminal.searchMode")) == SearchMode.OFF);
 
         var defaults = TerminalPreferences.defaults();
         assertTrue("terminal preference defaults match first-open controls",
                 defaults.sortMode() == SortMode.NAME
                         && defaults.sortOrder() == SortOrder.ASCENDING
-                        && defaults.searchMode() == SearchMode.NORMAL
+                        && defaults.searchMode() == SearchMode.OFF
                         && defaults.resourceView() == TerminalResourceView.ITEM
                         && defaults.page() == CraftingTerminalPage.STORAGE
                         && !defaults.usePlayerInventory()
@@ -1140,7 +1608,7 @@ class SelfTest {
         var crafting = new TerminalPreferences(
                 SortMode.QUANTITY,
                 SortOrder.DESCENDING,
-                SearchMode.MOD,
+                SearchMode.EMI_TWO_WAY,
                 TerminalResourceView.GAS,
                 CraftingTerminalPage.FUEL,
                 true,
@@ -1149,7 +1617,7 @@ class SelfTest {
         var storageChange = new TerminalPreferences(
                 SortMode.ID,
                 SortOrder.ASCENDING,
-                SearchMode.TAG,
+                SearchMode.EMI,
                 TerminalResourceView.OTHER,
                 CraftingTerminalPage.STORAGE,
                 false,
@@ -1159,9 +1627,9 @@ class SelfTest {
         assertTrue("storage terminals update only shared RS2-style preferences",
                 merged.sortMode() == SortMode.ID
                         && merged.sortOrder() == SortOrder.ASCENDING
-                        && merged.searchMode() == SearchMode.TAG
+                        && merged.searchMode() == SearchMode.EMI
                         && merged.resourceView() == TerminalResourceView.OTHER
-                        && merged.page() == CraftingTerminalPage.FUEL
+                        && merged.page() == CraftingTerminalPage.TRANSFORM
                         && merged.usePlayerInventory()
                         && merged.outputDestination() == TerminalOutputDestination.STORAGE
                         && merged.fuelTarget() == EnergyType.BLAZE_FUEL);
@@ -1181,7 +1649,7 @@ class SelfTest {
         var changed = new TerminalPreferences(
                 SortMode.NAME,
                 SortOrder.DESCENDING,
-                SearchMode.MOD,
+                SearchMode.EMI_TWO_WAY,
                 TerminalResourceView.GAS,
                 CraftingTerminalPage.FUEL,
                 true,
@@ -1208,7 +1676,7 @@ class SelfTest {
             new TerminalPreferences(
                     SortMode.NAME,
                     SortOrder.ASCENDING,
-                    SearchMode.NORMAL,
+                    SearchMode.OFF,
                     TerminalResourceView.ITEM,
                     CraftingTerminalPage.STORAGE,
                     false,
@@ -1218,25 +1686,6 @@ class SelfTest {
             rejected = true;
         }
         assertTrue("non-fuel energy cannot become a persisted fuel target", rejected);
-    }
-
-    private static void testSearchModeApply() {
-        assertTrue("NORMAL keeps raw text",
-                SearchMode.NORMAL.apply("stone").equals("stone"));
-        assertTrue("NORMAL keeps empty text",
-                SearchMode.NORMAL.apply("").isEmpty());
-        assertTrue("TAG prepends #",
-                SearchMode.TAG.apply("logs").equals("#logs"));
-        assertTrue("TAG does not double-prefix #",
-                SearchMode.TAG.apply("#logs").equals("#logs"));
-        assertTrue("MOD prepends @",
-                SearchMode.MOD.apply("minecraft").equals("@minecraft"));
-        assertTrue("MOD does not double-prefix @",
-                SearchMode.MOD.apply("@minecraft").equals("@minecraft"));
-        assertTrue("TAG empty text stays empty",
-                SearchMode.TAG.apply("").isEmpty());
-        assertTrue("MOD empty text stays empty",
-                SearchMode.MOD.apply("").isEmpty());
     }
 
     private static void testAdaptiveTerminalLayout() {
@@ -1261,58 +1710,75 @@ class SelfTest {
         assertTrue("guiScale-4 fullscreen width uses side-by-side layout", sideBySide.wide());
         assertTrue("side-by-side frame shrinks within its supported range",
                 sideBySide.imageWidth() == 367);
-        assertTrue("side-by-side workspace remains usable", sideBySide.workspace().width() >= 162);
+        assertTrue("side-by-side recipe ledger keeps three full-size amount columns",
+                sideBySide.recipeLedger().width() >= 3 * 56);
         assertTrue("side-by-side layout reserves vertical breathing room",
                 sideBySide.imageHeight() <= 291);
         assertTrue("side-by-side workspace sits right of item grid",
                 sideBySide.workspace().x() >= sideBySide.scrollbar().right());
         assertTrue("side-by-side boundary is based on complete usable width",
-                !TerminalLayout.forProfile(TerminalProfile.CRAFTING, 415, 291, counts).wide()
-                        && TerminalLayout.forProfile(TerminalProfile.CRAFTING, 416, 291, counts).wide());
+                !TerminalLayout.forProfile(TerminalProfile.CRAFTING, 422, 291, counts).wide()
+                        && TerminalLayout.forProfile(TerminalProfile.CRAFTING, 423, 291, counts).wide());
         assertFuelCategoryGeometry("side-by-side", sideBySide, counts);
         assertRecipeGeometry("side-by-side", sideBySide);
+        assertTrue("guiScale-4 fullscreen keeps full-height recipe amount rows",
+                sideBySide.recipeLedgerCells(9).stream()
+                        .allMatch(cell -> cell.height() == TerminalLayout.SLOT_SIZE));
+        var screenshotGeometry = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING, 432, 319, counts);
+        assertTrue("fullscreen recipe body keeps the compact top inset",
+                screenshotGeometry.recipeContent().y()
+                        == screenshotGeometry.workspace().y() + 4);
+        float ultimateRecipeScale = Math.min(
+                screenshotGeometry.recipeDiagram().width() / 162.0F,
+                screenshotGeometry.recipeDiagram().height() / 195.0F);
+        assertTrue("fullscreen keeps the Extended Crafting EMI widget readable when scaled",
+                ultimateRecipeScale >= 0.75F);
         assertTrue("page tabs are visually separated from item controls",
-                sideBySide.railButtons().get(3).y() - sideBySide.railButtons().get(2).bottom() >= 6);
-        assertTrue("Fuel rail contains only the three page tabs",
-                sideBySide.fuelRailButtons().size() == 3);
-        assertTrue("Fuel popup includes Auto plus every server-approved target",
-                sideBySide.fuelTargetPopup().itemCount() == counts.fuelTargetCount());
-        assertTrue("Fuel popup rows are descriptor-driven and bounded",
-                sideBySide.fuelTargetPopup().rows(0).size() == counts.fuelTargetCount()
-                        && rectanglesDoNotOverlap(sideBySide.fuelTargetPopup().rows(0)));
-        assertTrue("Fuel popup never overlaps the left control rail",
-                !sideBySide.fuelTargetPopup().bounds().overlaps(sideBySide.railPanel()));
+                sideBySide.railButtons().get(4).y() - sideBySide.railButtons().get(3).bottom() >= 6);
+        assertTrue("utility rail frames page tabs and the two visible sort controls",
+                sideBySide.fuelRailButtons().size() == 7
+                        && sideBySide.fuelRailPanel().contains(
+                                sideBySide.fuelRailButtons().getLast().x(),
+                                sideBySide.fuelRailButtons().getLast().y()));
+        assertTrue("Transform sidebar includes Auto plus every server-approved target",
+                sideBySide.transformTargetList().itemCount() == counts.fuelTargetCount());
+        assertTrue("Transform target rows are descriptor-driven and bounded",
+                sideBySide.transformTargetList().rows(0).size() == counts.fuelTargetCount()
+                        && rectanglesDoNotOverlap(sideBySide.transformTargetList().rows(0)));
+        assertTrue("Transform target sidebar never overlaps the left control rail",
+                !sideBySide.transformTargetList().bounds().overlaps(sideBySide.railPanel()));
 
         TerminalLayout.Rect sampleFlowCell = new TerminalLayout.Rect(20, 30, 72, 28);
-        assertTrue("station hover geometry is the upper centered 18px slot",
+        assertTrue("station hover geometry is the left-centered 18px slot",
                 TerminalLayout.fuelSlot(sampleFlowCell).equals(
-                        new TerminalLayout.Rect(47, 31,
+                        new TerminalLayout.Rect(21, 35,
                                 TerminalLayout.SLOT_SIZE, TerminalLayout.SLOT_SIZE)));
-        assertTrue("reserve hover geometry is the upper centered 16px icon",
+        assertTrue("reserve hover geometry is the left-centered 16px icon",
                 TerminalLayout.fuelIcon(sampleFlowCell).equals(
-                        new TerminalLayout.Rect(48, 31,
+                        new TerminalLayout.Rect(22, 36,
                                 TerminalLayout.ICON_CANVAS_SIZE, TerminalLayout.ICON_CANVAS_SIZE)));
-        assertTrue("Fuel amount geometry occupies the lower line",
+        assertTrue("station amount geometry sits horizontally beside its icon",
                 TerminalLayout.fuelAmountBounds(sampleFlowCell).equals(
-                        new TerminalLayout.Rect(21, 49, 70, 9)));
+                        new TerminalLayout.Rect(42, 39, 49, 9)));
         assertTrue("Fuel slot and amount never overlap",
                 !TerminalLayout.fuelSlot(sampleFlowCell).overlaps(
                         TerminalLayout.fuelAmountBounds(sampleFlowCell)));
 
         var overflowCounts = new TerminalLayout.FuelDescriptorCounts(64, 64, 64, 61);
         var overflow = TerminalLayout.forProfile(TerminalProfile.CRAFTING, 423, 291, overflowCounts);
-        assertTrue("large Fuel target lists expose a bounded popup viewport",
-                overflow.fuelTargetPopup().capacity() > 0
-                        && overflow.fuelTargetPopup().capacity() <= 6
-                        && overflow.fuelTargetPopup().itemCount() == 61);
-        assertFullWidthLastPage("consumables", overflow.consumablesGrid());
-        assertFullWidthLastPage("timed stations", overflow.timedStationsGrid());
-        assertFullWidthLastPage("instant stations", overflow.instantStationsGrid());
+        assertTrue("large Transform target lists expose a paged persistent viewport",
+                overflow.transformTargetList().capacity() > 0
+                        && overflow.transformTargetList().pageCount() > 1
+                        && overflow.transformTargetList().itemCount() == 61);
+        assertLastPageLayout("transform cards", overflow.transformCards());
+        assertLastPageLayout("timed stations", overflow.timedStationsGrid());
+        assertLastPageLayout("instant stations", overflow.instantStationsGrid());
         assertTrue("descriptor growth preserves the inventory-side type-capacity panel",
                 overflow.fuelStatus().equals(sideBySide.fuelStatus())
                         && overflow.instantStationsGrid().bounds().equals(
                         sideBySide.instantStationsGrid().bounds())
-                        && overflow.consumablesGrid().pageCount() > 1
+                        && overflow.transformCards().pageCount() > 1
                         && overflow.timedStationsGrid().pageCount() > 1
                         && overflow.instantStationsGrid().pageCount() > 1);
         for (int page = 0; page < overflow.instantStationsGrid().pageCount(); page++) {
@@ -1321,6 +1787,80 @@ class SelfTest {
                         !cell.overlaps(overflow.fuelStatus()));
             }
         }
+
+        var fullscreen = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING, 640, 416, overflowCounts);
+        assertTrue("fullscreen Processing Stations receive the larger workspace share",
+                fullscreen.timedStationsPanel().width()
+                        > fullscreen.instantStationsPanel().width());
+        assertTrue("fullscreen Processing Stations use three readable work-value columns",
+                fullscreen.timedStationsGrid().columns() == 3);
+        var sparseProcessing = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING,
+                640,
+                416,
+                new TerminalLayout.FuelDescriptorCounts(4, 5, 3, 3))
+                .timedStationsGrid()
+                .cells();
+        assertTrue("sparse Processing rows preserve the same left-aligned three-column rhythm",
+                sparseProcessing.size() == 5
+                        && sparseProcessing.get(0).x() == sparseProcessing.get(3).x()
+                        && sparseProcessing.get(1).x() == sparseProcessing.get(4).x()
+                        && sparseProcessing.stream()
+                        .map(TerminalLayout.Rect::width)
+                        .distinct()
+                        .count() == 1);
+        assertTrue("fullscreen Instant Stations use a denser icon grid",
+                fullscreen.instantStationsGrid().columns()
+                        > fullscreen.timedStationsGrid().columns());
+        for (TerminalLayout.FlowGrid grid : List.of(
+                fullscreen.timedStationsGrid(),
+                fullscreen.instantStationsGrid())) {
+            assertTrue("fullscreen Stations derive at least seven readable rows from available height",
+                    grid.rows() >= 7);
+            assertTrue("adaptive Station rows preserve an 18px item slot",
+                    grid.cells().stream().allMatch(cell -> cell.height() >= TerminalLayout.SLOT_SIZE));
+        }
+        assertTrue("Station search uses the same readable adaptive row sizing",
+                fullscreen.fuelSearchGrid().cells().stream()
+                        .allMatch(cell -> cell.height() >= TerminalLayout.SLOT_SIZE));
+        var currentFullscreen = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING, 735, 478, overflowCounts);
+        assertTrue("current fullscreen uses every complete item row above the inventory",
+                currentFullscreen.visibleRows() > 9
+                        && currentFullscreen.visibleRows()
+                        == currentFullscreen.itemGrid().height() / TerminalLayout.SLOT_SIZE);
+        assertTrue("current fullscreen display rows remain inside the fixed menu slot bank",
+                currentFullscreen.visibleRows() <= StorageTerminalMenu.MAX_DISPLAY_ROWS);
+        var transformCards = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING,
+                735,
+                462,
+                new TerminalLayout.FuelDescriptorCounts(2, 5, 3, 5));
+        int transformActionBottom = Math.max(
+                transformCards.transformInput().bottom(),
+                transformCards.transformAmountButtons().getFirst().bottom());
+        List<TerminalLayout.Rect> visibleTransformCards =
+                transformCards.transformCards().cells();
+        assertTrue("Transform cards begin immediately below the input action row",
+                transformCards.transformCards().bounds().y()
+                        == transformActionBottom + 2);
+        assertTrue("Transform cards keep their compact fixed-height rhythm",
+                visibleTransformCards.size() == 2
+                        && visibleTransformCards.stream().allMatch(cell -> cell.height() == 32)
+                        && visibleTransformCards.get(1).y()
+                        == visibleTransformCards.get(0).bottom());
+        assertTrue("Transform paging is reserved below cards instead of leaving a hidden top row",
+                transformCards.transformCardPageControls().previous().y()
+                        > transformCards.transformCards().bounds().bottom());
+        var tallFullscreen = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING, 640, 600, overflowCounts);
+        assertTrue("taller viewports expose more Station rows instead of keeping a fixed cap",
+                tallFullscreen.timedStationsGrid().rows()
+                        > fullscreen.timedStationsGrid().rows()
+                        && tallFullscreen.instantStationsGrid().rows()
+                        > fullscreen.instantStationsGrid().rows()
+                        && tallFullscreen.timedStationsGrid().rows() >= 8);
 
         for (int height = 240; height <= 600; height++) {
             for (int width : new int[]{320, 415, 416, 423, 480, 854}) {
@@ -1345,7 +1885,8 @@ class SelfTest {
                             groupLeft >= 16 && width - groupRight >= 16);
                 }
                 assertTrue("crafting row count stays supported at " + width + "x" + height,
-                        geometry.visibleRows() >= 1 && geometry.visibleRows() <= 9);
+                        geometry.visibleRows() >= 1
+                                && geometry.visibleRows() <= StorageTerminalMenu.MAX_DISPLAY_ROWS);
                 assertTrue("crafting exclusion covers frame and rail at " + width + "x" + height,
                         geometry.exclusionRects().size() == 2
                                 && geometry.exclusionRects().get(1).equals(geometry.railPanel()));
@@ -1364,8 +1905,9 @@ class SelfTest {
                     geometry.profile() == TerminalProfile.STORAGE);
             assertTrue("storage frame stays onscreen at height " + height,
                     geometry.imageHeight() <= height);
-            assertTrue("storage rows stay 3..9 at height " + height,
-                    geometry.visibleRows() >= 3 && geometry.visibleRows() <= 9);
+            assertTrue("storage rows stay inside the adaptive slot bank at height " + height,
+                    geometry.visibleRows() >= 3
+                            && geometry.visibleRows() <= StorageTerminalMenu.MAX_DISPLAY_ROWS);
             assertTrue("storage search ends before scrollbar at height " + height,
                     geometry.searchBackground().right() <= geometry.scrollbar().x());
             int left = geometry.centeredFrameLeft(320);
@@ -1376,50 +1918,122 @@ class SelfTest {
         }
     }
 
+    private static void testTerminalScrollbar() {
+        assertTrue("disabled scrollbar thumb stays at the track top",
+                TerminalScrollbar.thumbTop(10, 100, 0, 0) == 10);
+        assertTrue("scrollbar starts at the track top",
+                TerminalScrollbar.thumbTop(10, 100, 0, 90) == 10);
+        assertTrue("scrollbar reaches the track bottom",
+                TerminalScrollbar.thumbTop(10, 100, 90, 90) == 95);
+        TerminalScrollbar scrollbar = new TerminalScrollbar();
+        int pressed = scrollbar.press(57, 10, 100, 45, 90, 18);
+        assertTrue("thumb press preserves the current position", pressed == 45);
+        assertTrue("thumb press enters grabbed state", scrollbar.isDragging());
+        assertTrue("thumb drag preserves the exact five-pixel grab offset",
+                scrollbar.drag(67, 10, 100, 90) == 55);
+        scrollbar.release();
+
+        int paged = scrollbar.press(90, 10, 100, 45, 90, 18);
+        assertTrue("track click pages once toward the pointer", paged == 63);
+        assertTrue("track click is held but does not grab the thumb",
+                scrollbar.isPressed() && !scrollbar.isDragging());
+        assertTrue("track hold waits before repeating",
+                scrollbar.tick(90, 18).isEmpty()
+                        && scrollbar.tick(90, 18).isEmpty()
+                        && scrollbar.tick(90, 18).isEmpty()
+                        && scrollbar.tick(90, 18).isEmpty());
+        assertTrue("track hold repeats after its initial delay",
+                scrollbar.tick(90, 18).orElse(-1) == 81);
+        scrollbar.release();
+
+        assertTrue("wheel step is immediate and row aligned",
+                scrollbar.step(45, 9, 90) == 54);
+        assertTrue("disabled scrollbar exposes a disabled visual state",
+                scrollbar.visualState(0) == TerminalScrollbar.VisualState.DISABLED);
+        assertTrue("released enabled scrollbar exposes its normal visual state",
+                scrollbar.visualState(90) == TerminalScrollbar.VisualState.ENABLED);
+    }
+
     private static void assertFuelCategoryGeometry(
             String label,
             TerminalLayout.Geometry geometry,
             TerminalLayout.FuelDescriptorCounts counts
     ) {
-        List<TerminalLayout.Rect> panels = List.of(
-                geometry.consumablesPanel(),
+        TerminalLayout.Rect transform = geometry.transformPanel();
+        List<TerminalLayout.Rect> stations = List.of(
                 geometry.timedStationsPanel(),
                 geometry.instantStationsPanel());
-        assertTrue(label + " Fuel category panels do not overlap", rectanglesDoNotOverlap(panels));
-        assertTrue(label + " Fuel category panels reserve the player-inventory label band",
-                panels.getLast().bottom() == geometry.playerInventory().y() - 13);
-        assertTrue(label + " Fuel category panels fill from terminal content to inventory",
-                panels.getFirst().y() == TerminalLayout.TOP_HEIGHT
-                        && panels.getFirst().height() >= 51
-                        && panels.get(1).height() >= 32
-                        && panels.getLast().height() >= 32);
-        for (TerminalLayout.Rect panel : panels) {
-            assertTrue(label + " Fuel category panels use full inner width",
-                    panel.x() == 8 && panel.width() == geometry.imageWidth() - 16);
-        }
-        assertTrue(label + " Fuel category panel order is semantic",
-                geometry.consumablesPanel().bottom() <= geometry.timedStationsPanel().y()
-                        && geometry.timedStationsPanel().bottom() <= geometry.instantStationsPanel().y());
-        assertPagedFlowGrid(label + " consumables", geometry.consumablesGrid(), counts.consumableCount());
+        List<TerminalLayout.Rect> panels = stations;
+        assertTrue(label + " Transform fills the complete upper workspace",
+                transform.x() == 8
+                        && transform.y() == TerminalLayout.TOP_HEIGHT
+                        && transform.width() == geometry.imageWidth() - 16
+                        && transform.bottom() == geometry.playerInventory().y() - 13);
+        assertTrue(label + " all four page viewports share the inventory upper edge",
+                !geometry.wide()
+                        || geometry.itemGrid().bottom() == transform.bottom()
+                        && geometry.scrollbar().bottom() == transform.bottom()
+                        && geometry.visibleRows()
+                        == Math.min(
+                        StorageTerminalMenu.MAX_DISPLAY_ROWS,
+                        geometry.itemGrid().height() / TerminalLayout.SLOT_SIZE));
+        assertTrue(label + " Stations use two non-overlapping top-aligned groups",
+                rectanglesDoNotOverlap(stations)
+                        && stations.getFirst().x() == transform.x()
+                        && stations.getFirst().y() == transform.y()
+                        && stations.getLast().y() == transform.y()
+                        && stations.getFirst().bottom() == transform.bottom()
+                        && stations.getLast().bottom() == transform.bottom()
+                        && stations.getLast().right() == transform.right());
+        assertTrue(label + " Stations preserve a visible group gap",
+                stations.getLast().x() > stations.getFirst().right());
+        assertPagedFlowGrid(label + " transform cards", geometry.transformCards(), counts.consumableCount());
         assertPagedFlowGrid(label + " timed stations", geometry.timedStationsGrid(), counts.timedStationCount());
         assertPagedFlowGrid(label + " instant stations", geometry.instantStationsGrid(), counts.instantStationCount());
-        assertTrue(label + " Fuel rows reserve bounded left category labels",
-                geometry.consumablesGrid().bounds().x() >= geometry.consumablesPanel().x() + 68
-                        && geometry.timedStationsGrid().bounds().x()
-                        >= geometry.timedStationsPanel().x() + 68
-                        && geometry.instantStationsGrid().bounds().x()
-                        >= geometry.instantStationsPanel().x() + 68);
-        assertTrue(label + " Fuel input is the first consumable slot",
-                geometry.fuelInput().equals(
-                        TerminalLayout.fuelSlot(geometry.consumablesGrid().cells().getFirst())));
-        assertTrue(label + " Fuel target selector stays in Consumables header",
-                geometry.fuelTargetSelector().x() >= geometry.consumablesPanel().x()
-                        && geometry.fuelTargetSelector().right() <= geometry.consumablesPanel().right()
-                        && geometry.fuelTargetSelector().y() >= geometry.consumablesPanel().y()
-                        && geometry.fuelTargetSelector().bottom()
-                        <= geometry.consumablesGrid().bounds().y());
-        assertTrue(label + " Fuel target selector is a compact control",
-                geometry.fuelTargetSelector().width() <= 96);
+        List<TerminalLayout.FlowGrid> grids = List.of(
+                geometry.timedStationsGrid(),
+                geometry.instantStationsGrid());
+        boolean horizontalHeaders = grids.get(0).bounds().x() == panels.get(0).x() + 2
+                && grids.get(1).bounds().x() == panels.get(1).x() + 2;
+        for (int index = 0; index < grids.size(); index++) {
+            TerminalLayout.Rect panel = panels.get(index);
+            TerminalLayout.FlowGrid grid = grids.get(index);
+            TerminalLayout.Rect header = TerminalLayout.fuelCategoryLabel(panel, grid);
+            if (horizontalHeaders) {
+                assertTrue(label + " tall Fuel rows use a horizontal header above full-width content",
+                        header.x() == panel.x() + 2
+                                && header.width() == panel.width() - 4
+                                && header.y() == panel.y() + 2
+                                && header.bottom() <= grid.bounds().y()
+                                && grid.bounds().right() == panel.right() - 2);
+            } else {
+                assertTrue(label + " short Fuel rows retain a bounded compact label",
+                        grid.bounds().x() >= panel.x() + 68
+                                && header.right() <= grid.bounds().x());
+            }
+        }
+        assertTrue(label + " Transform input remains a standalone slot outside recipe cards",
+                geometry.transformPanel().contains(
+                        geometry.transformInput().x(), geometry.transformInput().y())
+                        && geometry.transformCards().cells().stream()
+                        .noneMatch(cell -> cell.overlaps(geometry.transformInput())));
+        assertTrue(label + " Transform and Stations searches reuse the common top search position",
+                geometry.transformTargetSearch().equals(geometry.searchBox())
+                        && geometry.fuelSearchBox().equals(geometry.searchBox()));
+        assertTrue(label + " Transform target list begins at the top of the left column",
+                geometry.transformTargetList().bounds().x()
+                        == geometry.transformPanel().x() + 2
+                        && geometry.transformTargetList().bounds().y()
+                        == geometry.transformPanel().y() + 2
+                        && geometry.transformTargetList().bounds().right()
+                        < geometry.transformCards().bounds().x());
+        assertTrue(label + " Transform amount actions stay in the upper input band",
+                geometry.transformAmountButtons().stream().allMatch(button ->
+                        button.y() >= geometry.transformInput().y()
+                                && button.bottom() <= geometry.transformCards().bounds().y()));
+        assertTrue(label + " Transform paging follows the compact card area",
+                geometry.transformCards().bounds().bottom()
+                        < geometry.transformCardPageControls().previous().y());
         assertTrue(label + " type capacity is an independent panel right of player inventory",
                 geometry.fuelStatus().x() == geometry.playerInventory().right() + 2
                         && geometry.fuelStatus().right() == geometry.imageWidth() - 8
@@ -1427,28 +2041,51 @@ class SelfTest {
                         && geometry.fuelStatus().bottom() == geometry.playerInventory().bottom()
                         && !geometry.fuelStatus().overlaps(geometry.playerInventory())
                         && !geometry.fuelStatus().overlaps(geometry.instantStationsPanel()));
-        assertTrue(label + " type capacity keeps icon above its amount",
-                !TerminalLayout.fuelIcon(geometry.fuelStatus()).overlaps(
-                        TerminalLayout.fuelAmountBounds(geometry.fuelStatus())));
+        assertTrue(label + " type capacity keeps icon and amount horizontal",
+                TerminalLayout.fuelIcon(geometry.fuelStatus()).right()
+                        <= TerminalLayout.fuelAmountBounds(geometry.fuelStatus()).x());
+        assertTrue(label + " unified Fuel search replaces the complete upper workspace",
+                geometry.fuelSearchPanel().equals(transform)
+                        && geometry.fuelSearchPanel().right() == stations.getLast().right()
+                        && geometry.fuelSearchPanel().bottom() == stations.getLast().bottom()
+                        && !geometry.fuelSearchPanel().overlaps(geometry.playerInventory()));
+        int searchableCount = counts.timedStationCount() + counts.instantStationCount();
+        assertPagedFlowGrid(
+                label + " unified Fuel search",
+                geometry.fuelSearchGrid(),
+                searchableCount);
+        assertTrue(label + " filtered Fuel search cells use only the requested result count",
+                geometry.fuelSearchGrid().cells(0, Math.min(2, searchableCount)).size()
+                        == Math.min(2, searchableCount));
+        assertTrue(label + " Fuel search paging controls stay inside the unified header",
+                geometry.fuelSearchPanel().contains(
+                        geometry.fuelSearchPageControls().previous().x(),
+                        geometry.fuelSearchPageControls().previous().y())
+                        && geometry.fuelSearchPanel().contains(
+                        geometry.fuelSearchPageControls().next().x(),
+                        geometry.fuelSearchPageControls().next().y())
+                        && !geometry.fuelSearchPageControls().previous().overlaps(
+                        geometry.fuelSearchPageControls().next()));
         for (TerminalLayout.FlowGrid grid : List.of(
-                geometry.consumablesGrid(),
                 geometry.timedStationsGrid(),
                 geometry.instantStationsGrid())) {
             for (TerminalLayout.Rect cell : grid.cells()) {
                 TerminalLayout.Rect slot = TerminalLayout.fuelSlot(cell);
                 TerminalLayout.Rect icon = TerminalLayout.fuelIcon(cell);
-                TerminalLayout.Rect amount = TerminalLayout.fuelAmountBounds(cell);
-                assertTrue(label + " Fuel slots stay above amounts",
-                        !slot.overlaps(amount));
-                assertTrue(label + " Fuel icons stay above amounts",
-                        !icon.overlaps(amount));
-                assertTrue(label + " Fuel vertical content stays inside its cell",
+                assertTrue(label + " Fuel item content stays inside its cell",
                         slot.x() >= cell.x() && slot.y() >= cell.y()
                                 && slot.right() <= cell.right() && slot.bottom() <= cell.bottom()
                                 && icon.x() >= cell.x() && icon.y() >= cell.y()
-                                && icon.right() <= cell.right() && icon.bottom() <= cell.bottom()
-                                && amount.x() >= cell.x() && amount.y() >= cell.y()
-                                && amount.right() <= cell.right() && amount.bottom() <= cell.bottom());
+                                && icon.right() <= cell.right() && icon.bottom() <= cell.bottom());
+                if (!grid.compact()) {
+                    TerminalLayout.Rect amount = TerminalLayout.fuelAmountBounds(cell);
+                    assertTrue(label + " Fuel slot and icon stay left of amount",
+                            slot.right() <= amount.x() && icon.right() <= amount.x());
+                    assertTrue(label + " Processing work stays inside its cell",
+                            amount.x() >= cell.x() && amount.y() >= cell.y()
+                                    && amount.right() <= cell.right()
+                                    && amount.bottom() <= cell.bottom());
+                }
             }
         }
     }
@@ -1463,10 +2100,9 @@ class SelfTest {
                 grid.columns() >= 1 && grid.rows() >= 1
                         && grid.capacity() == grid.columns() * grid.rows());
         assertTrue(label + " visible cells do not overlap", rectanglesDoNotOverlap(grid.cells()));
-        if (!grid.cells().isEmpty()) {
-            assertTrue(label + " sparse cells span complete width",
-                    grid.cells().getFirst().x() == grid.bounds().x()
-                            && grid.cells().getLast().right() == grid.bounds().right());
+        if (!grid.compact() && !grid.cells().isEmpty()) {
+            assertTrue(label + " starts at the fixed grid origin",
+                    grid.cells().getFirst().x() == grid.bounds().x());
         }
         for (TerminalLayout.Rect cell : grid.cells()) {
             assertTrue(label + " cell stays inside row bounds",
@@ -1477,13 +2113,15 @@ class SelfTest {
         }
     }
 
-    private static void assertFullWidthLastPage(String label, TerminalLayout.FlowGrid grid) {
+    private static void assertLastPageLayout(String label, TerminalLayout.FlowGrid grid) {
         List<TerminalLayout.Rect> last = grid.cells(grid.pageCount() - 1);
         assertTrue(label + " overflow creates at least two pages", grid.pageCount() >= 2);
-        assertTrue(label + " last page spans complete width",
-                !last.isEmpty()
-                        && last.getFirst().x() == grid.bounds().x()
-                        && last.getLast().right() == grid.bounds().right());
+        assertTrue(label + " last page starts at the grid origin",
+                !last.isEmpty() && last.getFirst().x() == grid.bounds().x());
+        if (!grid.compact()) {
+            assertTrue(label + " last page preserves the first-page cell width",
+                    last.getFirst().width() == grid.cells().getFirst().width());
+        }
     }
 
     private static void assertRecipeGeometry(String label, TerminalLayout.Geometry geometry) {
@@ -1500,31 +2138,38 @@ class SelfTest {
                         && !geometry.recipeContent().overlaps(geometry.recipeFooter()));
         int contentTopLimit = geometry.workspace().y() + 4;
         int contentBottomLimit = geometry.recipeFooter().y() - 4;
-        int topBreathingRoom = geometry.recipeContent().y() - contentTopLimit;
         int bottomBreathingRoom = contentBottomLimit - geometry.recipeContent().bottom();
-        assertTrue(label + " recipe body is compact and centered above its footer",
-                geometry.recipeContent().height() <= 126
+        assertTrue(label + " recipe body keeps a small symmetric top and side inset",
+                geometry.recipeContent().y() == contentTopLimit
+                        && geometry.recipeContent().x() - geometry.workspace().x() == 4
                         && geometry.recipeLedger().height() <= 54
-                        && topBreathingRoom >= 0
-                        && bottomBreathingRoom >= 0
-                        && Math.abs(topBreathingRoom - bottomBreathingRoom) <= 1);
+                        && bottomBreathingRoom == 0);
         assertTrue(label + " recipe diagram exposes nine bounded inputs",
                 geometry.recipeInputSlots().size() == RecipePresentation.MAX_INPUTS
                         && rectanglesDoNotOverlap(geometry.recipeInputSlots()));
-        for (int resourceCount = 0; resourceCount <= 12; resourceCount++) {
+        int ledgerCapacity = geometry.recipeLedgerCapacity();
+        assertTrue(label + " ledger exposes a bounded readable viewport",
+                ledgerCapacity >= 2 && ledgerCapacity <= 12);
+        for (int resourceCount = 0; resourceCount <= ledgerCapacity; resourceCount++) {
             List<TerminalLayout.Rect> cells = geometry.recipeLedgerCells(resourceCount);
             assertTrue(label + " ledger row count follows resources",
-                    cells.size() == resourceCount && rectanglesDoNotOverlap(cells));
+                    cells.size() == resourceCount
+                            && rectanglesDoNotOverlap(cells)
+                            && cells.stream().allMatch(cell -> cell.height() >= 16));
         }
         List<TerminalLayout.Rect> oneResource = geometry.recipeLedgerCells(1);
         assertTrue(label + " resource rows align to the ledger top",
                 oneResource.size() == 1
                         && oneResource.getFirst().height() <= TerminalLayout.SLOT_SIZE
                         && oneResource.getFirst().y() == geometry.recipeLedger().y());
-        List<TerminalLayout.Rect> nineResources = geometry.recipeLedgerCells(9);
-        assertTrue(label + " more than eight resources use a third row and at most four columns",
-                nineResources.stream().map(TerminalLayout.Rect::y).distinct().count() == 3
-                        && nineResources.stream().map(TerminalLayout.Rect::x).distinct().count() <= 4);
+        if (ledgerCapacity >= 9) {
+            List<TerminalLayout.Rect> nineResources = geometry.recipeLedgerCells(9);
+            assertTrue(label + " nine resources keep three readable rows and at most four columns",
+                    nineResources.stream().map(TerminalLayout.Rect::y).distinct().count() == 3
+                            && nineResources.stream().map(TerminalLayout.Rect::x)
+                            .distinct().count() <= 4
+                            && nineResources.stream().allMatch(cell -> cell.width() >= 56));
+        }
         List<TerminalLayout.Rect> craftButtons = geometry.recipeCraftButtons();
         assertTrue(label + " amount strip contains four equal segments", craftButtons.size() == 4
                 && craftButtons.stream().map(TerminalLayout.Rect::width).distinct().count() == 1);

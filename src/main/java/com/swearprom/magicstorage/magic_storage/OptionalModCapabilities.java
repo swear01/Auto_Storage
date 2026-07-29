@@ -22,8 +22,15 @@ final class OptionalModCapabilities {
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException exception) {
             throw new IllegalStateException("Failed to load Mekanism chemical compatibility", exception);
         } catch (InvocationTargetException exception) {
+            if (exception.getCause() instanceof LinkageError error) {
+                throw new IllegalStateException(
+                        "Mekanism chemical compatibility is binary-incompatible", error);
+            }
             throw new IllegalStateException(
                     "Failed to register Mekanism chemical compatibility", exception.getCause());
+        } catch (LinkageError error) {
+            throw new IllegalStateException(
+                    "Mekanism chemical compatibility is binary-incompatible", error);
         }
     }
 }

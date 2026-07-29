@@ -1,0 +1,14 @@
+{
+  "type": "create:milling",
+  "ingredients": [
+    {
+      "item": "minecraft:lava_bucket"
+    }
+  ],
+  "processing_time": 10,
+  "results": [
+    {
+      "id": "minecraft:obsidian"
+    }
+  ]
+}

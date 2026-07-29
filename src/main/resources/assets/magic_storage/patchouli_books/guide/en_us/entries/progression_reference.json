@@ -22,7 +22,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)Quick route:$() finish $(l:magic_storage:first_network)Your First Network$(), learn $(l:magic_storage:terminal_controls)Terminal Controls$(), install stations through $(l:magic_storage:energy_overview)Fuel Workspace$(), then add $(l:magic_storage:import_bus)automation$() and $(l:magic_storage:remote_terminal)remote access$() as needed."
+      "text": "$(thing)Quick route:$() finish $(l:magic_storage:first_network)Your First Network$(), learn $(l:magic_storage:terminal_controls)Terminal Controls$(), install stations through the $(l:magic_storage:energy_overview)Stations tab$(), then add $(l:magic_storage:import_bus)automation$() and $(l:magic_storage:remote_terminal)remote access$() as needed."
     }
   ]
 }

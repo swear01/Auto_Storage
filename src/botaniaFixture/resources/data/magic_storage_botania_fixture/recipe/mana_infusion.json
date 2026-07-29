@@ -1,0 +1,15 @@
+{
+  "type": "botania:mana_infusion",
+  "catalyst": {
+    "type": "botania:block",
+    "block": "botania:alchemy_catalyst"
+  },
+  "input": {
+    "item": "minecraft:diamond"
+  },
+  "mana": 500,
+  "output": {
+    "count": 2,
+    "id": "minecraft:emerald"
+  }
+}

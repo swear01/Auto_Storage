@@ -1,0 +1,14 @@
+{
+  "type": "create:cutting",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "processing_time": 0,
+  "results": [
+    {
+      "id": "minecraft:iron_nugget"
+    }
+  ]
+}

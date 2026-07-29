@@ -2,6 +2,7 @@ package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -17,6 +18,12 @@ final class StorageResourceBridge {
     static final ResourceLocation ITEM_KIND = StorageResourceKindApi.ITEM_KIND;
     static final ResourceLocation FLUID_KIND = StorageResourceKindApi.FLUID_KIND;
     static final ResourceLocation ENERGY_KIND = StorageResourceKindApi.ENERGY_KIND;
+    static final ResourceLocation WORK_KIND = StorageResourceKindApi.WORK_KIND;
+    private static final ResourceLocation DESCRIPTOR_RESOURCE =
+            ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "descriptor");
+    private static final ResourceLocation STATION_WORK_RESOURCE =
+            ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "station_work");
+    private static final String DESCRIPTOR_ID = "descriptorId";
     static final StorageResourceKey ENERGY_KEY = StorageResourceKey.of(
             ENERGY_KIND,
             ResourceLocation.fromNamespaceAndPath("neoforge", "energy"),
@@ -25,16 +32,70 @@ final class StorageResourceBridge {
     private StorageResourceBridge() {
     }
 
+    static StorageResourceKey energyKey(EnergyType type) {
+        return StorageResourceKey.of(
+                WORK_KIND,
+                ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, type.getId()),
+                new CompoundTag());
+    }
+
+    static Optional<EnergyType> energyType(StorageResourceKey key) {
+        if (!key.kindId().equals(WORK_KIND) || !key.variantData().isEmpty()) {
+            return Optional.empty();
+        }
+        for (EnergyType type : EnergyType.values()) {
+            if (key.equals(energyKey(type))) return Optional.of(type);
+        }
+        return Optional.empty();
+    }
+
+    static StorageResourceKey descriptorKey(ResourceLocation descriptorId) {
+        return workKey(DESCRIPTOR_RESOURCE, descriptorId);
+    }
+
+    static Optional<ResourceLocation> descriptorId(StorageResourceKey key) {
+        return workDescriptorId(key, DESCRIPTOR_RESOURCE);
+    }
+
+    static StorageResourceKey stationWorkKey(ResourceLocation descriptorId) {
+        return workKey(STATION_WORK_RESOURCE, descriptorId);
+    }
+
+    static Optional<ResourceLocation> stationWorkDescriptorId(StorageResourceKey key) {
+        return workDescriptorId(key, STATION_WORK_RESOURCE);
+    }
+
+    private static StorageResourceKey workKey(
+            ResourceLocation resourceId,
+            ResourceLocation descriptorId
+    ) {
+        CompoundTag variant = new CompoundTag();
+        variant.putString(DESCRIPTOR_ID, descriptorId.toString());
+        return StorageResourceKey.of(WORK_KIND, resourceId, variant);
+    }
+
+    private static Optional<ResourceLocation> workDescriptorId(
+            StorageResourceKey key,
+            ResourceLocation resourceId
+    ) {
+        if (!key.kindId().equals(WORK_KIND) || !key.resourceId().equals(resourceId)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(ResourceLocation.tryParse(
+                key.variantData().getString(DESCRIPTOR_ID)));
+    }
+
     static StorageResourceKey itemKey(
             ItemKey key,
             HolderLookup.Provider registries
     ) {
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(key.item());
         if (itemId == null) throw new IllegalArgumentException("Item is not registered");
+        ItemStack stack = key.toStack(1);
         return StorageResourceKey.of(
                 ITEM_KIND,
                 itemId,
-                encodeComponents(key.components(), registries));
+                encodeComponentPatch(stack.getComponentsPatch(), registries));
     }
 
     static Optional<ItemKey> itemKey(
@@ -44,10 +105,10 @@ final class StorageResourceBridge {
         if (!key.kindId().equals(ITEM_KIND)) return Optional.empty();
         var item = BuiltInRegistries.ITEM.getOptional(key.resourceId()).orElse(null);
         if (item == null) return Optional.empty();
-        Optional<DataComponentMap> components = decodeComponents(key, registries);
-        if (components.isEmpty()) return Optional.empty();
+        Optional<DataComponentPatch> componentPatch = decodeComponentPatch(key, registries);
+        if (componentPatch.isEmpty()) return Optional.empty();
         ItemStack stack = new ItemStack(item);
-        stack.applyComponents(components.get());
+        stack.applyComponents(componentPatch.get());
         return Optional.of(ItemKey.of(stack));
     }
 
@@ -85,6 +146,26 @@ final class StorageResourceBridge {
     ) {
         return DataComponentMap.CODEC.parse(
                 RegistryOps.create(NbtOps.INSTANCE, registries), key.variantData()).result();
+    }
+
+    private static Optional<DataComponentPatch> decodeComponentPatch(
+            StorageResourceKey key,
+            HolderLookup.Provider registries
+    ) {
+        return DataComponentPatch.CODEC.parse(
+                RegistryOps.create(NbtOps.INSTANCE, registries), key.variantData()).result();
+    }
+
+    private static CompoundTag encodeComponentPatch(
+            DataComponentPatch components,
+            HolderLookup.Provider registries
+    ) {
+        Tag encoded = DataComponentPatch.CODEC.encodeStart(
+                RegistryOps.create(NbtOps.INSTANCE, registries), components).getOrThrow();
+        if (!(encoded instanceof CompoundTag compound)) {
+            throw new IllegalArgumentException("Resource component patch did not encode as a compound");
+        }
+        return compound;
     }
 
     private static CompoundTag encodeComponents(

@@ -134,7 +134,7 @@ public class CraftingTests {
                 return;
             }
 
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             if (menu.selectRecipe(level, ironSlot, blasting.id(), player)) {
                 helper.fail("Fuel page must reject server-side recipe selection");
                 return;
@@ -791,7 +791,7 @@ public class CraftingTests {
                 helper.fail("Invalid amount or stale recipe ID must fail closed");
                 return;
             }
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             if (menu.handleRecipeRequest(level, stickId, 1, CraftingDestination.INVENTORY, player)) {
                 helper.fail("Fuel page must reject EMI recipe requests");
                 return;
@@ -1534,6 +1534,104 @@ public class CraftingTests {
     }
 
     @GameTest(template = "platform")
+    public static void craftable_grid_does_not_rescan_before_machine_energy_threshold(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            installAllRecipeStations(core);
+            core.insertItem(new ItemStack(Items.OAK_LOG));
+            core.addFuel(new ItemStack(Items.COAL), EnergyType.FURNACE_FUEL);
+
+            var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+            var menu = new CountingRefreshMenu(167, player.getInventory(), core);
+            menu.clickMenuButton(player, CraftingTerminalMenu.CRAFTABLE_PAGE_BUTTON);
+            int refreshesBeforeTick = menu.refreshes;
+
+            core.tick();
+            menu.broadcastChanges();
+            if (menu.refreshes != refreshesBeforeTick) {
+                helper.fail("A sub-threshold machine tick rebuilt the full Craftable grid");
+                return;
+            }
+            menu.observeStationWorkChange(core);
+            if (menu.descriptorStateSends != 1) {
+                helper.fail("Station work changed without synchronizing the descriptor amount");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform")
+    public static void warm_craftable_switch_reuses_the_visible_snapshot(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            installAllRecipeStations(core);
+            core.insertItem(new ItemStack(Items.OAK_LOG));
+            var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+            var menu = new CountingRefreshMenu(168, player.getInventory(), core);
+
+            menu.clickMenuButton(player, CraftingTerminalMenu.CRAFTABLE_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STORAGE_PAGE_BUTTON);
+            int refreshesBeforeWarmSwitch = menu.refreshes;
+            menu.clickMenuButton(player, CraftingTerminalMenu.CRAFTABLE_PAGE_BUTTON);
+
+            if (menu.refreshes != refreshesBeforeWarmSwitch
+                    || findDisplaySlot(menu, Items.OAK_PLANKS) < 0) {
+                helper.fail("An unchanged warm Craftable switch rebuilt the full catalog");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform")
+    public static void craftable_prefetch_tracks_player_inventory_setting(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            installAllRecipeStations(core);
+            var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+            player.getInventory().setItem(0, new ItemStack(Items.OAK_LOG));
+            var menu = new CraftingTerminalMenu(169, player.getInventory(), core);
+
+            menu.broadcastChanges();
+            menu.clickMenuButton(player, 7);
+            menu.clickMenuButton(player, CraftingTerminalMenu.CRAFTABLE_PAGE_BUTTON);
+
+            if (findDisplaySlot(menu, Items.OAK_PLANKS) < 0) {
+                helper.fail("Craftable cache ignored the enabled player inventory source");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform")
     public static void constructor_preserves_component_variants_without_compact_grid(GameTestHelper helper) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
@@ -1670,7 +1768,7 @@ public class CraftingTests {
                 helper.fail("Middle-reset actions must restore Player output and Core-only ingredients");
                 return;
             }
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             if (menu.clickMenuButton(player, CraftingTerminalMenu.OUTPUT_DESTINATION_BUTTON)
                     || menu.clickMenuButton(player, CraftingTerminalMenu.RESET_OUTPUT_DESTINATION_BUTTON)
                     || menu.getOutputDestination() != TerminalOutputDestination.PLAYER) {
@@ -3272,6 +3370,47 @@ public class CraftingTests {
     }
 
     @GameTest(template = "platform")
+    public static void vanilla_cake_recipe_returns_all_three_milk_buckets(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            installAllRecipeStations(core);
+            core.insertItem(new ItemStack(Items.MILK_BUCKET, 3));
+            core.insertItem(new ItemStack(Items.SUGAR, 2));
+            core.insertItem(new ItemStack(Items.EGG));
+            core.insertItem(new ItemStack(Items.WHEAT, 3));
+
+            var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+            var menu = new CraftingTerminalMenu(184, player.getInventory(), core);
+            ResourceLocation cakeRecipe = ResourceLocation.withDefaultNamespace("cake");
+            if (!menu.handleRecipeRequest(
+                    level, cakeRecipe, 1, CraftingDestination.INVENTORY, player)) {
+                helper.fail("Vanilla Cake recipe was not selected and crafted");
+                return;
+            }
+            if (countInInventory(player, Items.CAKE) != 1
+                    || countInInventory(player, Items.BUCKET) != 3
+                    || core.getItemCount(ItemKey.of(new ItemStack(Items.MILK_BUCKET))) != 0
+                    || core.getItemCount(ItemKey.of(new ItemStack(Items.SUGAR))) != 0
+                    || core.getItemCount(ItemKey.of(new ItemStack(Items.EGG))) != 0
+                    || core.getItemCount(ItemKey.of(new ItemStack(Items.WHEAT))) != 0) {
+                helper.fail("Vanilla Cake must consume its exact ingredients and return three buckets: "
+                        + "cake=" + countInInventory(player, Items.CAKE)
+                        + ", buckets=" + countInInventory(player, Items.BUCKET));
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform")
     public static void fuel_conversion_refreshes_open_crafting_preview(GameTestHelper helper) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
@@ -3303,10 +3442,13 @@ public class CraftingTests {
                 if (menu.getSlot(i).getItem().is(Items.COAL)) { coalSlot = i; break; }
             }
             if (coalSlot < 0) { helper.fail("Coal player slot not found"); return; }
-            menu.clickMenuButton(player, CraftingTerminalMenu.FUEL_PAGE_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player,
                     CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL));
             menu.quickMoveStack(player, coalSlot);
+            menu.clickMenuButton(player, CraftingTerminalMenu.transformUseButtonId(0));
+            menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
+            menu.clickMenuButton(player, CraftingTerminalMenu.STORAGE_PAGE_BUTTON);
             if (menu.getCraftableCount() != 1) {
                 helper.fail("Fuel conversion should refresh preview to one craftable stone, got "
                         + menu.getCraftableCount());
@@ -4184,6 +4326,86 @@ public class CraftingTests {
     }
 
     @GameTest(template = "platform")
+    public static void recipe_navigation_prioritizes_craftable_variants_and_preserves_selection(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            installAllRecipeStations(core);
+            core.insertItem(new ItemStack(Items.BARRIER));
+            core.insertItem(new ItemStack(Items.DIRT));
+            ResourceLocation blockedId = ResourceLocation.fromNamespaceAndPath(
+                    MagicStorage.MODID, "craftable_order_a_blocked");
+            ResourceLocation craftableId = ResourceLocation.fromNamespaceAndPath(
+                    MagicStorage.MODID, "craftable_order_z_available");
+            var blocked = new RecipeHolder<>(blockedId, new ShapelessRecipe(
+                    "", CraftingBookCategory.MISC, new ItemStack(Items.BARRIER),
+                    NonNullList.of(Ingredient.EMPTY, Ingredient.of(Items.STONE))));
+            var craftable = new RecipeHolder<>(craftableId, new ShapelessRecipe(
+                    "", CraftingBookCategory.MISC, new ItemStack(Items.BARRIER),
+                    NonNullList.of(Ingredient.EMPTY, Ingredient.of(Items.DIRT))));
+            var manager = level.getRecipeManager();
+            var original = java.util.List.copyOf(manager.getRecipes());
+            var registered = new java.util.ArrayList<>(original);
+            registered.add(blocked);
+            registered.add(craftable);
+            manager.replaceRecipes(registered);
+            try {
+                var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+                var menu = new CraftingTerminalMenu(167, player.getInventory(), core);
+                int barrierSlot = findDisplaySlot(menu, Items.BARRIER);
+                if (barrierSlot < 0) {
+                    helper.fail("Barrier display slot not found");
+                    return;
+                }
+                menu.clicked(barrierSlot, 0, ClickType.PICKUP, player);
+                if (menu.getRecipeCount() != 2
+                        || menu.getCraftableRecipeCount() != 1
+                        || !menu.getCurrentRecipes().getFirst().id().equals(craftableId)) {
+                    helper.fail("Craftable recipe must sort first with a separate craftable-variant count: "
+                            + menu.getCurrentRecipes().stream().map(RecipeHolder::id).toList());
+                    return;
+                }
+                menu.nextRecipe();
+                if (!menu.getRecipePresentation().recipeId().equals(blockedId)) {
+                    helper.fail("Fixture could not select the blocked exact recipe");
+                    return;
+                }
+
+                core.insertItem(new ItemStack(Items.STONE));
+                menu.broadcastChanges();
+                if (menu.getCraftableRecipeCount() != 2
+                        || !menu.getRecipePresentation().recipeId().equals(blockedId)
+                        || !menu.getCurrentRecipes().get(menu.getCurrentRecipeIndex())
+                        .id().equals(blockedId)) {
+                    helper.fail("Material changes must rerank variants without changing exact selection");
+                    return;
+                }
+                core.extractItem(ItemKey.of(new ItemStack(Items.DIRT)), 1);
+                core.extractItem(ItemKey.of(new ItemStack(Items.STONE)), 1);
+                menu.broadcastChanges();
+                if (menu.getCraftableRecipeCount() != 0
+                        || menu.getRecipeCount() != 2
+                        || !menu.getRecipePresentation().recipeId().equals(blockedId)) {
+                    helper.fail("Zero-craftable state must retain both variants and exact selection");
+                    return;
+                }
+                helper.succeed();
+            } finally {
+                manager.replaceRecipes(original);
+            }
+        });
+    }
+
+    @GameTest(template = "platform")
     public static void recipe_navigation_rebinds_exact_identity_before_reload_validation(
             GameTestHelper helper
     ) {
@@ -4335,6 +4557,13 @@ public class CraftingTests {
         }
 
         @Override
+        java.util.List<IngredientSource> storedItemSources() {
+            displaySnapshots++;
+            ItemStack stack = new ItemStack(Items.OAK_PLANKS);
+            return java.util.List.of(new IngredientSource(ItemKey.of(stack), -1, stack, 64L));
+        }
+
+        @Override
         public long getItemCount(ItemKey key) {
             return key.item() == Items.OAK_PLANKS ? 64 : 0;
         }
@@ -4342,6 +4571,37 @@ public class CraftingTests {
         @Override
         public long countMatching(java.util.function.Predicate<ItemStack> predicate) {
             return predicate.test(new ItemStack(Items.OAK_PLANKS)) ? 64 : 0;
+        }
+    }
+
+    private static final class CountingRefreshMenu extends CraftingTerminalMenu {
+        private int refreshes;
+        private int descriptorStateSends;
+
+        private CountingRefreshMenu(
+                int containerId,
+                net.minecraft.world.entity.player.Inventory inventory,
+                StorageCoreBlockEntity core
+        ) {
+            super(containerId, inventory, core);
+            refreshes = 0;
+        }
+
+        @Override
+        public void refreshDisplayItems(StorageCoreBlockEntity core) {
+            refreshes++;
+            super.refreshDisplayItems(core);
+        }
+
+        private void observeStationWorkChange(StorageCoreBlockEntity core) {
+            descriptorStateSends = 0;
+            onObservedStationWorkChanged(
+                    core, java.util.Map.of(MachineEnergyTable.FURNACE_ID, 1L), false);
+        }
+
+        @Override
+        protected void sendDescriptorStates() {
+            descriptorStateSends++;
         }
     }
 

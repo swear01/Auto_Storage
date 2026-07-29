@@ -1,6 +1,6 @@
 {
-  "name": "Fuel and Stations",
-  "description": "Manage consumables, timed machines, instant stations, and Axe Energy.",
+  "name": "Transforms and Stations",
+  "description": "Convert inputs into stored resources and install processing or instant stations.",
   "icon": "minecraft:furnace",
   "sortnum": 3
 }
