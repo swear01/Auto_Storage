@@ -12,9 +12,33 @@ from pathlib import Path
 from typing import Callable, NamedTuple
 
 try:
-    from prepare_prism_gui_world import DisplayMode, DEFAULT_PRISM_MINECRAFT_DIR, DEFAULT_SOURCE_WORLD, DEFAULT_WORLD_NAME, current_macos_main_display_mode, prepare_world
+    from prepare_prism_gui_world import (
+        DisplayMode,
+        DEFAULT_PRISM_MINECRAFT_DIR,
+        DEFAULT_SOURCE_WORLD,
+        DEFAULT_WORLD_NAME,
+        TERMINAL_SCALE_COUNTS,
+        TERMINAL_SCALE_ITEMS_PER_TYPE,
+        VOID_GENERATOR,
+        current_macos_main_display_mode,
+        prepare_world,
+        terminal_scale_summary,
+        validate_scale_types,
+    )
 except ModuleNotFoundError:
-    from scripts.prepare_prism_gui_world import DisplayMode, DEFAULT_PRISM_MINECRAFT_DIR, DEFAULT_SOURCE_WORLD, DEFAULT_WORLD_NAME, current_macos_main_display_mode, prepare_world
+    from scripts.prepare_prism_gui_world import (
+        DisplayMode,
+        DEFAULT_PRISM_MINECRAFT_DIR,
+        DEFAULT_SOURCE_WORLD,
+        DEFAULT_WORLD_NAME,
+        TERMINAL_SCALE_COUNTS,
+        TERMINAL_SCALE_ITEMS_PER_TYPE,
+        VOID_GENERATOR,
+        current_macos_main_display_mode,
+        prepare_world,
+        terminal_scale_summary,
+        validate_scale_types,
+    )
 
 try:
     from deploy_prism_dev import (
@@ -122,38 +146,60 @@ SCENARIOS = {
         "hotbar_keys": ["1", "2"],
         "checks": [
             "Pass the fullscreen gate before pressing hotbar/use/click/scroll.",
-            "The true-void scenario starts already aimed at the Crafting Terminal with a deterministic preloaded Core record. Every station, stored resource, and recipe ingredient needed below is already installed or stored; the only player item is one Coal visual input in hotbar `3`, so visual acceptance requires no setup action.",
+            "Confirm the current-run log contains `macfix 0.1.0 loaded` and `macfix: installed windowWillReturnFieldEditor stub`; MacFix must be active before this F11 close-safety gate is accepted.",
+            "The true-void scenario starts already aimed at the Crafting Terminal with a deterministic preloaded Core record. Every station, stored resource, and recipe ingredient needed below is already installed or stored; the only non-navigation player item is one Coal visual input in hotbar `3`, so visual acceptance requires no setup action.",
             "hotbar `1`, then `u`: open the Storage Terminal and confirm the active Creative Storage Unit makes the capacity line show localized unlimited type capacity rather than a large finite sentinel.",
             "hotbar `2`, then `u`: open the Crafting Terminal; confirm the frame and left rail are centered as one group, retain visible outer margins, and use the side-by-side layout without clipping at this fullscreen size.",
-            "On the Storage tab, confirm only stored stacks appear and the recipe panel, otherwise-empty player inventory, scrollbar, and slot grid are aligned to one geometry; the EMI overlay covers neither the frame nor left rail.",
+            "Switch through Storage, Craftable, Transform, and Stations and confirm all four page content bottoms align with the player inventory upper edge; Storage/Craftable grid and scrollbar must not stop above the utility pages.",
+            "On the Storage tab, confirm only stored stacks appear and the recipe panel, otherwise-empty player inventory, scrollbar, and all complete adaptive grid rows are aligned to one geometry; the current F11 height must expose more than nine rows, no lower row is blank because of a delayed layout packet, and the EMI overlay covers neither the frame nor left rail.",
             "Confirm preloaded Oak Logs show the compact large item counts form `121K`, Cobblestone is also compact, and all amounts automatically shrink/right-align inside their own slot without entering neighboring item cells.",
-            "On both Storage and Craftable, confirm the resource selector exposes registered resource kinds only. Gases appears because Mekanism provides chemicals; Other appears because Botania Mana and Ars Nouveau Source providers are loaded. Items uses the Chest icon while Use Player Inventory uses the distinct Bundle icon, right-click goes backward, and middle-click resets to Items. Transform and Stations hide the resource selector.",
-            "Confirm the first four page tabs are Storage, Craftable, Transform, and Stations, followed by a clear visual gap before the item-page sorting/search controls; every rail icon occupies the same visual size inside identical buttons.",
-            "Type ordinary text, `@minecraft`, and `#minecraft:logs` directly in the search bar; confirm the server-owned grid applies each prefix without a separate Name/Tag/Mod selector.",
-            "Confirm Auto Focus is a separate on/off control: with it enabled, opening either terminal immediately receives keyboard input in the search field and clicking another control does not release that keyboard focus; disable it and confirm ordinary focus behavior returns.",
+            "On both Storage and Craftable, confirm the resource selector exposes registered resource kinds plus All and its tooltip reads exactly `Show: All`. Energy contains FE, Fuel, Brew Energy, Mana, and Source; Mana uses Mana Powder and the name Mana, never Mana Tablet, while Source uses Source Gem and the name Source, never Source Jar. Other contains Axe Uses and independently registered addon values. Gases appears because Mekanism provides chemicals; Oxygen, Hydrogen, and Chlorine use their translated names and the same colored chemical icon EMI renders, never a Chemical Tank or Brewing Stand. Fluids use a teal frame, Energy uses a violet frame, Gas/Other use a blue frame, and Processing work uses a distinct amber frame. All combines the preloaded item and typed resources. Items uses the Chest icon while Use Player Inventory uses the distinct Bundle icon, right-click goes backward, and middle-click resets to Items. Transform and Stations hide the resource selector.",
+            "Confirm the first four page tabs are Storage, Craftable, Transform, and Stations, followed by a clear visual gap before the active sorting/search controls; every visible rail group has an automatically sized panel behind all of its buttons, and every icon occupies the same visual size inside identical buttons.",
+            "Type ordinary text, then clear it and type only `@`, `#`, or `$`: each bare operator must behave exactly like an empty query and show all entries without flashing to an empty grid. Continue to `@minecraft`, enter partial mod query `@creat`, then `#minecraft:logs`. `@creat` must find Create entries, and all four pages use the same parser without a separate Name/Tag/Mod selector.",
+            "Confirm Auto Focus is a separate on/off control: with it enabled, opening either terminal initially receives keyboard input in the search field. Clicking any control, slot, or empty panel space outside the active search field must release search focus without clearing the current query; clicking the field focuses it again.",
             "Cycle Search Sync through Off, EMI, and EMI Two-way. Off must leave EMI search untouched; EMI must copy terminal text to EMI; EMI Two-way must additionally copy EMI edits back into the terminal and refresh the storage results.",
             "Click a left-rail toggle, then click empty panel space: no white focus border may remain on the button.",
-            "Use Transform; confirm item-grid sorting/search/recipe controls hide, the input slot starts empty, and a persistent target list fills the left side of the workspace. Search targets filters localized target names; its previous/next buttons, page indicator, wheel paging, full-row selection, selected row, and middle-click reset stay inside that column.",
+            "Fill Storage/Craftable beyond one page and use the wheel over the grid: each wheel input must move exactly one row immediately, with no queued, elastic, or rebound animation. The scrollbar must show a visible recessed track/frame around its thumb; click/drag still maps directly to the server-validated absolute position.",
+            "Use Player Inventory starts Off and remains a genuine on/off source control. Use Transform; confirm item-grid-only search sync/resource/recipe controls hide while Transform and Stations expose Sort Method and Sort Order from the same shared controls and comparator as Storage. Changing method/order must reorder target cards or station entries without changing their identity. The input slot starts empty, and a persistent target list fills the left side of the workspace. The empty top search field has no visible placeholder; entering text filters localized target names, while its previous/next buttons, page indicator, wheel paging, full-row selection, selected row, and middle-click reset stay inside that column.",
             "Shift-click the preloaded Coal from hotbar `3` into Transform. Confirm Coal remains visibly present in the upper input slot. In Auto, confirm the whole horizontal card is clickable and lists every compatible exact-item use without preselecting or consuming one. Fuel and Energy target rows must filter that same Coal input rather than opening a global recipe catalog; Energy must be labeled as the produced resource, not Redstone Dust.",
             "Confirm ×1, ×8, ×64, and Max form one strip in the upper input area and dim whenever the input, output capacity, or required station work cannot complete that amount. An input with no matching use shows neutral No transformations text.",
+            "Confirm Transform cards begin immediately below the input/action strip, keep a compact fixed 32-pixel row height, and remain top-aligned; card previous/next controls sit below the card area, and a hidden single-page pager leaves no blank row above the first card.",
             "Confirm every cyclic sort/search-sync/source/output selector also resets to its documented default on middle-click; page tabs do not pretend to be on/off controls.",
-            "Click one Transform card and confirm its selected state is distinct, its second line names the direct source or required station/work inline, and the amount buttons become available only after that explicit selection. There is no detached lower selection strip.",
-            "Open Stations. Confirm exactly two top-aligned groups—Processing Stations and Instant Stations—use the same light vanilla container panels, visible previous/next buttons, and panel-local wheel paging. Processing Stations occupies more than half the workspace and uses three columns at this F11 size: each installed stack count overlays its item and accumulated station work is the separate value beside it. Instant Stations uses the narrower remainder as a dense icon grid with no fake work totals. Both groups derive row count from available height. Processing includes Iron Furnace, Blast Furnace, Smoker, Campfire, Brewing Stand, Cooking Pot, Powah Furnator, and supported Mekanism machines; Instant contains Crafting Table, Stonecutter, and Smithing Table.",
-            "Use the bottom-right Search Stations control and enter ordinary text, `@mekanism`, and a matching item tag. While search is active, both station groups become one result grid containing stations only; clearing or closing search restores the two groups without moving or duplicating any installed station.",
-            "Confirm Stations shows no permanent rate formula or per-tile explanatory labels. The lower hovered station detail reports the exact station name, installed count, combined decimal rate per tick, and stored work when the pointer is anywhere on that station row; otherwise it returns to type capacity.",
-            "On Stations, confirm stored types / total type capacity appears in an independent information box immediately to the right of the player inventory, aligned to the inventory's top and bottom, readable without hover, and matching the Storage Core. The active network must show localized unlimited type capacity with the Creative Storage Unit icon; finite networks continue to use the Tier 1 icon.",
-            "Hover the preinstalled Iron Furnace stack and confirm one tooltip reports a fixed two-decimal rate such as 1.25/tick, never a fraction, and never overlaps a second vanilla tooltip. Open the Charcoal recipe and confirm its dim representative station item starts with the installed variant first, advances exactly once per real-time second like EMI/JEI, then returns to Iron Furnace after one complete station-icon cycle.",
+            "Click one Transform card and confirm its selected state is distinct and the amount buttons become available only after that explicit selection. Direct Fuel cards use only the produced resource/amount line; timed cards add the required logical station family/work below it. The Powah Coal-to-Energy card names the logical Furnator family, never a concrete Starter/Nitro tier. There is no detached lower selection strip.",
+            "Open Stations. Confirm the Show control switches between `Show: All` (all registered descriptors, with uninstalled entries visibly dimmed) and `Show: Installed` (installed entries only), including while search is active. Confirm exactly two top-aligned groups—Processing Stations and Instant Stations—use the same light vanilla container panels, visible previous/next buttons, and panel-local wheel paging. Processing Stations occupies more than half the workspace and uses three columns at this F11 size: each installed stack count overlays its item and accumulated station work is the separate value beside it. A final row with only one or two entries stays left/top aligned and does not resize or redistribute incomplete rows. The preloaded Ultimate Crushing Factory is a near-Integer.MAX_VALUE Processing aggregate and must remain readable without overflow. Instant Stations uses the narrower remainder as a dense icon grid with no installed count and no fake work totals. Both groups derive row count from available height. Processing includes Iron Furnace, Blast Furnace, Smoker, Campfire, Brewing Stand, Cooking Pot, Powah Furnator, and supported Mekanism machines; Instant contains Crafting Table, Stonecutter, and Smithing Table.",
+            "Use the empty top search field beside Crafting Terminal—the same position used by Storage, Craftable, and Transform—and enter ordinary text, `@mekanism`, and a matching item tag. It has no visible Search Stations placeholder. While the query is non-empty, both station groups become one result grid containing stations only; clearing it restores the two groups without moving or duplicating any installed station.",
+            "Confirm Stations shows no permanent rate formula, per-tile explanatory labels, or duplicate side-panel hover summary. Hovering a station item shows that exact item's normal tooltip. Hovering a Processing value shows its localized logical family name—such as Crusher, Energizing Rod, or Furnator—and current aggregate increase rate; it does not fall back to the generic Station Work name and does not repeat installed/stored totals.",
+            "On Transform and Stations, confirm stored types / total type capacity appears in an independent information box immediately to the right of the player inventory, aligned to the inventory's top and bottom, readable without hover, and matching the Storage Core. The active network must show localized unlimited type capacity with the Creative Storage Unit icon; finite networks continue to use the Tier 1 icon. This panel never changes on hover.",
+            "Open the Charcoal recipe and confirm its dim representative station item starts with the installed variant first, advances exactly once per real-time second like EMI/JEI, then returns to Iron Furnace after one complete station-icon cycle.",
             "Open EMI's Smelting category and confirm TMRV imports the workstation catalysts that Iron Furnaces owns through JEI. Magic Storage does not register third-party EMI workstations.",
-            "Open the Craftable tab and confirm the already installed Crafting Table exposes an Oak Log recipe, Stonecutter exposes a Cobblestone result, Smithing Table exposes the Netherite Smithing Transform, and preloaded Axe Energy exposes the Oak Log strip transformation.",
+            "Open the Craftable tab and confirm the already installed Crafting Table exposes an Oak Log recipe, Stonecutter exposes a Cobblestone result, Smithing Table exposes the Netherite Smithing Transform, and preloaded Axe Uses exposes the Oak Log strip transformation.",
             "Confirm Charcoal is present in Craftable even though its zero stored count is not rendered, then select it to open the exact smelting Available / Required preview.",
             "Select the preloaded Cooking Pot Mushroom Stew recipe. Confirm EMI renders the third-party recipe, the station badge is Cooking Pot, and the ledger separates brown mushroom, red mushroom, and bowl from Cooking Pot work and Fuel.",
-            "Select each expanded recipe once and confirm the light vanilla-style recipe workspace contains one compact raised panel: the EMI recipe diagram is used for represented standard recipes while the internal axe transformation uses the native diagram, and the material ledger follows immediately below without an oversized empty panel. Required resources align from the ledger's top edge, use at most four columns, and recipes with more than eight total item/energy/tool resources continue into a third row without clipping. Every resource keeps two full-size lines—available such as `121K`, then required such as `/200`—without truncating digits, shrinking the font, or entering the neighboring cell. Both diagrams clearly show input resources, operation arrow, exact output count, Ready/Missing state, explicit vanilla-style navigation buttons, and vanilla-style ×1/×8/×64/Max buttons. A dim station icon stays in the diagram's lower-right corner without covering recipe content.",
+            "Select the preloaded Aluminum Blade Macerator recipe from Modern Industrialization and hover its diagram. The EMI public widget diagram and tooltip must render without crashing; its intentional outer drawable remains clipped to the recipe panel.",
+            "Select each expanded recipe once and confirm the right recipe workspace has no redundant outer border, its `1/1` page counter sits at the terminal header's far right, and the light vanilla-style recipe body uses the available height from its top edge: represented recipes reuse EMI's public widget diagram at native size when it fits and uniformly scale the complete widget when necessary, while the internal axe transformation uses the native diagram. The material ledger stays below it, top-aligns its resources, uses at most four columns, and scrolls instead of clipping. Short amounts stay on one line such as `1/1`; only values that would overflow their cell wrap into full-size available and required lines such as `121K` then `/200`. Neither form may truncate digits, shrink the font, or enter a neighboring cell. Both diagrams clearly show input resources, operation arrow, exact output count, Ready/Missing state, explicit vanilla-style navigation buttons, and vanilla-style ×1/×8/×64/Max buttons. A dim station icon stays in the diagram's lower-right corner without covering recipe content.",
             "Select no item and confirm the complete wrapped prompt is centered in that same compact card without losing its final character; select a stored item with no supported recipe and confirm the panel shows a neutral No supported recipe message instead of an empty panel, white fallback surface, or red error.",
-            "Toggle Craft Output and confirm Player uses a player-head icon while Storage uses the Storage Core icon; Craft Output: Storage has no status light, while the genuine Use Player Inventory on/off control may show one.",
+            "Toggle Craft Output and confirm Player uses a player-head icon while Storage uses the Storage Core icon; Craft Output: Storage has no status light, while the genuine Use Player Inventory on/off control may show one. Selecting a non-item output means Craft Output is locked to Storage without changing the saved item-output preference.",
             "In that table, confirm Oak Log shows its current available count and 1 required, while Smelting Energy and Fuel each show their current reserve and the exact recipe cooking time required for one craft.",
-            "Cycle the resource selector through preloaded Fluids, Energy, Gases, Station Work, and Other. Energy must contain NeoForge power plus generated Fuel/Brew/Axe/descriptor reserves, while Station Work contains only processing-station work; confirm water/lava, Mekanism oxygen/hydrogen, Botania Mana, and Ars Nouveau Source also render with readable long amounts.",
+            "Cycle the resource selector through preloaded Fluids, Energy, Gases, Processing, and Other. Energy must contain NeoForge power, Fuel/Brew reserves, Botania Mana, and Ars Nouveau Source; Processing contains only descriptor-keyed processing work, and Other contains Axe Uses plus unclassified addon values. Confirm water/lava and Mekanism oxygen/hydrogen also render with readable long amounts.",
+            "Use Craftable to inspect one preloaded recipe for each typed-resource path: Honey Bottle consumes a Glass Bottle plus 250 mB Honey; Energized Steel consumes Iron, Gold, 10,000 FE, and Energizing Rod work; Manasteel Ingot consumes Iron plus 3,000 Mana; under Gases, Hydrogen Chloride consumes the recipe's exact Hydrogen and Chlorine amounts. Each chemical row must use the actual EMI chemical icon and exact per-craft number, never a tank icon or its 64,000 capacity. Each preview must show the installed station, available reserve, required amount, and storage output without any setup action.",
+            "Select the preloaded Ultimate Singularity. Confirm the Ultimate Crafting Table unlocks the real Extended Crafting recipe, the terminal reuses EMI's complete 9×9 Ultimate Crafting widget rather than its native 3×3 summary, all 19 exact singularity variants show `1/1`, and ×1 is ready without placing ingredients manually. Use the wheel over the material area to scroll through the complete material ledger without compressed, clipped, or overlapping rows.",
             "Confirm each preinstalled Mekanism representative exposes its deterministic recipe family without manual per-machine registration.",
             "Return between Storage, Craftable, Transform, and Stations once more and confirm search, sort, item grid, adaptive recipe panel, transform cards, machine slots, and crafting controls restore without drifting. A warm Craftable return should be immediate and must not produce a new keep-up warning.",
+            "Close with the current safe sequence F11 → bordered window → Command-Q. Confirm there is no `windowWillReturnFieldEditor:toObject:` unrecognized-selector crash and the run records a graceful shutdown; direct Command-Q from F11 remains outside the approved workflow until a separate acceptance explicitly changes that contract.",
+            CURRENT_RUN_LOG_CHECK,
+        ],
+    },
+    "terminal-scale": {
+        "description": "Verify terminal responsiveness and layout with synthetic exact variants plus every runtime item and station.",
+        "manual_gui_required": True,
+        "hotbar_keys": [],
+        "checks": [
+            "Pass the fullscreen gate before pressing use, clicking, typing, or scrolling.",
+            "Confirm the true-void fixture starts aimed at the Crafting Terminal with an empty player inventory except hotbar 1/2 navigation, every runtime registered item already stored, and all installable station fields already filled; press `u` without performing setup.",
+            "On Storage, cycle Name, ID, Quantity, and Mod sorting in both directions and confirm each result remains responsive and stable.",
+            "Clear search between checks, then test plain partial text, `@magic_storage`, and `#minecraft:logs`; a bare operator must still show all types.",
+            "Scroll from the first and far-end type ranges, drag the scrollbar between distant positions, and confirm rows remain populated without pauses, snapping, or stale entries.",
+            "Switch Storage to Craftable, select a green craftable output, and inspect its recipe preview, materials, station source, and output count; return to Storage and repeat once without a keep-up warning or layout drift.",
             CURRENT_RUN_LOG_CHECK,
         ],
     },
@@ -720,6 +766,7 @@ def verify_deployed_gui_support_jars(project_dir: Path, minecraft_dir: Path) -> 
             f"{DEPLOY_REQUIRED_MESSAGE}"
         )
     labels = {
+        "macfix": "MacFix",
         "iron-furnaces": "Iron Furnaces",
         "farmers-delight": "Farmer's Delight",
         "tmrv": "TMRV",
@@ -756,6 +803,7 @@ def configure_instance_for_manual_handoff(instance_dir: Path) -> bool:
         "OverrideConsole": "true",
         "ShowConsole": "false",
         "ShowConsoleOnError": "false",
+        "LowMemWarning": "false",
         "WrapperCommand": "",
     }
     output = []
@@ -818,6 +866,11 @@ def write_checklist(
             "The user performs the fullscreen gate and the scenario steps below.",
             "",
         ])
+    if scenario_name == "terminal-scale":
+        type_count = manifest["baseline"]["scale_fixture"]["type_count"]
+        lines.append(
+            f"- Confirm Storage reports {type_count:,} exact component-bearing types from one preloaded repository record."
+        )
     for check in scenario["checks"]:
         lines.append(f"- {check}")
     if scenario["hotbar_keys"]:
@@ -863,6 +916,87 @@ def session_to_json(result: SessionResult, instance_cfg_changed: bool, log_path:
     }
 
 
+def validate_scenario_manifest(
+    scenario_name: str,
+    manifest: dict,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> None:
+    validate_scale_types(scenario_name, scale_types, items_per_type)
+    expected_start = {
+        "boot-smoke": "overview",
+        "terminal-left-rail": "storage_terminal",
+        "bus-configuration": "import_bus",
+        "crafting-fuel-page": "crafting_terminal",
+        "terminal-scale": "crafting_terminal",
+        "patchouli-guide": "overview",
+    }[scenario_name]
+    if (
+        manifest.get("schema_version") != 5
+        or manifest.get("scenario") != scenario_name
+        or manifest.get("start_target") != expected_start
+    ):
+        raise RuntimeError(f"{scenario_name} GUI manifest identity is invalid")
+    if scenario_name == "terminal-scale":
+        baseline = manifest.get("baseline", {})
+        fixture = baseline.get("scale_fixture", {})
+        runtime_fixture = baseline.get("runtime_fixture", {})
+        player_kit = manifest.get("player_kit", {})
+        if (
+            manifest.get("bootstrap", {}).get("core_preloaded") is not True
+            or manifest.get("bootstrap", {}).get(
+                "runtime_fixture_ready_log"
+            ) != "MS_GUI_RUNTIME_FIXTURE_READY"
+            or manifest.get("world_generator") != VOID_GENERATOR
+            or player_kit != {
+                "hotbar": {
+                    "1": {
+                        "slot": "hotbar.0",
+                        "item": "magic_storage:storage_terminal",
+                        "count": 1,
+                    },
+                    "2": {
+                        "slot": "hotbar.1",
+                        "item": "magic_storage:crafting_terminal",
+                        "count": 1,
+                    },
+                },
+                "inventory": [],
+            }
+            or baseline.get("stored_items") != {}
+            or baseline.get("stored_stacks") != []
+            or fixture != terminal_scale_summary(scale_types)
+            or runtime_fixture != {
+                "registry": "runtime",
+                "items_per_type": items_per_type,
+                "installable_descriptors": "all",
+                "processing_count": 130,
+                "instant_count": 1,
+                "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+            }
+            or "variants" in fixture
+        ):
+            raise RuntimeError(
+                "terminal-scale preloaded Core contract is invalid"
+            )
+        return
+    if scenario_name != "crafting-fuel-page":
+        return
+    baseline = manifest.get("baseline", {})
+    crusher = baseline.get("installed_stations", {}).get(
+        "magic_storage:mekanism_crusher", {}
+    )
+    coal = manifest.get("player_kit", {}).get("hotbar", {}).get("3", {})
+    if (
+        manifest.get("bootstrap", {}).get("core_preloaded") is not True
+        or crusher.get("item") != "mekanism:ultimate_crushing_factory"
+        or crusher.get("count") != 2_147_483_647
+        or coal.get("item") != "minecraft:coal"
+        or coal.get("count") != 1
+    ):
+        raise RuntimeError("crafting-fuel-page preloaded Core contract is invalid")
+
+
 def run_session(
     scenario_name: str,
     minecraft_dir: Path = DEFAULT_PRISM_MINECRAFT_DIR,
@@ -884,9 +1018,14 @@ def run_session(
     display_mode_verifier=None,
     watchdog_launcher=start_shutdown_watchdog,
     timestamp_func=timestamp,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
 ) -> SessionResult:
     if scenario_name not in SCENARIOS:
         raise RuntimeError(f"unknown GUI scenario: {scenario_name}")
+    if scenario_name == "terminal-scale" and items_per_type is None:
+        items_per_type = TERMINAL_SCALE_ITEMS_PER_TYPE
+    validate_scale_types(scenario_name, scale_types, items_per_type)
     scenario = SCENARIOS[scenario_name]
     if not no_launch:
         verify_prism_version(prism_app)
@@ -898,15 +1037,27 @@ def run_session(
         require_running_normal_prism()
         verify_deployed_magic_storage_jar(DEFAULT_PROJECT_DIR, minecraft_dir)
         verify_deployed_fusion_jar(minecraft_dir)
-        if scenario_name == "crafting-fuel-page":
+        if scenario_name in {"crafting-fuel-page", "terminal-scale"}:
             verify_deployed_gui_support_jars(DEFAULT_PROJECT_DIR, minecraft_dir)
         cleanup_existing_func(instance_dir, minecraft_dir, instance, world)
     instance_cfg_changed = configure_instance_func(instance_dir)
+    prepare_arguments = {
+        "scenario_name": scenario_name,
+    }
+    if scenario_name == "terminal-scale":
+        prepare_arguments["scale_types"] = scale_types
+        prepare_arguments["items_per_type"] = items_per_type
     manifest = prepare_world_func(
         minecraft_dir,
         source_world,
         world,
-        scenario_name=scenario_name,
+        **prepare_arguments,
+    )
+    validate_scenario_manifest(
+        scenario_name,
+        manifest,
+        scale_types,
+        items_per_type,
     )
     log_path = minecraft_dir / "logs" / "latest.log"
     offset = log_cursor(log_path)
@@ -926,10 +1077,13 @@ def run_session(
         else:
             process_baseline = snapshot_processes()
             launcher(launch_command)
+            required_patterns = list(DEFAULT_REQUIRED_PATTERNS)
+            if scenario_name == "terminal-scale":
+                required_patterns.append("MS_GUI_RUNTIME_FIXTURE_READY")
             log_excerpt = wait_for_log_func(
                 log_path=log_path,
                 offset=offset,
-                required_patterns=DEFAULT_REQUIRED_PATTERNS,
+                required_patterns=required_patterns,
                 forbidden_patterns=DEFAULT_FORBIDDEN_PATTERNS,
                 timeout_seconds=timeout_seconds,
                 poll_seconds=poll_seconds,
@@ -997,6 +1151,12 @@ def main(argv: list[str]) -> int:
         return 0
     parser = argparse.ArgumentParser(description="Prepare and launch the fixed Prism GUI test world with current-run log polling.")
     parser.add_argument("--scenario", choices=sorted(SCENARIOS), default="boot-smoke")
+    parser.add_argument(
+        "--scale-types",
+        type=int,
+        choices=TERMINAL_SCALE_COUNTS,
+    )
+    parser.add_argument("--items-per-type", type=int)
     parser.add_argument("--minecraft-dir", type=Path, default=DEFAULT_PRISM_MINECRAFT_DIR)
     parser.add_argument("--instance-dir", type=Path, default=DEFAULT_INSTANCE_DIR)
     parser.add_argument("--run-root", type=Path, default=DEFAULT_RUN_ROOT)
@@ -1011,6 +1171,8 @@ def main(argv: list[str]) -> int:
     try:
         result = run_session(
             scenario_name=args.scenario,
+            scale_types=args.scale_types,
+            items_per_type=args.items_per_type,
             minecraft_dir=args.minecraft_dir,
             instance_dir=args.instance_dir,
             run_root=args.run_root,

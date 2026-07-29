@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import gzip
+import hashlib
 import inspect
 import importlib.util
 import json
@@ -145,6 +146,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 hotbar["3"],
             )
             self.assertEqual(121_000, crafting_manifest["baseline"]["stored_items"]["minecraft:oak_log"])
+            self.assertEqual(19, len(crafting_manifest["baseline"]["stored_stacks"]))
             self.assertEqual(
                 "ironfurnaces:iron_furnace",
                 crafting_manifest["baseline"]["installed_stations"]["magic_storage:furnace"]["item"],
@@ -157,14 +159,19 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 1_561,
                 crafting_manifest["baseline"]["descriptor_consumables"]["magic_storage:axe"]["amount"],
             )
-            self.assertIn(
-                {
-                    "kind": "mekanism:chemical",
-                    "resource": "mekanism:oxygen",
-                    "amount": 5_000_000,
-                },
-                crafting_manifest["baseline"]["typed_resources"],
-            )
+            for chemical, amount in {
+                "oxygen": 5_000_000,
+                "hydrogen": 4_000_000,
+                "chlorine": 3_000_000,
+            }.items():
+                self.assertIn(
+                    {
+                        "kind": "mekanism:chemical",
+                        "resource": f"mekanism:{chemical}",
+                        "amount": amount,
+                    },
+                    crafting_manifest["baseline"]["typed_resources"],
+                )
 
             functions = crafting / "datapacks/magic_storage_gui_test/data/magic_storage_gui_test/function"
             player_ready = (functions / "player_ready.mcfunction").read_text()
@@ -184,6 +191,216 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
         self.assertIs(inspect.Parameter.empty, install_parameter.default)
         self.assertIs(inspect.Parameter.empty, prepare_parameter.default)
         self.assertEqual(inspect.Parameter.KEYWORD_ONLY, prepare_parameter.kind)
+
+    def test_terminal_scale_requires_a_supported_type_count_and_rejects_it_elsewhere(self):
+        mod = self.load_script()
+        with tempfile.TemporaryDirectory() as tmp:
+            world_dir = Path(tmp)
+            with self.assertRaisesRegex(ValueError, "terminal-scale.*--scale-types.*required"):
+                mod.install_datapack(world_dir, "terminal-scale")
+            with self.assertRaisesRegex(ValueError, "--scale-types.*10000.*30000"):
+                mod.install_datapack(
+                    world_dir,
+                    "terminal-scale",
+                    scale_types=9_999,
+                )
+            with self.assertRaisesRegex(ValueError, "--scale-types.*only.*terminal-scale"):
+                mod.install_datapack(
+                    world_dir,
+                    "boot-smoke",
+                    scale_types=10_000,
+                )
+            with self.assertRaisesRegex(ValueError, "--items-per-type.*positive"):
+                mod.install_datapack(
+                    world_dir,
+                    "terminal-scale",
+                    scale_types=10_000,
+                    items_per_type=0,
+                )
+            with self.assertRaisesRegex(ValueError, "--items-per-type.*only.*terminal-scale"):
+                mod.install_datapack(
+                    world_dir,
+                    "boot-smoke",
+                    items_per_type=64,
+                )
+
+    def test_terminal_scale_adds_runtime_registry_items_stations_and_both_terminals(self):
+        mod = self.load_script()
+        with tempfile.TemporaryDirectory() as tmp:
+            world_dir = Path(tmp)
+            manifest = mod.install_datapack(
+                world_dir,
+                "terminal-scale",
+                scale_types=10_000,
+                items_per_type=64,
+            )
+
+            self.assertEqual(mod.VOID_GENERATOR, manifest["world_generator"])
+            self.assertEqual("crafting_terminal", manifest["start_target"])
+            self.assertEqual(
+                {"storage_core", "storage_terminal", "crafting_terminal"},
+                set(manifest["targets"]),
+            )
+            self.assertEqual(
+                {"1", "2"},
+                set(manifest["player_kit"]["hotbar"]),
+            )
+            self.assertEqual([], manifest["player_kit"]["inventory"])
+            self.assertTrue(manifest["bootstrap"]["core_preloaded"])
+            self.assertEqual(
+                {
+                    "registry": "runtime",
+                    "items_per_type": 64,
+                    "installable_descriptors": "all",
+                    "processing_count": 130,
+                    "instant_count": 1,
+                    "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+                },
+                manifest["baseline"]["runtime_fixture"],
+            )
+            self.assertEqual(
+                "MS_GUI_RUNTIME_FIXTURE_READY",
+                manifest["bootstrap"]["runtime_fixture_ready_log"],
+            )
+
+            functions = (
+                world_dir
+                / "datapacks/magic_storage_gui_test/data/magic_storage_gui_test/function"
+            )
+            setup = (functions / "setup.mcfunction").read_text()
+            player_ready = (functions / "player_ready.mcfunction").read_text()
+            self.assertIn("magic_storage:storage_core{storageSchema:1,storageId:[I;", setup)
+            self.assertIn("setblock -1 80 0 magic_storage:storage_terminal", setup)
+            self.assertIn("setblock 1 80 0 magic_storage:crafting_terminal", setup)
+            self.assertIn("setblock 0 80 -1 magic_storage:creative_storage_unit", setup)
+            self.assertIn("magic_storage _gui_test_seed 0 80 0 64", setup)
+            self.assertIn(
+                "magic_storage _gui_test_warm_craftable 0 80 0",
+                player_ready,
+            )
+            self.assertNotIn("magic_storage:storage_unit_t", setup)
+            self.assertNotIn("magic_storage:import_bus", setup)
+            self.assertNotIn("magic_storage:export_bus", setup)
+            reset_player = (functions / "reset_player.mcfunction").read_text()
+            self.assertIn("clear @s", reset_player)
+            self.assertIn(
+                "item replace entity @s hotbar.0 with magic_storage:storage_terminal 1",
+                reset_player,
+            )
+            self.assertIn(
+                "item replace entity @s hotbar.1 with magic_storage:crafting_terminal 1",
+                reset_player,
+            )
+            self.assertTrue(
+                (world_dir / mod.RUNTIME_FIXTURE_MARKER_FILE).is_file()
+            )
+
+    def test_terminal_scale_repository_has_exact_component_variants_and_summary_only_manifest(self):
+        mod = self.load_script()
+        expected_base_items = (
+            "minecraft:oak_log",
+            "minecraft:spruce_log",
+            "minecraft:stone",
+            "minecraft:iron_ingot",
+            "magic_storage:storage_unit_t1",
+            "magic_storage:storage_unit_t2",
+            "magic_storage:storage_terminal",
+            "magic_storage:crafting_terminal",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for scale_types in (10_000, 30_000):
+                world_dir = root / str(scale_types)
+                world_dir.mkdir()
+                manifest = mod.install_datapack(
+                    world_dir,
+                    "terminal-scale",
+                    scale_types=scale_types,
+                )
+
+                repository = mod._read_gzip_nbt(
+                    world_dir / "data/magic_storage_core_storages.dat"
+                )
+                repository_root = mod._require_compound(repository[2], "data")
+                storage_type, storages = mod._require_item(
+                    repository_root,
+                    "storages",
+                    mod.TAG_LIST,
+                )
+                self.assertEqual(mod.TAG_COMPOUND, storage_type)
+                self.assertEqual(1, len(storages))
+                segment_type, segments = mod._require_item(
+                    storages[0],
+                    "inventorySegments",
+                    mod.TAG_LIST,
+                )
+                self.assertEqual(mod.TAG_COMPOUND, segment_type)
+                self.assertEqual((scale_types + 62) // 63, len(segments))
+
+                entries = []
+                for segment in segments:
+                    entries_type, segment_entries = mod._require_item(
+                        segment,
+                        "entries",
+                        mod.TAG_LIST,
+                    )
+                    self.assertEqual(mod.TAG_COMPOUND, entries_type)
+                    self.assertLessEqual(len(segment_entries), 63)
+                    entries.extend(segment_entries)
+                self.assertEqual(scale_types, len(entries))
+
+                digest = hashlib.sha256()
+                amount_sum = 0
+                exact_keys = set()
+                for index, entry in enumerate(entries):
+                    item = mod._require_compound(entry, "item")
+                    item_id = mod._require_item(item, "id", mod.TAG_STRING)
+                    custom_name = mod._require_item(
+                        mod._require_compound(item, "components"),
+                        "minecraft:custom_name",
+                        mod.TAG_STRING,
+                    )
+                    amount = mod._require_item(entry, "count", mod.TAG_LONG)
+                    expected_name = json.dumps(
+                        {
+                            "italic": False,
+                            "text": f"Terminal Scale {index:05d}",
+                        },
+                        separators=(",", ":"),
+                        sort_keys=True,
+                    )
+                    expected_amount = ((index * 104_729) % 1_000_000) + 1
+                    self.assertEqual(
+                        expected_base_items[index % len(expected_base_items)],
+                        item_id,
+                    )
+                    self.assertEqual(expected_name, custom_name)
+                    self.assertEqual(expected_amount, amount)
+                    exact_keys.add((item_id, custom_name))
+                    amount_sum += amount
+                    digest.update(
+                        f"{item_id}\0{custom_name}\0{amount}\n".encode()
+                    )
+                self.assertEqual(scale_types, len(exact_keys))
+
+                scale_fixture = manifest["baseline"]["scale_fixture"]
+                self.assertEqual(scale_types, scale_fixture["type_count"])
+                self.assertEqual(63, scale_fixture["segment_limit"])
+                self.assertEqual(len(segments), scale_fixture["segment_count"])
+                self.assertEqual(1, scale_fixture["repository_records"])
+                self.assertEqual(
+                    "minecraft:custom_name",
+                    scale_fixture["component"],
+                )
+                self.assertEqual(amount_sum, scale_fixture["amount_sum"])
+                self.assertEqual(digest.hexdigest(), scale_fixture["key_sha256"])
+                self.assertEqual({}, manifest["baseline"]["stored_items"])
+                self.assertEqual([], manifest["baseline"]["stored_stacks"])
+                self.assertNotIn("variants", scale_fixture)
+                self.assertLess(
+                    len(json.dumps(manifest, separators=(",", ":"))),
+                    20_000,
+                )
 
     def test_player_kit_rejects_slots_outside_minecraft_item_replace_domains(self):
         mod = self.load_script()
@@ -219,6 +436,14 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertEqual("view_storage_terminal", manifest["hotbar_views"]["1"]["function"])
             self.assertEqual("view_crafting_terminal", manifest["hotbar_views"]["2"]["function"])
             self.assertEqual({"1", "2"}, set(manifest["hotbar_views"]))
+            self.assertEqual(
+                mod.GUI_CORE_STORAGE_ID,
+                manifest["baseline"]["storage_id"],
+            )
+            self.assertEqual(
+                mod.GUI_CORE_NETWORK_ID,
+                manifest["baseline"]["network_id"],
+            )
             self.assertEqual(121_000, manifest["baseline"]["stored_items"]["minecraft:oak_log"])
             self.assertEqual(999_999, manifest["baseline"]["stored_items"]["minecraft:cobblestone"])
             self.assertEqual(
@@ -231,7 +456,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertEqual(
                 {
                     "item": "mekanism:ultimate_crushing_factory",
-                    "count": 130,
+                    "count": 2_147_483_647,
                 },
                 manifest["baseline"]["installed_stations"][
                     "magic_storage:mekanism_crusher"
@@ -365,17 +590,61 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 storage, "inventorySegments", mod.TAG_LIST
             )
             self.assertEqual(mod.TAG_COMPOUND, segment_type)
-            entries_type, entries = mod._require_item(
-                segments[0], "entries", mod.TAG_LIST
-            )
-            self.assertEqual(mod.TAG_COMPOUND, entries_type)
+            entries = []
+            for segment in segments:
+                entries_type, segment_entries = mod._require_item(
+                    segment, "entries", mod.TAG_LIST
+                )
+                self.assertEqual(mod.TAG_COMPOUND, entries_type)
+                self.assertLessEqual(len(segment_entries), 63)
+                entries.extend(segment_entries)
+            plain_entries = [
+                entry for entry in entries
+                if mod._find_compound_item(
+                    mod._require_compound(entry, "item"), "components"
+                )[1] is None
+            ]
             stored_counts = {
                 mod._require_item(
                     mod._require_compound(entry, "item"), "id", mod.TAG_STRING
                 ): mod._require_item(entry, "count", mod.TAG_LONG)
-                for entry in entries
+                for entry in plain_entries
             }
-            self.assertEqual(121_000, stored_counts["minecraft:oak_log"])
+            self.assertEqual(
+                manifest["baseline"]["stored_items"],
+                stored_counts,
+            )
+            singularity_entries = [
+                entry for entry in entries
+                if mod._require_item(
+                    mod._require_compound(entry, "item"), "id", mod.TAG_STRING
+                ) == "extendedcrafting:singularity"
+            ]
+            self.assertEqual(19, len(singularity_entries))
+            self.assertEqual(
+                {
+                    stack["components"]["extendedcrafting:singularity_id"]
+                    for stack in manifest["baseline"]["stored_stacks"]
+                },
+                {
+                    mod._require_item(
+                        mod._require_compound(
+                            mod._require_compound(entry, "item"), "components"
+                        ),
+                        "extendedcrafting:singularity_id",
+                        mod.TAG_STRING,
+                    )
+                    for entry in singularity_entries
+                },
+            )
+            self.assertEqual(
+                manifest["baseline"]["storage_id"],
+                mod._require_item(storage, "storageId", mod.TAG_INT_ARRAY),
+            )
+            self.assertEqual(
+                manifest["baseline"]["network_id"],
+                mod._require_item(storage, "networkId", mod.TAG_INT_ARRAY),
+            )
             machine_type, machines = mod._require_item(
                 storage, "machineDescriptors", mod.TAG_LIST
             )
@@ -392,6 +661,16 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 mod._require_item(machine, "count", mod.TAG_LONG)
                 for machine in machines
             }
+            self.assertEqual(
+                manifest["baseline"]["installed_stations"],
+                {
+                    descriptor_id: {
+                        "item": machine_items[descriptor_id],
+                        "count": machine_counts[descriptor_id],
+                    }
+                    for descriptor_id in machine_items
+                },
+            )
             encoded_item_counts = {
                 mod._require_item(machine, "descriptorId", mod.TAG_STRING):
                 mod._require_item(
@@ -407,8 +686,51 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 "mekanism:ultimate_crushing_factory",
                 machine_items["magic_storage:mekanism_crusher"],
             )
-            self.assertEqual(130, machine_counts["magic_storage:mekanism_crusher"])
+            self.assertEqual(
+                2_147_483_647,
+                machine_counts["magic_storage:mekanism_crusher"],
+            )
             self.assertTrue(all(count == 1 for count in encoded_item_counts.values()))
+            consumable_type, consumables = mod._require_item(
+                storage, "descriptorConsumables", mod.TAG_LIST
+            )
+            self.assertEqual(mod.TAG_COMPOUND, consumable_type)
+            self.assertEqual(
+                manifest["baseline"]["descriptor_consumables"],
+                {
+                    mod._require_item(
+                        entry, "descriptorId", mod.TAG_STRING
+                    ): {
+                        "amount": mod._require_item(entry, "amount", mod.TAG_LONG),
+                        "infinite": bool(
+                            mod._require_item(entry, "infinite", mod.TAG_BYTE)
+                        ),
+                    }
+                    for entry in consumables
+                },
+            )
+            work_type, work_entries = mod._require_item(
+                storage, "machineWork", mod.TAG_LIST
+            )
+            self.assertEqual(mod.TAG_COMPOUND, work_type)
+            self.assertEqual(
+                manifest["baseline"]["station_work"],
+                {
+                    mod._require_item(
+                        entry, "descriptorId", mod.TAG_STRING
+                    ): mod._require_item(entry, "amount", mod.TAG_LONG)
+                    for entry in work_entries
+                },
+            )
+            energy = mod._require_compound(storage, "energy")
+            self.assertEqual(
+                manifest["baseline"]["energy"],
+                {
+                    name: value
+                    for tag_type, name, value in energy
+                    if tag_type == mod.TAG_LONG
+                },
+            )
             ledger = mod._require_compound(storage, "resourceLedger")
             resource_type, resources = mod._require_item(
                 ledger, "entries", mod.TAG_LIST
@@ -421,6 +743,13 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 ): mod._require_item(entry, "amount", mod.TAG_LONG)
                 for entry in resources
             }
+            self.assertEqual(
+                {
+                    (entry["kind"], entry["resource"]): entry["amount"]
+                    for entry in manifest["baseline"]["typed_resources"]
+                },
+                resource_amounts,
+            )
             self.assertEqual(
                 5_000_000,
                 resource_amounts[("mekanism:chemical", "mekanism:oxygen")],
@@ -520,6 +849,44 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 manifest["baseline"]["station_work"][descriptor] > 0
                 for descriptor in expected_stations
             ))
+            self.assertEqual(
+                {"item": "extendedcrafting:ultimate_table", "count": 1},
+                stations["magic_storage:extended_crafting_table"],
+            )
+            self.assertFalse((
+                world_dir
+                / "datapacks/magic_storage_gui_test/data/magic_storage_gui_test/recipe/ultimate_grid.json"
+            ).exists())
+            singularities = manifest["baseline"]["stored_stacks"]
+            self.assertEqual(19, len(singularities))
+            self.assertTrue(all(
+                stack["item"] == "extendedcrafting:singularity"
+                and stack["amount"] == 1
+                and set(stack["components"]) == {"extendedcrafting:singularity_id"}
+                for stack in singularities
+            ))
+            tag_root = (
+                world_dir
+                / "datapacks/magic_storage_gui_test/data/c/tags/item/ingots"
+            )
+            expected_test_tags = {
+                "aluminum", "bronze", "electrum", "invar", "lead",
+                "nickel", "platinum", "silver", "steel", "tin",
+            }
+            self.assertEqual(
+                expected_test_tags,
+                {path.stem for path in tag_root.glob("*.json")},
+            )
+            for name in expected_test_tags:
+                self.assertEqual(
+                    {"replace": False, "values": ["minecraft:iron_ingot"]},
+                    json.loads((tag_root / f"{name}.json").read_text()),
+                )
+            self.assertGreaterEqual(
+                len(manifest["baseline"]["stored_items"]),
+                90,
+                "visual fixture must fill nine rows and leave a scrollable tenth row",
+            )
             self.assertFalse(any("pneumatic" in descriptor for descriptor in stations))
             self.assertFalse(any("evilcraft" in descriptor for descriptor in stations))
 
@@ -535,6 +902,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 "create:andesite_alloy",
                 "minecraft:glass_bottle",
                 "minecraft:honey_bottle",
+                "minecraft:gold_ingot",
             }
             self.assertTrue(required_items.issubset(manifest["baseline"]["stored_items"]))
             self.assertFalse(any(
@@ -553,6 +921,10 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 ("magic_storage:fluid", "create:honey"),
                 ("magic_storage:neoforge_energy", "neoforge:energy"),
                 ("ars_nouveau:source", "ars_nouveau:source"),
+                ("mekanism:chemical", "mekanism:oxygen"),
+                ("mekanism:chemical", "mekanism:hydrogen"),
+                ("mekanism:chemical", "mekanism:chlorine"),
+                ("botania:mana", "botania:mana"),
             }:
                 self.assertIn(key, resources)
                 self.assertGreater(resources[key], 0)

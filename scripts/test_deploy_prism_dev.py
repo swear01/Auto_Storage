@@ -15,6 +15,7 @@ class DeployPrismDevTests(unittest.TestCase):
     BOTANIA_BYTES = b"botania gui test artifact"
     CURIOS_BYTES = b"curios gui test artifact"
     BATCHED_SUPPORT = {
+        "macfix-gui-test.jar": b"macfix gui test artifact",
         "modern-industrialization-gui-test.jar": b"modern industrialization gui test artifact",
         "guideme-gui-test.jar": b"guideme gui test artifact",
         "ars-nouveau-gui-test.jar": b"ars nouveau gui test artifact",
@@ -24,6 +25,8 @@ class DeployPrismDevTests(unittest.TestCase):
         "industrial-foregoing-gui-test.jar": b"industrial foregoing gui test artifact",
         "titanium-gui-test.jar": b"titanium gui test artifact",
         "create-gui-test.jar": b"create gui test artifact",
+        "extended-crafting-gui-test.jar": b"extended crafting gui test artifact",
+        "cucumber-gui-test.jar": b"cucumber gui test artifact",
     }
 
     def test_gradle_build_uses_single_use_daemon(self):
@@ -452,6 +455,7 @@ class DeployPrismDevTests(unittest.TestCase):
 
     def test_fusion_artifact_pin_matches_the_approved_official_release(self):
         self.assertEqual("1.2.12", deploy_prism_dev.FUSION_VERSION)
+        self.assertEqual("h2GrA0Ku", deploy_prism_dev.FUSION_RUNTIME_VERSION)
         self.assertEqual(
             "fusion-1.2.12-neoforge-mc1.21.1.jar",
             deploy_prism_dev.FUSION_FILENAME,
@@ -463,6 +467,13 @@ class DeployPrismDevTests(unittest.TestCase):
         self.assertEqual(
             "50604fa4125e846b659479a8bb8bcef5db47460a8185902b8655d8b12c6cc67eb3cc4c08fee45e82a6b215976bea2a480e32ce420f062cea88abe17cb362365c",
             deploy_prism_dev.FUSION_SHA512,
+        )
+
+    def test_macfix_is_part_of_the_transactional_gui_support_pack(self):
+        self.assertEqual("macfix-gui-test.jar", deploy_prism_dev.MACFIX_FILENAME)
+        self.assertIn(
+            (deploy_prism_dev.MACFIX_FILENAME, deploy_prism_dev.macfix_jars),
+            deploy_prism_dev.SUPPORT_ARTIFACTS,
         )
 
     def test_hash_mismatch_leaves_version_and_both_active_mods_untouched(self):

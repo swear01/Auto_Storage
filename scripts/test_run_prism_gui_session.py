@@ -13,6 +13,45 @@ SCRIPT_PATH = ROOT / "scripts" / "run_prism_gui_session.py"
 
 
 class RunPrismGuiSessionTests(unittest.TestCase):
+    @staticmethod
+    def terminal_scale_fixture_summary(scale_types: int) -> dict:
+        base_items = (
+            "minecraft:oak_log",
+            "minecraft:spruce_log",
+            "minecraft:stone",
+            "minecraft:iron_ingot",
+            "magic_storage:storage_unit_t1",
+            "magic_storage:storage_unit_t2",
+            "magic_storage:storage_terminal",
+            "magic_storage:crafting_terminal",
+        )
+        digest = hashlib.sha256()
+        amount_sum = 0
+        for index in range(scale_types):
+            item_id = base_items[index % len(base_items)]
+            custom_name = json.dumps(
+                {
+                    "italic": False,
+                    "text": f"Terminal Scale {index:05d}",
+                },
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+            amount = ((index * 104_729) % 1_000_000) + 1
+            digest.update(f"{item_id}\0{custom_name}\0{amount}\n".encode())
+            amount_sum += amount
+        return {
+            "generator_schema": 1,
+            "type_count": scale_types,
+            "segment_limit": 63,
+            "segment_count": (scale_types + 62) // 63,
+            "repository_records": 1,
+            "base_item_ids": list(base_items),
+            "component": "minecraft:custom_name",
+            "key_sha256": digest.hexdigest(),
+            "amount_sum": amount_sum,
+        }
+
     def load_script(
         self,
         stub_prism_version: bool = True,
@@ -38,6 +77,8 @@ class RunPrismGuiSessionTests(unittest.TestCase):
         source_world: str,
         target_world: str,
         scenario_name: str | None = None,
+        scale_types: int | None = None,
+        items_per_type: int | None = None,
     ):
         world_dir = minecraft_dir / "saves" / target_world
         world_dir.mkdir(parents=True, exist_ok=True)
@@ -56,6 +97,10 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
                 "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
             },
+            "terminal-scale": {
+                "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
+                "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
+            },
         }.get(scenario_name, {})
         return {
             "schema_version": 5,
@@ -66,9 +111,81 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "terminal-left-rail": "storage_terminal",
                 "bus-configuration": "import_bus",
                 "crafting-fuel-page": "crafting_terminal",
+                "terminal-scale": "crafting_terminal",
                 "patchouli-guide": "overview",
             }.get(scenario_name, "overview"),
-            "player_kit": {"hotbar": {}, "inventory": []},
+            "player_kit": {
+                "hotbar": (
+                    {
+                        "3": {
+                            "slot": "hotbar.2",
+                            "item": "minecraft:coal",
+                            "count": 1,
+                        }
+                    }
+                    if scenario_name == "crafting-fuel-page"
+                    else {
+                        "1": {
+                            "slot": "hotbar.0",
+                            "item": "magic_storage:storage_terminal",
+                            "count": 1,
+                        },
+                        "2": {
+                            "slot": "hotbar.1",
+                            "item": "magic_storage:crafting_terminal",
+                            "count": 1,
+                        },
+                    }
+                    if scenario_name == "terminal-scale"
+                    else {}
+                ),
+                "inventory": [],
+            },
+            "baseline": {
+                "installed_stations": (
+                    {
+                        "magic_storage:mekanism_crusher": {
+                            "item": "mekanism:ultimate_crushing_factory",
+                            "count": 2_147_483_647,
+                        }
+                    }
+                    if scenario_name == "crafting-fuel-page"
+                    else {}
+                ),
+                "stored_items": {},
+                "stored_stacks": [],
+                **(
+                    {
+                        "scale_fixture": self.terminal_scale_fixture_summary(
+                            scale_types
+                        ),
+                        "runtime_fixture": {
+                            "registry": "runtime",
+                            "items_per_type": items_per_type,
+                            "installable_descriptors": "all",
+                            "processing_count": 130,
+                            "instant_count": 1,
+                            "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+                        },
+                    }
+                    if scenario_name == "terminal-scale"
+                    else {}
+                ),
+            },
+            "bootstrap": {
+                "core_preloaded": scenario_name in {
+                    "crafting-fuel-page",
+                    "terminal-scale",
+                },
+                **(
+                    {
+                        "runtime_fixture_ready_log":
+                            "MS_GUI_RUNTIME_FIXTURE_READY",
+                    }
+                    if scenario_name == "terminal-scale"
+                    else {}
+                ),
+            },
             "hotbar_views": hotbar_views,
             "world_generator": {
                 "type": "minecraft:flat",
@@ -120,6 +237,225 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             )
 
             self.assertEqual(["bus-configuration"], received)
+
+    def test_terminal_scale_requires_supported_count_and_forwards_it_to_world_preparation(self):
+        mod = self.load_script()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            minecraft_dir = root / "minecraft"
+            (minecraft_dir / "logs").mkdir(parents=True)
+
+            common = {
+                "minecraft_dir": minecraft_dir,
+                "instance_dir": root / "instances" / "dev",
+                "run_root": root / "gui-runs",
+                "configure_instance_func": lambda instance_dir: True,
+                "no_launch": True,
+            }
+            with self.assertRaisesRegex(
+                ValueError,
+                "terminal-scale.*--scale-types.*required",
+            ):
+                mod.run_session(scenario_name="terminal-scale", **common)
+            with self.assertRaisesRegex(
+                ValueError,
+                "--scale-types.*10000.*30000",
+            ):
+                mod.run_session(
+                    scenario_name="terminal-scale",
+                    scale_types=9_999,
+                    **common,
+                )
+            with self.assertRaisesRegex(
+                ValueError,
+                "--scale-types.*only.*terminal-scale",
+            ):
+                mod.run_session(
+                    scenario_name="boot-smoke",
+                    scale_types=10_000,
+                    **common,
+                )
+
+            received = []
+
+            def prepare(
+                minecraft,
+                source,
+                target,
+                *,
+                scenario_name,
+                scale_types,
+                items_per_type,
+            ):
+                received.append((scenario_name, scale_types, items_per_type))
+                return self.fake_prepare(
+                    minecraft,
+                    source,
+                    target,
+                    scenario_name,
+                    scale_types,
+                    items_per_type,
+                )
+
+            result = mod.run_session(
+                scenario_name="terminal-scale",
+                scale_types=10_000,
+                items_per_type=64,
+                prepare_world_func=prepare,
+                timestamp_func=lambda: "20260728-010203",
+                **common,
+            )
+
+            self.assertEqual([("terminal-scale", 10_000, 64)], received)
+            self.assertEqual(10_000, result.manifest["baseline"]["scale_fixture"]["type_count"])
+            self.assertEqual(
+                64,
+                result.manifest["baseline"]["runtime_fixture"]["items_per_type"],
+            )
+
+    def test_terminal_scale_manifest_validation_rejects_expanded_or_nonempty_fixture(self):
+        mod = self.load_script()
+        manifest = self.fake_prepare(
+            Path("/tmp/minecraft"),
+            "New World",
+            "MagicStorageGuiTest",
+            "terminal-scale",
+            10_000,
+            64,
+        )
+        mod.validate_scenario_manifest("terminal-scale", manifest, 10_000, 64)
+
+        for mutation in (
+            lambda value: value["player_kit"]["hotbar"].update(
+                {"1": {"item": "minecraft:stone"}}
+            ),
+            lambda value: value["player_kit"]["inventory"].append(
+                {"slot": "inventory.0", "item": "minecraft:stone", "count": 1}
+            ),
+            lambda value: value["baseline"]["stored_stacks"].append(
+                {"item": "minecraft:stone", "amount": 1}
+            ),
+            lambda value: value["baseline"]["scale_fixture"].update(
+                {"segment_limit": 64}
+            ),
+            lambda value: value["baseline"]["scale_fixture"].update(
+                {"repository_records": 2}
+            ),
+            lambda value: value["baseline"]["scale_fixture"].update(
+                {"key_sha256": "b" * 64}
+            ),
+            lambda value: value["baseline"]["scale_fixture"].update(
+                {"amount_sum": 1}
+            ),
+        ):
+            invalid = json.loads(json.dumps(manifest))
+            mutation(invalid)
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "terminal-scale preloaded Core contract",
+            ):
+                mod.validate_scenario_manifest(
+                    "terminal-scale",
+                    invalid,
+                    10_000,
+                    64,
+                )
+
+    def test_terminal_scale_writes_a_focused_fullscreen_checklist(self):
+        mod = self.load_script()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            minecraft_dir = root / "minecraft"
+            (minecraft_dir / "logs").mkdir(parents=True)
+            result = mod.run_session(
+                scenario_name="terminal-scale",
+                scale_types=30_000,
+                items_per_type=64,
+                minecraft_dir=minecraft_dir,
+                instance_dir=root / "instances" / "dev",
+                run_root=root / "gui-runs",
+                prepare_world_func=self.fake_prepare,
+                configure_instance_func=lambda instance_dir: True,
+                no_launch=True,
+                timestamp_func=lambda: "20260728-020304",
+            )
+
+            checklist = (result.run_dir / "checklist.md").read_text()
+            self.assertIn("30,000 exact component-bearing types", checklist)
+            self.assertIn("empty player inventory", checklist)
+            self.assertIn("Name, ID, Quantity, and Mod", checklist)
+            self.assertIn("@magic_storage", checklist)
+            self.assertIn("#minecraft:logs", checklist)
+            self.assertIn("Storage", checklist)
+            self.assertIn("Craftable", checklist)
+            self.assertIn("every runtime registered item", checklist)
+            self.assertIn("all installable station fields", checklist)
+            self.assertIn("recipe preview", checklist)
+            self.assertIn("first and far-end", checklist)
+            self.assertIn("fullscreen gate", checklist)
+            self.assertNotIn("install any station", checklist.lower())
+
+    def test_terminal_scale_launch_uses_only_base_deployment_preflight(self):
+        mod = self.load_script()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            minecraft_dir = root / "minecraft"
+            (minecraft_dir / "logs").mkdir(parents=True)
+            (root / "logs").mkdir()
+            (root / "logs" / "PrismLauncher-0.log").write_text("")
+            preflights = []
+            mod.verify_deployed_magic_storage_jar = (
+                lambda project_dir, target: preflights.append("magic-storage")
+            )
+            mod.verify_deployed_fusion_jar = (
+                lambda target: preflights.append("fusion")
+            )
+            mod.verify_deployed_gui_support_jars = (
+                lambda project_dir, target: preflights.append("support-pack")
+            )
+            mod.snapshot_processes = lambda: {}
+
+            mod.run_session(
+                scenario_name="terminal-scale",
+                scale_types=10_000,
+                items_per_type=64,
+                minecraft_dir=minecraft_dir,
+                instance_dir=root / "instances" / "dev",
+                run_root=root / "gui-runs",
+                prepare_world_func=self.fake_prepare,
+                cleanup_existing_func=lambda *args: None,
+                configure_instance_func=lambda instance_dir: True,
+                launcher=lambda command: None,
+                wait_for_log_func=lambda **kwargs: (
+                    "SelfTest: 104 passed\n"
+                    "MS_GUI_RUNTIME_FIXTURE_READY\n"
+                    "MS_GUI_TEST_READY\n"
+                ),
+                auth_verifier=lambda text: None,
+                display_mode_verifier=lambda manifest: None,
+                watchdog_launcher=lambda *args: None,
+                timestamp_func=lambda: "20260728-030405",
+            )
+
+            self.assertEqual(
+                ["magic-storage", "fusion", "support-pack"],
+                preflights,
+            )
+
+    def test_crafting_scenario_rejects_a_manifest_without_preloaded_core_contract(self):
+        mod = self.load_script()
+        with self.assertRaisesRegex(RuntimeError, "preloaded Core contract"):
+            mod.validate_scenario_manifest(
+                "crafting-fuel-page",
+                {
+                    "schema_version": 5,
+                    "scenario": "crafting-fuel-page",
+                    "start_target": "crafting_terminal",
+                    "bootstrap": {"core_preloaded": False},
+                    "baseline": {},
+                    "player_kit": {"hotbar": {}, "inventory": []},
+                },
+            )
 
     def configure_matching_deployment(self, mod, root: Path, minecraft_dir: Path) -> None:
         project_dir = root / "project"
@@ -574,6 +910,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "Storage tab",
                 "Craftable tab",
                 "Transform",
+                "hidden single-page pager leaves no blank row",
                 "Stations",
                 "page tabs",
                 "visual gap",
@@ -588,7 +925,13 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "Instant Stations",
                 "exactly two top-aligned groups",
                 "installed stack count overlays its item",
+                "near-Integer.MAX_VALUE Processing aggregate",
                 "accumulated station work",
+                "Mana uses Mana Powder and the name Mana",
+                "Fluids use a teal frame",
+                "Energy uses a violet frame",
+                "Other contains Axe Uses",
+                "distinct amber frame",
                 "dense icon grid",
                 "panel-local wheel paging",
                 "independent information box immediately to the right of the player inventory",
@@ -599,19 +942,22 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "Crafting Table",
                 "Stonecutter",
                 "Smithing Table",
-                "Axe Energy",
+                "Axe Uses",
                 "Smithing Transform",
                 "strip",
                 "Creative Storage Unit",
                 "localized unlimited type capacity",
                 "Creative Storage Unit icon",
-                "one tooltip",
+                "never changes on hover",
                 "white focus border",
                 "Available / Required",
                 "Oak Log",
                 "Smelting Energy",
                 "same visual size",
                 "no permanent rate formula",
+                "exact item's normal tooltip",
+                "current aggregate increase rate",
+                "does not repeat installed/stored totals",
                 "large item counts",
                 "inside their own slot",
                 "stored types / total type capacity",
@@ -620,34 +966,37 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "dim representative station item",
                 "stored types / total type capacity",
                 "light vanilla container panels",
-                "compact raised panel",
-                "align from the ledger's top edge",
+                "uniformly scale the complete widget",
+                "top-aligns its resources",
                 "at most four columns",
-                "third row",
-                "without an oversized empty panel",
-                "Search targets",
+                "Short amounts stay on one line",
+                "empty top search field",
                 "selected row",
                 "page indicator",
                 "whole horizontal card",
                 "Coal remains visibly present in the upper input slot",
                 "strip in the upper input area",
-                "second line names the direct source or required station/work",
+                "Direct Fuel cards use only the produced resource/amount line",
+                "timed cards add the required logical station family/work",
                 "no detached lower selection strip",
-                "Station Work",
+                "Processing",
                 "derive row count from available height",
-                "hovered station detail",
-                "bottom-right Search Stations",
+                "does not resize or redistribute incomplete rows",
+                "logical Furnator family",
+                "four page content bottoms",
                 "one result grid",
                 "stations only",
                 "right-click",
-                "anywhere on that station row",
                 "×8",
                 "×64",
                 "Max",
+                "each bare operator",
+                "behave exactly like an empty query",
+                "release search focus without clearing",
                 "@minecraft",
                 "#minecraft:logs",
                 "Auto Focus",
-                "immediately receives keyboard input",
+                "initially receives keyboard input",
                 "Search Sync",
                 "Off",
                 "EMI Two-way",
@@ -661,10 +1010,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "red mushroom",
                 "bowl",
                 "third-party recipe",
-                "fixed two-decimal",
-                "1.25/tick",
-                "never a fraction",
-                "full-size lines",
+                "full-size available and required lines",
                 "121K",
                 "/200",
                 "TMRV",
@@ -672,14 +1018,42 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "Magic Storage does not register",
                 "Mekanism",
                 "Gases appears because",
-                "Other appears because",
+                "Other contains Axe Uses",
                 "Botania Mana",
                 "Ars Nouveau Source",
                 "preinstalled",
                 "preloaded",
                 "no setup action",
+                "Honey Bottle",
+                "250 mB Honey",
+                "Energized Steel",
+                "10,000 FE",
+                "Manasteel Ingot",
+                "3,000 Mana",
+                "Hydrogen Chloride",
+                "Hydrogen",
+                "Chlorine",
+                "Ultimate Crafting Table",
+                "Ultimate Singularity",
+                "19 exact singularity variants",
+                "complete 9×9 Ultimate Crafting widget",
+                "scroll through the complete material ledger",
                 "warm Craftable return should be immediate",
                 "must not produce a new keep-up warning",
+                "MacFix",
+                "windowWillReturnFieldEditor",
+                "F11 → bordered window → Command-Q",
+                "@creat",
+                "Show: All",
+                "starts Off",
+                "Transform and Stations expose Sort Method and Sort Order",
+                "never a Chemical Tank or Brewing Stand",
+                "64,000 capacity",
+                "scrollbar must show a visible recessed track/frame",
+                "Aluminum Blade",
+                "Macerator recipe",
+                "non-item output",
+                "locked to Storage",
             ]:
                 self.assertIn(expected, checklist)
             for forbidden in [
@@ -715,7 +1089,19 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             mods = minecraft / "mods"
             staged.mkdir(parents=True)
             mods.mkdir(parents=True)
-            self.assertEqual(15, len(mod.SUPPORT_ARTIFACTS))
+            self.assertEqual(18, len(mod.SUPPORT_ARTIFACTS))
+            self.assertIn(
+                "macfix-gui-test.jar",
+                {filename for filename, _ in mod.SUPPORT_ARTIFACTS},
+            )
+            self.assertIn(
+                "extended-crafting-gui-test.jar",
+                {filename for filename, _ in mod.SUPPORT_ARTIFACTS},
+            )
+            self.assertIn(
+                "cucumber-gui-test.jar",
+                {filename for filename, _ in mod.SUPPORT_ARTIFACTS},
+            )
             self.assertFalse(any(
                 "pneumatic" in filename for filename, _ in mod.SUPPORT_ARTIFACTS
             ))
@@ -766,6 +1152,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "ShowConsole=true\n"
                 "ShowConsoleOnError=true\n"
                 "AutoCloseConsole=false\n"
+                "LowMemWarning=true\n"
                 "JavaPath=/tmp/java\n"
                 "WrapperCommand=/tmp/magic_storage_minecraft_cu_wrapper.sh\n"
             )
@@ -781,6 +1168,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     "ShowConsole=false",
                     "ShowConsoleOnError=false",
                     "AutoCloseConsole=false",
+                    "LowMemWarning=false",
                     "JavaPath=/tmp/java",
                     "WrapperCommand=",
                 ],

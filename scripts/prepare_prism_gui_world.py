@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import gzip
+import hashlib
 import json
 import re
 import shutil
@@ -17,10 +18,26 @@ DEFAULT_WORLD_NAME = "MagicStorageGuiTest"
 DEFAULT_OFFLINE_PLAYER = "MagicStorageBot"
 DATAPACK_NAME = "magic_storage_gui_test"
 MARKER_FILE = ".magic_storage_gui_test_world"
+RUNTIME_FIXTURE_MARKER_FILE = ".magic_storage_runtime_fixture_pending"
 PACK_FORMAT = 48
 WORLD_DATA_VERSION = 3955
 GUI_CORE_STORAGE_ID = [1297303379, -1689374253, -1229988241, 1836016741]
 GUI_CORE_NETWORK_ID = [-1483115547, 1063596744, -1848102033, 706652923]
+TERMINAL_SCALE_COUNTS = (10_000, 30_000)
+TERMINAL_SCALE_ITEMS_PER_TYPE = 64
+TERMINAL_SCALE_PROCESSING_COUNT = 130
+TERMINAL_SCALE_SEGMENT_LIMIT = 63
+TERMINAL_SCALE_COMPONENT = "minecraft:custom_name"
+TERMINAL_SCALE_BASE_ITEMS = (
+    "minecraft:oak_log",
+    "minecraft:spruce_log",
+    "minecraft:stone",
+    "minecraft:iron_ingot",
+    "magic_storage:storage_unit_t1",
+    "magic_storage:storage_unit_t2",
+    "magic_storage:storage_terminal",
+    "magic_storage:crafting_terminal",
+)
 
 OPTION_OVERRIDES = {
     "fullscreen": "true",
@@ -147,6 +164,7 @@ TARGETS = {
 
 BASELINE = {
     "stored_items": {},
+    "stored_stacks": [],
     "installed_stations": {},
     "descriptor_consumables": {},
     "station_work": {},
@@ -166,12 +184,86 @@ BASELINE = {
     },
 }
 
+EXTENDED_CRAFTING_SINGULARITIES = (
+    "aluminum",
+    "bronze",
+    "coal",
+    "copper",
+    "diamond",
+    "electrum",
+    "emerald",
+    "glowstone",
+    "gold",
+    "invar",
+    "iron",
+    "lapis_lazuli",
+    "lead",
+    "nickel",
+    "platinum",
+    "redstone",
+    "silver",
+    "steel",
+    "tin",
+)
+EXTENDED_CRAFTING_TEST_INGOT_TAGS = (
+    "aluminum", "bronze", "electrum", "invar", "lead",
+    "nickel", "platinum", "silver", "steel", "tin",
+)
+
+CRAFTING_FUEL_SCROLL_STRESS_ITEMS = tuple(
+    f"minecraft:{color}_{block}"
+    for block in ("wool", "terracotta")
+    for color in (
+        "white", "orange", "magenta", "light_blue",
+        "yellow", "lime", "pink", "gray",
+        "light_gray", "cyan", "purple", "blue",
+        "brown", "green", "red", "black",
+    )
+) + (
+    "minecraft:stone",
+    "minecraft:dirt",
+    "minecraft:sand",
+    "minecraft:gravel",
+    "minecraft:granite",
+    "minecraft:diorite",
+    "minecraft:andesite",
+    "minecraft:deepslate",
+    "minecraft:cobbled_deepslate",
+    "minecraft:tuff",
+    "minecraft:calcite",
+    "minecraft:dripstone_block",
+    "minecraft:grass_block",
+    "minecraft:podzol",
+    "minecraft:mycelium",
+    "minecraft:clay",
+    "minecraft:snow_block",
+    "minecraft:ice",
+    "minecraft:packed_ice",
+    "minecraft:blue_ice",
+    "minecraft:netherrack",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:end_stone",
+    "minecraft:obsidian",
+    "minecraft:crying_obsidian",
+)
+
 CRAFTING_FUEL_CORE_BASELINE = {
     "storage_id": GUI_CORE_STORAGE_ID,
     "network_id": GUI_CORE_NETWORK_ID,
     "stored_items": {
+        **dict.fromkeys(CRAFTING_FUEL_SCROLL_STRESS_ITEMS, 1),
         "minecraft:oak_log": 121_000,
         "minecraft:cobblestone": 999_999,
+        "minecraft:redstone": 128,
+        "minecraft:glowstone_dust": 16,
+        "minecraft:coal": 16,
+        "minecraft:charcoal": 16,
+        "minecraft:copper_ingot": 16,
+        "minecraft:lapis_lazuli": 16,
+        "minecraft:quartz": 16,
         "minecraft:brown_mushroom": 64,
         "minecraft:red_mushroom": 64,
         "minecraft:bowl": 64,
@@ -179,6 +271,7 @@ CRAFTING_FUEL_CORE_BASELINE = {
         "minecraft:diamond_sword": 8,
         "minecraft:netherite_ingot": 64,
         "minecraft:iron_ingot": 64,
+        "minecraft:gold_ingot": 64,
         "minecraft:bone_meal": 64,
         "minecraft:sugar_cane": 64,
         "minecraft:fishing_rod": 1,
@@ -201,6 +294,16 @@ CRAFTING_FUEL_CORE_BASELINE = {
         "botania:mana_diamond": 64,
         "botania:white_mystical_petal": 64,
     },
+    "stored_stacks": [
+        {
+            "item": "extendedcrafting:singularity",
+            "amount": 1,
+            "components": {
+                "extendedcrafting:singularity_id": f"extendedcrafting:{singularity}",
+            },
+        }
+        for singularity in EXTENDED_CRAFTING_SINGULARITIES
+    ],
     "installed_stations": {
         "magic_storage:furnace": {
             "item": "ironfurnaces:iron_furnace",
@@ -232,6 +335,10 @@ CRAFTING_FUEL_CORE_BASELINE = {
         },
         "magic_storage:smithing_table": {
             "item": "minecraft:smithing_table",
+            "count": 1,
+        },
+        "magic_storage:extended_crafting_table": {
+            "item": "extendedcrafting:ultimate_table",
             "count": 1,
         },
         "magic_storage:farmers_delight_cooking_pot": {
@@ -340,7 +447,7 @@ CRAFTING_FUEL_CORE_BASELINE = {
         },
         "magic_storage:mekanism_crusher": {
             "item": "mekanism:ultimate_crushing_factory",
-            "count": 130,
+            "count": 2_147_483_647,
         },
         "magic_storage:mekanism_enrichment_chamber": {
             "item": "mekanism:enrichment_chamber",
@@ -567,6 +674,11 @@ CRAFTING_FUEL_CORE_BASELINE = {
             "amount": 4_000_000,
         },
         {
+            "kind": "mekanism:chemical",
+            "resource": "mekanism:chlorine",
+            "amount": 3_000_000,
+        },
+        {
             "kind": "botania:mana",
             "resource": "botania:mana",
             "amount": 2_000_000,
@@ -664,6 +776,32 @@ SCENARIO_PROFILES = {
                 "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
                 "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
                 "3": {"slot": "hotbar.2", "item": "minecraft:coal", "count": 1},
+            },
+            "inventory": [],
+        },
+        "hotbar_views": {
+            "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
+            "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
+        },
+    },
+    "terminal-scale": {
+        "start_target": "crafting_terminal",
+        "target_names": ("storage_core", "storage_terminal", "crafting_terminal"),
+        "setup_blocks": (
+            "setblock 0 80 0 magic_storage:storage_core"
+            "{storageSchema:1,storageId:[I;"
+            + ",".join(str(value) for value in GUI_CORE_STORAGE_ID)
+            + "]}",
+            "setblock -1 80 0 magic_storage:storage_terminal",
+            "setblock 1 80 0 magic_storage:crafting_terminal",
+            "setblock 0 80 -1 magic_storage:creative_storage_unit",
+        ),
+        "type_capacity": {"finite_type_slots": 0, "unlimited": True},
+        "reset_world": False,
+        "player_kit": {
+            "hotbar": {
+                "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
             },
             "inventory": [],
         },
@@ -869,13 +1007,101 @@ def _require_item(compound: list, name: str, tag_type: int):
     return item[2]
 
 
-def _item_stack_nbt(item_id: str, count: int = 1) -> list:
+def _item_stack_nbt(
+        item_id: str,
+        count: int = 1,
+        components: dict[str, str] | None = None,
+) -> list:
     if not item_id or count <= 0:
         raise ValueError(f"invalid preloaded item stack: {item_id} x{count}")
-    return [
+    result = [
         (TAG_INT, "count", count),
         (TAG_STRING, "id", item_id),
     ]
+    if components:
+        if any(not key or not value for key, value in components.items()):
+            raise ValueError(f"invalid preloaded item components: {components}")
+        result.append((
+            TAG_COMPOUND,
+            "components",
+            [
+                (TAG_STRING, key, value)
+                for key, value in sorted(components.items())
+            ],
+        ))
+    return result
+
+
+def validate_scale_types(
+    scenario_name: str,
+    scale_types: int | None,
+    items_per_type: int | None = None,
+) -> None:
+    if scenario_name == "terminal-scale":
+        if scale_types is None:
+            raise ValueError(
+                "terminal-scale --scale-types is required and must be 10000 or 30000"
+            )
+        if scale_types not in TERMINAL_SCALE_COUNTS:
+            raise ValueError("--scale-types accepts only 10000 or 30000")
+    elif scale_types is not None:
+        raise ValueError("--scale-types is only valid for terminal-scale")
+    if scenario_name == "terminal-scale":
+        if items_per_type is not None and items_per_type <= 0:
+            raise ValueError("--items-per-type must be positive")
+    elif items_per_type is not None:
+        raise ValueError("--items-per-type is only valid for terminal-scale")
+
+
+def _terminal_scale_variant(index: int) -> tuple[str, str, int]:
+    item_id = TERMINAL_SCALE_BASE_ITEMS[index % len(TERMINAL_SCALE_BASE_ITEMS)]
+    custom_name = json.dumps(
+        {
+            "text": f"Terminal Scale {index:05d}",
+            "italic": False,
+        },
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    amount = ((index * 104_729) % 1_000_000) + 1
+    return item_id, custom_name, amount
+
+
+def _terminal_scale_core_baseline(scale_types: int) -> dict:
+    return {
+        "storage_id": list(GUI_CORE_STORAGE_ID),
+        "network_id": list(GUI_CORE_NETWORK_ID),
+        "stored_items": {},
+        "stored_stacks": [],
+        "installed_stations": {},
+        "descriptor_consumables": {},
+        "station_work": {},
+        "typed_resources": [],
+        "energy": dict(BASELINE["energy"]),
+        "scale_types": scale_types,
+    }
+
+
+def terminal_scale_summary(scale_types: int) -> dict:
+    digest = hashlib.sha256()
+    amount_sum = 0
+    for index in range(scale_types):
+        item_id, custom_name, amount = _terminal_scale_variant(index)
+        digest.update(f"{item_id}\0{custom_name}\0{amount}\n".encode())
+        amount_sum += amount
+    return {
+        "generator_schema": 1,
+        "type_count": scale_types,
+        "segment_limit": TERMINAL_SCALE_SEGMENT_LIMIT,
+        "segment_count": (
+            scale_types + TERMINAL_SCALE_SEGMENT_LIMIT - 1
+        ) // TERMINAL_SCALE_SEGMENT_LIMIT,
+        "repository_records": 1,
+        "base_item_ids": list(TERMINAL_SCALE_BASE_ITEMS),
+        "component": TERMINAL_SCALE_COMPONENT,
+        "key_sha256": digest.hexdigest(),
+        "amount_sum": amount_sum,
+    }
 
 
 def _core_repository_root(core_baseline: dict) -> tuple:
@@ -887,9 +1113,56 @@ def _core_repository_root(core_baseline: dict) -> tuple:
         ]
         for item_id, amount in sorted(stored_items.items())
     ]
-    inventory_segments = [] if not inventory_entries else [[
-        (TAG_LIST, "entries", (TAG_COMPOUND, inventory_entries)),
-    ]]
+    inventory_entries.extend(
+        [
+            (TAG_LONG, "count", stack["amount"]),
+            (
+                TAG_COMPOUND,
+                "item",
+                _item_stack_nbt(stack["item"], components=stack["components"]),
+            ),
+        ]
+        for stack in core_baseline.get("stored_stacks", [])
+    )
+    scale_types = core_baseline.get("scale_types")
+    if scale_types is not None:
+        validate_scale_types("terminal-scale", scale_types)
+        inventory_entries.extend(
+            [
+                (TAG_LONG, "count", amount),
+                (
+                    TAG_COMPOUND,
+                    "item",
+                    _item_stack_nbt(
+                        item_id,
+                        components={TERMINAL_SCALE_COMPONENT: custom_name},
+                    ),
+                ),
+            ]
+            for item_id, custom_name, amount in (
+                _terminal_scale_variant(index)
+                for index in range(scale_types)
+            )
+        )
+    inventory_segments = [
+        [
+            (
+                TAG_LIST,
+                "entries",
+                (
+                    TAG_COMPOUND,
+                    inventory_entries[
+                        offset:offset + TERMINAL_SCALE_SEGMENT_LIMIT
+                    ],
+                ),
+            )
+        ]
+        for offset in range(
+            0,
+            len(inventory_entries),
+            TERMINAL_SCALE_SEGMENT_LIMIT,
+        )
+    ]
     descriptor_consumables = [
         [
             (TAG_STRING, "descriptorId", descriptor_id),
@@ -1152,6 +1425,11 @@ def build_setup_function(profile: dict) -> str:
         "spawnpoint @a 0 80 7",
     ]
     lines.extend(profile["setup_blocks"])
+    if "runtime_items_per_type" in profile:
+        lines.append(
+            "magic_storage _gui_test_seed 0 80 0 "
+            f"{profile['runtime_items_per_type']}"
+        )
     lines.extend([
         "tag @a remove ms_gui_ready",
         "scoreboard players reset @a ms_gui_timer",
@@ -1168,10 +1446,26 @@ def _view_function(target_name: str) -> str:
     return f"tp @s {stand} facing {face}\n"
 
 
-def scenario_profile(scenario_name: str) -> dict:
+def scenario_profile(
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict:
     if scenario_name not in SCENARIO_PROFILES:
         raise ValueError(f"unknown GUI scenario profile: {scenario_name}")
-    return SCENARIO_PROFILES[scenario_name]
+    validate_scale_types(scenario_name, scale_types, items_per_type)
+    profile = SCENARIO_PROFILES[scenario_name]
+    if scenario_name != "terminal-scale":
+        return profile
+    return {
+        **profile,
+        "core_baseline": _terminal_scale_core_baseline(scale_types),
+        "runtime_items_per_type": (
+            TERMINAL_SCALE_ITEMS_PER_TYPE
+            if items_per_type is None
+            else items_per_type
+        ),
+    }
 
 
 def build_reset_player_function(player_kit: dict) -> str:
@@ -1212,9 +1506,13 @@ def build_player_ready_function(profile: dict) -> str:
         "spawnpoint @s 0 80 7",
         f"function {DATAPACK_NAME}:view_{profile['start_target']}",
         f"function {DATAPACK_NAME}:prime_hotbar_latch",
+    ]
+    if "runtime_items_per_type" in profile:
+        lines.append("magic_storage _gui_test_warm_craftable 0 80 0")
+    lines.extend([
         "tag @s add ms_gui_ready",
         "say MS_GUI_TEST_READY",
-    ]
+    ])
     return "\n".join(lines) + "\n"
 
 
@@ -1254,8 +1552,12 @@ def build_prime_hotbar_latch_function(hotbar_views: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def build_function_bodies(scenario_name: str) -> dict[str, str]:
-    profile = scenario_profile(scenario_name)
+def build_function_bodies(
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict[str, str]:
+    profile = scenario_profile(scenario_name, scale_types, items_per_type)
     hotbar_views = profile["hotbar_views"]
     bodies = dict(STATIC_FUNCTIONS)
     bodies.update({
@@ -1277,12 +1579,22 @@ def build_function_bodies(scenario_name: str) -> dict[str, str]:
     return bodies
 
 
-def build_manifest(world_dir: Path, scenario_name: str) -> dict:
-    profile = scenario_profile(scenario_name)
+def build_manifest(
+    world_dir: Path,
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict:
+    profile = scenario_profile(scenario_name, scale_types, items_per_type)
     core_baseline = profile.get("core_baseline", {})
     baseline = {
         **BASELINE,
+        "storage_id": list(core_baseline.get("storage_id", [])),
+        "network_id": list(core_baseline.get("network_id", [])),
         "stored_items": dict(core_baseline.get("stored_items", {})),
+        "stored_stacks": json.loads(json.dumps(
+            core_baseline.get("stored_stacks", [])
+        )),
         "installed_stations": json.loads(json.dumps(
             core_baseline.get("installed_stations", {})
         )),
@@ -1299,9 +1611,23 @@ def build_manifest(world_dir: Path, scenario_name: str) -> dict:
         },
         "type_capacity": dict(profile["type_capacity"]),
     }
+    if scenario_name == "terminal-scale":
+        baseline["scale_fixture"] = terminal_scale_summary(scale_types)
+        baseline["runtime_fixture"] = {
+            "registry": "runtime",
+            "items_per_type": profile["runtime_items_per_type"],
+            "installable_descriptors": "all",
+            "processing_count": TERMINAL_SCALE_PROCESSING_COUNT,
+            "instant_count": 1,
+            "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+        }
     commands = {
         name: f"/function {DATAPACK_NAME}:{name}"
-        for name in build_function_bodies(scenario_name)
+        for name in build_function_bodies(
+            scenario_name,
+            scale_types,
+            items_per_type,
+        )
     }
     return {
         "schema_version": 5,
@@ -1332,6 +1658,14 @@ def build_manifest(world_dir: Path, scenario_name: str) -> dict:
                 else None
             ),
             "core_preloaded": bool(core_baseline),
+            **(
+                {
+                    "runtime_fixture_ready_log":
+                        "MS_GUI_RUNTIME_FIXTURE_READY",
+                }
+                if scenario_name == "terminal-scale"
+                else {}
+            ),
         },
         "commands": commands,
         "hotbar_views": profile["hotbar_views"],
@@ -1341,21 +1675,56 @@ def build_manifest(world_dir: Path, scenario_name: str) -> dict:
     }
 
 
-def install_datapack(world_dir: Path, scenario_name: str) -> dict:
-    profile = scenario_profile(scenario_name)
+def install_datapack(
+    world_dir: Path,
+    scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
+) -> dict:
+    profile = scenario_profile(
+        scenario_name,
+        scale_types,
+        items_per_type,
+    )
     datapack = world_dir / "datapacks" / DATAPACK_NAME
     if datapack.exists():
         shutil.rmtree(datapack)
 
-    manifest = build_manifest(world_dir, scenario_name)
+    manifest = build_manifest(
+        world_dir,
+        scenario_name,
+        scale_types,
+        items_per_type,
+    )
     install_core_repository_baseline(world_dir, profile)
     _write_text(datapack / "pack.mcmeta", json.dumps({"pack": {"pack_format": PACK_FORMAT, "description": "Magic Storage true-void GUI test lab"}}, indent=2))
     _write_text(datapack / "data/minecraft/tags/function/load.json", json.dumps({"values": [f"{DATAPACK_NAME}:load"]}, indent=2))
     _write_text(datapack / "data/minecraft/tags/function/tick.json", json.dumps({"values": [f"{DATAPACK_NAME}:tick"]}, indent=2))
-    function_bodies = build_function_bodies(scenario_name)
+    if scenario_name == "crafting-fuel-page":
+        for name in EXTENDED_CRAFTING_TEST_INGOT_TAGS:
+            _write_text(
+                datapack / "data/c/tags/item/ingots" / f"{name}.json",
+                json.dumps(
+                    {"replace": False, "values": ["minecraft:iron_ingot"]},
+                    indent=2,
+                ),
+            )
+    function_bodies = build_function_bodies(
+        scenario_name,
+        scale_types,
+        items_per_type,
+    )
     for name, body in function_bodies.items():
         _write_text(datapack / "data" / DATAPACK_NAME / "function" / f"{name}.mcfunction", body)
     _write_text(datapack / "magic_storage_gui_test_manifest.json", json.dumps(manifest, indent=2))
+    runtime_marker = world_dir / RUNTIME_FIXTURE_MARKER_FILE
+    if scenario_name == "terminal-scale":
+        _write_text(
+            runtime_marker,
+            "generated by scripts/prepare_prism_gui_world.py",
+        )
+    elif runtime_marker.exists():
+        runtime_marker.unlink()
     return manifest
 
 
@@ -1439,8 +1808,11 @@ def prepare_world(
     target_world: str = DEFAULT_WORLD_NAME,
     *,
     scenario_name: str,
+    scale_types: int | None = None,
+    items_per_type: int | None = None,
     display_mode_func=current_macos_main_display_mode,
 ) -> dict:
+    validate_scale_types(scenario_name, scale_types, items_per_type)
     minecraft_dir = minecraft_dir.expanduser().resolve()
     source = minecraft_dir / "saves" / source_world
     target = minecraft_dir / "saves" / target_world
@@ -1455,7 +1827,15 @@ def prepare_world(
         if world_generator != VOID_GENERATOR:
             raise ValueError(f"generated overworld does not match the true-void contract: {world_generator}")
 
-        manifest = install_datapack(staging, scenario_name)
+        if scenario_name == "terminal-scale":
+            manifest = install_datapack(
+                staging,
+                scenario_name,
+                scale_types,
+                items_per_type,
+            )
+        else:
+            manifest = install_datapack(staging, scenario_name)
         options_path = minecraft_dir / "options.txt"
         options_changed = patch_options(options_path)
         manifest.update(
@@ -1468,7 +1848,12 @@ def prepare_world(
                 "desktop_display_mode": display_mode.as_dict(),
                 "level": read_level_dat_summary(level_dat),
                 "world_generator": world_generator,
-                "launch_command": build_manifest(target, scenario_name)["launch_command"],
+                "launch_command": build_manifest(
+                    target,
+                    scenario_name,
+                    scale_types,
+                    items_per_type,
+                )["launch_command"],
             }
         )
         manifest_text = json.dumps(manifest, indent=2)
@@ -1494,6 +1879,12 @@ def main(argv: list[str]) -> int:
         choices=sorted(SCENARIO_PROFILES),
         default="boot-smoke",
     )
+    parser.add_argument(
+        "--scale-types",
+        type=int,
+        choices=TERMINAL_SCALE_COUNTS,
+    )
+    parser.add_argument("--items-per-type", type=int)
     args = parser.parse_args(argv[1:])
     try:
         result = prepare_world(
@@ -1501,6 +1892,8 @@ def main(argv: list[str]) -> int:
             args.source_world,
             args.world,
             scenario_name=args.scenario,
+            scale_types=args.scale_types,
+            items_per_type=args.items_per_type,
         )
     except Exception as exc:
         print(str(exc), file=sys.stderr)

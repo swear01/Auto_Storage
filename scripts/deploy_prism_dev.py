@@ -10,14 +10,27 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from bump_patch_version import bump_patch_version
+try:
+    from bump_patch_version import bump_patch_version
+except ModuleNotFoundError:
+    from scripts.bump_patch_version import bump_patch_version
 
 DEFAULT_JAVA_HOME = Path("/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home")
 DEFAULT_PRISM_MINECRAFT_DIR = Path.home() / "Library/Application Support/PrismLauncher/instances/dev/minecraft"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+FUSION_RUNTIME_VERSION = next(
+    line.split("=", 1)[1].strip()
+    for line in (PROJECT_ROOT / "gradle.properties").read_text().splitlines()
+    if line.startswith("fusion_runtime_version=")
+)
 FUSION_VERSION = "1.2.12"
 FUSION_FILENAME = "fusion-1.2.12-neoforge-mc1.21.1.jar"
-FUSION_URL = "https://cdn.modrinth.com/data/p19vrgc2/versions/h2GrA0Ku/fusion-1.2.12-neoforge-mc1.21.1.jar"
+FUSION_URL = (
+    "https://cdn.modrinth.com/data/p19vrgc2/versions/"
+    f"{FUSION_RUNTIME_VERSION}/{FUSION_FILENAME}"
+)
 FUSION_SHA512 = "50604fa4125e846b659479a8bb8bcef5db47460a8185902b8655d8b12c6cc67eb3cc4c08fee45e82a6b215976bea2a480e32ce420f062cea88abe17cb362365c"
+MACFIX_FILENAME = "macfix-gui-test.jar"
 IRON_FURNACES_FILENAME = "iron-furnaces-gui-test.jar"
 FARMERS_DELIGHT_FILENAME = "farmers-delight-gui-test.jar"
 TMRV_FILENAME = "tmrv-gui-test.jar"
@@ -35,6 +48,8 @@ CLOTH_CONFIG_FILENAME = "cloth-config-gui-test.jar"
 INDUSTRIAL_FOREGOING_FILENAME = "industrial-foregoing-gui-test.jar"
 TITANIUM_FILENAME = "titanium-gui-test.jar"
 CREATE_FILENAME = "create-gui-test.jar"
+EXTENDED_CRAFTING_FILENAME = "extended-crafting-gui-test.jar"
+CUCUMBER_FILENAME = "cucumber-gui-test.jar"
 
 
 @dataclass(frozen=True)
@@ -68,6 +83,10 @@ def magic_storage_jars(mods_dir: Path) -> list[Path]:
 
 def fusion_jars(mods_dir: Path) -> list[Path]:
     return sorted(mods_dir.glob("fusion-*.jar"))
+
+
+def macfix_jars(mods_dir: Path) -> list[Path]:
+    return sorted({*mods_dir.glob("macfix*.jar"), *mods_dir.glob("MacFix*.jar")})
 
 
 def iron_furnaces_jars(mods_dir: Path) -> list[Path]:
@@ -163,7 +182,20 @@ def create_jars(mods_dir: Path) -> list[Path]:
     return sorted({*mods_dir.glob("create-*.jar"), *mods_dir.glob("Create-*.jar")})
 
 
+def extended_crafting_jars(mods_dir: Path) -> list[Path]:
+    return sorted({
+        *mods_dir.glob("extended-crafting*.jar"),
+        *mods_dir.glob("extended_crafting*.jar"),
+        *mods_dir.glob("ExtendedCrafting*.jar"),
+    })
+
+
+def cucumber_jars(mods_dir: Path) -> list[Path]:
+    return sorted({*mods_dir.glob("cucumber*.jar"), *mods_dir.glob("Cucumber*.jar")})
+
+
 SUPPORT_ARTIFACTS = (
+    (MACFIX_FILENAME, macfix_jars),
     (IRON_FURNACES_FILENAME, iron_furnaces_jars),
     (FARMERS_DELIGHT_FILENAME, farmers_delight_jars),
     (TMRV_FILENAME, tmrv_jars),
@@ -179,6 +211,8 @@ SUPPORT_ARTIFACTS = (
     (INDUSTRIAL_FOREGOING_FILENAME, industrial_foregoing_jars),
     (TITANIUM_FILENAME, titanium_jars),
     (CREATE_FILENAME, create_jars),
+    (EXTENDED_CRAFTING_FILENAME, extended_crafting_jars),
+    (CUCUMBER_FILENAME, cucumber_jars),
 )
 
 
