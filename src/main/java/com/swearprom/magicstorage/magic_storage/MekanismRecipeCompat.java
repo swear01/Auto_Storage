@@ -417,6 +417,7 @@ public final class MekanismRecipeCompat {
     ) {
         machineDescriptors.register(registryPath, () -> MachineDescriptor.installableVariants(
                 descriptorId,
+                new ItemStack(factoryType.getBaseBlock().asItem()).getHoverName(),
                 () -> factoryVariants(factoryType),
                 MachineEnergyTable.Category.PROCESS,
                 MachineDescriptorApi.MAX_INSTALLED_COUNT,
@@ -432,6 +433,7 @@ public final class MekanismRecipeCompat {
     ) {
         machineDescriptors.register(registryPath, () -> MachineDescriptor.installableVariants(
                 descriptorId,
+                stationStack(stationPath).getHoverName(),
                 () -> List.of(MachineVariant.of(stationStack(stationPath), rate)),
                 MachineEnergyTable.Category.PROCESS,
                 MachineDescriptorApi.MAX_INSTALLED_COUNT,
@@ -841,8 +843,7 @@ public final class MekanismRecipeCompat {
         }
         ItemStack presentationOutput = itemOutput;
         if (presentationOutput.isEmpty()) {
-            presentationOutput = new ItemStack(Items.BREWING_STAND);
-            presentationOutput.set(DataComponents.CUSTOM_NAME, chemicalOutput.getTextComponent());
+            presentationOutput = chemicalPresentation(chemicalOutput);
         }
         return builder
                 .presentationOutput(presentationOutput)
@@ -952,7 +953,7 @@ public final class MekanismRecipeCompat {
     }
 
     private static ItemStack chemicalPresentation(ChemicalStack output) {
-        ItemStack presentation = new ItemStack(Items.BREWING_STAND);
+        ItemStack presentation = stationStack("basic_chemical_tank");
         presentation.set(DataComponents.CUSTOM_NAME, output.getTextComponent());
         return presentation;
     }

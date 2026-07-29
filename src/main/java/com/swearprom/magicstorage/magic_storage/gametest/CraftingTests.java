@@ -4326,6 +4326,86 @@ public class CraftingTests {
     }
 
     @GameTest(template = "platform")
+    public static void recipe_navigation_prioritizes_craftable_variants_and_preserves_selection(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            installAllRecipeStations(core);
+            core.insertItem(new ItemStack(Items.BARRIER));
+            core.insertItem(new ItemStack(Items.DIRT));
+            ResourceLocation blockedId = ResourceLocation.fromNamespaceAndPath(
+                    MagicStorage.MODID, "craftable_order_a_blocked");
+            ResourceLocation craftableId = ResourceLocation.fromNamespaceAndPath(
+                    MagicStorage.MODID, "craftable_order_z_available");
+            var blocked = new RecipeHolder<>(blockedId, new ShapelessRecipe(
+                    "", CraftingBookCategory.MISC, new ItemStack(Items.BARRIER),
+                    NonNullList.of(Ingredient.EMPTY, Ingredient.of(Items.STONE))));
+            var craftable = new RecipeHolder<>(craftableId, new ShapelessRecipe(
+                    "", CraftingBookCategory.MISC, new ItemStack(Items.BARRIER),
+                    NonNullList.of(Ingredient.EMPTY, Ingredient.of(Items.DIRT))));
+            var manager = level.getRecipeManager();
+            var original = java.util.List.copyOf(manager.getRecipes());
+            var registered = new java.util.ArrayList<>(original);
+            registered.add(blocked);
+            registered.add(craftable);
+            manager.replaceRecipes(registered);
+            try {
+                var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+                var menu = new CraftingTerminalMenu(167, player.getInventory(), core);
+                int barrierSlot = findDisplaySlot(menu, Items.BARRIER);
+                if (barrierSlot < 0) {
+                    helper.fail("Barrier display slot not found");
+                    return;
+                }
+                menu.clicked(barrierSlot, 0, ClickType.PICKUP, player);
+                if (menu.getRecipeCount() != 2
+                        || menu.getCraftableRecipeCount() != 1
+                        || !menu.getCurrentRecipes().getFirst().id().equals(craftableId)) {
+                    helper.fail("Craftable recipe must sort first with a separate craftable-variant count: "
+                            + menu.getCurrentRecipes().stream().map(RecipeHolder::id).toList());
+                    return;
+                }
+                menu.nextRecipe();
+                if (!menu.getRecipePresentation().recipeId().equals(blockedId)) {
+                    helper.fail("Fixture could not select the blocked exact recipe");
+                    return;
+                }
+
+                core.insertItem(new ItemStack(Items.STONE));
+                menu.broadcastChanges();
+                if (menu.getCraftableRecipeCount() != 2
+                        || !menu.getRecipePresentation().recipeId().equals(blockedId)
+                        || !menu.getCurrentRecipes().get(menu.getCurrentRecipeIndex())
+                        .id().equals(blockedId)) {
+                    helper.fail("Material changes must rerank variants without changing exact selection");
+                    return;
+                }
+                core.extractItem(ItemKey.of(new ItemStack(Items.DIRT)), 1);
+                core.extractItem(ItemKey.of(new ItemStack(Items.STONE)), 1);
+                menu.broadcastChanges();
+                if (menu.getCraftableRecipeCount() != 0
+                        || menu.getRecipeCount() != 2
+                        || !menu.getRecipePresentation().recipeId().equals(blockedId)) {
+                    helper.fail("Zero-craftable state must retain both variants and exact selection");
+                    return;
+                }
+                helper.succeed();
+            } finally {
+                manager.replaceRecipes(original);
+            }
+        });
+    }
+
+    @GameTest(template = "platform")
     public static void recipe_navigation_rebinds_exact_identity_before_reload_validation(
             GameTestHelper helper
     ) {
@@ -4474,6 +4554,13 @@ public class CraftingTests {
         public java.util.List<ItemStack> getDisplayStacks() {
             displaySnapshots++;
             return java.util.List.of(new ItemStack(Items.OAK_PLANKS, 64));
+        }
+
+        @Override
+        java.util.List<IngredientSource> storedItemSources() {
+            displaySnapshots++;
+            ItemStack stack = new ItemStack(Items.OAK_PLANKS);
+            return java.util.List.of(new IngredientSource(ItemKey.of(stack), -1, stack, 64L));
         }
 
         @Override

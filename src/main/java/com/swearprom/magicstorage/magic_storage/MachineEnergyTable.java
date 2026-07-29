@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -58,6 +59,7 @@ public final class MachineEnergyTable {
     static void registerBuiltIns(DeferredRegister<MachineDescriptor> descriptors) {
         descriptors.register(FURNACE_ID.getPath(), () -> MachineDescriptor.installableVariants(
                 FURNACE_ID,
+                Items.FURNACE.getDescription(),
                 () -> MachineVariantContributors.combine(
                         FURNACE_ID,
                         List.of(MachineVariant.of(
@@ -186,6 +188,9 @@ public final class MachineEnergyTable {
             ItemStack.STREAM_CODEC.encode(buf, descriptor.representativeStack());
             Ingredient.CONTENTS_STREAM_CODEC.encode(buf, descriptor.acceptedItems());
             buf.writeEnum(descriptor.category());
+            if (descriptor.category() != Category.TRANSFORM) {
+                ComponentSerialization.STREAM_CODEC.encode(buf, descriptor.stationLabel());
+            }
             buf.writeVarInt(descriptor.maxInstalledCount());
             buf.writeBoolean(descriptor.energyType() != null);
             if (descriptor.energyType() != null) buf.writeEnum(descriptor.energyType());
@@ -215,6 +220,8 @@ public final class MachineEnergyTable {
             ItemStack representative = ItemStack.STREAM_CODEC.decode(buf);
             Ingredient acceptedItems = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
             Category category = buf.readEnum(Category.class);
+            var stationLabel = category == Category.TRANSFORM
+                    ? null : ComponentSerialization.STREAM_CODEC.decode(buf);
             int maxInstalledCount = buf.readVarInt();
             EnergyType energyType = buf.readBoolean() ? buf.readEnum(EnergyType.class) : null;
             int energyPerTick = buf.readVarInt();
@@ -231,10 +238,10 @@ public final class MachineEnergyTable {
             }
             descriptors.add(!polymorphic
                     ? MachineDescriptor.clientSynced(
-                            id, representative, acceptedItems, category,
+                            id, stationLabel, representative, acceptedItems, category,
                             maxInstalledCount, energyType, energyPerTick)
                     : MachineDescriptor.clientSyncedVariants(
-                            id, variants, category, maxInstalledCount, energyType));
+                            id, stationLabel, variants, category, maxInstalledCount, energyType));
         }
         return List.copyOf(descriptors);
     }

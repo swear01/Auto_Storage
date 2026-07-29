@@ -220,6 +220,7 @@ record RecipeAdapterMatch(
         private final List<ItemStack> representatives;
         private final List<Item> representativeItems;
         private final boolean representativeItemsExhaustive;
+        private final boolean matchesAllItemVariants;
         private final int multiplicity;
         private final boolean empty;
 
@@ -228,6 +229,7 @@ record RecipeAdapterMatch(
                 Predicate<ItemStack> matcher,
                 List<ItemStack> representatives,
                 boolean representativeItemsExhaustive,
+                boolean matchesAllItemVariants,
                 int multiplicity,
                 boolean empty
         ) {
@@ -243,6 +245,11 @@ record RecipeAdapterMatch(
                     .distinct()
                     .toList();
             this.representativeItemsExhaustive = representativeItemsExhaustive;
+            if (matchesAllItemVariants && !representativeItemsExhaustive) {
+                throw new IllegalArgumentException(
+                        "All-item-variant inputs require exhaustive representative items");
+            }
+            this.matchesAllItemVariants = matchesAllItemVariants;
             if (empty != (multiplicity == 0)) {
                 throw new IllegalArgumentException("Empty inputs require zero multiplicity");
             }
@@ -259,7 +266,7 @@ record RecipeAdapterMatch(
                 List<ItemStack> representatives,
                 int multiplicity
         ) {
-            return of(identity, matcher, representatives, false, multiplicity);
+            return of(identity, matcher, representatives, false, false, multiplicity);
         }
 
         static Input of(
@@ -269,17 +276,31 @@ record RecipeAdapterMatch(
                 boolean representativeItemsExhaustive,
                 int multiplicity
         ) {
+            return of(
+                    identity, matcher, representatives,
+                    representativeItemsExhaustive, false, multiplicity);
+        }
+
+        static Input of(
+                Object identity,
+                Predicate<ItemStack> matcher,
+                List<ItemStack> representatives,
+                boolean representativeItemsExhaustive,
+                boolean matchesAllItemVariants,
+                int multiplicity
+        ) {
             return new Input(
                     identity,
                     matcher,
                     representatives,
                     representativeItemsExhaustive,
+                    matchesAllItemVariants,
                     multiplicity,
                     false);
         }
 
         static Input empty(Object identity) {
-            return new Input(identity, stack -> false, List.of(), true, 0, true);
+            return new Input(identity, stack -> false, List.of(), true, false, 0, true);
         }
 
         boolean test(ItemStack stack) {
@@ -296,6 +317,10 @@ record RecipeAdapterMatch(
 
         boolean representativeItemsExhaustive() {
             return representativeItemsExhaustive;
+        }
+
+        boolean matchesAllItemVariants() {
+            return matchesAllItemVariants;
         }
 
         int multiplicity() {

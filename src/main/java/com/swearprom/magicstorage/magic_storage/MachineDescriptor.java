@@ -1,6 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +16,8 @@ import java.util.function.Supplier;
 
 public final class MachineDescriptor {
     private final ResourceLocation id;
+    @Nullable
+    private final Component stationLabel;
     private final ItemStack representative;
     private final Ingredient acceptedItems;
     private final MachineEnergyTable.Category category;
@@ -29,6 +32,7 @@ public final class MachineDescriptor {
 
     private MachineDescriptor(
             ResourceLocation id,
+            @Nullable Component stationLabel,
             ItemStack representative,
             Ingredient acceptedItems,
             MachineEnergyTable.Category category,
@@ -39,6 +43,7 @@ public final class MachineDescriptor {
             @Nullable TransformValue transformValue
     ) {
         this.id = Objects.requireNonNull(id);
+        this.stationLabel = stationLabel;
         this.representative = Objects.requireNonNull(representative).copyWithCount(1);
         this.acceptedItems = Objects.requireNonNull(acceptedItems);
         this.category = Objects.requireNonNull(category);
@@ -61,6 +66,7 @@ public final class MachineDescriptor {
     ) {
         return new MachineDescriptor(
                 id,
+                representative.getHoverName(),
                 representative,
                 acceptedItems,
                 category,
@@ -73,6 +79,7 @@ public final class MachineDescriptor {
 
     public static MachineDescriptor installableVariants(
             ResourceLocation id,
+            Component stationLabel,
             Supplier<List<MachineVariant>> variants,
             MachineEnergyTable.Category category,
             int maxInstalledCount,
@@ -82,6 +89,7 @@ public final class MachineDescriptor {
         List<MachineVariant> initial = checkedVariantStacks(id, variants.get());
         return new MachineDescriptor(
                 id,
+                Objects.requireNonNull(stationLabel, "stationLabel"),
                 initial.getFirst().stack(),
                 Ingredient.of(initial.stream().map(MachineVariant::stack)),
                 category,
@@ -100,6 +108,7 @@ public final class MachineDescriptor {
     ) {
         return new MachineDescriptor(
                 id,
+                null,
                 representative,
                 acceptedItems,
                 MachineEnergyTable.Category.TRANSFORM,
@@ -112,6 +121,7 @@ public final class MachineDescriptor {
 
     static MachineDescriptor clientSynced(
             ResourceLocation id,
+            @Nullable Component stationLabel,
             ItemStack representative,
             Ingredient acceptedItems,
             MachineEnergyTable.Category category,
@@ -128,6 +138,7 @@ public final class MachineDescriptor {
                 : null;
         return new MachineDescriptor(
                 id,
+                stationLabel,
                 representative,
                 acceptedItems,
                 category,
@@ -140,13 +151,15 @@ public final class MachineDescriptor {
 
     static MachineDescriptor clientSyncedVariants(
             ResourceLocation id,
+            Component stationLabel,
             List<MachineVariant> variants,
             MachineEnergyTable.Category category,
             int maxInstalledCount,
             @Nullable EnergyType energyType
     ) {
         List<MachineVariant> snapshot = List.copyOf(variants);
-        return installableVariants(id, () -> snapshot, category, maxInstalledCount, energyType);
+        return installableVariants(
+                id, stationLabel, () -> snapshot, category, maxInstalledCount, energyType);
     }
 
     private void validate() {
@@ -157,13 +170,14 @@ public final class MachineDescriptor {
             throw new IllegalArgumentException("Descriptor ingredient cannot be explicitly empty: " + id);
         }
         if (category == MachineEnergyTable.Category.TRANSFORM) {
-            if (maxInstalledCount != 0 || energyType != null || energyPerTick != 0
+            if (stationLabel != null || maxInstalledCount != 0 || energyType != null || energyPerTick != 0
                     || transformValue == null) {
                 throw new IllegalArgumentException("Invalid transform descriptor: " + id);
             }
             return;
         }
-        if (maxInstalledCount < 1
+        if (stationLabel == null || stationLabel.getString().isBlank()
+                || maxInstalledCount < 1
                 || maxInstalledCount > MachineDescriptorApi.MAX_INSTALLED_COUNT
                 || transformValue != null) {
             throw new IllegalArgumentException("Invalid installable descriptor count: " + id);
@@ -175,6 +189,13 @@ public final class MachineDescriptor {
 
     public ResourceLocation id() {
         return id;
+    }
+
+    public Component stationLabel() {
+        if (stationLabel == null) {
+            throw new IllegalStateException("Transform descriptor has no station label: " + id);
+        }
+        return stationLabel;
     }
 
     public ItemStack representativeStack() {

@@ -90,6 +90,8 @@ public final class ModernIndustrializationCompat {
                     machineDescriptors.getNamespace(), registryPath);
             machineDescriptors.register(registryPath, () -> MachineDescriptor.installableVariants(
                     descriptorId,
+                    net.minecraft.network.chat.Component.translatable(
+                            "gui.magic_storage.station." + registryPath),
                     () -> variants(family),
                     MachineEnergyTable.Category.PROCESS,
                     MachineDescriptorApi.MAX_INSTALLED_COUNT,

@@ -21,7 +21,7 @@ bridge. Simulation and commit both use Ars Nouveau's own `receiveSource` and
 `extractSource` operations; Source joins the same atomic Core transaction as
 items, station work, remainders, and outputs.
 
-Source appears in the terminal's Other resource view only while Ars Nouveau is
+Source appears in the terminal's Energy resource view only while Ars Nouveau is
 loaded. Its amount, capacity, persistence, and transfer limits remain the
 provider's native Source units.
 

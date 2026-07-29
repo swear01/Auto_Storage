@@ -11,7 +11,7 @@ final class TerminalLayout {
     static final int TOP_HEIGHT = 19;
     static final int MIN_STORAGE_ROWS = 3;
     static final int MIN_CRAFTING_ROWS = 1;
-    static final int MAX_ROWS = 9;
+    static final int MAX_ROWS = StorageTerminalMenu.MAX_DISPLAY_ROWS;
     static final int RAIL_GROUP_GAP = 6;
 
     private static final int NARROW_WIDTH = 210;
@@ -50,15 +50,11 @@ final class TerminalLayout {
     private static final int RECIPE_INSET = 4;
     private static final int CONTROL_GAP = 2;
     private static final int RECIPE_DIAGRAM_MIN_HEIGHT = SLOT_SIZE * 3;
-    private static final int RECIPE_DIAGRAM_MAX_HEIGHT = SLOT_SIZE * 4;
     private static final int RECIPE_LEDGER_MIN_ROW_HEIGHT = 16;
     private static final int RECIPE_LEDGER_MAX_COLUMNS = 4;
     private static final int RECIPE_LEDGER_MIN_CELL_WIDTH = 56;
     private static final int RECIPE_LEDGER_MAX_HEIGHT = SLOT_SIZE * 3;
-    private static final int RECIPE_BODY_MAX_HEIGHT = RECIPE_DIAGRAM_MAX_HEIGHT
-            + RECIPE_LEDGER_MAX_HEIGHT;
     private static final int RECIPE_BODY_FOOTER_GAP = 4;
-    private static final int MAX_RECIPE_LEDGER_ROWS = RecipePresentation.MAX_ITEM_RESOURCES + 3;
     private static final int TRANSFORM_TARGET_ROW_HEIGHT = 20;
     private static final int TRANSFORM_TARGET_COLUMN_MIN_WIDTH = 96;
     private static final int TRANSFORM_TARGET_COLUMN_MAX_WIDTH = 116;
@@ -232,7 +228,6 @@ final class TerminalLayout {
             Rect transformInput,
             List<Rect> transformAmountButtons,
             Rect fuelStatus,
-            Rect fuelSearchButton,
             Rect fuelSearchBox,
             Rect fuelSearchPanel,
             FlowGrid transformCards,
@@ -262,6 +257,15 @@ final class TerminalLayout {
 
         List<Rect> recipeLedgerCells(int resourceCount) {
             return TerminalLayout.recipeLedgerCells(recipeLedger, resourceCount);
+        }
+
+        int recipeLedgerColumns() {
+            return TerminalLayout.recipeLedgerColumns(recipeLedger);
+        }
+
+        int recipeLedgerCapacity() {
+            return recipeLedgerColumns()
+                    * Math.max(1, recipeLedger.height() / SLOT_SIZE);
         }
 
         Rect recipeContent() {
@@ -326,7 +330,7 @@ final class TerminalLayout {
                 itemGrid,
                 new Rect(102, 6, 70, 9),
                 new Rect(100, 4, 72, 12),
-                new Rect(174, TOP_HEIGHT, 12, rows * SLOT_SIZE),
+                new Rect(173, TOP_HEIGHT, 14, rows * SLOT_SIZE),
                 playerInventory,
                 empty,
                 empty,
@@ -347,7 +351,6 @@ final class TerminalLayout {
                 emptyPageControls,
                 empty,
                 List.of(),
-                empty,
                 empty,
                 empty,
                 empty,
@@ -392,7 +395,7 @@ final class TerminalLayout {
         int rows = wide ? wideRows : narrowRows(screenHeight);
 
         Rect itemGrid = new Rect(8, TOP_HEIGHT, 9 * SLOT_SIZE, rows * SLOT_SIZE);
-        Rect scrollbar = new Rect(174, TOP_HEIGHT, 12, rows * SLOT_SIZE);
+        Rect scrollbar = new Rect(173, TOP_HEIGHT, 14, rows * SLOT_SIZE);
         Rect playerInventory;
         Rect workspace;
         int imageHeight;
@@ -460,7 +463,7 @@ final class TerminalLayout {
         int imageHeight = playerInventory.bottom() + 8;
         Rect workspace = new Rect(8, workspaceY, NARROW_WIDTH - 16, NARROW_WORKSPACE_HEIGHT);
         return assembleCraftingGeometry(profile, false, NARROW_WIDTH, imageHeight, rows, itemGrid,
-                new Rect(174, TOP_HEIGHT, 12, rows * SLOT_SIZE), playerInventory, workspace,
+                new Rect(173, TOP_HEIGHT, 14, rows * SLOT_SIZE), playerInventory, workspace,
                 profileRails(profile, imageHeight), fuelDescriptors, horizontalFuelHeaders);
     }
 
@@ -479,6 +482,24 @@ final class TerminalLayout {
             boolean horizontalFuelHeaders
     ) {
         int fuelAreaBottom = playerInventory.y() - INVENTORY_LABEL_BAND_HEIGHT;
+        Rect searchBox = new Rect(102, 6, 70, 9);
+        Rect searchBackground = new Rect(100, 4, 72, 12);
+        if (wide) {
+            itemGrid = new Rect(
+                    itemGrid.x(),
+                    itemGrid.y(),
+                    itemGrid.width(),
+                    fuelAreaBottom - itemGrid.y());
+            scrollbar = new Rect(
+                    scrollbar.x(),
+                    scrollbar.y(),
+                    scrollbar.width(),
+                    fuelAreaBottom - scrollbar.y());
+            rows = Math.clamp(
+                    itemGrid.height() / SLOT_SIZE,
+                    MIN_STORAGE_ROWS,
+                    MAX_ROWS);
+        }
         int availablePanelHeight = fuelAreaBottom - TOP_HEIGHT;
         Rect transformPanel = new Rect(
                 8, TOP_HEIGHT, imageWidth - 16, availablePanelHeight);
@@ -496,38 +517,35 @@ final class TerminalLayout {
                 transformPanel.width() / 3,
                 TRANSFORM_TARGET_COLUMN_MIN_WIDTH,
                 TRANSFORM_TARGET_COLUMN_MAX_WIDTH);
-        Rect transformTargetSearch = new Rect(
-                transformPanel.x() + FUEL_PANEL_INSET,
-                transformPanel.y() + FUEL_PANEL_INSET,
-                targetColumnWidth,
-                CONTROL_SIZE);
+        Rect transformTargetSearch = searchBox;
+        int targetColumnX = transformPanel.x() + FUEL_PANEL_INSET;
         FuelPageControls transformTargetPageControls = new FuelPageControls(
                 new Rect(
-                        transformTargetSearch.x(),
+                        targetColumnX,
                         transformPanel.bottom() - FUEL_PANEL_INSET - CONTROL_SIZE,
                         CONTROL_SIZE,
                         CONTROL_SIZE),
                 new Rect(
-                        transformTargetSearch.right() - CONTROL_SIZE,
+                        targetColumnX + targetColumnWidth - CONTROL_SIZE,
                         transformPanel.bottom() - FUEL_PANEL_INSET - CONTROL_SIZE,
                         CONTROL_SIZE,
                         CONTROL_SIZE));
         int fuelTargetCount = fuelDescriptors.fuelTargetCount();
-        int targetListY = transformTargetSearch.bottom() + CONTROL_GAP;
+        int targetListY = transformPanel.y() + FUEL_PANEL_INSET;
         int targetListHeight = Math.max(
                 TRANSFORM_TARGET_ROW_HEIGHT,
                 transformTargetPageControls.previous().y() - CONTROL_GAP - targetListY);
         int targetCapacity = Math.max(1, targetListHeight / TRANSFORM_TARGET_ROW_HEIGHT);
         PagedList transformTargetList = new PagedList(
                 new Rect(
-                        transformTargetSearch.x(),
+                        targetColumnX,
                         targetListY,
                         targetColumnWidth,
                         targetCapacity * TRANSFORM_TARGET_ROW_HEIGHT),
                 TRANSFORM_TARGET_ROW_HEIGHT,
                 targetCapacity,
                 fuelTargetCount);
-        int transformContentX = transformTargetSearch.right() + CONTROL_GAP;
+        int transformContentX = targetColumnX + targetColumnWidth + CONTROL_GAP;
         int transformContentWidth = transformPanel.right() - FUEL_PANEL_INSET - transformContentX;
         Rect transformInput = new Rect(
                 transformContentX + 1,
@@ -542,7 +560,7 @@ final class TerminalLayout {
                 : transformContentWidth;
         int amountStripWidth = Math.max(
                 minimumAmountStripWidth,
-                Math.min(216, amountStripAvailable));
+                Math.min(minimumAmountStripWidth * 2, amountStripAvailable));
         amountStripWidth -= amountStripWidth % 4;
         Rect transformAmountStrip = new Rect(
                 singleTransformActionRow
@@ -555,8 +573,10 @@ final class TerminalLayout {
                 CONTROL_SIZE);
         List<Rect> transformAmountButtons =
                 contiguousSegmentRects(transformAmountStrip, 4);
-        int transformCardControlsY = Math.max(
+        int transformCardsY = Math.max(
                 transformInput.bottom(), transformAmountStrip.bottom()) + CONTROL_GAP;
+        int transformCardControlsY =
+                transformPanel.bottom() - FUEL_PANEL_INSET - CONTROL_SIZE;
         FuelPageControls transformCardPageControls = new FuelPageControls(
                 new Rect(
                         transformPanel.right() - FUEL_PANEL_INSET
@@ -569,13 +589,12 @@ final class TerminalLayout {
                         transformCardControlsY,
                         CONTROL_SIZE,
                         CONTROL_SIZE));
-        int transformCardsY = transformCardPageControls.previous().bottom() + CONTROL_GAP;
         Rect transformCardBounds = new Rect(
                 transformContentX,
                 transformCardsY,
                 transformContentWidth,
                 Math.max(TRANSFORM_CARD_HEIGHT,
-                        transformPanel.bottom() - FUEL_PANEL_INSET - transformCardsY));
+                        transformCardControlsY - CONTROL_GAP - transformCardsY));
         FlowGrid transformCards = pagedSingleColumnGrid(
                 transformCardBounds,
                 fuelDescriptors.consumableCount(),
@@ -593,18 +612,7 @@ final class TerminalLayout {
                 playerInventory.y(),
                 imageWidth - 8 - statusX,
                 playerInventory.height());
-        Rect fuelSearchButton = new Rect(
-                fuelStatus.right() - CONTROL_SIZE,
-                fuelStatus.bottom() - CONTROL_SIZE,
-                CONTROL_SIZE,
-                CONTROL_SIZE);
-        Rect fuelSearchBox = fuelStatus.width() >= CONTROL_SIZE * 4
-                ? new Rect(
-                        fuelStatus.x() + 3,
-                        fuelSearchButton.y() + 4,
-                        fuelSearchButton.x() - CONTROL_GAP - fuelStatus.x() - 6,
-                        9)
-                : new Rect(102, 6, 70, 9);
+        Rect fuelSearchBox = searchBox;
         Rect fuelSearchPanel = new Rect(
                 transformPanel.x(),
                 transformPanel.y(),
@@ -650,8 +658,8 @@ final class TerminalLayout {
                 imageHeight,
                 rows,
                 itemGrid,
-                new Rect(102, 6, 70, 9),
-                new Rect(100, 4, 72, 12),
+                searchBox,
+                searchBackground,
                 scrollbar,
                 playerInventory,
                 workspace,
@@ -674,7 +682,6 @@ final class TerminalLayout {
                 transformInput,
                 transformAmountButtons,
                 fuelStatus,
-                fuelSearchButton,
                 fuelSearchBox,
                 fuelSearchPanel,
                 transformCards,
@@ -765,7 +772,7 @@ final class TerminalLayout {
         int bodyTopLimit = workspace.y() + RECIPE_INSET;
         int bodyBottomLimit = footer.y() - RECIPE_BODY_FOOTER_GAP;
         int availableBodyHeight = bodyBottomLimit - bodyTopLimit;
-        int bodyHeight = Math.min(RECIPE_BODY_MAX_HEIGHT, availableBodyHeight);
+        int bodyHeight = availableBodyHeight;
         if (bodyHeight < RECIPE_DIAGRAM_MIN_HEIGHT + RECIPE_LEDGER_MIN_ROW_HEIGHT) {
             throw new IllegalArgumentException("Recipe workspace is too short for its compact body");
         }
@@ -774,7 +781,7 @@ final class TerminalLayout {
                 Math.max(RECIPE_LEDGER_MIN_ROW_HEIGHT,
                         bodyHeight - RECIPE_DIAGRAM_MIN_HEIGHT));
         int diagramHeight = bodyHeight - ledgerHeight;
-        int bodyY = bodyTopLimit + (availableBodyHeight - bodyHeight) / 2;
+        int bodyY = bodyTopLimit;
         Rect diagram = new Rect(
                 workspace.x() + RECIPE_INSET,
                 bodyY,
@@ -795,7 +802,7 @@ final class TerminalLayout {
         int chainWidth = inputGridSize + CONTROL_GAP + CONTROL_SIZE
                 + CONTROL_GAP + outputSize;
         int chainX = diagram.x() + Math.max(0, (diagram.width() - chainWidth) / 2);
-        int inputY = diagram.y() + Math.max(0, (diagram.height() - inputGridSize) / 2);
+        int inputY = diagram.y() + 2;
         List<Rect> inputSlots = new ArrayList<>(RecipePresentation.MAX_INPUTS);
         for (int input = 0; input < RecipePresentation.MAX_INPUTS; input++) {
             inputSlots.add(new Rect(
@@ -806,12 +813,12 @@ final class TerminalLayout {
         }
         Rect arrow = new Rect(
                 chainX + inputGridSize + CONTROL_GAP,
-                diagram.y() + (diagram.height() - CONTROL_SIZE) / 2,
+                inputY + (inputGridSize - CONTROL_SIZE) / 2,
                 CONTROL_SIZE,
                 CONTROL_SIZE);
         Rect output = new Rect(
                 arrow.right() + CONTROL_GAP,
-                diagram.y() + (diagram.height() - outputSize) / 2,
+                inputY + (inputGridSize - outputSize) / 2,
                 outputSize,
                 outputSize);
         Rect station = new Rect(
@@ -855,12 +862,12 @@ final class TerminalLayout {
     }
 
     private static List<Rect> recipeLedgerCells(Rect bounds, int resourceCount) {
-        if (resourceCount < 0 || resourceCount > MAX_RECIPE_LEDGER_ROWS) {
+        int columns = Math.min(recipeLedgerColumns(bounds), Math.max(1, resourceCount));
+        int capacity = recipeLedgerColumns(bounds) * Math.max(1, bounds.height() / SLOT_SIZE);
+        if (resourceCount < 0 || resourceCount > capacity) {
             throw new IllegalArgumentException("Recipe ledger resource count is out of bounds");
         }
         if (resourceCount == 0) return List.of();
-        int availableColumns = Math.max(1, bounds.width() / RECIPE_LEDGER_MIN_CELL_WIDTH);
-        int columns = Math.min(Math.min(RECIPE_LEDGER_MAX_COLUMNS, availableColumns), resourceCount);
         int rows = (resourceCount + columns - 1) / columns;
         int cellHeight = Math.min(SLOT_SIZE, bounds.height() / rows);
         int top = bounds.y();
@@ -877,6 +884,12 @@ final class TerminalLayout {
                     cellHeight));
         }
         return List.copyOf(result);
+    }
+
+    private static int recipeLedgerColumns(Rect bounds) {
+        return Math.min(
+                RECIPE_LEDGER_MAX_COLUMNS,
+                Math.max(1, bounds.width() / RECIPE_LEDGER_MIN_CELL_WIDTH));
     }
 
     private static List<Rect> contiguousSegmentRects(Rect bounds, int segmentCount) {
@@ -1001,6 +1014,11 @@ final class TerminalLayout {
             int cellHeight
     ) {
         int rows = Math.max(1, bounds.height() / cellHeight);
+        bounds = new Rect(
+                bounds.x(),
+                bounds.y(),
+                bounds.width(),
+                rows * cellHeight);
         int visible = Math.min(itemCount, rows);
         List<Rect> cells = flowCells(
                 bounds,
@@ -1029,22 +1047,17 @@ final class TerminalLayout {
             boolean compact
     ) {
         if (visible <= 0) return List.of();
-        int largestColumns = Math.min(maxColumns, visible);
-        int minimumColumns = (visible + maxRows - 1) / maxRows;
-        int preferredColumns = Math.max(1, bounds.width() / preferredCellWidth);
-        int columns = Math.clamp(preferredColumns, minimumColumns, largestColumns);
-        int rows = (visible + columns - 1) / columns;
+        int columns = Math.max(1, maxColumns);
         List<Rect> cells = new ArrayList<>(visible);
         for (int index = 0; index < visible; index++) {
             int column = index % columns;
             int row = index / columns;
-            int columnsInRow = Math.min(columns, visible - row * columns);
             int left = compact
                     ? bounds.x() + column * preferredCellWidth
-                    : bounds.x() + column * bounds.width() / columnsInRow;
+                    : bounds.x() + column * bounds.width() / columns;
             int right = compact
                     ? Math.min(bounds.right(), left + preferredCellWidth)
-                    : bounds.x() + (column + 1) * bounds.width() / columnsInRow;
+                    : bounds.x() + (column + 1) * bounds.width() / columns;
             int top = compact
                     ? bounds.y() + row * preferredCellWidth
                     : bounds.y() + row * bounds.height() / maxRows;

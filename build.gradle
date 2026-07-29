@@ -70,6 +70,10 @@ sourceSets {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
     }
+    extendedCraftingFixture {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.runtimeClasspath
+    }
     compatibilityMatrixFixture {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
@@ -97,6 +101,7 @@ neoForge {
     addModdingDependenciesTo sourceSets.industrialForegoingFixture
     addModdingDependenciesTo sourceSets.createFixture
     addModdingDependenciesTo sourceSets.pneumaticCraftFixture
+    addModdingDependenciesTo sourceSets.extendedCraftingFixture
     addModdingDependenciesTo sourceSets.compatibilityMatrixFixture
 
     mods {
@@ -138,6 +143,9 @@ neoForge {
         }
         magic_storage_pneumaticcraft_fixture {
             sourceSet(sourceSets.pneumaticCraftFixture)
+        }
+        magic_storage_extended_crafting_fixture {
+            sourceSet(sourceSets.extendedCraftingFixture)
         }
         magic_storage_compatibility_matrix_fixture {
             sourceSet(sourceSets.compatibilityMatrixFixture)
@@ -261,12 +269,22 @@ neoForge {
                     'magic_storage_pneumaticcraft_fixture'
         }
 
+        extendedCraftingGameTestServer {
+            type = "gameTestServer"
+            sourceSet = sourceSets.extendedCraftingFixture
+            loadedMods = [mods."${mod_id}", mods.magic_storage_extended_crafting_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces',
+                    'magic_storage_extended_crafting_fixture'
+        }
+
         compatibilityMatrixGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.compatibilityMatrixFixture
             loadedMods = [mods."${mod_id}", mods.magic_storage_compatibility_matrix_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
                     'magic_storage_compatibility_matrix_fixture'
+            systemProperty 'magic_storage.terminalScaleTypes',
+                    providers.gradleProperty('terminalScaleTypes').orElse('10000').get()
         }
 
         data {
@@ -377,6 +395,16 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    prismGuiExtendedCrafting {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    prismGuiCucumber {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
 }
 
 repositories {
@@ -417,6 +445,8 @@ dependencies {
     compileOnly "maven.modrinth:titanium:${titanium_ci_version}"
     compileOnly "maven.modrinth:create:${create_ci_version}"
     compileOnly "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}"
+    compileOnly "maven.modrinth:extended-crafting:${extended_crafting_ci_version}"
+    compileOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
     mekanismFixtureRuntimeOnly "maven.modrinth:mekanism:${mekanism_ci_version}"
     botaniaFixtureRuntimeOnly(
             "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}") {
@@ -441,6 +471,9 @@ dependencies {
     industrialForegoingFixtureRuntimeOnly "maven.modrinth:titanium:${titanium_ci_version}"
     createFixtureRuntimeOnly "maven.modrinth:create:${create_ci_version}"
     pneumaticCraftFixtureRuntimeOnly "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}"
+    extendedCraftingFixtureRuntimeOnly(
+            "maven.modrinth:extended-crafting:${extended_crafting_ci_version}")
+    extendedCraftingFixtureRuntimeOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
     compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:mekanism:${mekanism_ci_version}"
     compatibilityMatrixFixtureRuntimeOnly(
             "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}") {
@@ -467,11 +500,14 @@ dependencies {
     compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:create:${create_ci_version}"
     compatibilityMatrixFixtureRuntimeOnly(
             "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly(
+            "maven.modrinth:extended-crafting:${extended_crafting_ci_version}")
+    compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
     fusionRuntimeRuntimeOnly "maven.modrinth:emi:${emi_runtime_version}"
     emiRuntime "maven.modrinth:emi:${emi_runtime_version}"
-    fusionRuntimeRuntimeOnly "maven.modrinth:fusion-connected-textures:h2GrA0Ku"
+    fusionRuntimeRuntimeOnly "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
     clientSmokePatchouli "vazkii.patchouli:Patchouli:${patchouli_version}"
-    clientSmokeFusion "maven.modrinth:fusion-connected-textures:h2GrA0Ku"
+    clientSmokeFusion "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
     prismGuiIronFurnaces "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
     prismGuiFarmersDelight "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
     prismGuiTmrv "maven.modrinth:tmrv:${tmrv_ci_version}"
@@ -487,6 +523,8 @@ dependencies {
     prismGuiIndustrialForegoing "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}"
     prismGuiTitanium "maven.modrinth:titanium:${titanium_ci_version}"
     prismGuiCreate "maven.modrinth:create:${create_ci_version}"
+    prismGuiExtendedCrafting "maven.modrinth:extended-crafting:${extended_crafting_ci_version}"
+    prismGuiCucumber "maven.modrinth:cucumber:${cucumber_ci_version}"
 }
 
 def botaniaFixtureRuntime = configurations.named("botaniaFixtureRuntimeClasspath")
@@ -524,6 +562,9 @@ tasks.named("compileBotaniaFixtureJava").configure {
 }
 
 def stagedEmiVersion = project.emi_version.toString()
+def macfixGuiArtifact = layout.projectDirectory.file(
+        "../macfix/build/libs/macfix-${macfix_gui_version}.jar")
+def expectedMacfixGuiSha256 = macfix_gui_sha256.toString()
 tasks.register("stageEmiRuntime", Copy) {
     from configurations.emiRuntime
     into layout.buildDirectory.dir("client-smoke-mods")
@@ -542,7 +583,30 @@ tasks.register("stageClientSmokeSupportMods", Copy) {
 
 tasks.register("stagePrismGuiSupportMods", Sync) {
     dependsOn tasks.named("verifyBotaniaFixtureArtifact")
+    inputs.file(macfixGuiArtifact)
+    inputs.property("macfixSha256", expectedMacfixGuiSha256)
     into layout.buildDirectory.dir("prism-gui-mods")
+    doFirst {
+        def artifact = macfixGuiArtifact.asFile
+        if (!artifact.isFile()) {
+            throw new GradleException("MacFix GUI artifact not found: ${artifact}")
+        }
+        def digest = java.security.MessageDigest.getInstance("SHA-256")
+        artifact.withInputStream { input ->
+            byte[] buffer = new byte[8192]
+            for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        def actual = digest.digest().encodeHex().toString()
+        if (actual != expectedMacfixGuiSha256) {
+            throw new GradleException(
+                    "MacFix GUI artifact SHA-256 mismatch: expected ${expectedMacfixGuiSha256}, got ${actual}")
+        }
+    }
+    from(macfixGuiArtifact) {
+        rename { "macfix-gui-test.jar" }
+    }
     from(configurations.prismGuiIronFurnaces) {
         rename { "iron-furnaces-gui-test.jar" }
     }
@@ -588,6 +652,12 @@ tasks.register("stagePrismGuiSupportMods", Sync) {
     from(configurations.prismGuiCreate) {
         rename { "create-gui-test.jar" }
     }
+    from(configurations.prismGuiExtendedCrafting) {
+        rename { "extended-crafting-gui-test.jar" }
+    }
+    from(configurations.prismGuiCucumber) {
+        rename { "cucumber-gui-test.jar" }
+    }
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -632,14 +702,14 @@ tasks.named('check').configure {
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-def expectedSelfTestSummary = 'SelfTest: 214653 passed, 0 failed, 214653 total'
+def expectedSelfTestSummary = 'SelfTest: 204908 passed, 0 failed, 204908 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {
             throw new GradleException('Base GameTest did not produce run/logs/latest.log')
         }
         def text = baseGameTestLatestLog.getText('UTF-8')
-        if (!text.contains('All 396 required tests passed')
+        if (!text.contains('All 405 required tests passed')
                 || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Base GameTest or SelfTest did not pass; inspect run/logs/latest.log')
@@ -839,6 +909,23 @@ tasks.named('runPneumaticCraftGameTestServer').configure {
     }
 }
 
+def extendedCraftingLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+tasks.named('runExtendedCraftingGameTestServer').configure {
+    doLast {
+        if (!extendedCraftingLatestLog.exists()) {
+            throw new GradleException(
+                    'Extended Crafting GameTest did not produce run/logs/latest.log')
+        }
+        def text = extendedCraftingLatestLog.getText('UTF-8')
+        if (!text.contains('All 4 required tests passed')
+                || !text.contains(expectedSelfTestSummary)
+                || text.contains('TESTS FAILED!')) {
+            throw new GradleException(
+                    'Extended Crafting GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+        }
+    }
+}
+
 def compatibilityMatrixLatestLog =
         layout.projectDirectory.file('run/logs/latest.log').asFile
 tasks.named('runCompatibilityMatrixGameTestServer').configure {
@@ -849,9 +936,16 @@ tasks.named('runCompatibilityMatrixGameTestServer').configure {
                     'Compatibility matrix GameTest did not produce run/logs/latest.log')
         }
         def text = compatibilityMatrixLatestLog.getText('UTF-8')
+        def warmStart = text.indexOf('TERMINAL_SCALE_WARM_INTERACTIONS_BEGIN')
+        def warmEnd = text.indexOf('TERMINAL_SCALE_WARM_INTERACTIONS_END', warmStart + 1)
+        def warmLog = warmStart >= 0 && warmEnd > warmStart
+                ? text.substring(warmStart, warmEnd)
+                : ''
         if (!text.contains('All 3 required tests passed')
                 || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
+                || text.contains('TESTS FAILED!')
+                || warmLog.isEmpty()
+                || warmLog.contains("Can't keep up!")) {
             throw new GradleException(
                     'Compatibility matrix GameTest or SelfTest did not pass; inspect run/logs/latest.log')
         }

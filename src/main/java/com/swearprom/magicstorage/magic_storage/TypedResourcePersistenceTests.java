@@ -450,7 +450,7 @@ public final class TypedResourcePersistenceTests {
             menu.clickMenuButton(player, StorageTerminalMenu.NEXT_RESOURCE_VIEW_BUTTON);
             if (menu.getResourceView() != TerminalResourceView.STATION_WORK
                     || menu.getTotalItemTypes() != 0) {
-                helper.fail("Selector did not expose the built-in Station Work view");
+                helper.fail("Selector did not expose the built-in Processing view");
                 return;
             }
 

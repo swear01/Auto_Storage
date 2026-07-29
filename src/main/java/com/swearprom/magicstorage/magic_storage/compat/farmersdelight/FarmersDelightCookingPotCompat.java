@@ -58,6 +58,7 @@ public final class FarmersDelightCookingPotCompat {
         ResourceLocation descriptorId = descriptorId(machineDescriptors.getNamespace());
         machineDescriptors.register(REGISTRY_PATH, () -> MachineDescriptor.installableVariants(
                 descriptorId,
+                new ItemStack(ModItems.COOKING_POT.get()).getHoverName(),
                 () -> List.of(MachineVariant.of(
                         new ItemStack(ModItems.COOKING_POT.get()),
                         MachineWorkRate.ONE)),

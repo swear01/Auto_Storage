@@ -309,8 +309,28 @@ public class FuelPageTests {
         if (geometry.transformTargetList().bounds().right()
                 >= geometry.transformCards().bounds().x()
                 || geometry.transformCards().bounds().bottom()
-                != geometry.transformPanel().bottom() - 2) {
-            helper.fail("Transform sidebar and cards must remain separate while cards fill the workspace");
+                >= geometry.transformCardPageControls().previous().y()) {
+            helper.fail("Transform sidebar and cards must remain separate while paging follows compact cards");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
+    public static void fullscreen_transform_header_keeps_input_name_readable(
+            GameTestHelper helper
+    ) {
+        var geometry = TerminalLayout.forProfile(
+                TerminalProfile.CRAFTING,
+                423, 291, new TerminalLayout.FuelDescriptorCounts(64, 64, 64, 5));
+        TerminalLayout.Rect input = geometry.transformInput();
+        java.util.List<TerminalLayout.Rect> actions = geometry.transformAmountButtons();
+        int inputNameWidth = actions.getFirst().x() - input.right();
+        if (inputNameWidth < 48
+                || actions.stream().anyMatch(action -> action.width() > 36)
+                || actions.getLast().right() > geometry.transformPanel().right() - 2) {
+            helper.fail("Transform actions must leave a readable input name: inputNameWidth="
+                    + inputNameWidth + ", actions=" + actions);
             return;
         }
         helper.succeed();
@@ -448,20 +468,23 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void retired_previous_next_target_button_ids_are_noops(GameTestHelper helper) {
+    public static void utility_sort_reuses_retired_target_cycle_id_without_changing_target(
+            GameTestHelper helper
+    ) {
         withCore(helper, (core, player) -> {
             var menu = new CraftingTerminalMenu(123, player.getInventory(), core);
             menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
             menu.clickMenuButton(player, CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL));
 
-            if (menu.clickMenuButton(player, 17)
+            if (!menu.clickMenuButton(player, StorageTerminalMenu.PREVIOUS_SORT_MODE_BUTTON)
+                    || menu.getSortMode() != SortMode.ID
                     || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
-                helper.fail("Retired previous-target button id must not mutate the explicit target");
+                helper.fail("Utility previous-sort must not mutate the explicit Transform target");
                 return;
             }
             if (menu.clickMenuButton(player, 18)
                     || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
-                helper.fail("Retired next-target button id must not mutate the explicit target");
+                helper.fail("Unassigned utility button 18 must remain a no-op");
                 return;
             }
             helper.succeed();
@@ -469,7 +492,9 @@ public class FuelPageTests {
     }
 
     @GameTest(template = "terminalflowtests.platform", batch = "fuel_page")
-    public static void fuel_target_ids_keep_fuel_and_brew_while_retired_bottle_is_rejected(GameTestHelper helper) {
+    public static void fuel_target_ids_keep_fuel_and_brew_while_21_resets_sort(
+            GameTestHelper helper
+    ) {
         withCore(helper, (core, player) -> {
             int fuelTargetId = CraftingTerminalMenu.fuelTargetButtonId(EnergyType.FURNACE_FUEL);
             int brewTargetId = CraftingTerminalMenu.fuelTargetButtonId(EnergyType.BLAZE_FUEL);
@@ -491,10 +516,14 @@ public class FuelPageTests {
                 helper.fail("Brew target ID 20 must select Brew");
                 return;
             }
-            boolean retiredAccepted = menu.clickMenuButton(player, 21);
-            if (retiredAccepted || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
-                helper.fail("Retired Bottle target ID 21 must be rejected without changing Brew: accepted="
-                        + retiredAccepted + " selected=" + menu.getSelectedFuelTarget());
+            menu.clickMenuButton(player, StorageTerminalMenu.SORT_ORDER_BUTTON);
+            boolean resetAccepted = menu.clickMenuButton(
+                    player, StorageTerminalMenu.RESET_SORT_ORDER_BUTTON);
+            if (!resetAccepted
+                    || menu.getSortOrder() != SortOrder.ASCENDING
+                    || menu.getSelectedFuelTarget() != EnergyType.BLAZE_FUEL) {
+                helper.fail("Utility sort reset must not change the Brew target: accepted="
+                        + resetAccepted + " selected=" + menu.getSelectedFuelTarget());
                 return;
             }
             helper.succeed();
@@ -544,6 +573,25 @@ public class FuelPageTests {
                     || menu.getSortOrder() != SortOrder.DESCENDING
                     || menu.getSearchMode() != SearchMode.EMI) {
                 helper.fail("Crafting Items page must delegate sort, order, and search controls");
+                return;
+            }
+
+            menu.clickMenuButton(player, CraftingTerminalMenu.TRANSFORM_PAGE_BUTTON);
+            if (!menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_MODE_BUTTON)
+                    || !menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_ORDER_BUTTON)
+                    || !menu.clickMenuButton(player, StorageTerminalMenu.PREVIOUS_SORT_MODE_BUTTON)
+                    || menu.getSortMode() != SortMode.ID
+                    || menu.getSortOrder() != SortOrder.ASCENDING) {
+                helper.fail("Transform must reuse shared sort method and order controls");
+                return;
+            }
+
+            menu.clickMenuButton(player, CraftingTerminalMenu.STATIONS_PAGE_BUTTON);
+            if (!menu.clickMenuButton(player, StorageTerminalMenu.SORT_ORDER_BUTTON)
+                    || !menu.clickMenuButton(player, StorageTerminalMenu.NEXT_SORT_MODE_BUTTON)
+                    || menu.getSortMode() != SortMode.NAME
+                    || menu.getSortOrder() != SortOrder.DESCENDING) {
+                helper.fail("Stations must reuse shared sort method and order controls");
                 return;
             }
             helper.succeed();
@@ -970,8 +1018,8 @@ public class FuelPageTests {
 
             var serverData = dataSlots(serverMenu);
             var clientData = dataSlots(clientMenu);
-            if (serverData.size() != 103 || clientData.size() != 103) {
-                helper.fail("Crafting fuel/resource/output/Axe Energy/unlimited-capacity/resource-view/Transform-card sync requires exact 103-slot compatibility parity, server="
+            if (serverData.size() != 392 || clientData.size() != 392) {
+                helper.fail("Crafting fuel/resource/output/Axe Energy/unlimited-capacity/resource-view/Transform-card/craftable-variant sync requires exact 392-slot compatibility parity, server="
                         + serverData.size() + " client=" + clientData.size());
                 return;
             }
@@ -1323,6 +1371,13 @@ public class FuelPageTests {
                 helper.fail("Near-cap Shift-click must install exactly the available 32 slots "
                         + "and preserve the other 32 machines: installed=" + installed
                         + ", remainder=" + remainder + ", moved=" + moved);
+                return;
+            }
+            long workBefore = core.getEnergy(EnergyType.SMELTING_ENERGY);
+            core.tick();
+            if (core.getEnergy(EnergyType.SMELTING_ENERGY) - workBefore != Integer.MAX_VALUE) {
+                helper.fail("Integer.MAX_VALUE installed Furnaces must contribute exact work "
+                        + "without overflow");
                 return;
             }
 

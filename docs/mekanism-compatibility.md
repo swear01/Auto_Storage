@@ -95,6 +95,10 @@ four excluded.
 - Exact Mekanism chemicals use the Core's shared long-amount typed ledger.
 - The terminal exposes the Gases resource group only while a chemical provider
   is registered.
+- Every player-facing Gas entry, selector, native diagram, and resource ledger
+  renders Mekanism's exact EMI chemical glyph and per-recipe long amount. The
+  internal tank carrier is not a player icon, and its capacity is not a recipe
+  unit.
 - Held containers and Import/Export Buses use the optional Mekanism chemical
   capability without making Mekanism a required dependency.
 - Item, fluid, NeoForge Energy, and chemical inputs may participate in the same

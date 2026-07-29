@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,6 +24,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private static final int STORAGE_SCHEMA = 1;
 
     private final Set<BlockPos> connectedBlocks = new HashSet<>();
+    private final Set<BlockPos> connectedBlocksView =
+            Collections.unmodifiableSet(connectedBlocks);
     private final UUID attachmentToken = UUID.randomUUID();
     private UUID storageId;
     private int storageSchema;
@@ -30,9 +33,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private StorageAvailability storageAvailability = StorageAvailability.UNINITIALIZED;
     private UUID networkId;
     private boolean conflicted = false;
+    private boolean networkCapped;
     private long topologyRevision;
     private StorageTypeCapacity typeCapacity = StorageTypeCapacity.zero();
     private int typeCount = 0;
+    private long craftableRevision;
     private long machineRevision;
     private Set<ResourceLocation> infiniteDescriptors = new HashSet<>();
     private Map<ResourceLocation, MachineWorkAccumulator.Remainder> machineWorkRemainders =
@@ -42,8 +47,16 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private SimpleContainer machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
 
     private StorageResourceLedger resourceLedger = new StorageResourceLedger();
-    private final Map<ItemKey, Long> flatCache = new HashMap<>();
-    private final Map<ItemKey, TerminalSearchEntry> itemSearchCache = new HashMap<>();
+    private final Map<ItemKey, IndexedItem> itemIndex = new HashMap<>();
+    private final Map<Item, List<IndexedItem>> itemIndexByItem = new HashMap<>();
+    private final Map<Item, Long> itemAmountIndex = new HashMap<>();
+    private final List<IndexedItem> sortedNameIndex = new ArrayList<>();
+    private final EnumMap<SortMode, List<IndexedItem>> sortedItemIndex =
+            new EnumMap<>(SortMode.class);
+    private List<IngredientSource> ingredientSourceSnapshot;
+    private Map<ItemKey, Long> ingredientAmountSnapshot;
+    private Map<Item, Long> ingredientAmountByItemSnapshot;
+    private Map<Item, List<IngredientSource>> ingredientSourcesByItemSnapshot;
     private final CoreStorageResourceHandler resourceHandler = new CoreStorageResourceHandler(this);
     private final CoreFluidHandler fluidHandler = new CoreFluidHandler(this);
     private final CoreEnergyStorage energyStorage = new CoreEnergyStorage(this);
@@ -52,6 +65,49 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private int mutationBatchDepth;
     private boolean storageChangedInBatch;
     private boolean cacheDirty = true;
+
+    private static final class IndexedItem {
+        private final ItemKey key;
+        private final ItemStack identity;
+        private final ResourceLocation id;
+        private final String idString;
+        private TerminalSearchEntry search;
+        private IngredientSource ingredientSource;
+        private final String displayName;
+        private final String componentIdentity;
+        private long amount;
+
+        private IndexedItem(ItemKey key, long amount) {
+            this.key = key;
+            ItemStack stack = key.toStack(1);
+            this.identity = stack;
+            this.id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            this.idString = id.toString();
+            this.displayName = identity.getHoverName().getString();
+            this.componentIdentity = key.components().toString();
+            this.amount = amount;
+        }
+
+        private TerminalSearchEntry search() {
+            if (search == null) search = TerminalSearchEntry.create(identity);
+            return search;
+        }
+
+        private IngredientSource ingredientSource() {
+            if (ingredientSource == null) {
+                ingredientSource = new IngredientSource(key, -1, identity, amount);
+            }
+            return ingredientSource;
+        }
+
+        private String displayName() {
+            return displayName;
+        }
+
+        private String componentIdentity() {
+            return componentIdentity;
+        }
+    }
 
     public StorageCoreBlockEntity(BlockPos pos, BlockState state) {
         super(MagicStorage.STORAGE_CORE_BE.get(), pos, state);
@@ -111,6 +167,10 @@ public class StorageCoreBlockEntity extends BlockEntity {
 
     public long getMachineRevision() {
         return machineRevision;
+    }
+
+    public long getCraftableRevision() {
+        return craftableRevision;
     }
 
     public long getAxeEnergy() {
@@ -489,7 +549,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
         machineWorkRemainders = record.machineWorkRemainders();
         resourceLedger = record.resourceLedger();
         typeCount = record.typeCount();
+        craftableRevision++;
         cacheDirty = true;
+        rebuildCache();
         record.setMachineMutationCallback(this::onMachineChanged);
         updateStorageAvailability(StorageAvailability.AVAILABLE);
     }
@@ -533,18 +595,155 @@ public class StorageCoreBlockEntity extends BlockEntity {
 
     private void rebuildCache() {
         if (!cacheDirty) return;
-        flatCache.clear();
-        itemSearchCache.clear();
+        itemIndex.clear();
+        itemIndexByItem.clear();
+        itemAmountIndex.clear();
+        sortedNameIndex.clear();
+        sortedItemIndex.clear();
+        invalidateIngredientSourceSnapshot();
         if (level == null) return;
         for (StorageResourceKey resourceKey : resourceLedger.keys(StorageResourceBridge.ITEM_KIND)) {
             StorageResourceBridge.itemKey(resourceKey, level.registryAccess())
-                    .ifPresent(key -> flatCache.merge(
-                            key, resourceLedger.amount(resourceKey), Long::sum));
+                    .ifPresent(key -> itemIndex.compute(key, (ignored, existing) -> {
+                        long amount = resourceLedger.amount(resourceKey);
+                        if (existing == null) return new IndexedItem(key, amount);
+                        existing.amount = saturatingAdd(existing.amount, amount);
+                        return existing;
+                    }));
         }
-        for (ItemKey key : flatCache.keySet()) {
-            itemSearchCache.put(key, TerminalSearchEntry.create(key));
-        }
+        sortedNameIndex.addAll(itemIndex.values());
+        sortedNameIndex.sort(StorageCoreBlockEntity::compareByName);
         cacheDirty = false;
+        for (IndexedItem item : sortedItems(SortMode.ID)) {
+            itemIndexByItem.computeIfAbsent(
+                    item.identity.getItem(), ignored -> new ArrayList<>()).add(item);
+            itemAmountIndex.merge(
+                    item.identity.getItem(), item.amount, StorageCoreBlockEntity::saturatingAdd);
+        }
+    }
+
+    private List<IndexedItem> sortedItems(SortMode mode) {
+        rebuildCache();
+        if (mode == SortMode.NAME) return sortedNameIndex;
+        return sortedItemIndex.computeIfAbsent(mode, this::buildSortedItems);
+    }
+
+    void prewarmTerminalIndexes() {
+        for (SortMode mode : SortMode.values()) sortedItems(mode);
+        for (IndexedItem item : itemIndex.values()) item.search();
+        storedItemSources();
+    }
+
+    private List<IndexedItem> buildSortedItems(SortMode mode) {
+        Comparator<IndexedItem> comparator = switch (mode) {
+            case NAME -> StorageCoreBlockEntity::compareByName;
+            case QUANTITY -> StorageCoreBlockEntity::compareByQuantity;
+            case MOD -> StorageCoreBlockEntity::compareByMod;
+            case ID -> StorageCoreBlockEntity::compareById;
+        };
+        IndexedItem[] sorted = itemIndex.values().toArray(IndexedItem[]::new);
+        Arrays.sort(sorted, comparator);
+        return List.of(sorted);
+    }
+
+    private static int compareByName(IndexedItem left, IndexedItem right) {
+        int compared = left.displayName.compareTo(right.displayName);
+        if (compared != 0) return compared;
+        compared = left.idString.compareTo(right.idString);
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private static int compareByQuantity(IndexedItem left, IndexedItem right) {
+        int compared = Long.compare(left.amount, right.amount);
+        if (compared != 0) return compared;
+        compared = left.idString.compareTo(right.idString);
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private static int compareByMod(IndexedItem left, IndexedItem right) {
+        int compared = left.id.getNamespace().compareTo(right.id.getNamespace());
+        if (compared != 0) return compared;
+        compared = left.displayName.compareTo(right.displayName);
+        if (compared != 0) return compared;
+        compared = left.id.getPath().compareTo(right.id.getPath());
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private static int compareById(IndexedItem left, IndexedItem right) {
+        int compared = left.idString.compareTo(right.idString);
+        return compared != 0
+                ? compared
+                : left.componentIdentity.compareTo(right.componentIdentity);
+    }
+
+    private void updateItemIndex(ItemKey key, long newAmount) {
+        if (cacheDirty) return;
+        IndexedItem existing = itemIndex.get(key);
+        if (newAmount <= 0) {
+            if (existing != null) {
+                itemIndex.remove(key);
+                Item item = existing.identity.getItem();
+                List<IndexedItem> matching = itemIndexByItem.get(item);
+                if (matching != null) {
+                    matching.remove(existing);
+                    if (matching.isEmpty()) itemIndexByItem.remove(item);
+                }
+                updateItemAmount(item, existing.amount, 0);
+                sortedNameIndex.remove(existing);
+                sortedItemIndex.clear();
+                invalidateIngredientSourceSnapshot();
+            }
+            return;
+        }
+        if (existing == null) {
+            IndexedItem inserted = new IndexedItem(key, newAmount);
+            itemIndex.put(key, inserted);
+            Item item = inserted.identity.getItem();
+            List<IndexedItem> matching =
+                    itemIndexByItem.computeIfAbsent(item, ignored -> new ArrayList<>());
+            int itemIndex = Collections.binarySearch(
+                    matching, inserted, StorageCoreBlockEntity::compareById);
+            matching.add(itemIndex < 0 ? -itemIndex - 1 : itemIndex, inserted);
+            updateItemAmount(item, 0, newAmount);
+            int index = Collections.binarySearch(
+                    sortedNameIndex, inserted, StorageCoreBlockEntity::compareByName);
+            // ponytail: O(n) insertion keeps terminal opens O(1); use a tree only if
+            // random bulk new-type imports are measured as the bottleneck.
+            sortedNameIndex.add(index < 0 ? -index - 1 : index, inserted);
+            sortedItemIndex.remove(SortMode.QUANTITY);
+            sortedItemIndex.remove(SortMode.MOD);
+            sortedItemIndex.remove(SortMode.ID);
+            invalidateIngredientSourceSnapshot();
+            return;
+        }
+        if (existing.amount != newAmount) {
+            updateItemAmount(existing.identity.getItem(), existing.amount, newAmount);
+            existing.amount = newAmount;
+            existing.ingredientSource = null;
+            sortedItemIndex.remove(SortMode.QUANTITY);
+            invalidateIngredientSourceSnapshot();
+        }
+    }
+
+    private void updateItemAmount(Item item, long oldAmount, long newAmount) {
+        long total = itemAmountIndex.getOrDefault(item, 0L);
+        total = oldAmount > total ? 0 : total - oldAmount;
+        total = saturatingAdd(total, newAmount);
+        if (total == 0) itemAmountIndex.remove(item);
+        else itemAmountIndex.put(item, total);
+    }
+
+    private void invalidateIngredientSourceSnapshot() {
+        ingredientSourceSnapshot = null;
+        ingredientAmountSnapshot = null;
+        ingredientAmountByItemSnapshot = null;
+        ingredientSourcesByItemSnapshot = null;
     }
 
     public void addListener(StorageListener listener) {
@@ -694,10 +893,18 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (deltas.isEmpty() || conflicted || !isStorageAvailable() || level == null) return false;
         Map<StorageResourceKey, ItemKey> itemKeys = new HashMap<>();
         boolean capacityTypesChanged = false;
+        boolean invalidatesCraftableCache = false;
         for (StorageResourceKey key : deltas.keySet()) {
             if (!StorageResourceKinds.accepts(key)) return false;
             if (!key.kindId().equals(StorageResourceBridge.WORK_KIND)) {
                 capacityTypesChanged = true;
+            }
+            long delta = deltas.get(key);
+            if (delta != 0 && (!key.kindId().equals(StorageResourceBridge.WORK_KIND)
+                    || delta < 0
+                    || StorageResourceBridge.energyType(key).isEmpty()
+                    && StorageResourceBridge.stationWorkDescriptorId(key).isEmpty())) {
+                invalidatesCraftableCache = true;
             }
             if (!key.kindId().equals(StorageResourceBridge.ITEM_KIND)) continue;
             var itemKey = StorageResourceBridge.itemKey(key, level.registryAccess());
@@ -706,14 +913,17 @@ public class StorageCoreBlockEntity extends BlockEntity {
         }
         if (!resourceLedger.applyExact(deltas, ledgerCapacity(deltas), action)) return false;
         if (action == Action.EXECUTE) {
+            if (invalidatesCraftableCache) craftableRevision++;
             if (capacityTypesChanged) refreshTypeCount();
-            if (!itemKeys.isEmpty()) cacheDirty = true;
             if (deltas.keySet().stream().anyMatch(
                     key -> StorageResourceBridge.descriptorId(key).isPresent())) {
                 machineRevision++;
             }
             markStorageChanged();
             for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
+                updateItemIndex(
+                        entry.getValue(),
+                        resourceLedger.amount(entry.getKey()));
                 fireChanged(
                         entry.getValue(),
                         deltas.get(entry.getKey()),
@@ -783,8 +993,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
     private StorageTypeCapacity ledgerCapacity(Map<StorageResourceKey, Long> deltas) {
         StorageTypeCapacity base = ledgerCapacity();
         if (base.unlimited()) return base;
-        int projectedWorkTypes = resourceLedger.typeCount(
-                key -> key.kindId().equals(StorageResourceBridge.WORK_KIND));
+        int projectedWorkTypes = resourceLedger.typeCount(StorageResourceBridge.WORK_KIND);
         for (Map.Entry<StorageResourceKey, Long> entry : deltas.entrySet()) {
             if (!entry.getKey().kindId().equals(StorageResourceBridge.WORK_KIND)) continue;
             long current = resourceLedger.amount(entry.getKey());
@@ -802,13 +1011,15 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     private int capacityTypeCount() {
-        return resourceLedger.typeCount(
-                key -> !key.kindId().equals(StorageResourceBridge.WORK_KIND));
+        return resourceLedger.typeCount() - resourceLedger.typeCount(StorageResourceBridge.WORK_KIND);
     }
 
     private void refreshTypeCount() {
-        typeCount = storageRecord == null
-                ? resourceLedger.typeCount() : storageRecord.typeCount();
+        long unresolved = storageRecord == null
+                ? 0 : storageRecord.unresolvedInventoryEntries().size();
+        long resolved = capacityTypeCount();
+        typeCount = unresolved + resolved >= Integer.MAX_VALUE
+                ? Integer.MAX_VALUE : (int) (unresolved + resolved);
     }
 
     public long insertItemCount(ItemKey key, long amount, Action action, Actor actor) {
@@ -867,13 +1078,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
         rebuildCache();
         TerminalSearchQuery query = TerminalSearchQuery.compile(filter);
         List<ItemStack> result = new ArrayList<>();
-        for (var entry : flatCache.entrySet()) {
-            ItemKey key = entry.getKey();
-            long count = entry.getValue();
-            if (query.matches(itemSearchCache.get(key))) {
-                ItemStack stack = key.toStack(1);
+        for (IndexedItem item : itemIndex.values()) {
+            if (query.matches(item.search())) {
+                ItemStack stack = item.key.toStack(1);
                 if (!stack.isEmpty()) {
-                    result.add(TerminalDisplayStack.create(stack, count));
+                    result.add(TerminalDisplayStack.create(stack, item.amount));
                 }
             }
         }
@@ -881,9 +1090,136 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     public List<ItemStack> getDisplayStacks(String filter, SortMode mode, SortOrder order) {
-        List<ItemStack> result = getDisplayStacks(filter);
-        result.sort(TerminalEntryComparator.forMode(mode, order));
+        if (!isStorageAvailable()) return List.of();
+        TerminalSearchQuery query = TerminalSearchQuery.compile(filter);
+        List<IndexedItem> sorted = sortedItems(mode);
+        List<ItemStack> result = new ArrayList<>();
+        for (int index = 0; index < sorted.size(); index++) {
+            IndexedItem item = sorted.get(order == SortOrder.ASCENDING
+                    ? index : sorted.size() - 1 - index);
+            if (query.matches(item.search())) {
+                result.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+            }
+        }
         return result;
+    }
+
+    public TerminalDisplayPage getTerminalDisplayPage(
+            String filter,
+            SortMode mode,
+            SortOrder order,
+            TerminalResourceView resourceView,
+            int requestedOffset,
+            int limit
+    ) {
+        if (!isStorageAvailable() || limit <= 0) {
+            return new TerminalDisplayPage(0, 0, List.of());
+        }
+        int offset = Math.max(0, requestedOffset);
+        if (resourceView != TerminalResourceView.ITEM) {
+            List<ItemStack> all = getTerminalDisplayStacks(filter, mode, order, resourceView);
+            offset = Math.min(offset, Math.max(0, all.size() - 1));
+            return new TerminalDisplayPage(
+                    all.size(),
+                    offset,
+                    all.subList(offset, Math.min(all.size(), offset + limit)));
+        }
+        TerminalSearchQuery query = TerminalSearchQuery.compile(filter);
+        List<IndexedItem> sorted = sortedItems(mode);
+        if (query.isEmpty()) {
+            offset = Math.min(offset, Math.max(0, sorted.size() - 1));
+            List<ItemStack> visible = new ArrayList<>(Math.min(limit, sorted.size()));
+            for (int index = offset; index < Math.min(sorted.size(), offset + limit); index++) {
+                IndexedItem item = sorted.get(order == SortOrder.ASCENDING
+                        ? index : sorted.size() - 1 - index);
+                visible.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+            }
+            return new TerminalDisplayPage(sorted.size(), offset, visible);
+        }
+        int total = 0;
+        for (IndexedItem item : sorted) {
+            if (query.matches(item.search())) total++;
+        }
+        offset = Math.min(offset, Math.max(0, total - 1));
+        List<ItemStack> visible = new ArrayList<>(Math.min(limit, total));
+        int matchIndex = 0;
+        for (int index = 0; index < sorted.size() && visible.size() < limit; index++) {
+            IndexedItem item = sorted.get(order == SortOrder.ASCENDING
+                    ? index : sorted.size() - 1 - index);
+            if (!query.matches(item.search())) continue;
+            if (matchIndex++ < offset) continue;
+            visible.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+        }
+        return new TerminalDisplayPage(total, offset, visible);
+    }
+
+    List<IngredientSource> storedItemSources() {
+        List<IndexedItem> sorted = sortedItems(SortMode.ID);
+        if (ingredientSourceSnapshot == null) {
+            List<IngredientSource> sources = new ArrayList<>(sorted.size());
+            Map<ItemKey, Long> amounts = new HashMap<>();
+            Map<Item, Long> amountsByItem = new HashMap<>();
+            Map<Item, List<IngredientSource>> byItem = new HashMap<>();
+            for (IndexedItem item : sorted) {
+                IngredientSource source = item.ingredientSource();
+                sources.add(source);
+                amounts.put(item.key, item.amount);
+                amountsByItem.merge(
+                        item.identity.getItem(),
+                        item.amount,
+                        (left, right) -> left > Long.MAX_VALUE - right
+                                ? Long.MAX_VALUE : left + right);
+                byItem.computeIfAbsent(
+                        item.identity.getItem(), ignored -> new ArrayList<>()).add(source);
+            }
+            byItem.replaceAll((item, matching) -> List.copyOf(matching));
+            ingredientSourceSnapshot = List.copyOf(sources);
+            ingredientAmountSnapshot = Map.copyOf(amounts);
+            ingredientAmountByItemSnapshot = Map.copyOf(amountsByItem);
+            ingredientSourcesByItemSnapshot = Map.copyOf(byItem);
+        }
+        return ingredientSourceSnapshot;
+    }
+
+    Collection<Item> storedItems() {
+        rebuildCache();
+        return Collections.unmodifiableSet(itemIndexByItem.keySet());
+    }
+
+    long storedItemAmount(Item item) {
+        rebuildCache();
+        return itemAmountIndex.getOrDefault(item, 0L);
+    }
+
+    List<IngredientSource> storedItemSources(Item item) {
+        rebuildCache();
+        List<IndexedItem> matching = itemIndexByItem.get(item);
+        if (matching == null) return List.of();
+        return matching.stream().map(IndexedItem::ingredientSource).toList();
+    }
+
+    List<IngredientSource> storedItemSources(Predicate<ItemStack> predicate) {
+        rebuildCache();
+        List<IngredientSource> matching = new ArrayList<>();
+        for (IndexedItem item : sortedItems(SortMode.ID)) {
+            if (predicate.test(item.identity)) matching.add(item.ingredientSource());
+        }
+        return List.copyOf(matching);
+    }
+
+    Map<ItemKey, Long> storedItemAmounts() {
+        storedItemSources();
+        return ingredientAmountSnapshot;
+    }
+
+    Map<Item, List<IngredientSource>> storedItemSourcesByItem() {
+        storedItemSources();
+        return ingredientSourcesByItemSnapshot;
+    }
+
+    Map<Item, Long> storedItemAmountsByItem() {
+        storedItemSources();
+        return ingredientAmountByItemSnapshot;
     }
 
     public List<ItemStack> getTerminalDisplayStacks(
@@ -928,9 +1264,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (!isStorageAvailable()) return 0;
         rebuildCache();
         long total = 0;
-        for (var entry : flatCache.entrySet()) {
-            if (!pred.test(entry.getKey().toStack(1))) continue;
-            long amount = entry.getValue();
+        for (IndexedItem item : itemIndex.values()) {
+            if (!pred.test(item.key.toStack(1))) continue;
+            long amount = item.amount;
             if (total > Long.MAX_VALUE - amount) return Long.MAX_VALUE;
             total += amount;
         }
@@ -941,8 +1277,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (amount <= 0 || conflicted || !isStorageAvailable()) return 0;
         rebuildCache();
         List<ItemKey> matches = new ArrayList<>();
-        for (var entry : flatCache.entrySet()) {
-            if (pred.test(entry.getKey().toStack(1))) matches.add(entry.getKey());
+        for (IndexedItem item : itemIndex.values()) {
+            if (pred.test(item.key.toStack(1))) matches.add(item.key);
         }
         long extracted = 0;
         for (ItemKey key : matches) {
@@ -974,8 +1310,29 @@ public class StorageCoreBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        storageId = tag.hasUUID(TAG_STORAGE_ID) ? tag.getUUID(TAG_STORAGE_ID) : null;
-        storageSchema = tag.getInt(TAG_STORAGE_SCHEMA);
+        UUID loadedStorageId = tag.hasUUID(TAG_STORAGE_ID)
+                ? tag.getUUID(TAG_STORAGE_ID) : null;
+        int loadedStorageSchema = tag.getInt(TAG_STORAGE_SCHEMA);
+        ServerLevel serverLevel = level instanceof ServerLevel current ? current : null;
+        boolean replaceLiveStorage = serverLevel != null && storageRecord != null;
+        if (replaceLiveStorage) {
+            if (Objects.equals(storageId, loadedStorageId)) {
+                storageSchema = loadedStorageSchema;
+                return;
+            }
+            CoreStorageRepository repository = CoreStorageRepository.get(serverLevel);
+            if (!repository.removeIfEmpty(
+                    storageId, location(serverLevel), attachmentToken)) {
+                MagicStorage.LOGGER.error(
+                        "Refusing to replace non-empty live Core storage {} with {}",
+                        storageId,
+                        loadedStorageId);
+                return;
+            }
+            storageRecord.clearMachineMutationCallback();
+        }
+        storageId = loadedStorageId;
+        storageSchema = loadedStorageSchema;
         storageRecord = null;
         networkId = null;
         machines = new SimpleContainer(MachineDescriptorApi.MAX_DESCRIPTORS);
@@ -987,6 +1344,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
         storageAvailability = storageId == null
                 ? StorageAvailability.MISSING_REFERENCE
                 : StorageAvailability.UNINITIALIZED;
+        if (replaceLiveStorage && storageId != null && serverLevel != null) {
+            attachExistingStorage(serverLevel);
+        }
     }
 
     // ===== Network =====
@@ -995,9 +1355,11 @@ public class StorageCoreBlockEntity extends BlockEntity {
         Set<BlockPos> previousConnectedBlocks = Set.copyOf(connectedBlocks);
         StorageTypeCapacity previousTypeCapacity = typeCapacity;
         boolean wasConflicted = conflicted;
+        boolean wasNetworkCapped = networkCapped;
         connectedBlocks.clear();
         typeCapacity = StorageTypeCapacity.zero();
         conflicted = false;
+        networkCapped = false;
 
         Queue<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
@@ -1005,10 +1367,19 @@ public class StorageCoreBlockEntity extends BlockEntity {
         visited.add(getBlockPos());
 
         int depth = 0;
-        while (!queue.isEmpty() && depth < MagicStorage.NETWORK_SCAN_DEPTH && visited.size() <= MagicStorage.MAX_NETWORK_BLOCKS) {
+        scan:
+        while (!queue.isEmpty()) {
+            if (depth >= MagicStorage.NETWORK_SCAN_DEPTH) {
+                networkCapped = true;
+                break;
+            }
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 BlockPos current = queue.poll();
+                if (connectedBlocks.size() >= MagicStorage.MAX_NETWORK_BLOCKS) {
+                    networkCapped = true;
+                    break scan;
+                }
 
                 BlockState state = level.getBlockState(current);
                 if (state.getBlock() instanceof IStorageNetworkBlock networkBlock) {
@@ -1036,13 +1407,14 @@ public class StorageCoreBlockEntity extends BlockEntity {
             MagicStorage.LOGGER.warn("Storage network at {} has multiple cores; multi-core is unsupported, network disabled until extra cores removed.", getBlockPos());
         }
         if (wasConflicted != conflicted || !previousTypeCapacity.equals(typeCapacity)
+                || wasNetworkCapped != networkCapped
                 || !previousConnectedBlocks.equals(connectedBlocks)) {
             topologyRevision++;
         }
     }
 
     public boolean tryIncrementalAdd(Level level, BlockPos placedPos) {
-        if (conflicted) return false;
+        if (conflicted || networkCapped) return false;
         if (placedPos.equals(getBlockPos())) return false;
         if (connectedBlocks.contains(placedPos)) return false;
 
@@ -1113,12 +1485,15 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     public void onBreak() {
-        if (!connectedBlocks.isEmpty() || !typeCapacity.equals(StorageTypeCapacity.zero())) topologyRevision++;
+        if (!connectedBlocks.isEmpty() || !typeCapacity.equals(StorageTypeCapacity.zero())
+                || networkCapped) topologyRevision++;
         connectedBlocks.clear();
         typeCapacity = StorageTypeCapacity.zero();
+        networkCapped = false;
     }
 
-    public Set<BlockPos> getConnectedBlocks() { return connectedBlocks; }
+    public Set<BlockPos> getConnectedBlocks() { return connectedBlocksView; }
+    public boolean isNetworkCapped() { return networkCapped; }
     public int getTotalTypeSlots() { return typeCapacity.finiteTypeSlots(); }
     public StorageTypeCapacity getTypeCapacity() { return typeCapacity; }
     public long getTopologyRevision() { return topologyRevision; }
@@ -1148,4 +1523,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
             };
         }
     }
+}
+
+record IngredientSource(ItemKey key, int playerSlot, ItemStack stack, long amount) {
 }

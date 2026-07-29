@@ -32,6 +32,11 @@ public class ExportBusBlockEntity extends BlockEntity implements BusConfiguratio
     private BusConfiguration busConfiguration = BusConfiguration.defaults(BusKind.EXPORT);
     private BusResourceEscrow pendingResources = BusResourceEscrow.empty();
     private long operationSequence;
+    private StorageCoreBlockEntity itemCandidateCore;
+    private long itemCandidateCoreRevision = Long.MIN_VALUE;
+    private long itemCandidateConfigRevision = Long.MIN_VALUE;
+    private long itemCandidateDatapackRevision = Long.MIN_VALUE;
+    private List<ItemKey> cachedItemCandidates = List.of();
     private final IItemHandler[] passiveItemHandlers = new IItemHandler[7];
     private final StorageResourceHandler[] passiveResourceHandlers = new StorageResourceHandler[7];
     private final IFluidHandler[] passiveFluidHandlers = new IFluidHandler[7];
@@ -143,14 +148,29 @@ public class ExportBusBlockEntity extends BlockEntity implements BusConfiguratio
         if (!isLiveServerBus()) return null;
         StorageCoreBlockEntity core = resolveCore();
         if (core == null || core.isConflicted()) return null;
-        BusFilterPolicy filter = BusFilterPolicy.compile(
-                busConfiguration, level.registryAccess());
-        List<ItemKey> candidates = core.getDisplayStacks().stream()
-                .map(ItemKey::of)
-                .distinct()
-                .toList();
-        List<ItemKey> ordered = filter.orderedCandidates(candidates);
-        return ordered.isEmpty() ? null : ordered.getFirst();
+        List<ItemKey> candidates = itemCandidates(core);
+        return candidates.isEmpty() ? null : candidates.getFirst();
+    }
+
+    private List<ItemKey> itemCandidates(StorageCoreBlockEntity core) {
+        long coreRevision = core.getCraftableRevision();
+        long configRevision = busConfiguration.configRevision();
+        long datapackRevision = MagicStorage.datapackRevision();
+        if (itemCandidateCore == core
+                && itemCandidateCoreRevision == coreRevision
+                && itemCandidateConfigRevision == configRevision
+                && itemCandidateDatapackRevision == datapackRevision) {
+            return cachedItemCandidates;
+        }
+        List<ItemKey> candidates = BusFilterPolicy.compile(
+                busConfiguration, level.registryAccess()).orderedCandidates(
+                core.getDisplayStacks().stream().map(ItemKey::of).toList());
+        itemCandidateCore = core;
+        itemCandidateCoreRevision = coreRevision;
+        itemCandidateConfigRevision = configRevision;
+        itemCandidateDatapackRevision = datapackRevision;
+        cachedItemCandidates = candidates;
+        return cachedItemCandidates;
     }
 
     StorageResourceHandler passiveResourceHandler(Direction side) {
@@ -275,17 +295,12 @@ public class ExportBusBlockEntity extends BlockEntity implements BusConfiguratio
                 Capabilities.ItemHandler.BLOCK, targetPos, targetSide);
 
         if (handler != null) {
-            BusFilterPolicy filterPolicy = BusFilterPolicy.compile(
-                    busConfiguration, level.registryAccess());
-            List<ItemKey> candidates = core.getDisplayStacks().stream()
-                    .map(ItemKey::of)
-                    .toList();
             BusActor actor = nextBusActor(core, BusOperationDirection.EXPORT);
             BusItemTransferPlan plan = BusItemTransferPlan.capture(
                     level, getBlockPos(), targetPos, targetSide, core,
                     busConfiguration, handler, actor, BusOperationDirection.EXPORT);
             if (plan != null) {
-                for (ItemKey candidate : filterPolicy.orderedCandidates(candidates)) {
+                for (ItemKey candidate : itemCandidates(core)) {
                     if (BusTransferGuard.run(actor, false, () -> transferOneStack(
                             core, candidate, handler, actor,
                             stack -> BusRecoveryDrops.spawnDirectOrThrow(

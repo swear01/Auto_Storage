@@ -18,7 +18,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)Axe Energy:$() an accepted axe is consumed. Finite value comes from remaining $(thing)durability$() × ($(thing)Unbreaking$() level + 1) × stack count; Mending adds nothing. An $(thing)Unbreakable$() axe supplies infinity. Supported strip, scrape, and wax-off recipes spend one Axe Energy each."
+      "text": "$(thing)Axe Uses:$() an accepted axe is consumed. Finite value comes from remaining $(thing)durability$() × ($(thing)Unbreaking$() level + 1) × stack count; Mending adds nothing. An $(thing)Unbreakable$() axe supplies infinity. Supported strip, scrape, and wax-off recipes spend one Axe Use each."
     },
     {
       "type": "patchouli:text",

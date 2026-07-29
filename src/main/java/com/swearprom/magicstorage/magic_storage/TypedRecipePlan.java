@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 
 public final class TypedRecipePlan {
+    public static final int MAX_INPUTS = 81;
+
     private final List<TypedRecipeInput> inputs;
     private final List<TypedRecipeOutput> outputs;
     private final TypedRecipeOutput selectionOutput;
@@ -36,8 +38,8 @@ public final class TypedRecipePlan {
         width = builder.width;
         height = builder.height;
         shapeless = builder.shapeless;
-        if (inputs.isEmpty() || inputs.size() > RecipePresentation.MAX_INPUTS) {
-            throw new IllegalArgumentException("Typed recipe plan requires one to nine inputs");
+        if (inputs.isEmpty() || inputs.size() > MAX_INPUTS) {
+            throw new IllegalArgumentException("Typed recipe plan requires one to 81 inputs");
         }
         if (primaryOutputs.isEmpty()) {
             throw new IllegalArgumentException("Typed recipe plan requires a primary output");
@@ -55,8 +57,13 @@ public final class TypedRecipePlan {
             throw new IllegalArgumentException(
                     "Typed item selection output must match its presentation item");
         }
-        if (width < 1 || width > 3 || height < 1 || height > 3 || width * height < inputs.size()) {
-            throw new IllegalArgumentException("Typed recipe layout must fit one to nine inputs");
+        if (width < 1 || width > 3 || height < 1 || height > 3
+                || (inputs.size() <= RecipePresentation.MAX_INPUTS
+                && width * height < inputs.size())
+                || (inputs.size() > RecipePresentation.MAX_INPUTS
+                && (!shapeless || width != 3 || height != 3))) {
+            throw new IllegalArgumentException(
+                    "Typed recipe layout must fit its inputs or use a 3x3 shapeless summary");
         }
         requireCompatibleInputKeys(inputs);
         requireUniqueKeys(outputs.stream().map(TypedRecipeOutput::key).toList(), "output");

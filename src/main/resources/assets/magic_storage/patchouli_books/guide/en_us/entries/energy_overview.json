@@ -18,7 +18,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "The $(thing)Transform tab$() is separate from Stations. It converts real input items into stored typed resources such as Fuel, Brew Energy, Axe Energy, or FE. Energy lists those generated reserves; Station Work separately lists only processing-station work."
+      "text": "The $(thing)Transform tab$() is separate from Stations. It converts real input items into stored typed resources such as Fuel, Brew Energy, Axe Uses, or FE. Energy groups FE, Fuel/Brew, Mana, and Source; Other holds Axe Uses and unclassified addon values; Processing lists only accumulated station work."
     }
   ]
 }

@@ -30,6 +30,10 @@ interface RecipeAdapter {
             Level level
     );
 
+    default boolean requiresAvailableStacksForVariants() {
+        return true;
+    }
+
     boolean matchesLookupOutput(
             RecipeHolder<?> holder,
             RecipeAdapterMatch.Contract variantContract,
@@ -40,4 +44,5 @@ interface RecipeAdapter {
     default Optional<RecipeFamilyKey> exactFamilyKey() {
         return Optional.empty();
     }
+
 }

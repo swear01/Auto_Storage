@@ -268,6 +268,7 @@ public final class RecipeFamily {
                     ingredient,
                     Arrays.asList(ingredient.getItems()),
                     ingredient.isSimple(),
+                    ingredient.isSimple(),
                     1);
             RecipeAdapterMatch.OutputResolver outputResolver = (allocations, crafts, level) -> {
                 if (level == null) return Optional.empty();
@@ -311,9 +312,9 @@ public final class RecipeFamily {
             if (isTyped()) {
                 if (level == null) return List.of();
                 if (typedPlan != null) {
-                    return List.of(typedContractCache.computeIfAbsent(recipe, ignored ->
-                            typedContract(recipe, typedPlanFor(
-                                    recipe, level.registryAccess()))));
+                    if (baseContract.typedRecipePlan() != null) return List.of(baseContract);
+                    return List.of(typedContract(
+                            recipe, typedPlanFor(recipe, level.registryAccess())));
                 }
                 return typedPlansFor(recipe, availableStacks, level.registryAccess()).stream()
                         .map(plan -> typedContract(recipe, plan))
@@ -321,6 +322,11 @@ public final class RecipeFamily {
             }
             if (level == null || outputFor(recipe, level.registryAccess()).isEmpty()) return List.of();
             return List.of(baseContract);
+        }
+
+        @Override
+        public boolean requiresAvailableStacksForVariants() {
+            return typedPlanVariants != null;
         }
 
         @Override

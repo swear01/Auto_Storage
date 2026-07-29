@@ -15,11 +15,11 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Use the left resource selector for Items, Fluids, Energy, Gases, Station Work, or Other registered addon kinds. Energy includes FE and generated Fuel/Brew/Axe/descriptor reserves; Station Work contains only processing work. Item view supports normal extraction and inventory insertion. Other views use display-only representatives."
+      "text": "Use the left resource selector for Items, Fluids, Energy, Gases, Processing, or Other registered addon kinds. All shows every available group together. Energy includes FE, Fuel/Brew, Mana, and Source; Processing contains only accumulated station work; Other contains Axe Uses and unclassified addon values. Fluids use teal frames, Energy violet, Gas/Other blue, and Processing amber. Item view supports normal extraction and inventory insertion. Other views use display-only representatives."
     },
     {
       "type": "patchouli:text",
-      "text": "The search field parses its own prefixes: use ordinary text for names, @mod, or #tag. Auto Focus starts keyboard input in Search when the terminal opens. Search Sync separately leaves EMI alone, copies terminal text to EMI, or synchronizes both ways."
+      "text": "The search field parses ordinary names, @mod, and #tag. A bare @, #, or $ behaves like an empty search. Click outside to release Search without clearing its filter. Auto Focus gives Search initial focus only when the terminal opens; Search Sync separately controls EMI."
     },
     {
       "type": "patchouli:text",

@@ -66,10 +66,13 @@ public final class ArsNouveauIntegrationGameTests {
         StorageResourceKind sourceKind = MagicStorage.RESOURCE_KIND_REGISTRY.get(
                 StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND);
         if (sourceKind == null
-                || !sourceKind.representative().is(arsItem("source_jar"))
-                || !TerminalResourceView.OTHER.isAvailable()
-                || !TerminalResourceView.OTHER.matches(sourceKey())) {
-            helper.fail("Ars Nouveau Source was not exposed as one conditional resource kind");
+                || !sourceKind.representative().is(arsItem("source_gem"))
+                || !Component.translatable("gui.magic_storage.resource.source")
+                .equals(sourceKind.representative().get(DataComponents.CUSTOM_NAME))
+                || !TerminalResourceView.ENERGY.isAvailable()
+                || !TerminalResourceView.ENERGY.matches(sourceKey())
+                || TerminalResourceView.OTHER.matches(sourceKey())) {
+            helper.fail("Ars Nouveau Source was not exposed in the Energy resource group");
             return;
         }
         for (var station : List.of(
@@ -133,9 +136,11 @@ public final class ArsNouveauIntegrationGameTests {
             seedResource(context.core(), sourceKey(), 4_321);
             var menu = new StorageTerminalMenu(
                     801, context.player().getInventory(), context.core());
-            selectOtherView(menu, context);
-            if (!menu.getSlot(0).getItem().is(arsItem("source_jar"))
-                    || TerminalDisplayStack.amount(menu.getSlot(0).getItem()) != 4_321) {
+            selectEnergyView(menu, context);
+            if (!menu.getSlot(0).getItem().is(arsItem("source_gem"))
+                    || TerminalDisplayStack.amount(menu.getSlot(0).getItem()) != 4_321
+                    || !Component.translatable("gui.magic_storage.resource.source")
+                    .equals(menu.getSlot(0).getItem().get(DataComponents.CUSTOM_NAME))) {
                 helper.fail("Terminal did not display exact stored Source");
                 return;
             }
@@ -456,18 +461,18 @@ public final class ArsNouveauIntegrationGameTests {
                 context.player());
     }
 
-    private static void selectOtherView(
+    private static void selectEnergyView(
             StorageTerminalMenu menu,
             FixtureContext context
     ) {
         for (int attempt = 0;
              attempt < TerminalResourceView.values().length
-                     && menu.getResourceView() != TerminalResourceView.OTHER;
+                     && menu.getResourceView() != TerminalResourceView.ENERGY;
              attempt++) {
             menu.clickMenuButton(context.player(), NEXT_RESOURCE_VIEW_BUTTON);
         }
-        if (menu.getResourceView() != TerminalResourceView.OTHER) {
-            throw new IllegalStateException("Ars Nouveau Source did not make Other available");
+        if (menu.getResourceView() != TerminalResourceView.ENERGY) {
+            throw new IllegalStateException("Ars Nouveau Source was not selectable in Energy");
         }
         menu.refreshDisplayItems(context.core());
     }

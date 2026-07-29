@@ -1,0 +1,47 @@
+{
+  "type": "extendedcrafting:shaped_table",
+  "tier": 4,
+  "pattern": [
+    "ABCDEFGHI",
+    "ABCDEFGHI",
+    "ABCDEFGHI",
+    "ABCDEFGHI",
+    "ABCDEFGHI",
+    "ABCDEFGHI",
+    "ABCDEFGHI",
+    "ABCDEFGHI",
+    "ABCDEFGHI"
+  ],
+  "key": {
+    "A": {
+      "item": "minecraft:redstone"
+    },
+    "B": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "C": {
+      "item": "minecraft:coal"
+    },
+    "D": {
+      "item": "minecraft:charcoal"
+    },
+    "E": {
+      "item": "minecraft:iron_ingot"
+    },
+    "F": {
+      "item": "minecraft:gold_ingot"
+    },
+    "G": {
+      "item": "minecraft:copper_ingot"
+    },
+    "H": {
+      "item": "minecraft:lapis_lazuli"
+    },
+    "I": {
+      "item": "minecraft:quartz"
+    }
+  },
+  "result": {
+    "id": "minecraft:diamond"
+  }
+}

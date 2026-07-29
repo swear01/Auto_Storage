@@ -225,16 +225,16 @@ final class CoreStorageRecord {
 
         List<CompoundTag> inventoryEntries = new ArrayList<>();
         Set<StorageResourceKey> persistedAsInventory = new HashSet<>();
-        for (Map.Entry<StorageResourceKey, Long> entry : resourceLedger.snapshot().entrySet()) {
-            if (!entry.getKey().kindId().equals(StorageResourceBridge.ITEM_KIND)) continue;
-            var itemKey = StorageResourceBridge.itemKey(entry.getKey(), registries);
-            if (itemKey.isEmpty()) continue;
+        resourceLedger.forEach((resourceKey, amount) -> {
+            if (!resourceKey.kindId().equals(StorageResourceBridge.ITEM_KIND)) return;
+            var itemKey = StorageResourceBridge.itemKey(resourceKey, registries);
+            if (itemKey.isEmpty()) return;
             CompoundTag inventoryEntry = new CompoundTag();
             inventoryEntry.put(TAG_ITEM, itemKey.get().toStack(1).save(registries));
-            inventoryEntry.putLong(TAG_COUNT, entry.getValue());
+            inventoryEntry.putLong(TAG_COUNT, amount);
             inventoryEntries.add(inventoryEntry);
-            persistedAsInventory.add(entry.getKey());
-        }
+            persistedAsInventory.add(resourceKey);
+        });
         inventoryEntries.sort(Comparator
                 .comparing((CompoundTag entry) -> entry.getCompound(TAG_ITEM).getString("id"))
                 .thenComparing(entry -> entry.getCompound(TAG_ITEM).toString())
@@ -519,19 +519,15 @@ final class CoreStorageRecord {
     }
 
     int typeCount() {
-        long count = unresolvedInventoryEntries.size() + (long) resourceLedger.typeCount(
-                key -> !key.kindId().equals(StorageResourceBridge.WORK_KIND));
+        long count = unresolvedInventoryEntries.size()
+                + (long) resourceLedger.typeCount()
+                - resourceLedger.typeCount(StorageResourceBridge.WORK_KIND);
         if (count >= Integer.MAX_VALUE) return Integer.MAX_VALUE;
         return (int) count;
     }
 
     long itemCount() {
-        long total = 0;
-        for (Map.Entry<StorageResourceKey, Long> entry : resourceLedger.snapshot().entrySet()) {
-            if (entry.getKey().kindId().equals(StorageResourceBridge.ITEM_KIND)) {
-                total = saturatingAdd(total, entry.getValue());
-            }
-        }
+        long total = resourceLedger.totalAmount(StorageResourceBridge.ITEM_KIND);
         for (CompoundTag unresolved : unresolvedInventoryEntries) {
             total = saturatingAdd(total, Math.max(0, unresolved.getLong(TAG_COUNT)));
         }

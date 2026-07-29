@@ -86,6 +86,7 @@ public final class FixtureMod {
         MACHINE_DESCRIPTORS.register("fractional_processor", () ->
                 MachineDescriptor.installableVariants(
                         FRACTIONAL_PROCESSOR_ID,
+                        net.minecraft.network.chat.Component.literal("Fractional Processor"),
                         () -> java.util.List.of(
                                 MachineVariant.of(
                                         new net.minecraft.world.item.ItemStack(

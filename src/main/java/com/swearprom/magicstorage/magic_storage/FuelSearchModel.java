@@ -60,7 +60,10 @@ final class FuelSearchModel {
     }
 
     static List<Entry> search(String text, Index index) {
-        TerminalSearchQuery query = TerminalSearchQuery.compile(text);
+        return search(TerminalSearchQuery.compile(text), index);
+    }
+
+    static List<Entry> search(TerminalSearchQuery query, Index index) {
         List<Entry> result = new ArrayList<>();
         for (IndexedEntry indexed : index.entries()) {
             if (indexed.searchEntries().stream().anyMatch(query::matches)) {

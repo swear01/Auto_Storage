@@ -65,6 +65,7 @@ public final class PowahCompat {
         machineDescriptors.register(descriptorId.getPath(), () ->
                 MachineDescriptor.installableVariants(
                         descriptorId,
+                        Component.translatable("gui.magic_storage.station.powah_energizing"),
                         PowahCompat::rodVariants,
                         MachineEnergyTable.Category.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
@@ -81,6 +82,7 @@ public final class PowahCompat {
         machineDescriptors.register(furnatorId.getPath(), () ->
                 MachineDescriptor.installableVariants(
                         furnatorId,
+                        Component.translatable("gui.magic_storage.station.powah_furnator"),
                         PowahCompat::furnatorVariants,
                         MachineEnergyTable.Category.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
@@ -90,6 +92,7 @@ public final class PowahCompat {
                 StorageResourceKindApi.ENERGY_KIND,
                 new ItemStack(Items.REDSTONE),
                 Component.translatable("gui.magic_storage.resource_view.energy"),
+                Component.translatable("gui.magic_storage.station.powah_furnator"),
                 stack -> furnatorTransform(stack, furnatorId));
     }
 

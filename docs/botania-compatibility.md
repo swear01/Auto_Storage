@@ -15,7 +15,7 @@ The fixture coordinate is timestamped so a newer upstream snapshot cannot silent
 ## Mana storage
 
 - `botania:mana` is a conditional, variantless resource kind backed by the Core's existing `long` ledger.
-- It appears in the terminal's Other group only while Botania is loaded.
+- It appears in the terminal's Energy group only while Botania is loaded.
 - Held transfer uses public `ManaItem.LOOKUP` on a private one-count copy.
 - The first implementation accepts only a finite local Mana Tablet.
 - Deposit and withdrawal require the observed post-mutation Mana delta and maximum to match exactly before the Core/cursor transaction may commit.
@@ -53,4 +53,4 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest \
   scripts.test_static_regressions.StaticRegressionTests.test_botania_mana_and_recipe_compat_is_optional_and_isolated
 ```
 
-The Botania run requires `All 14 required tests passed` plus the current SelfTest summary. It loads Botania, Curios, and Patchouli without JEI. No new Magic Storage player-facing string is introduced in this slice: the existing localized Other group and Botania's own item names provide the UI labels.
+The Botania run requires `All 14 required tests passed` plus the current SelfTest summary. It loads Botania, Curios, and Patchouli without JEI. Mana uses Mana Powder as its semantic representative and the localized resource name `Mana`; Mana Tablet remains a transfer container.

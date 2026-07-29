@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.BiConsumer;
 
 final class StorageResourceLedger {
     private static final int SCHEMA = 1;
@@ -22,6 +23,7 @@ final class StorageResourceLedger {
     private static final String TAG_AMOUNT = "amount";
 
     private final Map<StorageResourceKey, Long> amounts = new HashMap<>();
+    private final Map<ResourceLocation, Integer> typeCountsByKind = new HashMap<>();
 
     long amount(StorageResourceKey key) {
         return amounts.getOrDefault(Objects.requireNonNull(key, "key"), 0L);
@@ -33,6 +35,10 @@ final class StorageResourceLedger {
 
     int typeCount(Predicate<StorageResourceKey> include) {
         return (int) amounts.keySet().stream().filter(include).count();
+    }
+
+    int typeCount(ResourceLocation kindId) {
+        return typeCountsByKind.getOrDefault(Objects.requireNonNull(kindId, "kindId"), 0);
     }
 
     boolean isEmpty() {
@@ -53,6 +59,21 @@ final class StorageResourceLedger {
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry -> snapshot.put(entry.getKey(), entry.getValue()));
         return Map.copyOf(snapshot);
+    }
+
+    void forEach(BiConsumer<StorageResourceKey, Long> consumer) {
+        Objects.requireNonNull(consumer, "consumer");
+        amounts.forEach(consumer);
+    }
+
+    long totalAmount(ResourceLocation kindId) {
+        long total = 0;
+        for (Map.Entry<StorageResourceKey, Long> entry : amounts.entrySet()) {
+            if (!entry.getKey().kindId().equals(kindId)) continue;
+            total = total > Long.MAX_VALUE - entry.getValue()
+                    ? Long.MAX_VALUE : total + entry.getValue();
+        }
+        return total;
     }
 
     long insert(
@@ -121,8 +142,16 @@ final class StorageResourceLedger {
         if (!capacity.unlimited() && projectedTypeCount > capacity.finiteTypeSlots()) return false;
         if (action == Action.EXECUTE) {
             for (Map.Entry<StorageResourceKey, Long> update : updates.entrySet()) {
-                if (update.getValue() == 0) amounts.remove(update.getKey());
-                else amounts.put(update.getKey(), update.getValue());
+                StorageResourceKey key = update.getKey();
+                long existing = amounts.getOrDefault(key, 0L);
+                if (update.getValue() == 0) {
+                    amounts.remove(key);
+                    typeCountsByKind.computeIfPresent(key.kindId(), (ignored, count) ->
+                            count == 1 ? null : count - 1);
+                } else {
+                    amounts.put(key, update.getValue());
+                    if (existing == 0) typeCountsByKind.merge(key.kindId(), 1, Integer::sum);
+                }
             }
         }
         return true;
@@ -182,6 +211,7 @@ final class StorageResourceLedger {
             if (ledger.amounts.putIfAbsent(key, amount) != null) {
                 throw new IllegalArgumentException("Duplicate typed resource ledger key " + key);
             }
+            ledger.typeCountsByKind.merge(kindId, 1, Integer::sum);
         }
         return ledger;
     }

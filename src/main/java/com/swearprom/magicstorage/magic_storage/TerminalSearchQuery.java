@@ -31,7 +31,7 @@ final class TerminalSearchQuery {
                     ? token.substring(1)
                     : token;
             if (value.isEmpty()) {
-                terms.add(InvalidTerm.INSTANCE);
+                continue;
             } else if (prefix == '@') {
                 terms.add(new ModTerm(value));
             } else if (prefix == '#') {
@@ -51,6 +51,10 @@ final class TerminalSearchQuery {
             if (!term.matches(entry)) return false;
         }
         return true;
+    }
+
+    boolean isEmpty() {
+        return terms.isEmpty();
     }
 
     boolean matches(StorageResourceKey key, ItemStack representative) {
@@ -84,12 +88,12 @@ final class TerminalSearchQuery {
     private record ModTerm(String value) implements Term {
         @Override
         public boolean matches(TerminalSearchEntry entry) {
-            return entry.namespace().equals(value);
+            return entry.namespace().contains(value);
         }
 
         @Override
         public boolean matches(StorageResourceKey key, String identity) {
-            return key.resourceId().getNamespace().equals(value);
+            return key.resourceId().getNamespace().contains(value);
         }
     }
 

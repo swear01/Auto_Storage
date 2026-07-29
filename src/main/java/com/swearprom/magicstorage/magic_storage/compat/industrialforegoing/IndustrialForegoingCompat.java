@@ -116,15 +116,16 @@ public final class IndustrialForegoingCompat {
             ResourceLocation descriptorId,
             String itemPath
     ) {
-        machineDescriptors.register(descriptorId.getPath(), () ->
-                MachineDescriptor.installableVariants(
-                        descriptorId,
-                        () -> List.of(MachineVariant.of(
-                                new ItemStack(requiredItem(itemPath)),
-                                MachineWorkRate.ONE)),
-                        MachineEnergyTable.Category.PROCESS,
-                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
-                        null));
+        machineDescriptors.register(descriptorId.getPath(), () -> {
+            Item item = requiredItem(itemPath);
+            return MachineDescriptor.installableVariants(
+                    descriptorId,
+                    new ItemStack(item).getHoverName(),
+                    () -> List.of(MachineVariant.of(new ItemStack(item), MachineWorkRate.ONE)),
+                    MachineEnergyTable.Category.PROCESS,
+                    MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                    null);
+        });
     }
 
     private static boolean supportsDissolution(DissolutionChamberRecipe recipe) {

@@ -2,12 +2,18 @@ package com.swearprom.magicstorage.magic_storage.gametest;
 
 import com.swearprom.magicstorage.magic_storage.EnergyType;
 import com.swearprom.magicstorage.magic_storage.MagicStorage;
+import com.swearprom.magicstorage.magic_storage.SortMode;
+import com.swearprom.magicstorage.magic_storage.SortOrder;
 import com.swearprom.magicstorage.magic_storage.StorageCoreBlockEntity;
+import com.swearprom.magicstorage.magic_storage.TerminalDisplayStack;
+import com.swearprom.magicstorage.magic_storage.TerminalResourceView;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -124,6 +130,16 @@ public final class TypedResourceTests {
             if (core.getEnergy(EnergyType.SMELTING_ENERGY) != 0
                     || core.getEnergy(EnergyType.FURNACE_FUEL) != 0) {
                 helper.fail("NeoForge Energy leaked into magic-crafting energy pools");
+                return;
+            }
+            var entries = core.getTerminalDisplayStacks(
+                    "", SortMode.NAME, SortOrder.ASCENDING, TerminalResourceView.ENERGY);
+            ItemStack entry = entries.size() == 1 ? entries.getFirst() : ItemStack.EMPTY;
+            if (!entry.is(Items.REDSTONE)
+                    || TerminalDisplayStack.amount(entry) != 1_200
+                    || !Component.translatable("gui.magic_storage.resource.neoforge_energy")
+                    .equals(entry.get(DataComponents.CUSTOM_NAME))) {
+                helper.fail("NeoForge Energy terminal entry used its carrier item as the resource identity");
                 return;
             }
             if (energy.extractEnergy(350, true) != 350 || energy.getEnergyStored() != 1_200) {

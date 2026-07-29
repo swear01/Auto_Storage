@@ -23,6 +23,7 @@ final class TerminalProfile {
             Capability.OUTPUT_DESTINATION);
 
     private static final int PAGE_CONTROL_COUNT = 4;
+    private static final int UTILITY_VIEW_CONTROL_COUNT = 3;
     private static final int VIEW_CONTROL_COUNT = 5;
 
     private final Set<Capability> capabilities;
@@ -80,7 +81,7 @@ final class TerminalProfile {
 
     List<Integer> fuelRailGroups() {
         return supports(Capability.PAGES)
-                ? List.of(PAGE_CONTROL_COUNT)
+                ? List.of(PAGE_CONTROL_COUNT, UTILITY_VIEW_CONTROL_COUNT)
                 : itemRailGroups();
     }
 }

@@ -1,5 +1,7 @@
 package com.swearprom.magicstorage.magic_storage;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,14 +11,16 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 final class StorageResourceKinds {
     private static final ResourceLocation CHEMICAL_REGISTRY_ID =
             ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "chemical");
+    private static final ResourceLocation MEKANISM_CHEMICAL_TANK_ID =
+            ResourceLocation.fromNamespaceAndPath("mekanism", "basic_chemical_tank");
     private static final ResourceLocation BOTANIA_MANA_REGISTRY_ID =
             ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "mana");
-    private static final ResourceLocation BOTANIA_MANA_TABLET_ID =
-            ResourceLocation.fromNamespaceAndPath("botania", "mana_tablet");
+    private static final ResourceLocation BOTANIA_MANA_POWDER_ID =
+            ResourceLocation.fromNamespaceAndPath("botania", "mana_powder");
     private static final ResourceLocation ARS_NOUVEAU_SOURCE_REGISTRY_ID =
             ResourceLocation.fromNamespaceAndPath(MagicStorage.MODID, "source");
-    private static final ResourceLocation ARS_NOUVEAU_SOURCE_JAR_ID =
-            ResourceLocation.fromNamespaceAndPath("ars_nouveau", "source_jar");
+    private static final ResourceLocation ARS_NOUVEAU_SOURCE_GEM_ID =
+            ResourceLocation.fromNamespaceAndPath("ars_nouveau", "source_gem");
 
     private StorageResourceKinds() {
     }
@@ -27,28 +31,41 @@ final class StorageResourceKinds {
         kinds.register(StorageResourceKindApi.FLUID_KIND.getPath(), () ->
                 StorageResourceKind.variantAware(() -> new ItemStack(Items.BUCKET)));
         kinds.register(StorageResourceKindApi.ENERGY_KIND.getPath(), () ->
-                StorageResourceKind.variantless(() -> new ItemStack(Items.REDSTONE)));
+                StorageResourceKind.variantless(() -> named(
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.magic_storage.resource.neoforge_energy"))));
         kinds.register(StorageResourceKindApi.WORK_KIND.getPath(), () ->
                 StorageResourceKind.variantAware(() -> new ItemStack(Items.CLOCK)));
     }
 
     static void registerChemical(DeferredRegister<StorageResourceKind> kinds) {
         kinds.register(StorageResourceKindApi.CHEMICAL_KIND.getPath(), () ->
-                StorageResourceKind.variantless(() -> new ItemStack(Items.BREWING_STAND)));
+                StorageResourceKind.variantless(StorageResourceKinds::chemicalTank));
         kinds.addAlias(StorageResourceKindApi.CHEMICAL_KIND, CHEMICAL_REGISTRY_ID);
+    }
+
+    private static ItemStack chemicalTank() {
+        var item = BuiltInRegistries.ITEM.get(MEKANISM_CHEMICAL_TANK_ID);
+        if (item == Items.AIR) {
+            throw new IllegalStateException(
+                    "Loaded Mekanism did not register " + MEKANISM_CHEMICAL_TANK_ID);
+        }
+        return new ItemStack(item);
     }
 
     static void registerBotaniaMana(DeferredRegister<StorageResourceKind> kinds) {
         kinds.register(StorageResourceKindApi.BOTANIA_MANA_KIND.getPath(), () ->
-                StorageResourceKind.variantless(() ->
-                        new ItemStack(BuiltInRegistries.ITEM.get(BOTANIA_MANA_TABLET_ID))));
+                StorageResourceKind.variantless(() -> namedRepresentative(
+                        BOTANIA_MANA_POWDER_ID,
+                        Component.translatable("gui.magic_storage.resource.mana"))));
         kinds.addAlias(StorageResourceKindApi.BOTANIA_MANA_KIND, BOTANIA_MANA_REGISTRY_ID);
     }
 
     static void registerArsNouveauSource(DeferredRegister<StorageResourceKind> kinds) {
         kinds.register(StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND.getPath(), () ->
-                StorageResourceKind.variantless(() ->
-                        new ItemStack(BuiltInRegistries.ITEM.get(ARS_NOUVEAU_SOURCE_JAR_ID))));
+                StorageResourceKind.variantless(() -> namedRepresentative(
+                        ARS_NOUVEAU_SOURCE_GEM_ID,
+                        Component.translatable("gui.magic_storage.resource.source"))));
         kinds.addAlias(
                 StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND,
                 ARS_NOUVEAU_SOURCE_REGISTRY_ID);
@@ -69,14 +86,23 @@ final class StorageResourceKinds {
     }
 
     static boolean hasOtherKind() {
-        return MagicStorage.RESOURCE_KIND_REGISTRY.keySet().stream()
+        return isKindAvailable(StorageResourceKindApi.WORK_KIND)
+                || MagicStorage.RESOURCE_KIND_REGISTRY.keySet().stream()
                 .anyMatch(kindId -> !isBuiltInKindId(kindId));
+    }
+
+    static boolean isEnergyKindId(ResourceLocation kindId) {
+        return kindId.equals(StorageResourceKindApi.ENERGY_KIND)
+                || kindId.equals(StorageResourceKindApi.BOTANIA_MANA_KIND)
+                || kindId.equals(BOTANIA_MANA_REGISTRY_ID)
+                || kindId.equals(StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND)
+                || kindId.equals(ARS_NOUVEAU_SOURCE_REGISTRY_ID);
     }
 
     static boolean isBuiltInKindId(ResourceLocation kindId) {
         return kindId.equals(StorageResourceKindApi.ITEM_KIND)
                 || kindId.equals(StorageResourceKindApi.FLUID_KIND)
-                || kindId.equals(StorageResourceKindApi.ENERGY_KIND)
+                || isEnergyKindId(kindId)
                 || kindId.equals(StorageResourceKindApi.WORK_KIND)
                 || isChemicalKindId(kindId);
     }
@@ -90,6 +116,12 @@ final class StorageResourceKinds {
         return MagicStorage.RESOURCE_KIND_REGISTRY.get(key.kindId()) != null;
     }
 
+    static ItemStack kindRepresentative(ResourceLocation kindId) {
+        StorageResourceKind kind = MagicStorage.RESOURCE_KIND_REGISTRY.get(kindId);
+        if (kind == null) throw new IllegalArgumentException("Unknown storage resource kind " + kindId);
+        return kind.representative();
+    }
+
     static ItemStack representative(StorageResourceKey key, net.minecraft.core.HolderLookup.Provider registries) {
         if (key.kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
             var item = StorageResourceBridge.itemKey(key, registries);
@@ -99,21 +131,51 @@ final class StorageResourceKinds {
             var fluid = StorageResourceBridge.fluidStack(key, 1, registries);
             if (fluid.isPresent()) {
                 ItemStack bucket = new ItemStack(fluid.get().getFluid().getBucket());
-                if (!bucket.isEmpty()) return bucket;
+                if (!bucket.isEmpty()) return named(bucket, fluid.get().getHoverName());
             }
         }
         if (key.kindId().equals(StorageResourceKindApi.WORK_KIND)) {
             EnergyType energyType = StorageResourceBridge.energyType(key).orElse(null);
-            if (energyType != null) return energyType.representativeStack();
+            if (energyType != null) {
+                return named(
+                        energyType.representativeStack(),
+                        Component.translatable("gui.magic_storage.energy." + energyType.getId()));
+            }
             ResourceLocation descriptorId = StorageResourceBridge.descriptorId(key)
                     .or(() -> StorageResourceBridge.stationWorkDescriptorId(key))
                     .orElse(null);
             MachineDescriptor descriptor = descriptorId == null
                     ? null : MachineEnergyTable.get(descriptorId);
-            if (descriptor != null) return descriptor.representativeStack();
+            if (descriptor != null) {
+                Component label = StorageResourceBridge.stationWorkDescriptorId(key).isPresent()
+                        ? Component.translatable(
+                                "gui.magic_storage.resource.station_work",
+                                descriptor.stationLabel())
+                        : descriptorId.equals(MachineEnergyTable.AXE_ID)
+                        ? Component.translatable("gui.magic_storage.axe_energy")
+                        : descriptor.representativeStack().getHoverName();
+                return named(descriptor.representativeStack(), label);
+            }
         }
-        StorageResourceKind kind = MagicStorage.RESOURCE_KIND_REGISTRY.get(key.kindId());
-        if (kind == null) throw new IllegalArgumentException("Unknown storage resource kind " + key.kindId());
-        return kind.representative();
+        ItemStack representative = kindRepresentative(key.kindId());
+        if (isChemicalKindId(key.kindId())) {
+            representative.set(
+                    DataComponents.CUSTOM_NAME,
+                    Component.translatable(key.resourceId().toLanguageKey("chemical")));
+        }
+        return representative;
+    }
+
+    private static ItemStack namedRepresentative(ResourceLocation itemId, Component name) {
+        var item = BuiltInRegistries.ITEM.get(itemId);
+        if (item == Items.AIR) {
+            throw new IllegalStateException("Loaded resource provider did not register " + itemId);
+        }
+        return named(new ItemStack(item), name);
+    }
+
+    private static ItemStack named(ItemStack stack, Component name) {
+        stack.set(DataComponents.CUSTOM_NAME, name);
+        return stack;
     }
 }

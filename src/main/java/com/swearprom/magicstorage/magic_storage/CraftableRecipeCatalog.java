@@ -14,10 +14,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 final class CraftableRecipeCatalog {
@@ -32,32 +30,37 @@ final class CraftableRecipeCatalog {
 
     List<Candidate> getCandidates(
             Level level,
-            Collection<ItemStack> availableStacks
+            Collection<Item> availableItems
     ) {
         CatalogIndex current = ensureCurrent(level);
-        Set<ResourceLocation> candidates = new LinkedHashSet<>();
-        candidates.addAll(current.unindexedRecipeIds());
-        for (ItemStack stack : availableStacks) {
-            if (stack.isEmpty()) continue;
-            candidates.addAll(current.recipeIdsByIngredient()
-                    .getOrDefault(stack.getItem(), List.of()));
-        }
-        List<ResourceLocation> result = new ArrayList<>(candidates);
-        BitSet availableItems = new BitSet();
-        for (ItemStack stack : availableStacks) {
-            if (!stack.isEmpty()) {
-                availableItems.set(net.minecraft.core.registries.BuiltInRegistries.ITEM
-                        .getId(stack.getItem()));
+        BitSet candidates = new BitSet(current.entries().size());
+        for (int index : current.unindexedRecipeIndices()) candidates.set(index);
+        BitSet visitedItems = new BitSet();
+        BitSet availableItemIds = new BitSet();
+        for (Item item : availableItems) {
+            int itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM
+                    .getId(item);
+            availableItemIds.set(itemId);
+            if (visitedItems.get(itemId)) continue;
+            visitedItems.set(itemId);
+            for (int candidate : current.recipeIndicesByIngredient()
+                    .getOrDefault(item, new int[0])) {
+                candidates.set(candidate);
             }
         }
-        result.removeIf(id -> !requirementsMet(
-                current.requiredItemGroups().get(id), availableItems));
-        result.sort(Comparator.comparingInt(
-                id -> current.recipeOrder().getOrDefault(id, Integer.MAX_VALUE)));
-        return result.stream()
-                .map(id -> new Candidate(id, current.adaptersByRecipeId().get(id)))
-                .filter(candidate -> candidate.adapter() != null)
-                .toList();
+        List<Candidate> result = new ArrayList<>(candidates.cardinality());
+        for (int index = candidates.nextSetBit(0);
+             index >= 0;
+             index = candidates.nextSetBit(index + 1)) {
+            CatalogEntry entry = current.entries().get(index);
+            if (requirementsMet(entry.requiredItemGroups(), availableItemIds)) {
+                result.add(new Candidate(
+                        entry.id(),
+                        entry.adapter(),
+                        entry));
+            }
+        }
+        return List.copyOf(result);
     }
 
     private CatalogIndex ensureCurrent(Level level) {
@@ -93,32 +96,31 @@ final class CraftableRecipeCatalog {
                     .forEach(supported::add);
         }
 
-        Map<Item, List<ResourceLocation>> byIngredient = new HashMap<>();
-        Map<ResourceLocation, Integer> order = new HashMap<>();
-        Map<ResourceLocation, RecipeAdapter> adaptersByRecipeId = new HashMap<>();
-        Map<ResourceLocation, int[][]> requiredItemGroups = new HashMap<>();
-        List<ResourceLocation> unindexed = new ArrayList<>();
+        Map<Item, List<Integer>> byIngredient = new HashMap<>();
+        List<CatalogEntry> entries = new ArrayList<>(supported.size());
+        List<Integer> unindexed = new ArrayList<>();
         for (int index = 0; index < supported.size(); index++) {
             RecipeAdapterMatch match = supported.get(index);
             RecipeHolder<?> holder = match.holder();
-            order.put(holder.id(), index);
-            adaptersByRecipeId.put(holder.id(), match.adapter());
             int[][] requirements = requiredItemGroups(match, level);
-            if (requirements.length > 0) {
-                requiredItemGroups.put(holder.id(), requirements);
-            }
-            Set<Item> indexedItems = new LinkedHashSet<>();
-            if (!match.candidateIndex().isExhaustive()) unindexed.add(holder.id());
+            boolean fullVariantSnapshot = !match.candidateIndex().isExhaustive();
+            entries.add(new CatalogEntry(
+                    holder.id(),
+                    match.adapter(),
+                    requirements));
+            java.util.Set<Item> indexedItems = new java.util.LinkedHashSet<>();
+            if (fullVariantSnapshot) unindexed.add(index);
             for (ItemStack candidate : match.candidateIndex().representatives()) {
                 if (!candidate.isEmpty()) indexedItems.add(candidate.getItem());
             }
             for (Item item : indexedItems) {
-                byIngredient.computeIfAbsent(item, ignored -> new ArrayList<>()).add(holder.id());
+                byIngredient.computeIfAbsent(item, ignored -> new ArrayList<>()).add(index);
             }
         }
 
-        Map<Item, List<ResourceLocation>> immutableIndex = new HashMap<>();
-        byIngredient.forEach((item, ids) -> immutableIndex.put(item, List.copyOf(ids)));
+        Map<Item, int[]> immutableIndex = new HashMap<>();
+        byIngredient.forEach((item, indices) -> immutableIndex.put(
+                item, indices.stream().mapToInt(Integer::intValue).toArray()));
         long elapsedMillis = (System.nanoTime() - started) / 1_000_000L;
         MagicStorage.LOGGER.info(
                 "Craftable catalog built in {} ms: total={}, supported={}, unindexed={}, ingredientKeys={}",
@@ -129,11 +131,9 @@ final class CraftableRecipeCatalog {
                 immutableIndex.size());
         return new CatalogIndex(
                 recipeSnapshot,
+                List.copyOf(entries),
                 Map.copyOf(immutableIndex),
-                Map.copyOf(order),
-                Map.copyOf(adaptersByRecipeId),
-                Map.copyOf(requiredItemGroups),
-                List.copyOf(unindexed));
+                unindexed.stream().mapToInt(Integer::intValue).toArray());
     }
 
     private static int[][] requiredItemGroups(RecipeAdapterMatch match, Level level) {
@@ -186,20 +186,85 @@ final class CraftableRecipeCatalog {
         return true;
     }
 
-    record Candidate(ResourceLocation id, RecipeAdapter adapter) {
+    record Candidate(
+            ResourceLocation id,
+            RecipeAdapter adapter,
+            CatalogEntry entry
+    ) {
         RecipeAdapterMatch match(RecipeHolder<?> holder) {
-            return new RecipeAdapterMatch(
-                    adapter, holder, RecipeCandidateIndex.exhaustive(List.of()));
+            return entry.match(holder);
+        }
+
+        List<RecipeAdapterMatch> resolveVariants(
+                RecipeAdapterMatch match,
+                List<ItemStack> availableStacks,
+                Level level
+        ) {
+            return entry.resolveVariants(match, availableStacks, level);
+        }
+    }
+
+    private static final class CatalogEntry {
+        private final ResourceLocation id;
+        private final RecipeAdapter adapter;
+        private final int[][] requiredItemGroups;
+        private RecipeAdapterMatch match;
+        private List<RecipeAdapterMatch> fixedVariants;
+
+        private CatalogEntry(
+                ResourceLocation id,
+                RecipeAdapter adapter,
+                int[][] requiredItemGroups
+        ) {
+            this.id = id;
+            this.adapter = adapter;
+            this.requiredItemGroups = requiredItemGroups;
+        }
+
+        private ResourceLocation id() {
+            return id;
+        }
+
+        private RecipeAdapter adapter() {
+            return adapter;
+        }
+
+        private int[][] requiredItemGroups() {
+            return requiredItemGroups;
+        }
+
+        private RecipeAdapterMatch match(RecipeHolder<?> holder) {
+            if (match == null || !match.isCurrentHolder(holder)) {
+                match = new RecipeAdapterMatch(
+                        adapter,
+                        holder,
+                        RecipeCandidateIndex.exhaustive(List.of()));
+            }
+            return match;
+        }
+
+        private List<RecipeAdapterMatch> resolveVariants(
+                RecipeAdapterMatch baseMatch,
+                List<ItemStack> availableStacks,
+                Level level
+        ) {
+            if (adapter.requiresAvailableStacksForVariants()) {
+                return baseMatch.resolveVariantsFromSnapshot(
+                        availableStacks, level);
+            }
+            if (fixedVariants == null) {
+                fixedVariants = baseMatch.resolveVariantsFromSnapshot(
+                        List.of(), level);
+            }
+            return fixedVariants;
         }
     }
 
     private record CatalogIndex(
             Collection<RecipeHolder<?>> recipeSnapshot,
-            Map<Item, List<ResourceLocation>> recipeIdsByIngredient,
-            Map<ResourceLocation, Integer> recipeOrder,
-            Map<ResourceLocation, RecipeAdapter> adaptersByRecipeId,
-            Map<ResourceLocation, int[][]> requiredItemGroups,
-            List<ResourceLocation> unindexedRecipeIds
+            List<CatalogEntry> entries,
+            Map<Item, int[]> recipeIndicesByIngredient,
+            int[] unindexedRecipeIndices
     ) {
     }
 }

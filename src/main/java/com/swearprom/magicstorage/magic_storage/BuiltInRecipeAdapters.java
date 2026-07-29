@@ -33,10 +33,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -453,6 +455,7 @@ final class BuiltInRecipeAdapters {
             Level level
     ) {
         if (level == null) return List.of();
+        if (smithingVariantLimitExceeded(recipe, availableStacks)) return List.of();
         Optional<List<ItemStack>> orderedStacks = uniqueExactStacks(availableStacks, level);
         if (orderedStacks.isEmpty()) return List.of();
         List<ItemStack> unique = orderedStacks.get();
@@ -484,6 +487,35 @@ final class BuiltInRecipeAdapters {
             }
         }
         return List.copyOf(variants.values());
+    }
+
+    private static boolean smithingVariantLimitExceeded(
+            SmithingRecipe recipe,
+            List<ItemStack> availableStacks
+    ) {
+        Set<ItemKey> templates = new HashSet<>();
+        Set<ItemKey> bases = new HashSet<>();
+        Set<ItemKey> additions = new HashSet<>();
+        for (ItemStack stack : availableStacks) {
+            if (stack.isEmpty()) continue;
+            ItemKey key = null;
+            if (recipe.isTemplateIngredient(stack)) {
+                key = ItemKey.of(stack);
+                templates.add(key);
+            }
+            if (recipe.isBaseIngredient(stack)) {
+                if (key == null) key = ItemKey.of(stack);
+                bases.add(key);
+            }
+            if (recipe.isAdditionIngredient(stack)) {
+                if (key == null) key = ItemKey.of(stack);
+                additions.add(key);
+            }
+            if (!templates.isEmpty() && !bases.isEmpty() && !additions.isEmpty()
+                    && templates.size() > MAX_SMITHING_VARIANT_COMBINATIONS
+                    / bases.size() / additions.size()) return true;
+        }
+        return false;
     }
 
     private static RecipeAdapterMatch.Contract smithingVariantContract(
@@ -657,6 +689,7 @@ final class BuiltInRecipeAdapters {
                             ingredient,
                             ingredient,
                             Arrays.asList(ingredient.getItems()),
+                            ingredient.isSimple(),
                             ingredient.isSimple(),
                             1));
         }
@@ -850,6 +883,11 @@ final class BuiltInRecipeAdapters {
             R recipe = recipeClass.cast(holder.value());
             return List.copyOf(variantContractFactory.resolve(
                     recipe, baseContract, availableStacks, level));
+        }
+
+        @Override
+        public boolean requiresAvailableStacksForVariants() {
+            return id.equals(SMITHING_TRANSFORM_ID) || id.equals(SMITHING_TRIM_ID);
         }
 
         @Override

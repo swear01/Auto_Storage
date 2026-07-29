@@ -133,7 +133,7 @@ public final class MekanismChemicalCompat {
         return StorageResourceKey.of(CHEMICAL_KIND, chemicalId, new CompoundTag());
     }
 
-    private static ChemicalStack stack(StorageResourceKey key, long amount) {
+    static ChemicalStack stack(StorageResourceKey key, long amount) {
         if (!key.kindId().equals(CHEMICAL_KIND) || amount <= 0) return ChemicalStack.EMPTY;
         return MekanismAPI.CHEMICAL_REGISTRY.getHolder(ResourceKey.create(
                         MekanismAPI.CHEMICAL_REGISTRY_NAME, key.resourceId()))

@@ -5,13 +5,15 @@ import com.swearprom.magicstorage.magic_storage.RecipePresentation;
 import com.swearprom.magicstorage.magic_storage.RecipePresentationKind;
 import dev.emi.emi.api.EmiApi;
 import dev.emi.emi.api.recipe.EmiRecipe;
-import dev.emi.emi.api.widget.Bounds;
+import dev.emi.emi.api.stack.EmiIngredient;
+import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.api.widget.WidgetHolder;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.ArrayList;
@@ -33,9 +35,7 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         EmiRecipe recipe = compatibleRecipe(presentation);
         return recipe != null
                 && recipe.getDisplayWidth() > 0
-                && recipe.getDisplayHeight() > 0
-                && recipe.getDisplayWidth() <= geometry.diagram().width()
-                && recipe.getDisplayHeight() <= geometry.diagram().height();
+                && recipe.getDisplayHeight() > 0;
     }
 
     @Override
@@ -54,8 +54,8 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         Rect diagram = geometry.diagram();
         int originX = left + state.x();
         int originY = top + state.y();
-        int localMouseX = mouseX - originX;
-        int localMouseY = mouseY - originY;
+        int localMouseX = (int) ((mouseX - originX) / state.scale());
+        int localMouseY = (int) ((mouseY - originY) / state.scale());
 
         graphics.enableScissor(
                 left + diagram.x(),
@@ -66,6 +66,7 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
             graphics.pose().pushPose();
             try {
                 graphics.pose().translate(originX, originY, 0);
+                graphics.pose().scale(state.scale(), state.scale(), 1.0F);
                 for (Widget widget : state.widgets()) {
                     widget.render(graphics, localMouseX, localMouseY, partialTick);
                 }
@@ -90,8 +91,8 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         Rect diagram = geometry.diagram();
         if (!diagram.contains(mouseX - left, mouseY - top)) return false;
         WidgetState state = widgetState(presentation, geometry);
-        int localMouseX = (int) mouseX - left - state.x();
-        int localMouseY = (int) mouseY - top - state.y();
+        int localMouseX = (int) ((mouseX - left - state.x()) / state.scale());
+        int localMouseY = (int) ((mouseY - top - state.y()) / state.scale());
         for (Widget widget : state.widgets()) {
             if (widget.getBounds().contains(localMouseX, localMouseY)
                     && widget.mouseClicked(localMouseX, localMouseY, button)) {
@@ -116,8 +117,8 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         Rect diagram = geometry.diagram();
         if (!diagram.contains(mouseX - left, mouseY - top)) return false;
         WidgetState state = widgetState(presentation, geometry);
-        int localMouseX = mouseX - left - state.x();
-        int localMouseY = mouseY - top - state.y();
+        int localMouseX = (int) ((mouseX - left - state.x()) / state.scale());
+        int localMouseY = (int) ((mouseY - top - state.y()) / state.scale());
         for (Widget widget : state.widgets()) {
             if (widget.getBounds().contains(localMouseX, localMouseY)
                     && widget.keyPressed(keyCode, scanCode, modifiers)) {
@@ -141,8 +142,8 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         Rect diagram = geometry.diagram();
         if (!diagram.contains(mouseX - left, mouseY - top)) return false;
         WidgetState state = widgetState(presentation, geometry);
-        int localMouseX = mouseX - left - state.x();
-        int localMouseY = mouseY - top - state.y();
+        int localMouseX = (int) ((mouseX - left - state.x()) / state.scale());
+        int localMouseY = (int) ((mouseY - top - state.y()) / state.scale());
         for (Widget widget : state.widgets()) {
             if (!widget.getBounds().contains(localMouseX, localMouseY)) continue;
             List<ClientTooltipComponent> tooltip = widget.getTooltip(localMouseX, localMouseY);
@@ -154,22 +155,80 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
     }
 
     private EmiRecipe compatibleRecipe(RecipePresentation presentation) {
-        EmiRecipe recipe = EmiApi.getRecipeManager().getRecipe(presentation.recipeId());
-        if (recipe == null || !Objects.equals(recipe.getId(), presentation.recipeId())) {
-            return null;
+        var manager = EmiApi.getRecipeManager();
+        if (Objects.equals(cachedId, presentation.recipeId())
+                && cachedRecipe != null
+                && manager.getRecipe(cachedRecipe.getId()) == cachedRecipe) {
+            return cachedRecipe;
         }
-        RecipeHolder<?> backingRecipe = recipe.getBackingRecipe();
-        if (backingRecipe == null || !backingRecipe.id().equals(presentation.recipeId())) {
-            return null;
+        EmiRecipe direct = manager.getRecipe(presentation.recipeId());
+        if (direct != null && Objects.equals(direct.getId(), presentation.recipeId())) {
+            RecipeHolder<?> backingRecipe = direct.getBackingRecipe();
+            if (backingRecipe != null && backingRecipe.id().equals(presentation.recipeId())) {
+                return direct;
+            }
         }
-        return recipe;
+        EmiRecipe match = null;
+        for (EmiRecipe candidate : manager.getRecipesByOutput(EmiStack.of(presentation.output()))) {
+            if (!matchesPublicRecipe(candidate, presentation)) continue;
+            if (match != null && match != candidate) return null;
+            match = candidate;
+        }
+        return match;
+    }
+
+    private static boolean matchesPublicRecipe(
+            EmiRecipe recipe,
+            RecipePresentation presentation
+    ) {
+        if (recipe == null || recipe.getId() == null
+                || recipe.getDisplayWidth() <= 0 || recipe.getDisplayHeight() <= 0
+                || !matchesOutput(recipe, presentation.output())) {
+            return false;
+        }
+        List<RecipePresentation.Resource> resources = presentation.resources();
+        if (resources.isEmpty()
+                || resources.stream().anyMatch(resource ->
+                resource.kind() != RecipePresentation.ResourceKind.ITEM)) {
+            return false;
+        }
+        long[] matchedAmounts = new long[resources.size()];
+        for (EmiIngredient ingredient : recipe.getInputs()) {
+            if (ingredient.isEmpty()) continue;
+            long amount = ingredient.getAmount();
+            if (amount <= 0) return false;
+            int matchedResource = -1;
+            for (int index = 0; index < resources.size(); index++) {
+                ItemStack expected = resources.get(index).stack();
+                if (ingredient.getEmiStacks().stream().anyMatch(candidate ->
+                        ItemStack.isSameItemSameComponents(candidate.getItemStack(), expected))) {
+                    if (matchedResource >= 0) return false;
+                    matchedResource = index;
+                }
+            }
+            if (matchedResource < 0
+                    || amount > resources.get(matchedResource).required()
+                    - matchedAmounts[matchedResource]) {
+                return false;
+            }
+            matchedAmounts[matchedResource] += amount;
+        }
+        for (int index = 0; index < resources.size(); index++) {
+            if (matchedAmounts[index] != resources.get(index).required()) return false;
+        }
+        return true;
+    }
+
+    private static boolean matchesOutput(EmiRecipe recipe, ItemStack output) {
+        return recipe.getOutputs().stream().anyMatch(candidate ->
+                candidate.getAmount() == output.getCount()
+                        && ItemStack.isSameItemSameComponents(candidate.getItemStack(), output));
     }
 
     private WidgetState widgetState(RecipePresentation presentation, Geometry geometry) {
         EmiRecipe recipe = compatibleRecipe(presentation);
         if (recipe == null || recipe.getDisplayWidth() <= 0 || recipe.getDisplayHeight() <= 0
-                || recipe.getDisplayWidth() > geometry.diagram().width()
-                || recipe.getDisplayHeight() > geometry.diagram().height()) {
+                || geometry.diagram().width() <= 0 || geometry.diagram().height() <= 0) {
             throw new IllegalStateException(
                     "Selected recipe no longer has a compatible EMI public-widget representation");
         }
@@ -187,9 +246,14 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
             cachedWidgets = holder.widgets();
         }
         Rect diagram = geometry.diagram();
+        float scale = Math.min(1.0F, Math.min(
+                diagram.width() / (float) cachedWidth,
+                diagram.height() / (float) cachedHeight));
+        int scaledWidth = Math.round(cachedWidth * scale);
         return new WidgetState(
-                diagram.x() + (diagram.width() - cachedWidth) / 2,
-                diagram.y() + (diagram.height() - cachedHeight) / 2,
+                diagram.x() + (diagram.width() - scaledWidth) / 2,
+                diagram.y(),
+                scale,
                 cachedWidgets);
     }
 
@@ -242,8 +306,11 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         }
     }
 
-    private record WidgetState(int x, int y, List<Widget> widgets) {
+    private record WidgetState(int x, int y, float scale, List<Widget> widgets) {
         private WidgetState {
+            if (scale <= 0.0F) {
+                throw new IllegalArgumentException("EMI widget scale must be positive");
+            }
             widgets = List.copyOf(widgets);
         }
     }
@@ -274,13 +341,7 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         @Override
         public <T extends Widget> T add(T widget) {
             Objects.requireNonNull(widget, "widget");
-            Bounds bounds = Objects.requireNonNull(widget.getBounds(), "widget bounds");
-            long right = (long) bounds.x() + bounds.width();
-            long bottom = (long) bounds.y() + bounds.height();
-            if (bounds.x() < 0 || bounds.y() < 0 || bounds.width() < 0 || bounds.height() < 0
-                    || right > width || bottom > height) {
-                throw new IllegalArgumentException("EMI recipe widget exceeds its public holder bounds");
-            }
+            Objects.requireNonNull(widget.getBounds(), "widget bounds");
             widgets.add(widget);
             return widget;
         }

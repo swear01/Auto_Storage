@@ -1,5 +1,7 @@
 package com.swearprom.magicstorage.fixture.compatibilitymatrix;
 
+import com.blakebr0.extendedcrafting.crafting.recipe.UltimateSingularityRecipe;
+import com.blakebr0.extendedcrafting.singularity.SingularityRegistry;
 import com.swearprom.magicstorage.magic_storage.CraftingTerminalMenu;
 import com.swearprom.magicstorage.magic_storage.MachineEnergyTable;
 import com.swearprom.magicstorage.magic_storage.MagicStorage;
@@ -37,7 +39,8 @@ public final class CompatibilityMatrixGameTests {
                 "powah",
                 "industrialforegoing",
                 "create",
-                "pneumaticcraft")) {
+                "pneumaticcraft",
+                "extendedcrafting")) {
             if (!ModList.get().isLoaded(modId)) {
                 helper.fail("Compatibility matrix did not load " + modId);
                 return;
@@ -52,7 +55,8 @@ public final class CompatibilityMatrixGameTests {
                 "evilcraft_blood_infuser",
                 "powah_energizing",
                 "industrial_foregoing_dissolution_chamber",
-                "create_cutting")) {
+                "create_cutting",
+                "extended_crafting_table")) {
             ResourceLocation id = magicStorage(path);
             if (!MagicStorage.MACHINE_DESCRIPTOR_REGISTRY.containsKey(id)
                     || !MagicStorage.RECIPE_FAMILY_REGISTRY.containsKey(id)) {
@@ -80,6 +84,22 @@ public final class CompatibilityMatrixGameTests {
                 ResourceLocation.fromNamespaceAndPath("ironfurnaces", "iron_furnace")));
         if (furnace == null || ironFurnace.is(Items.AIR) || !furnace.accepts(ironFurnace)) {
             helper.fail("Iron Furnaces variant did not coexist with the shared Furnace descriptor");
+            return;
+        }
+        var ultimate = helper.getLevel().getRecipeManager().byKey(
+                ResourceLocation.fromNamespaceAndPath(
+                        "extendedcrafting", "ultimate_singularity")).orElse(null);
+        int expectedSingularities = SingularityRegistry.getInstance().getSingularities().stream()
+                .filter(singularity -> singularity.isInUltimateSingularity()
+                        && !singularity.getIngredient().isEmpty())
+                .toList().size();
+        int actualIngredients = ultimate != null
+                && ultimate.value() instanceof UltimateSingularityRecipe recipe
+                ? recipe.getIngredients().size()
+                : -1;
+        if (expectedSingularities <= 0 || actualIngredients != expectedSingularities) {
+            helper.fail("Combined Ultimate Singularity inputs: expected "
+                    + expectedSingularities + ", actual " + actualIngredients);
             return;
         }
         helper.succeed();

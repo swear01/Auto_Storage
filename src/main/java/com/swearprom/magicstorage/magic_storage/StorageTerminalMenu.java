@@ -32,7 +32,8 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     static final int PREVIOUS_RESOURCE_VIEW_BUTTON = 27;
     static final int RESET_RESOURCE_VIEW_BUTTON = 28;
 
-    public static final int MAX_DISPLAY_ROWS = 9;
+    public static final int MAX_DISPLAY_ROWS = 18;
+    public static final int INITIAL_DISPLAY_ROWS = 9;
     public static final int DISPLAY_COLS = 9;
     public static final int DISPLAY_SLOTS = MAX_DISPLAY_ROWS * DISPLAY_COLS;
     public static final int PLAYER_INVENTORY_SLOTS = 36;
@@ -49,7 +50,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     protected int displayTypeCount = 0;
     protected int displayMaxTypes = 0;
     protected boolean displayUnlimitedTypeCapacity;
-    private int visibleRows = 6;
+    private int visibleRows = INITIAL_DISPLAY_ROWS;
     private SortMode sortMode = SortMode.NAME;
     private SortOrder sortOrder = SortOrder.ASCENDING;
     private SearchMode searchMode = SearchMode.OFF;
@@ -293,13 +294,18 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             replaceVisibleDisplayStacks(List.of(), visibleRows);
             return;
         }
-        java.util.List<ItemStack> stacks = core.getTerminalDisplayStacks(
-                currentFilter, sortMode, sortOrder, resourceView);
-        totalItemTypes = stacks.size();
+        int limit = visibleRows * DISPLAY_COLS;
+        TerminalDisplayPage page = core.getTerminalDisplayPage(
+                currentFilter, sortMode, sortOrder, resourceView, scrollOffset, limit);
+        totalItemTypes = page.totalTypes();
         refreshDisplayMetadata(core);
-        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
-        scrollOffset = Math.min(scrollOffset, maxOffset);
-        replaceVisibleDisplayStacks(stacks, visibleRows);
+        int alignedOffset = rowAlignedScrollOffset(page.offset());
+        if (alignedOffset != page.offset()) {
+            page = core.getTerminalDisplayPage(
+                    currentFilter, sortMode, sortOrder, resourceView, alignedOffset, limit);
+        }
+        scrollOffset = page.offset();
+        replaceVisiblePageStacks(page.stacks(), visibleRows);
     }
 
     protected final void refreshDisplayMetadata(StorageCoreBlockEntity core) {
@@ -316,7 +322,19 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             ItemStack current = displayInventory.getItem(i);
             if (current.getCount() != next.getCount()
                     || !ItemStack.isSameItemSameComponents(current, next)) {
-                displayInventory.setItem(i, next.copy());
+                displayInventory.setItem(i, next);
+            }
+        }
+    }
+
+    protected final void replaceVisiblePageStacks(List<ItemStack> stacks, int rows) {
+        for (int i = 0; i < DISPLAY_SLOTS; i++) {
+            ItemStack next = i < stacks.size() && i < rows * DISPLAY_COLS
+                    ? stacks.get(i) : ItemStack.EMPTY;
+            ItemStack current = displayInventory.getItem(i);
+            if (current.getCount() != next.getCount()
+                    || !ItemStack.isSameItemSameComponents(current, next)) {
+                displayInventory.setItem(i, next);
             }
         }
     }
@@ -329,13 +347,26 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     public void scrollBy(int delta) {
-        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
-        scrollOffset = Math.clamp(scrollOffset + delta, 0, maxOffset);
+        scrollTo((int) Math.clamp(
+                (long) scrollOffset + delta, Integer.MIN_VALUE, Integer.MAX_VALUE));
     }
 
     public void scrollTo(int offset) {
-        int maxOffset = Math.max(0, totalItemTypes - visibleRows * DISPLAY_COLS);
-        scrollOffset = Math.clamp(offset, 0, maxOffset);
+        scrollOffset = rowAlignedScrollOffset(offset);
+    }
+
+    int getMaxScrollOffset() {
+        long totalRows = ((long) totalItemTypes + DISPLAY_COLS - 1) / DISPLAY_COLS;
+        long offset = Math.max(0L, totalRows - visibleRows) * DISPLAY_COLS;
+        int largestAlignedInt = Integer.MAX_VALUE - Integer.MAX_VALUE % DISPLAY_COLS;
+        return (int) Math.min(offset, largestAlignedInt);
+    }
+
+    private int rowAlignedScrollOffset(int offset) {
+        int maxOffset = getMaxScrollOffset();
+        int clamped = Math.clamp(offset, 0, maxOffset);
+        long rounded = ((long) clamped + DISPLAY_COLS / 2) / DISPLAY_COLS * DISPLAY_COLS;
+        return (int) Math.min(rounded, maxOffset);
     }
 
     public int getScrollOffset() {
@@ -619,7 +650,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     public boolean applySettings(TerminalSettingsPacket packet, Player player) {
-        int rows = Math.clamp(packet.visibleRows(), 3, MAX_DISPLAY_ROWS);
+        int rows = Math.clamp(packet.visibleRows(), minimumVisibleRows(), MAX_DISPLAY_ROWS);
         TerminalPreferences preferences = packet.preferences();
         TerminalResourceView requestedView = preferences.resourceView().availableOrItem();
         boolean changed = rows != visibleRows
@@ -633,6 +664,10 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         searchMode = preferences.searchMode();
         resourceView = requestedView;
         return changed;
+    }
+
+    protected int minimumVisibleRows() {
+        return TerminalLayout.MIN_STORAGE_ROWS;
     }
 
     public int getVisibleRows() {
@@ -683,7 +718,8 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     protected void onObservedEnergyChanged(StorageCoreBlockEntity core) {
-        if (resourceView == TerminalResourceView.ENERGY) refreshDisplayItems(core);
+        if (resourceView == TerminalResourceView.ENERGY
+                || resourceView == TerminalResourceView.ALL) refreshDisplayItems(core);
     }
 
     protected void onObservedStationWorkChanged(
@@ -691,7 +727,8 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             Map<ResourceLocation, Long> increases,
             boolean decreased
     ) {
-        if (resourceView == TerminalResourceView.STATION_WORK) refreshDisplayItems(core);
+        if (resourceView == TerminalResourceView.STATION_WORK
+                || resourceView == TerminalResourceView.ALL) refreshDisplayItems(core);
     }
 
     @Override

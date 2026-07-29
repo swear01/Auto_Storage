@@ -1,11 +1,14 @@
 package com.swearprom.magicstorage.magic_storage;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Registry;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkLevel;
@@ -62,6 +65,7 @@ public class MagicStorage {
 
     static final int NETWORK_SCAN_DEPTH = 64;
     static final int MAX_NETWORK_BLOCKS = 8192;
+    private static long datapackRevision;
     private static final Map<Level, Set<BlockPos>> PENDING_NETWORK_GROWTH = new WeakHashMap<>();
     private static final Map<Level, Set<ChunkPos>> PENDING_NETWORK_CHUNK_LOADS = new WeakHashMap<>();
     private static final Map<Level, Map<ChunkPos, LevelChunk>> PENDING_NETWORK_CHUNK_UNLOADS = new WeakHashMap<>();
@@ -261,7 +265,7 @@ public class MagicStorage {
             ClientSetup.register(modEventBus);
         }
         modEventBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) -> {
-            var registrar = event.registrar(MODID).versioned("1.3");
+            var registrar = event.registrar(MODID).versioned("1.5");
             registrar.playToServer(SearchFilterPacket.TYPE, SearchFilterPacket.STREAM_CODEC, this::handleSearchFilter);
             registrar.playToServer(TerminalSettingsPacket.TYPE, TerminalSettingsPacket.STREAM_CODEC, this::handleTerminalSettings);
             registrar.playToServer(TerminalScrollPacket.TYPE, TerminalScrollPacket.STREAM_CODEC, this::handleTerminalScroll);
@@ -340,38 +344,78 @@ public class MagicStorage {
     private void registerCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(MODID)
                 .then(Commands.literal("recover_core")
-                        .executes(context -> {
-                            var player = context.getSource().getPlayerOrException();
-                            var summary = CoreStorageRepository.get(player.serverLevel())
-                                    .reissueLatest(player.getUUID());
-                            if (summary.isEmpty()) {
-                                context.getSource().sendFailure(Component.translatable(
-                                        "msg.magic_storage.core_recovery_none"));
-                                return 0;
-                            }
-                            ItemStack stack = StorageCoreBlockItem.createRecoveryStack(summary.get());
-                            if (!player.getInventory().add(stack)) {
-                                player.drop(stack, false);
-                            }
-                            player.inventoryMenu.broadcastChanges();
-                            context.getSource().sendSuccess(
-                                    () -> Component.translatable(
-                                            "msg.magic_storage.core_recovery_reissued",
-                                            summary.get().typeCount(),
-                                            summary.get().itemCount()),
-                                    false);
-                            return 1;
-                        })));
+                        .executes(context -> reissueCoreRecovery(context.getSource(), false))
+                        .then(Commands.literal("ownerless")
+                                .requires(source -> source.hasPermission(2))
+                                .executes(context -> reissueCoreRecovery(
+                                        context.getSource(), true))))
+                .then(Commands.literal("_gui_test_seed")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("core", BlockPosArgument.blockPos())
+                                .then(Commands.argument(
+                                                "items_per_type",
+                                                IntegerArgumentType.integer(1))
+                                        .executes(context -> GuiRuntimeFixture.run(
+                                                context.getSource(),
+                                                BlockPosArgument.getLoadedBlockPos(
+                                                        context, "core"),
+                                                IntegerArgumentType.getInteger(
+                                                        context, "items_per_type"))))))
+                .then(Commands.literal("_gui_test_warm_craftable")
+                        .requires(source -> source.hasPermission(4))
+                        .then(Commands.argument("core", BlockPosArgument.blockPos())
+                                .executes(context -> GuiRuntimeFixture.warmCraftable(
+                                        context.getSource(),
+                                        BlockPosArgument.getLoadedBlockPos(
+                                                context, "core"))))));
+    }
+
+    private static int reissueCoreRecovery(CommandSourceStack source, boolean ownerless)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        var repository = CoreStorageRepository.get(player.serverLevel());
+        var summary = ownerless
+                ? repository.reissueLatestOwnerless()
+                : repository.reissueLatest(player.getUUID());
+        if (summary.isEmpty()) {
+            source.sendFailure(Component.translatable("msg.magic_storage.core_recovery_none"));
+            return 0;
+        }
+        ItemStack stack = StorageCoreBlockItem.createRecoveryStack(summary.get());
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false);
+        }
+        player.inventoryMenu.broadcastChanges();
+        source.sendSuccess(
+                () -> Component.translatable(
+                        "msg.magic_storage.core_recovery_reissued",
+                        summary.get().typeCount(),
+                        summary.get().itemCount()),
+                false);
+        return 1;
     }
 
     private void onServerStarted(
             net.neoforged.neoforge.event.server.ServerStartedEvent event
     ) {
+        OptionalModRecipeCompatibility.refreshRuntimeData();
         CraftableRecipeCatalog.prewarm(event.getServer().overworld());
     }
 
     private void onDatapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
+        if (event.getPlayer() == null) {
+            invalidateDatapackCaches();
+            OptionalModRecipeCompatibility.refreshRuntimeData();
+        }
         CraftableRecipeCatalog.prewarm(event.getPlayerList().getServer().overworld());
+    }
+
+    public static void invalidateDatapackCaches() {
+        datapackRevision++;
+    }
+
+    static long datapackRevision() {
+        return datapackRevision;
     }
 
     private void handleSearchFilter(SearchFilterPacket packet, net.neoforged.neoforge.network.handling.IPayloadContext ctx) {
@@ -777,6 +821,8 @@ public class MagicStorage {
 
     private static Set<BlockPos> bfsFindCorePositions(Level level, BlockPos start) {
         Set<BlockPos> cores = new HashSet<>();
+        if (!level.hasChunkAt(start)
+                || !(level.getBlockState(start).getBlock() instanceof IStorageNetworkBlock)) return cores;
         Queue<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
         queue.add(start);
@@ -797,12 +843,12 @@ public class MagicStorage {
 
                     for (Direction dir : Direction.values()) {
                         BlockPos next = current.relative(dir);
-                        if (!visited.contains(next) && level.hasChunkAt(next)) {
-                            visited.add(next);
-                            if (level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock) {
-                                queue.add(next);
-                            }
-                        }
+                        if (visited.size() >= MAX_NETWORK_BLOCKS
+                                || visited.contains(next)
+                                || !level.hasChunkAt(next)
+                                || !(level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock)) continue;
+                        visited.add(next);
+                        queue.add(next);
                     }
                 }
             }
@@ -812,6 +858,8 @@ public class MagicStorage {
     }
 
     static StorageCoreBlockEntity bfsFindCore(Level level, BlockPos start) {
+        if (!level.hasChunkAt(start)
+                || !(level.getBlockState(start).getBlock() instanceof IStorageNetworkBlock)) return null;
         Queue<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> visited = new HashSet<>();
         queue.add(start);
@@ -834,12 +882,12 @@ public class MagicStorage {
 
                     for (Direction dir : Direction.values()) {
                         BlockPos next = current.relative(dir);
-                        if (!visited.contains(next) && level.hasChunkAt(next)) {
-                            visited.add(next);
-                            if (level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock) {
-                                queue.add(next);
-                            }
-                        }
+                        if (visited.size() >= MAX_NETWORK_BLOCKS
+                                || visited.contains(next)
+                                || !level.hasChunkAt(next)
+                                || !(level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock)) continue;
+                        visited.add(next);
+                        queue.add(next);
                     }
                 }
             }
@@ -850,7 +898,8 @@ public class MagicStorage {
 
     static List<BlockPos> findLoadedNetworkPath(Level level, BlockPos start, BlockPos target) {
         if (level == null || start == null || target == null
-                || !level.hasChunkAt(start) || !level.hasChunkAt(target)) return List.of();
+                || !level.hasChunkAt(start) || !level.hasChunkAt(target)
+                || !(level.getBlockState(start).getBlock() instanceof IStorageNetworkBlock)) return List.of();
 
         Queue<BlockPos> queue = new ArrayDeque<>();
         Map<BlockPos, BlockPos> previous = new HashMap<>();
@@ -874,13 +923,13 @@ public class MagicStorage {
                 }
                 for (Direction direction : Direction.values()) {
                     BlockPos next = current.relative(direction);
-                    if (!visited.contains(next) && level.hasChunkAt(next)) {
-                        visited.add(next);
-                        if (level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock) {
-                            previous.put(next, current);
-                            queue.add(next);
-                        }
-                    }
+                    if (visited.size() >= MAX_NETWORK_BLOCKS
+                            || visited.contains(next)
+                            || !level.hasChunkAt(next)
+                            || !(level.getBlockState(next).getBlock() instanceof IStorageNetworkBlock)) continue;
+                    visited.add(next);
+                    previous.put(next, current);
+                    queue.add(next);
                 }
             }
             depth++;

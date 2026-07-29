@@ -30,7 +30,7 @@ CI uses EvilCraft 1.2.91 (`Shx1BSHZ`) plus Cyclops Core 1.29.1 (`vEjxRv40`) as o
 
 TMRV 0.9.0 declares a `jei` stub. With EvilCraft 1.2.91, the integrated server then sends `evilcraftcompat:jei_spirit_furnace_recipe` before TMRV has created EvilCraft's JEI registrar, producing a real client `FATAL` with `SPIRIT_FURNACE_RECIPES_REGISTRAR is null`. This must not be whitelisted.
 
-The 15-jar Prism EMI/TMRV pack therefore omits EvilCraft and Cyclops Core and removes stale copies transactionally. A diagnostic real-JEI/JEMI run avoided that exception but did not reach the fixed-world handoff reliably, so it is not a silent replacement. EvilCraft compatibility remains verified by the isolated fixture above; a combined GUI check waits for an upstream TMRV/EvilCraft lifecycle fix.
+The 18-jar Prism EMI/TMRV pack therefore omits EvilCraft and Cyclops Core and removes stale copies transactionally. A diagnostic real-JEI/JEMI run avoided that exception but did not reach the fixed-world handoff reliably, so it is not a silent replacement. EvilCraft compatibility remains verified by the isolated fixture above; a combined GUI check waits for an upstream TMRV/EvilCraft lifecycle fix.
 
 ```bash
 ./gradlew runEvilCraftGameTestServer

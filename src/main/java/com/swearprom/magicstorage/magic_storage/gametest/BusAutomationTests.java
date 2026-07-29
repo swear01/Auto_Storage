@@ -562,6 +562,168 @@ public final class BusAutomationTests {
     }
 
     @GameTest(template = "behavioraltests.platform")
+    public static void export_item_candidate_cache_tracks_core_and_config_revisions_for_active_and_passive(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        BlockPos corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        BlockPos busPos = corePos.east();
+        BlockPos targetPos = busPos.east();
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.south(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(busPos, MagicStorage.EXPORT_BUS.get().defaultBlockState()
+                .setValue(ExportBusBlock.FACING, Direction.EAST), Block.UPDATE_ALL);
+        level.setBlock(targetPos, Blocks.BLUE_GLAZED_TERRACOTTA.defaultBlockState(), Block.UPDATE_ALL);
+        TestItemHandler target = new TestItemHandler(1);
+        installTestEndpoint(level, targetPos, target, new TestEnergyStorage(0, 0));
+
+        helper.runAfterDelay(2, () -> {
+            CountingStorageCoreBlockEntity core = replaceWithCountingCore(level, corePos);
+            if (!(level.getBlockEntity(busPos) instanceof ExportBusBlockEntity bus)) {
+                helper.fail("Export candidate cache Bus is missing");
+                return;
+            }
+            core.rebuildNetwork(level);
+            core.insertItem(new ItemStack(Items.STONE, 2));
+            BusConfiguration passive = BusConfiguration.current(
+                    BusMode.DIRECTIONLESS,
+                    BusConfiguration.ALL_SIDES_MASK,
+                    false,
+                    true,
+                    BusFilterMode.DENY,
+                    List.of(),
+                    Optional.empty(),
+                    1);
+            bus.setBusConfiguration(passive);
+            IItemHandler passiveItems = level.getCapability(
+                    Capabilities.ItemHandler.BLOCK, busPos, Direction.UP);
+            if (passiveItems == null) {
+                helper.fail("Passive Export item capability is missing");
+                return;
+            }
+
+            long stableRevision = core.getCraftableRevision();
+            ItemStack first = passiveItems.getStackInSlot(0);
+            ItemStack repeated = passiveItems.getStackInSlot(0);
+            if (!first.is(Items.STONE) || !repeated.is(Items.STONE)
+                    || core.getCraftableRevision() != stableRevision
+                    || core.displayStackBuilds() != 1) {
+                helper.fail("Unchanged passive Export automation rebuilt the full display list: "
+                        + core.displayStackBuilds());
+                return;
+            }
+
+            MagicStorage.invalidateDatapackCaches();
+            if (!passiveItems.getStackInSlot(0).is(Items.STONE)
+                    || core.displayStackBuilds() != 2) {
+                helper.fail("Datapack reload did not invalidate the Export candidate cache");
+                return;
+            }
+
+            core.extractItem(ItemKey.of(new ItemStack(Items.STONE)), 64);
+            core.insertItem(new ItemStack(Items.DIRT, 2));
+            if (core.getCraftableRevision() == stableRevision
+                    || !passiveItems.getStackInSlot(0).is(Items.DIRT)
+                    || core.displayStackBuilds() != 3) {
+                helper.fail("Passive Export reused a stale candidate after Core revision change");
+                return;
+            }
+
+            bus.setBusConfiguration(BusConfiguration.current(
+                    BusMode.DIRECTIONLESS,
+                    BusConfiguration.ALL_SIDES_MASK,
+                    false,
+                    true,
+                    BusFilterMode.ALLOW,
+                    List.of(BusFilterRule.item(ResourceLocation.withDefaultNamespace("stone"))),
+                    Optional.empty(),
+                    2));
+            if (!passiveItems.getStackInSlot(0).isEmpty()
+                    || core.displayStackBuilds() != 4) {
+                helper.fail("Passive Export reused a stale candidate after filter revision change");
+                return;
+            }
+            bus.setBusConfiguration(BusConfiguration.current(
+                    BusMode.DIRECTIONLESS,
+                    BusConfiguration.ALL_SIDES_MASK,
+                    false,
+                    true,
+                    BusFilterMode.ALLOW,
+                    List.of(BusFilterRule.item(ResourceLocation.withDefaultNamespace("dirt"))),
+                    Optional.empty(),
+                    3));
+            if (!passiveItems.getStackInSlot(0).is(Items.DIRT)
+                    || core.displayStackBuilds() != 5) {
+                helper.fail("Passive Export did not rebuild the candidate after filter revision change");
+                return;
+            }
+
+            target.setStack(0, new ItemStack(Items.BARRIER, 64));
+            bus.setBusConfiguration(BusConfiguration.current(
+                    BusMode.DIRECTIONAL,
+                    BusConfiguration.ALL_SIDES_MASK,
+                    false,
+                    true,
+                    BusFilterMode.DENY,
+                    List.of(),
+                    Optional.empty(),
+                    4));
+            stableRevision = core.getCraftableRevision();
+            bus.tick();
+            runNextAutomationCycle(bus);
+            if (core.getCraftableRevision() != stableRevision
+                    || core.displayStackBuilds() != 6) {
+                helper.fail("Unchanged active Export automation rebuilt the full display list: "
+                        + core.displayStackBuilds());
+                return;
+            }
+
+            core.extractItem(ItemKey.of(new ItemStack(Items.DIRT)), 64);
+            core.insertItem(new ItemStack(Items.STONE, 2));
+            target.setStack(0, ItemStack.EMPTY);
+            runNextAutomationCycle(bus);
+            if (!target.getStackInSlot(0).is(Items.STONE)
+                    || core.displayStackBuilds() != 7) {
+                helper.fail("Active Export reused a stale candidate after Core revision change");
+                return;
+            }
+
+            core.insertItem(new ItemStack(Items.STONE, 2));
+            core.insertItem(new ItemStack(Items.DIRT, 2));
+            target.setStack(0, new ItemStack(Items.BARRIER, 64));
+            bus.setBusConfiguration(BusConfiguration.current(
+                    BusMode.DIRECTIONAL,
+                    BusConfiguration.ALL_SIDES_MASK,
+                    false,
+                    true,
+                    BusFilterMode.ALLOW,
+                    List.of(BusFilterRule.item(ResourceLocation.withDefaultNamespace("stone"))),
+                    Optional.empty(),
+                    5));
+            bus.tick();
+            long configStableRevision = core.getCraftableRevision();
+            target.setStack(0, ItemStack.EMPTY);
+            bus.setBusConfiguration(BusConfiguration.current(
+                    BusMode.DIRECTIONAL,
+                    BusConfiguration.ALL_SIDES_MASK,
+                    false,
+                    true,
+                    BusFilterMode.ALLOW,
+                    List.of(BusFilterRule.item(ResourceLocation.withDefaultNamespace("dirt"))),
+                    Optional.empty(),
+                    6));
+            bus.tick();
+            if (core.getCraftableRevision() == configStableRevision
+                    || !target.getStackInSlot(0).is(Items.DIRT)
+                    || core.displayStackBuilds() != 9) {
+                helper.fail("Active Export reused a stale candidate after filter revision change");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "behavioraltests.platform")
     public static void directional_import_keeps_source_order_and_attempts_typed_transfer(
             GameTestHelper helper
     ) {
@@ -623,7 +785,7 @@ public final class BusAutomationTests {
 
             source.setStack(1, new ItemStack(Items.STONE, 3));
             energy.receiveEnergy(50, false);
-            makeCoreStorageUnavailable(core, level.registryAccess());
+            makeCoreStorageUnavailable(level, corePos);
             boolean activeCrashed = false;
             try {
                 for (int tick = 0; tick <= 10; tick++) bus.tick();
@@ -763,7 +925,7 @@ public final class BusAutomationTests {
                 return;
             }
 
-            makeCoreStorageUnavailable(core, level.registryAccess());
+            makeCoreStorageUnavailable(level, corePos);
             boolean activeCrashed = false;
             try {
                 for (int tick = 0; tick <= 10; tick++) bus.tick();
@@ -2110,14 +2272,46 @@ public final class BusAutomationTests {
         return tag;
     }
 
-    private static void makeCoreStorageUnavailable(
-            StorageCoreBlockEntity core,
-            net.minecraft.core.HolderLookup.Provider registries
+    private static CountingStorageCoreBlockEntity replaceWithCountingCore(
+            net.minecraft.server.level.ServerLevel level,
+            BlockPos corePos
     ) {
+        if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity original)) {
+            throw new IllegalStateException("Core test fixture is missing");
+        }
+        CompoundTag stored = original.saveWithoutMetadata(level.registryAccess());
+        level.removeBlockEntity(corePos);
+        CountingStorageCoreBlockEntity replacement = new CountingStorageCoreBlockEntity(
+                corePos, level.getBlockState(corePos));
+        replacement.loadWithComponents(stored, level.registryAccess());
+        level.setBlockEntity(replacement);
+        replacement.onLoad();
+        if (!replacement.isStorageAvailable()) {
+            throw new IllegalStateException("Counting Core test fixture did not attach storage");
+        }
+        return replacement;
+    }
+
+    private static void runNextAutomationCycle(ExportBusBlockEntity bus) {
+        for (int tick = 0; tick <= 10; tick++) bus.tick();
+    }
+
+    private static void makeCoreStorageUnavailable(
+            net.minecraft.server.level.ServerLevel level,
+            BlockPos corePos
+    ) {
+        level.removeBlock(corePos, false);
+        level.setBlock(
+                corePos,
+                MagicStorage.STORAGE_CORE.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+            throw new IllegalStateException("Unavailable Core test fixture was not replaced");
+        }
         CompoundTag reference = new CompoundTag();
         reference.putUUID("storageId", UUID.randomUUID());
         reference.putInt("storageSchema", 1);
-        core.loadWithComponents(reference, registries);
+        core.loadWithComponents(reference, level.registryAccess());
         if (core.isStorageAvailable()) {
             throw new IllegalStateException("Unavailable Core test fixture remained attached");
         }
@@ -2235,6 +2429,24 @@ public final class BusAutomationTests {
     }
 
     private record TestEndpoint(IItemHandler items, IEnergyStorage energy) {
+    }
+
+    private static final class CountingStorageCoreBlockEntity extends StorageCoreBlockEntity {
+        private int displayStackBuilds;
+
+        private CountingStorageCoreBlockEntity(BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+            super(pos, state);
+        }
+
+        @Override
+        public List<ItemStack> getDisplayStacks() {
+            displayStackBuilds++;
+            return super.getDisplayStacks();
+        }
+
+        private int displayStackBuilds() {
+            return displayStackBuilds;
+        }
     }
 
     private static final class TestItemHandler implements IItemHandler {

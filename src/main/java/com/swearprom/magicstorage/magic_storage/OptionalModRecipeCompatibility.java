@@ -39,6 +39,9 @@ final class OptionalModRecipeCompatibility {
     private static final String CREATE_MOD_ID = "create";
     private static final String CREATE_COMPAT_CLASS =
             "com.swearprom.magicstorage.magic_storage.compat.create.CreateCompat";
+    private static final String EXTENDED_CRAFTING_MOD_ID = "extendedcrafting";
+    private static final String EXTENDED_CRAFTING_COMPAT_CLASS =
+            "com.swearprom.magicstorage.magic_storage.compat.extendedcrafting.ExtendedCraftingCompat";
 
     private OptionalModRecipeCompatibility() {
     }
@@ -120,6 +123,23 @@ final class OptionalModRecipeCompatibility {
                     CREATE_COMPAT_CLASS,
                     "register");
         }
+        if (ModList.get().isLoaded(EXTENDED_CRAFTING_MOD_ID)) {
+            invokeRegistrar(
+                    EXTENDED_CRAFTING_MOD_ID,
+                    "Extended Crafting table compatibility",
+                    EXTENDED_CRAFTING_COMPAT_CLASS,
+                    "register");
+        }
+    }
+
+    static void refreshRuntimeData() {
+        if (ModList.get().isLoaded(EXTENDED_CRAFTING_MOD_ID)) {
+            invokeNoArg(
+                    EXTENDED_CRAFTING_MOD_ID,
+                    "Extended Crafting runtime data",
+                    EXTENDED_CRAFTING_COMPAT_CLASS,
+                    "refreshRuntimeData");
+        }
     }
 
     private static void invokeRegistrar(
@@ -181,6 +201,26 @@ final class OptionalModRecipeCompatibility {
             }
             throw new IllegalStateException(
                     module + " failed for loaded mod " + modId, cause);
+        } catch (LinkageError error) {
+            throw new IllegalStateException(
+                    module + " is binary-incompatible with loaded mod " + modId, error);
+        }
+    }
+
+    private static void invokeNoArg(
+            String modId,
+            String module,
+            String className,
+            String methodName
+    ) {
+        try {
+            Class.forName(className).getDeclaredMethod(methodName).invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException exception) {
+            throw new IllegalStateException(
+                    "Failed to load " + module + " for loaded mod " + modId, exception);
+        } catch (InvocationTargetException exception) {
+            throw new IllegalStateException(
+                    module + " failed for loaded mod " + modId, exception.getCause());
         } catch (LinkageError error) {
             throw new IllegalStateException(
                     module + " is binary-incompatible with loaded mod " + modId, error);

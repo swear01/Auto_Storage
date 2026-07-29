@@ -6,7 +6,7 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "$(thing)Missing or conflicted Core:$() check that every required block touches by a full face and that the route is loaded. A network must have exactly one Core. Remove an extra Core to clear a conflicted network."
+      "text": "$(thing)Core or route problem:$() check that every required block touches by a full face and that the route is loaded. A network must have exactly one Core. If the Core warns that its scan limit was reached, shorten or split the route until the warning clears."
     },
     {
       "type": "patchouli:text",
@@ -22,7 +22,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "$(thing)Output has no room:$() a $(thing)whole craft$() must fit with every container remainder. Clear player or Core space, or switch Craft Output, then retry. A failed capacity check consumes no ingredients, energy, or Axe Energy."
+      "text": "$(thing)Output has no room:$() a $(thing)whole craft$() must fit with every container remainder. Clear player or Core space, or switch Craft Output, then retry. A failed capacity check consumes no ingredients, energy, or Axe Uses."
     },
     {
       "type": "patchouli:text",

@@ -3,9 +3,11 @@ package com.swearprom.magicstorage.magic_storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -19,8 +21,112 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.items.IItemHandler;
 
+import java.util.List;
+
 @GameTestHolder(MagicStorage.MODID)
 public class TerminalFlowTests {
+
+    @GameTest(template = "platform", timeoutTicks = 200)
+    public static void generated_work_only_invalidates_craftable_cache_at_thresholds(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(
+                corePos,
+                MagicStorage.STORAGE_CORE.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        level.setBlock(
+                corePos.east(),
+                MagicStorage.CREATIVE_STORAGE_UNIT.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        helper.runAfterDelay(3, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core BE not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            long initial = core.getCraftableRevision();
+            if (!core.applyResourceTransaction(
+                    java.util.Map.of(
+                            StorageResourceBridge.energyKey(EnergyType.FURNACE_FUEL),
+                            1L),
+                    Action.EXECUTE,
+                    Actor.EMPTY)) {
+                helper.fail("Generated work transaction was rejected");
+                return;
+            }
+            if (core.getCraftableRevision() != initial) {
+                helper.fail("Positive generated work invalidated the shared Craftable cache");
+                return;
+            }
+            if (core.insertItem(new ItemStack(Items.STONE)) != 1) {
+                helper.fail("Item transaction was rejected");
+                return;
+            }
+            if (core.getCraftableRevision() == initial) {
+                helper.fail("Item mutation did not invalidate the shared Craftable cache");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform", timeoutTicks = 200)
+    public static void gui_runtime_fixture_seeds_every_item_and_installable_station(
+            GameTestHelper helper
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(
+                corePos,
+                MagicStorage.STORAGE_CORE.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        level.setBlock(
+                corePos.east(),
+                MagicStorage.CREATIVE_STORAGE_UNIT.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+
+        helper.runAfterDelay(3, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core BE not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            GuiRuntimeFixture.SeedSummary summary =
+                    GuiRuntimeFixture.seedCore(core, 7);
+            long expectedTypes = BuiltInRegistries.ITEM.entrySet().stream()
+                    .map(entry -> entry.getValue().getDefaultInstance())
+                    .filter(stack -> !stack.isEmpty())
+                    .count();
+            if (summary.itemTypes() != expectedTypes) {
+                helper.fail("Runtime item fixture missed registered items");
+                return;
+            }
+            for (var entry : BuiltInRegistries.ITEM.entrySet()) {
+                ItemStack stack = entry.getValue().getDefaultInstance();
+                if (stack.isEmpty()) continue;
+                if (core.getItemCount(ItemKey.of(stack)) < 7) {
+                    helper.fail("Runtime fixture item count is low for "
+                            + entry.getKey().location());
+                    return;
+                }
+            }
+            for (int slot = 0; slot < MachineEnergyTable.entries().size(); slot++) {
+                MachineDescriptor descriptor = MachineEnergyTable.get(slot);
+                if (descriptor.category() == MachineEnergyTable.Category.TRANSFORM) continue;
+                ItemStack installed = core.getMachineContainer().getItem(slot);
+                int expectedCount = descriptor.category() == MachineEnergyTable.Category.PROCESS
+                        ? Math.min(130, descriptor.maxInstalledCount()) : 1;
+                if (!descriptor.accepts(installed)
+                        || installed.getCount() != expectedCount) {
+                    helper.fail("Runtime fixture station mismatch for " + descriptor.id());
+                    return;
+                }
+            }
+            helper.succeed();
+        });
+    }
 
     @GameTest(template = "platform")
     public static void terminal_insert_via_quick_move(GameTestHelper helper) {
@@ -114,23 +220,72 @@ public class TerminalFlowTests {
         });
     }
 
-    @GameTest(template = "platform")
-    public static void terminal_finds_core_through_chain(GameTestHelper helper) {
+    @GameTest(template = "platform", batch = "network_guard")
+    public static void terminal_finds_core_across_legal_large_network(GameTestHelper helper) {
         var level = helper.getLevel();
-        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
-        var unitPos = corePos.east();
-        var termPos = unitPos.east();
+        var terminalPos = helper.absolutePos(new BlockPos(1, 3, 1));
+        var corePos = terminalPos.offset(20, 20, 20);
+        var networkPositions = new java.util.ArrayList<BlockPos>();
+        var unitState = MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState();
 
-        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(unitPos, MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(termPos, MagicStorage.STORAGE_TERMINAL.get().defaultBlockState(), Block.UPDATE_ALL);
+        for (int x = 0; x <= 20; x++) {
+            for (int y = 0; y <= 20; y++) {
+                for (int z = 0; z <= 20; z++) {
+                    if (x + y + z > 35
+                            && !(y == 0 && z == 0)
+                            && !(x == 20 && z == 0)
+                            && !(x == 20 && y == 20)) continue;
+                    BlockPos pos = terminalPos.offset(x, y, z);
+                    networkPositions.add(pos);
+                    level.setBlock(
+                            pos,
+                            pos.equals(terminalPos)
+                                    ? MagicStorage.STORAGE_TERMINAL.get().defaultBlockState()
+                                    : pos.equals(corePos)
+                                    ? MagicStorage.STORAGE_CORE.get().defaultBlockState()
+                                    : unitState,
+                            Block.UPDATE_ALL);
+                }
+            }
+        }
 
-        helper.runAfterDelay(3, () -> {
-            var found = MagicStorage.bfsFindCore(level, termPos);
-            if (found == null) helper.fail("BFS should find core through chain of blocks");
-            if (!found.getBlockPos().equals(corePos)) helper.fail("Found wrong core");
-            helper.succeed();
-        });
+        String failure = null;
+        if (networkPositions.size() >= MagicStorage.MAX_NETWORK_BLOCKS) {
+            failure = "Test network must remain below the configured member limit";
+        } else {
+            var found = MagicStorage.bfsFindCore(level, terminalPos);
+            if (found == null || !found.getBlockPos().equals(corePos)) {
+                failure = "BFS did not find the Core across a legal "
+                        + networkPositions.size() + "-block network";
+            } else if (MagicStorage.findLoadedNetworkPath(level, terminalPos, corePos).isEmpty()) {
+                failure = "Loaded path search did not reach the Core across the legal large network";
+            } else {
+                try {
+                    var method = MagicStorage.class.getDeclaredMethod(
+                            "bfsFindCorePositions",
+                            net.minecraft.world.level.Level.class,
+                            BlockPos.class);
+                    method.setAccessible(true);
+                    @SuppressWarnings("unchecked")
+                    var cores = (java.util.Set<BlockPos>) method.invoke(null, level, terminalPos);
+                    if (!cores.contains(corePos)) {
+                        failure = "Core-position search did not reach the Core across the legal large network";
+                    }
+                } catch (ReflectiveOperationException exception) {
+                    failure = "Could not invoke Core-position traversal: " + exception;
+                }
+            }
+        }
+
+        var air = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        for (BlockPos pos : networkPositions) {
+            level.setBlock(pos, air, Block.UPDATE_ALL);
+        }
+        if (failure != null) {
+            helper.fail(failure);
+            return;
+        }
+        helper.succeed();
     }
 
     @GameTest(template = "platform")
@@ -268,6 +423,75 @@ public class TerminalFlowTests {
     }
 
     @GameTest(template = "platform")
+    public static void terminal_page_is_bounded_and_tracks_exact_mutations(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.east(), MagicStorage.CREATIVE_STORAGE_UNIT.get().defaultBlockState(), Block.UPDATE_ALL);
+
+        helper.runAfterDelay(3, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core BE not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            ItemStack last = ItemStack.EMPTY;
+            for (int index = 0; index < 20; index++) {
+                ItemStack stack = new ItemStack(Items.STONE);
+                stack.set(DataComponents.CUSTOM_NAME, Component.literal(
+                        String.format(java.util.Locale.ROOT, "Scale %02d", index)));
+                ItemStack identity = stack.copy();
+                if (core.insertItem(stack) != 1) {
+                    helper.fail("Could not insert exact variant " + index);
+                    return;
+                }
+                last = identity;
+            }
+            TerminalDisplayPage page = core.getTerminalDisplayPage(
+                    "scale", SortMode.NAME, SortOrder.ASCENDING,
+                    TerminalResourceView.ITEM, 9, 9);
+            if (page.totalTypes() != 20 || page.offset() != 9 || page.stacks().size() != 9) {
+                helper.fail("Bounded page metadata was " + page);
+                return;
+            }
+            if (!page.stacks().getFirst().getHoverName().getString().equals("Scale 09")) {
+                helper.fail("Far page did not preserve exact Name ordering");
+                return;
+            }
+            ItemKey lastKey = ItemKey.of(last);
+            if (core.insertItemCount(lastKey, 99, Action.EXECUTE, Actor.EMPTY) != 99) {
+                helper.fail("Could not update exact variant amount");
+                return;
+            }
+            TerminalDisplayPage quantity = core.getTerminalDisplayPage(
+                    "", SortMode.QUANTITY, SortOrder.DESCENDING,
+                    TerminalResourceView.ITEM, 0, 9);
+            if (quantity.totalTypes() != 20 || quantity.stacks().size() != 9
+                    || !ItemStack.isSameItemSameComponents(
+                    TerminalDisplayStack.strip(quantity.stacks().getFirst()), last)
+                    || TerminalDisplayStack.amount(quantity.stacks().getFirst()) != 100) {
+                helper.fail("Quantity page did not update the exact mutated variant");
+                return;
+            }
+            if (core.extractItemCount(lastKey, 100, Action.SIMULATE, Actor.EMPTY) != 100
+                    || core.getTerminalDisplayPage(
+                    "", SortMode.NAME, SortOrder.ASCENDING,
+                    TerminalResourceView.ITEM, 0, 9).totalTypes() != 20) {
+                helper.fail("Simulated extraction changed the shared terminal index");
+                return;
+            }
+            if (core.extractItemCount(lastKey, 100, Action.EXECUTE, Actor.EMPTY) != 100
+                    || core.getTerminalDisplayPage(
+                    "", SortMode.NAME, SortOrder.ASCENDING,
+                    TerminalResourceView.ITEM, 0, 9).totalTypes() != 19) {
+                helper.fail("Exact removal did not update the shared terminal index");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "platform")
     public static void sort_items_by_id(GameTestHelper helper) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
@@ -381,9 +605,20 @@ public class TerminalFlowTests {
             core.rebuildNetwork(level);
             var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             var menu = new StorageTerminalMenu(2, player.getInventory(), core);
+            if (menu.getVisibleRows() != StorageTerminalMenu.INITIAL_DISPLAY_ROWS) {
+                helper.fail("A fresh terminal must use the bounded pre-layout row count");
+                return;
+            }
             var packet = new TerminalSettingsPacket(0, 9, TerminalPreferences.defaults());
             menu.applySettings(packet, player);
             if (menu.getVisibleRows() != 9) helper.fail("visibleRows should be 9, got " + menu.getVisibleRows());
+            var tallerPacket = new TerminalSettingsPacket(0, 12, TerminalPreferences.defaults());
+            menu.applySettings(tallerPacket, player);
+            if (menu.getVisibleRows() != 12) {
+                helper.fail("A taller client should receive 12 complete display rows, got "
+                        + menu.getVisibleRows());
+                return;
+            }
             helper.succeed();
         });
     }
@@ -416,23 +651,36 @@ public class TerminalFlowTests {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
         level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
-        level.setBlock(corePos.east(), MagicStorage.STORAGE_UNIT_T1.get().defaultBlockState(), Block.UPDATE_ALL);
+        level.setBlock(corePos.east(), MagicStorage.STORAGE_UNIT_T6.get().defaultBlockState(), Block.UPDATE_ALL);
 
         helper.runAfterDelay(3, () -> {
             var be = level.getBlockEntity(corePos);
             if (!(be instanceof StorageCoreBlockEntity core)) { helper.fail("Core BE not found"); return; }
             core.rebuildNetwork(level);
-            core.insertItem(new ItemStack(Items.STONE, 64));
-            core.insertItem(new ItemStack(Items.DIRT, 64));
-            core.insertItem(new ItemStack(Items.DIAMOND, 64));
-            core.insertItem(new ItemStack(Items.APPLE, 64));
+            int inserted = 0;
+            for (var item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
+                if (item == Items.AIR) continue;
+                if (core.insertItem(new ItemStack(item)) == 1) inserted++;
+                if (inserted == 30) break;
+            }
+            if (inserted != 30) {
+                helper.fail("Could not create 30 display types");
+                return;
+            }
             var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
-            var menu = new StorageTerminalMenu(4, player.getInventory(), core);
+            var menu = new CraftingTerminalMenu(4, player.getInventory(), core);
             var packet = new TerminalSettingsPacket(0, 1, TerminalPreferences.defaults());
             menu.applySettings(packet, player);
             menu.refreshDisplayItems(core);
             if (!menu.getSlot(0).hasItem()) helper.fail("Slot 0 should have item with visibleRows=1");
             if (menu.getSlot(9).hasItem()) helper.fail("Slot 9 should be empty beyond row 0 with visibleRows=1");
+            var packet2 = new TerminalSettingsPacket(0, 2, TerminalPreferences.defaults());
+            menu.applySettings(packet2, player);
+            menu.refreshDisplayItems(core);
+            if (!menu.getSlot(17).hasItem() || menu.getSlot(18).hasItem()) {
+                helper.fail("Crafting terminal must keep client/server slot visibility aligned at two rows");
+                return;
+            }
             var packet3 = new TerminalSettingsPacket(0, 3, TerminalPreferences.defaults());
             menu.applySettings(packet3, player);
             menu.refreshDisplayItems(core);
@@ -440,7 +688,7 @@ public class TerminalFlowTests {
             for (int i = 0; i < 27; i++) {
                 if (menu.getSlot(i).hasItem()) filled++;
             }
-            if (filled < 4) helper.fail("visibleRows=3 should show up to 27 slots, got " + filled + " (need 4 items)");
+            if (filled != 27) helper.fail("visibleRows=3 should show exactly 27 slots, got " + filled);
             if (menu.getSlot(27).hasItem()) helper.fail("Slot 27 should be empty beyond visibleRows=3");
             helper.succeed();
         });
@@ -674,8 +922,8 @@ public class TerminalFlowTests {
             if (menu.getResourceView() != TerminalResourceView.ITEM)
                 helper.fail("previous resource button should sync ITEM, got " + menu.getResourceView());
             menu.clickMenuButton(player, StorageTerminalMenu.PREVIOUS_RESOURCE_VIEW_BUTTON);
-            if (menu.getResourceView() != TerminalResourceView.STATION_WORK)
-                helper.fail("previous resource button should skip unavailable views and wrap ITEM to STATION_WORK, got "
+            if (menu.getResourceView() != TerminalResourceView.ALL)
+                helper.fail("previous resource button should wrap ITEM to the All aggregate, got "
                         + menu.getResourceView());
             menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_ORDER_BUTTON);
             menu.clickMenuButton(player, StorageTerminalMenu.RESET_SORT_MODE_BUTTON);
@@ -757,6 +1005,10 @@ public class TerminalFlowTests {
 
             var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             var serverMenu = new StorageTerminalMenu(80, player.getInventory(), core);
+            serverMenu.applySettings(
+                    new TerminalSettingsPacket(
+                            serverMenu.containerId, 3, TerminalPreferences.defaults()),
+                    player);
             serverMenu.scrollBy(StorageTerminalMenu.DISPLAY_COLS);
             if (serverMenu.getTotalItemTypes() != 72 || serverMenu.getScrollOffset() != StorageTerminalMenu.DISPLAY_COLS) {
                 helper.fail("Server scroll setup failed: types=" + serverMenu.getTotalItemTypes()
@@ -887,7 +1139,7 @@ public class TerminalFlowTests {
     }
 
     @GameTest(template = "platform")
-    public static void terminal_absolute_scroll_clamps_without_row_snapping(GameTestHelper helper) {
+    public static void terminal_absolute_scroll_clamps_to_complete_rows(GameTestHelper helper) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
         level.setBlock(corePos, MagicStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
@@ -911,14 +1163,18 @@ public class TerminalFlowTests {
             }
             var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             var menu = new StorageTerminalMenu(86, player.getInventory(), core);
+            menu.applySettings(
+                    new TerminalSettingsPacket(
+                            menu.containerId, 6, TerminalPreferences.defaults()),
+                    player);
             menu.scrollTo(1);
-            if (menu.getScrollOffset() != 1) {
-                helper.fail("Absolute scroll must preserve maxOffset=1 instead of snapping to a row");
+            if (menu.getScrollOffset() != 0) {
+                helper.fail("Absolute scroll must snap to the nearest complete row");
                 return;
             }
             menu.scrollTo(Integer.MAX_VALUE);
-            if (menu.getScrollOffset() != 1) {
-                helper.fail("Absolute scroll must clamp huge offsets to the server max");
+            if (menu.getScrollOffset() != StorageTerminalMenu.DISPLAY_COLS) {
+                helper.fail("Absolute scroll must expose the final partial row without shifting columns");
                 return;
             }
             menu.scrollTo(-1);
@@ -1002,7 +1258,7 @@ public class TerminalFlowTests {
                     new TerminalSettingsPacket(menu.containerId, menu.getVisibleRows(),
                             menu.getTerminalPreferences()), player);
             boolean changedRows = menu.applySettings(new TerminalSettingsPacket(
-                    menu.containerId, 9, menu.getTerminalPreferences()), player);
+                    menu.containerId, 3, menu.getTerminalPreferences()), player);
             if (unchangedRows || !changedRows) {
                 helper.fail("Layout requests must report whether visible rows actually changed");
                 return;
@@ -1288,7 +1544,20 @@ public class TerminalFlowTests {
                 helper.fail("Auto Show Uses did not expose the Blaze transformation");
                 return;
             }
-            menu.clickMenuButton(player, CraftingTerminalMenu.transformUseButtonId(1));
+            int blazeUse = -1;
+            List<TransformProviderApi.Use> uses = menu.getVisibleTransformUses();
+            for (int index = 0; index < uses.size(); index++) {
+                if (uses.get(index).targetId().equals(
+                        TransformProviderApi.energyTargetId(EnergyType.BLAZE_FUEL))) {
+                    blazeUse = index;
+                    break;
+                }
+            }
+            if (blazeUse < 0) {
+                helper.fail("Auto Show Uses did not retain the Blaze transformation identity");
+                return;
+            }
+            menu.clickMenuButton(player, CraftingTerminalMenu.transformUseButtonId(blazeUse));
             menu.clickMenuButton(player, CraftingTerminalMenu.MAX_CRAFT_BUTTON);
             if (core.getEnergy(EnergyType.BLAZE_FUEL) != 1200
                     || core.getEnergy(EnergyType.FURNACE_FUEL) != 0) {
@@ -1463,6 +1732,15 @@ public class TerminalFlowTests {
             if (afterIncremental != authoritative)
                 helper.fail("incremental capacity " + afterIncremental + " != full-rebuild " + authoritative);
             if (authoritative != 10 + 25 + 50 + 100) helper.fail("full-rebuild capacity wrong, got " + authoritative);
+            var connectedView = core.getConnectedBlocks();
+            try {
+                connectedView.clear();
+            } catch (UnsupportedOperationException ignored) {
+            }
+            if (core.getConnectedBlocks().size() != afterMembers) {
+                helper.fail("Mutating the connected-block view changed the Core's authoritative topology");
+                return;
+            }
             helper.succeed();
         });
     }
@@ -1511,7 +1789,9 @@ public class TerminalFlowTests {
     }
 
     @GameTest(template = "platform")
-    public static void programmatic_network_block_placement_updates_remote_core_automatically(GameTestHelper helper) {
+    public static void programmatic_network_updates_and_core_neighbor_rebuilds_are_coalesced(
+            GameTestHelper helper
+    ) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
         var firstUnit = corePos.east();
@@ -1530,7 +1810,48 @@ public class TerminalFlowTests {
                     helper.fail("Programmatic placement did not update the remote core network");
                     return;
                 }
-                helper.succeed();
+                var countingCore = new CountingStorageCoreBlockEntity(
+                        corePos, level.getBlockState(corePos));
+                level.removeBlockEntity(corePos);
+                level.setBlockEntity(countingCore);
+                helper.runAfterDelay(2, () -> {
+                    int baseline = countingCore.rebuildCount;
+                    var coreBlock = (StorageCoreBlock) MagicStorage.STORAGE_CORE.get();
+                    for (int i = 0; i < 3; i++) {
+                        coreBlock.neighborChanged(
+                                level.getBlockState(corePos),
+                                level,
+                                corePos,
+                                net.minecraft.world.level.block.Blocks.STONE,
+                                corePos.north(),
+                                false);
+                    }
+                    if (countingCore.rebuildCount != baseline) {
+                        helper.fail("Non-network neighbors must not rebuild the Core");
+                        return;
+                    }
+                    for (int i = 0; i < 3; i++) {
+                        coreBlock.neighborChanged(
+                                level.getBlockState(corePos),
+                                level,
+                                corePos,
+                                MagicStorage.STORAGE_UNIT_T1.get(),
+                                firstUnit,
+                                false);
+                    }
+                    if (countingCore.rebuildCount != baseline) {
+                        helper.fail("Relevant neighbor changes must defer their rebuild");
+                        return;
+                    }
+                    helper.runAfterDelay(2, () -> {
+                        if (countingCore.rebuildCount != baseline + 1) {
+                            helper.fail("Relevant neighbor changes must coalesce to one rebuild, got "
+                                    + (countingCore.rebuildCount - baseline));
+                            return;
+                        }
+                        helper.succeed();
+                    });
+                });
             });
         });
     }
@@ -1553,12 +1874,50 @@ public class TerminalFlowTests {
                 helper.fail("Test setup did not stop at the authoritative depth boundary");
                 return;
             }
+            if (!networkCapped(core)) {
+                helper.fail("Depth-truncated topology must expose its capped state");
+                return;
+            }
+            Component[] warning = {null};
+            boolean[] actionBar = {false};
+            var player = new net.neoforged.neoforge.common.util.FakePlayer(
+                    level,
+                    new com.mojang.authlib.GameProfile(
+                            java.util.UUID.randomUUID(), "network_cap_test")) {
+                @Override
+                public void displayClientMessage(Component message, boolean overlay) {
+                    warning[0] = message;
+                    actionBar[0] = overlay;
+                }
+            };
+            level.getBlockState(corePos).useWithoutItem(
+                    level,
+                    player,
+                    new BlockHitResult(
+                            Vec3.atCenterOf(corePos),
+                            Direction.UP,
+                            corePos,
+                            false));
+            if (!actionBar[0]
+                    || warning[0] == null
+                    || !(warning[0].getContents()
+                    instanceof net.minecraft.network.chat.contents.TranslatableContents contents)
+                    || !"msg.magic_storage.network_capped".equals(contents.getKey())) {
+                helper.fail("A capped Core must show its concise player-facing warning");
+                return;
+            }
             if (core.tryIncrementalAdd(level, boundaryPos)) {
                 helper.fail("Incremental add must reject a block excluded by full rebuild depth");
                 return;
             }
             if (core.getTotalTypeSlots() != authoritativeCapacity) {
                 helper.fail("Rejected boundary growth must not mutate cached capacity");
+                return;
+            }
+            level.removeBlock(boundaryPos, false);
+            core.rebuildNetwork(level);
+            if (networkCapped(core)) {
+                helper.fail("Capped state must clear after the truncated member is removed");
                 return;
             }
             helper.succeed();
@@ -1671,6 +2030,9 @@ public class TerminalFlowTests {
             String failure = null;
             if (connected > maxNetworkBlocks) {
                 failure = "rebuildNetwork should cap connected blocks at " + maxNetworkBlocks + ", got " + connected;
+            }
+            if (failure == null && !networkCapped(core)) {
+                failure = "Member-truncated topology must expose its capped state";
             }
             int expectedCapacity = (connected - 1) * 10;
             if (failure == null && core.getTotalTypeSlots() != expectedCapacity) {
@@ -2074,7 +2436,7 @@ public class TerminalFlowTests {
             core.rebuildNetwork(level);
             core.insertItem(new ItemStack(Items.STONE, 1));
             try {
-                if (!core.getDisplayStacks("#").isEmpty()) { helper.fail("bare # tag token should match nothing"); return; }
+                if (core.getDisplayStacks("#").isEmpty()) { helper.fail("bare # tag token should behave like an empty query"); return; }
                 if (!core.getDisplayStacks("#:").isEmpty()) { helper.fail("invalid #: tag token should match nothing"); return; }
                 if (!core.getDisplayStacks("#minecraft:BAD!").isEmpty()) { helper.fail("invalid tag token should match nothing"); return; }
             } catch (RuntimeException e) {
@@ -2719,7 +3081,7 @@ public class TerminalFlowTests {
             int serverCount = serverData.size();
             int bufCount = clientData.size();
             if (serverCount != bufCount) { helper.fail("crafting data-slot count mismatch: server=" + serverCount + " buf=" + bufCount); return; }
-            if (serverCount != 103) { helper.fail("crafting menu should sync base 13 + crafting/fuel/resource/output/Axe Energy/Transform-card 90 data slots, got " + serverCount); return; }
+            if (serverCount != 392) { helper.fail("crafting menu should sync base 13 + crafting/fuel/resource/output/Axe Energy/Transform-card/craftable-variant 379 data slots, got " + serverCount); return; }
             for (int i = 0; i < serverData.size(); i++) {
                 var wire = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
                 var packet = new net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket(
@@ -2736,7 +3098,9 @@ public class TerminalFlowTests {
                 helper.fail("Client menu did not receive exact finite Axe Energy state");
                 return;
             }
-            int expectedSlots = 149 - 9 + MachineDescriptorApi.MAX_DESCRIPTORS;
+            int expectedSlots = StorageTerminalMenu.DISPLAY_SLOTS + 50
+                    + MachineDescriptorApi.MAX_DESCRIPTORS
+                    + RecipePresentation.MAX_ITEM_RESOURCES;
             if (serverMenu.slots.size() != expectedSlots || bufMenu.slots.size() != expectedSlots) {
                 helper.fail("crafting menu requires fixed descriptor-bank slot parity, server="
                         + serverMenu.slots.size() + " buf=" + bufMenu.slots.size());
@@ -2789,7 +3153,7 @@ public class TerminalFlowTests {
             }
             int metadataStart = machineStart + CraftingTerminalMenu.MACHINE_SLOT_COUNT;
             int metadataSlots = serverMenu.slots.size() - metadataStart;
-            if (metadataSlots != 22) { helper.fail("crafting presentation metadata should be 22 hidden slots after machine equipment, got " + metadataSlots); return; }
+            if (metadataSlots != RecipePresentation.MAX_ITEM_RESOURCES + 13) { helper.fail("crafting presentation metadata should include every resource plus 13 fixed hidden slots after machine equipment, got " + metadataSlots); return; }
             for (int i = metadataStart; i < serverMenu.slots.size(); i++) {
                 var slot = serverMenu.getSlot(i);
                 if (slot.isActive()) { helper.fail("metadata slot " + i + " must be inactive"); return; }
@@ -2908,6 +3272,24 @@ public class TerminalFlowTests {
             refreshCount++;
             super.refreshDisplayItemsFiltered(core, filter);
         }
+    }
+
+    private static final class CountingStorageCoreBlockEntity extends StorageCoreBlockEntity {
+        private int rebuildCount;
+
+        private CountingStorageCoreBlockEntity(BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+            super(pos, state);
+        }
+
+        @Override
+        public void rebuildNetwork(net.minecraft.world.level.Level level) {
+            rebuildCount++;
+            super.rebuildNetwork(level);
+        }
+    }
+
+    private static boolean networkCapped(StorageCoreBlockEntity core) {
+        return core.isNetworkCapped();
     }
 
     @SuppressWarnings("unchecked")

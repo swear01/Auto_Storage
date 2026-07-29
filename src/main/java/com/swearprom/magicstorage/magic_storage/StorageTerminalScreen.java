@@ -16,6 +16,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.fml.ModList;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +31,16 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             ResourceLocation.fromNamespaceAndPath(
                     MagicStorage.MODID, "textures/gui/terminal_controls.png");
 
-    private static final int SCROLL_TRACK_INSET = 2;
+    private static final int SCROLL_TRACK_INSET = 1;
     private static final int SEARCH_DEBOUNCE_TICKS = 2;
+    private static final int FLUID_RESOURCE_BACKGROUND = 0xB0245966;
+    private static final int FLUID_RESOURCE_BORDER = 0xFF65E6FF;
+    private static final int ENERGY_RESOURCE_BACKGROUND = 0xB04F3F78;
+    private static final int ENERGY_RESOURCE_BORDER = 0xFFD69BFF;
+    private static final int OTHER_RESOURCE_BACKGROUND = 0xB03F7692;
+    private static final int OTHER_RESOURCE_BORDER = 0xFF7BD7FF;
+    private static final int STATION_WORK_BACKGROUND = 0xB0785128;
+    private static final int STATION_WORK_BORDER = 0xFFFFC86A;
     private static final ResourceLocation SCROLLER_SPRITE =
             ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
     private static final ResourceLocation SCROLLER_DISABLED_SPRITE =
@@ -40,9 +50,9 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     private final TerminalPreferenceSession preferenceSession;
     private final TerminalSearchSynchronizer searchSynchronizer;
     private EditBox searchBox;
-    private boolean isScrolling;
-    private double scrollGrabOffset;
+    private final TerminalScrollbar scrollbar = new TerminalScrollbar();
     private int lastRequestedScroll = Integer.MIN_VALUE;
+    private int lastObservedScroll = Integer.MIN_VALUE;
     private int searchTimer;
     private String lastSentSearch = "";
     private boolean searchBoxAutoSelected;
@@ -133,6 +143,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         this.searchBox.setTooltip(Tooltip.create(
                 Component.translatable("tooltip.magic_storage.search_help")));
         this.searchBox.setValue(previousSearchValue);
+        this.searchBox.setResponder(this::scheduleSearch);
         this.searchBoxAutoSelected = TerminalClientPreferences.searchBoxAutoSelected();
         this.addRenderableWidget(searchBox);
         configureSearchBoxFocus(searchBoxAutoSelected || previousSearchFocused);
@@ -203,11 +214,15 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     protected void setViewButtonsVisible(boolean visible) {
-        setWidgetVisible(sortOrderBtn, visible);
-        setWidgetVisible(sortModeBtn, visible);
+        setSortControlsVisible(visible);
         setWidgetVisible(autoFocusBtn, visible);
         setWidgetVisible(searchModeBtn, visible);
         setWidgetVisible(resourceViewBtn, visible && isResourceViewControlActive());
+    }
+
+    protected void setSortControlsVisible(boolean visible) {
+        setWidgetVisible(sortOrderBtn, visible);
+        setWidgetVisible(sortModeBtn, visible);
     }
 
     protected boolean isResourceViewControlActive() {
@@ -412,9 +427,17 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             case ITEM -> Items.CHEST.getDefaultInstance();
             case FLUID -> Items.WATER_BUCKET.getDefaultInstance();
             case ENERGY -> Items.REDSTONE.getDefaultInstance();
-            case GAS -> Items.BREWING_STAND.getDefaultInstance();
+            case GAS -> TerminalResourceDisplay.create(
+                    StorageResourceKinds.kindRepresentative(
+                            StorageResourceKindApi.CHEMICAL_KIND),
+                    StorageResourceKey.of(
+                            StorageResourceKindApi.CHEMICAL_KIND,
+                            ResourceLocation.fromNamespaceAndPath("mekanism", "oxygen"),
+                            new net.minecraft.nbt.CompoundTag()),
+                    1);
             case STATION_WORK -> Items.CLOCK.getDefaultInstance();
             case OTHER -> Items.AMETHYST_SHARD.getDefaultInstance();
+            case ALL -> MagicStorage.STORAGE_CORE_ITEM.get().getDefaultInstance();
         };
     }
 
@@ -456,12 +479,28 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     private void toggleSearchBoxAutoSelected() {
         searchBoxAutoSelected = !searchBoxAutoSelected;
         TerminalClientPreferences.saveSearchBoxAutoSelected(searchBoxAutoSelected);
-        configureSearchBoxFocus(searchBoxAutoSelected);
+        focusActiveSearchBox(searchBoxAutoSelected);
         updateViewSettingButtons();
     }
 
+    protected final boolean searchBoxAutoSelected() {
+        return searchBoxAutoSelected;
+    }
+
+    protected final void focusActiveSearchBox(boolean focused) {
+        EditBox active = activeSearchBox();
+        if (active == null) return;
+        active.setCanLoseFocus(true);
+        active.setFocused(focused);
+        if (focused) {
+            setFocused(active);
+        } else if (getFocused() == active) {
+            setFocused(null);
+        }
+    }
+
     private void configureSearchBoxFocus(boolean focused) {
-        searchBox.setCanLoseFocus(!searchBoxAutoSelected);
+        searchBox.setCanLoseFocus(true);
         searchBox.setFocused(focused);
         if (focused) {
             setFocused(searchBox);
@@ -494,7 +533,6 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
 
     public void refreshSearch(String text) {
         searchBox.setValue(text);
-        scheduleSearch();
     }
 
     @Override
@@ -511,13 +549,15 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         int totalItems = menu.getTotalItemTypes();
         int maxOffset = Math.max(0,
                 totalItems - visibleRows * StorageTerminalMenu.DISPLAY_COLS);
+        int position = scrollbar.synchronize(menu.getScrollOffset(), maxOffset);
         drawScrollbar(
                 graphics,
-                leftPos + geometry.scrollbar().x(),
+                leftPos + geometry.scrollbar().x() + SCROLL_TRACK_INSET,
                 scrollTrackTop(),
                 scrollTrackHeight(),
-                menu.getScrollOffset(),
-                maxOffset);
+                position,
+                maxOffset,
+                scrollbar.visualState(maxOffset));
     }
 
     private int scrollTrackTop() {
@@ -539,6 +579,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         drawRaisedPanel(graphics, x, y, new TerminalLayout.Rect(0, 0, imageWidth, imageHeight));
         drawRaisedPanel(graphics, x, y, geometry.railPanel());
         drawInsetPanel(graphics, x, y, geometry.itemGrid());
+        drawInsetPanel(graphics, x, y, geometry.scrollbar());
         drawInsetPanel(graphics, x, y, geometry.playerInventory());
         drawInsetPanel(graphics, x, y, geometry.searchBackground());
     }
@@ -629,14 +670,15 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         }
         if (stack.isEmpty()) return;
 
-        ItemStack icon = stack.copyWithCount(1);
         renderTypedResourceBackground(graphics, stack, slot.x, slot.y);
-        graphics.renderItem(icon, slot.x, slot.y);
-        graphics.renderItemDecorations(font, icon, slot.x, slot.y);
+        ItemStack icon = TerminalDisplayStack.strip(stack).copyWithCount(1);
+        if (!renderTerminalIcon(graphics, stack, slot.x, slot.y, 0.0F)) {
+            graphics.renderItemDecorations(font, icon, slot.x, slot.y);
+        }
         renderNetworkAmount(graphics, slot.x, slot.y, TerminalDisplayStack.amount(stack));
     }
 
-    private static void renderTypedResourceBackground(
+    static void renderTypedResourceBackground(
             GuiGraphics graphics,
             ItemStack stack,
             int x,
@@ -644,8 +686,56 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     ) {
         StorageResourceKey key = TerminalResourceDisplay.key(stack).orElse(null);
         if (key == null || key.kindId().equals(StorageResourceKindApi.ITEM_KIND)) return;
+        int background;
+        int border;
+        switch (TerminalResourceView.classify(key)) {
+            case FLUID -> {
+                background = FLUID_RESOURCE_BACKGROUND;
+                border = FLUID_RESOURCE_BORDER;
+            }
+            case ENERGY -> {
+                background = ENERGY_RESOURCE_BACKGROUND;
+                border = ENERGY_RESOURCE_BORDER;
+            }
+            case STATION_WORK -> {
+                background = STATION_WORK_BACKGROUND;
+                border = STATION_WORK_BORDER;
+            }
+            default -> {
+                background = OTHER_RESOURCE_BACKGROUND;
+                border = OTHER_RESOURCE_BORDER;
+            }
+        }
         graphics.fill(x, y, x + TerminalLayout.ICON_CANVAS_SIZE,
-                y + TerminalLayout.ICON_CANVAS_SIZE, 0x403F7692);
+                y + TerminalLayout.ICON_CANVAS_SIZE, background);
+        graphics.fill(x, y, x + TerminalLayout.ICON_CANVAS_SIZE, y + 1, border);
+        graphics.fill(x, y, x + 1, y + TerminalLayout.ICON_CANVAS_SIZE, border);
+        graphics.fill(x, y + TerminalLayout.ICON_CANVAS_SIZE - 1,
+                x + TerminalLayout.ICON_CANVAS_SIZE, y + TerminalLayout.ICON_CANVAS_SIZE, border);
+        graphics.fill(x + TerminalLayout.ICON_CANVAS_SIZE - 1, y,
+                x + TerminalLayout.ICON_CANVAS_SIZE, y + TerminalLayout.ICON_CANVAS_SIZE, border);
+    }
+
+    static boolean renderTerminalIcon(
+            GuiGraphics graphics,
+            ItemStack stack,
+            int x,
+            int y,
+            float partialTick
+    ) {
+        StorageResourceKey key = TerminalResourceDisplay.key(stack).orElse(null);
+        if (key != null
+                && StorageResourceKinds.isChemicalKindId(key.kindId())
+                && ModList.get().isLoaded("mekanism")) {
+            if (MekanismChemicalClientCompat.render(
+                    graphics, key, TerminalDisplayStack.amount(stack), x, y, partialTick)) {
+                return true;
+            }
+            graphics.renderItem(Items.BARRIER.getDefaultInstance(), x, y);
+            return true;
+        }
+        graphics.renderItem(TerminalDisplayStack.strip(stack).copyWithCount(1), x, y);
+        return false;
     }
 
     @Override
@@ -658,7 +748,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         return tooltip;
     }
 
-    private void renderNetworkAmount(GuiGraphics graphics, int x, int y, long amount) {
+    protected void renderNetworkAmount(GuiGraphics graphics, int x, int y, long amount) {
         if (amount <= 0) return;
         String text = TerminalAmountFormatter.formatCompact(amount);
         float scaledWidth = font.width(text) * networkAmountScale;
@@ -681,6 +771,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        unfocusSearchOnOutsideClick(mouseX, mouseY);
         TerminalResourceView visibleResourceView = displayedPreferences().resourceView();
         if (isItemViewActive()
                 && (button == 0 || button == 1)
@@ -689,7 +780,9 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 && hoveredSlot.index < visibleRows * StorageTerminalMenu.DISPLAY_COLS
                 && visibleResourceView != TerminalResourceView.ITEM
                 && !menu.getCarried().isEmpty()
-                && (button == 1 || TerminalResourceDisplay.isTyped(hoveredSlot.getItem()))) {
+                && (button == 1 || TerminalResourceDisplay.key(hoveredSlot.getItem())
+                .map(key -> !key.kindId().equals(StorageResourceKindApi.ITEM_KIND))
+                .orElse(false))) {
             if (minecraft != null && minecraft.getConnection() != null) {
                 minecraft.getConnection().send(new TerminalHeldContainerTransferPacket(
                         menu.containerId,
@@ -705,23 +798,14 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         if (isItemViewActive() && isOverScrollBar(mouseX, mouseY) && button == 0) {
             lastRequestedScroll = Integer.MIN_VALUE;
             int maxOffset = maxScrollOffset();
-            int thumbTop = TerminalScrollbar.thumbTop(
-                    scrollTrackTop(), scrollTrackHeight(), menu.getScrollOffset(), maxOffset);
-            int target = TerminalScrollbar.pageTarget(
+            int position = scrollbar.synchronize(menu.getScrollOffset(), maxOffset);
+            sendScrollTarget(scrollbar.press(
                     mouseY,
-                    thumbTop,
-                    menu.getScrollOffset(),
-                    visibleRows * StorageTerminalMenu.DISPLAY_COLS,
-                    maxOffset);
-            if (target == menu.getScrollOffset()
-                    && mouseY >= thumbTop
-                    && mouseY < thumbTop + TerminalScrollbar.THUMB_HEIGHT
-                    && maxOffset > 0) {
-                isScrolling = true;
-                scrollGrabOffset = mouseY - thumbTop;
-            } else {
-                sendScrollTarget(target);
-            }
+                    scrollTrackTop(),
+                    scrollTrackHeight(),
+                    position,
+                    maxOffset,
+                    scrollPageStep()));
             return true;
         }
         if (isItemViewActive() && hoveredSlot != null
@@ -737,18 +821,24 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         return handled;
     }
 
+    protected final void unfocusSearchOnOutsideClick(double mouseX, double mouseY) {
+        EditBox active = activeSearchBox();
+        if (active == null || !active.isFocused() || active.isMouseOver(mouseX, mouseY)) return;
+        active.setFocused(false);
+        if (getFocused() == active) setFocused(null);
+    }
+
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0) isScrolling = false;
+        if (button == 0) scrollbar.release();
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (isItemViewActive() && isScrolling) {
-            sendScrollTarget(TerminalScrollbar.positionForPointer(
+        if (isItemViewActive() && scrollbar.isDragging()) {
+            sendScrollTarget(scrollbar.drag(
                     mouseY,
-                    scrollGrabOffset,
                     scrollTrackTop(),
                     scrollTrackHeight(),
                     maxScrollOffset()));
@@ -761,11 +851,14 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (isItemViewActive() && (isOverGrid(mouseX, mouseY) || isOverScrollBar(mouseX, mouseY))) {
             double direction = scrollY != 0.0 ? scrollY : scrollX;
-            if (direction > 0 && menu.getScrollOffset() > 0) {
-                sendButton(0);
-            } else if (direction < 0 && menu.getScrollOffset() < maxScrollOffset()) {
-                sendButton(1);
-            }
+            int maxOffset = maxScrollOffset();
+            int position = scrollbar.synchronize(menu.getScrollOffset(), maxOffset);
+            if (direction != 0.0) sendScrollTarget(scrollbar.step(
+                    position,
+                    direction > 0
+                            ? -StorageTerminalMenu.DISPLAY_COLS
+                            : StorageTerminalMenu.DISPLAY_COLS,
+                    maxOffset));
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
@@ -773,23 +866,30 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (isItemViewActive() && searchBox.keyPressed(keyCode, scanCode, modifiers)) {
-            scheduleSearch();
-            return true;
-        }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        EditBox active = activeSearchBox();
+        if (active != null && (active.keyPressed(keyCode, scanCode, modifiers)
+                || active.isFocused()
+                && keyCode >= GLFW.GLFW_KEY_SPACE
+                && keyCode <= GLFW.GLFW_KEY_WORLD_2)) return true;
+        return keyPressedOutsideSearch(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
-        if (isItemViewActive() && searchBox.charTyped(codePoint, modifiers)) {
-            scheduleSearch();
-            return true;
-        }
+        EditBox active = activeSearchBox();
+        if (active != null && active.charTyped(codePoint, modifiers)) return true;
         return super.charTyped(codePoint, modifiers);
     }
 
-    private void scheduleSearch() {
+    protected EditBox activeSearchBox() {
+        return isItemViewActive() ? searchBox : null;
+    }
+
+    protected boolean keyPressedOutsideSearch(int keyCode, int scanCode, int modifiers) {
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    private void scheduleSearch(String ignored) {
         searchSynchronizer.synchronizeFromTerminal(
                 displayedPreferences().searchMode(), searchBox.getValue());
         searchTimer = SEARCH_DEBOUNCE_TICKS;
@@ -798,6 +898,18 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     @Override
     protected void containerTick() {
         super.containerTick();
+        int serverScroll = menu.getScrollOffset();
+        if (serverScroll != lastObservedScroll) {
+            lastObservedScroll = serverScroll;
+            lastRequestedScroll = Integer.MIN_VALUE;
+        }
+        if (isItemViewActive()) {
+            scrollbar.synchronize(serverScroll, maxScrollOffset());
+            scrollbar.tick(maxScrollOffset(), scrollPageStep())
+                    .ifPresent(this::sendScrollTarget);
+        } else {
+            scrollbar.release();
+        }
         preferenceSession.observe(menu.getTerminalPreferences()).ifPresent(preferences -> {
             TerminalClientPreferences.save(preferences);
         });
@@ -856,8 +968,11 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     private int maxScrollOffset() {
-        return Math.max(0,
-                menu.getTotalItemTypes() - visibleRows * StorageTerminalMenu.DISPLAY_COLS);
+        return menu.getMaxScrollOffset();
+    }
+
+    private int scrollPageStep() {
+        return Math.max(1, visibleRows / 6) * StorageTerminalMenu.DISPLAY_COLS;
     }
 
     private void sendScrollTarget(int target) {
@@ -874,16 +989,22 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             int trackTop,
             int trackHeight,
             int position,
-            int maxPosition
+            int maxPosition,
+            TerminalScrollbar.VisualState state
     ) {
         int thumbTop = TerminalScrollbar.thumbTop(
                 trackTop, trackHeight, position, maxPosition);
+        if (state == TerminalScrollbar.VisualState.CLICKED) {
+            graphics.setColor(0.75F, 0.75F, 0.75F, 1.0F);
+        }
         graphics.blitSprite(
-                maxPosition > 0 ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE,
+                state == TerminalScrollbar.VisualState.DISABLED
+                        ? SCROLLER_DISABLED_SPRITE : SCROLLER_SPRITE,
                 x,
                 thumbTop,
                 TerminalScrollbar.THUMB_WIDTH,
                 TerminalScrollbar.THUMB_HEIGHT);
+        graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     protected static void blitControlIcon(
@@ -984,7 +1105,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             int iconX = getX() + (getWidth() - TerminalLayout.ICON_CANVAS_SIZE) / 2;
             int iconY = getY() + (getHeight() - TerminalLayout.ICON_CANVAS_SIZE) / 2;
             if (!itemIcon.isEmpty()) {
-                graphics.renderItem(itemIcon, iconX, iconY);
+                renderTerminalIcon(graphics, itemIcon, iconX, iconY, partialTick);
                 return;
             }
             if (icon == null) return;

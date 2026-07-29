@@ -8,7 +8,8 @@ public enum TerminalResourceView {
     ENERGY,
     GAS,
     STATION_WORK,
-    OTHER;
+    OTHER,
+    ALL;
 
     public TerminalResourceView next() {
         return values()[(ordinal() + 1) % values().length];
@@ -27,6 +28,7 @@ public enum TerminalResourceView {
             case STATION_WORK ->
                     StorageResourceKinds.isKindAvailable(StorageResourceKindApi.WORK_KIND);
             case OTHER -> StorageResourceKinds.hasOtherKind();
+            case ALL -> true;
         };
     }
 
@@ -53,18 +55,22 @@ public enum TerminalResourceView {
     }
 
     public boolean matches(StorageResourceKey key) {
+        return this == ALL || this == classify(key);
+    }
+
+    static TerminalResourceView classify(StorageResourceKey key) {
         ResourceLocation kind = key.kindId();
-        return switch (this) {
-            case ITEM -> kind.equals(StorageResourceKindApi.ITEM_KIND);
-            case FLUID -> kind.equals(StorageResourceKindApi.FLUID_KIND);
-            case ENERGY -> kind.equals(StorageResourceKindApi.ENERGY_KIND)
-                    || kind.equals(StorageResourceKindApi.WORK_KIND)
-                    && StorageResourceBridge.stationWorkDescriptorId(key).isEmpty();
-            case GAS -> StorageResourceKinds.isChemicalKindId(kind);
-            case STATION_WORK ->
-                    StorageResourceBridge.stationWorkDescriptorId(key).isPresent();
-            case OTHER -> !StorageResourceKinds.isBuiltInKindId(kind);
-        };
+        if (kind.equals(StorageResourceKindApi.ITEM_KIND)) return ITEM;
+        if (kind.equals(StorageResourceKindApi.FLUID_KIND)) return FLUID;
+        if (StorageResourceKinds.isEnergyKindId(kind)
+                || StorageResourceBridge.energyType(key).isPresent()) {
+            return ENERGY;
+        }
+        if (StorageResourceKinds.isChemicalKindId(kind)) return GAS;
+        if (StorageResourceBridge.stationWorkDescriptorId(key).isPresent()) {
+            return STATION_WORK;
+        }
+        return OTHER;
     }
 
     public static TerminalResourceView byId(int id) {

@@ -14,7 +14,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Crafting Table, Stonecutter, and exact Smithing Transform recipes need their matching Instant Station but spend no processing work. Built-in axe stripping, scraping, and wax removal spend Axe Energy instead. Botania recipes consume their exact Mana cost; Elven Trade also spends the runtime portal Mana cost."
+      "text": "Crafting Table, Stonecutter, and exact Smithing Transform recipes need their matching Instant Station but spend no processing work. Built-in axe stripping, scraping, and wax removal spend Axe Uses instead. Botania recipes consume their exact Mana cost; Elven Trade also spends the runtime portal Mana cost."
     },
     {
       "type": "patchouli:text",

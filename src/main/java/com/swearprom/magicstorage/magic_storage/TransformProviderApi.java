@@ -25,12 +25,14 @@ public final class TransformProviderApi {
             ResourceLocation targetId,
             ItemStack representative,
             Component targetLabel,
+            Component sourceLabel,
             Resolver resolver
     ) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(targetId, "targetId");
         Objects.requireNonNull(representative, "representative");
         Objects.requireNonNull(targetLabel, "targetLabel");
+        Objects.requireNonNull(sourceLabel, "sourceLabel");
         Objects.requireNonNull(resolver, "resolver");
         if (representative.isEmpty()) {
             throw new IllegalArgumentException("Transform representative cannot be empty: " + id);
@@ -39,7 +41,15 @@ public final class TransformProviderApi {
             throw new IllegalArgumentException("Duplicate transform provider: " + id);
         }
         PROVIDERS.add(new Provider(
-                id, targetId, representative.copyWithCount(1), targetLabel, resolver));
+                id, targetId, representative.copyWithCount(1),
+                targetLabel, sourceLabel, resolver));
+    }
+
+    public static synchronized Optional<Component> sourceLabel(ResourceLocation providerId) {
+        return PROVIDERS.stream()
+                .filter(provider -> provider.id().equals(providerId))
+                .map(Provider::sourceLabel)
+                .findFirst();
     }
 
     public static ResourceLocation energyTargetId(EnergyType type) {
@@ -191,6 +201,12 @@ public final class TransformProviderApi {
         return List.copyOf(result);
     }
 
+    static ItemStack sortStack(Use use) {
+        return TerminalDisplayStack.create(
+                use.representative(),
+                use.infinite() ? Long.MAX_VALUE : use.amountPerItem());
+    }
+
     public record Result(
             StorageResourceKey output,
             long amountPerItem,
@@ -255,11 +271,13 @@ public final class TransformProviderApi {
             ResourceLocation targetId,
             ItemStack representative,
             Component targetLabel,
+            Component sourceLabel,
             Resolver resolver
     ) {
         private Provider {
             representative = representative.copyWithCount(1);
             Objects.requireNonNull(targetLabel, "targetLabel");
+            Objects.requireNonNull(sourceLabel, "sourceLabel");
         }
     }
 }

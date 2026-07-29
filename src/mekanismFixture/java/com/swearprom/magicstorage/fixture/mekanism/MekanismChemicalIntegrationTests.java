@@ -11,8 +11,10 @@ import com.swearprom.magicstorage.magic_storage.ImportBusBlockEntity;
 import com.swearprom.magicstorage.magic_storage.StorageCoreBlockEntity;
 import com.swearprom.magicstorage.magic_storage.StorageResourceKey;
 import com.swearprom.magicstorage.magic_storage.StorageTerminalMenu;
+import com.swearprom.magicstorage.magic_storage.TerminalDisplayStack;
 import com.swearprom.magicstorage.magic_storage.TerminalContainerTransferDirection;
 import com.swearprom.magicstorage.magic_storage.TerminalHeldContainerTransferPacket;
+import com.swearprom.magicstorage.magic_storage.TerminalResourceDisplay;
 import com.swearprom.magicstorage.magic_storage.TerminalResourceView;
 import mekanism.api.Action;
 import mekanism.api.MekanismAPI;
@@ -20,6 +22,7 @@ import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -444,6 +447,19 @@ public final class MekanismChemicalIntegrationTests {
                     TerminalContainerTransferDirection.DEPOSIT), player)
                     || core.getResourceAmount(oxygenKey) != 500_000L) {
                 helper.fail("Mekanism tank did not deposit its exact chemical amount");
+                return;
+            }
+            List<ItemStack> gasEntries = core.getTerminalDisplayStacks(
+                    "",
+                    com.swearprom.magicstorage.magic_storage.SortMode.NAME,
+                    com.swearprom.magicstorage.magic_storage.SortOrder.ASCENDING,
+                    TerminalResourceView.GAS);
+            ItemStack gasEntry = gasEntries.size() == 1 ? gasEntries.getFirst() : ItemStack.EMPTY;
+            if (!TerminalResourceDisplay.key(gasEntry).filter(oxygenKey::equals).isPresent()
+                    || TerminalDisplayStack.amount(gasEntry) != 500_000L
+                    || !oxygenHolder.value().getTextComponent().equals(
+                    gasEntry.get(DataComponents.CUSTOM_NAME))) {
+                helper.fail("Gas entry did not preserve its typed chemical identity, amount, and name");
                 return;
             }
             IChemicalHandler emptyHandler = menu.getCarried().getCapability(CHEMICAL_ITEM_CAPABILITY);

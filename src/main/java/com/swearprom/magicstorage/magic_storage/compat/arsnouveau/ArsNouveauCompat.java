@@ -124,6 +124,7 @@ public final class ArsNouveauCompat {
             Item item = requiredItem(itemPath);
             return MachineDescriptor.installableVariants(
                     descriptorId,
+                    new ItemStack(item).getHoverName(),
                     () -> List.of(MachineVariant.of(
                             new ItemStack(item), MachineWorkRate.ONE)),
                     MachineEnergyTable.Category.PROCESS,

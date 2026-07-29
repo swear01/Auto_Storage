@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public final class RecipePresentation {
     public static final int MAX_INPUTS = 9;
-    public static final int MAX_ITEM_RESOURCES = 9;
+    public static final int MAX_ITEM_RESOURCES = TypedRecipePlan.MAX_INPUTS;
 
     private static final String ID_KEY = "magic_storage:recipe_presentation_id";
     private static final String KIND_KEY = "magic_storage:recipe_presentation_kind";

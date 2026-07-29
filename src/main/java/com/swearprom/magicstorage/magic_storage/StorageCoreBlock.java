@@ -1,7 +1,10 @@
 package com.swearprom.magicstorage.magic_storage;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -166,6 +170,11 @@ public class StorageCoreBlock extends Block implements EntityBlock, IStorageNetw
         if (!state.is(newState.getBlock())) {
             if (level.getBlockEntity(pos) instanceof StorageCoreBlockEntity core) {
                 if (!moved) {
+                    if (level instanceof ServerLevel serverLevel
+                            && core.hasRecoverableContents()
+                            && core.getPreparedRecoveryId().isEmpty()) {
+                        core.prepareRecoveryDrop(serverLevel, null);
+                    }
                     core.onBreak();
                 }
                 if (level instanceof ServerLevel serverLevel) {
@@ -179,10 +188,35 @@ public class StorageCoreBlock extends Block implements EntityBlock, IStorageNetw
 
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
-        if (!level.isClientSide()) {
-            if (level.getBlockEntity(pos) instanceof StorageCoreBlockEntity core) {
-                core.rebuildNetwork(level);
-            }
+        if (level.isClientSide()
+                || (!(neighborBlock instanceof IStorageNetworkBlock)
+                && (!level.hasChunkAt(neighborPos)
+                || !(level.getBlockState(neighborPos).getBlock() instanceof IStorageNetworkBlock)))) return;
+        level.scheduleTick(pos, this, 1);
+    }
+
+    @Override
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (level.getBlockEntity(pos) instanceof StorageCoreBlockEntity core) {
+            core.rebuildNetwork(level);
         }
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            BlockHitResult hitResult
+    ) {
+        if (!level.isClientSide()
+                && level.getBlockEntity(pos) instanceof StorageCoreBlockEntity core
+                && core.isNetworkCapped()) {
+            player.displayClientMessage(
+                    Component.translatable("msg.magic_storage.network_capped"), true);
+            return InteractionResult.CONSUME;
+        }
+        return InteractionResult.PASS;
     }
 }

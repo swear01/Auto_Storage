@@ -1,5 +1,6 @@
 package com.swearprom.magicstorage.magic_storage;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -14,11 +15,19 @@ record TerminalSearchEntry(Item item, String namespace, String searchableName) {
 
     static TerminalSearchEntry create(ItemStack stack) {
         ResourceLocation id = stack.getItem().builtInRegistryHolder().key().location();
-        String name = stack.getHoverName().getString().toLowerCase(Locale.ROOT);
+        return create(stack, id, stack.getHoverName());
+    }
+
+    static TerminalSearchEntry create(
+            ItemStack stack,
+            ResourceLocation identity,
+            Component label
+    ) {
+        String name = label.getString().toLowerCase(Locale.ROOT);
         return new TerminalSearchEntry(
                 stack.getItem(),
-                id.getNamespace(),
-                name + " " + id.getPath().toLowerCase(Locale.ROOT));
+                identity.getNamespace(),
+                name + " " + identity.getPath().toLowerCase(Locale.ROOT));
     }
 
     boolean is(TagKey<Item> tag) {

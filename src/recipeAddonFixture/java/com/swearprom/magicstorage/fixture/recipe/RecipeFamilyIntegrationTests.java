@@ -321,13 +321,14 @@ public final class RecipeFamilyIntegrationTests {
                 ItemStack display = terminal.getSlot(slot).getItem();
                 if (TerminalResourceDisplay.key(display).orElse(null) != null
                         && TerminalResourceDisplay.key(display).orElseThrow().equals(blue)
-                        && TerminalDisplayStack.amount(display) == 500) {
+                        && TerminalDisplayStack.amount(display) == 500
+                        && TerminalDisplayStack.strip(display).is(Items.AMETHYST_SHARD)) {
                     terminalEntry = true;
                     break;
                 }
             }
             if (!terminalEntry) {
-                helper.fail("Registered addon kind was absent from the terminal listing");
+                helper.fail("Registered addon kind did not keep its registered representative");
                 return;
             }
             StorageResourceTransaction transaction = StorageResourceTransaction.builder()

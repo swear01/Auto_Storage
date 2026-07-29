@@ -56,15 +56,16 @@ public final class EvilCraftCompat {
 
         ResourceLocation descriptorId = ResourceLocation.fromNamespaceAndPath(
                 machineDescriptors.getNamespace(), "evilcraft_blood_infuser");
-        machineDescriptors.register(descriptorId.getPath(), () ->
-                MachineDescriptor.installableVariants(
-                        descriptorId,
-                        () -> List.of(MachineVariant.of(
-                                new ItemStack(requiredItem("blood_infuser")),
-                                MachineWorkRate.ONE)),
-                        MachineEnergyTable.Category.PROCESS,
-                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
-                        null));
+        machineDescriptors.register(descriptorId.getPath(), () -> {
+            Item item = requiredItem("blood_infuser");
+            return MachineDescriptor.installableVariants(
+                    descriptorId,
+                    new ItemStack(item).getHoverName(),
+                    () -> List.of(MachineVariant.of(new ItemStack(item), MachineWorkRate.ONE)),
+                    MachineEnergyTable.Category.PROCESS,
+                    MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                    null);
+        });
         recipeFamilies.register(descriptorId.getPath(), () ->
                 RecipeFamilyFactories.deterministicResources(
                         RecipeBloodInfuser.class,

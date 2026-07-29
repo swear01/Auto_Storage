@@ -108,6 +108,7 @@ public final class RecipeFamilyApiCompileFixture {
     public static MachineDescriptor polymorphicStation() {
         return MachineDescriptor.installableVariants(
                 ResourceLocation.fromNamespaceAndPath("fixture_mod", "polymorphic_station"),
+                net.minecraft.network.chat.Component.literal("Polymorphic Station"),
                 () -> List.of(
                         MachineVariant.of(new ItemStack(Items.COPPER_BLOCK), MachineWorkRate.of(10, 9)),
                         MachineVariant.of(new ItemStack(Items.IRON_BLOCK), MachineWorkRate.of(5, 4))),

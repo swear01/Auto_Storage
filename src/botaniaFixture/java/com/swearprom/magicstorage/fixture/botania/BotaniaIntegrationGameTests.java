@@ -17,10 +17,12 @@ import com.swearprom.magicstorage.magic_storage.TerminalHeldContainerTransferPac
 import com.swearprom.magicstorage.magic_storage.TerminalResourceView;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -85,10 +87,13 @@ public final class BotaniaIntegrationGameTests {
         StorageResourceKind manaKind = MagicStorage.RESOURCE_KIND_REGISTRY.get(
                 StorageResourceKindApi.BOTANIA_MANA_KIND);
         if (manaKind == null
-                || !manaKind.representative().is(botaniaItem("mana_tablet"))
-                || !TerminalResourceView.OTHER.isAvailable()
-                || !TerminalResourceView.OTHER.matches(manaKey())) {
-            helper.fail("Botania Mana was not exposed as one conditional terminal resource kind");
+                || !manaKind.representative().is(botaniaItem("mana_powder"))
+                || !Component.translatable("gui.magic_storage.resource.mana")
+                .equals(manaKind.representative().get(DataComponents.CUSTOM_NAME))
+                || !TerminalResourceView.ENERGY.isAvailable()
+                || !TerminalResourceView.ENERGY.matches(manaKey())
+                || TerminalResourceView.OTHER.matches(manaKey())) {
+            helper.fail("Botania Mana was not exposed in the Energy resource group");
             return;
         }
 
@@ -128,7 +133,7 @@ public final class BotaniaIntegrationGameTests {
 
             StorageTerminalMenu menu = new StorageTerminalMenu(
                     701, context.player().getInventory(), context.core());
-            selectOtherView(menu, context);
+            selectEnergyView(menu, context);
             menu.setCarried(tablet);
             boolean deposited = transferHeld(
                     menu, context, TerminalContainerTransferDirection.DEPOSIT);
@@ -158,7 +163,7 @@ public final class BotaniaIntegrationGameTests {
         withCore(helper, context -> {
             StorageTerminalMenu menu = new StorageTerminalMenu(
                     702, context.player().getInventory(), context.core());
-            selectOtherView(menu, context);
+            selectEnergyView(menu, context);
 
             ItemStack creative = new ItemStack(botaniaItem("mana_tablet"));
             ManaTabletItem.setStackCreative(creative);
@@ -517,19 +522,19 @@ public final class BotaniaIntegrationGameTests {
                 context.level(), recipeId, crafts, CraftingDestination.STORAGE, context.player());
     }
 
-    private static void selectOtherView(
+    private static void selectEnergyView(
             StorageTerminalMenu menu,
             FixtureContext context
     ) {
         for (int attempt = 0;
              attempt < TerminalResourceView.values().length
-                     && menu.getResourceView() != TerminalResourceView.OTHER;
+                     && menu.getResourceView() != TerminalResourceView.ENERGY;
              attempt++) {
             menu.clickMenuButton(
                     context.player(), NEXT_RESOURCE_VIEW_BUTTON);
         }
-        if (menu.getResourceView() != TerminalResourceView.OTHER) {
-            throw new IllegalStateException("Botania Mana did not make Other available");
+        if (menu.getResourceView() != TerminalResourceView.ENERGY) {
+            throw new IllegalStateException("Botania Mana was not selectable in Energy");
         }
         menu.refreshDisplayItems(context.core());
     }
@@ -545,7 +550,7 @@ public final class BotaniaIntegrationGameTests {
                         menu.containerId,
                         menu.getStateId(),
                         0,
-                        TerminalResourceView.OTHER,
+                        TerminalResourceView.ENERGY,
                         direction),
                 context.player());
     }

@@ -543,6 +543,15 @@ public final class MekanismRecipeIntegrationTests {
                     || !TerminalResourceDisplay.key(
                     context.menu().getRecipePresentation().output())
                     .filter(keys.oxygen()::equals).isPresent()
+                    || context.menu().getRecipePresentation().inputs().stream()
+                    .filter(TerminalResourceDisplay::isTyped)
+                    .noneMatch(input -> TerminalResourceDisplay.key(input)
+                            .filter(keys.hydrogen()::equals).isPresent()
+                            && TerminalDisplayStack.amount(input) == REACTION_CHEMICAL)
+                    || context.menu().getIngredientPreview().stream()
+                    .noneMatch(input -> TerminalResourceDisplay.key(input.stack())
+                            .filter(keys.hydrogen()::equals).isPresent()
+                            && input.required() == REACTION_CHEMICAL)
                     || TerminalDisplayStack.amount(
                     context.menu().getRecipePresentation().output())
                     != REACTION_CHEMICAL_OUTPUT
