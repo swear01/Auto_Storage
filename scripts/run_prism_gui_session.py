@@ -209,7 +209,7 @@ SCENARIOS = {
         "hotbar_keys": [],
         "checks": [
             "Pass the fullscreen gate before any GUI action.",
-            "Open the Magic Storage Guide and confirm categories/entries render, not No Entries.",
+            "Use the preloaded Auto Storage Guide in hotbar `1` and confirm categories/entries render, not No Entries.",
             "Confirm log-excerpt.log includes Patchouli preloading when Patchouli is installed in the Prism dev instance.",
         ],
     },
