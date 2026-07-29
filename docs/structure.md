@@ -2,6 +2,7 @@
 
 | Path | Purpose |
 |------|---------|
+| `.cursor/skills/full-repo-audit/` | Cursor Cloud 手動全 repo、唯讀 audit Skill；查證官方與相似專案後，把去重結果發布為單一 GitHub issue。 |
 | `.github/workflows/` | GitHub Actions CI/CD:push/PR build + Modrinth EMI minimum/latest-compatible release compile + base/recipe-addon/Mekanism/Botania/Iron Furnaces/Farmer's Delight/Modern Industrialization/Ars Nouveau/EvilCraft/Powah/Industrial Foregoing/Create/PneumaticCraft/Extended Crafting十四個依序隔離GameTest runs + 一個全選配模組共存GameTest run + Python unittest + datagen drift check + jar/log/report artifacts；full EMI client/data runtime由exact Modrinth version ID供應，optional-mod artifacts各只代表一個CI版本且不成為玩家端exact pin；Botania mutable snapshot另以expected SHA-256守住；`v<mod_version>` tag release重跑同一組 gates，並以`publishing` environment設定將同一alpha jar發佈到GitHub、Modrinth與CurseForge；手動`client-smoke.yml`放入required Patchouli、釘選Fusion與最新相容exact EMI，再以10分鐘上限跑NeoForge client boot/resource smoke。 |
 | `art/texture-generation/` | 貼圖生成 metadata、predictions 與 preview 原稿；`20260714-terminal-family/` 另含 fixed-seed/shared-reference selection manifest、palette/chassis cleanup script與候選/選定 contact sheets。全部刻意放在 runtime resource tree 外，不打進 mod jar。 |
 | `README.md` | 公開 GitHub repo 首頁:專案簡介、build/test、CI/CD、GUI 驗證入口、授權狀態。 |
