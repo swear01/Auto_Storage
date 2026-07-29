@@ -2,7 +2,7 @@
 
 ## What This Is
 
-`magic_storage` — NeoForge 1.21.1 的一站式儲存 + 魔法合成 mod。玩家用終端儲存與取用物品、流體、能量、氣體和addon資源；有限 Storage Units提供種類容量，Creative Storage Unit則明確提供無限種類。Crafting Terminal把可執行配方、確定性Transform，以及Processing/Instant Stations放在四個分開頁面。
+**Auto Storage**（穩定技術 mod ID：`magic_storage`；repository：`Magic_Storage`）— NeoForge 1.21.1 的一站式儲存 + 魔法合成 mod。公開 listing、模組 display name 與玩家指南使用 Auto Storage；既有 mod ID、registry namespace、package、存檔 key 與 repository 名稱不改，避免破壞世界及 addon 相容性。玩家用終端儲存與取用物品、流體、能量、氣體和addon資源；有限 Storage Units提供種類容量，Creative Storage Unit則明確提供無限種類。Crafting Terminal把可執行配方、確定性Transform，以及Processing/Instant Stations放在四個分開頁面。
 
 概念源自 **Terraria 的 Magic Storage**(無限容量、配方書操作);NeoForge 的儲存網路 / grid UI / 物品處理等**技術模式參考 Refined Storage 2** 原始碼(見 `docs/notes.md`)。
 

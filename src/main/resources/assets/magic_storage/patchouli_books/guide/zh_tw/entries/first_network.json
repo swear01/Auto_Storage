@@ -6,7 +6,7 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "text": "Magic Storage 讓多種物品共用一個操作介面。你的$(thing)起步採買清單$()是 $(l:magic_storage:storage_core)儲存核心$()、$(l:magic_storage:storage_terminal)儲存終端機$()與兩個 $(l:magic_storage:unit_tiers)T1 儲存單元$()。整套起步設備合計只需一顆鑽石，另加黑色混凝土粉末、黑曜石、銅、紅石、玻璃、木材與木桶；T1 不需要紫水晶。"
+      "text": "Auto Storage 讓多種物品共用一個操作介面。你的$(thing)起步採買清單$()是 $(l:magic_storage:storage_core)儲存核心$()、$(l:magic_storage:storage_terminal)儲存終端機$()與兩個 $(l:magic_storage:unit_tiers)T1 儲存單元$()。整套起步設備合計只需一顆鑽石，另加黑色混凝土粉末、黑曜石、銅、紅石、玻璃、木材與木桶；T1 不需要紫水晶。"
     },
     {
       "type": "patchouli:text",

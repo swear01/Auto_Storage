@@ -14,7 +14,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "Use Magic Storage's wrench or any compatible wrench in your main hand. $(thing)Right-click$() a directional Import or Export Bus to rotate it around the clicked face. Ordinary right-click on a Core, Unit, or Terminal does not invent a direction."
+      "text": "Use Auto Storage's wrench or any compatible wrench in your main hand. $(thing)Right-click$() a directional Import or Export Bus to rotate it around the clicked face. Ordinary right-click on a Core, Unit, or Terminal does not invent a direction."
     },
     {
       "type": "patchouli:text",

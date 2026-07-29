@@ -10,7 +10,7 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 description='''
-Magic Storage — All-in-one storage system inspired by Terraria.
+Auto Storage — all-in-one server-authoritative storage and crafting.
 Connect Storage Units to a Core, access all items from one terminal,
 and craft instantly using accumulated Crafting Energy.
 '''

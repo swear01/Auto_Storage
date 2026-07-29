@@ -1,6 +1,6 @@
 {
-  "name": "Magic Storage Guide",
-  "landing_text": "Welcome to Magic Storage! This guide will teach you how to set up your storage network, craft instantly with accumulated energy, and automate your base.",
+  "name": "Auto Storage Guide",
+  "landing_text": "Welcome to Auto Storage! This guide will teach you how to set up your storage network, craft instantly with accumulated energy, and automate your base.",
   "version": 0,
   "creative_tab": "magic_storage:magic_storage",
   "custom_book_item": "magic_storage:guide_book",
