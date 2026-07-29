@@ -212,8 +212,8 @@ public final class CraftablePerformanceGameTests {
                     throw new IllegalStateException(
                             "Could not prepare Craftable benchmark");
                 }
-                preparationMenu.removed(player);
                 craftablePreparationNanos = System.nanoTime() - started;
+                preparationMenu.removed(player);
                 helper.runAfterDelay(40, this::measureFirst);
             });
         }

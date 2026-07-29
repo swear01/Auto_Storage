@@ -41,7 +41,7 @@
 - NeoForge 一般 deprecation migration(低優先):`ClientSetup` for-removal bus 用法已清除；剩餘 `Level.hasChunkAt`、item registry holder 與 GameTest `RegistryFriendlyByteBuf` 舊 API 要在不改 unloaded-chunk 行為下遷移。
 - Build/GUI tooling cleanup(低優先)：提供不 bump 版本的 transactional exact-current Prism deploy CLI，並讓 runner error message 分流。
 - 舊 Art metadata portability(低優先)：`20260713-*` 等較早 `art/texture-generation/**/*.json` 仍保存本機 `/Users/swear/...` 絕對路徑；runtime jar 不含這些 metadata。新的 `20260714-terminal-family/selection.json` 與 normalized metadata 已使用 repo-relative provenance，舊批次日後有需要再遷移。
-- Modrinth / CurseForge 發布:未來等公開頁面 metadata、icon、description、dependency matrix、secrets 與授權策略確認後再接進 release workflow;目前 CD 僅建立 GitHub Release。
+- Modrinth / CurseForge 發布：0.2.0-alpha workflow、metadata、dependency matrix與fail-closed `publishing` environment已完成；只剩建立兩個公開平台專案、寫入project ID/token，並以`v0.2.0`觸發同一jar的GitHub/Modrinth/CurseForge alpha發布。
 
 ## In Progress
 

@@ -2068,6 +2068,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("TERMINAL_SCALE_WARM_INTERACTIONS_END", fixture)
         self.assertIn("providers.gradleProperty('terminalScaleTypes').orElse('10000')", build)
         self.assertIn("warmLog.contains(\"Can't keep up!\")", build)
+        self.assertLess(
+            fixture.index("craftablePreparationNanos = System.nanoTime() - started;"),
+            fixture.index("preparationMenu.removed(player);"),
+        )
 
     def test_large_exact_variant_prefilter_avoids_rescanning_equivalent_item_variants(self):
         adapters = self.read_required(
