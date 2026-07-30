@@ -22,11 +22,17 @@ static {
 }
 
 public ExampleMod(IEventBus modEventBus) {
-    RECIPE_FAMILIES.register(modEventBus);
+    AutoStorageAddon.register(MODID, modEventBus, addon ->
+            addon.recipeFamilies(RECIPE_FAMILIES));
 }
 ```
 
 `GRINDING_RECIPE_TYPE` may be a `DeferredHolder`, because the factory stores the supplier and resolves it after registry registration. `GRINDER_DESCRIPTOR_ID` must already identify a registered [`MachineDescriptor`](machine-descriptor-api.md). A missing descriptor, duplicate family registry ID, or duplicate exact class/type pair fails startup instead of silently choosing one family.
+
+Use one `AutoStorageAddon.register(...)` call when the same addon contributes
+stations, resources, transfers, Transforms, or variants. The full Gradle setup,
+facade contract, and release artifact policy are in
+[`addon-development.md`](addon-development.md).
 
 ## Factory contracts
 

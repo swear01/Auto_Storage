@@ -2,6 +2,10 @@
 
 > Status: implemented foundation under GitHub [#9](https://github.com/swear01/Auto_Storage/issues/9). Item, fluid, NeoForge Energy, optional Mekanism chemical, Botania Mana, Ars Nouveau Source, and registered addon kinds now share one live ledger and transaction domain. Terminal listing and its resource selector, passive Bus capabilities, Creative unlimited type capacity, the public resource-kind API, and deterministic typed recipe families are connected.
 
+Addon resource kinds and transfer strategies should be wired with the one-call
+facade in [`addon-development.md`](addon-development.md); the low-level
+registries below remain available for focused or advanced registration.
+
 ## Product boundary
 
 Auto Storage owns stored resources and executes supported recipes immediately inside its server-owned transaction engine. It does not export ingredients to an external machine and wait for that machine to finish.
@@ -75,6 +79,23 @@ Mana recipe costs join the same typed transaction as items, water, catalysts, co
 `StorageResourceKindApi.createDeferredRegister(modId)` registers stable kind IDs in `auto_storage:resource_kind` during normal NeoForge loading. A kind declares whether exact variant payloads are legal and supplies a non-empty representative item. That representative is preserved exactly in Terminal listings. Prefer a provider's resource-specific placeholder when one exists; a generic crafting placeholder, transfer container, or workstation is not a resource identity. When no resource placeholder exists, use the clearest semantic material from that provider. Addons construct canonical `StorageResourceKey` values and may expose them through `StorageResourceCapabilities.BLOCK`; built-in helpers create and decode exact item/fluid keys and the singleton NeoForge Energy key. `StorageResourceBlockApi` and `StorageResourceContainerApi` register one deterministic bridge per kind for, respectively, adjacent block capabilities and a single held item container.
 
 Registration does not grant Core/player mutation callbacks. `StorageResourceHandler` exposes bounded list/amount/insert/extract operations; `StorageResourceTransaction` is the only public multi-key mutation request. Auto Storage still owns validation, capacity, persistence, synchronization, and all-or-nothing commit. Missing providers remain raw on disk and are omitted from terminal presentation until their kind is registered again; new live mutations reject unregistered kinds instead of guessing or fabricating a representative.
+
+An addon that also exposes its native sided capability from Auto Storage uses
+`AutoStorageCapabilityApi.registerSidedResourceCapability(...)` inside the
+facade's capability hook. The adapter receives only the public
+`StorageResourceHandler` and queried `Direction`; Auto Storage registers the
+wrapper on the Core and both Buses without exposing internal block entities.
+The wrapper remains server-only and must preserve exact simulate/execute
+semantics.
+
+Exact client glyphs are optional presentation only. A client module may call
+`TerminalResourceRendererApi.register(kindId, GuiGraphics.class, renderer)`
+from client setup; the generic context keeps the common API artifact free of
+client-only bytecode. Duplicate or over-limit renderers fail explicitly, and a
+renderer returning `false` falls back to the registered resource-kind
+representative. Registration closes before menu-screen registration; a later
+call fails explicitly instead of modifying live terminal rendering. This hook
+cannot read or mutate Core state.
 
 Terminal entries carry the exact key and long amount in display-only metadata. A server-owned menu value selects one available presentation group in stable Item, Fluid, Energy, Gas, Processing, Other order, followed by an always-available All aggregate whose tooltip is `Show: All`. Energy is the broad player-facing group for FE, Mana, Source, Fuel, Brew Energy, and other recognized energy reserves. Processing contains only exact internal `station_work` keys accumulated by Processing stations. Other contains values without a better shared physical category, including the axe durability-derived **Axe Uses** reserve and independently registered addon kinds. The internal `AxeEnergy`/descriptor IDs remain stable implementation and persistence names. Both persisted and registry-canonical chemical IDs map to Gas. Missing provider-specific groups remain omitted. Player-facing entries name the stored resource, never its transfer container: Redstone represents **Forge Energy**, Mana Powder represents **Mana**, Source Gem represents **Source**, and Processing entries use `<logical family> Work`; Mana Tablet and Source Jar remain transfer containers only. Fluids use a teal frame, Energy a violet frame, Gas/Other a blue frame, and Processing an amber frame, all with opaque enough backgrounds and solid borders to remain visible. Each chemical entry keeps its exact Oxygen/Hydrogen/etc. translated name. The server/wire carrier may remain a Basic Chemical Tank, but every player-facing Terminal grid, selector, native diagram, and ledger renders EMI's exact colored chemical glyph and the exact recipe amount; neither a Tank icon nor its 64,000 capacity is a recipe unit. The selector appears on Storage and Craftable views in both terminal types, resets to Item, and is hidden/rejected on Transform and Stations. The All aggregate keeps Item entries as ordinary item display stacks, including normal `#tag` search, Storage withdrawal, and Crafting selection; it does not wrap Item keys as typed representatives. Clicking a non-item representative in Storage never extracts its icon or selects an item recipe; clicking one in Craftable may select the exact typed-output recipe represented by that key. Processing `@mod` search uses the representative workstation item namespace rather than the internal `auto_storage:station_work` resource ID. EMI excludes every non-item representative from item inputs. A player may deposit into or withdraw from a supported fluid, FE, chemical, or addon container held on the cursor; the server rejects spectator, stale, wrong-view, hidden-slot, out-of-range, and otherwise invalid-menu packets before mutation, plans against a private one-item copy, simulates Core capacity, then atomically commits the Core delta and exact replacement container. Cursor/inventory placement and the Core delta share one mutation batch, so listeners cannot observe a half-committed transfer. It never stores storage state on the client.
 
