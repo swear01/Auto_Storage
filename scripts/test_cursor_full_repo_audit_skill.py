@@ -123,6 +123,10 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
         self.assertIn("GitHub #32，complete / merged", roadmap)
         self.assertNotIn("GitHub #32，feature complete / main pending", roadmap)
 
+        plan = (ROOT / "docs/plan.md").read_text()
+        self.assertIn("GitHub #32 modular compatibility SDK complete / merged", plan)
+        self.assertNotIn("GitHub #32 modular compatibility SDK feature branch complete / main merge pending", plan)
+
         releasing = (ROOT / "docs/releasing.md").read_text()
         self.assertIn("GitHub-triggered bot review evidence", releasing)
         self.assertIn("PR #36", releasing)
