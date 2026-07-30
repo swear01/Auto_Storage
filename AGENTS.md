@@ -31,6 +31,11 @@ Match existing code style, naming, and patterns.
 No new libraries unless asked. No comments unless asked.
 Keep changes minimal.
 
+### GitHub PR Review
+When the user explicitly requests GitHub PR code review, invoke the
+`github-pr-review-loop` skill. A local agent review is supplementary evidence,
+not a substitute for a GitHub review bot.
+
 ### No-Useless Options
 When changing behavior, change it — do not keep the old behavior as an option.
 Never add flags, parameters, or config options that were not explicitly requested.
