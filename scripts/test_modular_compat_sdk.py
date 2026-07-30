@@ -65,6 +65,11 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn('"${spec.runName}"', build)
         self.assertIn("tasks.named(spec.runTask)", build)
         self.assertIn("spec.expectedTests", build)
+        self.assertIn(
+            "def runName = descriptor.fixture.substring(",
+            build,
+        )
+        self.assertNotIn("def compatPascalName", build)
         for fixture_id in (
             "auto_storage_mekanism_fixture {",
             "auto_storage_botania_fixture {",

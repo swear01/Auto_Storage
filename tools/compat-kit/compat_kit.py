@@ -131,6 +131,27 @@ FAMILY_KEYS = {
     "evidence",
     "decision",
 }
+TARGET_KEYS = {
+    "mod_id",
+    "display_name",
+    "version",
+    "dependency",
+    "repositories",
+}
+STATION_KEYS = {"descriptor_id", "category", "variants"}
+VARIANT_KEYS = {"item", "rate", "bounds"}
+RATE_KEYS = {"numerator", "denominator"}
+TERM_KEYS = {"role", "resource_kind", "amount", "selector"}
+COST_KEYS = {"resource_kind", "amount", "selector"}
+VERIFICATION_KEYS = {
+    "fixture",
+    "expected_game_tests",
+    "game_test_task",
+    "gradle_tasks",
+    "checks",
+    "evidence",
+}
+VERIFICATION_EVIDENCE_KEYS = {"task", "source", "marker"}
 
 
 def canonical_json(value) -> str:
@@ -531,8 +552,10 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
         "verification": {
             "fixture": None,
             "expected_game_tests": None,
+            "game_test_task": None,
             "gradle_tasks": [],
             "checks": [],
+            "evidence": {},
         },
     }
     validate_contract(contract, require_complete=False)
@@ -543,6 +566,148 @@ def _unknown_keys(value: dict, allowed: set[str], location: str):
     unknown = sorted(set(value) - allowed)
     if unknown:
         raise ValueError(f"{location} has unknown keys: {', '.join(unknown)}")
+
+
+def _validate_nonempty_string(value, location: str):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{location} must be a non-empty string")
+
+
+def _validate_amount(value, location: str):
+    if isinstance(value, bool) or not isinstance(value, (int, str)):
+        raise ValueError(f"{location} amount must be a positive integer or expression")
+    if isinstance(value, int) and value <= 0:
+        raise ValueError(f"{location} amount must be positive")
+    if isinstance(value, str) and not value.strip():
+        raise ValueError(f"{location} amount expression must not be empty")
+
+
+def _validate_unique_strings(value, location: str, *, allow_empty: bool):
+    if not isinstance(value, list) or (not allow_empty and not value):
+        raise ValueError(f"{location} must be a {'non-empty ' if not allow_empty else ''}list")
+    for index, entry in enumerate(value):
+        _validate_nonempty_string(entry, f"{location} {index}")
+    if len(set(value)) != len(value):
+        raise ValueError(f"{location} must not contain duplicates")
+
+
+def _validate_terms(value, location: str):
+    if not isinstance(value, list):
+        raise ValueError(f"{location} must be a list")
+    for index, term in enumerate(value):
+        term_location = f"{location} {index}"
+        if not isinstance(term, dict):
+            raise ValueError(f"{term_location} must be an object")
+        _unknown_keys(term, TERM_KEYS, term_location)
+        if not {"role", "resource_kind", "amount"} <= set(term):
+            raise ValueError(
+                f"{term_location} requires role, resource_kind, and amount"
+            )
+        _validate_nonempty_string(term["role"], f"{term_location} role")
+        _validate_nonempty_string(
+            term["resource_kind"], f"{term_location} resource_kind"
+        )
+        _validate_amount(term["amount"], term_location)
+        if "selector" in term:
+            _validate_nonempty_string(term["selector"], f"{term_location} selector")
+
+
+def _validate_costs(value, location: str):
+    if not isinstance(value, list):
+        raise ValueError(f"{location} must be a list")
+    for index, cost in enumerate(value):
+        cost_location = f"{location} {index}"
+        if not isinstance(cost, dict):
+            raise ValueError(f"{cost_location} must be an object")
+        _unknown_keys(cost, COST_KEYS, cost_location)
+        if not {"resource_kind", "amount"} <= set(cost):
+            raise ValueError(f"{cost_location} requires resource_kind and amount")
+        _validate_nonempty_string(
+            cost["resource_kind"], f"{cost_location} resource_kind"
+        )
+        _validate_amount(cost["amount"], cost_location)
+        if "selector" in cost:
+            _validate_nonempty_string(cost["selector"], f"{cost_location} selector")
+
+
+def _validate_station(value, location: str):
+    if not isinstance(value, dict):
+        raise ValueError(f"{location} station must be an object")
+    _unknown_keys(value, STATION_KEYS, f"{location} station")
+    if set(value) != STATION_KEYS:
+        raise ValueError(
+            f"{location} station requires descriptor_id, category, and variants"
+        )
+    _validate_nonempty_string(
+        value["descriptor_id"], f"{location} station descriptor_id"
+    )
+    if value["category"] not in ("instant", "process", "transform"):
+        raise ValueError(f"{location} station has invalid category")
+    variants = value["variants"]
+    if not isinstance(variants, list) or not variants:
+        raise ValueError(f"{location} station variants must be a non-empty list")
+    for index, variant in enumerate(variants):
+        variant_location = f"{location} station variant {index}"
+        if not isinstance(variant, dict):
+            raise ValueError(f"{variant_location} must be an object")
+        _unknown_keys(variant, VARIANT_KEYS, variant_location)
+        if not {"item", "rate"} <= set(variant):
+            raise ValueError(f"{variant_location} requires item and rate")
+        _validate_nonempty_string(variant["item"], f"{variant_location} item")
+        rate = variant["rate"]
+        if not isinstance(rate, dict):
+            raise ValueError(f"{variant_location} rate must be an object")
+        _unknown_keys(rate, RATE_KEYS, f"{variant_location} rate")
+        if set(rate) != RATE_KEYS:
+            raise ValueError(
+                f"{variant_location} rate requires numerator and denominator"
+            )
+        numerator = rate["numerator"]
+        denominator = rate["denominator"]
+        if (
+            isinstance(numerator, bool)
+            or not isinstance(numerator, int)
+            or numerator < 0
+        ):
+            raise ValueError(f"{variant_location} rate numerator must be non-negative")
+        if (
+            isinstance(denominator, bool)
+            or not isinstance(denominator, int)
+            or denominator <= 0
+        ):
+            raise ValueError(f"{variant_location} rate denominator must be positive")
+        if "bounds" in variant:
+            _validate_nonempty_string(variant["bounds"], f"{variant_location} bounds")
+
+
+def _validate_verification_evidence(verification: dict):
+    evidence = verification["evidence"]
+    if not isinstance(evidence, dict):
+        raise ValueError("verification evidence must be an object")
+    if set(evidence) != set(verification["checks"]):
+        raise ValueError("verification evidence keys must exactly match checks")
+    gradle_tasks = set(verification["gradle_tasks"])
+    for check, records in evidence.items():
+        if not isinstance(records, list) or not records:
+            raise ValueError(f"verification evidence for {check} must be non-empty")
+        for index, record in enumerate(records):
+            location = f"verification evidence {check} {index}"
+            if not isinstance(record, dict):
+                raise ValueError(f"{location} must be an object")
+            _unknown_keys(record, VERIFICATION_EVIDENCE_KEYS, location)
+            if set(record) != VERIFICATION_EVIDENCE_KEYS:
+                raise ValueError(f"{location} requires task, source, and marker")
+            task = record["task"]
+            source = record["source"]
+            marker = record["marker"]
+            _validate_nonempty_string(task, f"{location} task")
+            if task not in gradle_tasks:
+                raise ValueError(f"{location} task is not declared in gradle_tasks")
+            _validate_nonempty_string(source, f"{location} source")
+            source_path = Path(source)
+            if source_path.is_absolute() or ".." in source_path.parts:
+                raise ValueError(f"{location} source must be a safe relative glob")
+            _validate_nonempty_string(marker, f"{location} marker")
 
 
 def validate_contract(contract: dict, *, require_complete: bool):
@@ -558,9 +723,26 @@ def validate_contract(contract: dict, *, require_complete: bool):
     target = contract.get("target")
     if not isinstance(target, dict):
         raise ValueError("contract target must be an object")
+    _unknown_keys(target, TARGET_KEYS, "contract target")
     for key in ("mod_id", "display_name", "version"):
         if not isinstance(target.get(key), str) or not target[key].strip():
             raise ValueError(f"contract target requires {key}")
+    if not re.fullmatch(r"[a-z0-9_-]+", target["mod_id"]):
+        raise ValueError("contract target has invalid mod_id")
+    if "dependency" in target:
+        _validate_nonempty_string(target["dependency"], "contract target dependency")
+    if "repositories" in target:
+        repositories = target["repositories"]
+        _validate_unique_strings(
+            repositories, "contract target repositories", allow_empty=True
+        )
+        invalid = [
+            repository
+            for repository in repositories
+            if not re.fullmatch(r"https://[^\s]+", repository)
+        ]
+        if invalid:
+            raise ValueError("contract target repositories must use HTTPS URLs")
     unresolved = []
     seen_ids = set()
     for index, family in enumerate(contract["families"]):
@@ -573,6 +755,27 @@ def validate_contract(contract: dict, *, require_complete: bool):
         if family_id in seen_ids:
             raise ValueError(f"duplicate family id: {family_id}")
         seen_ids.add(family_id)
+        _validate_nonempty_string(family.get("class"), f"family {family_id} class")
+        recipe_type = family.get("recipe_type")
+        if recipe_type is not None:
+            _validate_nonempty_string(recipe_type, f"family {family_id} recipe_type")
+        station = family.get("station")
+        if station is not None:
+            _validate_station(station, f"family {family_id}")
+        _validate_terms(family.get("inputs"), f"family {family_id} inputs")
+        _validate_terms(family.get("outputs"), f"family {family_id} outputs")
+        _validate_costs(family.get("costs"), f"family {family_id} costs")
+        _validate_unique_strings(
+            family.get("risks"), f"family {family_id} risks", allow_empty=True
+        )
+        _validate_unique_strings(
+            family.get("evidence"),
+            f"family {family_id} evidence",
+            allow_empty=False,
+        )
+        decision = family.get("decision")
+        if decision is not None:
+            _validate_nonempty_string(decision, f"family {family_id} decision")
         status = family.get("status")
         if status not in ("accepted", "rejected", "needs_decision"):
             raise ValueError(f"family {family_id} has invalid status: {status}")
@@ -597,18 +800,15 @@ def validate_contract(contract: dict, *, require_complete: bool):
     if require_complete:
         if not isinstance(target.get("dependency"), str) or not target["dependency"].strip():
             raise ValueError("complete contract target requires dependency")
+        if not isinstance(target.get("repositories"), list):
+            raise ValueError("complete contract target requires repositories")
         verification = contract.get("verification")
         if not isinstance(verification, dict):
             raise ValueError("complete contract requires verification")
-        if set(verification) != {
-            "fixture",
-            "expected_game_tests",
-            "gradle_tasks",
-            "checks",
-        }:
+        if set(verification) != VERIFICATION_KEYS:
             raise ValueError(
                 "verification keys must be fixture, expected_game_tests, "
-                "gradle_tasks, and checks"
+                "game_test_task, gradle_tasks, checks, and evidence"
             )
         if not isinstance(verification["fixture"], str) or not verification["fixture"]:
             raise ValueError("verification requires fixture")
@@ -620,13 +820,35 @@ def validate_contract(contract: dict, *, require_complete: bool):
             raise ValueError("verification requires positive expected_game_tests")
         if not isinstance(verification["gradle_tasks"], list) or not verification["gradle_tasks"]:
             raise ValueError("verification requires gradle_tasks")
-        missing_checks = sorted(
-            set(REQUIRED_VERIFICATION_CHECKS) - set(verification["checks"])
+        _validate_unique_strings(
+            verification["gradle_tasks"],
+            "verification gradle_tasks",
+            allow_empty=False,
         )
-        if missing_checks:
+        invalid_tasks = [
+            task
+            for task in verification["gradle_tasks"]
+            if not re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", task)
+        ]
+        if invalid_tasks:
+            raise ValueError("verification has invalid gradle task names")
+        _validate_nonempty_string(
+            verification["game_test_task"], "verification game_test_task"
+        )
+        if verification["game_test_task"] not in verification["gradle_tasks"]:
+            raise ValueError("verification game_test_task must be in gradle_tasks")
+        _validate_unique_strings(
+            verification["checks"], "verification checks", allow_empty=False
+        )
+        if set(verification["checks"]) != set(REQUIRED_VERIFICATION_CHECKS):
             raise ValueError(
-                "verification is missing checks: " + ", ".join(missing_checks)
+                "verification checks must exactly match the required checks"
             )
+        _validate_verification_evidence(verification)
+    else:
+        verification = contract.get("verification")
+        if not isinstance(verification, dict) or set(verification) != VERIFICATION_KEYS:
+            raise ValueError("draft contract has invalid verification keys")
     return contract
 
 
@@ -822,20 +1044,25 @@ public final class {class_prefix}IntegrationGameTests {{
 
 
 def _wrapper_files() -> dict[str, bytes]:
-    repo_root = Path(__file__).resolve().parents[2]
     required = (
         "gradlew",
         "gradlew.bat",
         "gradle/wrapper/gradle-wrapper.jar",
         "gradle/wrapper/gradle-wrapper.properties",
     )
-    files = {}
-    for relative in required:
-        path = repo_root / relative
-        if not path.is_file():
-            raise ValueError(f"compat-kit distribution is missing wrapper template: {relative}")
-        files[relative] = path.read_bytes()
-    return files
+    tool_file = Path(__file__).resolve()
+    roots = (tool_file.parent, tool_file.parents[2])
+    for root in roots:
+        if all((root / relative).is_file() for relative in required):
+            return {
+                relative: (root / relative).read_bytes()
+                for relative in required
+            }
+    searched = ", ".join(str(root) for root in roots)
+    raise ValueError(
+        "compat-kit distribution is missing a complete wrapper template in: "
+        + searched
+    )
 
 
 def _addon_files(contract: dict) -> dict[str, bytes]:
@@ -876,6 +1103,10 @@ mod_id={addon_id}
 mod_version=0.1.0
 mod_group_id={package}
 """
+    repository_lines = "".join(
+        f'    maven {{ url = uri("{repository}") }}\n'
+        for repository in target["repositories"]
+    )
     build = f"""plugins {{
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.141'
@@ -886,6 +1117,7 @@ group = mod_group_id
 
 repositories {{
     mavenCentral()
+{repository_lines}
     ivy {{
         name = "AutoStorageReleases"
         url = uri("https://github.com/swear01/Auto_Storage/releases/download/v${{auto_storage_version}}")
@@ -1172,6 +1404,53 @@ def _source_text(root: Path) -> str:
     return "\n".join(path.read_text() for path in sources)
 
 
+def _verification_evidence(
+    contract: dict,
+    root: Path,
+    mode: str,
+) -> dict[str, list[str]]:
+    resolved = {}
+    game_test_task = contract["verification"]["game_test_task"]
+    for check, records in contract["verification"]["evidence"].items():
+        resolved_records = []
+        for record in records:
+            matches = sorted(
+                path
+                for path in root.glob(record["source"])
+                if path.is_file()
+            )
+            if not matches:
+                raise ValueError(
+                    f"verification evidence source matched no files: {record['source']}"
+                )
+            if len(matches) > MAX_SOURCE_FILES:
+                raise ValueError(
+                    f"verification evidence source exceeds {MAX_SOURCE_FILES} files: "
+                    f"{record['source']}"
+                )
+            if not any(record["marker"] in path.read_text() for path in matches):
+                raise ValueError(
+                    f"verification evidence marker not found for {check}: "
+                    f"{record['marker']}"
+                )
+            task = record["task"]
+            if mode == "addon":
+                task = (
+                    "runGameTestServer"
+                    if task == game_test_task or task.startswith("run")
+                    else "build"
+                )
+            resolved_records.append(
+                f"{task}:{record['source']}#{record['marker']}"
+            )
+        resolved[check] = resolved_records
+    return resolved
+
+
+def _game_test_count(root: Path) -> int:
+    return len(re.findall(r"(?m)^\s*@GameTest\s*\(", _source_text(root)))
+
+
 def verify_contract(
     contract: dict,
     *,
@@ -1193,7 +1472,7 @@ def verify_contract(
         else root / ".compat-kit-manifest.json"
     )
     manifest_sha = _load_and_verify_manifest(root, manifest_path, contract)
-    sources = _source_text(root)
+    sources = _source_text(root / "src")
     if "compat-kit scaffold is intentionally RED" in sources:
         raise ValueError(
             "compat-kit scaffold is intentionally RED; implement the adapter and tests"
@@ -1218,6 +1497,8 @@ def verify_contract(
             ["./gradlew", "build", "--console=plain", "--no-daemon"],
             ["./gradlew", "runGameTestServer", "--console=plain", "--no-daemon"],
         ]
+        fixture_root = root / "src/main/java"
+        game_test_task = "runGameTestServer"
     else:
         fixture = contract["verification"]["fixture"]
         fixture_root = root / f"src/{fixture}/java"
@@ -1228,8 +1509,18 @@ def verify_contract(
             ["./gradlew", task, "--console=plain", "--no-daemon"]
             for task in contract["verification"]["gradle_tasks"]
         ]
+        game_test_task = contract["verification"]["game_test_task"]
+    expected_game_tests = contract["verification"]["expected_game_tests"]
+    source_game_tests = _game_test_count(fixture_root)
+    if source_game_tests != expected_game_tests:
+        raise ValueError(
+            f"verification expected {expected_game_tests} GameTests, "
+            f"but source declares {source_game_tests}"
+        )
+    evidence = _verification_evidence(contract, root, mode)
     runner = command_runner or _default_command_runner
     command_reports = []
+    game_test_output = None
     for command in commands:
         if mode == "bundled" or (len(command) > 1 and command[1].startswith("run")):
             world = root / "run/world"
@@ -1254,6 +1545,20 @@ def verify_contract(
                 f"verification command failed ({result.returncode}): "
                 f"{' '.join(command)}\n{detail[-4000:]}"
             )
+        if command[1] == game_test_task:
+            game_test_output = stdout + "\n" + stderr
+    if game_test_output is None:
+        raise ValueError(f"verification did not run game_test_task: {game_test_task}")
+    passed_match = re.search(
+        r"All\s+(\d+)\s+required tests passed\s+:\)",
+        game_test_output,
+    )
+    if passed_match is None or int(passed_match.group(1)) != expected_game_tests:
+        actual = passed_match.group(1) if passed_match is not None else "missing"
+        raise ValueError(
+            f"verification expected {expected_game_tests} GameTests to pass, "
+            f"but command reported {actual}"
+        )
     return {
         "schema": SCHEMA_VERSION,
         "kind": "auto_storage_compat_report",
@@ -1265,9 +1570,7 @@ def verify_contract(
             {
                 "id": check,
                 "status": "passed",
-                "evidence": contract["verification"]["gradle_tasks"]
-                if mode == "bundled"
-                else ["build", "runGameTestServer"],
+                "evidence": evidence[check],
             }
             for check in REQUIRED_VERIFICATION_CHECKS
         ],

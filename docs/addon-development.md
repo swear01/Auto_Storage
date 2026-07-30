@@ -66,6 +66,11 @@ integrates another mod, declare that target dependency in the addon's own
 metadata as well. Do not pin player installations to Auto Storage's
 representative CI fixture versions.
 
+Compat Kit contracts list every target Maven repository as an explicit HTTPS
+URL. The generated addon copies those repositories into `build.gradle`; it
+does not infer Modrinth, Curse Maven, or an upstream repository from a
+dependency coordinate. Keep this list minimal and reviewable.
+
 ## Register through one facade
 
 Create addon-owned `DeferredRegister` instances with the focused API classes,

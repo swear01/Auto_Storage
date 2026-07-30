@@ -1048,6 +1048,15 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("SelfTest: 204927 passed, 0 failed, 204927 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
+    def test_compatibility_matrix_locks_the_thirteen_mod_recipe_workload(self):
+        matrix = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CraftablePerformanceGameTests.java"
+        )
+        self.assertIn("EXPECTED_RECIPE_COUNT = 11_657", matrix)
+        self.assertIn("recipeCount != EXPECTED_RECIPE_COUNT", matrix)
+        self.assertIn("Compatibility recipe workload drifted", matrix)
+
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")

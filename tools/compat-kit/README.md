@@ -27,8 +27,11 @@ python3 --version
 ```
 
 Review every candidate and record exact ingredients, catalysts, remainders,
-outputs, typed units, station rates, costs, bounds, and evidence. After the
-contract has no `needs_decision` entry:
+outputs, typed units, station rates, costs, bounds, target HTTPS Maven
+repositories, and evidence. Each required verification check must name the
+successful Gradle task plus a source glob and marker; the declared
+`game_test_task` must report exactly `expected_game_tests` passing tests. After
+the contract has no `needs_decision` entry:
 
 The scan publishes only public signatures and compact risk evidence. Bounded
 private bytecode is inspected for hidden randomness, world/entity access,
@@ -44,7 +47,10 @@ audit.
 
 Use `scaffold --bundled contract.json` and `verify --bundled <repo>` inside the
 Auto Storage repository. Bundled verification runs each declared Gradle task
-separately and removes only `run/world` before each one.
+separately, removes only `run/world` before each one, validates every evidence
+marker, and checks both the source GameTest annotation count and runtime passing
+count. The published archive includes its own Gradle wrapper template, so an
+extracted copy can scaffold an addon without an Auto Storage checkout.
 
 ## Review an update
 

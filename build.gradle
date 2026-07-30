@@ -33,13 +33,6 @@ def expandCompatDependency = { String notation ->
     }
 }
 
-def compatPascalName = { String id ->
-    id.split(/[^A-Za-z0-9]+/)
-            .findAll { !it.isEmpty() }
-            .collect { word -> word.substring(0, 1).toUpperCase() + word.substring(1) }
-            .join()
-}
-
 def compatModules = compatModuleFiles.collect { descriptorFile ->
     def descriptor = new JsonSlurper().parse(descriptorFile)
     def directoryId = descriptorFile.parentFile.name
@@ -59,7 +52,13 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
         throw new GradleException(
                 "Invalid compatibility module descriptor: ${descriptorFile}")
     }
-    def pascalName = compatPascalName(directoryId)
+    if (!descriptor.fixture.endsWith('Fixture')
+            || descriptor.fixture.length() == 'Fixture'.length()) {
+        throw new GradleException(
+                "Compatibility fixture must end with Fixture: ${descriptorFile}")
+    }
+    def runName = descriptor.fixture.substring(
+            0, descriptor.fixture.length() - 'Fixture'.length()) + 'GameTestServer'
     [
             id          : directoryId,
             moduleId    : descriptor.id,
@@ -69,8 +68,8 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             sourceSet   : descriptor.sourceSet,
             fixture     : descriptor.fixture,
             fixtureModId: "auto_storage_${directoryId}_fixture",
-            runName     : "${pascalName.substring(0, 1).toLowerCase()}${pascalName.substring(1)}GameTestServer",
-            runTask     : "run${pascalName}GameTestServer",
+            runName     : runName,
+            runTask     : "run${runName.substring(0, 1).toUpperCase()}${runName.substring(1)}",
             expectedTests: descriptor.expectedTests.intValue(),
             dependencies: descriptor.dependencies.collect {
                 expandCompatDependency(it.toString())

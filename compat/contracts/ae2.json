@@ -1260,6 +1260,7 @@
     "dependency": "org.appliedenergistics:appliedenergistics2:19.2.17",
     "display_name": "Applied Energistics 2",
     "mod_id": "ae2",
+    "repositories": [],
     "version": "19.2.17"
   },
   "verification": {
@@ -1277,11 +1278,99 @@
       "api_only_compilation",
       "all_mod_coexistence"
     ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "absent optional mods never resolve compatibility entrypoints",
+          "source": "src/main/java/com/swear/autostorage/SelfTest.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "optional_compatibility_registrations_coexist",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "inscribe_retains_press_and_consumes_middle_fe_and_work",
+          "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
+          "task": "runAe2GameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Long.MAX_VALUE",
+          "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
+          "task": "runAe2GameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "destination_overflow_is_atomic",
+          "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
+          "task": "runAe2GameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "insufficient_fe_is_atomic",
+          "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
+          "task": "runAe2GameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "typed_family_capacity_failure_changes_no_input_output_or_player_state",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "typed_family_commits_multiple_inputs_outputs_and_retained_roles_atomically",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "inscriber_registers_exact_rate_and_charger_stays_excluded",
+          "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
+          "task": "runAe2GameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "exact_recipe_selection_accepts_supported_backing_recipe_and_rejects_stale_id",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
     "expected_game_tests": 7,
     "fixture": "ae2Fixture",
+    "game_test_task": "runAe2GameTestServer",
     "gradle_tasks": [
-      "compileCompatAe2Java",
+      "build",
       "runGameTestServer",
+      "runRecipeAddonGameTestServer",
       "runAe2GameTestServer",
       "runCompatibilityMatrixGameTestServer"
     ]

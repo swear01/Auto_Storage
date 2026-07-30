@@ -363,6 +363,57 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "accepted family.*station"):
             self.compat_kit.validate_contract(contract, require_complete=False)
 
+    def test_contract_validation_rejects_malformed_nested_semantics(self):
+        mutations = (
+            ("station", "invalid", "station must be an object"),
+            ("inputs", "invalid", "inputs must be a list"),
+            (
+                "outputs",
+                [{"role": "primary", "resource_kind": "item", "amount": 0}],
+                "amount must be positive",
+            ),
+            (
+                "costs",
+                [{"resource_kind": "fuel", "amount": 1, "unknown": True}],
+                "unknown keys",
+            ),
+            (
+                "inputs",
+                [
+                    {
+                        "role": "consume",
+                        "resource_kind": "item",
+                        "selector": "recipe.input",
+                    }
+                ],
+                "requires role, resource_kind, and amount",
+            ),
+            (
+                "costs",
+                [
+                    {
+                        "resource_kind": "fuel",
+                        "selector": "recipe.fuel",
+                    }
+                ],
+                "requires resource_kind and amount",
+            ),
+        )
+        for field, value, expected in mutations:
+            with self.subTest(field=field):
+                contract = self.accepted_contract()
+                accepted = next(
+                    family
+                    for family in contract["families"]
+                    if family["status"] == "accepted"
+                )
+                accepted[field] = value
+                with self.assertRaisesRegex(ValueError, expected):
+                    self.compat_kit.validate_contract(
+                        contract,
+                        require_complete=True,
+                    )
+
     def test_diff_reports_only_changed_evidence_and_contract_impact(self):
         old = self.compat_kit.scan_jar(
             self.jar,
@@ -402,6 +453,9 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         contract, _ = self.compat_kit.decide_audit(audit)
         contract["target"]["dependency"] = "com.example:samplemod:1.2.3"
+        contract["target"]["repositories"] = [
+            "https://repo.example.com/releases"
+        ]
         for family in contract["families"]:
             if family["class"] == "samplemod.recipe.ChanceRecipe":
                 family["status"] = "rejected"
@@ -449,11 +503,22 @@ class CompatKitAuditTests(unittest.TestCase):
         contract["verification"] = {
             "fixture": "samplemodFixture",
             "expected_game_tests": 1,
+            "game_test_task": "runSamplemodGameTestServer",
             "gradle_tasks": [
                 "compileCompatSamplemodJava",
                 "runSamplemodGameTestServer",
             ],
             "checks": list(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            "evidence": {
+                check: [
+                    {
+                        "task": "runSamplemodGameTestServer",
+                        "source": "**/SamplemodIntegrationGameTests.java",
+                        "marker": "compat_kit_scaffold_remains_red",
+                    }
+                ]
+                for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS
+            },
         }
         self.compat_kit.validate_contract(contract, require_complete=True)
         return contract
@@ -550,6 +615,10 @@ class CompatKitAuditTests(unittest.TestCase):
             build,
         )
         self.assertIn('runtimeOnly("com.example:samplemod:1.2.3")', build)
+        self.assertIn(
+            'url = uri("https://repo.example.com/releases")',
+            build,
+        )
         self.assertIn("gameTestServer", build)
         self.assertNotIn("src/main", build)
         self.assertEqual(1, entrypoint.count("AutoStorageAddon.register("))
@@ -597,8 +666,10 @@ class CompatKitAuditTests(unittest.TestCase):
             {
                 "fixture",
                 "expected_game_tests",
+                "game_test_task",
                 "gradle_tasks",
                 "checks",
+                "evidence",
             },
             set(verification_schema["required"]),
         )
@@ -656,6 +727,11 @@ class CompatKitAuditTests(unittest.TestCase):
         manifest.write_text(
             json.dumps(manifest_data, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         )
+        stale_build_source = output_root / "build/generated/StaleScaffold.java"
+        stale_build_source.parent.mkdir(parents=True)
+        stale_build_source.write_text(
+            'class StaleScaffold { String value = "compat-kit scaffold is intentionally RED"; }\n'
+        )
         commands = []
         world = output_root / "run/world"
         world.mkdir(parents=True)
@@ -666,7 +742,12 @@ class CompatKitAuditTests(unittest.TestCase):
             commands.append((command, cwd))
             world.mkdir(parents=True)
             (world / "sentinel").write_text("stale")
-            return subprocess.CompletedProcess(command, 0, "green\n", "")
+            output = (
+                "All 1 required tests passed :)\n"
+                if command[1] == "runSamplemodGameTestServer"
+                else "green\n"
+            )
+            return subprocess.CompletedProcess(command, 0, output, "")
 
         report = self.compat_kit.verify_contract(
             contract,
@@ -686,6 +767,48 @@ class CompatKitAuditTests(unittest.TestCase):
         ])
         self.assertTrue(all(command[0][0] == "./gradlew" for command in commands))
         self.assertTrue(all(command[1] == output_root for command in commands))
+        self.assertTrue(all(check["evidence"] for check in report["checks"]))
+
+    def test_verify_rejects_missing_check_evidence_or_wrong_gametest_count(self):
+        contract = self.accepted_contract()
+        contract["verification"]["evidence"].pop("checked_overflow_atomic")
+        with self.assertRaisesRegex(ValueError, "verification evidence keys"):
+            self.compat_kit.validate_contract(contract, require_complete=True)
+
+        contract = self.accepted_contract()
+        output_root = self.root / "bundled"
+        self.compat_kit.scaffold_bundled(contract, output_root)
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "expected 1 GameTests"):
+            self.compat_kit.verify_contract(
+                contract,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 2 required tests passed :)\n", ""
+                ),
+            )
 
     def test_verify_fails_closed_on_red_scaffold_contract_drift_or_command_failure(self):
         contract = self.accepted_contract()
@@ -795,10 +918,12 @@ class CompatKitAuditTests(unittest.TestCase):
             commands.append(command)
             if command[1] == "build":
                 self.assertTrue(world.exists())
+                output_text = "green\n"
             else:
                 self.assertEqual("runGameTestServer", command[1])
                 self.assertFalse(world.exists())
-            return subprocess.CompletedProcess(command, 0, "green\n", "")
+                output_text = "All 1 required tests passed :)\n"
+            return subprocess.CompletedProcess(command, 0, output_text, "")
 
         report = self.compat_kit.verify_contract(
             contract,
@@ -842,6 +967,23 @@ class CompatKitAuditTests(unittest.TestCase):
             self.assertTrue(
                 all(info.date_time == (1980, 1, 1, 0, 0, 0) for info in archive.infolist())
             )
+            archive.extractall(self.root / "extracted")
+
+        extracted_module_path = (
+            self.root
+            / "extracted/auto-storage-compat-kit/compat_kit.py"
+        )
+        spec = importlib.util.spec_from_file_location(
+            "extracted_auto_storage_compat_kit",
+            extracted_module_path,
+        )
+        extracted_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(extracted_module)
+        extracted_module.scaffold_addon(
+            self.accepted_contract(),
+            self.root / "extracted-addon",
+        )
+        self.assertTrue((self.root / "extracted-addon/gradlew").is_file())
 
 
 if __name__ == "__main__":

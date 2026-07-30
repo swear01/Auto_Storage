@@ -107,9 +107,17 @@ An accepted family records:
 4. every primary and secondary output with exact typed units;
 5. station-work and item/fluid/energy/chemical/addon-resource costs;
 6. deterministic bounds and source/class/method evidence;
-7. fixture, expected GameTest count, Gradle gates, and required checks.
+7. target Maven repositories as explicit HTTPS URLs;
+8. fixture, exact GameTest count, authoritative GameTest task, Gradle gates,
+   and every required check mapped to `{task, source, marker}` evidence.
 
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
+
+Repository declarations are build inputs, not discovery hints. A target
+published through Modrinth Maven, Curse Maven, or its own Maven must list the
+required repository in `target.repositories`; an empty list means Maven
+Central is sufficient. Generated addons copy only these reviewed repositories
+and never guess a repository from the dependency coordinate.
 
 ### 4. Scaffold a RED integration
 
@@ -135,7 +143,8 @@ run task, and expected test gate from that descriptor; no central compatibility
 switch is added.
 
 External output is an ordinary NeoForge project with the Gradle wrapper,
-compile-only Auto Storage API dependency, target dependency, one-call
+compile-only Auto Storage API dependency, reviewed target repositories and
+target dependency, one-call
 `AutoStorageAddon.register(...)`, dependency metadata, a RED present-target
 GameTest, and reusable GitHub Actions workflow. It cannot compile against Auto
 Storage implementation classes.
@@ -167,13 +176,19 @@ tools/compat-kit/compat-kit verify \
 ```
 
 For an external addon, use `--addon <directory>`; it runs both `build` and the
-fresh-world `runGameTestServer` gate. Verification rejects an
-unresolved contract, contract/manifest mismatch, remaining RED marker, missing
-GameTests, forbidden implementation links, or any non-zero command. The report
-records exact commands, exit codes, output hashes, checks, tool version, target,
-and manifest hash. Bundled verification runs every declared Gradle task as a
-separate process and removes only `run/world` before each task so stale
-GameTest state cannot leak between fixtures.
+fresh-world `runGameTestServer` gate. Verification rejects an unresolved
+contract, contract/manifest mismatch, remaining RED marker, forbidden
+implementation links, missing evidence source/marker, a source annotation
+count different from `expected_game_tests`, GameTest output that does not
+report that exact passing count, an undeclared evidence task, or any non-zero
+command. A check is marked passed only when all of its declared source markers
+exist and the associated Gradle task succeeds. The report records those
+per-check evidence links, exact commands, exit codes, output hashes, tool
+version, target, and manifest hash. Bundled verification runs every declared
+Gradle task as a separate process and removes only `run/world` before each task
+so stale GameTest state cannot leak between fixtures. RED and forbidden-link
+scans are scoped to `src/`; ignored `build/` outputs and previously extracted
+scaffolds cannot poison a later verification.
 
 ### 7. Review an upstream update
 
@@ -203,6 +218,9 @@ example, README, and license.
 it beside API, sources, and Javadocs artifacts.
 
 Archive member order, timestamps, permissions, and bytes are reproducible.
+The extracted archive is also self-contained: `scaffold --addon` resolves its
+Gradle wrapper template beside the extracted CLI instead of requiring an Auto
+Storage source checkout.
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_compat_kit
