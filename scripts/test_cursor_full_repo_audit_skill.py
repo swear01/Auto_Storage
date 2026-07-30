@@ -97,9 +97,18 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
     def test_github_pr_bot_gate_is_distinct_from_local_and_full_repo_review(self):
         agents = (ROOT / "AGENTS.md").read_text()
         notes = (ROOT / "docs/notes.md").read_text()
-        combined = "\n".join((agents, notes))
         for required in (
             "GitHub-triggered PR review",
+            "chatgpt-codex-connector[bot]",
+            "cursor[bot]",
+            "local CLI",
+            "do not satisfy",
+            "consumer Gemini Code Assist",
+            "sunset",
+        ):
+            self.assertIn(required, agents)
+        for required in (
+            "GitHub-triggered PR review gate",
             "chatgpt-codex-connector[bot]",
             "cursor[bot]",
             "local CLI",
@@ -107,8 +116,16 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
             "consumer Gemini Code Assist",
             "sunset",
         ):
-            self.assertIn(required, combined)
+            self.assertIn(required, notes)
         self.assertIn("not a PR diff review", self.skill_text())
+
+        roadmap = (ROOT / "docs/roadmap.md").read_text()
+        self.assertIn("GitHub #32，complete / merged", roadmap)
+        self.assertNotIn("GitHub #32，feature complete / main pending", roadmap)
+
+        releasing = (ROOT / "docs/releasing.md").read_text()
+        self.assertIn("GitHub-triggered bot review evidence", releasing)
+        self.assertIn("PR #36", releasing)
 
 
 if __name__ == "__main__":

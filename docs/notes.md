@@ -133,7 +133,9 @@ silent fallback。consumer Gemini Code Assist 的 GitHub reviewer 已
 2026-07-30 remediation evidence：Codex dashboard 的
 `swear01/Auto_Storage`目前是`Review all PRs`、`On every push`與exhaustive
 enabled；review-only [PR #36](https://github.com/swear01/Auto_Storage/pull/36)
-讓`chatgpt-codex-connector[bot]`精確審查原PR #35的`0d26517a88`並回覆
+明確以`review/pr35-base`的`297b7a2b74`為base、`review/pr35-head`的
+`0d26517a88`為head，讓`chatgpt-codex-connector[bot]`精確審查原PR #35的
+兩個SDK commits並回覆
 `Didn't find any major issues`。Cursor dashboard同時顯示此repo enabled，但
 PR #36的verbose request
 `serverGenReqId_c4c2d4b9-c5f5-496b-9a71-62c5d96183e2`與新開的PR #37都由

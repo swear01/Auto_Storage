@@ -110,7 +110,13 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_github_workflows
 ```
 
 Before tagging, require a clean `main`, green CI, the version-specific visual
-verdict, and `mod_version` equal to the intended tag without the leading `v`.
+verdict, GitHub-triggered bot review evidence for every merged release PR, and
+`mod_version` equal to the intended tag without the leading `v`. Local CLI
+summaries and manual full-repository audits are not PR review evidence. For the
+0.3.0 SDK work merged by PR #35, the retrospective PR #36 must retain its exact
+`297b7a2b74..0d26517a88` base/head evidence and completed Codex result; tagging
+remains blocked while Cursor Bugbot still reports its upstream repository-routing
+failure unless the user explicitly changes that gate.
 The matching `docs/release-notes/<mod_version>.md` file is mandatory; the
 workflow prepends it to generated commit history and fails before publishing if
 it is missing. Breaking and migration warnings belong in that versioned file so
