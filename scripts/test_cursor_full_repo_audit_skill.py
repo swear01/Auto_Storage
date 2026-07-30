@@ -98,17 +98,18 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
         agents = (ROOT / "AGENTS.md").read_text()
         notes = (ROOT / "docs/notes.md").read_text()
         for required in (
+            "github-pr-review-loop",
             "GitHub-triggered PR review",
-            "chatgpt-codex-connector[bot]",
-            "cursor[bot]",
-            "local CLI",
+            "local agent review",
             "do not satisfy",
             "consumer Gemini Code Assist",
             "sunset",
         ):
             self.assertIn(required, agents)
         for required in (
+            "github-pr-review-loop",
             "GitHub-triggered PR review gate",
+            "exactly one available",
             "chatgpt-codex-connector[bot]",
             "cursor[bot]",
             "local CLI",
@@ -129,7 +130,9 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
 
         releasing = (ROOT / "docs/releasing.md").read_text()
         self.assertIn("GitHub-triggered bot review evidence", releasing)
+        self.assertIn("selected bot", releasing)
         self.assertIn("PR #36", releasing)
+        self.assertNotIn("tagging remains blocked while Cursor", releasing)
 
 
 if __name__ == "__main__":

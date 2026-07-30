@@ -119,20 +119,21 @@ GitHub public repo:https://github.com/swear01/Auto_Storage 。目前版本以 `g
 
 ### GitHub-triggered PR review gate
 
-PR diff review 必須由 GitHub 上實際觸發並留下可檢查的 bot evidence。完成條件是
-`chatgpt-codex-connector[bot]` 的 completed review/comment，以及啟用時
-`cursor[bot]` 的 Bugbot result；觸發文字分別為 `@codex review` 與
-`@cursor review`。本機 Antigravity、Gemini CLI、Cursor CLI 或其他 local CLI
-輸出、手動貼上的摘要、只有 eyes reaction 尚未完成的工作，以及下方
-full-repo audit issue 都 **does not satisfy** 此 gate。Bot 回報 disabled、usage
-limit 或其他錯誤時必須保留 GitHub URL 與原文並停止合併，不能以本機 review
-silent fallback。consumer Gemini Code Assist 的 GitHub reviewer 已
+PR diff review 使用共享`github-pr-review-loop` Skill。每一輪只選 exactly one available
+GitHub bot，依Codex、Cursor Bugbot、Gemini的順序判定；同一head不可同時觸發多個
+provider。選定bot必須留下明示涵蓋latest head SHA的completed review/comment/check；
+Bot回報disabled、usage limit、auth failure或其他availability error時保存GitHub URL
+與原文，再依Skill明示切到下一個provider，不能改用local review silent fallback。
+參與provider的automatic review必須先停用，否則無法證明exactly-one selection。
+本機Antigravity、Gemini CLI、Cursor CLI或其他local CLI輸出、手動貼上的摘要、只有
+eyes reaction尚未完成的工作，以及下方full-repo audit issue都 **does not satisfy**
+此gate。consumer Gemini Code Assist的GitHub reviewer已
 [sunset](https://developers.google.com/gemini-code-assist/docs/deprecations/consumer-code-review)，
 所以其停止服務訊息不是 completed review，也不可再列入 reviewer 清單。
 
 2026-07-30 remediation evidence：Codex dashboard 的
-`swear01/Auto_Storage`目前是`Review all PRs`、`On every push`與exhaustive
-enabled；review-only [PR #36](https://github.com/swear01/Auto_Storage/pull/36)
+personal Auto review目前為Off，`swear01/Auto_Storage`為`Follow personal`，因此後續
+只由Skill手動觸發。review-only [PR #36](https://github.com/swear01/Auto_Storage/pull/36)
 明確以`review/pr35-base`的`297b7a2b74`為base、`review/pr35-head`的
 `0d26517a88`為head，讓`chatgpt-codex-connector[bot]`精確審查原PR #35的
 兩個SDK commits並回覆
@@ -141,7 +142,9 @@ PR #36的verbose request
 `serverGenReqId_c4c2d4b9-c5f5-496b-9a71-62c5d96183e2`與新開的PR #37都由
 `cursor[bot]`回覆`Bugbot is disabled for this repository`；這符合Cursor已知的
 [GitHub installation routing問題](https://forum.cursor.com/t/bugbot-reports-disabled-for-this-repository-despite-being-enabled-in-dashboard/154426)，
-因此目前是有GitHub原始證據的upstream block，不得改用local Cursor結果冒充。
+因此Cursor在該輪是有GitHub原始證據的unavailable provider，不得冒充completed
+review；Codex已是Skill順序中的首個available bot且exact diff clean，所以PR #35的
+retrospective review loop已完成。
 
 ### Cursor Cloud full-repo audit
 
