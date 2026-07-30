@@ -73,10 +73,12 @@ representative CI fixture versions.
 Compat Kit contracts list every target Maven repository as an explicit HTTPS
 URL. The generated addon copies those repositories into `build.gradle`; it
 does not infer Modrinth, Curse Maven, or an upstream repository from a
-dependency coordinate. Keep this list minimal and reviewable. The generated
+dependency coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
+because it can change which repository serves a coordinate. The generated
 build also copies every explicit `target.runtime_dependencies` entry, so
 required libraries such as GuideME do not depend on transitive metadata or an
-undocumented post-scaffold edit. The generated build resolves the reviewed
+undocumented post-scaffold edit. Target and explicit runtime dependencies are
+non-transitive, so every required companion must be listed. The generated build resolves the reviewed
 target dependency separately and checks its exact
 jar SHA against `source_audit_sha256` during both `build` and
 `runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.

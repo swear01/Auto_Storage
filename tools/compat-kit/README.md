@@ -42,7 +42,8 @@ private bytecode is inspected for hidden randomness, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded output,
 and capability mutations requiring simulation, but is never stored in the
 audit. Named nested classes are included and mapped to their top-level source;
-anonymous/local classes and class files carrying `ACC_SYNTHETIC` are excluded.
+anonymous/local classes, class files carrying `ACC_SYNTHETIC`, and
+`META-INF/versions/` aliases are excluded; the root binary name is scanned once.
 Chance, randomness, generic-ingredient, and capability-mutation method calls
 accept the descriptor syntax emitted by `javap -c -p`.
 
@@ -64,7 +65,7 @@ Use `scaffold --bundled contract.json --audit audit.json` and
 Storage repository. Bundled verification runs each declared Gradle task
 separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing
-count. Bundled descriptors preserve reviewed HTTPS repositories, and fixture
+count. Bundled descriptors preserve reviewed HTTPS repository order, and fixture
 names must be Java-safe identifiers ending in `Fixture`. The published archive
 includes its own Gradle wrapper template, so an extracted copy can scaffold an
 addon without an Auto Storage checkout.

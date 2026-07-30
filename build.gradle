@@ -90,7 +90,7 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             },
             repositories: descriptorRepositories.collect {
                 it.toString()
-            }.sort(),
+            },
             runtimeDependencies: (descriptor.runtimeDependencies ?: []).collect {
                 expandCompatDependency(it.toString())
             },
@@ -553,7 +553,7 @@ repositories {
         name = "C4"
         url = "https://maven.theillusivec4.top/"
     }
-    compatModules.collectMany { it.repositories }.toSet().sort().each { repository ->
+    compatModules.collectMany { it.repositories }.unique(false).each { repository ->
         maven {
             url = uri(repository)
         }

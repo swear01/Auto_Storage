@@ -72,6 +72,14 @@ class ModularCompatSdkTests(unittest.TestCase):
             build,
         )
         self.assertIn("compatModules.collectMany { it.repositories }", build)
+        self.assertIn(
+            "compatModules.collectMany { it.repositories }.unique(false).each",
+            build,
+        )
+        self.assertNotRegex(
+            build,
+            r"(?s)repositories:\s*descriptorRepositories\.collect\s*\{.*?\}\.sort\(\)",
+        )
         self.assertIn("url = uri(repository)", build)
         self.assertIn("verifyCompatArtifact", build)
         self.assertIn("MessageDigest.getInstance(\"SHA-256\")", build)

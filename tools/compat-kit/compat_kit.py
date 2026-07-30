@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 5
+SCAN_CACHE_VERSION = 6
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -266,7 +266,11 @@ def _is_inspectable_class(
     archive: zipfile.ZipFile,
     entry_name: str,
 ) -> bool:
-    if not entry_name.endswith(".class") or entry_name.endswith("module-info.class"):
+    if (
+        entry_name.startswith("META-INF/versions/")
+        or not entry_name.endswith(".class")
+        or entry_name.endswith("module-info.class")
+    ):
         return False
     nested_segments = _class_name(entry_name).split("$")[1:]
     named = all(
@@ -582,9 +586,7 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
         risks = sorted(set(risks_by_class.get(class_name, [])))
         family_id = _family_id(class_name)
         if family_id in duplicate_ids:
-            family_id = "_".join(
-                _family_id(segment) for segment in class_name.split(".")
-            )
+            family_id = f"{family_id}_{class_name.encode('utf-8').hex()}"
         family = {
             "id": family_id,
             "class": class_name,
@@ -1001,6 +1003,9 @@ def _java_segment(identifier: str) -> str:
 def _fixture_mods_toml(target: dict) -> str:
     mod_id = target["mod_id"]
     fixture_id = f"auto_storage_{mod_id}_fixture"
+    description = _toml_basic_string(
+        f"Compat Kit generated RED fixture for {target['display_name']}."
+    )
     return f"""modLoader="javafml"
 loaderVersion="[4,)"
 license="MIT"
@@ -1009,7 +1014,7 @@ license="MIT"
 modId="{fixture_id}"
 version="1.0.0"
 displayName="Auto Storage {_pascal(mod_id)} Fixture"
-description='''Compat Kit generated RED fixture for {target['display_name']}.'''
+description={description}
 
 [[dependencies.{fixture_id}]]
 modId="neoforge"
@@ -1254,7 +1259,7 @@ mod_group_id={package}
         for repository in target["repositories"]
     )
     runtime_dependency_lines = "".join(
-        f'    runtimeOnly("{dependency}")\n'
+        f'    runtimeOnly("{dependency}") {{ transitive = false }}\n'
         for dependency in target["runtime_dependencies"]
     )
     build = f"""plugins {{
@@ -1311,7 +1316,7 @@ dependencies {{
     runtimeOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}")
     runtimeOnly("vazkii.patchouli:Patchouli:${{patchouli_version}}")
     compileOnly("{target['dependency']}")
-    runtimeOnly("{target['dependency']}")
+    runtimeOnly("{target['dependency']}") {{ transitive = false }}
 {runtime_dependency_lines}
     compatKitTargetArtifact("{target['dependency']}")
 }}

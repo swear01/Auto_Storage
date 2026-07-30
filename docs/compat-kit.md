@@ -81,6 +81,8 @@ outputs, and capability mutations requiring simulation are persisted. Without
 `--source`, scans are cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
+Multi-release `META-INF/versions/` aliases are not treated as binary class names;
+the root binary name is scanned once.
 Chance, randomness, generic-ingredient, and capability-mutation detection read
 both source-like method signatures and the `methodName:(descriptor)` form
 emitted by `javap -c -p`.
@@ -128,11 +130,14 @@ Commit the reviewed result as `compat/contracts/<mod-id>.json`.
 Repository declarations are build inputs, not discovery hints. A target
 published through Modrinth Maven, Curse Maven, or its own Maven must list the
 required repository in `target.repositories`; an empty list means Maven
-Central is sufficient. Generated addons copy only these reviewed repositories
-and never guess a repository from the dependency coordinate. Required
+Central is sufficient. Generated addons copy only these reviewed repositories in declared order
+and never guess, sort, or otherwise change repository precedence from the
+dependency coordinate. Required
 target-side runtime artifacts belong in `target.runtime_dependencies`; bundled
 descriptors and external addon builds copy the exact reviewed list instead of
-depending on transitive metadata or hand edits.
+depending on transitive metadata or hand edits. Target and explicit runtime
+dependencies are non-transitive; every required companion must therefore appear
+in the contract.
 
 ### 4. Scaffold a RED integration
 
@@ -171,9 +176,10 @@ GameTest, required Patchouli runtime, and reusable GitHub Actions workflow. It
 cannot compile against Auto Storage implementation classes. The separate
 source audit is copied to `compat/audit.json`; its `build` and
 `runGameTestServer` gates also resolve exactly one target jar and verify
-`source_audit_sha256`. Target display names are serialized as TOML basic
-strings, so quotes, backslashes, control characters, and newlines cannot break
-the generated metadata.
+`source_audit_sha256`. Every target-derived metadata value, including addon display names and bundled
+fixture descriptions, is serialized as a TOML basic string, so quotes,
+backslashes, control characters, newlines, and multiline-literal delimiters
+cannot break generated metadata.
 
 The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the

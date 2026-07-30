@@ -402,6 +402,49 @@ class CompatKitAuditTests(unittest.TestCase):
             audit["source"]["files"],
         )
 
+    def test_scan_ignores_multi_release_archive_paths_and_scans_root_class_once(self):
+        multi_release_jar = self.root / "samplemod-multi-release.jar"
+        write_fixture_jar(multi_release_jar)
+        with zipfile.ZipFile(multi_release_jar, "a") as archive:
+            archive.writestr(
+                "samplemod/recipe/VersionedRecipe.class",
+                b"root recipe",
+            )
+            archive.writestr(
+                "META-INF/versions/21/samplemod/recipe/VersionedRecipe.class",
+                b"versioned recipe",
+            )
+        calls = []
+
+        def multi_release_signatures(class_name: str) -> str:
+            calls.append(class_name)
+            if class_name == "samplemod.recipe.VersionedRecipe":
+                return (
+                    "public final class samplemod.recipe.VersionedRecipe "
+                    "implements net.minecraft.world.item.crafting.Recipe { }"
+                )
+            return self.signatures(class_name)
+
+        audit = self.compat_kit.scan_jar(
+            multi_release_jar,
+            signature_reader=multi_release_signatures,
+            risk_reader=lambda class_name: (
+                "public final class samplemod.recipe.VersionedRecipe { }"
+                if class_name == "samplemod.recipe.VersionedRecipe"
+                else self.signatures(class_name)
+            ),
+        )
+
+        self.assertEqual(1, calls.count("samplemod.recipe.VersionedRecipe"))
+        self.assertNotIn("META-INF.versions", calls)
+        self.assertIn(
+            "samplemod.recipe.VersionedRecipe",
+            {
+                candidate["class"]
+                for candidate in audit["candidates"]["recipe_classes"]
+            },
+        )
+
     def test_scan_rejects_malformed_or_ambiguous_mod_metadata(self):
         malformed = self.root / "malformed.jar"
         with zipfile.ZipFile(malformed, "w") as archive:
@@ -445,21 +488,32 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unresolved"):
             self.compat_kit.validate_contract(contract, require_complete=True)
 
-    def test_decide_disambiguates_duplicate_simple_recipe_class_names(self):
+    def test_decide_disambiguates_normalization_colliding_recipe_class_names(self):
         audit = self.compat_kit.scan_jar(
             self.jar,
             signature_reader=self.signatures,
         )
-        duplicate = dict(audit["candidates"]["recipe_classes"][0])
-        duplicate["class"] = "samplemod.legacy.ChanceRecipe"
-        audit["candidates"]["recipe_classes"].append(duplicate)
+        prototype = dict(audit["candidates"]["recipe_classes"][0])
+        for class_name in ("samplemod.a_b.Recipe", "samplemod.a.b.Recipe"):
+            duplicate = dict(prototype)
+            duplicate["class"] = class_name
+            audit["candidates"]["recipe_classes"].append(duplicate)
 
         contract, _ = self.compat_kit.decide_audit(audit)
 
         ids = [family["id"] for family in contract["families"]]
         self.assertEqual(len(ids), len(set(ids)))
-        self.assertIn("samplemod_recipe_chance_recipe", ids)
-        self.assertIn("samplemod_legacy_chance_recipe", ids)
+        colliding_ids = {
+            family["class"]: family["id"]
+            for family in contract["families"]
+            if family["class"] in {"samplemod.a_b.Recipe", "samplemod.a.b.Recipe"}
+        }
+        self.assertNotEqual(
+            colliding_ids["samplemod.a_b.Recipe"],
+            colliding_ids["samplemod.a.b.Recipe"],
+        )
+        for family_id in colliding_ids.values():
+            self.assertRegex(family_id, r"^recipe_[0-9a-f]+$")
 
     def test_contract_validation_rejects_unknown_keys_and_incomplete_acceptance(self):
         audit = self.compat_kit.scan_jar(
@@ -846,7 +900,11 @@ class CompatKitAuditTests(unittest.TestCase):
             'compileOnly("com.swear.autostorage:auto_storage:${auto_storage_version}:api")',
             build,
         )
-        self.assertIn('runtimeOnly("com.example:samplemod:1.2.3")', build)
+        self.assertIn(
+            'runtimeOnly("com.example:samplemod:1.2.3") '
+            "{ transitive = false }",
+            build,
+        )
         self.assertIn(
             'runtimeOnly("vazkii.patchouli:Patchouli:${patchouli_version}")',
             build,
@@ -890,7 +948,8 @@ class CompatKitAuditTests(unittest.TestCase):
 
         build = (output / "build.gradle").read_text()
         self.assertIn(
-            'runtimeOnly("com.example:samplemod-runtime:4.5.6")',
+            'runtimeOnly("com.example:samplemod-runtime:4.5.6") '
+            "{ transitive = false }",
             build,
         )
 
@@ -940,6 +999,31 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             display_name + " Auto Storage Integration",
             metadata["mods"][0]["displayName"],
+        )
+
+    def test_bundled_scaffold_escapes_target_description_as_toml(self):
+        contract = self.accepted_contract()
+        audit = self.source_audit()
+        display_name = "Sample ''' Machines\\Control\nSecond Line"
+        contract["target"]["display_name"] = display_name
+        audit["target"]["display_name"] = display_name
+        output = self.root / "quoted-bundled"
+
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output,
+            source_audit=audit,
+        )
+
+        metadata = tomllib.loads(
+            (
+                output
+                / "src/samplemodFixture/resources/META-INF/neoforge.mods.toml"
+            ).read_text()
+        )
+        self.assertEqual(
+            f"Compat Kit generated RED fixture for {display_name}.",
+            metadata["mods"][0]["description"],
         )
 
     def test_external_scaffold_rejects_bundled_only_verification_tasks(self):
