@@ -22,8 +22,15 @@ The update-path dogfood compares that audit with official Maven Central
 `19.2.16` (SHA-256
 `a625ecf1a47e0674e05099652ee222c227de9315b9731f4052616ace22aeccb9`).
 The compact delta reports no recipe/resource/station signature or risk changes
-and `contract_affected=false`. This validates the delta workflow only; 19.2.16
-is not a second CI fixture or a compatibility promise.
+but `contract_affected=true` because the target jar bytes differ. This validates
+the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
+compatibility promise.
+
+Scanner format v4 also audits named nested classes while excluding anonymous,
+local, and synthetic classes. The reviewed contract explicitly rejects all 25
+new nested recipe-name candidates as UI, datagen, codec, result, condition, or
+value helpers; `InscriberRecipe$Ingredients` remains owned by the accepted
+parent `InscriberRecipe` contract rather than becoming another family.
 
 ## Accepted family
 

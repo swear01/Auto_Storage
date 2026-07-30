@@ -292,6 +292,66 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertTrue(calls)
         self.assertEqual(artifact_sha, audit["artifact"]["sha256"])
 
+    def test_scan_keeps_named_nested_recipe_classes_but_excludes_synthetic_classes(self):
+        nested_jar = self.root / "samplemod-nested.jar"
+        write_fixture_jar(nested_jar)
+        with zipfile.ZipFile(nested_jar, "a") as archive:
+            archive.writestr(
+                "samplemod/recipe/CrusherRecipes$PolishingRecipe.class",
+                b"named nested recipe",
+            )
+            archive.writestr(
+                "samplemod/recipe/CrusherRecipes$1.class",
+                b"anonymous recipe",
+            )
+            archive.writestr(
+                "samplemod/recipe/CrusherRecipes$1LocalRecipe.class",
+                b"local recipe",
+            )
+        source = self.root / "source"
+        source_file = (
+            source
+            / "src/main/java/samplemod/recipe/CrusherRecipes.java"
+        )
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(
+            "package samplemod.recipe;\n"
+            "final class CrusherRecipes { static final class PolishingRecipe {} }\n"
+        )
+
+        def nested_signatures(class_name: str) -> str:
+            if class_name == "samplemod.recipe.CrusherRecipes$PolishingRecipe":
+                return (
+                    "public final class "
+                    "samplemod.recipe.CrusherRecipes$PolishingRecipe "
+                    "implements net.minecraft.world.item.crafting.Recipe { }"
+                )
+            return self.signatures(class_name)
+
+        audit = self.compat_kit.scan_jar(
+            nested_jar,
+            source=source,
+            signature_reader=nested_signatures,
+        )
+
+        recipe_classes = [
+            candidate["class"]
+            for candidate in audit["candidates"]["recipe_classes"]
+        ]
+        self.assertIn(
+            "samplemod.recipe.CrusherRecipes$PolishingRecipe",
+            recipe_classes,
+        )
+        self.assertNotIn("samplemod.recipe.CrusherRecipes$1", recipe_classes)
+        self.assertNotIn(
+            "samplemod.recipe.CrusherRecipes$1LocalRecipe",
+            recipe_classes,
+        )
+        self.assertEqual(
+            ["src/main/java/samplemod/recipe/CrusherRecipes.java"],
+            audit["source"]["files"],
+        )
+
     def test_scan_rejects_malformed_or_ambiguous_mod_metadata(self):
         malformed = self.root / "malformed.jar"
         with zipfile.ZipFile(malformed, "w") as archive:
@@ -446,6 +506,32 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertTrue(delta["contract_affected"])
         self.assertNotIn("samplemod.Unrelated", json.dumps(delta))
 
+    def test_diff_requires_contract_review_when_artifact_bytes_change(self):
+        old = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        new_jar = self.root / "samplemod-implementation-change.jar"
+        write_fixture_jar(new_jar, version="1.2.4")
+        new = self.compat_kit.scan_jar(
+            new_jar,
+            signature_reader=self.signatures,
+        )
+
+        delta = self.compat_kit.diff_audits(old, new)
+
+        self.assertTrue(delta["contract_affected"])
+        for bucket in (
+            "recipe_classes",
+            "resource_apis",
+            "station_classes",
+        ):
+            self.assertEqual(
+                {"added": [], "removed": [], "changed": []},
+                delta[bucket],
+            )
+        self.assertEqual({"added": [], "removed": []}, delta["risks"])
+
     def accepted_contract(self) -> dict:
         audit = self.compat_kit.scan_jar(
             self.jar,
@@ -523,6 +609,27 @@ class CompatKitAuditTests(unittest.TestCase):
         self.compat_kit.validate_contract(contract, require_complete=True)
         return contract
 
+    def addon_contract(self) -> dict:
+        contract = self.accepted_contract()
+        contract["verification"]["fixture"] = "main"
+        contract["verification"]["game_test_task"] = "runGameTestServer"
+        contract["verification"]["gradle_tasks"] = [
+            "build",
+            "runGameTestServer",
+        ]
+        contract["verification"]["evidence"] = {
+            check: [
+                {
+                    "task": "runGameTestServer",
+                    "source": "**/SamplemodIntegrationGameTests.java",
+                    "marker": "compat_kit_scaffold_remains_red",
+                }
+            ]
+            for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS
+        }
+        self.compat_kit.validate_contract(contract, require_complete=True)
+        return contract
+
     def test_bundled_scaffold_is_descriptor_owned_fail_closed_and_drift_checked(self):
         contract = self.accepted_contract()
         output_root = self.root / "bundled"
@@ -550,6 +657,17 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             ["com.example:samplemod:1.2.3"],
             descriptor["dependencies"],
+        )
+        self.assertEqual(
+            ["com.example:samplemod:1.2.3"],
+            descriptor["runtimeDependencies"],
+        )
+        self.assertEqual(
+            {
+                "dependency": "com.example:samplemod:1.2.3",
+                "sha256": contract["source_audit_sha256"],
+            },
+            descriptor["auditArtifact"],
         )
         self.assertEqual(1, descriptor["expectedTests"])
         module = (
@@ -582,7 +700,7 @@ class CompatKitAuditTests(unittest.TestCase):
             self.compat_kit.scaffold_bundled(contract, output_root)
 
     def test_external_scaffold_is_api_only_and_has_reusable_ci(self):
-        contract = self.accepted_contract()
+        contract = self.addon_contract()
         output = self.root / "samplemod-auto-storage"
 
         generated = self.compat_kit.scaffold_addon(contract, output)
@@ -615,6 +733,9 @@ class CompatKitAuditTests(unittest.TestCase):
             build,
         )
         self.assertIn('runtimeOnly("com.example:samplemod:1.2.3")', build)
+        self.assertIn("compatKitTargetArtifact", build)
+        self.assertIn("verifyCompatKitTargetArtifact", build)
+        self.assertIn(contract["source_audit_sha256"], build)
         self.assertIn(
             'url = uri("https://repo.example.com/releases")',
             build,
@@ -626,6 +747,16 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertIn("./gradlew runGameTestServer", workflow)
         self.assertIn("compat-kit verify", workflow)
         self.assertNotIn("implementation project", build)
+
+    def test_external_scaffold_rejects_bundled_only_verification_tasks(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "addon verification tasks must be build and runGameTestServer",
+        ):
+            self.compat_kit.scaffold_addon(
+                self.accepted_contract(),
+                self.root / "addon",
+            )
 
     def test_scaffold_rejects_unresolved_or_semantically_incomplete_contracts(self):
         audit = self.compat_kit.scan_jar(
@@ -683,6 +814,42 @@ class CompatKitAuditTests(unittest.TestCase):
             (schema_root / "compat-report.schema.json").read_text()
         )
         self.assertFalse(report_schema["properties"]["checks"]["items"]["additionalProperties"])
+
+    def test_committed_ae2_contract_covers_every_audited_recipe_candidate(self):
+        audit = json.loads(
+            (ROOT / "compat/audits/ae2/19.2.17.json").read_text()
+        )
+        contract = json.loads(
+            (ROOT / "compat/contracts/ae2.json").read_text()
+        )
+        descriptor = json.loads(
+            (ROOT / "src/compat/ae2/compat-module.json").read_text()
+        )
+
+        audited_recipe_classes = {
+            candidate["class"]
+            for candidate in audit["candidates"]["recipe_classes"]
+        }
+        self.assertIn(
+            "appeng.recipes.handlers.InscriberRecipe$Ingredients",
+            audited_recipe_classes,
+        )
+        self.assertEqual(
+            audited_recipe_classes,
+            {family["class"] for family in contract["families"]},
+        )
+        self.assertEqual(
+            audit["artifact"]["sha256"],
+            contract["source_audit_sha256"],
+        )
+        self.assertEqual(
+            {
+                "dependency": contract["target"]["dependency"],
+                "sha256": audit["artifact"]["sha256"],
+            },
+            descriptor["auditArtifact"],
+        )
+        self.compat_kit.validate_contract(contract, require_complete=True)
 
     def test_verify_runs_declared_commands_and_emits_complete_report(self):
         contract = self.accepted_contract()
@@ -823,6 +990,25 @@ class CompatKitAuditTests(unittest.TestCase):
                 ),
             )
 
+        descriptor = output_root / "src/compat/samplemod/compat-module.json"
+        descriptor.write_text(
+            descriptor.read_text().replace(
+                contract["source_audit_sha256"],
+                "0" * 64,
+            )
+        )
+        with self.assertRaisesRegex(
+            ValueError,
+            "generated verification file drift",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "", ""
+                ),
+            )
+
         adapter = (
             output_root
             / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
@@ -840,7 +1026,7 @@ class CompatKitAuditTests(unittest.TestCase):
             )
 
     def test_external_verify_rejects_implementation_links(self):
-        contract = self.accepted_contract()
+        contract = self.addon_contract()
         output = self.root / "addon"
         self.compat_kit.scaffold_addon(contract, output)
         adapter = (
@@ -884,7 +1070,7 @@ class CompatKitAuditTests(unittest.TestCase):
             )
 
     def test_external_verify_runs_build_and_fresh_gametest_world(self):
-        contract = self.accepted_contract()
+        contract = self.addon_contract()
         output = self.root / "addon"
         self.compat_kit.scaffold_addon(contract, output)
         adapter = (
@@ -980,7 +1166,7 @@ class CompatKitAuditTests(unittest.TestCase):
         extracted_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(extracted_module)
         extracted_module.scaffold_addon(
-            self.accepted_contract(),
+            self.addon_contract(),
             self.root / "extracted-addon",
         )
         self.assertTrue((self.root / "extracted-addon/gradlew").is_file())

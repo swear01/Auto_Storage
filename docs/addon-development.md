@@ -69,7 +69,15 @@ representative CI fixture versions.
 Compat Kit contracts list every target Maven repository as an explicit HTTPS
 URL. The generated addon copies those repositories into `build.gradle`; it
 does not infer Modrinth, Curse Maven, or an upstream repository from a
-dependency coordinate. Keep this list minimal and reviewable.
+dependency coordinate. Keep this list minimal and reviewable. The generated
+build resolves the reviewed target dependency separately and checks its exact
+jar SHA against `source_audit_sha256` during both `build` and
+`runGameTestServer`; a different artifact fails before compatibility evidence
+can pass.
+
+An independent-addon contract uses fixture `main`, declares exactly `build`
+and `runGameTestServer`, and maps every evidence record to one of those actual
+tasks. Bundled task names are not translated or treated as equivalent.
 
 ## Register through one facade
 

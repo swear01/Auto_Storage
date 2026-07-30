@@ -26,12 +26,20 @@
         "public_signature": "Compiled from \"Rectangle2dDeserializer.java\"\npublic final class appeng.client.gui.style.Rectangle2dDeserializer extends java.lang.Enum<appeng.client.gui.style.Rectangle2dDeserializer> implements com.google.gson.JsonDeserializer<net.minecraft.client.renderer.Rect2i> {\n  public static final appeng.client.gui.style.Rectangle2dDeserializer INSTANCE;\n  public static appeng.client.gui.style.Rectangle2dDeserializer[] values();\n  public static appeng.client.gui.style.Rectangle2dDeserializer valueOf(java.lang.String);\n  public net.minecraft.client.renderer.Rect2i deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext) throws com.google.gson.JsonParseException;\n  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext) throws com.google.gson.JsonParseException;\n}"
       },
       {
+        "class": "appeng.client.gui.style.ScreenStyle$StyleSerializer",
+        "public_signature": "Compiled from \"ScreenStyle.java\"\nclass appeng.client.gui.style.ScreenStyle$StyleSerializer implements com.google.gson.JsonSerializer<net.minecraft.network.chat.Style>, com.google.gson.JsonDeserializer<net.minecraft.network.chat.Style> {\n  public net.minecraft.network.chat.Style deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext) throws com.google.gson.JsonParseException;\n  public com.google.gson.JsonElement serialize(net.minecraft.network.chat.Style, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);\n  public com.google.gson.JsonElement serialize(java.lang.Object, java.lang.reflect.Type, com.google.gson.JsonSerializationContext);\n  public java.lang.Object deserialize(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext) throws com.google.gson.JsonParseException;\n}"
+      },
+      {
         "class": "appeng.client.guidebook.LytInscriberRecipe",
         "public_signature": "Compiled from \"LytInscriberRecipe.java\"\npublic class appeng.client.guidebook.LytInscriberRecipe extends guideme.document.block.LytBox {\n  public appeng.client.guidebook.LytInscriberRecipe(appeng.recipes.handlers.InscriberRecipe);\n  public void render(guideme.render.RenderContext);\n}"
       },
       {
         "class": "appeng.client.guidebook.RecipeTypeContributions",
         "public_signature": "Compiled from \"RecipeTypeContributions.java\"\npublic class appeng.client.guidebook.RecipeTypeContributions implements guideme.compiler.tags.RecipeTypeMappingSupplier {\n  public appeng.client.guidebook.RecipeTypeContributions();\n  public void collect(guideme.compiler.tags.RecipeTypeMappingSupplier$RecipeTypeMappings);\n}"
+      },
+      {
+        "class": "appeng.client.guidebook.RecipeTypeContributions$FluidIcon",
+        "public_signature": "Compiled from \"RecipeTypeContributions.java\"\nclass appeng.client.guidebook.RecipeTypeContributions$FluidIcon extends guideme.document.block.LytBlock {\n  public appeng.client.guidebook.RecipeTypeContributions$FluidIcon(net.minecraft.world.level.material.Fluid);\n  public void renderBatch(guideme.render.RenderContext, net.minecraft.client.renderer.MultiBufferSource);\n  public void render(guideme.render.RenderContext);\n}"
       },
       {
         "class": "appeng.core.network.serverbound.FillCraftingGridFromRecipePacket",
@@ -94,8 +102,44 @@
         "public_signature": "Compiled from \"UpgradeRecipes.java\"\npublic class appeng.datagen.providers.recipes.UpgradeRecipes extends appeng.datagen.providers.recipes.AE2RecipeProvider {\n  public appeng.datagen.providers.recipes.UpgradeRecipes(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public void buildRecipes(net.minecraft.data.recipes.RecipeOutput);\n  public java.lang.String getName();\n}"
       },
       {
+        "class": "appeng.datagen.providers.recipes.UpgradeRecipes$CellDisassemblyTier",
+        "public_signature": "Compiled from \"UpgradeRecipes.java\"\nfinal class appeng.datagen.providers.recipes.UpgradeRecipes$CellDisassemblyTier extends java.lang.Record {\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public appeng.core.definitions.ItemDefinition<?> cell();\n  public appeng.core.definitions.ItemDefinition<?> component();\n}"
+      },
+      {
+        "class": "appeng.datagen.providers.recipes.UpgradeRecipes$CellUpgradeTier",
+        "public_signature": "Compiled from \"UpgradeRecipes.java\"\nfinal class appeng.datagen.providers.recipes.UpgradeRecipes$CellUpgradeTier extends java.lang.Record {\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.lang.String suffix();\n  public appeng.core.definitions.ItemDefinition<?> cell();\n  public net.minecraft.world.level.ItemLike component();\n}"
+      },
+      {
+        "class": "appeng.datagen.providers.recipes.UpgradeRecipes$UnitTransformTier",
+        "public_signature": "Compiled from \"UpgradeRecipes.java\"\nfinal class appeng.datagen.providers.recipes.UpgradeRecipes$UnitTransformTier extends java.lang.Record {\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public appeng.core.definitions.BlockDefinition<?> baseBlock();\n  public appeng.core.definitions.ItemDefinition<?> upgradeItem();\n}"
+      },
+      {
         "class": "appeng.integration.modules.emi.AbstractRecipeHandler",
         "public_signature": "Compiled from \"AbstractRecipeHandler.java\"\nabstract class appeng.integration.modules.emi.AbstractRecipeHandler<T extends appeng.menu.AEBaseMenu> implements dev.emi.emi.api.recipe.handler.StandardRecipeHandler<T> {\n  public java.util.List<net.minecraft.world.inventory.Slot> getInputSources(T);\n  public java.util.List<net.minecraft.world.inventory.Slot> getCraftingSlots(T);\n  public net.minecraft.world.inventory.Slot getOutputSlot(T);\n  public dev.emi.emi.api.recipe.EmiPlayerInventory getInventory(net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<T>);\n  public boolean canCraft(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>);\n  public boolean supportsRecipe(dev.emi.emi.api.recipe.EmiRecipe);\n  public boolean craft(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>);\n  public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>);\n  public void render(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>, java.util.List<dev.emi.emi.api.widget.Widget>, net.minecraft.client.gui.GuiGraphics);\n  public net.minecraft.world.inventory.Slot getOutputSlot(net.minecraft.world.inventory.AbstractContainerMenu);\n  public java.util.List getCraftingSlots(net.minecraft.world.inventory.AbstractContainerMenu);\n  public java.util.List getInputSources(net.minecraft.world.inventory.AbstractContainerMenu);\n}"
+      },
+      {
+        "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result",
+        "public_signature": "Compiled from \"AbstractRecipeHandler.java\"\npublic abstract class appeng.integration.modules.emi.AbstractRecipeHandler$Result {\n}"
+      },
+      {
+        "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$EncodeWithCraftables",
+        "public_signature": "Compiled from \"AbstractRecipeHandler.java\"\nfinal class appeng.integration.modules.emi.AbstractRecipeHandler$Result$EncodeWithCraftables extends appeng.integration.modules.emi.AbstractRecipeHandler$Result {\n  public appeng.integration.modules.emi.AbstractRecipeHandler$Result$EncodeWithCraftables(java.util.Set<appeng.api.stacks.AEKey>);\n}"
+      },
+      {
+        "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$Error",
+        "public_signature": "Compiled from \"AbstractRecipeHandler.java\"\nfinal class appeng.integration.modules.emi.AbstractRecipeHandler$Result$Error extends appeng.integration.modules.emi.AbstractRecipeHandler$Result {\n  public appeng.integration.modules.emi.AbstractRecipeHandler$Result$Error(net.minecraft.network.chat.Component, java.util.Set<java.lang.Integer>);\n  public net.minecraft.network.chat.Component getMessage();\n}"
+      },
+      {
+        "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$NotApplicable",
+        "public_signature": "Compiled from \"AbstractRecipeHandler.java\"\nfinal class appeng.integration.modules.emi.AbstractRecipeHandler$Result$NotApplicable extends appeng.integration.modules.emi.AbstractRecipeHandler$Result {\n}"
+      },
+      {
+        "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$PartiallyCraftable",
+        "public_signature": "Compiled from \"AbstractRecipeHandler.java\"\nfinal class appeng.integration.modules.emi.AbstractRecipeHandler$Result$PartiallyCraftable extends appeng.integration.modules.emi.AbstractRecipeHandler$Result {\n  public appeng.integration.modules.emi.AbstractRecipeHandler$Result$PartiallyCraftable(appeng.menu.me.items.CraftingTermMenu$MissingIngredientSlots);\n}"
+      },
+      {
+        "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$Success",
+        "public_signature": "Compiled from \"AbstractRecipeHandler.java\"\nfinal class appeng.integration.modules.emi.AbstractRecipeHandler$Result$Success extends appeng.integration.modules.emi.AbstractRecipeHandler$Result {\n}"
       },
       {
         "class": "appeng.integration.modules.emi.AppEngRecipeCategory",
@@ -158,6 +202,14 @@
         "public_signature": "Compiled from \"UseCraftingRecipeTransfer.java\"\npublic class appeng.integration.modules.rei.transfer.UseCraftingRecipeTransfer<T extends appeng.menu.me.items.CraftingTermMenu> extends appeng.integration.modules.rei.transfer.AbstractTransferHandler<T> {\n  public appeng.integration.modules.rei.transfer.UseCraftingRecipeTransfer(java.lang.Class<T>);\n  public static java.util.Map<java.lang.Integer, net.minecraft.world.item.crafting.Ingredient> getGuiSlotToIngredientMap(net.minecraft.world.item.crafting.Recipe<?>);\n}"
       },
       {
+        "class": "appeng.menu.implementations.MenuTypeBuilder$InitialDataDeserializer",
+        "public_signature": "Compiled from \"MenuTypeBuilder.java\"\npublic interface appeng.menu.implementations.MenuTypeBuilder$InitialDataDeserializer<C, I> {\n  public abstract void deserializeInitialData(I, C, net.minecraft.network.RegistryFriendlyByteBuf);\n}"
+      },
+      {
+        "class": "appeng.menu.implementations.MenuTypeBuilder$InitialDataSerializer",
+        "public_signature": "Compiled from \"MenuTypeBuilder.java\"\npublic interface appeng.menu.implementations.MenuTypeBuilder$InitialDataSerializer<I> {\n  public abstract void serializeInitialData(I, net.minecraft.network.RegistryFriendlyByteBuf);\n}"
+      },
+      {
         "class": "appeng.mixins.VariantDeserializerMixin",
         "public_signature": "Compiled from \"VariantDeserializerMixin.java\"\npublic class appeng.mixins.VariantDeserializerMixin {\n  public appeng.mixins.VariantDeserializerMixin();\n  public void addAdditionalRotationOptions(com.google.gson.JsonElement, java.lang.reflect.Type, com.google.gson.JsonDeserializationContext, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<net.minecraft.client.renderer.block.model.Variant>);\n}"
       },
@@ -178,6 +230,30 @@
         "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic class appeng.recipes.entropy.EntropyRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.entropy.EntropyRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe> STREAM_CODEC;\n  public static final net.minecraft.resources.ResourceLocation TYPE_ID;\n  public static final net.minecraft.world.item.crafting.RecipeType<appeng.recipes.entropy.EntropyRecipe> TYPE;\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public appeng.recipes.entropy.EntropyMode getMode();\n  public net.minecraft.world.level.block.state.BlockState getOutputBlockState(net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.world.level.material.FluidState getOutputFluidState(net.minecraft.world.level.material.FluidState);\n  public java.util.List<net.minecraft.world.item.ItemStack> getDrops();\n  public boolean matches(appeng.recipes.entropy.EntropyMode, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.material.FluidState);\n  public appeng.recipes.entropy.EntropyRecipe$Input getInput();\n  public appeng.recipes.entropy.EntropyRecipe$Output getOutput();\n}"
       },
       {
+        "class": "appeng.recipes.entropy.EntropyRecipe$BlockInput",
+        "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic final class appeng.recipes.entropy.EntropyRecipe$BlockInput extends java.lang.Record {\n  public static com.mojang.serialization.Codec<appeng.recipes.entropy.EntropyRecipe$BlockInput> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe$BlockInput> STREAM_CODEC;\n  public appeng.recipes.entropy.EntropyRecipe$BlockInput(net.minecraft.world.level.block.Block, java.util.Map<java.lang.String, appeng.recipes.entropy.PropertyValueMatcher>);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.level.block.Block block();\n  public java.util.Map<java.lang.String, appeng.recipes.entropy.PropertyValueMatcher> properties();\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.EntropyRecipe$BlockOutput",
+        "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic final class appeng.recipes.entropy.EntropyRecipe$BlockOutput extends java.lang.Record {\n  public static com.mojang.serialization.Codec<appeng.recipes.entropy.EntropyRecipe$BlockOutput> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe$BlockOutput> STREAM_CODEC;\n  public appeng.recipes.entropy.EntropyRecipe$BlockOutput(net.minecraft.world.level.block.Block, boolean, java.util.Map<java.lang.String, java.lang.String>);\n  public net.minecraft.world.level.block.state.BlockState apply(net.minecraft.world.level.block.state.BlockState);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.level.block.Block block();\n  public boolean keepProperties();\n  public java.util.Map<java.lang.String, java.lang.String> properties();\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.EntropyRecipe$FluidInput",
+        "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic final class appeng.recipes.entropy.EntropyRecipe$FluidInput extends java.lang.Record {\n  public static com.mojang.serialization.Codec<appeng.recipes.entropy.EntropyRecipe$FluidInput> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe$FluidInput> STREAM_CODEC;\n  public appeng.recipes.entropy.EntropyRecipe$FluidInput(net.minecraft.world.level.material.Fluid, java.util.Map<java.lang.String, appeng.recipes.entropy.PropertyValueMatcher>);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.level.material.Fluid fluid();\n  public java.util.Map<java.lang.String, appeng.recipes.entropy.PropertyValueMatcher> properties();\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.EntropyRecipe$FluidOutput",
+        "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic final class appeng.recipes.entropy.EntropyRecipe$FluidOutput extends java.lang.Record {\n  public static com.mojang.serialization.Codec<appeng.recipes.entropy.EntropyRecipe$FluidOutput> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe$FluidOutput> STREAM_CODEC;\n  public appeng.recipes.entropy.EntropyRecipe$FluidOutput(net.minecraft.world.level.material.Fluid, boolean, java.util.Map<java.lang.String, java.lang.String>);\n  public net.minecraft.world.level.material.FluidState apply(net.minecraft.world.level.material.FluidState);\n  public static void toNetwork(net.minecraft.network.FriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe$FluidOutput);\n  public static appeng.recipes.entropy.EntropyRecipe$FluidOutput fromNetwork(net.minecraft.network.FriendlyByteBuf);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.level.material.Fluid fluid();\n  public boolean keepProperties();\n  public java.util.Map<java.lang.String, java.lang.String> properties();\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.EntropyRecipe$Input",
+        "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic final class appeng.recipes.entropy.EntropyRecipe$Input extends java.lang.Record {\n  public static com.mojang.serialization.Codec<appeng.recipes.entropy.EntropyRecipe$Input> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe$Input> STREAM_CODEC;\n  public appeng.recipes.entropy.EntropyRecipe$Input(java.util.Optional<appeng.recipes.entropy.EntropyRecipe$BlockInput>, java.util.Optional<appeng.recipes.entropy.EntropyRecipe$FluidInput>);\n  public boolean matches(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.material.FluidState);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.util.Optional<appeng.recipes.entropy.EntropyRecipe$BlockInput> block();\n  public java.util.Optional<appeng.recipes.entropy.EntropyRecipe$FluidInput> fluid();\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.EntropyRecipe$Output",
+        "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic final class appeng.recipes.entropy.EntropyRecipe$Output extends java.lang.Record {\n  public static com.mojang.serialization.Codec<appeng.recipes.entropy.EntropyRecipe$Output> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe$Output> STREAM_CODEC;\n  public appeng.recipes.entropy.EntropyRecipe$Output(java.util.Optional<appeng.recipes.entropy.EntropyRecipe$BlockOutput>, java.util.Optional<appeng.recipes.entropy.EntropyRecipe$FluidOutput>, java.util.List<net.minecraft.world.item.ItemStack>);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.util.Optional<appeng.recipes.entropy.EntropyRecipe$BlockOutput> block();\n  public java.util.Optional<appeng.recipes.entropy.EntropyRecipe$FluidOutput> fluid();\n  public java.util.List<net.minecraft.world.item.ItemStack> drops();\n}"
+      },
+      {
         "class": "appeng.recipes.entropy.EntropyRecipeBuilder",
         "public_signature": "Compiled from \"EntropyRecipeBuilder.java\"\npublic class appeng.recipes.entropy.EntropyRecipeBuilder {\n  public appeng.recipes.entropy.EntropyRecipeBuilder();\n  public static appeng.recipes.entropy.EntropyRecipeBuilder cool();\n  public static appeng.recipes.entropy.EntropyRecipeBuilder heat();\n  public appeng.recipes.entropy.EntropyRecipeBuilder setMode(appeng.recipes.entropy.EntropyMode);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setInputBlock(net.minecraft.world.level.block.Block);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setInputFluid(net.minecraft.world.level.material.Fluid);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setOutputBlock(net.minecraft.world.level.block.Block);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setOutputBlockKeep(boolean);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setOutputFluid(net.minecraft.world.level.material.Fluid);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setOutputFluidKeep(boolean);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setDrops(java.util.List<net.minecraft.world.item.ItemStack>);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setDrops(net.minecraft.world.item.ItemStack...);\n  public appeng.recipes.entropy.EntropyRecipeBuilder addBlockStateMatcher(java.lang.String, appeng.recipes.entropy.PropertyValueMatcher);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setBlockStateMatchers(java.util.Map<java.lang.String, appeng.recipes.entropy.PropertyValueMatcher>);\n  public appeng.recipes.entropy.EntropyRecipeBuilder addFluidStateMatcher(java.lang.String, appeng.recipes.entropy.PropertyValueMatcher);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setFluidStateMatchers(java.util.Map<java.lang.String, appeng.recipes.entropy.PropertyValueMatcher>);\n  public appeng.recipes.entropy.EntropyRecipeBuilder addBlockStateAppliers(java.lang.String, java.lang.String);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setBlockStateAppliers(java.util.Map<java.lang.String, java.lang.String>);\n  public appeng.recipes.entropy.EntropyRecipeBuilder addFluidStateAppliers(java.lang.String, java.lang.String);\n  public appeng.recipes.entropy.EntropyRecipeBuilder setFluidStateAppliers(java.util.Map<java.lang.String, java.lang.String>);\n  public appeng.recipes.entropy.EntropyRecipe build();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n}"
       },
@@ -192,6 +268,18 @@
       {
         "class": "appeng.recipes.entropy.PropertyValueMatcher",
         "public_signature": "Compiled from \"PropertyValueMatcher.java\"\npublic interface appeng.recipes.entropy.PropertyValueMatcher {\n  public static final com.mojang.serialization.Codec<appeng.recipes.entropy.PropertyValueMatcher> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.FriendlyByteBuf, appeng.recipes.entropy.PropertyValueMatcher> STREAM_CODEC;\n  public static final com.mojang.serialization.Codec<java.util.Map<java.lang.String, appeng.recipes.entropy.PropertyValueMatcher>> MAP_CODEC;\n  public abstract void toNetwork(net.minecraft.network.FriendlyByteBuf);\n  public abstract void validate(net.minecraft.world.level.block.state.properties.Property<? extends java.lang.Comparable<?>>);\n  public abstract <T extends java.lang.Comparable<T>> boolean matches(net.minecraft.world.level.block.state.properties.Property<T>, net.minecraft.world.level.block.state.StateHolder<?, ?>);\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.PropertyValueMatcher$MultiValue",
+        "public_signature": "Compiled from \"PropertyValueMatcher.java\"\npublic final class appeng.recipes.entropy.PropertyValueMatcher$MultiValue extends java.lang.Record implements appeng.recipes.entropy.PropertyValueMatcher {\n  public appeng.recipes.entropy.PropertyValueMatcher$MultiValue(java.util.List<java.lang.String>);\n  public void toNetwork(net.minecraft.network.FriendlyByteBuf);\n  public void validate(net.minecraft.world.level.block.state.properties.Property<? extends java.lang.Comparable<?>>);\n  public <T extends java.lang.Comparable<T>> boolean matches(net.minecraft.world.level.block.state.properties.Property<T>, net.minecraft.world.level.block.state.StateHolder<?, ?>);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.util.List<java.lang.String> values();\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.PropertyValueMatcher$Range",
+        "public_signature": "Compiled from \"PropertyValueMatcher.java\"\npublic final class appeng.recipes.entropy.PropertyValueMatcher$Range extends java.lang.Record implements appeng.recipes.entropy.PropertyValueMatcher {\n  public appeng.recipes.entropy.PropertyValueMatcher$Range(java.lang.String, java.lang.String);\n  public void toNetwork(net.minecraft.network.FriendlyByteBuf);\n  public void validate(net.minecraft.world.level.block.state.properties.Property<? extends java.lang.Comparable<?>>);\n  public <T extends java.lang.Comparable<T>> boolean matches(net.minecraft.world.level.block.state.properties.Property<T>, net.minecraft.world.level.block.state.StateHolder<?, ?>);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.lang.String min();\n  public java.lang.String max();\n}"
+      },
+      {
+        "class": "appeng.recipes.entropy.PropertyValueMatcher$SingleValue",
+        "public_signature": "Compiled from \"PropertyValueMatcher.java\"\npublic final class appeng.recipes.entropy.PropertyValueMatcher$SingleValue extends java.lang.Record implements appeng.recipes.entropy.PropertyValueMatcher {\n  public appeng.recipes.entropy.PropertyValueMatcher$SingleValue(java.lang.String);\n  public void toNetwork(net.minecraft.network.FriendlyByteBuf);\n  public void validate(net.minecraft.world.level.block.state.properties.Property<? extends java.lang.Comparable<?>>);\n  public <T extends java.lang.Comparable<T>> boolean matches(net.minecraft.world.level.block.state.properties.Property<T>, net.minecraft.world.level.block.state.StateHolder<?, ?>);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.lang.String value();\n}"
       },
       {
         "class": "appeng.recipes.game.AddItemUpgradeRecipe",
@@ -216,6 +304,10 @@
       {
         "class": "appeng.recipes.game.RemoveItemUpgradeRecipe",
         "public_signature": "Compiled from \"RemoveItemUpgradeRecipe.java\"\npublic class appeng.recipes.game.RemoveItemUpgradeRecipe extends net.minecraft.world.item.crafting.CustomRecipe {\n  public static final appeng.recipes.game.RemoveItemUpgradeRecipe INSTANCE;\n  public static final net.minecraft.resources.ResourceLocation SERIALIZER_ID;\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.game.RemoveItemUpgradeRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.game.RemoveItemUpgradeRecipe> STREAM_CODEC;\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.core.NonNullList getRemainingItems(net.minecraft.world.item.crafting.RecipeInput);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "appeng.recipes.game.RemoveItemUpgradeRecipe$RemovalResult",
+        "public_signature": "Compiled from \"RemoveItemUpgradeRecipe.java\"\nfinal class appeng.recipes.game.RemoveItemUpgradeRecipe$RemovalResult extends java.lang.Record {\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.item.ItemStack upgradableItem();\n  public net.minecraft.world.item.ItemStack upgrade();\n}"
       },
       {
         "class": "appeng.recipes.game.RemoveItemUpgradeRecipeSerializer",
@@ -258,6 +350,10 @@
         "public_signature": "Compiled from \"InscriberRecipe.java\"\npublic class appeng.recipes.handlers.InscriberRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.handlers.InscriberRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.handlers.InscriberRecipe> STREAM_CODEC;\n  public static final net.minecraft.resources.ResourceLocation TYPE_ID;\n  public static final net.minecraft.world.item.crafting.RecipeType<appeng.recipes.handlers.InscriberRecipe> TYPE;\n  public appeng.recipes.handlers.InscriberRecipe(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, appeng.recipes.handlers.InscriberProcessType);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack getResultItem();\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public net.minecraft.world.item.crafting.Ingredient getMiddleInput();\n  public net.minecraft.world.item.crafting.Ingredient getTopOptional();\n  public net.minecraft.world.item.crafting.Ingredient getBottomOptional();\n  public appeng.recipes.handlers.InscriberProcessType getProcessType();\n  public boolean isSpecial();\n}"
       },
       {
+        "class": "appeng.recipes.handlers.InscriberRecipe$Ingredients",
+        "public_signature": "Compiled from \"InscriberRecipe.java\"\nfinal class appeng.recipes.handlers.InscriberRecipe$Ingredients extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<appeng.recipes.handlers.InscriberRecipe$Ingredients> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.handlers.InscriberRecipe$Ingredients> STREAM_CODEC;\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.item.crafting.Ingredient top();\n  public net.minecraft.world.item.crafting.Ingredient middle();\n  public net.minecraft.world.item.crafting.Ingredient bottom();\n}"
+      },
+      {
         "class": "appeng.recipes.handlers.InscriberRecipeBuilder",
         "public_signature": "Compiled from \"InscriberRecipeBuilder.java\"\npublic class appeng.recipes.handlers.InscriberRecipeBuilder {\n  public appeng.recipes.handlers.InscriberRecipeBuilder(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.level.ItemLike, int);\n  public static appeng.recipes.handlers.InscriberRecipeBuilder inscribe(net.minecraft.world.level.ItemLike, net.minecraft.world.level.ItemLike, int);\n  public static appeng.recipes.handlers.InscriberRecipeBuilder inscribe(net.minecraft.tags.TagKey<net.minecraft.world.item.Item>, net.minecraft.world.level.ItemLike, int);\n  public static appeng.recipes.handlers.InscriberRecipeBuilder inscribe(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.level.ItemLike, int);\n  public appeng.recipes.handlers.InscriberRecipeBuilder setTop(net.minecraft.world.item.crafting.Ingredient);\n  public appeng.recipes.handlers.InscriberRecipeBuilder setBottom(net.minecraft.world.item.crafting.Ingredient);\n  public appeng.recipes.handlers.InscriberRecipeBuilder setMode(appeng.recipes.handlers.InscriberProcessType);\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n}"
       },
@@ -284,6 +380,10 @@
       {
         "class": "appeng.recipes.transform.TransformCircumstance",
         "public_signature": "Compiled from \"TransformCircumstance.java\"\npublic class appeng.recipes.transform.TransformCircumstance {\n  public static final appeng.recipes.transform.TransformCircumstance EXPLOSION;\n  public static final com.mojang.serialization.Codec<appeng.recipes.transform.TransformCircumstance> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.transform.TransformCircumstance> STREAM_CODEC;\n  public appeng.recipes.transform.TransformCircumstance(java.lang.String);\n  public static appeng.recipes.transform.TransformCircumstance fluid(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);\n  public static appeng.recipes.transform.TransformCircumstance explosion();\n  public com.google.gson.JsonObject toJson();\n  public boolean equals(java.lang.Object);\n  public int hashCode();\n  public boolean isExplosion();\n  public boolean isFluid();\n  public boolean isFluidTag(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);\n  public boolean isFluid(net.minecraft.world.level.material.FluidState);\n  public boolean isFluid(net.minecraft.world.level.material.Fluid);\n  public java.util.List<net.minecraft.world.level.material.Fluid> getFluidsForRendering();\n}"
+      },
+      {
+        "class": "appeng.recipes.transform.TransformCircumstance$FluidType",
+        "public_signature": "Compiled from \"TransformCircumstance.java\"\nclass appeng.recipes.transform.TransformCircumstance$FluidType extends appeng.recipes.transform.TransformCircumstance {\n  public final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> fluidTag;\n  public appeng.recipes.transform.TransformCircumstance$FluidType(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);\n  public net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> getFluidTag();\n  public boolean equals(java.lang.Object);\n  public int hashCode();\n  public com.google.gson.JsonObject toJson();\n  public boolean isFluid();\n  public boolean isFluid(net.minecraft.world.level.material.Fluid);\n  public boolean isFluidTag(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);\n  public boolean isFluid(net.minecraft.world.level.material.FluidState);\n  public java.util.List<net.minecraft.world.level.material.Fluid> getFluidsForRendering();\n}"
       },
       {
         "class": "appeng.recipes.transform.TransformLogic",
@@ -314,6 +414,18 @@
       {
         "class": "appeng.api.behaviors.FluidContainerItemStrategy",
         "public_signature": "Compiled from \"FluidContainerItemStrategy.java\"\nclass appeng.api.behaviors.FluidContainerItemStrategy implements appeng.api.behaviors.ContainerItemStrategy<appeng.api.stacks.AEFluidKey, appeng.api.behaviors.FluidContainerItemStrategy$Context> {\n  public appeng.api.stacks.GenericStack getContainedStack(net.minecraft.world.item.ItemStack);\n  public appeng.api.behaviors.FluidContainerItemStrategy$Context findCarriedContext(net.minecraft.world.entity.player.Player, net.minecraft.world.inventory.AbstractContainerMenu);\n  public appeng.api.behaviors.FluidContainerItemStrategy$Context findPlayerSlotContext(net.minecraft.world.entity.player.Player, int);\n  public long extract(appeng.api.behaviors.FluidContainerItemStrategy$Context, appeng.api.stacks.AEFluidKey, long, appeng.api.config.Actionable);\n  public long insert(appeng.api.behaviors.FluidContainerItemStrategy$Context, appeng.api.stacks.AEFluidKey, long, appeng.api.config.Actionable);\n  public void playFillSound(net.minecraft.world.entity.player.Player, appeng.api.stacks.AEFluidKey);\n  public void playEmptySound(net.minecraft.world.entity.player.Player, appeng.api.stacks.AEFluidKey);\n  public appeng.api.stacks.GenericStack getExtractableContent(appeng.api.behaviors.FluidContainerItemStrategy$Context);\n  public appeng.api.stacks.GenericStack getExtractableContent(java.lang.Object);\n  public void playEmptySound(net.minecraft.world.entity.player.Player, appeng.api.stacks.AEKey);\n  public void playFillSound(net.minecraft.world.entity.player.Player, appeng.api.stacks.AEKey);\n  public long insert(java.lang.Object, appeng.api.stacks.AEKey, long, appeng.api.config.Actionable);\n  public long extract(java.lang.Object, appeng.api.stacks.AEKey, long, appeng.api.config.Actionable);\n  public java.lang.Object findPlayerSlotContext(net.minecraft.world.entity.player.Player, int);\n  public java.lang.Object findCarriedContext(net.minecraft.world.entity.player.Player, net.minecraft.world.inventory.AbstractContainerMenu);\n}"
+      },
+      {
+        "class": "appeng.api.behaviors.FluidContainerItemStrategy$CarriedContext",
+        "public_signature": "Compiled from \"FluidContainerItemStrategy.java\"\nfinal class appeng.api.behaviors.FluidContainerItemStrategy$CarriedContext extends java.lang.Record implements appeng.api.behaviors.FluidContainerItemStrategy$Context {\n  public net.minecraft.world.item.ItemStack getStack();\n  public void setStack(net.minecraft.world.item.ItemStack);\n  public void addOverflow(net.minecraft.world.item.ItemStack);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.entity.player.Player player();\n  public net.minecraft.world.inventory.AbstractContainerMenu menu();\n}"
+      },
+      {
+        "class": "appeng.api.behaviors.FluidContainerItemStrategy$Context",
+        "public_signature": "Compiled from \"FluidContainerItemStrategy.java\"\ninterface appeng.api.behaviors.FluidContainerItemStrategy$Context {\n  public abstract net.minecraft.world.item.ItemStack getStack();\n  public abstract void setStack(net.minecraft.world.item.ItemStack);\n  public abstract void addOverflow(net.minecraft.world.item.ItemStack);\n}"
+      },
+      {
+        "class": "appeng.api.behaviors.FluidContainerItemStrategy$PlayerInvContext",
+        "public_signature": "Compiled from \"FluidContainerItemStrategy.java\"\nfinal class appeng.api.behaviors.FluidContainerItemStrategy$PlayerInvContext extends java.lang.Record implements appeng.api.behaviors.FluidContainerItemStrategy$Context {\n  public net.minecraft.world.item.ItemStack getStack();\n  public void setStack(net.minecraft.world.item.ItemStack);\n  public void addOverflow(net.minecraft.world.item.ItemStack);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.entity.player.Player player();\n  public int slot();\n}"
       },
       {
         "class": "appeng.api.config.PowerMultiplier",
@@ -376,6 +488,10 @@
         "public_signature": "Compiled from \"GridPowerStorageStateChanged.java\"\npublic class appeng.api.networking.events.GridPowerStorageStateChanged extends appeng.api.networking.events.GridEvent {\n  public final appeng.api.networking.energy.IAEPowerStorage storage;\n  public final appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType type;\n  public appeng.api.networking.events.GridPowerStorageStateChanged(appeng.api.networking.energy.IAEPowerStorage, appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType);\n}"
       },
       {
+        "class": "appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType",
+        "public_signature": "Compiled from \"GridPowerStorageStateChanged.java\"\npublic final class appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType extends java.lang.Enum<appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType> {\n  public static final appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType RECEIVE_POWER;\n  public static final appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType PROVIDE_POWER;\n  public static appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType[] values();\n  public static appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType valueOf(java.lang.String);\n}"
+      },
+      {
         "class": "appeng.api.networking.security.IActionSource",
         "public_signature": "Compiled from \"IActionSource.java\"\npublic interface appeng.api.networking.security.IActionSource {\n  public static appeng.api.networking.security.IActionSource empty();\n  public static appeng.api.networking.security.IActionSource ofPlayer(net.minecraft.world.entity.player.Player);\n  public static appeng.api.networking.security.IActionSource ofPlayer(net.minecraft.world.entity.player.Player, appeng.api.networking.security.IActionHost);\n  public static appeng.api.networking.security.IActionSource ofMachine(appeng.api.networking.security.IActionHost);\n  public abstract java.util.Optional<net.minecraft.world.entity.player.Player> player();\n  public abstract java.util.Optional<appeng.api.networking.security.IActionHost> machine();\n  public abstract <T> java.util.Optional<T> context(java.lang.Class<T>);\n}"
       },
@@ -424,6 +540,14 @@
         "public_signature": "Compiled from \"AENetworkedPoweredBlockEntity.java\"\npublic abstract class appeng.blockentity.grid.AENetworkedPoweredBlockEntity extends appeng.blockentity.powersink.AEBasePoweredBlockEntity implements appeng.me.helpers.IGridConnectedBlockEntity {\n  public appeng.blockentity.grid.AENetworkedPoweredBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void loadTag(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public final appeng.api.networking.IManagedGridNode getMainNode();\n  public appeng.api.util.AECableType getCableConnectionType(net.minecraft.core.Direction);\n  public void clearRemoved();\n  public void setRemoved();\n  public void onChunkUnloaded();\n  public void onReady();\n}"
       },
       {
+        "class": "appeng.blockentity.grid.AENetworkedPoweredBlockEntity$Crankable",
+        "public_signature": "Compiled from \"AENetworkedPoweredBlockEntity.java\"\npublic final class appeng.blockentity.grid.AENetworkedPoweredBlockEntity$Crankable implements appeng.api.implementations.blockentities.ICrankable {\n  public appeng.blockentity.grid.AENetworkedPoweredBlockEntity$Crankable(appeng.blockentity.grid.AENetworkedPoweredBlockEntity);\n  public boolean canTurn();\n  public void applyTurn();\n}"
+      },
+      {
+        "class": "appeng.blockentity.misc.CondenserBlockEntity$FluidHandler",
+        "public_signature": "Compiled from \"CondenserBlockEntity.java\"\nclass appeng.blockentity.misc.CondenserBlockEntity$FluidHandler implements net.neoforged.neoforge.fluids.IFluidTank,net.neoforged.neoforge.fluids.capability.IFluidHandler {\n  public net.neoforged.neoforge.fluids.FluidStack getFluid();\n  public int getFluidAmount();\n  public int getCapacity();\n  public boolean isFluidValid(net.neoforged.neoforge.fluids.FluidStack);\n  public int fill(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(int, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public int getTanks();\n  public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int);\n  public int getTankCapacity(int);\n  public boolean isFluidValid(int, net.neoforged.neoforge.fluids.FluidStack);\n}"
+      },
+      {
         "class": "appeng.blockentity.networking.CreativeEnergyCellBlockEntity",
         "public_signature": "Compiled from \"CreativeEnergyCellBlockEntity.java\"\npublic class appeng.blockentity.networking.CreativeEnergyCellBlockEntity extends appeng.blockentity.grid.AENetworkedBlockEntity implements appeng.api.networking.energy.IAEPowerStorage {\n  public appeng.blockentity.networking.CreativeEnergyCellBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public appeng.api.util.AECableType getCableConnectionType(net.minecraft.core.Direction);\n  public double injectAEPower(double, appeng.api.config.Actionable);\n  public double getAEMaxPower();\n  public double getAECurrentPower();\n  public boolean isAEPublicPowerStorage();\n  public appeng.api.config.AccessRestriction getPowerFlow();\n  public double extractAEPower(double, appeng.api.config.Actionable, appeng.api.config.PowerMultiplier);\n  public int getPriority();\n}"
       },
@@ -444,6 +568,10 @@
         "public_signature": "Compiled from \"IExternalPowerSink.java\"\npublic interface appeng.blockentity.powersink.IExternalPowerSink extends appeng.api.networking.energy.IAEPowerStorage {\n  public abstract double injectExternalPower(appeng.api.config.PowerUnit, double, appeng.api.config.Actionable);\n  public abstract double getExternalPowerDemand(appeng.api.config.PowerUnit, double);\n}"
       },
       {
+        "class": "appeng.blockentity.storage.MEChestBlockEntity$FluidHandler",
+        "public_signature": "Compiled from \"MEChestBlockEntity.java\"\nclass appeng.blockentity.storage.MEChestBlockEntity$FluidHandler implements net.neoforged.neoforge.fluids.capability.IFluidHandler,net.neoforged.neoforge.fluids.IFluidTank {\n  public net.neoforged.neoforge.fluids.FluidStack getFluid();\n  public int getFluidAmount();\n  public int getCapacity();\n  public boolean isFluidValid(net.neoforged.neoforge.fluids.FluidStack);\n  public int getTanks();\n  public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int);\n  public int getTankCapacity(int);\n  public boolean isFluidValid(int, net.neoforged.neoforge.fluids.FluidStack);\n  public int fill(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(int, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n}"
+      },
+      {
         "class": "appeng.client.gui.implementations.EnergyLevelEmitterScreen",
         "public_signature": "Compiled from \"EnergyLevelEmitterScreen.java\"\npublic class appeng.client.gui.implementations.EnergyLevelEmitterScreen extends appeng.client.gui.implementations.UpgradeableScreen<appeng.menu.implementations.EnergyLevelEmitterMenu> {\n  public appeng.client.gui.implementations.EnergyLevelEmitterScreen(appeng.menu.implementations.EnergyLevelEmitterMenu, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component, appeng.client.gui.style.ScreenStyle);\n}"
       },
@@ -456,6 +584,10 @@
         "public_signature": "Compiled from \"StyleManager.java\"\npublic final class appeng.client.gui.style.StyleManager {\n  public static final java.lang.String PROP_INCLUDES;\n  public appeng.client.gui.style.StyleManager();\n  public static appeng.client.gui.style.ScreenStyle loadStyleDoc(java.lang.String);\n  public static void initialize(net.minecraft.server.packs.resources.ResourceManager);\n}"
       },
       {
+        "class": "appeng.client.gui.style.StyleManager$ReloadListener",
+        "public_signature": "Compiled from \"StyleManager.java\"\nclass appeng.client.gui.style.StyleManager$ReloadListener implements net.minecraft.server.packs.resources.ResourceManagerReloadListener {\n  public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager);\n}"
+      },
+      {
         "class": "appeng.client.gui.widgets.IScrollSource",
         "public_signature": "Compiled from \"IScrollSource.java\"\npublic interface appeng.client.gui.widgets.IScrollSource {\n  public abstract int getCurrentScroll();\n}"
       },
@@ -466,6 +598,10 @@
       {
         "class": "appeng.client.render.effects.EnergyFx",
         "public_signature": "Compiled from \"EnergyFx.java\"\npublic class appeng.client.render.effects.EnergyFx extends net.minecraft.client.particle.TextureSheetParticle {\n  public appeng.client.render.effects.EnergyFx(net.minecraft.client.multiplayer.ClientLevel, double, double, double, net.minecraft.client.particle.SpriteSet);\n  public net.minecraft.client.particle.ParticleRenderType getRenderType();\n  public float getQuadSize(float);\n  public void render(com.mojang.blaze3d.vertex.VertexConsumer, net.minecraft.client.Camera, float);\n  public void tick();\n  public void setMotionX(float);\n  public void setMotionY(float);\n  public void setMotionZ(float);\n}"
+      },
+      {
+        "class": "appeng.client.render.effects.EnergyFx$Factory",
+        "public_signature": "Compiled from \"EnergyFx.java\"\npublic class appeng.client.render.effects.EnergyFx$Factory implements net.minecraft.client.particle.ParticleProvider<appeng.client.render.effects.EnergyParticleData> {\n  public appeng.client.render.effects.EnergyFx$Factory(net.minecraft.client.particle.SpriteSet);\n  public net.minecraft.client.particle.Particle createParticle(appeng.client.render.effects.EnergyParticleData, net.minecraft.client.multiplayer.ClientLevel, double, double, double, double, double, double);\n  public net.minecraft.client.particle.Particle createParticle(net.minecraft.core.particles.ParticleOptions, net.minecraft.client.multiplayer.ClientLevel, double, double, double, double, double, double);\n}"
       },
       {
         "class": "appeng.client.render.effects.EnergyParticleData",
@@ -496,12 +632,24 @@
         "public_signature": "Compiled from \"ForgeEnergyAdapter.java\"\npublic class appeng.helpers.ForgeEnergyAdapter implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public appeng.helpers.ForgeEnergyAdapter(appeng.blockentity.powersink.IExternalPowerSink);\n  public final int receiveEnergy(int, boolean);\n  public final int getEnergyStored();\n  public final int getMaxEnergyStored();\n  public int extractEnergy(int, boolean);\n  public boolean canExtract();\n  public boolean canReceive();\n}"
       },
       {
+        "class": "appeng.helpers.InterfaceLogic$InterfaceRequestSource",
+        "public_signature": "Compiled from \"InterfaceLogic.java\"\nclass appeng.helpers.InterfaceLogic$InterfaceRequestSource extends appeng.me.helpers.MachineSource {\n  public <T> java.util.Optional<T> context(java.lang.Class<T>);\n}"
+      },
+      {
         "class": "appeng.helpers.externalstorage.GenericStackFluidStorage",
         "public_signature": "Compiled from \"GenericStackFluidStorage.java\"\npublic class appeng.helpers.externalstorage.GenericStackFluidStorage implements net.neoforged.neoforge.fluids.capability.IFluidHandler {\n  public appeng.helpers.externalstorage.GenericStackFluidStorage(appeng.api.behaviors.GenericInternalInventory);\n  public int getTanks();\n  public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int);\n  public int getTankCapacity(int);\n  public boolean isFluidValid(int, net.neoforged.neoforge.fluids.FluidStack);\n  public int fill(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(int, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n}"
       },
       {
         "class": "appeng.hooks.CompassManager",
         "public_signature": "Compiled from \"CompassManager.java\"\npublic final class appeng.hooks.CompassManager {\n  public static final appeng.hooks.CompassManager INSTANCE;\n  public void postResult(net.minecraft.world.level.ChunkPos, net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getClosestMeteorite(net.minecraft.core.BlockPos, boolean);\n  public net.minecraft.core.BlockPos getClosestMeteorite(net.minecraft.world.level.ChunkPos, boolean);\n}"
+      },
+      {
+        "class": "appeng.hooks.CompassManager$CachedResult",
+        "public_signature": "Compiled from \"CompassManager.java\"\nfinal class appeng.hooks.CompassManager$CachedResult extends java.lang.Record {\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.core.BlockPos closestMeteoritePos();\n  public long received();\n}"
+      },
+      {
+        "class": "appeng.init.client.InitStackRenderHandlers$FluidKeyRenderHandler",
+        "public_signature": "Compiled from \"InitStackRenderHandlers.java\"\nclass appeng.init.client.InitStackRenderHandlers$FluidKeyRenderHandler implements appeng.api.client.AEKeyRenderHandler<appeng.api.stacks.AEFluidKey> {\n  public void drawInGui(net.minecraft.client.Minecraft, net.minecraft.client.gui.GuiGraphics, int, int, appeng.api.stacks.AEFluidKey);\n  public void drawOnBlockFace(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, appeng.api.stacks.AEFluidKey, float, int, net.minecraft.world.level.Level);\n  public net.minecraft.network.chat.Component getDisplayName(appeng.api.stacks.AEFluidKey);\n  public java.util.List<net.minecraft.network.chat.Component> getTooltip(appeng.api.stacks.AEFluidKey);\n  public java.util.List getTooltip(appeng.api.stacks.AEKey);\n  public net.minecraft.network.chat.Component getDisplayName(appeng.api.stacks.AEKey);\n  public void drawOnBlockFace(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, appeng.api.stacks.AEKey, float, int, net.minecraft.world.level.Level);\n  public void drawInGui(net.minecraft.client.Minecraft, net.minecraft.client.gui.GuiGraphics, int, int, appeng.api.stacks.AEKey);\n}"
       },
       {
         "class": "appeng.integration.modules.emi.EmiFluidBlockSlot",
@@ -518,6 +666,10 @@
       {
         "class": "appeng.integration.modules.itemlists.FluidBlockRendering",
         "public_signature": "Compiled from \"FluidBlockRendering.java\"\npublic final class appeng.integration.modules.itemlists.FluidBlockRendering {\n  public static void render(net.minecraft.client.gui.GuiGraphics, net.minecraft.world.level.material.Fluid, int, int, int, int);\n  public static void renderInFancy(net.minecraft.client.gui.GuiGraphics, net.minecraft.world.level.material.Fluid, int, int, int, int);\n}"
+      },
+      {
+        "class": "appeng.integration.modules.itemlists.FluidBlockRendering$FakeWorld",
+        "public_signature": "Compiled from \"FluidBlockRendering.java\"\nclass appeng.integration.modules.itemlists.FluidBlockRendering$FakeWorld implements net.minecraft.world.level.BlockAndTintGetter {\n  public appeng.integration.modules.itemlists.FluidBlockRendering$FakeWorld(net.minecraft.world.level.material.FluidState);\n  public float getShade(net.minecraft.core.Direction, boolean);\n  public net.minecraft.world.level.lighting.LevelLightEngine getLightEngine();\n  public int getBrightness(net.minecraft.world.level.LightLayer, net.minecraft.core.BlockPos);\n  public int getRawBrightness(net.minecraft.core.BlockPos, int);\n  public int getBlockTint(net.minecraft.core.BlockPos, net.minecraft.world.level.ColorResolver);\n  public net.minecraft.world.level.block.entity.BlockEntity getBlockEntity(net.minecraft.core.BlockPos);\n  public net.minecraft.world.level.block.state.BlockState getBlockState(net.minecraft.core.BlockPos);\n  public net.minecraft.world.level.material.FluidState getFluidState(net.minecraft.core.BlockPos);\n  public int getHeight();\n  public int getMinBuildHeight();\n}"
       },
       {
         "class": "appeng.integration.modules.rei.FluidBlockRenderer",
@@ -538,6 +690,10 @@
       {
         "class": "appeng.items.tools.powered.BlockRecolorer",
         "public_signature": "Compiled from \"BlockRecolorer.java\"\npublic final class appeng.items.tools.powered.BlockRecolorer {\n  public static net.minecraft.world.level.block.Block recolor(net.minecraft.world.level.block.Block, appeng.api.util.AEColor);\n}"
+      },
+      {
+        "class": "appeng.items.tools.powered.BlockRecolorer$RecolorableBlockGroup",
+        "public_signature": "Compiled from \"BlockRecolorer.java\"\nclass appeng.items.tools.powered.BlockRecolorer$RecolorableBlockGroup {\n  public appeng.items.tools.powered.BlockRecolorer$RecolorableBlockGroup(net.minecraft.world.level.block.Block, com.google.common.collect.BiMap<appeng.api.util.AEColor, net.minecraft.world.level.block.Block>);\n}"
       },
       {
         "class": "appeng.items.tools.powered.ChargedStaffItem",
@@ -572,6 +728,10 @@
         "public_signature": "Compiled from \"WirelessTerminalItem.java\"\npublic class appeng.items.tools.powered.WirelessTerminalItem extends appeng.items.tools.powered.PoweredContainerItem implements appeng.api.implementations.menuobjects.IMenuItem,appeng.api.upgrades.IUpgradeableItem {\n  public static final appeng.api.features.IGridLinkableHandler LINKABLE_HANDLER;\n  public appeng.items.tools.powered.WirelessTerminalItem(java.util.function.DoubleSupplier, net.minecraft.world.item.Item$Properties);\n  public double getChargeRate(net.minecraft.world.item.ItemStack);\n  public boolean openFromInventory(net.minecraft.world.entity.player.Player, appeng.menu.locator.ItemMenuHostLocator);\n  public net.minecraft.world.InteractionResultHolder<net.minecraft.world.item.ItemStack> use(net.minecraft.world.level.Level, net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand);\n  public void appendHoverText(net.minecraft.world.item.ItemStack, net.minecraft.world.item.Item$TooltipContext, java.util.List<net.minecraft.network.chat.Component>, net.minecraft.world.item.TooltipFlag);\n  public net.minecraft.core.GlobalPos getLinkedPosition(net.minecraft.world.item.ItemStack);\n  public appeng.api.networking.IGrid getLinkedGrid(net.minecraft.world.item.ItemStack, net.minecraft.world.level.Level, java.util.function.Consumer<net.minecraft.network.chat.Component>);\n  public net.minecraft.world.inventory.MenuType<?> getMenuType();\n  public appeng.helpers.WirelessTerminalMenuHost<?> getMenuHost(net.minecraft.world.entity.player.Player, appeng.menu.locator.ItemMenuHostLocator, net.minecraft.world.phys.BlockHitResult);\n  public boolean usePower(net.minecraft.world.entity.player.Player, double, net.minecraft.world.item.ItemStack);\n  public boolean hasPower(net.minecraft.world.entity.player.Player, double, net.minecraft.world.item.ItemStack);\n  public appeng.api.util.IConfigManager getConfigManager(java.util.function.Supplier<net.minecraft.world.item.ItemStack>);\n  public appeng.api.upgrades.IUpgradeInventory getUpgrades(net.minecraft.world.item.ItemStack);\n  public appeng.api.implementations.menuobjects.ItemMenuHost getMenuHost(net.minecraft.world.entity.player.Player, appeng.menu.locator.ItemMenuHostLocator, net.minecraft.world.phys.BlockHitResult);\n}"
       },
       {
+        "class": "appeng.items.tools.powered.WirelessTerminalItem$LinkableHandler",
+        "public_signature": "Compiled from \"WirelessTerminalItem.java\"\nclass appeng.items.tools.powered.WirelessTerminalItem$LinkableHandler implements appeng.api.features.IGridLinkableHandler {\n  public boolean canLink(net.minecraft.world.item.ItemStack);\n  public void link(net.minecraft.world.item.ItemStack, net.minecraft.core.GlobalPos);\n  public void unlink(net.minecraft.world.item.ItemStack);\n}"
+      },
+      {
         "class": "appeng.items.tools.powered.powersink.AEBasePoweredItem",
         "public_signature": "Compiled from \"AEBasePoweredItem.java\"\npublic abstract class appeng.items.tools.powered.powersink.AEBasePoweredItem extends appeng.items.AEBaseItem implements appeng.api.implementations.items.IAEItemPowerStorage {\n  public appeng.items.tools.powered.powersink.AEBasePoweredItem(java.util.function.DoubleSupplier, net.minecraft.world.item.Item$Properties);\n  public void appendHoverText(net.minecraft.world.item.ItemStack, net.minecraft.world.item.Item$TooltipContext, java.util.List<net.minecraft.network.chat.Component>, net.minecraft.world.item.TooltipFlag);\n  public void addToMainCreativeTab(net.minecraft.world.item.CreativeModeTab$ItemDisplayParameters, net.minecraft.world.item.CreativeModeTab$Output);\n  public boolean isBarVisible(net.minecraft.world.item.ItemStack);\n  public boolean shouldCauseReequipAnimation(net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, boolean);\n  public int getBarWidth(net.minecraft.world.item.ItemStack);\n  public int getBarColor(net.minecraft.world.item.ItemStack);\n  public double injectAEPower(net.minecraft.world.item.ItemStack, double, appeng.api.config.Actionable);\n  public double extractAEPower(net.minecraft.world.item.ItemStack, double, appeng.api.config.Actionable);\n  public double getAEMaxPower(net.minecraft.world.item.ItemStack);\n  public double getAECurrentPower(net.minecraft.world.item.ItemStack);\n  public appeng.api.config.AccessRestriction getPowerFlow(net.minecraft.world.item.ItemStack);\n}"
       },
@@ -582,6 +742,10 @@
       {
         "class": "appeng.me.ManagedGridNode",
         "public_signature": "Compiled from \"ManagedGridNode.java\"\npublic class appeng.me.ManagedGridNode implements appeng.api.networking.IManagedGridNode {\n  public <T> appeng.me.ManagedGridNode(T, appeng.api.networking.IGridNodeListener<? super T>);\n  public appeng.me.ManagedGridNode setInWorldNode(boolean);\n  public appeng.me.ManagedGridNode setTagName(java.lang.String);\n  public void destroy();\n  public void create(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);\n  public appeng.api.networking.IGridNode getNode();\n  public void loadFromNBT(net.minecraft.nbt.CompoundTag);\n  public void saveToNBT(net.minecraft.nbt.CompoundTag);\n  public boolean isReady();\n  public boolean isActive();\n  public boolean isOnline();\n  public boolean isPowered();\n  public boolean hasGridBooted();\n  public void setOwningPlayerId(int);\n  public void setOwningPlayer(net.minecraft.world.entity.player.Player);\n  public appeng.me.ManagedGridNode setFlags(appeng.api.networking.GridFlags...);\n  public appeng.me.ManagedGridNode setExposedOnSides(java.util.Set<net.minecraft.core.Direction>);\n  public appeng.me.ManagedGridNode setIdlePowerUsage(double);\n  public appeng.me.ManagedGridNode setVisualRepresentation(appeng.api.stacks.AEItemKey);\n  public appeng.me.ManagedGridNode setGridColor(appeng.api.util.AEColor);\n  public double getIdlePowerUsage();\n  public <T extends appeng.api.networking.IGridNodeService> appeng.me.ManagedGridNode addService(java.lang.Class<T>, T);\n  public appeng.api.util.AEColor getGridColor();\n  public appeng.api.networking.IManagedGridNode addService(java.lang.Class, appeng.api.networking.IGridNodeService);\n  public appeng.api.networking.IManagedGridNode setGridColor(appeng.api.util.AEColor);\n  public appeng.api.networking.IManagedGridNode setTagName(java.lang.String);\n  public appeng.api.networking.IManagedGridNode setInWorldNode(boolean);\n  public appeng.api.networking.IManagedGridNode setVisualRepresentation(appeng.api.stacks.AEItemKey);\n  public appeng.api.networking.IManagedGridNode setIdlePowerUsage(double);\n  public appeng.api.networking.IManagedGridNode setExposedOnSides(java.util.Set);\n  public appeng.api.networking.IManagedGridNode setFlags(appeng.api.networking.GridFlags[]);\n}"
+      },
+      {
+        "class": "appeng.me.ManagedGridNode$InitData",
+        "public_signature": "Compiled from \"ManagedGridNode.java\"\nclass appeng.me.ManagedGridNode$InitData<T> {\n  public com.google.common.collect.ClassToInstanceMap<appeng.api.networking.IGridNodeService> services;\n  public appeng.me.ManagedGridNode$InitData(T, appeng.api.networking.IGridNodeListener<T>);\n  public appeng.me.GridNode createNode();\n}"
       },
       {
         "class": "appeng.me.energy.EnergyThreshold",
@@ -602,6 +766,10 @@
       {
         "class": "appeng.me.energy.StoredEnergyAmount",
         "public_signature": "Compiled from \"StoredEnergyAmount.java\"\npublic final class appeng.me.energy.StoredEnergyAmount {\n  public static final double MIN_AMOUNT;\n  public static final double MAX_MAXIMUM;\n  public appeng.me.energy.StoredEnergyAmount(double, double, appeng.me.energy.StoredEnergyAmount$EventEmitter);\n  public appeng.me.energy.StoredEnergyAmount(double, double, double, double, appeng.me.energy.StoredEnergyAmount$EventEmitter);\n  public double getAmount();\n  public double getMaximum();\n  public double insert(double, boolean);\n  public double extract(double, boolean);\n  public void setStored(double);\n  public void setMaximum(double);\n  public double remainingCapacity();\n}"
+      },
+      {
+        "class": "appeng.me.energy.StoredEnergyAmount$EventEmitter",
+        "public_signature": "Compiled from \"StoredEnergyAmount.java\"\npublic interface appeng.me.energy.StoredEnergyAmount$EventEmitter {\n  public abstract void emitEvent(appeng.api.networking.events.GridPowerStorageStateChanged$PowerEventType);\n}"
       },
       {
         "class": "appeng.me.helpers.ActionHostEnergySource",
@@ -636,6 +804,22 @@
         "public_signature": "Compiled from \"TickManagerService.java\"\npublic class appeng.me.service.TickManagerService implements appeng.api.networking.ticking.ITickManager,appeng.api.networking.IGridServiceProvider {\n  public static boolean MONITORING_ENABLED;\n  public appeng.me.service.TickManagerService();\n  public void onServerStartTick();\n  public void onLevelEndTick(net.minecraft.world.level.Level);\n  public void onServerEndTick();\n  public void removeNode(appeng.api.networking.IGridNode);\n  public void addNode(appeng.api.networking.IGridNode, net.minecraft.nbt.CompoundTag);\n  public boolean alertDevice(appeng.api.networking.IGridNode);\n  public boolean sleepDevice(appeng.api.networking.IGridNode);\n  public boolean wakeDevice(appeng.api.networking.IGridNode);\n  public long getAverageTime(appeng.api.networking.IGridNode);\n  public long getOverallTime(appeng.api.networking.IGridNode);\n  public long getMaximumTime(appeng.api.networking.IGridNode);\n  public appeng.me.service.TickManagerService$NodeStatus getStatus(appeng.api.networking.IGridNode);\n}"
       },
       {
+        "class": "appeng.me.service.TickManagerService$NodeStatus",
+        "public_signature": "Compiled from \"TickManagerService.java\"\npublic final class appeng.me.service.TickManagerService$NodeStatus extends java.lang.Record {\n  public appeng.me.service.TickManagerService$NodeStatus(boolean, boolean, boolean, boolean, int, long);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public boolean alertable();\n  public boolean sleeping();\n  public boolean awake();\n  public boolean queued();\n  public int currentRate();\n  public long lastTick();\n}"
+      },
+      {
+        "class": "appeng.me.storage.ExternalStorageFacade$FluidHandlerFacade",
+        "public_signature": "Compiled from \"ExternalStorageFacade.java\"\nclass appeng.me.storage.ExternalStorageFacade$FluidHandlerFacade extends appeng.me.storage.ExternalStorageFacade {\n  public appeng.me.storage.ExternalStorageFacade$FluidHandlerFacade(net.neoforged.neoforge.fluids.capability.IFluidHandler);\n  public int getSlots();\n  public appeng.api.stacks.GenericStack getStackInSlot(int);\n  public appeng.api.stacks.AEKeyType getKeyType();\n  public int extractExternal(appeng.api.stacks.AEKey, int, appeng.api.config.Actionable);\n  public boolean containsAnyFuzzy(java.util.Set<appeng.api.stacks.AEKey>);\n  public void getAvailableStacks(appeng.api.stacks.KeyCounter);\n}"
+      },
+      {
+        "class": "appeng.menu.AEBaseMenu$FillingSource",
+        "public_signature": "Compiled from \"AEBaseMenu.java\"\npublic interface appeng.menu.AEBaseMenu$FillingSource {\n  public abstract long extract(long, appeng.api.config.Actionable);\n}"
+      },
+      {
+        "class": "appeng.menu.guisync.SynchronizedField$ResourceLocationField",
+        "public_signature": "Compiled from \"SynchronizedField.java\"\nclass appeng.menu.guisync.SynchronizedField$ResourceLocationField extends appeng.menu.guisync.SynchronizedField<net.minecraft.resources.ResourceLocation> {\n}"
+      },
+      {
         "class": "appeng.menu.implementations.EnergyLevelEmitterMenu",
         "public_signature": "Compiled from \"EnergyLevelEmitterMenu.java\"\npublic class appeng.menu.implementations.EnergyLevelEmitterMenu extends appeng.menu.implementations.UpgradeableMenu<appeng.parts.automation.EnergyLevelEmitterPart> {\n  public static final net.minecraft.world.inventory.MenuType<appeng.menu.implementations.EnergyLevelEmitterMenu> TYPE;\n  public appeng.menu.implementations.EnergyLevelEmitterMenu(int, net.minecraft.world.entity.player.Inventory, appeng.parts.automation.EnergyLevelEmitterPart);\n  public long getReportingValue();\n  public void setReportingValue(long);\n}"
       },
@@ -656,12 +840,40 @@
         "public_signature": "Compiled from \"EnergyAcceptorPart.java\"\npublic class appeng.parts.networking.EnergyAcceptorPart extends appeng.parts.AEBasePart implements appeng.blockentity.powersink.IExternalPowerSink {\n  public appeng.parts.networking.EnergyAcceptorPart(appeng.api.parts.IPartItem<?>);\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergyStorage();\n  public void getBoxes(appeng.api.parts.IPartCollisionHelper);\n  public float getCableConnectionLength(appeng.api.util.AECableType);\n  public appeng.api.parts.IPartModel getStaticModels();\n  public final double getExternalPowerDemand(appeng.api.config.PowerUnit, double);\n  public final double injectExternalPower(appeng.api.config.PowerUnit, double, appeng.api.config.Actionable);\n  public final double injectAEPower(double, appeng.api.config.Actionable);\n  public final double getAEMaxPower();\n  public final double getAECurrentPower();\n  public final boolean isAEPublicPowerStorage();\n  public final appeng.api.config.AccessRestriction getPowerFlow();\n  public final double extractAEPower(double, appeng.api.config.Actionable, appeng.api.config.PowerMultiplier);\n}"
       },
       {
+        "class": "appeng.parts.p2p.FEP2PTunnelPart$InputEnergyStorage",
+        "public_signature": "Compiled from \"FEP2PTunnelPart.java\"\nclass appeng.parts.p2p.FEP2PTunnelPart$InputEnergyStorage implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public int extractEnergy(int, boolean);\n  public int receiveEnergy(int, boolean);\n  public boolean canExtract();\n  public boolean canReceive();\n  public int getMaxEnergyStored();\n  public int getEnergyStored();\n}"
+      },
+      {
+        "class": "appeng.parts.p2p.FEP2PTunnelPart$NullEnergyStorage",
+        "public_signature": "Compiled from \"FEP2PTunnelPart.java\"\nclass appeng.parts.p2p.FEP2PTunnelPart$NullEnergyStorage implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}"
+      },
+      {
+        "class": "appeng.parts.p2p.FEP2PTunnelPart$OutputEnergyStorage",
+        "public_signature": "Compiled from \"FEP2PTunnelPart.java\"\nclass appeng.parts.p2p.FEP2PTunnelPart$OutputEnergyStorage implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public int extractEnergy(int, boolean);\n  public int receiveEnergy(int, boolean);\n  public boolean canExtract();\n  public boolean canReceive();\n  public int getMaxEnergyStored();\n  public int getEnergyStored();\n}"
+      },
+      {
         "class": "appeng.parts.p2p.FluidP2PTunnelPart",
         "public_signature": "Compiled from \"FluidP2PTunnelPart.java\"\npublic class appeng.parts.p2p.FluidP2PTunnelPart extends appeng.parts.p2p.CapabilityP2PTunnelPart<appeng.parts.p2p.FluidP2PTunnelPart, net.neoforged.neoforge.fluids.capability.IFluidHandler> {\n  public static java.util.List<appeng.api.parts.IPartModel> getModels();\n  public appeng.parts.p2p.FluidP2PTunnelPart(appeng.api.parts.IPartItem<?>);\n  public appeng.api.parts.IPartModel getStaticModels();\n}"
       },
       {
+        "class": "appeng.parts.p2p.FluidP2PTunnelPart$InputFluidHandler",
+        "public_signature": "Compiled from \"FluidP2PTunnelPart.java\"\nclass appeng.parts.p2p.FluidP2PTunnelPart$InputFluidHandler implements net.neoforged.neoforge.fluids.capability.IFluidHandler {\n  public int getTanks();\n  public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int);\n  public int getTankCapacity(int);\n  public boolean isFluidValid(int, net.neoforged.neoforge.fluids.FluidStack);\n  public int fill(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(int, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n}"
+      },
+      {
+        "class": "appeng.parts.p2p.FluidP2PTunnelPart$NullFluidHandler",
+        "public_signature": "Compiled from \"FluidP2PTunnelPart.java\"\nclass appeng.parts.p2p.FluidP2PTunnelPart$NullFluidHandler implements net.neoforged.neoforge.fluids.capability.IFluidHandler {\n  public int getTanks();\n  public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int);\n  public int getTankCapacity(int);\n  public boolean isFluidValid(int, net.neoforged.neoforge.fluids.FluidStack);\n  public int fill(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(int, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n}"
+      },
+      {
+        "class": "appeng.parts.p2p.FluidP2PTunnelPart$OutputFluidHandler",
+        "public_signature": "Compiled from \"FluidP2PTunnelPart.java\"\nclass appeng.parts.p2p.FluidP2PTunnelPart$OutputFluidHandler implements net.neoforged.neoforge.fluids.capability.IFluidHandler {\n  public int getTanks();\n  public net.neoforged.neoforge.fluids.FluidStack getFluidInTank(int);\n  public int getTankCapacity(int);\n  public boolean isFluidValid(int, net.neoforged.neoforge.fluids.FluidStack);\n  public int fill(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(net.neoforged.neoforge.fluids.FluidStack, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n  public net.neoforged.neoforge.fluids.FluidStack drain(int, net.neoforged.neoforge.fluids.capability.IFluidHandler$FluidAction);\n}"
+      },
+      {
         "class": "appeng.server.testplots.ExternalEnergyTestPlots",
         "public_signature": "Compiled from \"ExternalEnergyTestPlots.java\"\npublic class appeng.server.testplots.ExternalEnergyTestPlots {\n  public appeng.server.testplots.ExternalEnergyTestPlots();\n  public static void testEnergyAcceptorBlock(appeng.server.testworld.PlotBuilder);\n  public static void testEnergyAcceptorPart(appeng.server.testworld.PlotBuilder);\n  public static void testController(appeng.server.testworld.PlotBuilder);\n  public static void testInscriber(appeng.server.testworld.PlotBuilder);\n  public static void testChest(appeng.server.testworld.PlotBuilder);\n  public static void testCharger(appeng.server.testworld.PlotBuilder);\n  public static void testGrowthAccelerator(appeng.server.testworld.PlotBuilder);\n}"
+      },
+      {
+        "class": "appeng.server.testworld.DriveBuilder$FluidCellBuilder",
+        "public_signature": "Compiled from \"DriveBuilder.java\"\npublic class appeng.server.testworld.DriveBuilder$FluidCellBuilder extends appeng.server.testworld.DriveBuilder$CellBuilder {\n  public appeng.server.testworld.DriveBuilder$FluidCellBuilder(appeng.server.testworld.DriveBuilder, appeng.me.cells.BasicCellInventory);\n  public void addBuckets(net.minecraft.world.level.material.Fluid, double);\n}"
       },
       {
         "class": "appeng.spatial.SpatialStoragePlotManager",
@@ -714,12 +926,28 @@
         "public_signature": "Compiled from \"IMolecularAssemblerSupportedPattern.java\"\npublic interface appeng.blockentity.crafting.IMolecularAssemblerSupportedPattern extends appeng.api.crafting.IPatternDetails {\n  public abstract net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public default net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput);\n  public abstract boolean isItemValid(int, appeng.api.stacks.AEItemKey, net.minecraft.world.level.Level);\n  public abstract boolean isSlotEnabled(int);\n  public abstract void fillCraftingGrid(appeng.api.stacks.KeyCounter[], appeng.blockentity.crafting.IMolecularAssemblerSupportedPattern$CraftingGridAccessor);\n  public default boolean supportsPushInputsToExternalInventory();\n}"
       },
       {
+        "class": "appeng.blockentity.crafting.IMolecularAssemblerSupportedPattern$CraftingGridAccessor",
+        "public_signature": "Compiled from \"IMolecularAssemblerSupportedPattern.java\"\npublic interface appeng.blockentity.crafting.IMolecularAssemblerSupportedPattern$CraftingGridAccessor {\n  public abstract void set(int, net.minecraft.world.item.ItemStack);\n}"
+      },
+      {
         "class": "appeng.blockentity.crafting.MolecularAssemblerBlockEntity",
         "public_signature": "Compiled from \"MolecularAssemblerBlockEntity.java\"\npublic class appeng.blockentity.crafting.MolecularAssemblerBlockEntity extends appeng.blockentity.grid.AENetworkedInvBlockEntity implements appeng.api.upgrades.IUpgradeableObject,appeng.api.networking.ticking.IGridTickable,appeng.api.implementations.blockentities.ICraftingMachine,appeng.api.implementations.IPowerChannelState {\n  public static final net.minecraft.resources.ResourceLocation INV_MAIN;\n  public appeng.blockentity.crafting.MolecularAssemblerBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public appeng.api.implementations.blockentities.PatternContainerGroup getCraftingMachineInfo();\n  public boolean pushPattern(appeng.api.crafting.IPatternDetails, appeng.api.stacks.KeyCounter[], net.minecraft.core.Direction);\n  public boolean acceptsPlans();\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadTag(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public appeng.api.util.AECableType getCableConnectionType(net.minecraft.core.Direction);\n  public appeng.api.inventories.InternalInventory getSubInventory(net.minecraft.resources.ResourceLocation);\n  public appeng.api.inventories.InternalInventory getInternalInventory();\n  public void onChangeInventory(appeng.util.inv.AppEngInternalInventory, int);\n  public int getCraftingProgress();\n  public void addAdditionalDrops(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, java.util.List<net.minecraft.world.item.ItemStack>);\n  public void clearContent();\n  public appeng.api.networking.ticking.TickingRequest getTickingRequest(appeng.api.networking.IGridNode);\n  public appeng.api.networking.ticking.TickRateModulation tickingRequest(appeng.api.networking.IGridNode, int);\n  public void onMainNodeStateChanged(appeng.api.networking.IGridNodeListener$State);\n  public boolean isPowered();\n  public boolean isActive();\n  public void setAnimationStatus(appeng.client.render.crafting.AssemblerAnimationStatus);\n  public appeng.client.render.crafting.AssemblerAnimationStatus getAnimationStatus();\n  public appeng.api.upgrades.IUpgradeInventory getUpgrades();\n  public appeng.blockentity.crafting.IMolecularAssemblerSupportedPattern getCurrentPattern();\n}"
       },
       {
+        "class": "appeng.blockentity.crafting.MolecularAssemblerBlockEntity$CraftingGridFilter",
+        "public_signature": "Compiled from \"MolecularAssemblerBlockEntity.java\"\nclass appeng.blockentity.crafting.MolecularAssemblerBlockEntity$CraftingGridFilter implements appeng.util.inv.filter.IAEItemFilter {\n  public boolean allowExtract(appeng.api.inventories.InternalInventory, int, int);\n  public boolean allowInsert(appeng.api.inventories.InternalInventory, int, net.minecraft.world.item.ItemStack);\n}"
+      },
+      {
         "class": "appeng.blockentity.misc.InscriberBlockEntity",
         "public_signature": "Compiled from \"InscriberBlockEntity.java\"\npublic class appeng.blockentity.misc.InscriberBlockEntity extends appeng.blockentity.grid.AENetworkedPoweredBlockEntity implements appeng.api.networking.ticking.IGridTickable,appeng.api.upgrades.IUpgradeableObject,appeng.api.util.IConfigurableObject {\n  public appeng.blockentity.misc.InscriberBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public appeng.api.util.AECableType getCableConnectionType(net.minecraft.core.Direction);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadTag(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public java.util.Set<net.minecraft.core.Direction> getGridConnectableSides(appeng.api.orientation.BlockOrientation);\n  public void addAdditionalDrops(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, java.util.List<net.minecraft.world.item.ItemStack>);\n  public void clearContent();\n  public appeng.api.inventories.InternalInventory getInternalInventory();\n  public void onChangeInventory(appeng.util.inv.AppEngInternalInventory, int);\n  public appeng.api.networking.ticking.TickingRequest getTickingRequest(appeng.api.networking.IGridNode);\n  public appeng.recipes.handlers.InscriberRecipe getTask();\n  public appeng.api.networking.ticking.TickRateModulation tickingRequest(appeng.api.networking.IGridNode, int);\n  public appeng.api.inventories.InternalInventory getSubInventory(net.minecraft.resources.ResourceLocation);\n  public appeng.api.upgrades.IUpgradeInventory getUpgrades();\n  public appeng.api.util.IConfigManager getConfigManager();\n  public long getClientStart();\n  public boolean isSmash();\n  public void setSmash(boolean);\n  public boolean isRepeatSmash();\n  public void setRepeatSmash(boolean);\n  public int getMaxProcessingTime();\n  public int getProcessingTime();\n  public appeng.api.implementations.blockentities.ICrankable getCrankable(net.minecraft.core.Direction);\n}"
+      },
+      {
+        "class": "appeng.blockentity.misc.InscriberBlockEntity$AutomationFilter",
+        "public_signature": "Compiled from \"InscriberBlockEntity.java\"\npublic class appeng.blockentity.misc.InscriberBlockEntity$AutomationFilter implements appeng.util.inv.filter.IAEItemFilter {\n  public appeng.blockentity.misc.InscriberBlockEntity$AutomationFilter(appeng.blockentity.misc.InscriberBlockEntity);\n  public boolean allowExtract(appeng.api.inventories.InternalInventory, int, int);\n  public boolean allowInsert(appeng.api.inventories.InternalInventory, int, net.minecraft.world.item.ItemStack);\n}"
+      },
+      {
+        "class": "appeng.blockentity.misc.InscriberBlockEntity$BaseFilter",
+        "public_signature": "Compiled from \"InscriberBlockEntity.java\"\npublic class appeng.blockentity.misc.InscriberBlockEntity$BaseFilter implements appeng.util.inv.filter.IAEItemFilter {\n  public appeng.blockentity.misc.InscriberBlockEntity$BaseFilter(appeng.blockentity.misc.InscriberBlockEntity);\n  public boolean allowInsert(appeng.api.inventories.InternalInventory, int, net.minecraft.world.item.ItemStack);\n}"
       },
       {
         "class": "appeng.client.gui.implementations.InscriberScreen",
@@ -870,6 +1098,7 @@
       "src/main/java/appeng/blockentity/crafting/MolecularAssemblerBlockEntity.java",
       "src/main/java/appeng/blockentity/grid/AENetworkedPoweredBlockEntity.java",
       "src/main/java/appeng/blockentity/misc/ChargerRecipes.java",
+      "src/main/java/appeng/blockentity/misc/CondenserBlockEntity.java",
       "src/main/java/appeng/blockentity/misc/InscriberBlockEntity.java",
       "src/main/java/appeng/blockentity/misc/InscriberRecipes.java",
       "src/main/java/appeng/blockentity/networking/CreativeEnergyCellBlockEntity.java",
@@ -877,6 +1106,7 @@
       "src/main/java/appeng/blockentity/networking/EnergyCellBlockEntity.java",
       "src/main/java/appeng/blockentity/powersink/AEBasePoweredBlockEntity.java",
       "src/main/java/appeng/blockentity/powersink/IExternalPowerSink.java",
+      "src/main/java/appeng/blockentity/storage/MEChestBlockEntity.java",
       "src/main/java/appeng/client/gui/implementations/EnergyLevelEmitterScreen.java",
       "src/main/java/appeng/client/gui/implementations/InscriberScreen.java",
       "src/main/java/appeng/client/gui/implementations/MolecularAssemblerScreen.java",
@@ -884,6 +1114,7 @@
       "src/main/java/appeng/client/gui/style/ColorDeserializer.java",
       "src/main/java/appeng/client/gui/style/FluidBlitter.java",
       "src/main/java/appeng/client/gui/style/Rectangle2dDeserializer.java",
+      "src/main/java/appeng/client/gui/style/ScreenStyle.java",
       "src/main/java/appeng/client/gui/style/StyleManager.java",
       "src/main/java/appeng/client/gui/widgets/IScrollSource.java",
       "src/main/java/appeng/client/gui/widgets/ISortSource.java",
@@ -916,8 +1147,10 @@
       "src/main/java/appeng/debug/EnergyGeneratorBlock.java",
       "src/main/java/appeng/debug/EnergyGeneratorBlockEntity.java",
       "src/main/java/appeng/helpers/ForgeEnergyAdapter.java",
+      "src/main/java/appeng/helpers/InterfaceLogic.java",
       "src/main/java/appeng/helpers/externalstorage/GenericStackFluidStorage.java",
       "src/main/java/appeng/hooks/CompassManager.java",
+      "src/main/java/appeng/init/client/InitStackRenderHandlers.java",
       "src/main/java/appeng/integration/modules/emi/AbstractRecipeHandler.java",
       "src/main/java/appeng/integration/modules/emi/AppEngRecipeCategory.java",
       "src/main/java/appeng/integration/modules/emi/EmiAddItemUpgradeRecipe.java",
@@ -967,8 +1200,12 @@
       "src/main/java/appeng/me/service/EnergyOverlayGrid.java",
       "src/main/java/appeng/me/service/EnergyService.java",
       "src/main/java/appeng/me/service/TickManagerService.java",
+      "src/main/java/appeng/me/storage/ExternalStorageFacade.java",
+      "src/main/java/appeng/menu/AEBaseMenu.java",
+      "src/main/java/appeng/menu/guisync/SynchronizedField.java",
       "src/main/java/appeng/menu/implementations/EnergyLevelEmitterMenu.java",
       "src/main/java/appeng/menu/implementations/InscriberMenu.java",
+      "src/main/java/appeng/menu/implementations/MenuTypeBuilder.java",
       "src/main/java/appeng/menu/implementations/MolecularAssemblerMenu.java",
       "src/main/java/appeng/menu/me/networktool/MachineGroup.java",
       "src/main/java/appeng/menu/me/networktool/MachineGroupKey.java",
@@ -978,6 +1215,7 @@
       "src/main/java/appeng/parts/automation/FluidPickupStrategy.java",
       "src/main/java/appeng/parts/automation/FluidPlacementStrategy.java",
       "src/main/java/appeng/parts/networking/EnergyAcceptorPart.java",
+      "src/main/java/appeng/parts/p2p/FEP2PTunnelPart.java",
       "src/main/java/appeng/parts/p2p/FluidP2PTunnelPart.java",
       "src/main/java/appeng/recipes/AERecipeSerializers.java",
       "src/main/java/appeng/recipes/AERecipeTypes.java",
@@ -1017,6 +1255,7 @@
       "src/main/java/appeng/recipes/transform/TransformRecipeSerializer.java",
       "src/main/java/appeng/server/testplots/ExternalEnergyTestPlots.java",
       "src/main/java/appeng/server/testplots/InscriberTestPlots.java",
+      "src/main/java/appeng/server/testworld/DriveBuilder.java",
       "src/main/java/appeng/spatial/SpatialStoragePlotManager.java",
       "src/main/java/appeng/util/ConfigManager.java",
       "src/main/java/appeng/util/CraftingRecipeUtil.java",

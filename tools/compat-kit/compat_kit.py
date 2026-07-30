@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 3
+SCAN_CACHE_VERSION = 4
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -215,6 +215,16 @@ def _class_name(entry_name: str) -> str:
     return entry_name[:-6].replace("/", ".")
 
 
+def _is_inspectable_class(entry_name: str) -> bool:
+    if not entry_name.endswith(".class") or entry_name.endswith("module-info.class"):
+        return False
+    nested_segments = _class_name(entry_name).split("$")[1:]
+    return all(
+        re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
+        for segment in nested_segments
+    )
+
+
 def _candidate_bucket(class_name: str) -> str | None:
     lowered = class_name.lower()
     if any(term in lowered for term in RECIPE_TERMS):
@@ -271,7 +281,8 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
             f"source checkout exceeds {MAX_SOURCE_FILES} Java files: {source}"
         )
     source_suffixes = {
-        name.replace(".", "/") + ".java" for name in candidate_names
+        name.split("$", 1)[0].replace(".", "/") + ".java"
+        for name in candidate_names
     }
     files = [
         path.relative_to(source).as_posix()
@@ -411,9 +422,7 @@ def scan_jar(
         class_names = sorted(
             _class_name(name)
             for name in archive.namelist()
-            if name.endswith(".class")
-            and not name.endswith("module-info.class")
-            and "$" not in name
+            if _is_inspectable_class(name)
         )
         candidates = [
             (class_name, bucket)
@@ -718,6 +727,12 @@ def validate_contract(contract: dict, *, require_complete: bool):
         raise ValueError(f"unsupported contract schema: {contract.get('schema')}")
     if contract.get("kind") != "auto_storage_compat_contract":
         raise ValueError(f"invalid contract kind: {contract.get('kind')}")
+    source_audit_sha256 = contract.get("source_audit_sha256")
+    if not isinstance(source_audit_sha256, str) or not re.fullmatch(
+        r"[0-9a-f]{64}",
+        source_audit_sha256,
+    ):
+        raise ValueError("contract source_audit_sha256 must be a SHA-256 digest")
     if not isinstance(contract.get("families"), list):
         raise ValueError("contract families must be a list")
     target = contract.get("target")
@@ -930,6 +945,11 @@ def _bundled_files(contract: dict) -> dict[str, bytes]:
         "fixture": fixture,
         "expectedTests": contract["verification"]["expected_game_tests"],
         "dependencies": [target["dependency"]],
+        "runtimeDependencies": [target["dependency"]],
+        "auditArtifact": {
+            "dependency": target["dependency"],
+            "sha256": contract["source_audit_sha256"],
+        },
     }
     module = f"""package {module_package};
 
@@ -1115,6 +1135,14 @@ mod_group_id={package}
 version = mod_version
 group = mod_group_id
 
+configurations {{
+    compatKitTargetArtifact {{
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }}
+}}
+
 repositories {{
     mavenCentral()
 {repository_lines}
@@ -1152,9 +1180,42 @@ dependencies {{
     runtimeOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}")
     compileOnly("{target['dependency']}")
     runtimeOnly("{target['dependency']}")
+    compatKitTargetArtifact("{target['dependency']}")
 }}
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+def expectedCompatKitTargetSha256 = "{contract['source_audit_sha256']}"
+def verifyCompatKitTargetArtifact = tasks.register("verifyCompatKitTargetArtifact") {{
+    inputs.files(configurations.compatKitTargetArtifact)
+    inputs.property("expectedSha256", expectedCompatKitTargetSha256)
+    doLast {{
+        def artifacts = inputs.files.files.findAll {{ it.name.endsWith(".jar") }}
+        if (artifacts.size() != 1) {{
+            throw new GradleException(
+                    "Compat Kit target verification expected one resolved jar, found ${{artifacts.size()}}")
+        }}
+        def digest = java.security.MessageDigest.getInstance("SHA-256")
+        artifacts.iterator().next().withInputStream {{ input ->
+            byte[] buffer = new byte[8192]
+            for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {{
+                digest.update(buffer, 0, read)
+            }}
+        }}
+        def actual = digest.digest().encodeHex().toString()
+        if (actual != expectedCompatKitTargetSha256) {{
+            throw new GradleException(
+                    "Compat Kit target SHA-256 mismatch: expected ${{expectedCompatKitTargetSha256}}, got ${{actual}}")
+        }}
+    }}
+}}
+
+tasks.named("check").configure {{
+    dependsOn verifyCompatKitTargetArtifact
+}}
+tasks.named("runGameTestServer").configure {{
+    dependsOn verifyCompatKitTargetArtifact
+}}
 """
     entrypoint = f"""package {package};
 
@@ -1347,8 +1408,22 @@ def scaffold_bundled(contract: dict, root) -> list[Path]:
     )
 
 
+def _validate_addon_verification(contract: dict):
+    verification = contract["verification"]
+    if (
+        verification["fixture"] != "main"
+        or verification["game_test_task"] != "runGameTestServer"
+        or verification["gradle_tasks"] != ["build", "runGameTestServer"]
+    ):
+        raise ValueError(
+            "addon verification tasks must be build and runGameTestServer "
+            "with fixture main"
+        )
+
+
 def scaffold_addon(contract: dict, output) -> list[Path]:
     validate_contract(contract, require_complete=True)
+    _validate_addon_verification(contract)
     return _materialize(
         Path(output),
         _addon_files(contract),
@@ -1361,6 +1436,7 @@ def _load_and_verify_manifest(
     root: Path,
     manifest_path: Path,
     contract: dict,
+    verification_files: tuple[str, ...],
 ) -> str:
     if not manifest_path.is_file():
         raise ValueError(f"missing compat-kit manifest: {manifest_path}")
@@ -1383,6 +1459,20 @@ def _load_and_verify_manifest(
         raise ValueError(
             "compat-kit contract drift: scaffold was generated from a different contract"
         )
+    for relative in verification_files:
+        expected = manifest["files"].get(relative)
+        if not isinstance(expected, str) or not re.fullmatch(
+            r"[0-9a-f]{64}",
+            expected,
+        ):
+            raise ValueError(
+                f"compat-kit manifest is missing verification file: {relative}"
+            )
+        target = root / relative
+        if not target.is_file() or _sha256_file(target) != expected:
+            raise ValueError(
+                f"generated verification file drift: {relative}"
+            )
     return _sha256_file(manifest_path)
 
 
@@ -1407,10 +1497,8 @@ def _source_text(root: Path) -> str:
 def _verification_evidence(
     contract: dict,
     root: Path,
-    mode: str,
 ) -> dict[str, list[str]]:
     resolved = {}
-    game_test_task = contract["verification"]["game_test_task"]
     for check, records in contract["verification"]["evidence"].items():
         resolved_records = []
         for record in records:
@@ -1434,12 +1522,6 @@ def _verification_evidence(
                     f"{record['marker']}"
                 )
             task = record["task"]
-            if mode == "addon":
-                task = (
-                    "runGameTestServer"
-                    if task == game_test_task or task.startswith("run")
-                    else "build"
-                )
             resolved_records.append(
                 f"{task}:{record['source']}#{record['marker']}"
             )
@@ -1462,6 +1544,8 @@ def verify_contract(
     if (bundled_root is None) == (addon_root is None):
         raise ValueError("verify requires exactly one of bundled_root or addon_root")
     mode = "bundled" if bundled_root is not None else "addon"
+    if mode == "addon":
+        _validate_addon_verification(contract)
     root = Path(bundled_root if bundled_root is not None else addon_root)
     if not root.is_dir():
         raise ValueError(f"verification root does not exist: {root}")
@@ -1471,7 +1555,17 @@ def verify_contract(
         if mode == "bundled"
         else root / ".compat-kit-manifest.json"
     )
-    manifest_sha = _load_and_verify_manifest(root, manifest_path, contract)
+    verification_files = (
+        (f"src/compat/{mod_id}/compat-module.json",)
+        if mode == "bundled"
+        else ("build.gradle",)
+    )
+    manifest_sha = _load_and_verify_manifest(
+        root,
+        manifest_path,
+        contract,
+        verification_files,
+    )
     sources = _source_text(root / "src")
     if "compat-kit scaffold is intentionally RED" in sources:
         raise ValueError(
@@ -1494,11 +1588,11 @@ def verify_contract(
         if ":api" not in build_text or "compileOnly" not in build_text:
             raise ValueError("addon build does not compile against the API artifact")
         commands = [
-            ["./gradlew", "build", "--console=plain", "--no-daemon"],
-            ["./gradlew", "runGameTestServer", "--console=plain", "--no-daemon"],
+            ["./gradlew", task, "--console=plain", "--no-daemon"]
+            for task in contract["verification"]["gradle_tasks"]
         ]
         fixture_root = root / "src/main/java"
-        game_test_task = "runGameTestServer"
+        game_test_task = contract["verification"]["game_test_task"]
     else:
         fixture = contract["verification"]["fixture"]
         fixture_root = root / f"src/{fixture}/java"
@@ -1517,7 +1611,7 @@ def verify_contract(
             f"verification expected {expected_game_tests} GameTests, "
             f"but source declares {source_game_tests}"
         )
-    evidence = _verification_evidence(contract, root, mode)
+    evidence = _verification_evidence(contract, root)
     runner = command_runner or _default_command_runner
     command_reports = []
     game_test_output = None
@@ -1648,7 +1742,9 @@ def diff_audits(old: dict, new: dict) -> dict:
             f"{old['target']['mod_id']} != {new['target']['mod_id']}"
         )
     bucket_changes = {}
-    contract_affected = False
+    contract_affected = (
+        old["artifact"]["sha256"] != new["artifact"]["sha256"]
+    )
     for bucket in ("recipe_classes", "resource_apis", "station_classes"):
         old_map = _candidate_map(old, bucket)
         new_map = _candidate_map(new, bucket)

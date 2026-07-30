@@ -81,6 +81,8 @@ outputs, and capability mutations requiring simulation are persisted. Without
 `--source`, scans are cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
+Named nested classes are audited and mapped back to their top-level Java source;
+anonymous, local, and synthetic `$<number>` classes are excluded.
 
 Archive limits, candidate counts, signature size, source-file counts, malformed
 metadata, ambiguous multi-mod jars, missing JDK tools, and `javap` failures all
@@ -139,15 +141,18 @@ tools/compat-kit/compat-kit scaffold \
 Bundled output owns its `src/compat/<mod-id>/compat-module.json`, isolated source
 set, one-call `AutoStorageCompatModule`, present-mod fixture, and GameTest
 structure. Gradle discovers the source set, target dependencies, fixture mod,
-run task, and expected test gate from that descriptor; no central compatibility
-switch is added.
+run task, expected test gate, and audited target artifact from that descriptor;
+the target is on both compile and fixture runtime classpaths. `build` and the
+module GameTest resolve exactly one target jar and reject a SHA different from
+the reviewed audit. No central compatibility switch is added.
 
 External output is an ordinary NeoForge project with the Gradle wrapper,
 compile-only Auto Storage API dependency, reviewed target repositories and
 target dependency, one-call
 `AutoStorageAddon.register(...)`, dependency metadata, a RED present-target
 GameTest, and reusable GitHub Actions workflow. It cannot compile against Auto
-Storage implementation classes.
+Storage implementation classes. Its `build` and `runGameTestServer` gates also
+resolve exactly one target jar and verify `source_audit_sha256`.
 
 The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the
@@ -175,8 +180,11 @@ tools/compat-kit/compat-kit verify \
   --output build/compat-kit/target-report.json
 ```
 
-For an external addon, use `--addon <directory>`; it runs both `build` and the
-fresh-world `runGameTestServer` gate. Verification rejects an unresolved
+For an external addon, use `--addon <directory>`. Addon contracts must declare
+exactly `build` and `runGameTestServer`, use `main` as their fixture, and map
+evidence only to those actual tasks; the verifier never rewrites bundled task
+names into addon task names. It runs both gates and gives
+`runGameTestServer` a fresh world. Verification rejects an unresolved
 contract, contract/manifest mismatch, remaining RED marker, forbidden
 implementation links, missing evidence source/marker, a source annotation
 count different from `expected_game_tests`, GameTest output that does not
@@ -188,7 +196,9 @@ version, target, and manifest hash. Bundled verification runs every declared
 Gradle task as a separate process and removes only `run/world` before each task
 so stale GameTest state cannot leak between fixtures. RED and forbidden-link
 scans are scoped to `src/`; ignored `build/` outputs and previously extracted
-scaffolds cannot poison a later verification.
+scaffolds cannot poison a later verification. The manifest also hashes the
+bundled descriptor or external `build.gradle`, so the target-SHA gate cannot be
+removed after scaffolding while retaining a passing report.
 
 ### 7. Review an upstream update
 
@@ -201,8 +211,10 @@ tools/compat-kit/compat-kit diff \
 ```
 
 Read the compact delta first. It reports only added, removed, or changed
-recipe/resource/station signatures and risk evidence. Re-review affected
-contract entries; unchanged surfaces need no repeated explanation.
+recipe/resource/station signatures and risk evidence. Any target jar SHA change
+sets `contract_affected=true`, including private implementation-only changes
+whose public signatures happen to be stable. The compact surface delta narrows
+the review, but it never waives contract review for different artifact bytes.
 
 ## Distribution
 

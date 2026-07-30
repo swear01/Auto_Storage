@@ -37,13 +37,20 @@ The scan publishes only public signatures and compact risk evidence. Bounded
 private bytecode is inspected for hidden randomness, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded output,
 and capability mutations requiring simulation, but is never stored in the
-audit.
+audit. Named nested classes are included and mapped to their top-level source;
+anonymous, local, and synthetic classes are excluded.
 
 ```bash
 ./compat-kit scaffold --addon contract.json --output target-auto-storage
 ./compat-kit verify contract.json --addon target-auto-storage \
   --output report.json
 ```
+
+Addon contracts use fixture `main` and exactly the `build` and
+`runGameTestServer` tasks. Generated builds bind both gates to the exact
+reviewed target jar SHA; evidence task names are never remapped. Verification
+also checks the manifest hash of the generated `build.gradle` (or bundled
+descriptor), so removing that SHA gate is explicit drift rather than a pass.
 
 Use `scaffold --bundled contract.json` and `verify --bundled <repo>` inside the
 Auto Storage repository. Bundled verification runs each declared Gradle task
@@ -64,4 +71,5 @@ The audit, contract, delta, and report schemas are under `schema/`. A complete
 public-SDK registration example is under `examples/addon/`; its reusable
 workflow is under `examples/github-actions/`. Downloaded jars, source checkouts,
 caches, and reports are evidence or build products; do not put them in a
-Minecraft instance.
+Minecraft instance. Any different target jar SHA requires contract review even
+when the compact public-signature/risk delta is empty.

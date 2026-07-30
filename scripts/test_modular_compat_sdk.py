@@ -65,6 +65,17 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn('"${spec.runName}"', build)
         self.assertIn("tasks.named(spec.runTask)", build)
         self.assertIn("spec.expectedTests", build)
+        self.assertIn("descriptor.auditArtifact", build)
+        self.assertIn("verifyCompatArtifact", build)
+        self.assertIn("MessageDigest.getInstance(\"SHA-256\")", build)
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\(spec\.runTask\).*?dependsOn verifyTask",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\('check'\).*?dependsOn compatArtifactVerificationTasks",
+        )
         self.assertIn(
             "def runName = descriptor.fixture.substring(",
             build,

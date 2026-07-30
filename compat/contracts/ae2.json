@@ -80,6 +80,21 @@
       "status": "rejected"
     },
     {
+      "class": "appeng.client.gui.style.ScreenStyle$StyleSerializer",
+      "costs": [],
+      "decision": "Client-only UI or guide helper; not a server recipe family.",
+      "evidence": [
+        "appeng.client.gui.style.ScreenStyle$StyleSerializer#public_signature"
+      ],
+      "id": "screen_style__style_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "appeng.client.guidebook.LytInscriberRecipe",
       "costs": [],
       "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
@@ -102,6 +117,21 @@
         "appeng.client.guidebook.RecipeTypeContributions#public_signature"
       ],
       "id": "recipe_type_contributions",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.client.guidebook.RecipeTypeContributions$FluidIcon",
+      "costs": [],
+      "decision": "Client-only UI or guide helper; not a server recipe family.",
+      "evidence": [
+        "appeng.client.guidebook.RecipeTypeContributions$FluidIcon#public_signature"
+      ],
+      "id": "recipe_type_contributions__fluid_icon",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
@@ -338,6 +368,51 @@
       "status": "rejected"
     },
     {
+      "class": "appeng.datagen.providers.recipes.UpgradeRecipes$CellDisassemblyTier",
+      "costs": [],
+      "decision": "Datagen-only tier metadata; not a runtime recipe family.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.UpgradeRecipes$CellDisassemblyTier#public_signature"
+      ],
+      "id": "upgrade_recipes__cell_disassembly_tier",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.UpgradeRecipes$CellUpgradeTier",
+      "costs": [],
+      "decision": "Datagen-only tier metadata; not a runtime recipe family.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.UpgradeRecipes$CellUpgradeTier#public_signature"
+      ],
+      "id": "upgrade_recipes__cell_upgrade_tier",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.UpgradeRecipes$UnitTransformTier",
+      "costs": [],
+      "decision": "Datagen-only tier metadata; not a runtime recipe family.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.UpgradeRecipes$UnitTransformTier#public_signature"
+      ],
+      "id": "upgrade_recipes__unit_transform_tier",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "appeng.integration.modules.emi.AbstractRecipeHandler",
       "costs": [],
       "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
@@ -352,6 +427,96 @@
         "entity_mutation",
         "world_mutation"
       ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result",
+      "costs": [],
+      "decision": "EMI recipe-handler result state; not a server recipe family.",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler$Result#public_signature"
+      ],
+      "id": "abstract_recipe_handler__result",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$EncodeWithCraftables",
+      "costs": [],
+      "decision": "EMI recipe-handler result state; not a server recipe family.",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler$Result$EncodeWithCraftables#public_signature"
+      ],
+      "id": "abstract_recipe_handler__result__encode_with_craftables",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$Error",
+      "costs": [],
+      "decision": "EMI recipe-handler result state; not a server recipe family.",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler$Result$Error#public_signature"
+      ],
+      "id": "abstract_recipe_handler__result__error",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$NotApplicable",
+      "costs": [],
+      "decision": "EMI recipe-handler result state; not a server recipe family.",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler$Result$NotApplicable#public_signature"
+      ],
+      "id": "abstract_recipe_handler__result__not_applicable",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$PartiallyCraftable",
+      "costs": [],
+      "decision": "EMI recipe-handler result state; not a server recipe family.",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler$Result$PartiallyCraftable#public_signature"
+      ],
+      "id": "abstract_recipe_handler__result__partially_craftable",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AbstractRecipeHandler$Result$Success",
+      "costs": [],
+      "decision": "EMI recipe-handler result state; not a server recipe family.",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler$Result$Success#public_signature"
+      ],
+      "id": "abstract_recipe_handler__result__success",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
       "station": null,
       "status": "rejected"
     },
@@ -581,6 +746,36 @@
       "status": "rejected"
     },
     {
+      "class": "appeng.menu.implementations.MenuTypeBuilder$InitialDataDeserializer",
+      "costs": [],
+      "decision": "Menu initialization codec; not a recipe family.",
+      "evidence": [
+        "appeng.menu.implementations.MenuTypeBuilder$InitialDataDeserializer#public_signature"
+      ],
+      "id": "menu_type_builder__initial_data_deserializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.menu.implementations.MenuTypeBuilder$InitialDataSerializer",
+      "costs": [],
+      "decision": "Menu initialization codec; not a recipe family.",
+      "evidence": [
+        "appeng.menu.implementations.MenuTypeBuilder$InitialDataSerializer#public_signature"
+      ],
+      "id": "menu_type_builder__initial_data_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "appeng.mixins.VariantDeserializerMixin",
       "costs": [],
       "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
@@ -659,6 +854,96 @@
       "status": "rejected"
     },
     {
+      "class": "appeng.recipes.entropy.EntropyRecipe$BlockInput",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipe$BlockInput#public_signature"
+      ],
+      "id": "entropy_recipe__block_input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipe$BlockOutput",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipe$BlockOutput#public_signature"
+      ],
+      "id": "entropy_recipe__block_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipe$FluidInput",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipe$FluidInput#public_signature"
+      ],
+      "id": "entropy_recipe__fluid_input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipe$FluidOutput",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipe$FluidOutput#public_signature"
+      ],
+      "id": "entropy_recipe__fluid_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipe$Input",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipe$Input#public_signature"
+      ],
+      "id": "entropy_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipe$Output",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipe$Output#public_signature"
+      ],
+      "id": "entropy_recipe__output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "appeng.recipes.entropy.EntropyRecipeBuilder",
       "costs": [],
       "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
@@ -711,6 +996,51 @@
         "appeng.recipes.entropy.PropertyValueMatcher#public_signature"
       ],
       "id": "property_value_matcher",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.PropertyValueMatcher$MultiValue",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.PropertyValueMatcher$MultiValue#public_signature"
+      ],
+      "id": "property_value_matcher__multi_value",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.PropertyValueMatcher$Range",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.PropertyValueMatcher$Range#public_signature"
+      ],
+      "id": "property_value_matcher__range",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.PropertyValueMatcher$SingleValue",
+      "costs": [],
+      "decision": "Nested entropy value or condition model; the world-mutating parent family remains rejected.",
+      "evidence": [
+        "appeng.recipes.entropy.PropertyValueMatcher$SingleValue#public_signature"
+      ],
+      "id": "property_value_matcher__single_value",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
@@ -815,6 +1145,21 @@
         "generic_ingredients",
         "world_mutation"
       ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.RemoveItemUpgradeRecipe$RemovalResult",
+      "costs": [],
+      "decision": "Nested execution result value; it is not registered as an independent recipe family.",
+      "evidence": [
+        "appeng.recipes.game.RemoveItemUpgradeRecipe$RemovalResult#public_signature"
+      ],
+      "id": "remove_item_upgrade_recipe__removal_result",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
       "station": null,
       "status": "rejected"
     },
@@ -1042,6 +1387,21 @@
       "status": "accepted"
     },
     {
+      "class": "appeng.recipes.handlers.InscriberRecipe$Ingredients",
+      "costs": [],
+      "decision": "Nested ingredient value object; the accepted InscriberRecipe contract owns its exact semantics.",
+      "evidence": [
+        "appeng.recipes.handlers.InscriberRecipe$Ingredients#public_signature"
+      ],
+      "id": "inscriber_recipe__ingredients",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "appeng.recipes.handlers.InscriberRecipeBuilder",
       "costs": [],
       "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
@@ -1146,6 +1506,21 @@
         "appeng.recipes.transform.TransformCircumstance#public_signature"
       ],
       "id": "transform_circumstance",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.transform.TransformCircumstance$FluidType",
+      "costs": [],
+      "decision": "Nested transform condition enum; the in-world parent transform family remains rejected.",
+      "evidence": [
+        "appeng.recipes.transform.TransformCircumstance$FluidType#public_signature"
+      ],
+      "id": "transform_circumstance__fluid_type",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
