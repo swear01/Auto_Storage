@@ -120,7 +120,9 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -425,6 +427,7 @@
       "recipe_type": null,
       "risks": [
         "entity_mutation",
+        "simulation_required",
         "world_mutation"
       ],
       "station": null,
@@ -456,7 +459,9 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "simulation_required"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -636,7 +641,9 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -651,7 +658,9 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -726,7 +735,9 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -741,7 +752,10 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients",
+        "simulation_required"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -1143,6 +1157,7 @@
       "recipe_type": null,
       "risks": [
         "generic_ingredients",
+        "simulation_required",
         "world_mutation"
       ],
       "station": null,
@@ -1636,7 +1651,12 @@
     "dependency": "org.appliedenergistics:appliedenergistics2:19.2.17",
     "display_name": "Applied Energistics 2",
     "mod_id": "ae2",
-    "repositories": [],
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:guideme:rduAfwb7"
+    ],
     "version": "19.2.17"
   },
   "verification": {

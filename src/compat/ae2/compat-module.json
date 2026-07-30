@@ -10,10 +10,12 @@
   "dependencies": [
     "org.appliedenergistics:appliedenergistics2:19.2.17"
   ],
-  "repositories": [],
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
   "runtimeDependencies": [
     "org.appliedenergistics:appliedenergistics2:19.2.17",
-    "maven.modrinth:guideme:${guideme_ci_version}"
+    "maven.modrinth:guideme:rduAfwb7"
   ],
   "auditArtifact": {
     "dependency": "org.appliedenergistics:appliedenergistics2:19.2.17",

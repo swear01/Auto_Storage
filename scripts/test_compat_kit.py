@@ -3,6 +3,7 @@ import importlib.util
 import json
 import subprocess
 import tempfile
+import tomllib
 import unittest
 import zipfile
 from pathlib import Path
@@ -224,7 +225,13 @@ class CompatKitAuditTests(unittest.TestCase):
                 "  12: invokeinterface #42,  4 // InterfaceMethod "
                 "net/neoforged/neoforge/items/IItemHandler.insertItem:"
                 "(IILnet/minecraft/world/item/ItemStack;Z)"
-                "Lnet/minecraft/world/item/ItemStack;"
+                "Lnet/minecraft/world/item/ItemStack;\n"
+                "  18: invokevirtual #51 // Method "
+                "samplemod/recipe/Output.getChance:()F\n"
+                "  21: invokevirtual #52 // Method "
+                "samplemod/recipe/Output.random:()Ljava/util/Random;\n"
+                "  24: invokevirtual #53 // Method "
+                "samplemod/recipe/Output.getIngredients:()Ljava/util/List;"
                 if class_name == "samplemod.recipe.CrushingRecipe"
                 else self.signatures(class_name)
             ),
@@ -234,6 +241,21 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             ["samplemod.recipe.CrushingRecipe#insertItem"],
             risks["simulation_required"]["evidence"],
+        )
+        self.assertEqual(
+            [
+                "samplemod.recipe.ChanceRecipe#getChance",
+                "samplemod.recipe.CrushingRecipe#getChance",
+            ],
+            risks["chance_output"]["evidence"],
+        )
+        self.assertIn(
+            "samplemod.recipe.CrushingRecipe#random",
+            risks["randomness"]["evidence"],
+        )
+        self.assertEqual(
+            ["samplemod.recipe.CrushingRecipe#getIngredients"],
+            risks["generic_ingredients"]["evidence"],
         )
 
     def test_scan_allows_bounded_large_private_bytecode(self):
@@ -328,6 +350,10 @@ class CompatKitAuditTests(unittest.TestCase):
                 "samplemod/recipe/CrusherRecipes$1LocalRecipe.class",
                 b"local recipe",
             )
+            archive.writestr(
+                "samplemod/recipe/CrusherRecipes$WhenMappings.class",
+                bytes.fromhex("cafebabe0000003d000110000000"),
+            )
         source = self.root / "source"
         source_file = (
             source
@@ -365,6 +391,10 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertNotIn("samplemod.recipe.CrusherRecipes$1", recipe_classes)
         self.assertNotIn(
             "samplemod.recipe.CrusherRecipes$1LocalRecipe",
+            recipe_classes,
+        )
+        self.assertNotIn(
+            "samplemod.recipe.CrusherRecipes$WhenMappings",
             recipe_classes,
         )
         self.assertEqual(
@@ -596,6 +626,7 @@ class CompatKitAuditTests(unittest.TestCase):
         contract["target"]["repositories"] = [
             "https://repo.example.com/releases"
         ]
+        contract["target"]["runtime_dependencies"] = []
         for family in contract["families"]:
             if family["class"] == "samplemod.recipe.ChanceRecipe":
                 family["status"] = "rejected"
@@ -844,6 +875,73 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertTrue((output / "compat/audit.json").is_file())
         self.assertNotIn("implementation project", build)
 
+    def test_scaffolds_preserve_reviewed_target_runtime_dependencies(self):
+        contract = self.addon_contract()
+        contract["target"]["runtime_dependencies"] = [
+            "com.example:samplemod-runtime:4.5.6"
+        ]
+        output = self.root / "samplemod-runtime-addon"
+
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=self.source_audit(),
+        )
+
+        build = (output / "build.gradle").read_text()
+        self.assertIn(
+            'runtimeOnly("com.example:samplemod-runtime:4.5.6")',
+            build,
+        )
+
+        bundled = self.root / "samplemod-runtime-bundled"
+        contract["verification"]["fixture"] = "samplemodFixture"
+        contract["verification"]["game_test_task"] = "runSamplemodGameTestServer"
+        contract["verification"]["gradle_tasks"] = [
+            "compileCompatSamplemodJava",
+            "runSamplemodGameTestServer",
+        ]
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["task"] = "runSamplemodGameTestServer"
+        self.compat_kit.scaffold_bundled(
+            contract,
+            bundled,
+            source_audit=self.source_audit(),
+        )
+        descriptor = json.loads(
+            (bundled / "src/compat/samplemod/compat-module.json").read_text()
+        )
+        self.assertEqual(
+            [
+                "com.example:samplemod:1.2.3",
+                "com.example:samplemod-runtime:4.5.6",
+            ],
+            descriptor["runtimeDependencies"],
+        )
+
+    def test_external_scaffold_escapes_target_display_name_as_toml(self):
+        contract = self.addon_contract()
+        audit = self.source_audit()
+        display_name = 'Sample "Quoted" \\\\ Machines\nSecond Line'
+        contract["target"]["display_name"] = display_name
+        audit["target"]["display_name"] = display_name
+        output = self.root / "quoted-addon"
+
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=audit,
+        )
+
+        metadata = tomllib.loads(
+            (output / "src/main/resources/META-INF/neoforge.mods.toml").read_text()
+        )
+        self.assertEqual(
+            display_name + " Auto Storage Integration",
+            metadata["mods"][0]["displayName"],
+        )
+
     def test_external_scaffold_rejects_bundled_only_verification_tasks(self):
         with self.assertRaisesRegex(
             ValueError,
@@ -928,6 +1026,10 @@ class CompatKitAuditTests(unittest.TestCase):
             "source_recipe_inventory_sha256",
             contract_schema["required"],
         )
+        self.assertIn(
+            "runtime_dependencies",
+            contract_schema["properties"]["target"]["properties"],
+        )
         audit_schema = json.loads(
             (schema_root / "compat-audit.schema.json").read_text()
         )
@@ -972,6 +1074,17 @@ class CompatKitAuditTests(unittest.TestCase):
                 "sha256": audit["artifact"]["sha256"],
             },
             descriptor["auditArtifact"],
+        )
+        self.assertEqual(
+            contract["target"]["repositories"],
+            descriptor["repositories"],
+        )
+        self.assertEqual(
+            [
+                contract["target"]["dependency"],
+                *contract["target"]["runtime_dependencies"],
+            ],
+            descriptor["runtimeDependencies"],
         )
         self.compat_kit.validate_contract(
             contract,

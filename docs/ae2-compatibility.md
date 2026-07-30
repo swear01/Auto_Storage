@@ -26,11 +26,17 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-Scanner format v4 also audits named nested classes while excluding anonymous,
-local, and synthetic classes. The reviewed contract explicitly rejects all 25
-new nested recipe-name candidates as UI, datagen, codec, result, condition, or
-value helpers; `InscriberRecipe$Ingredients` remains owned by the accepted
-parent `InscriberRecipe` contract rather than becoming another family.
+Scanner format v5 audits named nested classes while excluding anonymous/local
+classes by name and JVM `ACC_SYNTHETIC` class files by access flag. It also
+recognizes the method-descriptor form that `javap` emits for chance,
+randomness, generic-ingredient, and capability-mutation calls. The reviewed
+contract explicitly rejects all 25 new nested recipe-name candidates as UI,
+datagen, codec, result, condition, or value helpers;
+`InscriberRecipe$Ingredients` remains owned by the accepted
+parent `InscriberRecipe` contract rather than becoming another family. The
+reviewed runtime list also carries GuideME through exact Modrinth artifact
+`rduAfwb7`; both bundled and generated-addon fixtures therefore reproduce AE2's
+required runtime instead of relying on a hand-edited descriptor.
 
 ## Accepted family
 

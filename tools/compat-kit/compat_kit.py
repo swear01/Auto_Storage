@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 4
+SCAN_CACHE_VERSION = 5
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -62,8 +62,8 @@ STATION_TERMS = (
     "station",
 )
 RISK_PATTERNS = (
-    ("chance_output", re.compile(r"\bgetChance\s*\("), "getChance"),
-    ("randomness", re.compile(r"\brandom\s*\("), "random"),
+    ("chance_output", re.compile(r"\bgetChance(?:\s*\(|:)"), "getChance"),
+    ("randomness", re.compile(r"\brandom(?:\s*\(|:)"), "random"),
     ("randomness", re.compile(r"\bRandom(?:Source)?\b"), "Random"),
     (
         "multiblock",
@@ -80,7 +80,7 @@ RISK_PATTERNS = (
     ),
     (
         "generic_ingredients",
-        re.compile(r"\bgetIngredients\s*\("),
+        re.compile(r"\bgetIngredients(?:\s*\(|:)"),
         "getIngredients",
     ),
     ("simulation_required", re.compile(r"\binsertItem(?:\s*\(|:)"), "insertItem"),
@@ -138,6 +138,7 @@ TARGET_KEYS = {
     "version",
     "dependency",
     "repositories",
+    "runtime_dependencies",
 }
 STATION_KEYS = {"descriptor_id", "category", "variants"}
 VARIANT_KEYS = {"item", "rate", "bounds"}
@@ -222,13 +223,60 @@ def _class_name(entry_name: str) -> str:
     return entry_name[:-6].replace("/", ".")
 
 
-def _is_inspectable_class(entry_name: str) -> bool:
+def _class_access_flags(payload: bytes, entry_name: str) -> int:
+    if not payload.startswith(b"\xca\xfe\xba\xbe"):
+        return 0
+    if len(payload) < 10:
+        raise ValueError(f"truncated class header: {entry_name}")
+    constant_pool_count = int.from_bytes(payload[8:10], "big")
+    offset = 10
+    index = 1
+    while index < constant_pool_count:
+        if offset >= len(payload):
+            raise ValueError(f"truncated class constant pool: {entry_name}")
+        tag = payload[offset]
+        offset += 1
+        if tag == 1:
+            if offset + 2 > len(payload):
+                raise ValueError(f"truncated class UTF-8 length: {entry_name}")
+            length = int.from_bytes(payload[offset:offset + 2], "big")
+            offset += 2 + length
+        elif tag in (3, 4, 9, 10, 11, 12, 17, 18):
+            offset += 4
+        elif tag in (5, 6):
+            offset += 8
+            index += 1
+        elif tag in (7, 8, 16, 19, 20):
+            offset += 2
+        elif tag == 15:
+            offset += 3
+        else:
+            raise ValueError(
+                f"unsupported class constant-pool tag {tag}: {entry_name}"
+            )
+        if offset > len(payload):
+            raise ValueError(f"truncated class constant pool: {entry_name}")
+        index += 1
+    if offset + 2 > len(payload):
+        raise ValueError(f"truncated class access flags: {entry_name}")
+    return int.from_bytes(payload[offset:offset + 2], "big")
+
+
+def _is_inspectable_class(
+    archive: zipfile.ZipFile,
+    entry_name: str,
+) -> bool:
     if not entry_name.endswith(".class") or entry_name.endswith("module-info.class"):
         return False
     nested_segments = _class_name(entry_name).split("$")[1:]
-    return all(
+    named = all(
         re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
         for segment in nested_segments
+    )
+    if not named:
+        return False
+    return not (
+        _class_access_flags(archive.read(entry_name), entry_name) & 0x1000
     )
 
 
@@ -429,7 +477,7 @@ def scan_jar(
         class_names = sorted(
             _class_name(name)
             for name in archive.namelist()
-            if _is_inspectable_class(name)
+            if _is_inspectable_class(archive, name)
         )
         candidates = [
             (class_name, bucket)
@@ -783,6 +831,12 @@ def validate_contract(
         ]
         if invalid:
             raise ValueError("contract target repositories must use HTTPS URLs")
+    if "runtime_dependencies" in target:
+        _validate_unique_strings(
+            target["runtime_dependencies"],
+            "contract target runtime_dependencies",
+            allow_empty=True,
+        )
     unresolved = []
     seen_ids = set()
     seen_classes = set()
@@ -874,6 +928,10 @@ def validate_contract(
             raise ValueError("complete contract target requires dependency")
         if not isinstance(target.get("repositories"), list):
             raise ValueError("complete contract target requires repositories")
+        if not isinstance(target.get("runtime_dependencies"), list):
+            raise ValueError(
+                "complete contract target requires runtime_dependencies"
+            )
         verification = contract.get("verification")
         if not isinstance(verification, dict):
             raise ValueError("complete contract requires verification")
@@ -1004,7 +1062,10 @@ def _bundled_files(contract: dict) -> dict[str, bytes]:
         "fixture": fixture,
         "expectedTests": contract["verification"]["expected_game_tests"],
         "dependencies": [target["dependency"]],
-        "runtimeDependencies": [target["dependency"]],
+        "runtimeDependencies": [
+            target["dependency"],
+            *target["runtime_dependencies"],
+        ],
         "repositories": target["repositories"],
         "auditArtifact": {
             "dependency": target["dependency"],
@@ -1145,6 +1206,10 @@ def _wrapper_files() -> dict[str, bytes]:
     )
 
 
+def _toml_basic_string(value: str) -> str:
+    return json.dumps(value, ensure_ascii=False)
+
+
 def _addon_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
     target = contract["target"]
     mod_id = target["mod_id"]
@@ -1187,6 +1252,10 @@ mod_group_id={package}
     repository_lines = "".join(
         f'    maven {{ url = uri("{repository}") }}\n'
         for repository in target["repositories"]
+    )
+    runtime_dependency_lines = "".join(
+        f'    runtimeOnly("{dependency}")\n'
+        for dependency in target["runtime_dependencies"]
     )
     build = f"""plugins {{
     id 'java-library'
@@ -1243,6 +1312,7 @@ dependencies {{
     runtimeOnly("vazkii.patchouli:Patchouli:${{patchouli_version}}")
     compileOnly("{target['dependency']}")
     runtimeOnly("{target['dependency']}")
+{runtime_dependency_lines}
     compatKitTargetArtifact("{target['dependency']}")
 }}
 
@@ -1344,7 +1414,7 @@ license="MIT"
 [[mods]]
 modId="{addon_id}"
 version="${{file.jarVersion}}"
-displayName="{target['display_name']} Auto Storage Integration"
+displayName={_toml_basic_string(target['display_name'] + ' Auto Storage Integration')}
 
 [[dependencies.{addon_id}]]
 modId="auto_storage"

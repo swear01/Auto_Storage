@@ -81,10 +81,12 @@ outputs, and capability mutations requiring simulation are persisted. Without
 `--source`, scans are cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
-Capability mutation detection reads both source-like method signatures and
-the `methodName:(descriptor)` form emitted by `javap -c -p`.
+Chance, randomness, generic-ingredient, and capability-mutation detection read
+both source-like method signatures and the `methodName:(descriptor)` form
+emitted by `javap -c -p`.
 Named nested classes are audited and mapped back to their top-level Java source;
-anonymous, local, and synthetic `$<number>` classes are excluded.
+anonymous/local `$<number>` classes and every class carrying the JVM
+`ACC_SYNTHETIC` access flag are excluded.
 
 Archive limits, candidate counts, signature size, source-file counts, malformed
 metadata, ambiguous multi-mod jars, missing JDK tools, and `javap` failures all
@@ -117,7 +119,8 @@ An accepted family records:
 5. station-work and item/fluid/energy/chemical/addon-resource costs;
 6. deterministic bounds and source/class/method evidence;
 7. target Maven repositories as explicit HTTPS URLs;
-8. fixture, exact GameTest count, authoritative GameTest task, Gradle gates,
+8. every additional required runtime artifact as an explicit dependency;
+9. fixture, exact GameTest count, authoritative GameTest task, Gradle gates,
    and every required check mapped to `{task, source, marker}` evidence.
 
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
@@ -126,7 +129,10 @@ Repository declarations are build inputs, not discovery hints. A target
 published through Modrinth Maven, Curse Maven, or its own Maven must list the
 required repository in `target.repositories`; an empty list means Maven
 Central is sufficient. Generated addons copy only these reviewed repositories
-and never guess a repository from the dependency coordinate.
+and never guess a repository from the dependency coordinate. Required
+target-side runtime artifacts belong in `target.runtime_dependencies`; bundled
+descriptors and external addon builds copy the exact reviewed list instead of
+depending on transitive metadata or hand edits.
 
 ### 4. Scaffold a RED integration
 
@@ -165,7 +171,9 @@ GameTest, required Patchouli runtime, and reusable GitHub Actions workflow. It
 cannot compile against Auto Storage implementation classes. The separate
 source audit is copied to `compat/audit.json`; its `build` and
 `runGameTestServer` gates also resolve exactly one target jar and verify
-`source_audit_sha256`.
+`source_audit_sha256`. Target display names are serialized as TOML basic
+strings, so quotes, backslashes, control characters, and newlines cannot break
+the generated metadata.
 
 The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the

@@ -21,6 +21,11 @@
           "type": "array",
           "items": {"type": "string", "pattern": "^https://\\S+$"},
           "uniqueItems": true
+        },
+        "runtime_dependencies": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
         }
       }
     },

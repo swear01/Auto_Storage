@@ -28,8 +28,9 @@ python3 --version
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
-repositories, and evidence. Each required verification check must name the
-successful Gradle task plus a source glob and marker; the declared
+repositories, additional required runtime artifacts, and evidence. Each
+required verification check must name the successful Gradle task plus a source
+glob and marker; the declared
 `game_test_task` must report exactly `expected_game_tests` passing tests. After
 the contract has no `needs_decision` entry, pass the same committed audit to
 every later command. Validation compares that audit's exact candidate set with
@@ -41,7 +42,9 @@ private bytecode is inspected for hidden randomness, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded output,
 and capability mutations requiring simulation, but is never stored in the
 audit. Named nested classes are included and mapped to their top-level source;
-anonymous, local, and synthetic classes are excluded.
+anonymous/local classes and class files carrying `ACC_SYNTHETIC` are excluded.
+Chance, randomness, generic-ingredient, and capability-mutation method calls
+accept the descriptor syntax emitted by `javap -c -p`.
 
 ```bash
 ./compat-kit scaffold --addon contract.json --audit audit.json \

@@ -1015,6 +1015,11 @@
       "code": "generic_ingredients",
       "disposition": "needs_decision",
       "evidence": [
+        "appeng.client.guidebook.RecipeTypeContributions#getIngredients",
+        "appeng.integration.modules.emi.EmiTransformRecipe#getIngredients",
+        "appeng.integration.modules.emi.EmiUseCraftingRecipeHandler#getIngredients",
+        "appeng.integration.modules.rei.TransformRecipeWrapper#getIngredients",
+        "appeng.integration.modules.rei.transfer.UseCraftingRecipeTransfer#getIngredients",
         "appeng.recipes.entropy.EntropyRecipe#getIngredients",
         "appeng.recipes.game.AddItemUpgradeRecipe#getIngredients",
         "appeng.recipes.game.RemoveItemUpgradeRecipe#getIngredients",
@@ -1032,6 +1037,16 @@
       "disposition": "needs_decision",
       "evidence": [
         "appeng.recipes.transform.TransformLogic: Random"
+      ]
+    },
+    {
+      "code": "simulation_required",
+      "disposition": "needs_decision",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler#fill",
+        "appeng.integration.modules.emi.AbstractRecipeHandler$Result$EncodeWithCraftables#fill",
+        "appeng.integration.modules.rei.transfer.UseCraftingRecipeTransfer#fill",
+        "appeng.recipes.game.RemoveItemUpgradeRecipe#extractItem"
       ]
     },
     {
