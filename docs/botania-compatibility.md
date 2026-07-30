@@ -2,7 +2,7 @@
 
 ## Status
 
-GitHub [#13](https://github.com/swear01/Magic_Storage/issues/13) has one safe server-side compatibility slice for Botania on NeoForge 1.21.1. Botania remains optional. Auto Storage loads its Botania-linked class only after `ModList` confirms `botania`; the normal absent-mod dedicated server does not link Botania classes.
+GitHub [#13](https://github.com/swear01/Auto_Storage/issues/13) has one safe server-side compatibility slice for Botania on NeoForge 1.21.1. Botania remains optional. Auto Storage loads its Botania-linked class only after `ModList` confirms `botania`; the normal absent-mod dedicated server does not link Botania classes.
 
 The player dependency is not pinned to one Botania build. CI uses official timestamped build `vazkii.botania:botania-neoforge-1.21.1:455-20260723.172746-31` from the upstream `455-SNAPSHOT` series as representative evidence. `verifyBotaniaFixtureArtifact` also requires that build31 jar to match SHA-256:
 

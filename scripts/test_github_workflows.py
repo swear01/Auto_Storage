@@ -254,7 +254,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         agents = self.read_required("AGENTS.md")
         structure = self.read_required("docs/structure.md")
         combined = "\n".join([readme, notes, agents, structure])
-        self.assertIn("https://github.com/swear01/Magic_Storage", combined)
+        self.assertIn("https://github.com/swear01/Auto_Storage", combined)
         self.assertIn("GitHub Actions", combined)
         self.assertIn("./gradlew runGameTestServer", combined)
         self.assertIn("tag `v<mod_version>`", combined)
@@ -371,7 +371,7 @@ class GitHubWorkflowTests(unittest.TestCase):
                 self.assertIn("Python 302", self.read_required(relative_path))
 
     def test_0_2_0_release_evidence_is_recorded(self):
-        release_url = "https://github.com/swear01/Magic_Storage/releases/tag/v0.2.0"
+        release_url = "https://github.com/swear01/Auto_Storage/releases/tag/v0.2.0"
         release_hash = "64cbe2705f2a1d20f83eb1bf848c1df7b74ffe9dab0e4fb958cfde498457b43c"
         for relative_path in (
             "docs/notes.md",

@@ -1,6 +1,6 @@
 # Typed Resource Storage Architecture
 
-> Status: implemented foundation under GitHub [#9](https://github.com/swear01/Magic_Storage/issues/9). Item, fluid, NeoForge Energy, optional Mekanism chemical, Botania Mana, Ars Nouveau Source, and registered addon kinds now share one live ledger and transaction domain. Terminal listing and its resource selector, passive Bus capabilities, Creative unlimited type capacity, the public resource-kind API, and deterministic typed recipe families are connected.
+> Status: implemented foundation under GitHub [#9](https://github.com/swear01/Auto_Storage/issues/9). Item, fluid, NeoForge Energy, optional Mekanism chemical, Botania Mana, Ars Nouveau Source, and registered addon kinds now share one live ledger and transaction domain. Terminal listing and its resource selector, passive Bus capabilities, Creative unlimited type capacity, the public resource-kind API, and deterministic typed recipe families are connected.
 
 ## Product boundary
 
@@ -52,7 +52,7 @@ Variant data is part of identity. Item and fluid components cannot be discarded 
 
 ### Botania Mana
 
-GitHub [#13](https://github.com/swear01/Magic_Storage/issues/13) now has its first safe production slice. `botania:mana` is a conditional variantless resource kind in the same long Core ledger and appears under Energy only while Botania is loaded. Held transfer currently accepts only a finite local Mana Tablet. It applies public `ManaItem.LOOKUP` to a private one-count copy, requires the exact requested delta to be observable after mutation, and then commits the cursor replacement and Core delta together. Creative/infinite tablets, Mana Mirrors bound to an external pool, and every other container whose exact local delta cannot be proven are rejected.
+GitHub [#13](https://github.com/swear01/Auto_Storage/issues/13) now has its first safe production slice. `botania:mana` is a conditional variantless resource kind in the same long Core ledger and appears under Energy only while Botania is loaded. Held transfer currently accepts only a finite local Mana Tablet. It applies public `ManaItem.LOOKUP` to a private one-count copy, requires the exact requested delta to be observable after mutation, and then commits the cursor replacement and Core delta together. Creative/infinite tablets, Mana Mirrors bound to an external pool, and every other container whose exact local delta cannot be proven are rejected.
 
 Mana recipe costs join the same typed transaction as items, water, catalysts, container remainders, and every output. The implemented families and exact fail-closed boundaries are documented in [`botania-compatibility.md`](botania-compatibility.md). Passive Bus transfer to Botania block receivers remains excluded: the audited `receiveMana(int)` contract has no simulation operation, so calling it during planning would violate simulate-then-commit.
 
@@ -108,7 +108,7 @@ Escrow is saved in the Bus BlockEntity and owner-stripped Bus drop. Each live Bu
 
 Current optional recipe bridges cover Farmer's Delight, Mekanism, Botania, Modern Industrialization, Ars Nouveau, EvilCraft, Powah, Industrial Foregoing, and Create. Their exact family lists and fail-closed boundaries are maintained in the corresponding compatibility documents. EvilCraft Blood uses the existing Fluid kind rather than introducing another resource kind. Powah Energizing consumes the existing NeoForge Energy kind rather than introducing a Powah-specific power key. Industrial Foregoing reuses the existing Fluid and NeoForge Energy kinds; it does not create machine-specific resource keys. Create reuses Item and Fluid and does not invent RPM/stress/FE resources. PneumaticCraft Air is not registered because its handler has no simulation/result contract, permits negative values, and derives pressure from mutable volume. Every accepted plan uses the same typed transaction and preserves its provider's exact input, output, catalyst, remainder, work, and resource-unit contracts.
 
-Chance, dynamic world/player callbacks, arbitrary mutation callbacks, and external-machine send-and-wait remain unsupported. Multi-step graph planning is still future work under GitHub [#1](https://github.com/swear01/Magic_Storage/issues/1).
+Chance, dynamic world/player callbacks, arbitrary mutation callbacks, and external-machine send-and-wait remain unsupported. Multi-step graph planning is still future work under GitHub [#1](https://github.com/swear01/Auto_Storage/issues/1).
 
 ## Delivery phases
 

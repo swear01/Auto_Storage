@@ -8,7 +8,7 @@
   "prompt": "flat front-facing 16x16 Minecraft block face, same carved dark deepslate and polished blackstone rectangular storage housing, same chunky square panel silhouette, concentrated small amethyst core latch with two tiny cyan sparks, magical but restrained accents, crisp limited-palette vanilla-style pixel art, no text, no letters, no numbers, no gradients, no perspective, no 3D cube, no scene",
   "size": 16,
   "seed": 64036,
-  "reference_image": "/Users/swear/Documents/diy_minecraft_mods/Magic_Storage/art/texture-generation/20260713-cohesive-16x16/block/storage_unit_t1_01.png",
+  "reference_image": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/art/texture-generation/20260713-cohesive-16x16/block/storage_unit_t1_01.png",
   "img2img": true,
   "input": {
     "prompt": "flat front-facing 16x16 Minecraft block face, same carved dark deepslate and polished blackstone rectangular storage housing, same chunky square panel silhouette, concentrated small amethyst core latch with two tiny cyan sparks, magical but restrained accents, crisp limited-palette vanilla-style pixel art, no text, no letters, no numbers, no gradients, no perspective, no 3D cube, no scene",
@@ -24,8 +24,8 @@
     "input_image": "[data:uri omitted]",
     "strength": 0.66
   },
-  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Magic_Storage/src/main/resources/assets/magic_storage/textures/block/storage_unit_t6.png",
-  "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Magic_Storage/art/texture-generation/20260713-cohesive-16x16/block/storage_unit_t6.preview.png",
+  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/magic_storage/textures/block/storage_unit_t6.png",
+  "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/art/texture-generation/20260713-cohesive-16x16/block/storage_unit_t6.preview.png",
   "raw_png": null,
   "selected_candidate": "storage_unit_t6_02"
 }

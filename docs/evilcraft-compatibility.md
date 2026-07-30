@@ -1,6 +1,6 @@
 # EvilCraft Compatibility
 
-> Status: automated complete for GitHub [#16](https://github.com/swear01/Magic_Storage/issues/16). The combined EMI/TMRV GUI pack deliberately excludes EvilCraft; this is an upstream recipe-viewer lifecycle boundary, not missing Auto Storage server coverage.
+> Status: automated complete for GitHub [#16](https://github.com/swear01/Auto_Storage/issues/16). The combined EMI/TMRV GUI pack deliberately excludes EvilCraft; this is an upstream recipe-viewer lifecycle boundary, not missing Auto Storage server coverage.
 
 ## Supported
 

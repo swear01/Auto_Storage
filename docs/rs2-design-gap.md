@@ -1,13 +1,13 @@
 # RS2 Design Heuristics — Gap Analysis
 
-> 對照 Refined Storage 2 的設計慣例(design heuristics),盤點 Magic_Storage 尚未採用的。
+> 對照 Refined Storage 2 的設計慣例(design heuristics),盤點 Auto Storage 尚未採用的。
 > 僅取**模式**,不照抄(授權不同)。RS2 參考:DeepWiki `refinedmods/refinedstorage2`。
-> 注意:Magic_Storage 有**刻意的哲學**(配方書一鍵合成、無限數量/限種類、合成能量時間銀行),
+> 注意:Auto Storage 有**刻意的哲學**(配方書一鍵合成、無限數量/限種類、合成能量時間銀行),
 > 部分 RS2 慣例是**故意分歧**——下方分「該採用」與「故意分歧」。
 
 ## A. 該採用(契合現有哲學,提升健壯/擴展/UX)
 
-| # | RS2 慣例 | Magic_Storage 現況 | 缺口/風險 | 建議 | 工作量 |
+| # | RS2 慣例 | Auto Storage 現況 | 缺口/風險 | 建議 | 工作量 |
 |---|---------|------------------|----------|------|--------|
 | A1 | **持久化 network graph + node visitor 增量更新**:RS2 維護常駐的 NodeGraph,方塊增刪時只增量更新受影響節點 | 已採用安全範圍:放置 callback 合併到 next-tick pass；單一安全放置用 cached-set bounded path check 後 `tryIncrementalAdd`，批次/破壞/不確定拓樸用 bounded full `rebuildNetwork`;活塞 old/new positions 與指令放置同樣覆蓋。Terminal/Bus 另 cache access path，每次只驗目前 loaded chunks/network blocks，失效時找 alternate loaded path | 大網路增量 depth check 仍需走 cached set BFS，破壞/分裂仍 O(min(全網,`MAX_NETWORK_BLOCKS`));尚無常駐 adjacency graph | 若真的需要,再改成常駐鄰接圖 + 局部 invalidation;目前低優先 | 大 |
 | A2 | **統一 Storage 介面**:`insert/extract(resource, amount, Action, Actor)`,回傳實際處理量 | 已採用：Item/fluid/FE/chemical/addon kind共用`StorageResourceLedger`/`StorageResourceTransaction`；Core mutation可帶`Action`與structured `BusActor`，generic/native Bus與Terminal container都走同一server transaction domain | (到位；`BusTransferGuard`以network/direction/operation identity拒絕recursive same-network/inverse self-call，public addon handler另有simulate/amount exact contract) | 新資源kind只經public registry/strategy接入，不新增平行Core map或client state | 小(慣例) |
@@ -21,7 +21,7 @@
 
 ## B. 故意分歧(要改哲學才採用 — 先別動,列為選項)
 
-| # | RS2 慣例 | 為何 Magic_Storage 不同 | 採用條件 |
+| # | RS2 慣例 | 為何 Auto Storage 不同 | 採用條件 |
 |---|---------|----------------------|---------|
 | B1 | **autocrafting 依賴樹任務系統**(Pattern → 算樹 → 遞迴合成中間物 → 執行) | 哲學是「配方書一鍵、單層合成、合成能量取代等待」——EMI 已支援 exact recipe 的單層立即執行，但刻意不做 RS2 pattern tree/排程 | 若要「自動合成多階產物」才採用(大工程) |
 | B2 | **每個 disk 有容量 + 優先序 + 分區(白/黑名單/voiding)** | 哲學是「無限數量、只限種類數;Unit 只貢獻種類槽」 | 若要改成「容量制」才採用 |

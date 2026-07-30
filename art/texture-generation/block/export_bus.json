@@ -20,7 +20,7 @@
     "remove_bg": false,
     "bypass_prompt_expansion": false
   },
-  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Magic_Storage/src/main/resources/assets/magic_storage/textures/block/export_bus.png",
-  "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Magic_Storage/src/main/resources/assets/magic_storage/textures/block/export_bus.preview.png",
+  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/magic_storage/textures/block/export_bus.png",
+  "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/magic_storage/textures/block/export_bus.preview.png",
   "raw_png": null
 }

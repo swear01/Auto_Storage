@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Adopt the "fits-our-philosophy" Refined Storage 2 design heuristics (A1–A7 from `docs/rs2-design-gap.md`) to make Magic_Storage more robust, scalable, and pleasant — without changing the recipe-book / infinite-quantity / crafting-energy philosophy.
+**Goal:** Adopt the "fits-our-philosophy" Refined Storage 2 design heuristics (A1–A7 from `docs/rs2-design-gap.md`) to make Auto Storage more robust, scalable, and pleasant — without changing the recipe-book / infinite-quantity / crafting-energy philosophy.
 
 **Architecture:** Contract-first + phased. Foundational contracts (Actor, change-events, comparison modes, view-settings sync) land first in the data layer; UI/consumers build on them; the two large rewrites (incremental grid delta, incremental network graph) come last. Most heuristics funnel through `StorageCoreBlockEntity` + the terminal menus/screens, so work-units are sequenced by file ownership to stay disjoint per dispatch batch.
 

@@ -10,7 +10,7 @@ This is the maintainer runbook for the tag-driven alpha publisher in
 - Main CI: `30467153149`
 - Release run: `30468162688`
 - GitHub prerelease:
-  <https://github.com/swear01/Magic_Storage/releases/tag/v0.2.0>
+  <https://github.com/swear01/Auto_Storage/releases/tag/v0.2.0>
 - Canonical jar SHA-256:
   `64cbe2705f2a1d20f83eb1bf848c1df7b74ffe9dab0e4fb958cfde498457b43c`
 
@@ -39,8 +39,8 @@ settings, and its `0.2.0` file remains under review.
 - Loader: NeoForge
 - Environment: Client and server
 - License: **MIT**
-- Source: <https://github.com/swear01/Magic_Storage>
-- Issues: <https://github.com/swear01/Magic_Storage/issues>
+- Source: <https://github.com/swear01/Auto_Storage>
+- Issues: <https://github.com/swear01/Auto_Storage/issues>
 - Modrinth categories: Storage, Technology, Utility, Management
 - Modrinth featured tags: Storage, Technology, Utility
 - CurseForge categories: Storage; Utility & QoL; Processing; Automation

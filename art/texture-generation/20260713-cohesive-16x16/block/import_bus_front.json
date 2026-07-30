@@ -22,8 +22,8 @@
     "bypass_prompt_expansion": true,
     "seed": 64051
   },
-  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Magic_Storage/src/main/resources/assets/magic_storage/textures/block/import_bus_front.png",
-  "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Magic_Storage/art/texture-generation/20260713-cohesive-16x16/block/import_bus_front.preview.png",
+  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/magic_storage/textures/block/import_bus_front.png",
+  "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/art/texture-generation/20260713-cohesive-16x16/block/import_bus_front.preview.png",
   "raw_png": null,
   "selected_candidate": "import_bus_front_01"
 }
