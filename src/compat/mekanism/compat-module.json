@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatMekanism",
   "fixture": "mekanismFixture",
+  "expectedTests": 47,
   "dependencies": [
     "maven.modrinth:mekanism:${mekanism_ci_version}",
     "maven.modrinth:emi:${emi_runtime_version}"

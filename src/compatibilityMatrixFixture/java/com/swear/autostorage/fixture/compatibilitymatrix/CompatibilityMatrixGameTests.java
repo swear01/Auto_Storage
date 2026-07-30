@@ -29,6 +29,7 @@ public final class CompatibilityMatrixGameTests {
             GameTestHelper helper
     ) {
         for (String modId : List.of(
+                "ae2",
                 "mekanism",
                 "botania",
                 "ironfurnaces",
@@ -47,6 +48,7 @@ public final class CompatibilityMatrixGameTests {
             }
         }
         for (String path : List.of(
+                "ae2_inscriber",
                 "mekanism_energized_smelter",
                 "botania_mana_pool",
                 "farmers_delight_cooking_pot",
@@ -110,6 +112,8 @@ public final class CompatibilityMatrixGameTests {
             GameTestHelper helper
     ) {
         for (ResourceLocation recipeId : List.of(
+                ResourceLocation.fromNamespaceAndPath(
+                        "ae2", "inscriber/logic_processor"),
                 ResourceLocation.fromNamespaceAndPath(
                         "botania", "mana_infusion/biscuit_of_totality"),
                 ResourceLocation.fromNamespaceAndPath(

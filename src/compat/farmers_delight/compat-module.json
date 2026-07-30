@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatFarmersDelight",
   "fixture": "farmersDelightFixture",
+  "expectedTests": 7,
   "dependencies": [
     "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
   ]

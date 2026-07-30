@@ -1,0 +1,848 @@
+import hashlib
+import importlib.util
+import json
+import subprocess
+import tempfile
+import unittest
+import zipfile
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+MODULE_PATH = ROOT / "tools/compat-kit/compat_kit.py"
+
+
+def load_compat_kit():
+    if not MODULE_PATH.is_file():
+        raise AssertionError("missing tools/compat-kit/compat_kit.py")
+    spec = importlib.util.spec_from_file_location("auto_storage_compat_kit", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def write_fixture_jar(path: Path, version: str = "1.2.3", extra_class: str | None = None):
+    mods_toml = f"""
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="samplemod"
+version="{version}"
+displayName="Sample Machines"
+""".strip()
+    entries = {
+        "META-INF/neoforge.mods.toml": mods_toml.encode(),
+        "samplemod/recipe/CrushingRecipe.class": b"recipe",
+        "samplemod/recipe/ChanceRecipe.class": b"chance",
+        "samplemod/api/FluidHandler.class": b"fluid",
+        "samplemod/machine/CrusherBlock.class": b"station",
+        "samplemod/decor/CasingBlock.class": b"decor",
+        "samplemod/Unrelated.class": b"other",
+    }
+    if extra_class:
+        entries[extra_class.replace(".", "/") + ".class"] = b"extra"
+    with zipfile.ZipFile(path, "w") as archive:
+        for name, payload in sorted(entries.items()):
+            info = zipfile.ZipInfo(name, (2020, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, payload)
+
+
+class CompatKitAuditTests(unittest.TestCase):
+    def setUp(self):
+        self.compat_kit = load_compat_kit()
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+        self.jar = self.root / "samplemod.jar"
+        write_fixture_jar(self.jar)
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    @staticmethod
+    def signatures(class_name: str) -> str:
+        signatures = {
+            "samplemod.recipe.CrushingRecipe": (
+                "public final class samplemod.recipe.CrushingRecipe "
+                "implements net.minecraft.world.item.crafting.Recipe { "
+                "public net.minecraft.world.item.ItemStack getResultItem(); }"
+            ),
+            "samplemod.recipe.ChanceRecipe": (
+                "public final class samplemod.recipe.ChanceRecipe { "
+                "public float getChance(); public java.util.Random random(); }"
+            ),
+            "samplemod.api.FluidHandler": (
+                "public interface samplemod.api.FluidHandler { "
+                "public net.neoforged.neoforge.fluids.FluidStack getFluid(); }"
+            ),
+            "samplemod.machine.CrusherBlock": (
+                "public final class samplemod.machine.CrusherBlock "
+                "extends net.minecraft.world.level.block.Block { }"
+            ),
+        }
+        return signatures[class_name]
+
+    def test_scan_is_deterministic_compact_and_fact_only(self):
+        source = self.root / "source"
+        source_file = source / "src/main/java/samplemod/recipe/CrushingRecipe.java"
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(
+            "package samplemod.recipe;\n"
+            "final class CrushingRecipe { int processingTime; }\n"
+        )
+        unrelated_same_name = (
+            source
+            / "src/main/java/samplemod/unrelated/CrushingRecipe.java"
+        )
+        unrelated_same_name.parent.mkdir(parents=True)
+        unrelated_same_name.write_text(
+            "package samplemod.unrelated;\nfinal class CrushingRecipe {}\n"
+        )
+
+        first = self.compat_kit.scan_jar(
+            self.jar,
+            source=source,
+            signature_reader=self.signatures,
+        )
+        second = self.compat_kit.scan_jar(
+            self.jar,
+            source=source,
+            signature_reader=self.signatures,
+        )
+
+        self.assertEqual(first, second)
+        self.assertEqual(1, first["schema"])
+        self.assertEqual("auto_storage_compat_audit", first["kind"])
+        self.assertEqual(
+            {
+                "mod_id": "samplemod",
+                "display_name": "Sample Machines",
+                "version": "1.2.3",
+            },
+            first["target"],
+        )
+        self.assertEqual(hashlib.sha256(self.jar.read_bytes()).hexdigest(), first["artifact"]["sha256"])
+        self.assertEqual(self.jar.stat().st_size, first["artifact"]["size"])
+        self.assertEqual(
+            [
+                "samplemod.recipe.ChanceRecipe",
+                "samplemod.recipe.CrushingRecipe",
+            ],
+            [candidate["class"] for candidate in first["candidates"]["recipe_classes"]],
+        )
+        self.assertEqual(
+            ["samplemod.api.FluidHandler"],
+            [candidate["class"] for candidate in first["candidates"]["resource_apis"]],
+        )
+        self.assertEqual(
+            ["samplemod.machine.CrusherBlock"],
+            [candidate["class"] for candidate in first["candidates"]["station_classes"]],
+        )
+        self.assertNotIn("samplemod.decor.CasingBlock", json.dumps(first))
+        self.assertEqual(
+            ["src/main/java/samplemod/recipe/CrushingRecipe.java"],
+            first["source"]["files"],
+        )
+        self.assertNotIn(str(self.root), json.dumps(first))
+        self.assertNotIn("consumes", json.dumps(first))
+        self.assertNotIn("catalyst", json.dumps(first))
+
+    def test_scan_records_risks_with_exact_evidence_but_does_not_decide_semantics(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+
+        risks = {risk["code"]: risk for risk in audit["risks"]}
+        self.assertIn("chance_output", risks)
+        self.assertEqual(
+            ["samplemod.recipe.ChanceRecipe#getChance"],
+            risks["chance_output"]["evidence"],
+        )
+        self.assertIn("randomness", risks)
+        self.assertEqual(
+            ["samplemod.recipe.ChanceRecipe#random"],
+            risks["randomness"]["evidence"],
+        )
+        for risk in audit["risks"]:
+            self.assertEqual("needs_decision", risk["disposition"])
+
+    def test_scan_uses_private_bytecode_for_risks_without_publishing_it(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            risk_reader=lambda class_name: (
+                "public NonNullList getIngredients(); "
+                "private MultiblockController controller; "
+                "private BlockEntity machine; "
+                "private void execute() { "
+                "RandomSource random; IItemHandler.insertItem(); }"
+                if class_name == "samplemod.recipe.CrushingRecipe"
+                else self.signatures(class_name)
+            ),
+        )
+
+        randomness = next(
+            risk for risk in audit["risks"] if risk["code"] == "randomness"
+        )
+        self.assertIn(
+            "samplemod.recipe.CrushingRecipe: Random",
+            randomness["evidence"],
+        )
+        risks = {risk["code"]: risk for risk in audit["risks"]}
+        self.assertEqual(
+            ["samplemod.recipe.CrushingRecipe: multiblock API"],
+            risks["multiblock"]["evidence"],
+        )
+        self.assertEqual(
+            ["samplemod.recipe.CrushingRecipe: live machine state"],
+            risks["live_machine_state"]["evidence"],
+        )
+        self.assertEqual(
+            ["samplemod.recipe.CrushingRecipe#getIngredients"],
+            risks["generic_ingredients"]["evidence"],
+        )
+        self.assertEqual(
+            ["samplemod.recipe.CrushingRecipe#insertItem"],
+            risks["simulation_required"]["evidence"],
+        )
+        crushing = next(
+            candidate
+            for candidate in audit["candidates"]["recipe_classes"]
+            if candidate["class"] == "samplemod.recipe.CrushingRecipe"
+        )
+        self.assertNotIn("RandomSource", crushing["public_signature"])
+        self.assertEqual({"class", "public_signature"}, set(crushing))
+
+    def test_scan_allows_bounded_large_private_bytecode(self):
+        large_private_bytecode = (
+            "private void generated() { "
+            + ("aload_0 nop " * 24_000)
+            + "RandomSource random; }"
+        )
+        self.assertGreater(
+            len(large_private_bytecode.encode("utf-8")),
+            self.compat_kit.MAX_SIGNATURE_BYTES,
+        )
+
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            risk_reader=lambda class_name: (
+                large_private_bytecode
+                if class_name == "samplemod.recipe.CrushingRecipe"
+                else self.signatures(class_name)
+            ),
+        )
+
+        randomness = next(
+            risk for risk in audit["risks"] if risk["code"] == "randomness"
+        )
+        self.assertIn(
+            "samplemod.recipe.CrushingRecipe: Random",
+            randomness["evidence"],
+        )
+
+    def test_scan_cache_is_sha_keyed_and_does_not_repeat_javap(self):
+        cache = self.root / "cache"
+        first = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=self.signatures,
+        )
+
+        def unexpected_reader(_class_name: str):
+            raise AssertionError("cached scan unexpectedly invoked javap")
+
+        second = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=unexpected_reader,
+        )
+
+        self.assertEqual(first, second)
+        cached = (
+            cache
+            / first["artifact"]["sha256"]
+            / f"v{self.compat_kit.SCAN_CACHE_VERSION}"
+            / "audit.json"
+        )
+        self.assertEqual(first, json.loads(cached.read_text()))
+
+    def test_scan_ignores_cache_from_an_older_scanner_format(self):
+        cache = self.root / "cache"
+        artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
+        legacy = cache / artifact_sha / "audit.json"
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text("{}")
+        calls = []
+
+        def recording_reader(class_name: str):
+            calls.append(class_name)
+            return self.signatures(class_name)
+
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=recording_reader,
+        )
+
+        self.assertTrue(calls)
+        self.assertEqual(artifact_sha, audit["artifact"]["sha256"])
+
+    def test_scan_rejects_malformed_or_ambiguous_mod_metadata(self):
+        malformed = self.root / "malformed.jar"
+        with zipfile.ZipFile(malformed, "w") as archive:
+            archive.writestr("samplemod/Recipe.class", b"recipe")
+        with self.assertRaisesRegex(ValueError, "NeoForge mod metadata"):
+            self.compat_kit.scan_jar(malformed, signature_reader=lambda _: "")
+
+        ambiguous = self.root / "ambiguous.jar"
+        with zipfile.ZipFile(ambiguous, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="first"\nversion="1"\ndisplayName="First"\n'
+                '[[mods]]\nmodId="second"\nversion="1"\ndisplayName="Second"\n',
+            )
+        with self.assertRaisesRegex(ValueError, "exactly one mod"):
+            self.compat_kit.scan_jar(ambiguous, signature_reader=lambda _: "")
+
+    def test_decide_outputs_strict_needs_decision_contract_and_actions(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+
+        contract, actions = self.compat_kit.decide_audit(audit)
+
+        self.assertEqual(1, contract["schema"])
+        self.assertEqual("auto_storage_compat_contract", contract["kind"])
+        self.assertEqual(audit["target"], contract["target"])
+        self.assertTrue(contract["families"])
+        self.assertTrue(all(family["status"] == "needs_decision" for family in contract["families"]))
+        self.assertIn("samplemod.recipe.ChanceRecipe", actions)
+        self.assertIn("chance_output", actions)
+        self.assertIn("consumed inputs", actions)
+        self.assertIn("complete outputs", actions)
+        self.compat_kit.validate_contract(contract, require_complete=False)
+        with self.assertRaisesRegex(ValueError, "unresolved"):
+            self.compat_kit.validate_contract(contract, require_complete=True)
+
+    def test_decide_disambiguates_duplicate_simple_recipe_class_names(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        duplicate = dict(audit["candidates"]["recipe_classes"][0])
+        duplicate["class"] = "samplemod.legacy.ChanceRecipe"
+        audit["candidates"]["recipe_classes"].append(duplicate)
+
+        contract, _ = self.compat_kit.decide_audit(audit)
+
+        ids = [family["id"] for family in contract["families"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn("samplemod_recipe_chance_recipe", ids)
+        self.assertIn("samplemod_legacy_chance_recipe", ids)
+
+    def test_contract_validation_rejects_unknown_keys_and_incomplete_acceptance(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        contract, _ = self.compat_kit.decide_audit(audit)
+        contract["unexpected"] = True
+        with self.assertRaisesRegex(ValueError, "unknown keys.*unexpected"):
+            self.compat_kit.validate_contract(contract, require_complete=False)
+
+        del contract["unexpected"]
+        family = contract["families"][0]
+        family["status"] = "accepted"
+        with self.assertRaisesRegex(ValueError, "accepted family.*station"):
+            self.compat_kit.validate_contract(contract, require_complete=False)
+
+    def test_diff_reports_only_changed_evidence_and_contract_impact(self):
+        old = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        new_jar = self.root / "samplemod-new.jar"
+        write_fixture_jar(new_jar, version="1.3.0", extra_class="samplemod.recipe.PolishingRecipe")
+
+        def new_signatures(class_name: str) -> str:
+            if class_name == "samplemod.recipe.PolishingRecipe":
+                return (
+                    "public final class samplemod.recipe.PolishingRecipe "
+                    "implements net.minecraft.world.item.crafting.Recipe { }"
+                )
+            return self.signatures(class_name)
+
+        new = self.compat_kit.scan_jar(
+            new_jar,
+            signature_reader=new_signatures,
+        )
+        delta = self.compat_kit.diff_audits(old, new)
+
+        self.assertEqual("1.2.3", delta["from_version"])
+        self.assertEqual("1.3.0", delta["to_version"])
+        self.assertEqual(
+            ["samplemod.recipe.PolishingRecipe"],
+            delta["recipe_classes"]["added"],
+        )
+        self.assertEqual([], delta["recipe_classes"]["removed"])
+        self.assertTrue(delta["contract_affected"])
+        self.assertNotIn("samplemod.Unrelated", json.dumps(delta))
+
+    def accepted_contract(self) -> dict:
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        contract, _ = self.compat_kit.decide_audit(audit)
+        contract["target"]["dependency"] = "com.example:samplemod:1.2.3"
+        for family in contract["families"]:
+            if family["class"] == "samplemod.recipe.ChanceRecipe":
+                family["status"] = "rejected"
+                family["decision"] = "Random output cannot be represented deterministically."
+                continue
+            family.update(
+                {
+                    "status": "accepted",
+                    "recipe_type": "samplemod:crushing",
+                    "station": {
+                        "descriptor_id": "auto_storage:samplemod_crusher",
+                        "category": "process",
+                        "variants": [
+                            {
+                                "item": "samplemod:crusher",
+                                "rate": {"numerator": 1, "denominator": 1},
+                            }
+                        ],
+                    },
+                    "inputs": [
+                        {
+                            "role": "consume",
+                            "resource_kind": "item",
+                            "amount": 1,
+                            "selector": "recipe.input",
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "role": "primary",
+                            "resource_kind": "item",
+                            "amount": "recipe.output.count",
+                            "selector": "recipe.output",
+                        }
+                    ],
+                    "costs": [
+                        {
+                            "resource_kind": "auto_storage:station_work",
+                            "amount": "recipe.processing_time",
+                        }
+                    ],
+                    "decision": "Exact single-input output with bounded processing time.",
+                }
+            )
+        contract["verification"] = {
+            "fixture": "samplemodFixture",
+            "expected_game_tests": 1,
+            "gradle_tasks": [
+                "compileCompatSamplemodJava",
+                "runSamplemodGameTestServer",
+            ],
+            "checks": list(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+        }
+        self.compat_kit.validate_contract(contract, require_complete=True)
+        return contract
+
+    def test_bundled_scaffold_is_descriptor_owned_fail_closed_and_drift_checked(self):
+        contract = self.accepted_contract()
+        output_root = self.root / "bundled"
+
+        generated = self.compat_kit.scaffold_bundled(contract, output_root)
+
+        expected = {
+            "src/compat/samplemod/compat-module.json",
+            "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/SamplemodCompat.java",
+            "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/SamplemodCompatModule.java",
+            "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/SamplemodFixtureMod.java",
+            "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/SamplemodIntegrationGameTests.java",
+            "src/samplemodFixture/resources/META-INF/neoforge.mods.toml",
+            "src/samplemodFixture/resources/data/auto_storage_samplemod_fixture/structure/craftingtests.platform.nbt",
+            "src/compat/samplemod/.compat-kit-manifest.json",
+        }
+        self.assertEqual(
+            expected,
+            {path.relative_to(output_root).as_posix() for path in generated},
+        )
+        descriptor = json.loads(
+            (output_root / "src/compat/samplemod/compat-module.json").read_text()
+        )
+        self.assertEqual(["samplemod"], descriptor["requires"])
+        self.assertEqual(
+            ["com.example:samplemod:1.2.3"],
+            descriptor["dependencies"],
+        )
+        self.assertEqual(1, descriptor["expectedTests"])
+        module = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompatModule.java"
+        ).read_text()
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        ).read_text()
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        ).read_text()
+        self.assertEqual(1, module.count("context.register("))
+        self.assertIn("SamplemodCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn("throw new IllegalStateException", adapter)
+        self.assertIn("compat-kit scaffold is intentionally RED", adapter)
+        for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS:
+            self.assertIn(check, fixture)
+
+        regenerated = self.compat_kit.scaffold_bundled(contract, output_root)
+        self.assertEqual(generated, regenerated)
+        descriptor_path = output_root / "src/compat/samplemod/compat-module.json"
+        descriptor_path.write_text(descriptor_path.read_text() + "\n")
+        with self.assertRaisesRegex(ValueError, "generated file drift"):
+            self.compat_kit.scaffold_bundled(contract, output_root)
+
+    def test_external_scaffold_is_api_only_and_has_reusable_ci(self):
+        contract = self.accepted_contract()
+        output = self.root / "samplemod-auto-storage"
+
+        generated = self.compat_kit.scaffold_addon(contract, output)
+
+        relative = {path.relative_to(output).as_posix() for path in generated}
+        for required in (
+            "build.gradle",
+            "gradle.properties",
+            "settings.gradle",
+            "gradlew",
+            "gradle/wrapper/gradle-wrapper.jar",
+            "gradle/wrapper/gradle-wrapper.properties",
+            ".github/workflows/ci.yml",
+            "src/main/java/com/example/samplemodautostorage/SamplemodAutoStorageAddon.java",
+            "src/main/java/com/example/samplemodautostorage/SamplemodCompat.java",
+            "src/main/java/com/example/samplemodautostorage/SamplemodIntegrationGameTests.java",
+            "src/main/resources/data/samplemod_auto_storage/structure/craftingtests.platform.nbt",
+            ".compat-kit-manifest.json",
+        ):
+            self.assertIn(required, relative)
+        build = (output / "build.gradle").read_text()
+        entrypoint = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/"
+            "SamplemodAutoStorageAddon.java"
+        ).read_text()
+        workflow = (output / ".github/workflows/ci.yml").read_text()
+        self.assertIn(
+            'compileOnly("com.swear.autostorage:auto_storage:${auto_storage_version}:api")',
+            build,
+        )
+        self.assertIn('runtimeOnly("com.example:samplemod:1.2.3")', build)
+        self.assertIn("gameTestServer", build)
+        self.assertNotIn("src/main", build)
+        self.assertEqual(1, entrypoint.count("AutoStorageAddon.register("))
+        self.assertIn("./gradlew build", workflow)
+        self.assertIn("./gradlew runGameTestServer", workflow)
+        self.assertIn("compat-kit verify", workflow)
+        self.assertNotIn("implementation project", build)
+
+    def test_scaffold_rejects_unresolved_or_semantically_incomplete_contracts(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        unresolved, _ = self.compat_kit.decide_audit(audit)
+        with self.assertRaisesRegex(ValueError, "unresolved"):
+            self.compat_kit.scaffold_bundled(unresolved, self.root / "bundled")
+        with self.assertRaisesRegex(ValueError, "unresolved"):
+            self.compat_kit.scaffold_addon(unresolved, self.root / "addon")
+
+    def test_schemas_are_versioned_strict_and_cover_all_machine_readable_documents(self):
+        schema_root = ROOT / "tools/compat-kit/schema"
+        expected = {
+            "compat-audit.schema.json": "auto_storage_compat_audit",
+            "compat-contract.schema.json": "auto_storage_compat_contract",
+            "compat-delta.schema.json": "auto_storage_compat_delta",
+            "compat-report.schema.json": "auto_storage_compat_report",
+        }
+        for name, kind in expected.items():
+            with self.subTest(schema=name):
+                schema = json.loads((schema_root / name).read_text())
+                self.assertEqual("https://json-schema.org/draft/2020-12/schema", schema["$schema"])
+                self.assertFalse(schema["additionalProperties"])
+                self.assertIn("schema", schema["required"])
+                self.assertIn("kind", schema["required"])
+                self.assertEqual({"const": 1}, schema["properties"]["schema"])
+                self.assertEqual({"const": kind}, schema["properties"]["kind"])
+        contract_schema = json.loads(
+            (schema_root / "compat-contract.schema.json").read_text()
+        )
+        family_schema = contract_schema["properties"]["families"]["items"]
+        verification_schema = contract_schema["properties"]["verification"]
+        self.assertFalse(family_schema["additionalProperties"])
+        self.assertFalse(verification_schema["additionalProperties"])
+        self.assertEqual(
+            {
+                "fixture",
+                "expected_game_tests",
+                "gradle_tasks",
+                "checks",
+            },
+            set(verification_schema["required"]),
+        )
+        audit_schema = json.loads(
+            (schema_root / "compat-audit.schema.json").read_text()
+        )
+        self.assertFalse(
+            audit_schema["properties"]["candidates"]["additionalProperties"]
+        )
+        report_schema = json.loads(
+            (schema_root / "compat-report.schema.json").read_text()
+        )
+        self.assertFalse(report_schema["properties"]["checks"]["items"]["additionalProperties"])
+
+    def test_verify_runs_declared_commands_and_emits_complete_report(self):
+        contract = self.accepted_contract()
+        output_root = self.root / "bundled"
+        self.compat_kit.scaffold_bundled(contract, output_root)
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            ).replace(
+                "    private static final Set<String> REQUIRED_CHECKS = Set.of(\n"
+                + "\n".join(
+                    f'            "{check}",'
+                    for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS
+                ).rstrip(",")
+                + ");\n\n",
+                "",
+            )
+        )
+        manifest = output_root / "src/compat/samplemod/.compat-kit-manifest.json"
+        manifest_data = json.loads(manifest.read_text())
+        for path in (adapter, fixture):
+            relative = path.relative_to(output_root).as_posix()
+            manifest_data["files"][relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+        manifest.write_text(
+            json.dumps(manifest_data, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        )
+        commands = []
+        world = output_root / "run/world"
+        world.mkdir(parents=True)
+        (world / "sentinel").write_text("stale")
+
+        def runner(command, cwd):
+            self.assertFalse(world.exists())
+            commands.append((command, cwd))
+            world.mkdir(parents=True)
+            (world / "sentinel").write_text("stale")
+            return subprocess.CompletedProcess(command, 0, "green\n", "")
+
+        report = self.compat_kit.verify_contract(
+            contract,
+            bundled_root=output_root,
+            command_runner=runner,
+        )
+
+        self.assertEqual("auto_storage_compat_report", report["kind"])
+        self.assertEqual("passed", report["status"])
+        self.assertEqual(
+            list(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            [check["id"] for check in report["checks"]],
+        )
+        self.assertTrue(all(check["status"] == "passed" for check in report["checks"]))
+        self.assertEqual(contract["verification"]["gradle_tasks"], [
+            command[0][1] for command in commands
+        ])
+        self.assertTrue(all(command[0][0] == "./gradlew" for command in commands))
+        self.assertTrue(all(command[1] == output_root for command in commands))
+
+    def test_verify_fails_closed_on_red_scaffold_contract_drift_or_command_failure(self):
+        contract = self.accepted_contract()
+        output_root = self.root / "bundled"
+        self.compat_kit.scaffold_bundled(contract, output_root)
+        with self.assertRaisesRegex(ValueError, "intentionally RED"):
+            self.compat_kit.verify_contract(
+                contract,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "", ""
+                ),
+            )
+
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        changed_contract = json.loads(json.dumps(contract))
+        changed_contract["families"][0]["decision"] += " Changed after scaffolding."
+        with self.assertRaisesRegex(ValueError, "contract drift"):
+            self.compat_kit.verify_contract(
+                changed_contract,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "", ""
+                ),
+            )
+
+    def test_external_verify_rejects_implementation_links(self):
+        contract = self.accepted_contract()
+        output = self.root / "addon"
+        self.compat_kit.scaffold_addon(contract, output)
+        adapter = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text()
+            .replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "addon.recipeFamilies(null);",
+            )
+            + "\nimport com.swear.autostorage.StorageCoreBlockEntity;\n"
+        )
+        fixture = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+        manifest = output / ".compat-kit-manifest.json"
+        manifest_data = json.loads(manifest.read_text())
+        relative = adapter.relative_to(output).as_posix()
+        manifest_data["files"][relative] = hashlib.sha256(adapter.read_bytes()).hexdigest()
+        manifest.write_text(
+            json.dumps(manifest_data, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        )
+        with self.assertRaisesRegex(ValueError, "implementation link"):
+            self.compat_kit.verify_contract(
+                contract,
+                addon_root=output,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "", ""
+                ),
+            )
+
+    def test_external_verify_runs_build_and_fresh_gametest_world(self):
+        contract = self.accepted_contract()
+        output = self.root / "addon"
+        self.compat_kit.scaffold_addon(contract, output)
+        adapter = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "addon.recipeFamilies(null);",
+            )
+        )
+        fixture = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+        world = output / "run/world"
+        world.mkdir(parents=True)
+        (world / "sentinel").write_text("stale")
+        commands = []
+
+        def runner(command, cwd):
+            commands.append(command)
+            if command[1] == "build":
+                self.assertTrue(world.exists())
+            else:
+                self.assertEqual("runGameTestServer", command[1])
+                self.assertFalse(world.exists())
+            return subprocess.CompletedProcess(command, 0, "green\n", "")
+
+        report = self.compat_kit.verify_contract(
+            contract,
+            addon_root=output,
+            command_runner=runner,
+        )
+
+        self.assertEqual("passed", report["status"])
+        self.assertEqual(["build", "runGameTestServer"], [
+            command[1] for command in commands
+        ])
+
+    def test_publish_archive_is_reproducible_and_self_contained(self):
+        first = self.root / "compat-kit-first.zip"
+        second = self.root / "compat-kit-second.zip"
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("fileTree('examples/addon')", build)
+
+        self.compat_kit.publish_archive(first)
+        self.compat_kit.publish_archive(second)
+
+        self.assertEqual(first.read_bytes(), second.read_bytes())
+        with zipfile.ZipFile(first) as archive:
+            names = set(archive.namelist())
+            for required in (
+                "auto-storage-compat-kit/compat-kit",
+                "auto-storage-compat-kit/compat_kit.py",
+                "auto-storage-compat-kit/README.md",
+                "auto-storage-compat-kit/LICENSE",
+                "auto-storage-compat-kit/schema/compat-audit.schema.json",
+                "auto-storage-compat-kit/schema/compat-contract.schema.json",
+                "auto-storage-compat-kit/schema/compat-delta.schema.json",
+                "auto-storage-compat-kit/schema/compat-report.schema.json",
+                "auto-storage-compat-kit/examples/github-actions/compat-kit.yml",
+                "auto-storage-compat-kit/examples/addon/src/main/java/example/autostorage/ExampleAddon.java",
+                "auto-storage-compat-kit/templates/craftingtests.platform.nbt",
+                "auto-storage-compat-kit/gradle/wrapper/gradle-wrapper.jar",
+            ):
+                self.assertIn(required, names)
+            self.assertTrue(
+                all(info.date_time == (1980, 1, 1, 0, 0, 0) for info in archive.infolist())
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

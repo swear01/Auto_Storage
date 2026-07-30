@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatIronFurnaces",
   "fixture": "ironFurnacesFixture",
+  "expectedTests": 3,
   "dependencies": [
     "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
   ]

@@ -33,6 +33,13 @@ def expandCompatDependency = { String notation ->
     }
 }
 
+def compatPascalName = { String id ->
+    id.split(/[^A-Za-z0-9]+/)
+            .findAll { !it.isEmpty() }
+            .collect { word -> word.substring(0, 1).toUpperCase() + word.substring(1) }
+            .join()
+}
+
 def compatModules = compatModuleFiles.collect { descriptorFile ->
     def descriptor = new JsonSlurper().parse(descriptorFile)
     def directoryId = descriptorFile.parentFile.name
@@ -43,11 +50,16 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || descriptor.side != 'both'
             || !(descriptor.sourceSet instanceof String)
             || !(descriptor.fixture instanceof String)
+            || !(descriptor.expectedTests instanceof Number)
+            || descriptor.expectedTests.intValue() <= 0
             || !(descriptor.dependencies instanceof List)
-            || descriptor.dependencies.isEmpty()) {
+            || descriptor.dependencies.isEmpty()
+            || (descriptor.runtimeDependencies != null
+            && !(descriptor.runtimeDependencies instanceof List))) {
         throw new GradleException(
                 "Invalid compatibility module descriptor: ${descriptorFile}")
     }
+    def pascalName = compatPascalName(directoryId)
     [
             id          : directoryId,
             moduleId    : descriptor.id,
@@ -56,7 +68,14 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             side        : descriptor.side,
             sourceSet   : descriptor.sourceSet,
             fixture     : descriptor.fixture,
+            fixtureModId: "auto_storage_${directoryId}_fixture",
+            runName     : "${pascalName.substring(0, 1).toLowerCase()}${pascalName.substring(1)}GameTestServer",
+            runTask     : "run${pascalName}GameTestServer",
+            expectedTests: descriptor.expectedTests.intValue(),
             dependencies: descriptor.dependencies.collect {
+                expandCompatDependency(it.toString())
+            },
+            runtimeDependencies: (descriptor.runtimeDependencies ?: []).collect {
                 expandCompatDependency(it.toString())
             },
     ]
@@ -110,51 +129,7 @@ sourceSets {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
     }
-    mekanismFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    botaniaFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    ironFurnacesFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    farmersDelightFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    modernIndustrializationFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    arsNouveauFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    evilCraftFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    powahFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    industrialForegoingFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    createFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
     pneumaticCraftFixture {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
-        runtimeClasspath += output + sourceSets.main.runtimeClasspath
-    }
-    extendedCraftingFixture {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
     }
@@ -177,7 +152,9 @@ compatModules.each { spec ->
         resources.srcDir("src/compat/${spec.id}/resources")
         runtimeClasspath += output + apiSourceSet.output + sourceSets.main.runtimeClasspath
     }
-    def fixture = sourceSets[spec.fixture]
+    def fixture = sourceSets.maybeCreate(spec.fixture)
+    fixture.compileClasspath += sourceSets.main.output + configurations.compileClasspath
+    fixture.runtimeClasspath += fixture.output + sourceSets.main.runtimeClasspath
     fixture.compileClasspath += compatSourceSets[spec.id].output
     fixture.runtimeClasspath += compatSourceSets[spec.id].output
 }
@@ -323,22 +300,12 @@ neoForge {
     addModdingDependenciesTo apiSourceSet
     addModdingDependenciesTo sourceSets.fusionRuntime
     addModdingDependenciesTo sourceSets.recipeAddonFixture
-    addModdingDependenciesTo sourceSets.mekanismFixture
-    addModdingDependenciesTo sourceSets.botaniaFixture
-    addModdingDependenciesTo sourceSets.ironFurnacesFixture
-    addModdingDependenciesTo sourceSets.farmersDelightFixture
-    addModdingDependenciesTo sourceSets.modernIndustrializationFixture
-    addModdingDependenciesTo sourceSets.arsNouveauFixture
-    addModdingDependenciesTo sourceSets.evilCraftFixture
-    addModdingDependenciesTo sourceSets.powahFixture
-    addModdingDependenciesTo sourceSets.industrialForegoingFixture
-    addModdingDependenciesTo sourceSets.createFixture
     addModdingDependenciesTo sourceSets.pneumaticCraftFixture
-    addModdingDependenciesTo sourceSets.extendedCraftingFixture
     addModdingDependenciesTo sourceSets.compatibilityMatrixFixture
     addModdingDependenciesTo sourceSets.addonExample
-    compatSourceSets.values().each { sourceSet ->
-        addModdingDependenciesTo sourceSet
+    compatModules.each { spec ->
+        addModdingDependenciesTo compatSourceSets[spec.id]
+        addModdingDependenciesTo sourceSets[spec.fixture]
     }
 
     mods {
@@ -352,41 +319,13 @@ neoForge {
         auto_storage_recipe_fixture {
             sourceSet(sourceSets.recipeAddonFixture)
         }
-        auto_storage_mekanism_fixture {
-            sourceSet(sourceSets.mekanismFixture)
-        }
-        auto_storage_botania_fixture {
-            sourceSet(sourceSets.botaniaFixture)
-        }
-        auto_storage_iron_furnaces_fixture {
-            sourceSet(sourceSets.ironFurnacesFixture)
-        }
-        auto_storage_farmers_delight_fixture {
-            sourceSet(sourceSets.farmersDelightFixture)
-        }
-        auto_storage_modern_industrialization_fixture {
-            sourceSet(sourceSets.modernIndustrializationFixture)
-        }
-        auto_storage_ars_nouveau_fixture {
-            sourceSet(sourceSets.arsNouveauFixture)
-        }
-        auto_storage_evilcraft_fixture {
-            sourceSet(sourceSets.evilCraftFixture)
-        }
-        auto_storage_powah_fixture {
-            sourceSet(sourceSets.powahFixture)
-        }
-        auto_storage_industrial_foregoing_fixture {
-            sourceSet(sourceSets.industrialForegoingFixture)
-        }
-        auto_storage_create_fixture {
-            sourceSet(sourceSets.createFixture)
-        }
         auto_storage_pneumaticcraft_fixture {
             sourceSet(sourceSets.pneumaticCraftFixture)
         }
-        auto_storage_extended_crafting_fixture {
-            sourceSet(sourceSets.extendedCraftingFixture)
+        compatModules.each { spec ->
+            "${spec.fixtureModId}" {
+                sourceSet(sourceSets[spec.fixture])
+            }
         }
         auto_storage_compatibility_matrix_fixture {
             sourceSet(sourceSets.compatibilityMatrixFixture)
@@ -426,82 +365,6 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_recipe_fixture'
         }
 
-        mekanismGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.mekanismFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_mekanism_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_mekanism_fixture'
-        }
-
-        botaniaGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.botaniaFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_botania_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_botania_fixture'
-        }
-
-        ironFurnacesGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.ironFurnacesFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_iron_furnaces_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_iron_furnaces_fixture'
-        }
-
-        farmersDelightGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.farmersDelightFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_farmers_delight_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_farmers_delight_fixture'
-        }
-
-        modernIndustrializationGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.modernIndustrializationFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_modern_industrialization_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'auto_storage_modern_industrialization_fixture'
-        }
-
-        arsNouveauGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.arsNouveauFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_ars_nouveau_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'auto_storage_ars_nouveau_fixture'
-        }
-
-        evilCraftGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.evilCraftFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_evilcraft_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'auto_storage_evilcraft_fixture'
-        }
-
-        powahGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.powahFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_powah_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'auto_storage_powah_fixture'
-        }
-
-        industrialForegoingGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.industrialForegoingFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_industrial_foregoing_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'auto_storage_industrial_foregoing_fixture'
-        }
-
-        createGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.createFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_create_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'auto_storage_create_fixture'
-        }
-
         pneumaticCraftGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.pneumaticCraftFixture
@@ -510,12 +373,13 @@ neoForge {
                     'auto_storage_pneumaticcraft_fixture'
         }
 
-        extendedCraftingGameTestServer {
-            type = "gameTestServer"
-            sourceSet = sourceSets.extendedCraftingFixture
-            loadedMods = [mods."${mod_id}", mods.auto_storage_extended_crafting_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'auto_storage_extended_crafting_fixture'
+        compatModules.each { spec ->
+            "${spec.runName}" {
+                type = "gameTestServer"
+                sourceSet = sourceSets[spec.fixture]
+                loadedMods = [mods."${mod_id}", mods."${spec.fixtureModId}"]
+                systemProperty 'neoforge.enabledGameTestNamespaces', spec.fixtureModId
+            }
         }
 
         compatibilityMatrixGameTestServer {
@@ -649,6 +513,7 @@ configurations {
 }
 
 repositories {
+    mavenCentral()
     exclusiveContent {
         forRepository {
             maven {
@@ -682,6 +547,14 @@ dependencies {
                 transitive = false
             }
             add(sourceSets.compatibilityMatrixFixture.compileOnlyConfigurationName, notation) {
+                transitive = false
+            }
+        }
+        spec.runtimeDependencies.each { notation ->
+            add(sourceSets[spec.fixture].runtimeOnlyConfigurationName, notation) {
+                transitive = false
+            }
+            add(sourceSets.compatibilityMatrixFixture.runtimeOnlyConfigurationName, notation) {
                 transitive = false
             }
         }
@@ -937,8 +810,29 @@ tasks.named('jar', Jar).configure {
     reproducibleFileOrder = true
 }
 
+def compatKitArchiveFile = layout.buildDirectory.file(
+        "distributions/auto-storage-compat-kit-${mod_version}.zip")
+def compatKitArchive = tasks.register('compatKitArchive', Exec) {
+    group = 'distribution'
+    description = 'Builds the versioned Auto Storage Compat Kit archive.'
+    inputs.files(
+            fileTree('tools/compat-kit'),
+            fileTree('examples/addon'),
+            file('gradlew'),
+            file('gradlew.bat'),
+            fileTree('gradle/wrapper'),
+            file('LICENSE'))
+    outputs.file(compatKitArchiveFile)
+    commandLine(
+            'python3',
+            file('tools/compat-kit/compat_kit.py'),
+            'publish',
+            '--output',
+            compatKitArchiveFile.get().asFile)
+}
+
 tasks.named('assemble').configure {
-    dependsOn apiJar, apiSourcesJar, apiJavadocJar
+    dependsOn apiJar, apiSourcesJar, apiJavadocJar, compatKitArchive
 }
 
 def apiJarFile = apiJar.flatMap { it.archiveFile }
@@ -980,6 +874,7 @@ tasks.register('verifyCompatIsolation') {
                 'import com.buuz135.industrial.',
                 'import com.simibubi.create.',
                 'import com.blakebr0.extendedcrafting.',
+                'import appeng.',
         ]
         commonJavaSources.files.each { source ->
             def text = source.getText('UTF-8')
@@ -1003,6 +898,7 @@ tasks.register('verifyCompatIsolation') {
                 'com/buuz135/industrial/',
                 'com/simibubi/create/',
                 'com/blakebr0/extendedcrafting/',
+                'appeng/',
         ]
         def archive = apiJarFile.get().asFile
         new java.util.zip.ZipFile(archive).withCloseable { zip ->
@@ -1079,162 +975,23 @@ tasks.named('runRecipeAddonGameTestServer').configure {
     }
 }
 
-def mekanismLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runMekanismGameTestServer').configure {
-    doLast {
-        if (!mekanismLatestLog.exists()) {
-            throw new GradleException('Mekanism GameTest did not produce run/logs/latest.log')
-        }
-        def text = mekanismLatestLog.getText('UTF-8')
-        if (!text.contains('All 47 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException('Mekanism GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def botaniaLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runBotaniaGameTestServer').configure {
-    doLast {
-        if (!botaniaLatestLog.exists()) {
-            throw new GradleException('Botania GameTest did not produce run/logs/latest.log')
-        }
-        def text = botaniaLatestLog.getText('UTF-8')
-        if (!text.contains('All 14 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException('Botania GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def ironFurnacesLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runIronFurnacesGameTestServer').configure {
-    doLast {
-        if (!ironFurnacesLatestLog.exists()) {
-            throw new GradleException('Iron Furnaces GameTest did not produce run/logs/latest.log')
-        }
-        def text = ironFurnacesLatestLog.getText('UTF-8')
-        if (!text.contains('All 3 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException('Iron Furnaces GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def farmersDelightLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runFarmersDelightGameTestServer').configure {
-    doLast {
-        if (!farmersDelightLatestLog.exists()) {
-            throw new GradleException("Farmer's Delight GameTest did not produce run/logs/latest.log")
-        }
-        def text = farmersDelightLatestLog.getText('UTF-8')
-        if (!text.contains('All 7 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException("Farmer's Delight GameTest or SelfTest did not pass; inspect run/logs/latest.log")
-        }
-    }
-}
-
-def modernIndustrializationLatestLog =
-        layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runModernIndustrializationGameTestServer').configure {
-    doLast {
-        if (!modernIndustrializationLatestLog.exists()) {
-            throw new GradleException(
-                    'Modern Industrialization GameTest did not produce run/logs/latest.log')
-        }
-        def text = modernIndustrializationLatestLog.getText('UTF-8')
-        if (!text.contains('All 7 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException(
-                    'Modern Industrialization GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def arsNouveauLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runArsNouveauGameTestServer').configure {
-    doLast {
-        if (!arsNouveauLatestLog.exists()) {
-            throw new GradleException('Ars Nouveau GameTest did not produce run/logs/latest.log')
-        }
-        def text = arsNouveauLatestLog.getText('UTF-8')
-        if (!text.contains('All 11 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException(
-                    'Ars Nouveau GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def evilCraftLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runEvilCraftGameTestServer').configure {
-    doLast {
-        if (!evilCraftLatestLog.exists()) {
-            throw new GradleException('EvilCraft GameTest did not produce run/logs/latest.log')
-        }
-        def text = evilCraftLatestLog.getText('UTF-8')
-        if (!text.contains('All 10 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException(
-                    'EvilCraft GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def powahLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runPowahGameTestServer').configure {
-    doLast {
-        if (!powahLatestLog.exists()) {
-            throw new GradleException('Powah GameTest did not produce run/logs/latest.log')
-        }
-        def text = powahLatestLog.getText('UTF-8')
-        if (!text.contains('All 11 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException(
-                    'Powah GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def industrialForegoingLatestLog =
-        layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runIndustrialForegoingGameTestServer').configure {
-    doLast {
-        if (!industrialForegoingLatestLog.exists()) {
-            throw new GradleException(
-                    'Industrial Foregoing GameTest did not produce run/logs/latest.log')
-        }
-        def text = industrialForegoingLatestLog.getText('UTF-8')
-        if (!text.contains('All 9 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException(
-                    'Industrial Foregoing GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def createLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runCreateGameTestServer').configure {
-    doLast {
-        if (!createLatestLog.exists()) {
-            throw new GradleException('Create GameTest did not produce run/logs/latest.log')
-        }
-        def text = createLatestLog.getText('UTF-8')
-        if (!text.contains('All 13 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException(
-                    'Create GameTest or SelfTest did not pass; inspect run/logs/latest.log')
+def compatGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
+compatModules.each { spec ->
+    def moduleId = spec.id
+    def expectedTests = spec.expectedTests
+    tasks.named(spec.runTask).configure {
+        doLast {
+            if (!compatGameTestLatestLog.exists()) {
+                throw new GradleException(
+                        "${moduleId} GameTest did not produce run/logs/latest.log")
+            }
+            def text = compatGameTestLatestLog.getText('UTF-8')
+            if (!text.contains("All ${expectedTests} required tests passed")
+                    || !text.contains(expectedSelfTestSummary)
+                    || text.contains('TESTS FAILED!')) {
+                throw new GradleException(
+                        "${moduleId} GameTest or SelfTest did not pass; inspect run/logs/latest.log")
+            }
         }
     }
 }
@@ -1252,23 +1009,6 @@ tasks.named('runPneumaticCraftGameTestServer').configure {
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException(
                     'PneumaticCraft GameTest or SelfTest did not pass; inspect run/logs/latest.log')
-        }
-    }
-}
-
-def extendedCraftingLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-tasks.named('runExtendedCraftingGameTestServer').configure {
-    doLast {
-        if (!extendedCraftingLatestLog.exists()) {
-            throw new GradleException(
-                    'Extended Crafting GameTest did not produce run/logs/latest.log')
-        }
-        def text = extendedCraftingLatestLog.getText('UTF-8')
-        if (!text.contains('All 4 required tests passed')
-                || !text.contains(expectedSelfTestSummary)
-                || text.contains('TESTS FAILED!')) {
-            throw new GradleException(
-                    'Extended Crafting GameTest or SelfTest did not pass; inspect run/logs/latest.log')
         }
     }
 }

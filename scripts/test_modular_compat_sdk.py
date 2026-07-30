@@ -25,6 +25,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             self.assertEqual("both", module["side"])
             self.assertTrue(module["requires"])
             self.assertTrue(module["dependencies"])
+            self.assertGreater(module["expectedTests"], 0)
             class_path = Path(
                 "src/compat",
                 module["id"].split(":", 1)[1],
@@ -46,6 +47,30 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn("JsonSlurper", build)
         self.assertIn("generateCompatModuleIndex", build)
         self.assertNotIn("def compatModules = [", build)
+
+    def test_descriptor_build_wires_new_fixture_run_and_test_gate_without_central_switches(self):
+        build = (ROOT / "build.gradle").read_text()
+        self.assertIn("sourceSets.maybeCreate(spec.fixture)", build)
+        self.assertRegex(
+            build,
+            r"(?s)compatModules\.each \{ spec ->.*?"
+            r"addModdingDependenciesTo sourceSets\[spec\.fixture\]",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)compatModules\.each \{ spec ->.*?"
+            r"\"\$\{spec\.fixtureModId\}\".*?"
+            r"sourceSet\(sourceSets\[spec\.fixture\]\)",
+        )
+        self.assertIn('"${spec.runName}"', build)
+        self.assertIn("tasks.named(spec.runTask)", build)
+        self.assertIn("spec.expectedTests", build)
+        for fixture_id in (
+            "auto_storage_mekanism_fixture {",
+            "auto_storage_botania_fixture {",
+            "auto_storage_create_fixture {",
+        ):
+            self.assertNotIn(fixture_id, build)
 
     def test_registration_and_reload_lifecycle_are_fail_closed_and_ordered(self):
         addon = (
@@ -149,8 +174,8 @@ class ModularCompatSdkTests(unittest.TestCase):
     def test_bundled_modules_compile_against_the_api_artifact(self):
         build = (ROOT / "build.gradle").read_text()
         compat_source_sets = re.search(
-            r"def compatSourceSets = \[:\](?P<body>.*?)"
-            r"def apiClassNames =",
+            r"compatSourceSets\[spec\.id\] = "
+            r"sourceSets\.create\(spec\.sourceSet\) \{(?P<body>.*?)\n\s*\}",
             build,
             re.DOTALL,
         ).group("body")
@@ -232,6 +257,7 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn(":api", guide)
         self.assertIn("api-sources.jar", guide)
         self.assertIn("api-javadoc.jar", guide)
+        self.assertIn("Compat Kit", guide)
         readme = (ROOT / "README.md").read_text()
         self.assertIn("docs/addon-development.md", readme)
         release = (ROOT / ".github/workflows/release.yml").read_text()

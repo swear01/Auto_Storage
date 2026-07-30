@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "id": "auto_storage:ae2",
+  "entrypoint": "com.swear.autostorage.compat.ae2.Ae2CompatModule",
+  "requires": ["ae2"],
+  "side": "both",
+  "sourceSet": "compatAe2",
+  "fixture": "ae2Fixture",
+  "expectedTests": 7,
+  "dependencies": [
+    "org.appliedenergistics:appliedenergistics2:19.2.17"
+  ],
+  "runtimeDependencies": [
+    "org.appliedenergistics:appliedenergistics2:19.2.17",
+    "maven.modrinth:guideme:${guideme_ci_version}"
+  ]
+}

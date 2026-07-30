@@ -1,0 +1,1289 @@
+{
+  "families": [
+    {
+      "class": "appeng.blockentity.misc.ChargerRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.blockentity.misc.ChargerRecipes#public_signature"
+      ],
+      "id": "appeng_blockentity_misc_charger_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.blockentity.misc.InscriberRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.blockentity.misc.InscriberRecipes#public_signature"
+      ],
+      "id": "appeng_blockentity_misc_inscriber_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.client.gui.style.BlitterDeserializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.client.gui.style.BlitterDeserializer#public_signature"
+      ],
+      "id": "blitter_deserializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.client.gui.style.ColorDeserializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.client.gui.style.ColorDeserializer#public_signature"
+      ],
+      "id": "color_deserializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.client.gui.style.Rectangle2dDeserializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.client.gui.style.Rectangle2dDeserializer#public_signature"
+      ],
+      "id": "rectangle2d_deserializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.client.guidebook.LytInscriberRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.client.guidebook.LytInscriberRecipe#public_signature"
+      ],
+      "id": "lyt_inscriber_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.client.guidebook.RecipeTypeContributions",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.client.guidebook.RecipeTypeContributions#public_signature"
+      ],
+      "id": "recipe_type_contributions",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.core.network.serverbound.FillCraftingGridFromRecipePacket",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.core.network.serverbound.FillCraftingGridFromRecipePacket#public_signature"
+      ],
+      "id": "fill_crafting_grid_from_recipe_packet",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.AE2RecipeProvider",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.AE2RecipeProvider#public_signature"
+      ],
+      "id": "a_e2_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.ChargerRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.ChargerRecipes#public_signature"
+      ],
+      "id": "appeng_datagen_providers_recipes_charger_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.CraftingRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.CraftingRecipes#public_signature"
+      ],
+      "id": "crafting_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.DecorationBlockRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.DecorationBlockRecipes#public_signature"
+      ],
+      "id": "decoration_block_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.DecorationRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.DecorationRecipes#public_signature"
+      ],
+      "id": "decoration_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.EntropyRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.EntropyRecipes#public_signature"
+      ],
+      "id": "entropy_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.InscriberRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.InscriberRecipes#public_signature"
+      ],
+      "id": "appeng_datagen_providers_recipes_inscriber_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.MatterCannonAmmoProvider",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.MatterCannonAmmoProvider#public_signature"
+      ],
+      "id": "matter_cannon_ammo_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.QuartzCuttingRecipesProvider",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.QuartzCuttingRecipesProvider#public_signature"
+      ],
+      "id": "quartz_cutting_recipes_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.RecipeCriteria",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.RecipeCriteria#public_signature"
+      ],
+      "id": "recipe_criteria",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.SmeltingRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.SmeltingRecipes#public_signature"
+      ],
+      "id": "smelting_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.SmithingRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.SmithingRecipes#public_signature"
+      ],
+      "id": "smithing_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.TransformRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.TransformRecipes#public_signature"
+      ],
+      "id": "transform_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.datagen.providers.recipes.UpgradeRecipes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.datagen.providers.recipes.UpgradeRecipes#public_signature"
+      ],
+      "id": "upgrade_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AbstractRecipeHandler",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.AbstractRecipeHandler#public_signature"
+      ],
+      "id": "abstract_recipe_handler",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.AppEngRecipeCategory",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.AppEngRecipeCategory#public_signature"
+      ],
+      "id": "app_eng_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiAddItemUpgradeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiAddItemUpgradeRecipe#public_signature"
+      ],
+      "id": "emi_add_item_upgrade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiChargerRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiChargerRecipe#public_signature"
+      ],
+      "id": "emi_charger_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiCondenserRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiCondenserRecipe#public_signature"
+      ],
+      "id": "emi_condenser_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiEntropyRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiEntropyRecipe#public_signature"
+      ],
+      "id": "emi_entropy_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiInscriberRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiInscriberRecipe#public_signature"
+      ],
+      "id": "emi_inscriber_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiP2PAttunementRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiP2PAttunementRecipe#public_signature"
+      ],
+      "id": "emi_p2_p_attunement_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiTransformRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiTransformRecipe#public_signature"
+      ],
+      "id": "emi_transform_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.emi.EmiUseCraftingRecipeHandler",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.emi.EmiUseCraftingRecipeHandler#public_signature"
+      ],
+      "id": "emi_use_crafting_recipe_handler",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.rei.EntropyRecipeCategory",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.rei.EntropyRecipeCategory#public_signature"
+      ],
+      "id": "entropy_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.rei.EntropyRecipeDisplay",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.rei.EntropyRecipeDisplay#public_signature"
+      ],
+      "id": "entropy_recipe_display",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.rei.InscriberRecipeCategory",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.rei.InscriberRecipeCategory#public_signature"
+      ],
+      "id": "inscriber_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.rei.InscriberRecipeDisplay",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.rei.InscriberRecipeDisplay#public_signature"
+      ],
+      "id": "inscriber_recipe_display",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.rei.TransformRecipeWrapper",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.rei.TransformRecipeWrapper#public_signature"
+      ],
+      "id": "transform_recipe_wrapper",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.integration.modules.rei.transfer.UseCraftingRecipeTransfer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.integration.modules.rei.transfer.UseCraftingRecipeTransfer#public_signature"
+      ],
+      "id": "use_crafting_recipe_transfer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.mixins.VariantDeserializerMixin",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.mixins.VariantDeserializerMixin#public_signature"
+      ],
+      "id": "variant_deserializer_mixin",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.AERecipeSerializers",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.AERecipeSerializers#public_signature"
+      ],
+      "id": "a_e_recipe_serializers",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.AERecipeTypes",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.AERecipeTypes#public_signature"
+      ],
+      "id": "a_e_recipe_types",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyMode",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyMode#public_signature"
+      ],
+      "id": "entropy_mode",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipe#public_signature"
+      ],
+      "id": "entropy_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipeBuilder",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipeBuilder#public_signature"
+      ],
+      "id": "entropy_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.EntropyRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.entropy.EntropyRecipeSerializer#public_signature"
+      ],
+      "id": "entropy_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.PropertyUtils",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.entropy.PropertyUtils#public_signature"
+      ],
+      "id": "property_utils",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.entropy.PropertyValueMatcher",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.entropy.PropertyValueMatcher#public_signature"
+      ],
+      "id": "property_value_matcher",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.AddItemUpgradeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.AddItemUpgradeRecipe#public_signature"
+      ],
+      "id": "add_item_upgrade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.AddItemUpgradeRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.AddItemUpgradeRecipeSerializer#public_signature"
+      ],
+      "id": "add_item_upgrade_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.CraftingUnitTransformRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.CraftingUnitTransformRecipe#public_signature"
+      ],
+      "id": "crafting_unit_transform_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.CraftingUnitTransformRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.CraftingUnitTransformRecipeSerializer#public_signature"
+      ],
+      "id": "crafting_unit_transform_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.FacadeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.FacadeRecipe#public_signature"
+      ],
+      "id": "facade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.RemoveItemUpgradeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.RemoveItemUpgradeRecipe#public_signature"
+      ],
+      "id": "remove_item_upgrade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.RemoveItemUpgradeRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.RemoveItemUpgradeRecipeSerializer#public_signature"
+      ],
+      "id": "remove_item_upgrade_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.StorageCellDisassemblyRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.StorageCellDisassemblyRecipe#public_signature"
+      ],
+      "id": "storage_cell_disassembly_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.StorageCellDisassemblyRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.StorageCellDisassemblyRecipeSerializer#public_signature"
+      ],
+      "id": "storage_cell_disassembly_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.StorageCellUpgradeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.StorageCellUpgradeRecipe#public_signature"
+      ],
+      "id": "storage_cell_upgrade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.StorageCellUpgradeRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.StorageCellUpgradeRecipeSerializer#public_signature"
+      ],
+      "id": "storage_cell_upgrade_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.handlers.ChargerRecipe",
+      "costs": [],
+      "decision": "Charger is excluded from this slice because completion timing is probabilistic and manual-crank power has no exact transaction cost.",
+      "evidence": [
+        "appeng.recipes.handlers.ChargerRecipe#public_signature"
+      ],
+      "id": "charger_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.handlers.ChargerRecipeBuilder",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.handlers.ChargerRecipeBuilder#public_signature"
+      ],
+      "id": "charger_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.handlers.ChargerRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.handlers.ChargerRecipeSerializer#public_signature"
+      ],
+      "id": "charger_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.handlers.InscriberProcessType",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.handlers.InscriberProcessType#public_signature"
+      ],
+      "id": "inscriber_process_type",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.handlers.InscriberRecipe",
+      "costs": [
+        {
+          "amount": 200,
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": "runtime exact integer conversion of 200 steps * 10 AE",
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept exact Inscriber recipes only when every ingredient is simple, output is non-empty, and the loaded AE cost converts to a finite positive exact integer FE amount.",
+      "evidence": [
+        "appeng/recipes/handlers/InscriberRecipe.java#getMiddleInput",
+        "appeng/recipes/handlers/InscriberRecipe.java#getTopOptional",
+        "appeng/recipes/handlers/InscriberRecipe.java#getBottomOptional",
+        "appeng/recipes/handlers/InscriberProcessType.java#INSCRIBE",
+        "appeng/recipes/handlers/InscriberProcessType.java#PRESS",
+        "appeng/blockentity/misc/InscriberBlockEntity.java#MAX_PROCESSING_STEPS",
+        "appeng/blockentity/misc/InscriberBlockEntity.java#tickingRequest",
+        "appeng/api/config/PowerUnit.java#convertTo",
+        "appeng/api/config/PowerMultiplier.java#multiply"
+      ],
+      "id": "inscriber_recipe",
+      "inputs": [
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.middle"
+        },
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "catalyst_when_inscribe_consume_when_press",
+          "selector": "recipe.top_optional"
+        },
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "catalyst_when_inscribe_consume_when_press",
+          "selector": "recipe.bottom_optional"
+        },
+        {
+          "amount": "exact_fe(PowerUnit.AE -> PowerUnit.FE, PowerMultiplier.CONFIG * 2000 AE)",
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.output.count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.output"
+        }
+      ],
+      "recipe_type": "ae2:inscriber",
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:ae2_inscriber",
+        "variants": [
+          {
+            "bounds": "plain station item; speed-card state is not inferred",
+            "item": "ae2:inscriber",
+            "rate": {
+              "denominator": 1,
+              "numerator": 2
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "appeng.recipes.handlers.InscriberRecipeBuilder",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.handlers.InscriberRecipeBuilder#public_signature"
+      ],
+      "id": "inscriber_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.handlers.InscriberRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.handlers.InscriberRecipeSerializer#public_signature"
+      ],
+      "id": "inscriber_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.mattercannon.MatterCannonAmmo",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.mattercannon.MatterCannonAmmo#public_signature"
+      ],
+      "id": "matter_cannon_ammo",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.mattercannon.MatterCannonAmmoSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.mattercannon.MatterCannonAmmoSerializer#public_signature"
+      ],
+      "id": "matter_cannon_ammo_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.quartzcutting.QuartzCuttingRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.quartzcutting.QuartzCuttingRecipe#public_signature"
+      ],
+      "id": "quartz_cutting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.quartzcutting.QuartzCuttingRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.quartzcutting.QuartzCuttingRecipeSerializer#public_signature"
+      ],
+      "id": "quartz_cutting_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.transform.TransformCircumstance",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.transform.TransformCircumstance#public_signature"
+      ],
+      "id": "transform_circumstance",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.transform.TransformLogic",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.transform.TransformLogic#public_signature"
+      ],
+      "id": "transform_logic",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.transform.TransformRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.transform.TransformRecipe#public_signature"
+      ],
+      "id": "transform_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.transform.TransformRecipeBuilder",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.transform.TransformRecipeBuilder#public_signature"
+      ],
+      "id": "transform_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.transform.TransformRecipeInput",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.transform.TransformRecipeInput#public_signature"
+      ],
+      "id": "transform_recipe_input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.transform.TransformRecipeSerializer",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.transform.TransformRecipeSerializer#public_signature"
+      ],
+      "id": "transform_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.util.CraftingRecipeUtil",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.util.CraftingRecipeUtil#public_signature"
+      ],
+      "id": "crafting_recipe_util",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "460d779a0609b81409907d9956de8f6f70a1b0912257e3e5c3c7e75ac9630e95",
+  "target": {
+    "dependency": "org.appliedenergistics:appliedenergistics2:19.2.17",
+    "display_name": "Applied Energistics 2",
+    "mod_id": "ae2",
+    "version": "19.2.17"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "expected_game_tests": 7,
+    "fixture": "ae2Fixture",
+    "gradle_tasks": [
+      "compileCompatAe2Java",
+      "runGameTestServer",
+      "runAe2GameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

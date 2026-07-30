@@ -9,6 +9,21 @@ This document is the authoritative addon guide. The GitHub Wiki copy must match
 it at every SDK release; edit this file first. The Wiki page is intentionally
 not listed in the player-manual Home contents or sidebar.
 
+## Start with Compat Kit
+
+Use the [Auto Storage Compat Kit](compat-kit.md) before writing a bundled
+integration or independent addon. It scans one reproducible target jar/source
+revision, creates an explicit reviewed recipe contract, generates a deliberately
+RED SDK-only scaffold, and runs the contract's verification gates. It does not
+infer consumption, catalysts, outputs, units, station costs, or determinism.
+
+```bash
+tools/compat-kit/compat-kit scan --help
+tools/compat-kit/compat-kit decide --help
+tools/compat-kit/compat-kit scaffold --help
+tools/compat-kit/compat-kit verify --help
+```
+
 ## Add the SDK
 
 Every GitHub release contains:

@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatModernIndustrialization",
   "fixture": "modernIndustrializationFixture",
+  "expectedTests": 7,
   "dependencies": [
     "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}",
     "maven.modrinth:guideme:${guideme_ci_version}"

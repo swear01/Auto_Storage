@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/swear01/Auto_Storage/tools/compat-kit/schema/compat-report.schema.json",
+  "title": "Auto Storage compatibility verification report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "tool_version", "target", "mode", "manifest_sha256", "checks", "commands", "status"],
+  "properties": {
+    "schema": {"const": 1},
+    "kind": {"const": "auto_storage_compat_report"},
+    "tool_version": {"type": "string", "minLength": 1},
+    "target": {"type": "object"},
+    "mode": {"enum": ["bundled", "addon"]},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "evidence"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "status": {"const": "passed"},
+          "evidence": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "exit_code", "stdout_sha256", "stderr_sha256"],
+        "properties": {
+          "command": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1
+          },
+          "exit_code": {"type": "integer", "const": 0},
+          "stdout_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "stderr_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "status": {"const": "passed"}
+  }
+}

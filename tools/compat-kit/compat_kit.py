@@ -1,0 +1,1503 @@
+#!/usr/bin/env python3
+
+import argparse
+import base64
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+import tomllib
+import zipfile
+from pathlib import Path
+
+
+SCHEMA_VERSION = 1
+SCAN_CACHE_VERSION = 3
+MAX_JAR_BYTES = 512 * 1024 * 1024
+MAX_ARCHIVE_ENTRIES = 100_000
+MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
+MAX_CANDIDATE_CLASSES = 2_000
+MAX_SIGNATURE_BYTES = 256 * 1024
+MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
+MAX_SOURCE_FILES = 10_000
+TOOL_VERSION = "0.3.0"
+REQUIRED_VERIFICATION_CHECKS = (
+    "absent_target_no_classload",
+    "present_target_load_once",
+    "ingredient_shortage_atomic",
+    "destination_capacity_atomic",
+    "checked_overflow_atomic",
+    "stale_recipe_holder_atomic",
+    "catalyst_tool_remainder_exact",
+    "multi_output_merge_exact",
+    "mixed_resource_rollback_atomic",
+    "dedicated_server_client_isolation",
+    "api_only_compilation",
+    "all_mod_coexistence",
+)
+MOD_METADATA_PATHS = (
+    "META-INF/neoforge.mods.toml",
+    "META-INF/mods.toml",
+)
+RECIPE_TERMS = ("recipe", "serializer")
+RESOURCE_TERMS = (
+    "chemical",
+    "energy",
+    "fluid",
+    "gas",
+    "mana",
+    "power",
+    "source",
+)
+STATION_TERMS = (
+    "assembler",
+    "crusher",
+    "furnace",
+    "inscriber",
+    "machine",
+    "mill",
+    "processor",
+    "station",
+)
+RISK_PATTERNS = (
+    ("chance_output", re.compile(r"\bgetChance\s*\("), "getChance"),
+    ("randomness", re.compile(r"\brandom\s*\("), "random"),
+    ("randomness", re.compile(r"\bRandom(?:Source)?\b"), "Random"),
+    (
+        "multiblock",
+        re.compile(r"\b(?:MultiBlock|Multiblock)[A-Za-z0-9_$]*\b"),
+        "multiblock API",
+    ),
+    (
+        "live_machine_state",
+        re.compile(
+            r"\b(?:BlockEntity|IItemHandler|IFluidHandler|IEnergyStorage|"
+            r"IChemicalHandler)\b"
+        ),
+        "live machine state",
+    ),
+    (
+        "generic_ingredients",
+        re.compile(r"\bgetIngredients\s*\("),
+        "getIngredients",
+    ),
+    ("simulation_required", re.compile(r"\binsertItem\s*\("), "insertItem"),
+    ("simulation_required", re.compile(r"\bextractItem\s*\("), "extractItem"),
+    ("simulation_required", re.compile(r"\bfill\s*\("), "fill"),
+    ("simulation_required", re.compile(r"\bdrain\s*\("), "drain"),
+    (
+        "simulation_required",
+        re.compile(r"\breceiveEnergy\s*\("),
+        "receiveEnergy",
+    ),
+    (
+        "simulation_required",
+        re.compile(r"\bextractEnergy\s*\("),
+        "extractEnergy",
+    ),
+    ("world_mutation", re.compile(r"\b(?:Level|ServerLevel|BlockPos)\b"), "world API"),
+    ("entity_mutation", re.compile(r"\b(?:Entity|LivingEntity|Player)\b"), "entity API"),
+    ("unbounded_output", re.compile(r"\b(?:Stream|Iterator)\s*<"), "streaming output"),
+)
+AUDIT_TOP_KEYS = {
+    "schema",
+    "kind",
+    "target",
+    "artifact",
+    "source",
+    "candidates",
+    "risks",
+}
+CONTRACT_TOP_KEYS = {
+    "schema",
+    "kind",
+    "target",
+    "source_audit_sha256",
+    "families",
+    "verification",
+}
+FAMILY_KEYS = {
+    "id",
+    "class",
+    "status",
+    "recipe_type",
+    "station",
+    "inputs",
+    "outputs",
+    "costs",
+    "risks",
+    "evidence",
+    "decision",
+}
+
+
+def canonical_json(value) -> str:
+    return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _validate_archive(path: Path, archive: zipfile.ZipFile):
+    if not path.is_file():
+        raise ValueError(f"target jar does not exist: {path}")
+    if path.stat().st_size > MAX_JAR_BYTES:
+        raise ValueError(f"target jar exceeds {MAX_JAR_BYTES} bytes: {path}")
+    entries = archive.infolist()
+    if len(entries) > MAX_ARCHIVE_ENTRIES:
+        raise ValueError(
+            f"target jar exceeds {MAX_ARCHIVE_ENTRIES} archive entries: {path}"
+        )
+    total = sum(entry.file_size for entry in entries)
+    if total > MAX_UNCOMPRESSED_BYTES:
+        raise ValueError(
+            f"target jar exceeds {MAX_UNCOMPRESSED_BYTES} uncompressed bytes: {path}"
+        )
+
+
+def _read_mod_metadata(archive: zipfile.ZipFile) -> dict:
+    metadata_path = next(
+        (candidate for candidate in MOD_METADATA_PATHS if candidate in archive.namelist()),
+        None,
+    )
+    if metadata_path is None:
+        raise ValueError("target jar has no NeoForge mod metadata")
+    try:
+        metadata = tomllib.loads(archive.read(metadata_path).decode("utf-8"))
+    except (UnicodeDecodeError, tomllib.TOMLDecodeError) as error:
+        raise ValueError(f"invalid NeoForge mod metadata: {error}") from error
+    mods = metadata.get("mods")
+    if not isinstance(mods, list) or len(mods) != 1:
+        raise ValueError("compat-kit requires exactly one mod in NeoForge mod metadata")
+    mod = mods[0]
+    required = ("modId", "version", "displayName")
+    missing = [key for key in required if not isinstance(mod.get(key), str)]
+    if missing:
+        raise ValueError(
+            "NeoForge mod metadata is missing string fields: " + ", ".join(missing)
+        )
+    return {
+        "mod_id": mod["modId"],
+        "display_name": mod["displayName"],
+        "version": mod["version"],
+    }
+
+
+def _class_name(entry_name: str) -> str:
+    return entry_name[:-6].replace("/", ".")
+
+
+def _candidate_bucket(class_name: str) -> str | None:
+    lowered = class_name.lower()
+    if any(term in lowered for term in RECIPE_TERMS):
+        return "recipe_classes"
+    if any(term in lowered for term in RESOURCE_TERMS):
+        return "resource_apis"
+    if any(term in lowered for term in STATION_TERMS):
+        return "station_classes"
+    return None
+
+
+def _run_javap(
+    jar: Path,
+    class_name: str,
+    *options: str,
+    output_limit: int = MAX_SIGNATURE_BYTES,
+    output_label: str = "public signature",
+) -> str:
+    command = ["javap", *options, "-classpath", str(jar), class_name]
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            check=False,
+            text=True,
+            timeout=20,
+        )
+    except FileNotFoundError as error:
+        raise RuntimeError(
+            "javap was not found; set JAVA_HOME to JDK 21 before scanning"
+        ) from error
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError(f"javap timed out for {class_name}") from error
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        raise RuntimeError(f"javap failed for {class_name}: {detail}")
+    encoded = result.stdout.encode("utf-8")
+    if len(encoded) > output_limit:
+        raise ValueError(
+            f"{output_label} exceeds {output_limit} bytes: {class_name}"
+        )
+    return result.stdout.strip()
+
+
+def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
+    if source is None:
+        return {"revision": None, "files": []}
+    source = source.resolve()
+    if not source.is_dir():
+        raise ValueError(f"source checkout does not exist: {source}")
+    java_files = sorted(source.rglob("*.java"))
+    if len(java_files) > MAX_SOURCE_FILES:
+        raise ValueError(
+            f"source checkout exceeds {MAX_SOURCE_FILES} Java files: {source}"
+        )
+    source_suffixes = {
+        name.replace(".", "/") + ".java" for name in candidate_names
+    }
+    files = [
+        path.relative_to(source).as_posix()
+        for path in java_files
+        if any(
+            path.as_posix().endswith(suffix)
+            for suffix in source_suffixes
+        )
+    ]
+    revision = None
+    git_dir = source / ".git"
+    if git_dir.exists():
+        result = subprocess.run(
+            ["git", "-C", str(source), "rev-parse", "HEAD"],
+            capture_output=True,
+            check=False,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                "failed to resolve source checkout revision: "
+                + (result.stderr.strip() or result.stdout.strip())
+            )
+        revision = result.stdout.strip()
+    return {"revision": revision, "files": files}
+
+
+def _risk_evidence(candidates: list[dict]) -> list[dict]:
+    collected: dict[str, set[str]] = {}
+    for candidate in candidates:
+        class_name = candidate["class"]
+        signature = candidate["public_signature"]
+        for code, pattern, label in RISK_PATTERNS:
+            if pattern.search(signature):
+                if label in {
+                    "drain",
+                    "extractEnergy",
+                    "extractItem",
+                    "fill",
+                    "getChance",
+                    "getIngredients",
+                    "insertItem",
+                    "random",
+                    "receiveEnergy",
+                }:
+                    evidence = f"{class_name}#{label}"
+                else:
+                    evidence = f"{class_name}: {label}"
+                collected.setdefault(code, set()).add(evidence)
+    for code, evidence in collected.items():
+        exact_classes = {
+            item.split("#", 1)[0]
+            for item in evidence
+            if "#" in item
+        }
+        collected[code] = {
+            item
+            for item in evidence
+            if ":" not in item or item.split(":", 1)[0] not in exact_classes
+        }
+    return [
+        {
+            "code": code,
+            "disposition": "needs_decision",
+            "evidence": sorted(evidence),
+        }
+        for code, evidence in sorted(collected.items())
+    ]
+
+
+def _validate_audit(audit: dict):
+    if not isinstance(audit, dict):
+        raise ValueError("audit must be a JSON object")
+    unknown = sorted(set(audit) - AUDIT_TOP_KEYS)
+    if unknown:
+        raise ValueError("audit has unknown keys: " + ", ".join(unknown))
+    if audit.get("schema") != SCHEMA_VERSION:
+        raise ValueError(f"unsupported audit schema: {audit.get('schema')}")
+    if audit.get("kind") != "auto_storage_compat_audit":
+        raise ValueError(f"invalid audit kind: {audit.get('kind')}")
+    for key in ("target", "artifact", "source", "candidates", "risks"):
+        if key not in audit:
+            raise ValueError(f"audit is missing {key}")
+
+
+def scan_jar(
+    jar,
+    *,
+    source=None,
+    cache_dir=None,
+    signature_reader=None,
+    risk_reader=None,
+) -> dict:
+    jar = Path(jar).resolve()
+    if not jar.is_file():
+        raise ValueError(f"target jar does not exist: {jar}")
+    artifact_sha = _sha256_file(jar)
+    cache_path = None
+    if cache_dir is not None and source is None:
+        cache_path = (
+            Path(cache_dir)
+            / artifact_sha
+            / f"v{SCAN_CACHE_VERSION}"
+            / "audit.json"
+        )
+        if cache_path.is_file():
+            cached = json.loads(cache_path.read_text())
+            _validate_audit(cached)
+            if cached["artifact"]["sha256"] != artifact_sha:
+                raise ValueError(f"cached audit SHA mismatch: {cache_path}")
+            return cached
+
+    reader = signature_reader or (
+        lambda class_name: _run_javap(jar, class_name, "-public")
+    )
+    private_reader = risk_reader or (
+        signature_reader
+        if signature_reader is not None
+        else lambda class_name: _run_javap(
+            jar,
+            class_name,
+            "-c",
+            "-p",
+            output_limit=MAX_PRIVATE_BYTECODE_BYTES,
+            output_label="private bytecode",
+        )
+    )
+    with zipfile.ZipFile(jar) as archive:
+        _validate_archive(jar, archive)
+        target = _read_mod_metadata(archive)
+        classified = {
+            "recipe_classes": [],
+            "resource_apis": [],
+            "station_classes": [],
+        }
+        class_names = sorted(
+            _class_name(name)
+            for name in archive.namelist()
+            if name.endswith(".class")
+            and not name.endswith("module-info.class")
+            and "$" not in name
+        )
+        candidates = [
+            (class_name, bucket)
+            for class_name in class_names
+            if (bucket := _candidate_bucket(class_name)) is not None
+        ]
+        if len(candidates) > MAX_CANDIDATE_CLASSES:
+            raise ValueError(
+                f"target jar exceeds {MAX_CANDIDATE_CLASSES} candidate classes"
+            )
+        risk_candidates = []
+        for class_name, bucket in candidates:
+            signature = reader(class_name)
+            if not isinstance(signature, str) or not signature.strip():
+                raise ValueError(f"empty public signature for {class_name}")
+            if len(signature.encode("utf-8")) > MAX_SIGNATURE_BYTES:
+                raise ValueError(
+                    f"public signature exceeds {MAX_SIGNATURE_BYTES} bytes: {class_name}"
+                )
+            classified[bucket].append(
+                {
+                    "class": class_name,
+                    "public_signature": signature.strip(),
+                }
+            )
+            if bucket == "recipe_classes":
+                risk_signature = private_reader(class_name)
+                if not isinstance(risk_signature, str) or not risk_signature.strip():
+                    raise ValueError(f"empty private bytecode for {class_name}")
+                if (
+                    len(risk_signature.encode("utf-8"))
+                    > MAX_PRIVATE_BYTECODE_BYTES
+                ):
+                    raise ValueError(
+                        "private bytecode exceeds "
+                        f"{MAX_PRIVATE_BYTECODE_BYTES} bytes: {class_name}"
+                    )
+                risk_candidates.append(
+                    {
+                        "class": class_name,
+                        "public_signature": risk_signature.strip(),
+                    }
+                )
+
+    all_candidates = [
+        candidate
+        for bucket in classified.values()
+        for candidate in bucket
+    ]
+    source_path = Path(source) if source is not None else None
+    audit = {
+        "schema": SCHEMA_VERSION,
+        "kind": "auto_storage_compat_audit",
+        "target": target,
+        "artifact": {
+            "sha256": artifact_sha,
+            "size": jar.stat().st_size,
+        },
+        "source": _source_evidence(
+            source_path,
+            {candidate["class"] for candidate in all_candidates},
+        ),
+        "candidates": classified,
+        "risks": _risk_evidence(risk_candidates),
+    }
+    _validate_audit(audit)
+    if cache_path is not None:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(canonical_json(audit))
+    return audit
+
+
+def _family_id(class_name: str) -> str:
+    simple = class_name.rsplit(".", 1)[-1]
+    words = re.sub(r"(?<!^)(?=[A-Z])", "_", simple).lower()
+    return re.sub(r"[^a-z0-9_]+", "_", words).strip("_")
+
+
+def decide_audit(audit: dict) -> tuple[dict, str]:
+    _validate_audit(audit)
+    risks_by_class: dict[str, list[str]] = {}
+    for risk in audit["risks"]:
+        for evidence in risk["evidence"]:
+            class_name = evidence.split("#", 1)[0].split(":", 1)[0]
+            risks_by_class.setdefault(class_name, []).append(risk["code"])
+    recipe_candidates = audit["candidates"]["recipe_classes"]
+    simple_ids = [_family_id(candidate["class"]) for candidate in recipe_candidates]
+    duplicate_ids = {
+        family_id for family_id in simple_ids if simple_ids.count(family_id) > 1
+    }
+    families = []
+    action_lines = [
+        f"# Compatibility decisions for {audit['target']['display_name']}",
+        "",
+        "Every candidate remains blocked until the contract records consumed inputs, "
+        "catalysts/tools, complete outputs/remainders, station, work/resource costs, "
+        "deterministic bounds, and an evidence-backed acceptance or rejection.",
+        "",
+    ]
+    for candidate in recipe_candidates:
+        class_name = candidate["class"]
+        risks = sorted(set(risks_by_class.get(class_name, [])))
+        family_id = _family_id(class_name)
+        if family_id in duplicate_ids:
+            family_id = "_".join(
+                _family_id(segment) for segment in class_name.split(".")
+            )
+        family = {
+            "id": family_id,
+            "class": class_name,
+            "status": "needs_decision",
+            "recipe_type": None,
+            "station": None,
+            "inputs": [],
+            "outputs": [],
+            "costs": [],
+            "risks": risks,
+            "evidence": [f"{class_name}#public_signature"],
+            "decision": None,
+        }
+        families.append(family)
+        action_lines.append(f"## {class_name}")
+        action_lines.append(
+            "- Decide exact recipe type, consumed inputs, catalysts/tools, complete "
+            "outputs/remainders, station, costs, and deterministic bounds."
+        )
+        if risks:
+            action_lines.append("- Resolve risk flags: " + ", ".join(risks) + ".")
+        action_lines.append("")
+    contract = {
+        "schema": SCHEMA_VERSION,
+        "kind": "auto_storage_compat_contract",
+        "target": audit["target"],
+        "source_audit_sha256": audit["artifact"]["sha256"],
+        "families": families,
+        "verification": {
+            "fixture": None,
+            "expected_game_tests": None,
+            "gradle_tasks": [],
+            "checks": [],
+        },
+    }
+    validate_contract(contract, require_complete=False)
+    return contract, "\n".join(action_lines).rstrip() + "\n"
+
+
+def _unknown_keys(value: dict, allowed: set[str], location: str):
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise ValueError(f"{location} has unknown keys: {', '.join(unknown)}")
+
+
+def validate_contract(contract: dict, *, require_complete: bool):
+    if not isinstance(contract, dict):
+        raise ValueError("contract must be a JSON object")
+    _unknown_keys(contract, CONTRACT_TOP_KEYS, "contract")
+    if contract.get("schema") != SCHEMA_VERSION:
+        raise ValueError(f"unsupported contract schema: {contract.get('schema')}")
+    if contract.get("kind") != "auto_storage_compat_contract":
+        raise ValueError(f"invalid contract kind: {contract.get('kind')}")
+    if not isinstance(contract.get("families"), list):
+        raise ValueError("contract families must be a list")
+    target = contract.get("target")
+    if not isinstance(target, dict):
+        raise ValueError("contract target must be an object")
+    for key in ("mod_id", "display_name", "version"):
+        if not isinstance(target.get(key), str) or not target[key].strip():
+            raise ValueError(f"contract target requires {key}")
+    unresolved = []
+    seen_ids = set()
+    for index, family in enumerate(contract["families"]):
+        if not isinstance(family, dict):
+            raise ValueError(f"family {index} must be an object")
+        _unknown_keys(family, FAMILY_KEYS, f"family {index}")
+        family_id = family.get("id")
+        if not isinstance(family_id, str) or not re.fullmatch(r"[a-z0-9_]+", family_id):
+            raise ValueError(f"family {index} has invalid id")
+        if family_id in seen_ids:
+            raise ValueError(f"duplicate family id: {family_id}")
+        seen_ids.add(family_id)
+        status = family.get("status")
+        if status not in ("accepted", "rejected", "needs_decision"):
+            raise ValueError(f"family {family_id} has invalid status: {status}")
+        if status == "needs_decision":
+            unresolved.append(family_id)
+        elif status == "rejected":
+            if not isinstance(family.get("decision"), str) or not family["decision"].strip():
+                raise ValueError(f"rejected family {family_id} requires a decision")
+        else:
+            for key in ("station", "recipe_type", "inputs", "outputs", "costs", "decision"):
+                value = family.get(key)
+                if value is None or value == [] or value == "":
+                    raise ValueError(f"accepted family {family_id} requires {key}")
+            outputs = family["outputs"]
+            if not isinstance(outputs, list) or not any(
+                isinstance(output, dict) and output.get("role") == "primary"
+                for output in outputs
+            ):
+                raise ValueError(f"accepted family {family_id} requires one primary output")
+    if require_complete and unresolved:
+        raise ValueError("contract has unresolved families: " + ", ".join(unresolved))
+    if require_complete:
+        if not isinstance(target.get("dependency"), str) or not target["dependency"].strip():
+            raise ValueError("complete contract target requires dependency")
+        verification = contract.get("verification")
+        if not isinstance(verification, dict):
+            raise ValueError("complete contract requires verification")
+        if set(verification) != {
+            "fixture",
+            "expected_game_tests",
+            "gradle_tasks",
+            "checks",
+        }:
+            raise ValueError(
+                "verification keys must be fixture, expected_game_tests, "
+                "gradle_tasks, and checks"
+            )
+        if not isinstance(verification["fixture"], str) or not verification["fixture"]:
+            raise ValueError("verification requires fixture")
+        if (
+            not isinstance(verification["expected_game_tests"], int)
+            or isinstance(verification["expected_game_tests"], bool)
+            or verification["expected_game_tests"] <= 0
+        ):
+            raise ValueError("verification requires positive expected_game_tests")
+        if not isinstance(verification["gradle_tasks"], list) or not verification["gradle_tasks"]:
+            raise ValueError("verification requires gradle_tasks")
+        missing_checks = sorted(
+            set(REQUIRED_VERIFICATION_CHECKS) - set(verification["checks"])
+        )
+        if missing_checks:
+            raise ValueError(
+                "verification is missing checks: " + ", ".join(missing_checks)
+            )
+    return contract
+
+
+def _pascal(identifier: str) -> str:
+    words = re.findall(r"[A-Za-z0-9]+", identifier)
+    if not words:
+        raise ValueError(f"identifier has no Java-safe characters: {identifier}")
+    return "".join(word[:1].upper() + word[1:].lower() for word in words)
+
+
+def _java_segment(identifier: str) -> str:
+    value = re.sub(r"[^a-z0-9]", "", identifier.lower())
+    if not value or value[0].isdigit():
+        raise ValueError(f"invalid Java package segment: {identifier}")
+    return value
+
+
+def _fixture_mods_toml(target: dict) -> str:
+    mod_id = target["mod_id"]
+    fixture_id = f"auto_storage_{mod_id}_fixture"
+    return f"""modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="{fixture_id}"
+version="1.0.0"
+displayName="Auto Storage {_pascal(mod_id)} Fixture"
+description='''Compat Kit generated RED fixture for {target['display_name']}.'''
+
+[[dependencies.{fixture_id}]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.{fixture_id}]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.{fixture_id}]]
+modId="auto_storage"
+type="required"
+versionRange="[0.3,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.{fixture_id}]]
+modId="{mod_id}"
+type="required"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+"""
+
+
+def _bundled_files(contract: dict) -> dict[str, bytes]:
+    target = contract["target"]
+    mod_id = target["mod_id"]
+    package_segment = _java_segment(mod_id)
+    class_prefix = _pascal(mod_id)
+    source_set = f"compat{class_prefix}"
+    fixture = contract["verification"]["fixture"]
+    module_package = f"com.swear.autostorage.compat.{package_segment}"
+    fixture_package = f"com.swear.autostorage.fixture.{package_segment}"
+    module_path = module_package.replace(".", "/")
+    fixture_path = fixture_package.replace(".", "/")
+    descriptor = {
+        "schema": 1,
+        "id": f"auto_storage:{mod_id}",
+        "entrypoint": f"{module_package}.{class_prefix}CompatModule",
+        "requires": [mod_id],
+        "side": "both",
+        "sourceSet": source_set,
+        "fixture": fixture,
+        "expectedTests": contract["verification"]["expected_game_tests"],
+        "dependencies": [target["dependency"]],
+    }
+    module = f"""package {module_package};
+
+import com.swear.autostorage.MachineDescriptor;
+import com.swear.autostorage.MachineDescriptorApi;
+import com.swear.autostorage.RecipeFamily;
+import com.swear.autostorage.RecipeFamilyApi;
+import com.swear.autostorage.api.AutoStorageApi;
+import com.swear.autostorage.api.AutoStorageCompatContext;
+import com.swear.autostorage.api.AutoStorageCompatModule;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+public final class {class_prefix}CompatModule implements AutoStorageCompatModule {{
+    private static final DeferredRegister<MachineDescriptor> MACHINES =
+            MachineDescriptorApi.createDeferredRegister(AutoStorageApi.MOD_ID);
+    private static final DeferredRegister<RecipeFamily> RECIPES =
+            RecipeFamilyApi.createDeferredRegister(AutoStorageApi.MOD_ID);
+
+    @Override
+    public void register(AutoStorageCompatContext context) {{
+        {class_prefix}Compat.register(MACHINES, RECIPES);
+        context.register(addon -> addon
+                .machineDescriptors(MACHINES)
+                .recipeFamilies(RECIPES));
+    }}
+}}
+"""
+    accepted = [
+        family["id"]
+        for family in contract["families"]
+        if family["status"] == "accepted"
+    ]
+    adapter = f"""package {module_package};
+
+import com.swear.autostorage.MachineDescriptor;
+import com.swear.autostorage.RecipeFamily;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+public final class {class_prefix}Compat {{
+    private {class_prefix}Compat() {{
+    }}
+
+    public static void register(
+            DeferredRegister<MachineDescriptor> machines,
+            DeferredRegister<RecipeFamily> recipes
+    ) {{
+        throw new IllegalStateException(
+                "compat-kit scaffold is intentionally RED: implement {', '.join(accepted)}");
+    }}
+}}
+"""
+    fixture_mod = f"""package {fixture_package};
+
+import net.neoforged.fml.common.Mod;
+
+@Mod({class_prefix}FixtureMod.MODID)
+public final class {class_prefix}FixtureMod {{
+    public static final String MODID = "auto_storage_{mod_id}_fixture";
+}}
+"""
+    checks = "\n".join(
+        f'            "{check}",' for check in REQUIRED_VERIFICATION_CHECKS
+    ).rstrip(",")
+    fixture_tests = f"""package {fixture_package};
+
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+import java.util.Set;
+
+@GameTestHolder({class_prefix}FixtureMod.MODID)
+@PrefixGameTestTemplate(false)
+public final class {class_prefix}IntegrationGameTests {{
+    private static final Set<String> REQUIRED_CHECKS = Set.of(
+{checks});
+
+    private {class_prefix}IntegrationGameTests() {{
+    }}
+
+    @GameTest(template = "craftingtests.platform")
+    public static void compat_kit_scaffold_remains_red(GameTestHelper helper) {{
+        helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);
+    }}
+}}
+"""
+    structure = base64.b64decode(
+        "H4sICMY9CmoC/2JlaGF2aW9yYWx0ZXN0cy5wbGF0Zm9ybS5uYnQAjdPLCsJADAXQm0zV"
+        "VpF+gH/i2rVL92OJMGhb7WTl1/uA+gDBG5hFSGYuHJg5ELDYRI87G3LqO6C+VChyulrA"
+        "Y/hxKszO8WTuNr+3WqLYxtZQt6mzZogHX2fvO8M4WL4HMQ2oMN2f+uaYH7dXFcK5z+Pb"
+        "rwqYZI9uz+Z7R4gdJXbGEiJLiCwhspTIUiJL/2QJYSiEoRCGQhgKYSiEoRCGQhgKYaiEo"
+        "RKGShgqYaiEoRKGShgqYfhrp7TOkyd7/m3gBsmsFS9XBAAA"
+    )
+    return {
+        f"src/compat/{mod_id}/compat-module.json": canonical_json(descriptor).encode(),
+        f"src/compat/{mod_id}/java/{module_path}/{class_prefix}Compat.java": adapter.encode(),
+        f"src/compat/{mod_id}/java/{module_path}/{class_prefix}CompatModule.java": module.encode(),
+        f"src/{fixture}/java/{fixture_path}/{class_prefix}FixtureMod.java": fixture_mod.encode(),
+        (
+            f"src/{fixture}/java/{fixture_path}/"
+            f"{class_prefix}IntegrationGameTests.java"
+        ): fixture_tests.encode(),
+        f"src/{fixture}/resources/META-INF/neoforge.mods.toml": _fixture_mods_toml(
+            target
+        ).encode(),
+        (
+            f"src/{fixture}/resources/data/auto_storage_{mod_id}_fixture/"
+            "structure/craftingtests.platform.nbt"
+        ): structure,
+    }
+
+
+def _wrapper_files() -> dict[str, bytes]:
+    repo_root = Path(__file__).resolve().parents[2]
+    required = (
+        "gradlew",
+        "gradlew.bat",
+        "gradle/wrapper/gradle-wrapper.jar",
+        "gradle/wrapper/gradle-wrapper.properties",
+    )
+    files = {}
+    for relative in required:
+        path = repo_root / relative
+        if not path.is_file():
+            raise ValueError(f"compat-kit distribution is missing wrapper template: {relative}")
+        files[relative] = path.read_bytes()
+    return files
+
+
+def _addon_files(contract: dict) -> dict[str, bytes]:
+    target = contract["target"]
+    mod_id = target["mod_id"]
+    package_segment = _java_segment(mod_id) + "autostorage"
+    package = f"com.example.{package_segment}"
+    package_path = package.replace(".", "/")
+    class_prefix = _pascal(mod_id)
+    addon_id = f"{mod_id}_auto_storage"
+    accepted = [
+        family["id"]
+        for family in contract["families"]
+        if family["status"] == "accepted"
+    ]
+    settings = f"""pluginManagement {{
+    repositories {{
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }}
+}}
+
+plugins {{
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}}
+
+rootProject.name = '{addon_id}'
+"""
+    properties = f"""org.gradle.jvmargs=-Xmx2G
+org.gradle.daemon=true
+org.gradle.caching=true
+
+minecraft_version=1.21.1
+neo_version=21.1.229
+auto_storage_version={TOOL_VERSION}
+mod_id={addon_id}
+mod_version=0.1.0
+mod_group_id={package}
+"""
+    build = f"""plugins {{
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.141'
+}}
+
+version = mod_version
+group = mod_group_id
+
+repositories {{
+    mavenCentral()
+    ivy {{
+        name = "AutoStorageReleases"
+        url = uri("https://github.com/swear01/Auto_Storage/releases/download/v${{auto_storage_version}}")
+        patternLayout {{
+            artifact("[artifact]-[revision](-[classifier]).[ext]")
+        }}
+        metadataSources {{
+            artifact()
+        }}
+    }}
+}}
+
+neoForge {{
+    version = neo_version
+
+    mods {{
+        {addon_id} {{
+            sourceSet sourceSets.main
+        }}
+    }}
+
+    runs {{
+        gameTestServer {{
+            type = "gameTestServer"
+            systemProperty "neoforge.enabledGameTestNamespaces", "{addon_id}"
+        }}
+    }}
+}}
+
+dependencies {{
+    compileOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}:api")
+    runtimeOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}")
+    compileOnly("{target['dependency']}")
+    runtimeOnly("{target['dependency']}")
+}}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+"""
+    entrypoint = f"""package {package};
+
+import com.swear.autostorage.api.AutoStorageAddon;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+
+@Mod({class_prefix}AutoStorageAddon.MOD_ID)
+public final class {class_prefix}AutoStorageAddon {{
+    public static final String MOD_ID = "{addon_id}";
+
+    public {class_prefix}AutoStorageAddon(IEventBus modBus) {{
+        AutoStorageAddon.register(MOD_ID, modBus, addon ->
+                {class_prefix}Compat.register(addon));
+    }}
+}}
+"""
+    adapter = f"""package {package};
+
+import com.swear.autostorage.api.AutoStorageAddon;
+
+public final class {class_prefix}Compat {{
+    private {class_prefix}Compat() {{
+    }}
+
+    public static void register(AutoStorageAddon.Registration addon) {{
+        throw new IllegalStateException(
+                "compat-kit scaffold is intentionally RED: implement {', '.join(accepted)}");
+    }}
+}}
+"""
+    checks = "\n".join(
+        f'            "{check}",' for check in REQUIRED_VERIFICATION_CHECKS
+    ).rstrip(",")
+    fixture_tests = f"""package {package};
+
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+import java.util.Set;
+
+@GameTestHolder({class_prefix}AutoStorageAddon.MOD_ID)
+@PrefixGameTestTemplate(false)
+public final class {class_prefix}IntegrationGameTests {{
+    private static final Set<String> REQUIRED_CHECKS = Set.of(
+{checks});
+
+    private {class_prefix}IntegrationGameTests() {{
+    }}
+
+    @GameTest(template = "craftingtests.platform")
+    public static void compat_kit_scaffold_remains_red(GameTestHelper helper) {{
+        helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);
+    }}
+}}
+"""
+    mods_toml = f"""modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="{addon_id}"
+version="${{file.jarVersion}}"
+displayName="{target['display_name']} Auto Storage Integration"
+
+[[dependencies.{addon_id}]]
+modId="auto_storage"
+type="required"
+versionRange="[{TOOL_VERSION},1)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.{addon_id}]]
+modId="{mod_id}"
+type="required"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+"""
+    workflow = """name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v6
+      - run: ./gradlew build --console=plain --no-daemon
+      - run: ./gradlew runGameTestServer --console=plain --no-daemon
+      - run: tools/compat-kit/compat-kit verify compat/contract.json --addon .
+"""
+    structure = base64.b64decode(
+        "H4sICMY9CmoC/2JlaGF2aW9yYWx0ZXN0cy5wbGF0Zm9ybS5uYnQAjdPLCsJADAXQm0zV"
+        "VpF+gH/i2rVL92OJMGhb7WTl1/uA+gDBG5hFSGYuHJg5ELDYRI87G3LqO6C+VChyulrA"
+        "Y/hxKszO8WTuNr+3WqLYxtZQt6mzZogHX2fvO8M4WL4HMQ2oMN2f+uaYH7dXFcK5z+Pb"
+        "rwqYZI9uz+Z7R4gdJXbGEiJLiCwhspTIUiJL/2QJYSiEoRCGQhgKYSiEoRCGQhgKYaiEo"
+        "RKGShgqYaiEoRKGShgqYfhrp7TOkyd7/m3gBsmsFS9XBAAA"
+    )
+    files = {
+        "settings.gradle": settings.encode(),
+        "gradle.properties": properties.encode(),
+        "build.gradle": build.encode(),
+        (
+            f"src/main/java/{package_path}/{class_prefix}AutoStorageAddon.java"
+        ): entrypoint.encode(),
+        f"src/main/java/{package_path}/{class_prefix}Compat.java": adapter.encode(),
+        (
+            f"src/main/java/{package_path}/{class_prefix}IntegrationGameTests.java"
+        ): fixture_tests.encode(),
+        "src/main/resources/META-INF/neoforge.mods.toml": mods_toml.encode(),
+        (
+            f"src/main/resources/data/{addon_id}/structure/"
+            "craftingtests.platform.nbt"
+        ): structure,
+        ".github/workflows/ci.yml": workflow.encode(),
+        "compat/contract.json": canonical_json(contract).encode(),
+        "tools/compat-kit/compat_kit.py": Path(__file__).read_bytes(),
+        "tools/compat-kit/compat-kit": (
+            b'#!/bin/sh\nexec python3 "$(dirname "$0")/compat_kit.py" "$@"\n'
+        ),
+    }
+    files.update(_wrapper_files())
+    return files
+
+
+def _contract_sha256(contract: dict) -> str:
+    return hashlib.sha256(canonical_json(contract).encode()).hexdigest()
+
+
+def _manifest(files: dict[str, bytes], contract: dict) -> bytes:
+    entries = {
+        relative: hashlib.sha256(payload).hexdigest()
+        for relative, payload in sorted(files.items())
+    }
+    return canonical_json(
+        {
+            "schema": SCHEMA_VERSION,
+            "tool_version": TOOL_VERSION,
+            "contract_sha256": _contract_sha256(contract),
+            "files": entries,
+        }
+    ).encode()
+
+
+def _materialize(
+    root: Path,
+    files: dict[str, bytes],
+    manifest_path: str,
+    contract: dict,
+) -> list[Path]:
+    complete = dict(files)
+    complete[manifest_path] = _manifest(files, contract)
+    generated = []
+    for relative, payload in sorted(complete.items()):
+        target = root / relative
+        if target.exists():
+            if not target.is_file() or target.read_bytes() != payload:
+                raise ValueError(f"generated file drift: {relative}")
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(payload)
+            if relative in ("gradlew", "tools/compat-kit/compat-kit"):
+                target.chmod(0o755)
+        generated.append(target)
+    return generated
+
+
+def scaffold_bundled(contract: dict, root) -> list[Path]:
+    validate_contract(contract, require_complete=True)
+    mod_id = contract["target"]["mod_id"]
+    return _materialize(
+        Path(root),
+        _bundled_files(contract),
+        f"src/compat/{mod_id}/.compat-kit-manifest.json",
+        contract,
+    )
+
+
+def scaffold_addon(contract: dict, output) -> list[Path]:
+    validate_contract(contract, require_complete=True)
+    return _materialize(
+        Path(output),
+        _addon_files(contract),
+        ".compat-kit-manifest.json",
+        contract,
+    )
+
+
+def _load_and_verify_manifest(
+    root: Path,
+    manifest_path: Path,
+    contract: dict,
+) -> str:
+    if not manifest_path.is_file():
+        raise ValueError(f"missing compat-kit manifest: {manifest_path}")
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except json.JSONDecodeError as error:
+        raise ValueError(f"invalid compat-kit manifest: {error}") from error
+    if set(manifest) != {
+        "schema",
+        "tool_version",
+        "contract_sha256",
+        "files",
+    }:
+        raise ValueError("invalid compat-kit manifest keys")
+    if manifest["schema"] != SCHEMA_VERSION:
+        raise ValueError(f"unsupported compat-kit manifest schema: {manifest['schema']}")
+    if not isinstance(manifest["files"], dict) or not manifest["files"]:
+        raise ValueError("compat-kit manifest has no files")
+    if manifest["contract_sha256"] != _contract_sha256(contract):
+        raise ValueError(
+            "compat-kit contract drift: scaffold was generated from a different contract"
+        )
+    return _sha256_file(manifest_path)
+
+
+def _default_command_runner(command, cwd):
+    return subprocess.run(
+        command,
+        cwd=cwd,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=1_800,
+    )
+
+
+def _source_text(root: Path) -> str:
+    sources = sorted(root.rglob("*.java"))
+    if len(sources) > MAX_SOURCE_FILES:
+        raise ValueError(f"verification root exceeds {MAX_SOURCE_FILES} Java files")
+    return "\n".join(path.read_text() for path in sources)
+
+
+def verify_contract(
+    contract: dict,
+    *,
+    bundled_root=None,
+    addon_root=None,
+    command_runner=None,
+) -> dict:
+    validate_contract(contract, require_complete=True)
+    if (bundled_root is None) == (addon_root is None):
+        raise ValueError("verify requires exactly one of bundled_root or addon_root")
+    mode = "bundled" if bundled_root is not None else "addon"
+    root = Path(bundled_root if bundled_root is not None else addon_root)
+    if not root.is_dir():
+        raise ValueError(f"verification root does not exist: {root}")
+    mod_id = contract["target"]["mod_id"]
+    manifest_path = (
+        root / f"src/compat/{mod_id}/.compat-kit-manifest.json"
+        if mode == "bundled"
+        else root / ".compat-kit-manifest.json"
+    )
+    manifest_sha = _load_and_verify_manifest(root, manifest_path, contract)
+    sources = _source_text(root)
+    if "compat-kit scaffold is intentionally RED" in sources:
+        raise ValueError(
+            "compat-kit scaffold is intentionally RED; implement the adapter and tests"
+        )
+    if mode == "addon":
+        forbidden = (
+            "com.swear.autostorage.StorageCoreBlockEntity",
+            "com.swear.autostorage.CompatibilityModuleLoader",
+            "com.swear.autostorage.internal.",
+            "com.swear.autostorage.compat.",
+        )
+        found = [name for name in forbidden if name in sources]
+        if found:
+            raise ValueError("addon has forbidden implementation link: " + ", ".join(found))
+        build = root / "build.gradle"
+        if not build.is_file():
+            raise ValueError("addon is missing build.gradle")
+        build_text = build.read_text()
+        if ":api" not in build_text or "compileOnly" not in build_text:
+            raise ValueError("addon build does not compile against the API artifact")
+        commands = [
+            ["./gradlew", "build", "--console=plain", "--no-daemon"],
+            ["./gradlew", "runGameTestServer", "--console=plain", "--no-daemon"],
+        ]
+    else:
+        fixture = contract["verification"]["fixture"]
+        fixture_root = root / f"src/{fixture}/java"
+        fixture_text = _source_text(fixture_root) if fixture_root.is_dir() else ""
+        if "@GameTest" not in fixture_text:
+            raise ValueError(f"bundled fixture {fixture} has no GameTests")
+        commands = [
+            ["./gradlew", task, "--console=plain", "--no-daemon"]
+            for task in contract["verification"]["gradle_tasks"]
+        ]
+    runner = command_runner or _default_command_runner
+    command_reports = []
+    for command in commands:
+        if mode == "bundled" or (len(command) > 1 and command[1].startswith("run")):
+            world = root / "run/world"
+            if world.exists():
+                if not world.is_dir():
+                    raise ValueError(f"GameTest world path is not a directory: {world}")
+                shutil.rmtree(world)
+        result = runner(command, root)
+        stdout = result.stdout or ""
+        stderr = result.stderr or ""
+        command_reports.append(
+            {
+                "command": command,
+                "exit_code": result.returncode,
+                "stdout_sha256": hashlib.sha256(stdout.encode()).hexdigest(),
+                "stderr_sha256": hashlib.sha256(stderr.encode()).hexdigest(),
+            }
+        )
+        if result.returncode != 0:
+            detail = stderr.strip() or stdout.strip()
+            raise RuntimeError(
+                f"verification command failed ({result.returncode}): "
+                f"{' '.join(command)}\n{detail[-4000:]}"
+            )
+    return {
+        "schema": SCHEMA_VERSION,
+        "kind": "auto_storage_compat_report",
+        "tool_version": TOOL_VERSION,
+        "target": contract["target"],
+        "mode": mode,
+        "manifest_sha256": manifest_sha,
+        "checks": [
+            {
+                "id": check,
+                "status": "passed",
+                "evidence": contract["verification"]["gradle_tasks"]
+                if mode == "bundled"
+                else ["build", "runGameTestServer"],
+            }
+            for check in REQUIRED_VERIFICATION_CHECKS
+        ],
+        "commands": command_reports,
+        "status": "passed",
+    }
+
+
+def _publish_files() -> dict[str, bytes]:
+    tool_root = Path(__file__).resolve().parent
+    repo_root = tool_root.parents[1]
+    files = {
+        "compat-kit": (tool_root / "compat-kit").read_bytes(),
+        "compat_kit.py": Path(__file__).read_bytes(),
+        "README.md": (tool_root / "README.md").read_bytes(),
+        "LICENSE": (repo_root / "LICENSE").read_bytes(),
+        "examples/github-actions/compat-kit.yml": (
+            tool_root / "examples/github-actions/compat-kit.yml"
+        ).read_bytes(),
+    }
+    for schema in sorted((tool_root / "schema").glob("*.json")):
+        files[f"schema/{schema.name}"] = schema.read_bytes()
+    addon_example_root = repo_root / "examples/addon"
+    for example in sorted(addon_example_root.rglob("*")):
+        if example.is_file():
+            files[
+                "examples/addon/"
+                + example.relative_to(addon_example_root).as_posix()
+            ] = example.read_bytes()
+    files["templates/craftingtests.platform.nbt"] = base64.b64decode(
+        "H4sICMY9CmoC/2JlaGF2aW9yYWx0ZXN0cy5wbGF0Zm9ybS5uYnQAjdPLCsJADAXQm0zV"
+        "VpF+gH/i2rVL92OJMGhb7WTl1/uA+gDBG5hFSGYuHJg5ELDYRI87G3LqO6C+VChyulrA"
+        "Y/hxKszO8WTuNr+3WqLYxtZQt6mzZogHX2fvO8M4WL4HMQ2oMN2f+uaYH7dXFcK5z+Pb"
+        "rwqYZI9uz+Z7R4gdJXbGEiJLiCwhspTIUiJL/2QJYSiEoRCGQhgKYSiEoRCGQhgKYaiEo"
+        "RKGShgqYaiEoRKGShgqYfhrp7TOkyd7/m3gBsmsFS9XBAAA"
+    )
+    for relative, payload in _wrapper_files().items():
+        files[relative] = payload
+    return files
+
+
+def publish_archive(output):
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    root = "auto-storage-compat-kit"
+    with zipfile.ZipFile(
+        output,
+        "w",
+        compression=zipfile.ZIP_DEFLATED,
+        compresslevel=9,
+    ) as archive:
+        for relative, payload in sorted(_publish_files().items()):
+            info = zipfile.ZipInfo(f"{root}/{relative}", (1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3
+            mode = 0o755 if relative in ("compat-kit", "gradlew") else 0o644
+            info.external_attr = mode << 16
+            archive.writestr(info, payload, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
+    return output
+
+
+def _candidate_map(audit: dict, bucket: str) -> dict[str, str]:
+    return {
+        candidate["class"]: candidate["public_signature"]
+        for candidate in audit["candidates"][bucket]
+    }
+
+
+def diff_audits(old: dict, new: dict) -> dict:
+    _validate_audit(old)
+    _validate_audit(new)
+    if old["target"]["mod_id"] != new["target"]["mod_id"]:
+        raise ValueError(
+            "audit mod IDs differ: "
+            f"{old['target']['mod_id']} != {new['target']['mod_id']}"
+        )
+    bucket_changes = {}
+    contract_affected = False
+    for bucket in ("recipe_classes", "resource_apis", "station_classes"):
+        old_map = _candidate_map(old, bucket)
+        new_map = _candidate_map(new, bucket)
+        added = sorted(set(new_map) - set(old_map))
+        removed = sorted(set(old_map) - set(new_map))
+        changed = sorted(
+            class_name
+            for class_name in set(old_map) & set(new_map)
+            if old_map[class_name] != new_map[class_name]
+        )
+        bucket_changes[bucket] = {
+            "added": added,
+            "removed": removed,
+            "changed": changed,
+        }
+        contract_affected = contract_affected or bool(added or removed or changed)
+    old_risks = {(risk["code"], tuple(risk["evidence"])) for risk in old["risks"]}
+    new_risks = {(risk["code"], tuple(risk["evidence"])) for risk in new["risks"]}
+    risk_changes = {
+        "added": [
+            {"code": code, "evidence": list(evidence)}
+            for code, evidence in sorted(new_risks - old_risks)
+        ],
+        "removed": [
+            {"code": code, "evidence": list(evidence)}
+            for code, evidence in sorted(old_risks - new_risks)
+        ],
+    }
+    contract_affected = contract_affected or bool(
+        risk_changes["added"] or risk_changes["removed"]
+    )
+    return {
+        "schema": SCHEMA_VERSION,
+        "kind": "auto_storage_compat_delta",
+        "mod_id": old["target"]["mod_id"],
+        "from_version": old["target"]["version"],
+        "to_version": new["target"]["version"],
+        **bucket_changes,
+        "risks": risk_changes,
+        "contract_affected": contract_affected,
+    }
+
+
+def _read_json(path) -> dict:
+    try:
+        return json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError(f"failed to read JSON {path}: {error}") from error
+
+
+def _write_json(path, value):
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(canonical_json(value))
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="compat-kit")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    scan = subparsers.add_parser("scan")
+    scan.add_argument("--jar", required=True)
+    scan.add_argument("--source")
+    scan.add_argument("--output", required=True)
+    scan.add_argument("--cache", default="build/compat-kit/cache")
+
+    decide = subparsers.add_parser("decide")
+    decide.add_argument("audit")
+    decide.add_argument("--output", required=True)
+    decide.add_argument("--next-actions", required=True)
+
+    delta = subparsers.add_parser("diff")
+    delta.add_argument("old_audit")
+    delta.add_argument("new_target")
+    delta.add_argument("--source")
+    delta.add_argument("--output", required=True)
+    delta.add_argument("--cache", default="build/compat-kit/cache")
+
+    scaffold = subparsers.add_parser("scaffold")
+    scaffold_target = scaffold.add_mutually_exclusive_group(required=True)
+    scaffold_target.add_argument("--bundled")
+    scaffold_target.add_argument("--addon")
+    scaffold.add_argument("--output")
+
+    verify = subparsers.add_parser("verify")
+    verify.add_argument("contract")
+    verify_target = verify.add_mutually_exclusive_group(required=True)
+    verify_target.add_argument("--bundled", nargs="?", const=".")
+    verify_target.add_argument("--addon")
+    verify.add_argument("--output", default="build/compat-kit/report.json")
+
+    publish = subparsers.add_parser("publish")
+    publish.add_argument("--output", required=True)
+    return parser
+
+
+def main(argv=None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "scan":
+            audit = scan_jar(
+                args.jar,
+                source=args.source,
+                cache_dir=args.cache,
+            )
+            _write_json(args.output, audit)
+        elif args.command == "decide":
+            contract, actions = decide_audit(_read_json(args.audit))
+            _write_json(args.output, contract)
+            action_path = Path(args.next_actions)
+            action_path.parent.mkdir(parents=True, exist_ok=True)
+            action_path.write_text(actions)
+        elif args.command == "diff":
+            old = _read_json(args.old_audit)
+            new_path = Path(args.new_target)
+            if new_path.suffix == ".json":
+                new = _read_json(new_path)
+            else:
+                new = scan_jar(
+                    new_path,
+                    source=args.source,
+                    cache_dir=args.cache,
+                )
+            _write_json(args.output, diff_audits(old, new))
+        elif args.command == "scaffold":
+            contract_path = args.bundled or args.addon
+            contract = _read_json(contract_path)
+            if args.bundled:
+                root = Path(args.output) if args.output else Path.cwd()
+                scaffold_bundled(contract, root)
+            else:
+                if not args.output:
+                    raise ValueError("scaffold --addon requires --output")
+                scaffold_addon(contract, args.output)
+        elif args.command == "verify":
+            contract = _read_json(args.contract)
+            report = verify_contract(
+                contract,
+                bundled_root=args.bundled,
+                addon_root=args.addon,
+            )
+            _write_json(args.output, report)
+        elif args.command == "publish":
+            publish_archive(args.output)
+        else:
+            parser.error(f"unsupported command: {args.command}")
+    except (OSError, RuntimeError, ValueError, zipfile.BadZipFile) as error:
+        print(f"compat-kit: {error}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

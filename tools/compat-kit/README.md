@@ -1,0 +1,61 @@
+# Auto Storage Compat Kit
+
+Compat Kit is a development-time CLI for auditing, contracting, scaffolding,
+and verifying deterministic Auto Storage integrations. It does not run inside
+Minecraft and never infers consumption, catalyst, output, remainder, cost, or
+determinism semantics.
+
+Run `compat-kit --help` for commands. The full maintainer and addon-author
+workflow is documented in `docs/compat-kit.md` in the Auto Storage repository.
+
+## Quick start
+
+Use Python 3.11 or newer, JDK 21, and one official representative target jar:
+
+```bash
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+python3 --version
+
+./compat-kit scan \
+  --jar target.jar \
+  --source target-source \
+  --output audit.json
+./compat-kit decide audit.json \
+  --output contract-draft.json \
+  --next-actions next-actions.md
+```
+
+Review every candidate and record exact ingredients, catalysts, remainders,
+outputs, typed units, station rates, costs, bounds, and evidence. After the
+contract has no `needs_decision` entry:
+
+The scan publishes only public signatures and compact risk evidence. Bounded
+private bytecode is inspected for hidden randomness, world/entity access,
+multiblocks, live machine state, generic ingredient surfaces, unbounded output,
+and capability mutations requiring simulation, but is never stored in the
+audit.
+
+```bash
+./compat-kit scaffold --addon contract.json --output target-auto-storage
+./compat-kit verify contract.json --addon target-auto-storage \
+  --output report.json
+```
+
+Use `scaffold --bundled contract.json` and `verify --bundled <repo>` inside the
+Auto Storage repository. Bundled verification runs each declared Gradle task
+separately and removes only `run/world` before each one.
+
+## Review an update
+
+```bash
+./compat-kit diff audit.json target-new.jar \
+  --source target-new-source \
+  --output delta.json
+```
+
+The audit, contract, delta, and report schemas are under `schema/`. A complete
+public-SDK registration example is under `examples/addon/`; its reusable
+workflow is under `examples/github-actions/`. Downloaded jars, source checkouts,
+caches, and reports are evidence or build products; do not put them in a
+Minecraft instance.

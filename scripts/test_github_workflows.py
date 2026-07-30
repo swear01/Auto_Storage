@@ -16,6 +16,10 @@ class GitHubWorkflowTests(unittest.TestCase):
             "./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log",
         ),
         (
+            "Run AE2 GameTest server",
+            "./gradlew runAe2GameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-gametest.log",
+        ),
+        (
             "Run Mekanism GameTest server",
             "./gradlew runMekanismGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/mekanism-gametest.log",
         ),
@@ -116,6 +120,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("./gradlew build --console=plain --no-daemon 2>&1 | tee build/ci-logs/build.log", text)
         self.assertIn("./gradlew runGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/gametest.log", text)
         self.assertIn("./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log", text)
+        self.assertIn("./gradlew runAe2GameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-gametest.log", text)
         self.assertIn("./gradlew runMekanismGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/mekanism-gametest.log", text)
         self.assertIn("./gradlew runBotaniaGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/botania-gametest.log", text)
         self.assertIn("./gradlew runModernIndustrializationGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/modern-industrialization-gametest.log", text)
@@ -136,6 +141,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("run/logs/**", text)
         self.assertIn("build/reports/**", text)
         self.assertIn("build/libs/auto_storage-*.jar", text)
+        self.assertIn("build/distributions/auto-storage-compat-kit-*.zip", text)
         self.assertIn("contents: read", text)
         self.assertIn("Verify minimum and latest compatible EMI releases", text)
         self.assertIn('MIN_EMI="$(sed -n \'s/^emi_version=//p\' gradle.properties)"', text)
@@ -178,6 +184,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("./gradlew build --console=plain --no-daemon 2>&1 | tee build/ci-logs/build.log", text)
         self.assertIn("./gradlew runGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/gametest.log", text)
         self.assertIn("./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log", text)
+        self.assertIn("./gradlew runAe2GameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-gametest.log", text)
         self.assertIn("./gradlew runMekanismGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/mekanism-gametest.log", text)
         self.assertIn("./gradlew runBotaniaGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/botania-gametest.log", text)
         self.assertIn("./gradlew runModernIndustrializationGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/modern-industrialization-gametest.log", text)
@@ -216,6 +223,10 @@ class GitHubWorkflowTests(unittest.TestCase):
             text,
         )
         self.assertIn("github-token: ${{ secrets.GITHUB_TOKEN }}", text)
+        self.assertIn(
+            '"build/distributions/auto-storage-compat-kit-${VERSION}.zip"',
+            text,
+        )
         self.assertIn("Verify minimum and latest compatible EMI releases", text)
         self.assertIn('MIN_EMI="$(sed -n \'s/^emi_version=//p\' gradle.properties)"', text)
         self.assertIn('MIN_EMI_RUNTIME="$(sed -n \'s/^emi_runtime_version=//p\' gradle.properties)"', text)

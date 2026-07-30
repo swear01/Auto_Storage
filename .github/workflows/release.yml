@@ -82,6 +82,12 @@ jobs:
           python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log
 
+      - name: Run AE2 GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runAe2GameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-gametest.log
+
       - name: Run Mekanism GameTest server
         run: |
           set -o pipefail
@@ -243,4 +249,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.release-meta.outputs.version }}"
-          gh release upload "$GITHUB_REF_NAME" "build/libs/auto_storage-${VERSION}-api.jar" "build/libs/auto_storage-${VERSION}-api-sources.jar" "build/libs/auto_storage-${VERSION}-api-javadoc.jar"
+          gh release upload "$GITHUB_REF_NAME" "build/libs/auto_storage-${VERSION}-api.jar" "build/libs/auto_storage-${VERSION}-api-sources.jar" "build/libs/auto_storage-${VERSION}-api-javadoc.jar" "build/distributions/auto-storage-compat-kit-${VERSION}.zip"

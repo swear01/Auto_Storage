@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatIndustrialForegoing",
   "fixture": "industrialForegoingFixture",
+  "expectedTests": 9,
   "dependencies": [
     "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}",
     "maven.modrinth:titanium:${titanium_ci_version}"

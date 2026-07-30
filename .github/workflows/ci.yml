@@ -62,6 +62,12 @@ jobs:
           python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log
 
+      - name: Run AE2 GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runAe2GameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-gametest.log
+
       - name: Run Mekanism GameTest server
         run: |
           set -o pipefail
@@ -177,4 +183,11 @@ jobs:
         with:
           name: auto-storage-jar
           path: build/libs/auto_storage-*.jar
+          if-no-files-found: error
+
+      - name: Upload Compat Kit
+        uses: actions/upload-artifact@v7
+        with:
+          name: auto-storage-compat-kit
+          path: build/distributions/auto-storage-compat-kit-*.zip
           if-no-files-found: error

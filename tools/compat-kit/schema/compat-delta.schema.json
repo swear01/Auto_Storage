@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/swear01/Auto_Storage/tools/compat-kit/schema/compat-delta.schema.json",
+  "title": "Auto Storage compatibility audit delta",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "kind",
+    "mod_id",
+    "from_version",
+    "to_version",
+    "recipe_classes",
+    "resource_apis",
+    "station_classes",
+    "risks",
+    "contract_affected"
+  ],
+  "properties": {
+    "schema": {"const": 1},
+    "kind": {"const": "auto_storage_compat_delta"},
+    "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+    "from_version": {"type": "string", "minLength": 1},
+    "to_version": {"type": "string", "minLength": 1},
+    "recipe_classes": {"$ref": "#/$defs/class_delta"},
+    "resource_apis": {"$ref": "#/$defs/class_delta"},
+    "station_classes": {"$ref": "#/$defs/class_delta"},
+    "risks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added", "removed"],
+      "properties": {
+        "added": {"$ref": "#/$defs/risks"},
+        "removed": {"$ref": "#/$defs/risks"}
+      }
+    },
+    "contract_affected": {"type": "boolean"}
+  },
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "class_delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added", "removed", "changed"],
+      "properties": {
+        "added": {"$ref": "#/$defs/strings"},
+        "removed": {"$ref": "#/$defs/strings"},
+        "changed": {"$ref": "#/$defs/strings"}
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "evidence"],
+        "properties": {
+          "code": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "evidence": {"$ref": "#/$defs/strings"}
+        }
+      }
+    }
+  }
+}
