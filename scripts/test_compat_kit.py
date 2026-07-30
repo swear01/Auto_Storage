@@ -334,6 +334,67 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertTrue(calls)
         self.assertEqual(artifact_sha, audit["artifact"]["sha256"])
 
+    def test_scan_rejects_dirty_git_source_checkout(self):
+        source = self.root / "source"
+        source_file = source / "src/main/java/samplemod/recipe/CrushingRecipe.java"
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text("package samplemod.recipe;\nfinal class CrushingRecipe {}\n")
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
+        source_file.write_text(
+            "package samplemod.recipe;\nfinal class CrushingRecipe { int dirty; }\n"
+        )
+
+        with self.assertRaisesRegex(ValueError, "source checkout is dirty"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                source=source,
+                signature_reader=self.signatures,
+            )
+
+    def test_scan_rejects_malformed_current_cache_structure(self):
+        cache = self.root / "cache"
+        artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
+        cached = (
+            cache
+            / artifact_sha
+            / f"v{self.compat_kit.SCAN_CACHE_VERSION}"
+            / "audit.json"
+        )
+        cached.parent.mkdir(parents=True)
+        malformed = {
+            "schema": 1,
+            "kind": "auto_storage_compat_audit",
+            "target": {},
+            "artifact": {"sha256": artifact_sha, "size": 1},
+            "source": {"revision": None, "files": []},
+            "candidates": {},
+            "risks": [],
+        }
+        cached.write_text(json.dumps(malformed))
+
+        with self.assertRaisesRegex(ValueError, "audit target"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                cache_dir=cache,
+                signature_reader=lambda _: "unexpected",
+            )
+
     def test_scan_keeps_named_nested_recipe_classes_but_excludes_synthetic_classes(self):
         nested_jar = self.root / "samplemod-nested.jar"
         write_fixture_jar(nested_jar)
@@ -901,6 +962,11 @@ class CompatKitAuditTests(unittest.TestCase):
             build,
         )
         self.assertIn(
+            'compileOnly("com.example:samplemod:1.2.3") '
+            "{ transitive = false }",
+            build,
+        )
+        self.assertIn(
             'runtimeOnly("com.example:samplemod:1.2.3") '
             "{ transitive = false }",
             build,
@@ -1175,6 +1241,10 @@ class CompatKitAuditTests(unittest.TestCase):
             require_complete=True,
             source_audit=audit,
         )
+        self.assertEqual(
+            set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            set(self.compat_kit._verification_evidence(contract, ROOT)),
+        )
 
     def test_recipe_family_verification_commands_include_ae2_fixture(self):
         guide = (ROOT / "docs/recipe-family-api.md").read_text()
@@ -1318,6 +1388,61 @@ class CompatKitAuditTests(unittest.TestCase):
                 bundled_root=output_root,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 2 required tests passed :)\n", ""
+                ),
+            )
+
+    def test_verify_rejects_gametest_marker_outside_annotated_method(self):
+        contract = self.accepted_contract()
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["marker"] = "detached_behavior_marker"
+        output_root = self.root / "detached-evidence"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text()
+            .replace(
+                "public final class SamplemodIntegrationGameTests {",
+                "public final class SamplemodIntegrationGameTests {\n"
+                '    private static final String MARKER = "detached_behavior_marker";',
+            )
+            .replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "evidence marker is not inside an @GameTest method",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 1 required tests passed :)\n", ""
                 ),
             )
 

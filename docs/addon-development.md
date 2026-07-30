@@ -78,7 +78,8 @@ because it can change which repository serves a coordinate. The generated
 build also copies every explicit `target.runtime_dependencies` entry, so
 required libraries such as GuideME do not depend on transitive metadata or an
 undocumented post-scaffold edit. Target and explicit runtime dependencies are
-non-transitive, so every required companion must be listed. The generated build resolves the reviewed
+non-transitive on both target compile and runtime classpaths, so every required
+companion must be listed. The generated build resolves the reviewed
 target dependency separately and checks its exact
 jar SHA against `source_audit_sha256` during both `build` and
 `runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
@@ -89,7 +90,10 @@ evidence can pass.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
-tasks. Bundled task names are not translated or treated as equivalent.
+tasks. A `runGameTestServer` evidence marker must live inside the annotated
+GameTest method that executes the assertion; file-level constants, comments,
+and detached helpers are rejected. Bundled task names are not translated or
+treated as equivalent.
 
 ## Register through one facade
 

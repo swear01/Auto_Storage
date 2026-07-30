@@ -1677,8 +1677,8 @@
     "evidence": {
       "absent_target_no_classload": [
         {
-          "marker": "absent optional mods never resolve compatibility entrypoints",
-          "source": "src/main/java/com/swear/autostorage/SelfTest.java",
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
           "task": "runGameTestServer"
         }
       ],

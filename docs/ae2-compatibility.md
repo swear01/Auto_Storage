@@ -87,5 +87,8 @@ range, or fractional. Auto Storage never rounds an AE cost.
 Seven real GameTests cover registration/Charger exclusion, retained INSCRIBE
 presses, consumed PRESS inputs, exact FE/work, insufficient FE, insufficient
 work, destination overflow rollback, and runtime conversion representation.
-The absent-target base run protects classloading and the all-mod compatibility
+The base
+`exact_recipe_selection_accepts_supported_backing_recipe_and_rejects_stale_id`
+GameTest also executes the absent-target no-classload assertion, so its contract
+marker is bound to an actual annotated GameTest body. The all-mod compatibility
 matrix protects coexistence.

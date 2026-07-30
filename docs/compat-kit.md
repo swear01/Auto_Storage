@@ -60,7 +60,9 @@ checkouts, and transient reports remain under ignored `build/`.
 
 Download one official representative jar and, when available, check out its
 matching source tag or commit. Record the artifact URL, SHA-256, and source
-revision in the compatibility document. Never silently replace a failed source.
+revision in the compatibility document. The checkout passed to `scan` or
+`diff` must be clean, including untracked files, so the recorded revision fully
+describes the inspected source. Never silently replace a failed source.
 
 ### 2. Scan
 
@@ -92,7 +94,9 @@ anonymous/local `$<number>` classes and every class carrying the JVM
 
 Archive limits, candidate counts, signature size, source-file counts, malformed
 metadata, ambiguous multi-mod jars, missing JDK tools, and `javap` failures all
-fail closed.
+fail closed. Current-format cache entries and committed audits are also fully
+validated down through target, artifact, source, candidate, and risk records;
+a matching cache path does not authorize malformed or partial evidence.
 
 ### 3. Decide
 
@@ -164,7 +168,8 @@ structure. The fixture must be a Java-safe camel-case identifier ending in
 `Fixture`; path-like values fail before any file is created. Gradle discovers
 the source set, reviewed HTTPS repositories, target dependencies, fixture mod,
 run task, expected test gate, and audited target artifact from that descriptor;
-the target is on both compile and fixture runtime classpaths. `build` and the
+the target is on both compile and fixture runtime classpaths, with both
+declarations non-transitive. `build` and the
 module GameTest resolve exactly one target jar and reject a SHA different from
 the reviewed audit. No central compatibility switch is added.
 
@@ -218,8 +223,11 @@ remaining RED marker, forbidden
 implementation links, missing evidence source/marker, a source annotation
 count different from `expected_game_tests`, GameTest output that does not
 report that exact passing count, an undeclared evidence task, or any non-zero
-command. A check is marked passed only when all of its declared source markers
-exist and the associated Gradle task succeeds. The report records those
+command. A marker assigned to a `run*GameTestServer` task must occur inside an
+annotated `@GameTest` method body; a detached constant, helper, or comment does
+not prove that the behavior ran. A check is marked passed only when all of its
+declared source markers exist in the correct execution boundary and the
+associated Gradle task succeeds. The report records those
 per-check evidence links, exact commands, exit codes, output hashes, tool
 version, target, and manifest hash. Bundled verification runs every declared
 Gradle task as a separate process and removes only `run/world` before each task

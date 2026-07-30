@@ -354,6 +354,29 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
     revision = None
     git_dir = source / ".git"
     if git_dir.exists():
+        status = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(source),
+                "status",
+                "--porcelain",
+                "--untracked-files=all",
+            ],
+            capture_output=True,
+            check=False,
+            text=True,
+            timeout=10,
+        )
+        if status.returncode != 0:
+            raise RuntimeError(
+                "failed to inspect source checkout status: "
+                + (status.stderr.strip() or status.stdout.strip())
+            )
+        if status.stdout.strip():
+            raise ValueError(
+                "source checkout is dirty: " + status.stdout.splitlines()[0]
+            )
         result = subprocess.run(
             ["git", "-C", str(source), "rev-parse", "HEAD"],
             capture_output=True,
@@ -426,6 +449,124 @@ def _validate_audit(audit: dict):
     for key in ("target", "artifact", "source", "candidates", "risks"):
         if key not in audit:
             raise ValueError(f"audit is missing {key}")
+    target = audit["target"]
+    if not isinstance(target, dict) or set(target) != {
+        "mod_id",
+        "display_name",
+        "version",
+    }:
+        raise ValueError("audit target requires mod_id, display_name, and version")
+    if not isinstance(target["mod_id"], str) or not re.fullmatch(
+        r"[a-z0-9_-]+",
+        target["mod_id"],
+    ):
+        raise ValueError("audit target has invalid mod_id")
+    for key in ("display_name", "version"):
+        if not isinstance(target[key], str) or not target[key].strip():
+            raise ValueError(f"audit target {key} must be a non-empty string")
+
+    artifact = audit["artifact"]
+    if not isinstance(artifact, dict) or set(artifact) != {"sha256", "size"}:
+        raise ValueError("audit artifact requires sha256 and size")
+    if not isinstance(artifact["sha256"], str) or not re.fullmatch(
+        r"[0-9a-f]{64}",
+        artifact["sha256"],
+    ):
+        raise ValueError("audit artifact sha256 must be a SHA-256 digest")
+    if (
+        isinstance(artifact["size"], bool)
+        or not isinstance(artifact["size"], int)
+        or artifact["size"] <= 0
+    ):
+        raise ValueError("audit artifact size must be a positive integer")
+
+    source = audit["source"]
+    if not isinstance(source, dict) or set(source) != {"revision", "files"}:
+        raise ValueError("audit source requires revision and files")
+    revision = source["revision"]
+    if revision is not None and (
+        not isinstance(revision, str)
+        or not re.fullmatch(r"[0-9a-f]{40,64}", revision)
+    ):
+        raise ValueError("audit source revision must be null or a Git digest")
+    files = source["files"]
+    if not isinstance(files, list) or any(
+        not isinstance(path, str) or not path for path in files
+    ):
+        raise ValueError("audit source files must be a string list")
+    if len(set(files)) != len(files):
+        raise ValueError("audit source files must not contain duplicates")
+
+    candidates = audit["candidates"]
+    candidate_buckets = {
+        "recipe_classes",
+        "resource_apis",
+        "station_classes",
+    }
+    if not isinstance(candidates, dict) or set(candidates) != candidate_buckets:
+        raise ValueError(
+            "audit candidates require recipe_classes, resource_apis, "
+            "and station_classes"
+        )
+    seen_classes = set()
+    for bucket in sorted(candidate_buckets):
+        records = candidates[bucket]
+        if not isinstance(records, list):
+            raise ValueError(f"audit candidates {bucket} must be a list")
+        for index, record in enumerate(records):
+            location = f"audit candidates {bucket} {index}"
+            if not isinstance(record, dict) or set(record) != {
+                "class",
+                "public_signature",
+            }:
+                raise ValueError(
+                    f"{location} requires class and public_signature"
+                )
+            class_name = record["class"]
+            if not isinstance(class_name, str) or not re.fullmatch(
+                r"[A-Za-z_$][A-Za-z0-9_$.]*",
+                class_name,
+            ):
+                raise ValueError(f"{location} has invalid class")
+            if class_name in seen_classes:
+                raise ValueError(f"audit repeats candidate class {class_name}")
+            seen_classes.add(class_name)
+            if (
+                not isinstance(record["public_signature"], str)
+                or not record["public_signature"].strip()
+            ):
+                raise ValueError(f"{location} has empty public_signature")
+
+    risks = audit["risks"]
+    if not isinstance(risks, list):
+        raise ValueError("audit risks must be a list")
+    seen_risks = set()
+    for index, risk in enumerate(risks):
+        location = f"audit risk {index}"
+        if not isinstance(risk, dict) or set(risk) != {
+            "code",
+            "disposition",
+            "evidence",
+        }:
+            raise ValueError(
+                f"{location} requires code, disposition, and evidence"
+            )
+        code = risk["code"]
+        if not isinstance(code, str) or not re.fullmatch(r"[a-z0-9_]+", code):
+            raise ValueError(f"{location} has invalid code")
+        if code in seen_risks:
+            raise ValueError(f"audit repeats risk code {code}")
+        seen_risks.add(code)
+        if risk["disposition"] != "needs_decision":
+            raise ValueError(f"{location} has invalid disposition")
+        evidence = risk["evidence"]
+        if (
+            not isinstance(evidence, list)
+            or not evidence
+            or any(not isinstance(item, str) or not item for item in evidence)
+            or len(set(evidence)) != len(evidence)
+        ):
+            raise ValueError(f"{location} evidence must be a unique string list")
 
 
 def scan_jar(
@@ -612,7 +753,7 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
     contract = {
         "schema": SCHEMA_VERSION,
         "kind": "auto_storage_compat_contract",
-        "target": audit["target"],
+        "target": dict(audit["target"]),
         "source_audit_sha256": audit["artifact"]["sha256"],
         "source_recipe_inventory_sha256": _recipe_inventory_sha256(
             candidate["class"] for candidate in recipe_candidates
@@ -1315,7 +1456,7 @@ dependencies {{
     compileOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}:api")
     runtimeOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}")
     runtimeOnly("vazkii.patchouli:Patchouli:${{patchouli_version}}")
-    compileOnly("{target['dependency']}")
+    compileOnly("{target['dependency']}") {{ transitive = false }}
     runtimeOnly("{target['dependency']}") {{ transitive = false }}
 {runtime_dependency_lines}
     compatKitTargetArtifact("{target['dependency']}")
@@ -1660,6 +1801,70 @@ def _source_text(root: Path) -> str:
     return "\n".join(path.read_text() for path in sources)
 
 
+def _java_block_end(text: str, opening: int) -> int:
+    depth = 0
+    index = opening
+    state = "code"
+    while index < len(text):
+        if state == "code":
+            if text.startswith('"""', index):
+                state = "text"
+                index += 3
+                continue
+            if text.startswith("//", index):
+                state = "line"
+                index += 2
+                continue
+            if text.startswith("/*", index):
+                state = "block"
+                index += 2
+                continue
+            character = text[index]
+            if character == '"':
+                state = "string"
+            elif character == "'":
+                state = "char"
+            elif character == "{":
+                depth += 1
+            elif character == "}":
+                depth -= 1
+                if depth == 0:
+                    return index
+        elif state == "line":
+            if text[index] == "\n":
+                state = "code"
+        elif state == "block":
+            if text.startswith("*/", index):
+                state = "code"
+                index += 2
+                continue
+        elif state == "text":
+            if text.startswith('"""', index):
+                state = "code"
+                index += 3
+                continue
+        elif text[index] == "\\":
+            index += 2
+            continue
+        elif state == "string" and text[index] == '"':
+            state = "code"
+        elif state == "char" and text[index] == "'":
+            state = "code"
+        index += 1
+    raise ValueError("unterminated @GameTest method body")
+
+
+def _game_test_blocks(text: str) -> list[str]:
+    blocks = []
+    for annotation in re.finditer(r"@GameTest\s*\(", text):
+        opening = text.find("{", annotation.end())
+        if opening < 0:
+            raise ValueError("@GameTest annotation has no method body")
+        closing = _java_block_end(text, opening)
+        blocks.append(text[annotation.start():closing + 1])
+    return blocks
+
+
 def _verification_evidence(
     contract: dict,
     root: Path,
@@ -1682,12 +1887,22 @@ def _verification_evidence(
                     f"verification evidence source exceeds {MAX_SOURCE_FILES} files: "
                     f"{record['source']}"
                 )
-            if not any(record["marker"] in path.read_text() for path in matches):
+            matching_texts = [path.read_text() for path in matches]
+            if not any(record["marker"] in text for text in matching_texts):
                 raise ValueError(
                     f"verification evidence marker not found for {check}: "
                     f"{record['marker']}"
                 )
             task = record["task"]
+            if re.fullmatch(r"run(?:[A-Za-z0-9]+)?GameTestServer", task) and not any(
+                record["marker"] in block
+                for text in matching_texts
+                for block in _game_test_blocks(text)
+            ):
+                raise ValueError(
+                    "evidence marker is not inside an @GameTest method for "
+                    f"{check}: {record['marker']}"
+                )
             resolved_records.append(
                 f"{task}:{record['source']}#{record['marker']}"
             )

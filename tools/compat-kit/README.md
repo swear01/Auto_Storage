@@ -26,12 +26,18 @@ python3 --version
   --next-actions next-actions.md
 ```
 
+When `--source` points at a Git checkout, tracked and untracked state must be
+clean so its HEAD identifies the exact inspected source. Current-format cache
+entries are fully schema-validated before reuse.
+
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
 repositories, additional required runtime artifacts, and evidence. Each
 required verification check must name the successful Gradle task plus a source
 glob and marker; the declared
-`game_test_task` must report exactly `expected_game_tests` passing tests. After
+`game_test_task` must report exactly `expected_game_tests` passing tests.
+Markers assigned to `run*GameTestServer` tasks must occur inside annotated
+`@GameTest` method bodies. After
 the contract has no `needs_decision` entry, pass the same committed audit to
 every later command. Validation compares that audit's exact candidate set with
 the contract, so recomputing a contract-only inventory digest cannot hide an
@@ -56,7 +62,9 @@ accept the descriptor syntax emitted by `javap -c -p`.
 
 Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
-reviewed target jar SHA; evidence task names are never remapped. Verification
+reviewed target jar SHA; target compile/runtime and explicit runtime
+dependencies are non-transitive, and evidence task names are never remapped.
+Verification
 also checks the manifest hash of the generated `build.gradle` (or bundled
 descriptor), so removing that SHA gate is explicit drift rather than a pass.
 

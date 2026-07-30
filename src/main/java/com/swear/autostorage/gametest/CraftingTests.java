@@ -28,8 +28,13 @@ import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.block.Block;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
+
+import java.io.StringReader;
+import java.lang.reflect.Proxy;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @GameTestHolder(AutoStorage.MODID)
 public class CraftingTests {
@@ -91,6 +96,7 @@ public class CraftingTests {
 
     @GameTest(template = "platform")
     public static void exact_recipe_selection_accepts_supported_backing_recipe_and_rejects_stale_id(GameTestHelper helper) {
+        verifyAbsentOptionalCompatDoesNotResolve(helper);
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
         level.setBlock(corePos, AutoStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
@@ -4686,6 +4692,33 @@ public class CraftingTests {
     private static boolean hasCompleteGenericIngredients(net.minecraft.world.item.crafting.Recipe<?> recipe) {
         if (recipe.isSpecial() || recipe.isIncomplete()) return false;
         return recipe.getIngredients().stream().anyMatch(ingredient -> !ingredient.isEmpty());
+    }
+
+    private static void verifyAbsentOptionalCompatDoesNotResolve(GameTestHelper helper) {
+        IEventBus modBus = (IEventBus) Proxy.newProxyInstance(
+                CraftingTests.class.getClassLoader(),
+                new Class<?>[]{IEventBus.class},
+                (proxy, method, arguments) -> null);
+        AtomicInteger resolutions = new AtomicInteger();
+        CompatibilityModuleLoader.load(
+                new StringReader("""
+                        {"schema":1,"modules":[{
+                        "id":"auto_storage:absent_target_test",
+                        "entrypoint":"com.example.AbsentCompat",
+                        "requires":["missing_target"],
+                        "side":"both"
+                        }]}
+                        """),
+                ignored -> false,
+                CompatibilityModuleLoader.Side.SERVER,
+                modBus,
+                name -> {
+                    resolutions.incrementAndGet();
+                    return Object.class;
+                });
+        if (resolutions.get() != 0) {
+            helper.fail("Absent optional mod resolved its compatibility entrypoint");
+        }
     }
 
     private static int findDisplaySlot(CraftingTerminalMenu menu, Item item) {
