@@ -94,6 +94,22 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
         self.assertIn("`.cursor/skills/full-repo-audit/`", structure)
         self.assertIn("Cursor Cloud", structure)
 
+    def test_github_pr_bot_gate_is_distinct_from_local_and_full_repo_review(self):
+        agents = (ROOT / "AGENTS.md").read_text()
+        notes = (ROOT / "docs/notes.md").read_text()
+        combined = "\n".join((agents, notes))
+        for required in (
+            "GitHub-triggered PR review",
+            "chatgpt-codex-connector[bot]",
+            "cursor[bot]",
+            "local CLI",
+            "does not satisfy",
+            "consumer Gemini Code Assist",
+            "sunset",
+        ):
+            self.assertIn(required, combined)
+        self.assertIn("not a PR diff review", self.skill_text())
+
 
 if __name__ == "__main__":
     unittest.main()
