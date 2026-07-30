@@ -81,6 +81,8 @@ outputs, and capability mutations requiring simulation are persisted. Without
 `--source`, scans are cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
+Capability mutation detection reads both source-like method signatures and
+the `methodName:(descriptor)` form emitted by `javap -c -p`.
 Named nested classes are audited and mapped back to their top-level Java source;
 anonymous, local, and synthetic `$<number>` classes are excluded.
 
@@ -100,9 +102,11 @@ tools/compat-kit/compat-kit decide \
 The draft contains one entry for every recipe-class candidate. Complete each
 entry as `accepted` or `rejected`; do not delete inconvenient candidates.
 `next-actions.md` is the compact review surface and lists only unresolved work.
-`source_recipe_inventory_sha256` binds the sorted audited recipe-class
-inventory; deleting or duplicating a family makes validation fail even if the
-remaining entries are complete.
+`source_recipe_inventory_sha256` binds the sorted recipe-class inventory, and
+every complete `scaffold`/`verify` invocation must also load the committed
+source audit. Validation compares the contract's exact family-class set,
+target identity, artifact SHA, and inventory digest with that separate audit;
+deleting a family and recomputing a contract field still fails.
 
 An accepted family records:
 
@@ -130,7 +134,8 @@ Bundled module:
 
 ```bash
 tools/compat-kit/compat-kit scaffold \
-  --bundled compat/contracts/target.json
+  --bundled compat/contracts/target.json \
+  --audit compat/audits/target/1.2.3.json
 ```
 
 Independent addon:
@@ -138,6 +143,7 @@ Independent addon:
 ```bash
 tools/compat-kit/compat-kit scaffold \
   --addon compat/contracts/target.json \
+  --audit compat/audits/target/1.2.3.json \
   --output ../target-auto-storage
 ```
 
@@ -155,9 +161,11 @@ External output is an ordinary NeoForge project with the Gradle wrapper,
 compile-only Auto Storage API dependency, reviewed target repositories and
 target dependency, one-call
 `AutoStorageAddon.register(...)`, dependency metadata, a RED present-target
-GameTest, and reusable GitHub Actions workflow. It cannot compile against Auto
-Storage implementation classes. Its `build` and `runGameTestServer` gates also
-resolve exactly one target jar and verify `source_audit_sha256`.
+GameTest, required Patchouli runtime, and reusable GitHub Actions workflow. It
+cannot compile against Auto Storage implementation classes. The separate
+source audit is copied to `compat/audit.json`; its `build` and
+`runGameTestServer` gates also resolve exactly one target jar and verify
+`source_audit_sha256`.
 
 The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the
@@ -181,6 +189,7 @@ client isolation, API-only compilation, and all-mod coexistence.
 ```bash
 tools/compat-kit/compat-kit verify \
   compat/contracts/target.json \
+  --audit compat/audits/target/1.2.3.json \
   --bundled . \
   --output build/compat-kit/target-report.json
 ```
@@ -190,7 +199,8 @@ exactly `build` and `runGameTestServer`, use `main` as their fixture, and map
 evidence only to those actual tasks; the verifier never rewrites bundled task
 names into addon task names. It runs both gates and gives
 `runGameTestServer` a fresh world. Verification rejects an unresolved
-contract, contract/manifest mismatch, remaining RED marker, forbidden
+contract, contract/source-audit mismatch, contract/manifest mismatch,
+remaining RED marker, forbidden
 implementation links, missing evidence source/marker, a source annotation
 count different from `expected_game_tests`, GameTest output that does not
 report that exact passing count, an undeclared evidence task, or any non-zero

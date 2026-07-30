@@ -126,6 +126,7 @@ Every optional recipe compatibility module loads only after `ModList` confirms t
 ```bash
 ./gradlew compileApiTestJava
 ./gradlew runRecipeAddonGameTestServer
+./gradlew runAe2GameTestServer
 ./gradlew runMekanismGameTestServer
 ./gradlew runIronFurnacesGameTestServer
 ./gradlew runFarmersDelightGameTestServer

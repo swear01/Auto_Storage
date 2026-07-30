@@ -16,8 +16,10 @@ integration or independent addon. It scans one reproducible target jar/source
 revision, creates an explicit reviewed recipe contract, generates a deliberately
 RED SDK-only scaffold, and runs the contract's verification gates. It does not
 infer consumption, catalysts, outputs, units, station costs, or determinism.
-The contract inventory digest prevents a recipe candidate from disappearing
-through an accidental hand edit.
+Every scaffold/verify command also loads the committed source audit. The exact
+audited recipe-candidate set, target identity, artifact SHA, and inventory
+digest must match the contract, so recomputing a contract-only field cannot
+hide an omitted candidate.
 
 ```bash
 tools/compat-kit/compat-kit scan --help
@@ -74,8 +76,11 @@ does not infer Modrinth, Curse Maven, or an upstream repository from a
 dependency coordinate. Keep this list minimal and reviewable. The generated
 build resolves the reviewed target dependency separately and checks its exact
 jar SHA against `source_audit_sha256` during both `build` and
-`runGameTestServer`; a different artifact fails before compatibility evidence
-can pass.
+`runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
+Because Auto Storage requires Patchouli on both sides, the generated
+GameTest runtime includes the matching Patchouli artifact and its repository.
+A different target artifact or source audit fails before compatibility
+evidence can pass.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual

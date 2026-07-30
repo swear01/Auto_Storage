@@ -31,8 +31,10 @@ outputs, typed units, station rates, costs, bounds, target HTTPS Maven
 repositories, and evidence. Each required verification check must name the
 successful Gradle task plus a source glob and marker; the declared
 `game_test_task` must report exactly `expected_game_tests` passing tests. After
-the contract has no `needs_decision` entry, its inventory digest still requires
-one family entry for every audited recipe class:
+the contract has no `needs_decision` entry, pass the same committed audit to
+every later command. Validation compares that audit's exact candidate set with
+the contract, so recomputing a contract-only inventory digest cannot hide an
+omitted recipe family:
 
 The scan publishes only public signatures and compact risk evidence. Bounded
 private bytecode is inspected for hidden randomness, world/entity access,
@@ -42,8 +44,9 @@ audit. Named nested classes are included and mapped to their top-level source;
 anonymous, local, and synthetic classes are excluded.
 
 ```bash
-./compat-kit scaffold --addon contract.json --output target-auto-storage
-./compat-kit verify contract.json --addon target-auto-storage \
+./compat-kit scaffold --addon contract.json --audit audit.json \
+  --output target-auto-storage
+./compat-kit verify contract.json --audit audit.json --addon target-auto-storage \
   --output report.json
 ```
 
@@ -53,8 +56,9 @@ reviewed target jar SHA; evidence task names are never remapped. Verification
 also checks the manifest hash of the generated `build.gradle` (or bundled
 descriptor), so removing that SHA gate is explicit drift rather than a pass.
 
-Use `scaffold --bundled contract.json` and `verify --bundled <repo>` inside the
-Auto Storage repository. Bundled verification runs each declared Gradle task
+Use `scaffold --bundled contract.json --audit audit.json` and
+`verify contract.json --audit audit.json --bundled <repo>` inside the Auto
+Storage repository. Bundled verification runs each declared Gradle task
 separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing
 count. Bundled descriptors preserve reviewed HTTPS repositories, and fixture

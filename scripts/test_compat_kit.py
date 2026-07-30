@@ -216,6 +216,26 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertNotIn("RandomSource", crushing["public_signature"])
         self.assertEqual({"class", "public_signature"}, set(crushing))
 
+    def test_scan_detects_capability_mutation_in_real_javap_invocation_syntax(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            risk_reader=lambda class_name: (
+                "  12: invokeinterface #42,  4 // InterfaceMethod "
+                "net/neoforged/neoforge/items/IItemHandler.insertItem:"
+                "(IILnet/minecraft/world/item/ItemStack;Z)"
+                "Lnet/minecraft/world/item/ItemStack;"
+                if class_name == "samplemod.recipe.CrushingRecipe"
+                else self.signatures(class_name)
+            ),
+        )
+
+        risks = {risk["code"]: risk for risk in audit["risks"]}
+        self.assertEqual(
+            ["samplemod.recipe.CrushingRecipe#insertItem"],
+            risks["simulation_required"]["evidence"],
+        )
+
     def test_scan_allows_bounded_large_private_bytecode(self):
         large_private_bytecode = (
             "private void generated() { "
@@ -428,20 +448,30 @@ class CompatKitAuditTests(unittest.TestCase):
             self.compat_kit.validate_contract(contract, require_complete=False)
 
     def test_contract_validation_rejects_an_omitted_audited_recipe_candidate(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
         contract = self.accepted_contract()
         contract["families"] = [
             family
             for family in contract["families"]
             if family["class"] != "samplemod.recipe.ChanceRecipe"
         ]
+        contract["source_recipe_inventory_sha256"] = (
+            self.compat_kit._recipe_inventory_sha256(
+                family["class"] for family in contract["families"]
+            )
+        )
 
         with self.assertRaisesRegex(
             ValueError,
-            "recipe family inventory does not match source audit",
+            "contract families do not match audited recipe candidates",
         ):
             self.compat_kit.validate_contract(
                 contract,
                 require_complete=True,
+                source_audit=audit,
             )
 
     def test_contract_validation_rejects_malformed_nested_semantics(self):
@@ -553,11 +583,14 @@ class CompatKitAuditTests(unittest.TestCase):
             )
         self.assertEqual({"added": [], "removed": []}, delta["risks"])
 
-    def accepted_contract(self) -> dict:
-        audit = self.compat_kit.scan_jar(
+    def source_audit(self) -> dict:
+        return self.compat_kit.scan_jar(
             self.jar,
             signature_reader=self.signatures,
         )
+
+    def accepted_contract(self) -> dict:
+        audit = self.source_audit()
         contract, _ = self.compat_kit.decide_audit(audit)
         contract["target"]["dependency"] = "com.example:samplemod:1.2.3"
         contract["target"]["repositories"] = [
@@ -627,7 +660,11 @@ class CompatKitAuditTests(unittest.TestCase):
                 for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS
             },
         }
-        self.compat_kit.validate_contract(contract, require_complete=True)
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=True,
+            source_audit=audit,
+        )
         return contract
 
     def addon_contract(self) -> dict:
@@ -648,14 +685,22 @@ class CompatKitAuditTests(unittest.TestCase):
             ]
             for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS
         }
-        self.compat_kit.validate_contract(contract, require_complete=True)
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=True,
+            source_audit=self.source_audit(),
+        )
         return contract
 
     def test_bundled_scaffold_is_descriptor_owned_fail_closed_and_drift_checked(self):
         contract = self.accepted_contract()
         output_root = self.root / "bundled"
 
-        generated = self.compat_kit.scaffold_bundled(contract, output_root)
+        generated = self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=self.source_audit(),
+        )
 
         expected = {
             "src/compat/samplemod/compat-module.json",
@@ -717,22 +762,35 @@ class CompatKitAuditTests(unittest.TestCase):
         for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS:
             self.assertIn(check, fixture)
 
-        regenerated = self.compat_kit.scaffold_bundled(contract, output_root)
+        regenerated = self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=self.source_audit(),
+        )
         self.assertEqual(generated, regenerated)
         descriptor_path = output_root / "src/compat/samplemod/compat-module.json"
         descriptor_path.write_text(descriptor_path.read_text() + "\n")
         with self.assertRaisesRegex(ValueError, "generated file drift"):
-            self.compat_kit.scaffold_bundled(contract, output_root)
+            self.compat_kit.scaffold_bundled(
+                contract,
+                output_root,
+                source_audit=self.source_audit(),
+            )
 
     def test_external_scaffold_is_api_only_and_has_reusable_ci(self):
         contract = self.addon_contract()
         output = self.root / "samplemod-auto-storage"
 
-        generated = self.compat_kit.scaffold_addon(contract, output)
+        generated = self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=self.source_audit(),
+        )
 
         relative = {path.relative_to(output).as_posix() for path in generated}
         for required in (
             "build.gradle",
+            "compat/audit.json",
             "gradle.properties",
             "settings.gradle",
             "gradlew",
@@ -758,6 +816,14 @@ class CompatKitAuditTests(unittest.TestCase):
             build,
         )
         self.assertIn('runtimeOnly("com.example:samplemod:1.2.3")', build)
+        self.assertIn(
+            'runtimeOnly("vazkii.patchouli:Patchouli:${patchouli_version}")',
+            build,
+        )
+        self.assertIn(
+            'url = uri("https://maven.blamejared.com")',
+            build,
+        )
         self.assertIn("compatKitTargetArtifact", build)
         self.assertIn("verifyCompatKitTargetArtifact", build)
         self.assertIn(contract["source_audit_sha256"], build)
@@ -770,7 +836,12 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(1, entrypoint.count("AutoStorageAddon.register("))
         self.assertIn("./gradlew build", workflow)
         self.assertIn("./gradlew runGameTestServer", workflow)
-        self.assertIn("compat-kit verify", workflow)
+        self.assertIn(
+            "compat-kit verify compat/contract.json "
+            "--audit compat/audit.json --addon .",
+            workflow,
+        )
+        self.assertTrue((output / "compat/audit.json").is_file())
         self.assertNotIn("implementation project", build)
 
     def test_external_scaffold_rejects_bundled_only_verification_tasks(self):
@@ -781,6 +852,7 @@ class CompatKitAuditTests(unittest.TestCase):
             self.compat_kit.scaffold_addon(
                 self.accepted_contract(),
                 self.root / "addon",
+                source_audit=self.source_audit(),
             )
 
     def test_bundled_scaffold_rejects_unsafe_fixture_paths(self):
@@ -794,6 +866,7 @@ class CompatKitAuditTests(unittest.TestCase):
             self.compat_kit.scaffold_bundled(
                 contract,
                 self.root / "bundled",
+                source_audit=self.source_audit(),
             )
         self.assertFalse((self.root / "outside").exists())
 
@@ -804,9 +877,17 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         unresolved, _ = self.compat_kit.decide_audit(audit)
         with self.assertRaisesRegex(ValueError, "unresolved"):
-            self.compat_kit.scaffold_bundled(unresolved, self.root / "bundled")
+            self.compat_kit.scaffold_bundled(
+                unresolved,
+                self.root / "bundled",
+                source_audit=audit,
+            )
         with self.assertRaisesRegex(ValueError, "unresolved"):
-            self.compat_kit.scaffold_addon(unresolved, self.root / "addon")
+            self.compat_kit.scaffold_addon(
+                unresolved,
+                self.root / "addon",
+                source_audit=audit,
+            )
 
     def test_schemas_are_versioned_strict_and_cover_all_machine_readable_documents(self):
         schema_root = ROOT / "tools/compat-kit/schema"
@@ -892,12 +973,28 @@ class CompatKitAuditTests(unittest.TestCase):
             },
             descriptor["auditArtifact"],
         )
-        self.compat_kit.validate_contract(contract, require_complete=True)
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=True,
+            source_audit=audit,
+        )
+
+    def test_recipe_family_verification_commands_include_ae2_fixture(self):
+        guide = (ROOT / "docs/recipe-family-api.md").read_text()
+        fixture_section = guide.split("## Repository verification fixture", 1)[1]
+        commands = fixture_section.split("```bash", 1)[1].split("```", 1)[0]
+
+        self.assertIn("./gradlew runAe2GameTestServer", commands)
 
     def test_verify_runs_declared_commands_and_emits_complete_report(self):
         contract = self.accepted_contract()
         output_root = self.root / "bundled"
-        self.compat_kit.scaffold_bundled(contract, output_root)
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
         adapter = (
             output_root
             / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
@@ -961,6 +1058,7 @@ class CompatKitAuditTests(unittest.TestCase):
 
         report = self.compat_kit.verify_contract(
             contract,
+            source_audit=source_audit,
             bundled_root=output_root,
             command_runner=runner,
         )
@@ -987,7 +1085,12 @@ class CompatKitAuditTests(unittest.TestCase):
 
         contract = self.accepted_contract()
         output_root = self.root / "bundled"
-        self.compat_kit.scaffold_bundled(contract, output_root)
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
         adapter = (
             output_root
             / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
@@ -1014,6 +1117,7 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "expected 1 GameTests"):
             self.compat_kit.verify_contract(
                 contract,
+                source_audit=source_audit,
                 bundled_root=output_root,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 2 required tests passed :)\n", ""
@@ -1023,10 +1127,16 @@ class CompatKitAuditTests(unittest.TestCase):
     def test_verify_fails_closed_on_red_scaffold_contract_drift_or_command_failure(self):
         contract = self.accepted_contract()
         output_root = self.root / "bundled"
-        self.compat_kit.scaffold_bundled(contract, output_root)
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
         with self.assertRaisesRegex(ValueError, "intentionally RED"):
             self.compat_kit.verify_contract(
                 contract,
+                source_audit=source_audit,
                 bundled_root=output_root,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
@@ -1046,6 +1156,7 @@ class CompatKitAuditTests(unittest.TestCase):
         ):
             self.compat_kit.verify_contract(
                 contract,
+                source_audit=source_audit,
                 bundled_root=output_root,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
@@ -1062,6 +1173,7 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "contract drift"):
             self.compat_kit.verify_contract(
                 changed_contract,
+                source_audit=source_audit,
                 bundled_root=output_root,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
@@ -1071,7 +1183,12 @@ class CompatKitAuditTests(unittest.TestCase):
     def test_external_verify_rejects_implementation_links(self):
         contract = self.addon_contract()
         output = self.root / "addon"
-        self.compat_kit.scaffold_addon(contract, output)
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=source_audit,
+        )
         adapter = (
             output
             / "src/main/java/com/example/samplemodautostorage/SamplemodCompat.java"
@@ -1106,6 +1223,7 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "implementation link"):
             self.compat_kit.verify_contract(
                 contract,
+                source_audit=source_audit,
                 addon_root=output,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
@@ -1115,7 +1233,12 @@ class CompatKitAuditTests(unittest.TestCase):
     def test_external_verify_runs_build_and_fresh_gametest_world(self):
         contract = self.addon_contract()
         output = self.root / "addon"
-        self.compat_kit.scaffold_addon(contract, output)
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=source_audit,
+        )
         adapter = (
             output
             / "src/main/java/com/example/samplemodautostorage/SamplemodCompat.java"
@@ -1156,6 +1279,7 @@ class CompatKitAuditTests(unittest.TestCase):
 
         report = self.compat_kit.verify_contract(
             contract,
+            source_audit=source_audit,
             addon_root=output,
             command_runner=runner,
         )
@@ -1211,6 +1335,7 @@ class CompatKitAuditTests(unittest.TestCase):
         extracted_module.scaffold_addon(
             self.addon_contract(),
             self.root / "extracted-addon",
+            source_audit=self.source_audit(),
         )
         self.assertTrue((self.root / "extracted-addon/gradlew").is_file())
 

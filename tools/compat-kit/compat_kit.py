@@ -83,18 +83,18 @@ RISK_PATTERNS = (
         re.compile(r"\bgetIngredients\s*\("),
         "getIngredients",
     ),
-    ("simulation_required", re.compile(r"\binsertItem\s*\("), "insertItem"),
-    ("simulation_required", re.compile(r"\bextractItem\s*\("), "extractItem"),
-    ("simulation_required", re.compile(r"\bfill\s*\("), "fill"),
-    ("simulation_required", re.compile(r"\bdrain\s*\("), "drain"),
+    ("simulation_required", re.compile(r"\binsertItem(?:\s*\(|:)"), "insertItem"),
+    ("simulation_required", re.compile(r"\bextractItem(?:\s*\(|:)"), "extractItem"),
+    ("simulation_required", re.compile(r"\bfill(?:\s*\(|:)"), "fill"),
+    ("simulation_required", re.compile(r"\bdrain(?:\s*\(|:)"), "drain"),
     (
         "simulation_required",
-        re.compile(r"\breceiveEnergy\s*\("),
+        re.compile(r"\breceiveEnergy(?:\s*\(|:)"),
         "receiveEnergy",
     ),
     (
         "simulation_required",
-        re.compile(r"\bextractEnergy\s*\("),
+        re.compile(r"\bextractEnergy(?:\s*\(|:)"),
         "extractEnergy",
     ),
     ("world_mutation", re.compile(r"\b(?:Level|ServerLevel|BlockPos)\b"), "world API"),
@@ -577,7 +577,7 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
             "evidence": {},
         },
     }
-    validate_contract(contract, require_complete=False)
+    validate_contract(contract, require_complete=False, source_audit=audit)
     return contract, "\n".join(action_lines).rstrip() + "\n"
 
 
@@ -729,7 +729,12 @@ def _validate_verification_evidence(verification: dict):
             _validate_nonempty_string(marker, f"{location} marker")
 
 
-def validate_contract(contract: dict, *, require_complete: bool):
+def validate_contract(
+    contract: dict,
+    *,
+    require_complete: bool,
+    source_audit: dict | None = None,
+):
     if not isinstance(contract, dict):
         raise ValueError("contract must be a JSON object")
     _unknown_keys(contract, CONTRACT_TOP_KEYS, "contract")
@@ -839,6 +844,29 @@ def validate_contract(contract: dict, *, require_complete: bool):
         raise ValueError(
             "contract recipe family inventory does not match source audit"
         )
+    if source_audit is not None:
+        _validate_audit(source_audit)
+        audit_target = source_audit["target"]
+        for key in ("mod_id", "display_name", "version"):
+            if target[key] != audit_target.get(key):
+                raise ValueError(f"contract target {key} does not match source audit")
+        if source_audit["artifact"]["sha256"] != source_audit_sha256:
+            raise ValueError("contract target artifact does not match source audit")
+        audited_recipe_classes = {
+            candidate["class"]
+            for candidate in source_audit["candidates"]["recipe_classes"]
+        }
+        if seen_classes != audited_recipe_classes:
+            raise ValueError(
+                "contract families do not match audited recipe candidates"
+            )
+        if (
+            source_recipe_inventory_sha256
+            != _recipe_inventory_sha256(audited_recipe_classes)
+        ):
+            raise ValueError(
+                "contract recipe family inventory does not match source audit"
+            )
     if require_complete and unresolved:
         raise ValueError("contract has unresolved families: " + ", ".join(unresolved))
     if require_complete:
@@ -889,6 +917,8 @@ def validate_contract(contract: dict, *, require_complete: bool):
                 "verification checks must exactly match the required checks"
             )
         _validate_verification_evidence(verification)
+        if source_audit is None:
+            raise ValueError("complete contract requires its source audit")
     else:
         verification = contract.get("verification")
         if not isinstance(verification, dict) or set(verification) != VERIFICATION_KEYS:
@@ -1115,7 +1145,7 @@ def _wrapper_files() -> dict[str, bytes]:
     )
 
 
-def _addon_files(contract: dict) -> dict[str, bytes]:
+def _addon_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
     target = contract["target"]
     mod_id = target["mod_id"]
     package_segment = _java_segment(mod_id) + "autostorage"
@@ -1149,6 +1179,7 @@ org.gradle.caching=true
 minecraft_version=1.21.1
 neo_version=21.1.229
 auto_storage_version={TOOL_VERSION}
+patchouli_version=1.21.1-93-NEOFORGE
 mod_id={addon_id}
 mod_version=0.1.0
 mod_group_id={package}
@@ -1176,6 +1207,7 @@ configurations {{
 repositories {{
     mavenCentral()
 {repository_lines}
+    maven {{ url = uri("https://maven.blamejared.com") }}
     ivy {{
         name = "AutoStorageReleases"
         url = uri("https://github.com/swear01/Auto_Storage/releases/download/v${{auto_storage_version}}")
@@ -1208,6 +1240,7 @@ neoForge {{
 dependencies {{
     compileOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}:api")
     runtimeOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}")
+    runtimeOnly("vazkii.patchouli:Patchouli:${{patchouli_version}}")
     compileOnly("{target['dependency']}")
     runtimeOnly("{target['dependency']}")
     compatKitTargetArtifact("{target['dependency']}")
@@ -1349,7 +1382,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - run: ./gradlew build --console=plain --no-daemon
       - run: ./gradlew runGameTestServer --console=plain --no-daemon
-      - run: tools/compat-kit/compat-kit verify compat/contract.json --addon .
+      - run: tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --addon .
 """
     structure = base64.b64decode(
         "H4sICMY9CmoC/2JlaGF2aW9yYWx0ZXN0cy5wbGF0Zm9ybS5uYnQAjdPLCsJADAXQm0zV"
@@ -1376,6 +1409,7 @@ jobs:
         ): structure,
         ".github/workflows/ci.yml": workflow.encode(),
         "compat/contract.json": canonical_json(contract).encode(),
+        "compat/audit.json": canonical_json(source_audit).encode(),
         "tools/compat-kit/compat_kit.py": Path(__file__).read_bytes(),
         "tools/compat-kit/compat-kit": (
             b'#!/bin/sh\nexec python3 "$(dirname "$0")/compat_kit.py" "$@"\n'
@@ -1427,8 +1461,17 @@ def _materialize(
     return generated
 
 
-def scaffold_bundled(contract: dict, root) -> list[Path]:
-    validate_contract(contract, require_complete=True)
+def scaffold_bundled(
+    contract: dict,
+    root,
+    *,
+    source_audit: dict,
+) -> list[Path]:
+    validate_contract(
+        contract,
+        require_complete=True,
+        source_audit=source_audit,
+    )
     _validate_bundled_verification(contract)
     mod_id = contract["target"]["mod_id"]
     return _materialize(
@@ -1460,12 +1503,21 @@ def _validate_addon_verification(contract: dict):
         )
 
 
-def scaffold_addon(contract: dict, output) -> list[Path]:
-    validate_contract(contract, require_complete=True)
+def scaffold_addon(
+    contract: dict,
+    output,
+    *,
+    source_audit: dict,
+) -> list[Path]:
+    validate_contract(
+        contract,
+        require_complete=True,
+        source_audit=source_audit,
+    )
     _validate_addon_verification(contract)
     return _materialize(
         Path(output),
-        _addon_files(contract),
+        _addon_files(contract, source_audit),
         ".compat-kit-manifest.json",
         contract,
     )
@@ -1575,11 +1627,16 @@ def _game_test_count(root: Path) -> int:
 def verify_contract(
     contract: dict,
     *,
+    source_audit: dict,
     bundled_root=None,
     addon_root=None,
     command_runner=None,
 ) -> dict:
-    validate_contract(contract, require_complete=True)
+    validate_contract(
+        contract,
+        require_complete=True,
+        source_audit=source_audit,
+    )
     if (bundled_root is None) == (addon_root is None):
         raise ValueError("verify requires exactly one of bundled_root or addon_root")
     mode = "bundled" if bundled_root is not None else "addon"
@@ -1869,9 +1926,11 @@ def _build_parser() -> argparse.ArgumentParser:
     scaffold_target.add_argument("--bundled")
     scaffold_target.add_argument("--addon")
     scaffold.add_argument("--output")
+    scaffold.add_argument("--audit", required=True)
 
     verify = subparsers.add_parser("verify")
     verify.add_argument("contract")
+    verify.add_argument("--audit", required=True)
     verify_target = verify.add_mutually_exclusive_group(required=True)
     verify_target.add_argument("--bundled", nargs="?", const=".")
     verify_target.add_argument("--addon")
@@ -1914,17 +1973,27 @@ def main(argv=None) -> int:
         elif args.command == "scaffold":
             contract_path = args.bundled or args.addon
             contract = _read_json(contract_path)
+            source_audit = _read_json(args.audit)
             if args.bundled:
                 root = Path(args.output) if args.output else Path.cwd()
-                scaffold_bundled(contract, root)
+                scaffold_bundled(
+                    contract,
+                    root,
+                    source_audit=source_audit,
+                )
             else:
                 if not args.output:
                     raise ValueError("scaffold --addon requires --output")
-                scaffold_addon(contract, args.output)
+                scaffold_addon(
+                    contract,
+                    args.output,
+                    source_audit=source_audit,
+                )
         elif args.command == "verify":
             contract = _read_json(args.contract)
             report = verify_contract(
                 contract,
+                source_audit=_read_json(args.audit),
                 bundled_root=args.bundled,
                 addon_root=args.addon,
             )
