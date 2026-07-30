@@ -130,6 +130,17 @@ silent fallback。consumer Gemini Code Assist 的 GitHub reviewer 已
 [sunset](https://developers.google.com/gemini-code-assist/docs/deprecations/consumer-code-review)，
 所以其停止服務訊息不是 completed review，也不可再列入 reviewer 清單。
 
+2026-07-30 remediation evidence：Codex dashboard 的
+`swear01/Auto_Storage`目前是`Review all PRs`、`On every push`與exhaustive
+enabled；review-only [PR #36](https://github.com/swear01/Auto_Storage/pull/36)
+讓`chatgpt-codex-connector[bot]`精確審查原PR #35的`0d26517a88`並回覆
+`Didn't find any major issues`。Cursor dashboard同時顯示此repo enabled，但
+PR #36的verbose request
+`serverGenReqId_c4c2d4b9-c5f5-496b-9a71-62c5d96183e2`與新開的PR #37都由
+`cursor[bot]`回覆`Bugbot is disabled for this repository`；這符合Cursor已知的
+[GitHub installation routing問題](https://forum.cursor.com/t/bugbot-reports-disabled-for-this-repository-despite-being-enabled-in-dashboard/154426)，
+因此目前是有GitHub原始證據的upstream block，不得改用local Cursor結果冒充。
+
 ### Cursor Cloud full-repo audit
 
 手動全庫審查使用 repo 內的 `.cursor/skills/full-repo-audit/SKILL.md`。先確認
