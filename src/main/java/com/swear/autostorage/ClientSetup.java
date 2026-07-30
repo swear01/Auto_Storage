@@ -8,6 +8,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -16,6 +17,10 @@ public class ClientSetup {
 
     public static void register(IEventBus modEventBus) {
         modEventBus.addListener(ClientSetup::registerScreens);
+        modEventBus.addListener(
+                EventPriority.LOWEST,
+                RegisterMenuScreensEvent.class,
+                ignored -> TerminalResourceRendererApi.freeze());
         modEventBus.addListener(ClientSetup::addFusionConnectedCasingPack);
     }
 

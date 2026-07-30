@@ -20,7 +20,7 @@ public final class MachineDescriptor {
     private final Component stationLabel;
     private final ItemStack representative;
     private final Ingredient acceptedItems;
-    private final MachineEnergyTable.Category category;
+    private final MachineCategory category;
     private final int maxInstalledCount;
     @Nullable
     private final EnergyType energyType;
@@ -35,7 +35,7 @@ public final class MachineDescriptor {
             @Nullable Component stationLabel,
             ItemStack representative,
             Ingredient acceptedItems,
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             int maxInstalledCount,
             @Nullable EnergyType energyType,
             int energyPerTick,
@@ -59,7 +59,7 @@ public final class MachineDescriptor {
             ResourceLocation id,
             ItemStack representative,
             Ingredient acceptedItems,
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             int maxInstalledCount,
             @Nullable EnergyType energyType,
             int energyPerTick
@@ -81,7 +81,7 @@ public final class MachineDescriptor {
             ResourceLocation id,
             Component stationLabel,
             Supplier<List<MachineVariant>> variants,
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             int maxInstalledCount,
             @Nullable EnergyType energyType
     ) {
@@ -111,7 +111,7 @@ public final class MachineDescriptor {
                 null,
                 representative,
                 acceptedItems,
-                MachineEnergyTable.Category.TRANSFORM,
+                MachineCategory.TRANSFORM,
                 0,
                 null,
                 0,
@@ -124,12 +124,12 @@ public final class MachineDescriptor {
             @Nullable Component stationLabel,
             ItemStack representative,
             Ingredient acceptedItems,
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             int maxInstalledCount,
             @Nullable EnergyType energyType,
             int energyPerTick
     ) {
-        TransformValue clientOnly = category == MachineEnergyTable.Category.TRANSFORM
+        TransformValue clientOnly = category == MachineCategory.TRANSFORM
                 ? id.equals(MachineEnergyTable.AXE_ID)
                 ? stack -> AxeEnergy.isInfinite(stack)
                 ? new TransformAmount(0, true)
@@ -153,7 +153,7 @@ public final class MachineDescriptor {
             ResourceLocation id,
             Component stationLabel,
             List<MachineVariant> variants,
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             int maxInstalledCount,
             @Nullable EnergyType energyType
     ) {
@@ -169,7 +169,7 @@ public final class MachineDescriptor {
         if (acceptedItems.isEmpty()) {
             throw new IllegalArgumentException("Descriptor ingredient cannot be explicitly empty: " + id);
         }
-        if (category == MachineEnergyTable.Category.TRANSFORM) {
+        if (category == MachineCategory.TRANSFORM) {
             if (stationLabel != null || maxInstalledCount != 0 || energyType != null || energyPerTick != 0
                     || transformValue == null) {
                 throw new IllegalArgumentException("Invalid transform descriptor: " + id);
@@ -207,7 +207,7 @@ public final class MachineDescriptor {
         return Ingredient.of(variants().stream().map(MachineVariant::stack));
     }
 
-    public MachineEnergyTable.Category category() {
+    public MachineCategory category() {
         return category;
     }
 
@@ -236,14 +236,14 @@ public final class MachineDescriptor {
     }
 
     public boolean generatesEnergy() {
-        return category == MachineEnergyTable.Category.PROCESS
+        return category == MachineCategory.PROCESS
                 && variants().stream().anyMatch(variant -> !variant.rate().isZero());
     }
 
     public List<MachineVariant> variants() {
-        if (category == MachineEnergyTable.Category.TRANSFORM) return List.of();
+        if (category == MachineCategory.TRANSFORM) return List.of();
         if (variantSource != null) return checkedVariants(id, category, variantSource.get());
-        MachineWorkRate rate = category == MachineEnergyTable.Category.PROCESS
+        MachineWorkRate rate = category == MachineCategory.PROCESS
                 ? MachineWorkRate.of(energyPerTick, 1) : MachineWorkRate.ZERO;
         List<MachineVariant> variants = new ArrayList<>();
         for (ItemStack stack : acceptedItems.getItems()) {
@@ -255,12 +255,24 @@ public final class MachineDescriptor {
         return List.copyOf(variants);
     }
 
+    MachineDescriptor withContributedVariants() {
+        if (category == MachineCategory.TRANSFORM
+                || !MachineVariantContributors.has(id)) return this;
+        return installableVariants(
+                id,
+                stationLabel(),
+                () -> MachineVariantContributors.combine(id, variants()),
+                category,
+                maxInstalledCount,
+                energyType);
+    }
+
     public Optional<MachineWorkRate> rateFor(ItemStack stack) {
-        if (category == MachineEnergyTable.Category.TRANSFORM || !accepts(stack)) {
+        if (category == MachineCategory.TRANSFORM || !accepts(stack)) {
             return Optional.empty();
         }
         if (variantSource == null) {
-            return Optional.of(category == MachineEnergyTable.Category.PROCESS
+            return Optional.of(category == MachineCategory.PROCESS
                     ? MachineWorkRate.of(energyPerTick, 1) : MachineWorkRate.ZERO);
         }
         return variants().stream()
@@ -271,19 +283,19 @@ public final class MachineDescriptor {
 
     private static List<MachineVariant> checkedVariants(
             ResourceLocation id,
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             List<MachineVariant> variants
     ) {
         List<MachineVariant> snapshot = checkedVariantStacks(id, variants);
         for (MachineVariant variant : snapshot) {
             MachineWorkRate rate = variant.rate();
-            if (category == MachineEnergyTable.Category.PROCESS && rate.isZero()) {
+            if (category == MachineCategory.PROCESS && rate.isZero()) {
                 throw new IllegalArgumentException("Process machine variants require positive work rates: " + id);
             }
-            if (category == MachineEnergyTable.Category.INSTANT && !rate.isZero()) {
+            if (category == MachineCategory.INSTANT && !rate.isZero()) {
                 throw new IllegalArgumentException("Instant machine variants cannot generate work: " + id);
             }
-            if (category == MachineEnergyTable.Category.TRANSFORM) {
+            if (category == MachineCategory.TRANSFORM) {
                 throw new IllegalArgumentException("Transform descriptors cannot expose installable variants: " + id);
             }
         }
@@ -310,7 +322,7 @@ public final class MachineDescriptor {
     }
 
     public TransformAmount valueOf(ItemStack stack) {
-        if (category != MachineEnergyTable.Category.TRANSFORM || transformValue == null) {
+        if (category != MachineCategory.TRANSFORM || transformValue == null) {
             throw new IllegalStateException("Descriptor is not a transform: " + id);
         }
         if (!accepts(stack)) return TransformAmount.EMPTY;

@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.recipe;
 
+import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
@@ -96,7 +97,7 @@ public final class FixtureMod {
                                         new net.minecraft.world.item.ItemStack(
                                                 net.minecraft.world.item.Items.IRON_BLOCK),
                                         MachineWorkRate.of(5, 4))),
-                        MachineEnergyTable.Category.PROCESS,
+                        MachineCategory.PROCESS,
                         64,
                         null));
         RECIPE_FAMILIES.register("grinding", () -> RecipeFamilyFactories.singleItemToItem(

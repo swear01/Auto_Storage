@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "id": "auto_storage:iron_furnaces",
+  "entrypoint": "com.swear.autostorage.compat.ironfurnaces.IronFurnacesCompatModule",
+  "requires": ["ironfurnaces"],
+  "side": "both",
+  "sourceSet": "compatIronFurnaces",
+  "fixture": "ironFurnacesFixture",
+  "dependencies": [
+    "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
+  ]
+}

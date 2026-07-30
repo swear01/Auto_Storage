@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.mekanism;
 
+import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.Action;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
@@ -174,7 +175,7 @@ public final class MekanismRecipeIntegrationTests {
                         + family.station().descriptorId());
                 return;
             }
-            if (descriptor.category() != MachineEnergyTable.Category.PROCESS
+            if (descriptor.category() != MachineCategory.PROCESS
                     || !descriptor.isPolymorphic()
                     || descriptor.variants().size() != FACTORY_TIERS.size() + 1) {
                 helper.fail("Factory-backed descriptor did not expose exactly one basic machine "

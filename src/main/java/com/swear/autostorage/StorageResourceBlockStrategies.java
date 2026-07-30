@@ -27,8 +27,6 @@ final class StorageResourceBlockStrategies {
     static void registerBuiltIns(DeferredRegister<StorageResourceBlockStrategy> strategies) {
         strategies.register("fluid", FluidBlockStrategy::new);
         strategies.register("neoforge_energy", EnergyBlockStrategy::new);
-        strategies.register("mekanism_chemical", ChemicalBlockStrategy::new);
-        strategies.register("ars_nouveau_source", ArsNouveauSourceBlockStrategy::new);
     }
 
     static synchronized void snapshot() {
@@ -109,39 +107,6 @@ final class StorageResourceBlockStrategies {
             return handler == null
                     ? Optional.empty()
                     : Optional.of(new EnergyBlockHandler(handler));
-        }
-    }
-
-    private static final class ChemicalBlockStrategy implements StorageResourceBlockStrategy {
-        @Override
-        public ResourceLocation kindId() {
-            return StorageResourceKindApi.CHEMICAL_KIND;
-        }
-
-        @Override
-        public Optional<StorageResourceHandler> find(
-                Level level,
-                BlockPos pos,
-                Direction side
-        ) {
-            return OptionalModBlockStrategies.findMekanismChemical(level, pos, side);
-        }
-    }
-
-    private static final class ArsNouveauSourceBlockStrategy
-            implements StorageResourceBlockStrategy {
-        @Override
-        public ResourceLocation kindId() {
-            return StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND;
-        }
-
-        @Override
-        public Optional<StorageResourceHandler> find(
-                Level level,
-                BlockPos pos,
-                Direction side
-        ) {
-            return OptionalModBlockStrategies.findArsNouveauSource(level, pos, side);
         }
     }
 

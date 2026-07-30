@@ -23,8 +23,6 @@ final class StorageResourceContainerStrategies {
     ) {
         strategies.register("fluid", FluidContainerStrategy::new);
         strategies.register("neoforge_energy", EnergyContainerStrategy::new);
-        strategies.register("mekanism_chemical", ChemicalContainerStrategy::new);
-        strategies.register("botania_mana", BotaniaManaContainerStrategy::new);
     }
 
     static synchronized void snapshot() {
@@ -154,57 +152,4 @@ final class StorageResourceContainerStrategies {
         }
     }
 
-    private static final class ChemicalContainerStrategy implements StorageResourceContainerStrategy {
-        @Override
-        public ResourceLocation kindId() {
-            return StorageResourceKindApi.CHEMICAL_KIND;
-        }
-
-        @Override
-        public Optional<Transfer> planDeposit(
-                ItemStack singleContainer,
-                HolderLookup.Provider registries
-        ) {
-            return OptionalModContainerStrategies.planMekanismChemicalDeposit(
-                    singleContainer, registries);
-        }
-
-        @Override
-        public Optional<Transfer> planWithdraw(
-                ItemStack singleContainer,
-                StorageResourceKey key,
-                long maxAmount,
-                HolderLookup.Provider registries
-        ) {
-            return OptionalModContainerStrategies.planMekanismChemicalWithdraw(
-                    singleContainer, key, maxAmount, registries);
-        }
-    }
-
-    private static final class BotaniaManaContainerStrategy implements StorageResourceContainerStrategy {
-        @Override
-        public ResourceLocation kindId() {
-            return StorageResourceKindApi.BOTANIA_MANA_KIND;
-        }
-
-        @Override
-        public Optional<Transfer> planDeposit(
-                ItemStack singleContainer,
-                HolderLookup.Provider registries
-        ) {
-            return OptionalModContainerStrategies.planBotaniaManaDeposit(
-                    singleContainer, registries);
-        }
-
-        @Override
-        public Optional<Transfer> planWithdraw(
-                ItemStack singleContainer,
-                StorageResourceKey key,
-                long maxAmount,
-                HolderLookup.Provider registries
-        ) {
-            return OptionalModContainerStrategies.planBotaniaManaWithdraw(
-                    singleContainer, key, maxAmount, registries);
-        }
-    }
 }

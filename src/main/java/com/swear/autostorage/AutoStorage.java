@@ -2,6 +2,7 @@ package com.swear.autostorage;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.logging.LogUtils;
+import com.swear.autostorage.api.AutoStorageAddonLifecycle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
@@ -43,6 +44,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.level.ChunkTicketLevelUpdatedEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import com.swear.autostorage.api.AutoStorageApi;
 
 import org.slf4j.Logger;
 
@@ -60,7 +62,7 @@ import java.util.function.Predicate;
 
 @Mod(AutoStorage.MODID)
 public class AutoStorage {
-    public static final String MODID = "auto_storage";
+    public static final String MODID = AutoStorageApi.MOD_ID;
     public static final Logger LOGGER = LogUtils.getLogger();
 
     static final int NETWORK_SCAN_DEPTH = 64;
@@ -103,6 +105,17 @@ public class AutoStorage {
     public static final Registry<StorageResourceBlockStrategy> RESOURCE_BLOCK_STRATEGY_REGISTRY =
             RESOURCE_BLOCK_STRATEGIES.makeRegistry(
                     builder -> builder.maxId(StorageResourceBlockApi.MAX_STRATEGIES - 1));
+    public static final DeferredRegister<TransformProvider> TRANSFORM_PROVIDERS =
+            TransformProviderApi.createDeferredRegister(MODID);
+    public static final Registry<TransformProvider> TRANSFORM_PROVIDER_REGISTRY =
+            TRANSFORM_PROVIDERS.makeRegistry(
+                    builder -> builder.maxId(TransformProviderApi.MAX_PROVIDERS - 1));
+    public static final DeferredRegister<MachineVariantContributor> MACHINE_VARIANT_CONTRIBUTORS =
+            MachineVariantContributorApi.createDeferredRegister(MODID);
+    public static final Registry<MachineVariantContributor> MACHINE_VARIANT_CONTRIBUTOR_REGISTRY =
+            MACHINE_VARIANT_CONTRIBUTORS.makeRegistry(
+                    builder -> builder.maxId(
+                            MachineVariantContributorApi.MAX_CONTRIBUTORS - 1));
     static {
         MachineEnergyTable.registerBuiltIns(MACHINE_DESCRIPTORS);
         StorageResourceKinds.registerBuiltIns(RESOURCE_KINDS);
@@ -237,7 +250,12 @@ public class AutoStorage {
 
     public AutoStorage(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.CLIENT, TerminalClientPreferences.SPEC);
-        OptionalModRecipeCompatibility.register();
+        modEventBus.addListener(
+                net.neoforged.bus.api.EventPriority.HIGHEST,
+                net.neoforged.neoforge.registries.NewRegistryEvent.class,
+                ignored -> AutoStorageAddonLifecycle.closeRegistration());
+        SelfTest.runConstructionPhaseTests();
+        CompatibilityModuleLoader.loadBundled(modEventBus);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
@@ -248,6 +266,8 @@ public class AutoStorage {
         RESOURCE_KINDS.register(modEventBus);
         RESOURCE_CONTAINER_STRATEGIES.register(modEventBus);
         RESOURCE_BLOCK_STRATEGIES.register(modEventBus);
+        TRANSFORM_PROVIDERS.register(modEventBus);
+        MACHINE_VARIANT_CONTRIBUTORS.register(modEventBus);
         NeoForge.EVENT_BUS.addListener(
                 net.neoforged.bus.api.EventPriority.HIGHEST,
                 true,
@@ -338,7 +358,6 @@ public class AutoStorage {
                 Capabilities.EnergyStorage.BLOCK,
                 EXPORT_BUS_BE.get(),
                 (bus, side) -> bus.passiveEnergyStorage(side));
-        OptionalModCapabilities.register(event);
     }
 
     private void registerCommands(RegisterCommandsEvent event) {
@@ -398,14 +417,17 @@ public class AutoStorage {
     private void onServerStarted(
             net.neoforged.neoforge.event.server.ServerStartedEvent event
     ) {
-        OptionalModRecipeCompatibility.refreshRuntimeData();
+        AutoStorageAddonLifecycle.runRecipeReloads();
+        invalidateDatapackCaches();
+        CraftableRecipeCatalog.invalidate();
         CraftableRecipeCatalog.prewarm(event.getServer().overworld());
     }
 
     private void onDatapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
         if (event.getPlayer() == null) {
+            AutoStorageAddonLifecycle.runRecipeReloads();
             invalidateDatapackCaches();
-            OptionalModRecipeCompatibility.refreshRuntimeData();
+            CraftableRecipeCatalog.invalidate();
         }
         CraftableRecipeCatalog.prewarm(event.getPlayerList().getServer().overworld());
     }

@@ -12,15 +12,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class MachineEnergyTable {
-    public enum Category {
-        PROCESS,
-        INSTANT,
-        TRANSFORM
-    }
-
     public static final int FURNACE_SLOT = 0;
     public static final int BLAST_FURNACE_SLOT = 1;
     public static final int SMOKER_SLOT = 2;
@@ -60,31 +55,29 @@ public final class MachineEnergyTable {
         descriptors.register(FURNACE_ID.getPath(), () -> MachineDescriptor.installableVariants(
                 FURNACE_ID,
                 Items.FURNACE.getDescription(),
-                () -> MachineVariantContributors.combine(
-                        FURNACE_ID,
-                        List.of(MachineVariant.of(
-                                new ItemStack(Items.FURNACE), MachineWorkRate.ONE))),
-                Category.PROCESS,
+                () -> List.of(MachineVariant.of(
+                        new ItemStack(Items.FURNACE), MachineWorkRate.ONE)),
+                MachineCategory.PROCESS,
                 MachineDescriptorApi.MAX_INSTALLED_COUNT,
                 EnergyType.SMELTING_ENERGY));
         descriptors.register(BLAST_FURNACE_ID.getPath(), () -> installable(
                 BLAST_FURNACE_ID, new ItemStack(Items.BLAST_FURNACE), EnergyType.BLASTING_ENERGY, 1,
-                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
+                MachineCategory.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(SMOKER_ID.getPath(), () -> installable(
                 SMOKER_ID, new ItemStack(Items.SMOKER), EnergyType.SMOKING_ENERGY, 1,
-                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
+                MachineCategory.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(CAMPFIRE_ID.getPath(), () -> installable(
                 CAMPFIRE_ID, new ItemStack(Items.CAMPFIRE), EnergyType.CAMPFIRE_ENERGY, 1,
-                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
+                MachineCategory.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(BREWING_STAND_ID.getPath(), () -> installable(
                 BREWING_STAND_ID, new ItemStack(Items.BREWING_STAND), EnergyType.BREW_ENERGY, 1,
-                Category.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
+                MachineCategory.PROCESS, MachineDescriptorApi.MAX_INSTALLED_COUNT));
         descriptors.register(CRAFTING_TABLE_ID.getPath(), () -> installable(
-                CRAFTING_TABLE_ID, new ItemStack(Items.CRAFTING_TABLE), null, 0, Category.INSTANT, 1));
+                CRAFTING_TABLE_ID, new ItemStack(Items.CRAFTING_TABLE), null, 0, MachineCategory.INSTANT, 1));
         descriptors.register(STONECUTTER_ID.getPath(), () -> installable(
-                STONECUTTER_ID, new ItemStack(Items.STONECUTTER), null, 0, Category.INSTANT, 1));
+                STONECUTTER_ID, new ItemStack(Items.STONECUTTER), null, 0, MachineCategory.INSTANT, 1));
         descriptors.register(SMITHING_TABLE_ID.getPath(), () -> installable(
-                SMITHING_TABLE_ID, new ItemStack(Items.SMITHING_TABLE), null, 0, Category.INSTANT, 1));
+                SMITHING_TABLE_ID, new ItemStack(Items.SMITHING_TABLE), null, 0, MachineCategory.INSTANT, 1));
         descriptors.register(AXE_ID.getPath(), () -> MachineDescriptor.transform(
                 AXE_ID,
                 new ItemStack(Items.IRON_AXE),
@@ -118,12 +111,19 @@ public final class MachineEnergyTable {
     }
 
     private static List<MachineDescriptor> buildEntries() {
+        MachineVariantContributors.validateDescriptorTargets(
+                AutoStorage.MACHINE_VARIANT_CONTRIBUTOR_REGISTRY.entrySet().stream()
+                        .map(entry -> Map.entry(
+                                entry.getKey().location(), entry.getValue()))
+                        .toList(),
+                id -> AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.get(id) != null);
         List<MachineDescriptor> ordered = new ArrayList<>();
         for (ResourceLocation id : BUILT_IN_ORDER) {
             MachineDescriptor descriptor = AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.get(id);
             if (descriptor == null) {
                 throw new IllegalStateException("Missing built-in machine descriptor: " + id);
             }
+            descriptor = descriptor.withContributedVariants();
             validateRegistryId(id, descriptor);
             ordered.add(descriptor);
         }
@@ -131,8 +131,9 @@ public final class MachineEnergyTable {
                 .filter(entry -> !BUILT_IN_ORDER.contains(entry.getKey().location()))
                 .sorted(Comparator.comparing(entry -> entry.getKey().location().toString()))
                 .forEach(entry -> {
-                    validateRegistryId(entry.getKey().location(), entry.getValue());
-                    ordered.add(entry.getValue());
+                    MachineDescriptor descriptor = entry.getValue().withContributedVariants();
+                    validateRegistryId(entry.getKey().location(), descriptor);
+                    ordered.add(descriptor);
                 });
         if (ordered.size() > MachineDescriptorApi.MAX_DESCRIPTORS) {
             throw new IllegalStateException("Registered " + ordered.size()
@@ -147,9 +148,10 @@ public final class MachineEnergyTable {
     }
 
     public static MachineDescriptor get(ResourceLocation id) {
-        MachineDescriptor descriptor = AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.get(id);
-        if (descriptor != null) validateRegistryId(id, descriptor);
-        return descriptor;
+        return entries().stream()
+                .filter(descriptor -> descriptor.id().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     public static int findSlot(ItemStack stack) {
@@ -188,7 +190,7 @@ public final class MachineEnergyTable {
             ItemStack.STREAM_CODEC.encode(buf, descriptor.representativeStack());
             Ingredient.CONTENTS_STREAM_CODEC.encode(buf, descriptor.acceptedItems());
             buf.writeEnum(descriptor.category());
-            if (descriptor.category() != Category.TRANSFORM) {
+            if (descriptor.category() != MachineCategory.TRANSFORM) {
                 ComponentSerialization.STREAM_CODEC.encode(buf, descriptor.stationLabel());
             }
             buf.writeVarInt(descriptor.maxInstalledCount());
@@ -219,8 +221,8 @@ public final class MachineEnergyTable {
             if (!ids.add(id)) throw new IllegalArgumentException("Duplicate machine descriptor: " + id);
             ItemStack representative = ItemStack.STREAM_CODEC.decode(buf);
             Ingredient acceptedItems = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
-            Category category = buf.readEnum(Category.class);
-            var stationLabel = category == Category.TRANSFORM
+            MachineCategory category = buf.readEnum(MachineCategory.class);
+            var stationLabel = category == MachineCategory.TRANSFORM
                     ? null : ComponentSerialization.STREAM_CODEC.decode(buf);
             int maxInstalledCount = buf.readVarInt();
             EnergyType energyType = buf.readBoolean() ? buf.readEnum(EnergyType.class) : null;
@@ -251,7 +253,7 @@ public final class MachineEnergyTable {
             ItemStack representative,
             EnergyType energyType,
             int energyPerTick,
-            Category category,
+            MachineCategory category,
             int maxInstalledCount
     ) {
         return MachineDescriptor.installable(

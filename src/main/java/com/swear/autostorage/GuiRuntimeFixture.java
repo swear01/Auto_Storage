@@ -115,12 +115,12 @@ final class GuiRuntimeFixture {
         int stations = 0;
         for (int slot = 0; slot < MachineEnergyTable.entries().size(); slot++) {
             MachineDescriptor descriptor = MachineEnergyTable.get(slot);
-            if (descriptor.category() == MachineEnergyTable.Category.TRANSFORM) continue;
-            int count = descriptor.category() == MachineEnergyTable.Category.PROCESS
+            if (descriptor.category() == MachineCategory.TRANSFORM) continue;
+            int count = descriptor.category() == MachineCategory.PROCESS
                     ? Math.min(130, descriptor.maxInstalledCount()) : 1;
             core.getMachineContainer().setItem(
                     slot, descriptor.representativeStack().copyWithCount(count));
-            if (descriptor.category() == MachineEnergyTable.Category.PROCESS
+            if (descriptor.category() == MachineCategory.PROCESS
                     && descriptor.energyType() == null) {
                 addReserve(
                         deltas,

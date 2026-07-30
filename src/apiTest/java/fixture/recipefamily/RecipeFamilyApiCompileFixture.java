@@ -1,8 +1,12 @@
 package fixture.recipefamily;
 
-import com.swear.autostorage.MachineEnergyTable;
+import com.swear.autostorage.MachineCategory;
+import com.swear.autostorage.AutoStorageCapabilityApi;
 import com.swear.autostorage.MachineDescriptor;
+import com.swear.autostorage.MachineDescriptorApi;
 import com.swear.autostorage.MachineVariant;
+import com.swear.autostorage.MachineVariantContributor;
+import com.swear.autostorage.MachineVariantContributorApi;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.EnergyCost;
 import com.swear.autostorage.EnergyType;
@@ -22,11 +26,17 @@ import com.swear.autostorage.StorageResourceContainerApi;
 import com.swear.autostorage.StorageResourceContainerStrategy;
 import com.swear.autostorage.StorageResourceHandler;
 import com.swear.autostorage.StorageResourceTransaction;
+import com.swear.autostorage.TerminalResourceRendererApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
+import com.swear.autostorage.api.AutoStorageAddon;
+import com.swear.autostorage.api.AutoStorageApi;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -38,11 +48,17 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 
 import java.util.List;
 import java.util.Optional;
 
 public final class RecipeFamilyApiCompileFixture {
+    private static final BlockCapability<StorageResourceHandler, Direction>
+            RESOURCE_CAPABILITY = BlockCapability.createSided(
+            ResourceLocation.fromNamespaceAndPath("fixture_mod", "resource"),
+            StorageResourceHandler.class);
     private RecipeFamilyApiCompileFixture() {
     }
 
@@ -50,7 +66,7 @@ public final class RecipeFamilyApiCompileFixture {
         return RecipeFamilyFactories.singleItemToItem(
                 StonecutterRecipe.class,
                 () -> RecipeType.STONECUTTING,
-                MachineEnergyTable.STONECUTTER_ID,
+                AutoStorageApi.id("stonecutter"),
                 recipe -> recipe.getIngredients().getFirst(),
                 (recipe, registries) -> recipe.getResultItem(registries),
                 recipe -> RecipeFamilyCost.free(),
@@ -61,7 +77,7 @@ public final class RecipeFamilyApiCompileFixture {
         return RecipeFamilyFactories.deterministicResources(
                 StonecutterRecipe.class,
                 () -> RecipeType.STONECUTTING,
-                MachineEnergyTable.STONECUTTER_ID,
+                AutoStorageApi.id("stonecutter"),
                 (recipe, registries) -> TypedRecipePlan.builder()
                         .input(TypedRecipeInput.consume(resource("mana", "blue"), 100))
                         .input(TypedRecipeInput.consumeAnyWithRemainders(
@@ -87,7 +103,7 @@ public final class RecipeFamilyApiCompileFixture {
         return RecipeFamilyFactories.deterministicResources(
                 StonecutterRecipe.class,
                 () -> RecipeType.STONECUTTING,
-                MachineEnergyTable.STONECUTTER_ID,
+                AutoStorageApi.id("stonecutter"),
                 recipe -> !recipe.getGroup().isEmpty(),
                 (recipe, registries) -> TypedRecipePlan.builder()
                         .input(TypedRecipeInput.consume(resource("item", "stone"), 1))
@@ -105,6 +121,44 @@ public final class RecipeFamilyApiCompileFixture {
         return families;
     }
 
+    public static void wireAddon(IEventBus modBus) {
+        DeferredRegister<MachineDescriptor> machines =
+                MachineDescriptorApi.createDeferredRegister("fixture_mod");
+        DeferredRegister<RecipeFamily> recipes =
+                RecipeFamilyApi.createDeferredRegister("fixture_mod");
+        DeferredRegister<StorageResourceKind> kinds =
+                StorageResourceKindApi.createDeferredRegister("fixture_mod");
+        DeferredRegister<StorageResourceContainerStrategy> containers =
+                StorageResourceContainerApi.createDeferredRegister("fixture_mod");
+        DeferredRegister<StorageResourceBlockStrategy> blocks =
+                StorageResourceBlockApi.createDeferredRegister("fixture_mod");
+        DeferredRegister<TransformProvider> transforms =
+                TransformProviderApi.createDeferredRegister("fixture_mod");
+        DeferredRegister<MachineVariantContributor> variants =
+                MachineVariantContributorApi.createDeferredRegister("fixture_mod");
+
+        AutoStorageAddon.register("fixture_mod", modBus, addon -> addon
+                .machineDescriptors(machines)
+                .recipeFamilies(recipes)
+                .resourceKinds(kinds)
+                .containerStrategies(containers)
+                .blockStrategies(blocks)
+                .transformProviders(transforms)
+                .machineVariantContributors(variants)
+                .capabilities(event -> AutoStorageCapabilityApi.registerSidedResourceCapability(
+                        event,
+                        RESOURCE_CAPABILITY,
+                        (resources, side) -> resources))
+                .recipeReload(
+                        ResourceLocation.fromNamespaceAndPath("fixture_mod", "recipes"),
+                        () -> {
+                        }));
+        TerminalResourceRendererApi.register(
+                ResourceLocation.fromNamespaceAndPath("fixture_mod", "mana"),
+                Object.class,
+                (context, key, amount, x, y, partialTick) -> false);
+    }
+
     public static MachineDescriptor polymorphicStation() {
         return MachineDescriptor.installableVariants(
                 ResourceLocation.fromNamespaceAndPath("fixture_mod", "polymorphic_station"),
@@ -112,7 +166,7 @@ public final class RecipeFamilyApiCompileFixture {
                 () -> List.of(
                         MachineVariant.of(new ItemStack(Items.COPPER_BLOCK), MachineWorkRate.of(10, 9)),
                         MachineVariant.of(new ItemStack(Items.IRON_BLOCK), MachineWorkRate.of(5, 4))),
-                MachineEnergyTable.Category.PROCESS,
+                MachineCategory.PROCESS,
                 64,
                 null);
     }

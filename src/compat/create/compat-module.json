@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "id": "auto_storage:create",
+  "entrypoint": "com.swear.autostorage.compat.create.CreateCompatModule",
+  "requires": ["create"],
+  "side": "both",
+  "sourceSet": "compatCreate",
+  "fixture": "createFixture",
+  "dependencies": [
+    "maven.modrinth:create:${create_ci_version}"
+  ]
+}

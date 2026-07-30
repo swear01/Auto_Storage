@@ -4,12 +4,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.swear.autostorage.api.AutoStorageApi;
 
 public final class StorageResourceContainerApi {
     public static final int MAX_STRATEGIES = StorageResourceKindApi.MAX_KINDS;
     public static final ResourceKey<Registry<StorageResourceContainerStrategy>> REGISTRY_KEY =
             ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "resource_container_strategy"));
+                    AutoStorageApi.MOD_ID, "resource_container_strategy"));
 
     private StorageResourceContainerApi() {
     }

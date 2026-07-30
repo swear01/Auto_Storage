@@ -1,3 +1,6 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -12,14 +15,95 @@ tasks.named('wrapper', Wrapper).configure {
 version = mod_version
 group = mod_group_id
 
+def compatModuleFiles = fileTree('src/compat') {
+    include '*/compat-module.json'
+}.files.sort { left, right -> left.path <=> right.path }
+
+if (compatModuleFiles.isEmpty()) {
+    throw new GradleException('No compatibility module descriptors found')
+}
+
+def expandCompatDependency = { String notation ->
+    notation.replaceAll(/\$\{([^}]+)\}/) { ignored, propertyName ->
+        if (!project.hasProperty(propertyName)) {
+            throw new GradleException(
+                    "Unknown compatibility dependency property: ${propertyName}")
+        }
+        project.property(propertyName).toString()
+    }
+}
+
+def compatModules = compatModuleFiles.collect { descriptorFile ->
+    def descriptor = new JsonSlurper().parse(descriptorFile)
+    def directoryId = descriptorFile.parentFile.name
+    if (descriptor.schema != 1
+            || descriptor.id != "auto_storage:${directoryId}"
+            || !(descriptor.entrypoint instanceof String)
+            || !(descriptor.requires instanceof List) || descriptor.requires.isEmpty()
+            || descriptor.side != 'both'
+            || !(descriptor.sourceSet instanceof String)
+            || !(descriptor.fixture instanceof String)
+            || !(descriptor.dependencies instanceof List)
+            || descriptor.dependencies.isEmpty()) {
+        throw new GradleException(
+                "Invalid compatibility module descriptor: ${descriptorFile}")
+    }
+    [
+            id          : directoryId,
+            moduleId    : descriptor.id,
+            entrypoint  : descriptor.entrypoint,
+            requires    : descriptor.requires.collect { it.toString() }.sort(),
+            side        : descriptor.side,
+            sourceSet   : descriptor.sourceSet,
+            fixture     : descriptor.fixture,
+            dependencies: descriptor.dependencies.collect {
+                expandCompatDependency(it.toString())
+            },
+    ]
+}.sort { left, right -> left.moduleId <=> right.moduleId }
+
+if (compatModules.collect { it.moduleId }.toSet().size() != compatModules.size()) {
+    throw new GradleException('Duplicate compatibility module ID')
+}
+
+def generatedCompatModuleIndexDir =
+        layout.buildDirectory.dir('generated/resources/compatModules')
+def generateCompatModuleIndex = tasks.register('generateCompatModuleIndex') {
+    inputs.files(compatModuleFiles)
+    def indexFile = generatedCompatModuleIndexDir.map {
+        it.file('META-INF/auto_storage/compat-modules.json')
+    }
+    outputs.file(indexFile)
+    doLast {
+        def output = [
+                schema : 1,
+                modules: compatModules.collect { module ->
+                    [
+                            id        : module.moduleId,
+                            entrypoint: module.entrypoint,
+                            requires  : module.requires,
+                            side      : module.side,
+                    ]
+                },
+        ]
+        def target = indexFile.get().asFile
+        target.parentFile.mkdirs()
+        target.text = JsonOutput.prettyPrint(JsonOutput.toJson(output)) + '\n'
+    }
+}
+
 sourceSets.main.resources {
     srcDir('src/generated/resources')
+    srcDir(generatedCompatModuleIndexDir)
     exclude("src/generated/**/.cache")
+}
+tasks.named('processResources').configure {
+    dependsOn generateCompatModuleIndex
 }
 sourceSets {
     fusionRuntime
     apiTest {
-        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        compileClasspath += configurations.compileClasspath
         runtimeClasspath += output + compileClasspath
     }
     recipeAddonFixture {
@@ -79,6 +163,154 @@ sourceSets {
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
     }
 }
+def apiSourceSet = sourceSets.create('api') {
+    java.setSrcDirs(['src/api/java'])
+    resources.setSrcDirs(['src/api/resources'])
+}
+sourceSets.main.compileClasspath += apiSourceSet.output
+sourceSets.main.runtimeClasspath += apiSourceSet.output
+
+def compatSourceSets = [:]
+compatModules.each { spec ->
+    compatSourceSets[spec.id] = sourceSets.create(spec.sourceSet) {
+        java.srcDir("src/compat/${spec.id}/java")
+        resources.srcDir("src/compat/${spec.id}/resources")
+        runtimeClasspath += output + apiSourceSet.output + sourceSets.main.runtimeClasspath
+    }
+    def fixture = sourceSets[spec.fixture]
+    fixture.compileClasspath += compatSourceSets[spec.id].output
+    fixture.runtimeClasspath += compatSourceSets[spec.id].output
+}
+
+def apiClassNames = [
+        'AutoStorageCapabilityApi',
+        'BusFilterRule',
+        'EnergyCost',
+        'EnergyType',
+        'ItemKey',
+        'MachineCategory',
+        'MachineDescriptor',
+        'MachineDescriptorApi',
+        'MachineVariant',
+        'MachineVariantContributor',
+        'MachineVariantContributorApi',
+        'MachineWorkRate',
+        'RecipeFamily',
+        'RecipeFamilyApi',
+        'RecipeFamilyCost',
+        'RecipeFamilyFactories',
+        'RecipePresentationKind',
+        'StorageResourceBlockApi',
+        'StorageResourceBlockStrategy',
+        'StorageResourceCapabilities',
+        'StorageResourceContainerApi',
+        'StorageResourceContainerStrategy',
+        'StorageResourceHandler',
+        'StorageResourceKey',
+        'StorageResourceKind',
+        'StorageResourceKindApi',
+        'StorageResourceTransaction',
+        'TerminalResourceRendererApi',
+        'TransformProvider',
+        'TransformProviderApi',
+        'TypedRecipeInput',
+        'TypedRecipeOutput',
+        'TypedRecipePlan',
+]
+def apiClassIncludes = apiClassNames.collectMany { name ->
+    ["com/swear/autostorage/${name}.class",
+     "com/swear/autostorage/${name}\$*.class"]
+}
+def apiSourceIncludes = apiClassNames.collect { name ->
+    "com/swear/autostorage/${name}.java"
+}
+
+def apiJar = tasks.register('apiJar', Jar) {
+    group = 'build'
+    description = 'Builds the compile-only Auto Storage addon API artifact.'
+    dependsOn tasks.named(apiSourceSet.classesTaskName)
+    dependsOn tasks.named(sourceSets.main.classesTaskName)
+    archiveClassifier.set('api')
+    from(apiSourceSet.output) {
+        exclude 'com/swear/autostorage/api/AutoStorageAddonLifecycle*.class'
+    }
+    from(sourceSets.main.output) {
+        include apiClassIncludes
+    }
+    from(rootProject.file('LICENSE'))
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+compatSourceSets.each { moduleId, sourceSet ->
+    sourceSet.compileClasspath += files(apiJar)
+    tasks.named(sourceSet.compileJavaTaskName).configure {
+        dependsOn apiJar
+    }
+}
+
+def apiSourcesJar = tasks.register('apiSourcesJar', Jar) {
+    group = 'build'
+    description = 'Builds sources for the Auto Storage addon API.'
+    archiveClassifier.set('api-sources')
+    from(apiSourceSet.allSource) {
+        exclude 'com/swear/autostorage/api/AutoStorageAddonLifecycle.java'
+    }
+    from('src/main/java') {
+        include apiSourceIncludes
+    }
+    from(rootProject.file('LICENSE'))
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+def apiJavadoc = tasks.register('apiJavadoc', Javadoc) {
+    group = 'documentation'
+    description = 'Builds Javadocs for the Auto Storage addon API.'
+    dependsOn tasks.named(apiSourceSet.classesTaskName)
+    dependsOn tasks.named(sourceSets.main.classesTaskName)
+    source = files(
+            apiSourceSet.allJava.matching {
+                exclude 'com/swear/autostorage/api/AutoStorageAddonLifecycle.java'
+            },
+            fileTree('src/main/java') {
+                include apiSourceIncludes
+            })
+    classpath = files(
+            apiSourceSet.compileClasspath,
+            apiSourceSet.output,
+            sourceSets.main.compileClasspath,
+            sourceSets.main.output)
+    destinationDir = layout.buildDirectory.dir('docs/api-javadoc').get().asFile
+    options.encoding = 'UTF-8'
+    failOnError = true
+}
+
+def apiJavadocJar = tasks.register('apiJavadocJar', Jar) {
+    group = 'build'
+    description = 'Builds Javadocs for the Auto Storage addon API artifact.'
+    archiveClassifier.set('api-javadoc')
+    dependsOn apiJavadoc
+    from(apiJavadoc)
+    from(rootProject.file('LICENSE'))
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+sourceSets.apiTest.compileClasspath += files(apiJar)
+sourceSets.apiTest.runtimeClasspath += files(apiJar)
+tasks.named(sourceSets.apiTest.compileJavaTaskName).configure {
+    dependsOn apiJar
+}
+sourceSets.create('addonExample') {
+    java.srcDir('examples/addon/src/main/java')
+    resources.srcDir('examples/addon/src/main/resources')
+    compileClasspath += files(apiJar) + configurations.compileClasspath
+    runtimeClasspath += output + compileClasspath
+}
+tasks.named(sourceSets.addonExample.compileJavaTaskName).configure {
+    dependsOn apiJar
+}
 
 base {
     archivesName = mod_id
@@ -88,6 +320,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
     version = project.neo_version
+    addModdingDependenciesTo apiSourceSet
     addModdingDependenciesTo sourceSets.fusionRuntime
     addModdingDependenciesTo sourceSets.recipeAddonFixture
     addModdingDependenciesTo sourceSets.mekanismFixture
@@ -103,10 +336,18 @@ neoForge {
     addModdingDependenciesTo sourceSets.pneumaticCraftFixture
     addModdingDependenciesTo sourceSets.extendedCraftingFixture
     addModdingDependenciesTo sourceSets.compatibilityMatrixFixture
+    addModdingDependenciesTo sourceSets.addonExample
+    compatSourceSets.values().each { sourceSet ->
+        addModdingDependenciesTo sourceSet
+    }
 
     mods {
         "${mod_id}" {
+            sourceSet(apiSourceSet)
             sourceSet(sourceSets.main)
+            compatSourceSets.values().each { compatSourceSet ->
+                sourceSet(compatSourceSet)
+            }
         }
         auto_storage_recipe_fixture {
             sourceSet(sourceSets.recipeAddonFixture)
@@ -432,21 +673,27 @@ dependencies {
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     compileOnly "maven.modrinth:emi:${emi_runtime_version}"
-    compileOnly "maven.modrinth:mekanism:${mekanism_ci_version}"
-    compileOnly "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"
-    compileOnly "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
-    compileOnly "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
-    compileOnly "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}"
-    compileOnly "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}"
-    compileOnly "maven.modrinth:evilcraft:${evilcraft_ci_version}"
-    compileOnly "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"
-    compileOnly "maven.modrinth:powah:${powah_ci_version}"
-    compileOnly "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}"
-    compileOnly "maven.modrinth:titanium:${titanium_ci_version}"
-    compileOnly "maven.modrinth:create:${create_ci_version}"
-    compileOnly "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}"
-    compileOnly "maven.modrinth:extended-crafting:${extended_crafting_ci_version}"
-    compileOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
+    compatModules.each { spec ->
+        spec.dependencies.each { notation ->
+            add(sourceSets[spec.sourceSet].compileOnlyConfigurationName, notation) {
+                transitive = false
+            }
+            add(sourceSets[spec.fixture].compileOnlyConfigurationName, notation) {
+                transitive = false
+            }
+            add(sourceSets.compatibilityMatrixFixture.compileOnlyConfigurationName, notation) {
+                transitive = false
+            }
+        }
+    }
+    pneumaticCraftFixtureCompileOnly(
+            "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}") {
+        transitive = false
+    }
+    compatibilityMatrixFixtureCompileOnly(
+            "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}") {
+        transitive = false
+    }
     mekanismFixtureRuntimeOnly "maven.modrinth:mekanism:${mekanism_ci_version}"
     botaniaFixtureRuntimeOnly(
             "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}") {
@@ -681,13 +928,106 @@ sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 
 tasks.named('jar', Jar).configure {
+    from(apiSourceSet.output)
+    compatSourceSets.values().each { compatSourceSet ->
+        from(compatSourceSet.output)
+    }
     from(rootProject.file('LICENSE'))
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.named('assemble').configure {
+    dependsOn apiJar, apiSourcesJar, apiJavadocJar
+}
+
+def apiJarFile = apiJar.flatMap { it.archiveFile }
+def apiSurfaceScript = layout.projectDirectory.file('scripts/check_api_surface.py')
+def apiSurfaceSnapshot = layout.projectDirectory.file('api/api-surface.txt')
+tasks.register('verifyApiSurface', Exec) {
+    group = 'verification'
+    description = 'Rejects unreviewed changes to the published addon API surface.'
+    dependsOn apiJar
+    inputs.file(apiJarFile)
+    inputs.file(apiSurfaceScript)
+    inputs.file(apiSurfaceSnapshot)
+    commandLine(
+            'python3',
+            apiSurfaceScript.asFile,
+            apiJarFile.get().asFile,
+            apiSurfaceSnapshot.asFile)
+}
+
+def commonJavaSources = files(
+        fileTree('src/api/java') { include '**/*.java' },
+        fileTree('src/main/java') { include '**/*.java' })
+tasks.register('verifyCompatIsolation') {
+    group = 'verification'
+    description = 'Rejects optional-mod imports in main and optional/client links in the API jar.'
+    dependsOn apiJar
+    inputs.files(commonJavaSources)
+    inputs.file(apiJarFile)
+    doLast {
+        def forbiddenSourcePrefixes = [
+                'import mekanism.',
+                'import vazkii.botania.',
+                'import ironfurnaces.',
+                'import vectorwing.farmersdelight.',
+                'import aztech.modern_industrialization.',
+                'import com.hollingsworth.arsnouveau.',
+                'import org.cyclops.evilcraft.',
+                'import owmii.powah.',
+                'import com.buuz135.industrial.',
+                'import com.simibubi.create.',
+                'import com.blakebr0.extendedcrafting.',
+        ]
+        commonJavaSources.files.each { source ->
+            def text = source.getText('UTF-8')
+            def forbidden = forbiddenSourcePrefixes.find { text.contains(it) }
+            if (forbidden != null) {
+                throw new GradleException(
+                        "Main source ${source} directly links optional target package ${forbidden}")
+            }
+        }
+
+        def forbiddenBytecode = [
+                'net/minecraft/client/',
+                'mekanism/',
+                'vazkii/botania/',
+                'ironfurnaces/',
+                'vectorwing/farmersdelight/',
+                'aztech/modern_industrialization/',
+                'com/hollingsworth/arsnouveau/',
+                'org/cyclops/evilcraft/',
+                'owmii/powah/',
+                'com/buuz135/industrial/',
+                'com/simibubi/create/',
+                'com/blakebr0/extendedcrafting/',
+        ]
+        def archive = apiJarFile.get().asFile
+        new java.util.zip.ZipFile(archive).withCloseable { zip ->
+            zip.entries().each { entry ->
+                if (!entry.name.endsWith('.class')) return
+                byte[] bytes = zip.getInputStream(entry).readAllBytes()
+                String constants = new String(
+                        bytes, java.nio.charset.StandardCharsets.ISO_8859_1)
+                def forbidden = forbiddenBytecode.find { constants.contains(it) }
+                if (forbidden != null) {
+                    throw new GradleException(
+                            "API class ${entry.name} links forbidden package ${forbidden}")
+                }
+            }
+        }
+    }
 }
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from components.java
+            artifact apiJar
+            artifact apiSourcesJar
+            artifact apiJavadocJar
         }
     }
     repositories {
@@ -703,10 +1043,13 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.named('check').configure {
     dependsOn tasks.named('compileApiTestJava')
+    dependsOn tasks.named('compileAddonExampleJava')
+    dependsOn tasks.named('verifyApiSurface')
+    dependsOn tasks.named('verifyCompatIsolation')
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-def expectedSelfTestSummary = 'SelfTest: 204908 passed, 0 failed, 204908 total'
+def expectedSelfTestSummary = 'SelfTest: 204927 passed, 0 failed, 204927 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {

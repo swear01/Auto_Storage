@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "id": "auto_storage:farmers_delight",
+  "entrypoint": "com.swear.autostorage.compat.farmersdelight.FarmersDelightCompatModule",
+  "requires": ["farmersdelight"],
+  "side": "both",
+  "sourceSet": "compatFarmersDelight",
+  "fixture": "farmersDelightFixture",
+  "dependencies": [
+    "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
+  ]
+}

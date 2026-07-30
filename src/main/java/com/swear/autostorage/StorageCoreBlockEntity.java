@@ -121,7 +121,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
         for (int slot = 0; slot < descriptors.size(); slot++) {
             MachineDescriptor entry = MachineEnergyTable.get(slot);
             ItemStack machineStack = machines.getItem(slot);
-            if (entry == null || entry.category() != MachineEnergyTable.Category.PROCESS
+            if (entry == null || entry.category() != MachineCategory.PROCESS
                     || !entry.accepts(machineStack)) {
                 if (entry != null && machineWorkRemainders.remove(entry.id()) != null) {
                     remainderChanged = true;
@@ -295,7 +295,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
         if (stack.isEmpty() || conflicted || !isStorageAvailable()
                 || hasInfiniteDescriptor(descriptorId)) return false;
         MachineDescriptor descriptor = MachineEnergyTable.get(descriptorId);
-        if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.TRANSFORM
+        if (descriptor == null || descriptor.category() != MachineCategory.TRANSFORM
                 || !descriptor.accepts(stack)) return false;
         MachineDescriptor.TransformAmount value = descriptor.valueOf(stack);
         return value.infinite() || value.amount() > 0

@@ -4,6 +4,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.swear.autostorage.api.AutoStorageApi;
 
 public final class StorageResourceKindApi {
     public static final int MAX_KINDS = 256;
@@ -28,6 +29,6 @@ public final class StorageResourceKindApi {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(AutoStorageApi.MOD_ID, path);
     }
 }

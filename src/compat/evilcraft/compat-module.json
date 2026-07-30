@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "id": "auto_storage:evilcraft",
+  "entrypoint": "com.swear.autostorage.compat.evilcraft.EvilCraftCompatModule",
+  "requires": ["evilcraft"],
+  "side": "both",
+  "sourceSet": "compatEvilCraft",
+  "fixture": "evilCraftFixture",
+  "dependencies": [
+    "maven.modrinth:evilcraft:${evilcraft_ci_version}",
+    "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"
+  ]
+}

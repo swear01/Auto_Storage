@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "id": "auto_storage:mekanism",
+  "entrypoint": "com.swear.autostorage.compat.mekanism.MekanismCompatModule",
+  "requires": ["mekanism"],
+  "side": "both",
+  "sourceSet": "compatMekanism",
+  "fixture": "mekanismFixture",
+  "dependencies": [
+    "maven.modrinth:mekanism:${mekanism_ci_version}",
+    "maven.modrinth:emi:${emi_runtime_version}"
+  ]
+}

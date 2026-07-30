@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.botania;
 
+import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.Action;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
@@ -107,7 +108,7 @@ public final class BotaniaIntegrationGameTests {
             MachineDescriptor descriptor = MachineEnergyTable.get(station.descriptorId());
             Item stationItem = botaniaItem(station.itemPath());
             if (descriptor == null
-                    || descriptor.category() != MachineEnergyTable.Category.INSTANT
+                    || descriptor.category() != MachineCategory.INSTANT
                     || descriptor.maxInstalledCount() != 1
                     || !descriptor.accepts(new ItemStack(stationItem))
                     || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(station.descriptorId())) {

@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.compatibilitymatrix;
 
+import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.Action;
 import com.swear.autostorage.Actor;
@@ -446,7 +447,7 @@ public final class CraftablePerformanceGameTests {
         Container machines = machineContainer(core);
         for (int slot = 0; slot < MachineEnergyTable.entries().size(); slot++) {
             MachineDescriptor descriptor = MachineEnergyTable.get(slot);
-            if (descriptor.category() != MachineEnergyTable.Category.INSTANT) continue;
+            if (descriptor.category() != MachineCategory.INSTANT) continue;
             machines.setItem(slot, descriptor.representativeStack());
         }
     }

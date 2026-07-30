@@ -1,9 +1,13 @@
 package com.swear.autostorage;
 
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.Nullable;
+import com.swear.autostorage.api.AutoStorageApi;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,44 +16,41 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Public registry and value contracts for deterministic Transform providers.
+ */
 public final class TransformProviderApi {
+    /**
+     * Maximum number of provider entries.
+     */
+    public static final int MAX_PROVIDERS = 256;
+    /**
+     * Registry key for Transform providers.
+     */
+    public static final ResourceKey<Registry<TransformProvider>> REGISTRY_KEY =
+            ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(
+                    AutoStorageApi.MOD_ID, "transform_provider"));
     public static final int TARGET_BUTTON_BASE = 1_000;
     static final int LEGACY_FUEL_BUTTON_BASE = 19;
-    private static final List<Provider> PROVIDERS = new ArrayList<>();
 
     private TransformProviderApi() {
     }
 
-    public static synchronized void register(
-            ResourceLocation id,
-            ResourceLocation targetId,
-            ItemStack representative,
-            Component targetLabel,
-            Component sourceLabel,
-            Resolver resolver
+    /**
+     * Creates an addon-owned deferred register.
+     *
+     * @param modId addon namespace
+     * @return deferred register targeting the provider registry
+     */
+    public static DeferredRegister<TransformProvider> createDeferredRegister(
+            String modId
     ) {
-        Objects.requireNonNull(id, "id");
-        Objects.requireNonNull(targetId, "targetId");
-        Objects.requireNonNull(representative, "representative");
-        Objects.requireNonNull(targetLabel, "targetLabel");
-        Objects.requireNonNull(sourceLabel, "sourceLabel");
-        Objects.requireNonNull(resolver, "resolver");
-        if (representative.isEmpty()) {
-            throw new IllegalArgumentException("Transform representative cannot be empty: " + id);
-        }
-        if (PROVIDERS.stream().anyMatch(provider -> provider.id().equals(id))) {
-            throw new IllegalArgumentException("Duplicate transform provider: " + id);
-        }
-        PROVIDERS.add(new Provider(
-                id, targetId, representative.copyWithCount(1),
-                targetLabel, sourceLabel, resolver));
+        return DeferredRegister.create(REGISTRY_KEY, modId);
     }
 
-    public static synchronized Optional<Component> sourceLabel(ResourceLocation providerId) {
-        return PROVIDERS.stream()
-                .filter(provider -> provider.id().equals(providerId))
-                .map(Provider::sourceLabel)
-                .findFirst();
+    public static Optional<Component> sourceLabel(ResourceLocation providerId) {
+        TransformProvider provider = AutoStorage.TRANSFORM_PROVIDER_REGISTRY.get(providerId);
+        return provider == null ? Optional.empty() : Optional.of(provider.sourceLabel());
     }
 
     public static ResourceLocation energyTargetId(EnergyType type) {
@@ -57,7 +58,7 @@ public final class TransformProviderApi {
         if (type.isMachineGenerated()) {
             throw new IllegalArgumentException("Machine-generated work is not a transform target");
         }
-        return ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, type.getId());
+        return ResourceLocation.fromNamespaceAndPath(AutoStorageApi.MOD_ID, type.getId());
     }
 
     public static Optional<EnergyType> energyType(ResourceLocation targetId) {
@@ -85,12 +86,12 @@ public final class TransformProviderApi {
             if (!type.isMachineGenerated()) result.add(energyTargetId(type));
         }
         descriptors.stream()
-                .filter(descriptor -> descriptor.category() == MachineEnergyTable.Category.TRANSFORM)
+                .filter(descriptor -> descriptor.category() == MachineCategory.TRANSFORM)
                 .map(MachineDescriptor::id)
                 .forEach(result::add);
-        synchronized (TransformProviderApi.class) {
-            PROVIDERS.stream().map(Provider::targetId).forEach(result::add);
-        }
+        providers().stream()
+                .map(entry -> entry.getValue().targetId())
+                .forEach(result::add);
         return result.stream().distinct().toList();
     }
 
@@ -100,12 +101,10 @@ public final class TransformProviderApi {
             if (!type.isMachineGenerated()) result.add(energyTargetId(type));
         }
         descriptors.stream()
-                .filter(descriptor -> descriptor.category() == MachineEnergyTable.Category.TRANSFORM)
+                .filter(descriptor -> descriptor.category() == MachineCategory.TRANSFORM)
                 .map(MachineDescriptor::id)
                 .forEach(result::add);
-        synchronized (TransformProviderApi.class) {
-            PROVIDERS.stream().map(Provider::id).forEach(result::add);
-        }
+        providers().stream().map(Map.Entry::getKey).forEach(result::add);
         if (result.stream().distinct().count() != result.size()) {
             throw new IllegalStateException("Duplicate transform use id");
         }
@@ -124,20 +123,19 @@ public final class TransformProviderApi {
             }
         }
         descriptors.stream()
-                .filter(descriptor -> descriptor.category() == MachineEnergyTable.Category.TRANSFORM)
+                .filter(descriptor -> descriptor.category() == MachineCategory.TRANSFORM)
                 .map(descriptor -> new Target(
                         descriptor.id(),
                         descriptor.representativeStack(),
                         descriptor.representativeStack().getHoverName()))
                 .forEach(target -> putTarget(result, target));
-        synchronized (TransformProviderApi.class) {
-            PROVIDERS.stream()
-                    .map(provider -> new Target(
-                            provider.targetId(),
-                            provider.representative(),
-                            provider.targetLabel()))
-                    .forEach(target -> putTarget(result, target));
-        }
+        providers().stream()
+                .map(Map.Entry::getValue)
+                .map(provider -> new Target(
+                        provider.targetId(),
+                        provider.representative(),
+                        provider.targetLabel()))
+                .forEach(target -> putTarget(result, target));
         return List.copyOf(result.values());
     }
 
@@ -168,7 +166,7 @@ public final class TransformProviderApi {
                     0));
         }
         for (MachineDescriptor descriptor : descriptors) {
-            if (descriptor.category() != MachineEnergyTable.Category.TRANSFORM
+            if (descriptor.category() != MachineCategory.TRANSFORM
                     || !descriptor.accepts(one)) continue;
             MachineDescriptor.TransformAmount value = descriptor.valueOf(one);
             if (value.infinite() || value.amount() > 0) {
@@ -183,22 +181,28 @@ public final class TransformProviderApi {
                         0));
             }
         }
-        synchronized (TransformProviderApi.class) {
-            for (Provider provider : PROVIDERS) {
-                Result resolved = provider.resolver().resolve(one.copy());
-                if (resolved == null) continue;
-                result.add(new Use(
-                        provider.id(),
-                        provider.targetId(),
-                        provider.representative(),
-                        resolved.output(),
-                        resolved.amountPerItem(),
-                        false,
-                        resolved.stationId(),
-                        resolved.stationWorkPerItem()));
-            }
+        for (Map.Entry<ResourceLocation, TransformProvider> entry : providers()) {
+            TransformProvider provider = entry.getValue();
+            Result resolved = provider.resolver().resolve(one.copy());
+            if (resolved == null) continue;
+            result.add(new Use(
+                    entry.getKey(),
+                    provider.targetId(),
+                    provider.representative(),
+                    resolved.output(),
+                    resolved.amountPerItem(),
+                    false,
+                    resolved.stationId(),
+                    resolved.stationWorkPerItem()));
         }
         return List.copyOf(result);
+    }
+
+    private static List<Map.Entry<ResourceLocation, TransformProvider>> providers() {
+        return AutoStorage.TRANSFORM_PROVIDER_REGISTRY.entrySet().stream()
+                .map(entry -> Map.entry(entry.getKey().location(), entry.getValue()))
+                .sorted(Map.Entry.comparingByKey())
+                .toList();
     }
 
     static ItemStack sortStack(Use use) {
@@ -207,6 +211,14 @@ public final class TransformProviderApi {
                 use.infinite() ? Long.MAX_VALUE : use.amountPerItem());
     }
 
+    /**
+     * One resolved typed output and its optional station-work cost.
+     *
+     * @param output exact typed output key
+     * @param amountPerItem positive output amount for one input item
+     * @param stationId required station descriptor, or {@code null}
+     * @param stationWorkPerItem positive work cost when a station is present
+     */
     public record Result(
             StorageResourceKey output,
             long amountPerItem,
@@ -260,24 +272,14 @@ public final class TransformProviderApi {
         }
     }
 
+    /**
+     * Side-effect-free exact-input resolver. Returning {@code null} means the
+     * provider does not accept the supplied item.
+     */
     @FunctionalInterface
     public interface Resolver {
         @Nullable
         Result resolve(ItemStack input);
     }
 
-    private record Provider(
-            ResourceLocation id,
-            ResourceLocation targetId,
-            ItemStack representative,
-            Component targetLabel,
-            Component sourceLabel,
-            Resolver resolver
-    ) {
-        private Provider {
-            representative = representative.copyWithCount(1);
-            Objects.requireNonNull(targetLabel, "targetLabel");
-            Objects.requireNonNull(sourceLabel, "sourceLabel");
-        }
-    }
 }

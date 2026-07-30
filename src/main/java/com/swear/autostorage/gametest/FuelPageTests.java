@@ -338,14 +338,14 @@ public class FuelPageTests {
 
     private static TerminalLayout.FuelDescriptorCounts currentFuelDescriptorCounts() {
         int timed = (int) MachineEnergyTable.entries().stream()
-                .filter(entry -> entry.category() == MachineEnergyTable.Category.PROCESS)
+                .filter(entry -> entry.category() == MachineCategory.PROCESS)
                 .count();
         int instant = (int) MachineEnergyTable.entries().stream()
-                .filter(entry -> entry.category() == MachineEnergyTable.Category.INSTANT)
+                .filter(entry -> entry.category() == MachineCategory.INSTANT)
                 .count();
         int consumable = CraftingTerminalMenu.fuelTargets().size()
                 + (int) MachineEnergyTable.entries().stream()
-                .filter(entry -> entry.category() == MachineEnergyTable.Category.TRANSFORM)
+                .filter(entry -> entry.category() == MachineCategory.TRANSFORM)
                 .count()
                 + 1;
         return new TerminalLayout.FuelDescriptorCounts(

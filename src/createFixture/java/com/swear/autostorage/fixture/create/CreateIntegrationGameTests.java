@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.create;
 
+import com.swear.autostorage.MachineCategory;
 import com.simibubi.create.content.fluids.drain.ItemDrainBlockEntity;
 import com.simibubi.create.content.fluids.spout.SpoutBlockEntity;
 import com.swear.autostorage.Action;
@@ -320,7 +321,7 @@ public final class CreateIntegrationGameTests {
         MachineDescriptor descriptor = MachineEnergyTable.get(stationId);
         ItemStack station = new ItemStack(createItem(itemPath));
         return descriptor != null
-                && descriptor.category() == MachineEnergyTable.Category.PROCESS
+                && descriptor.category() == MachineCategory.PROCESS
                 && descriptor.maxInstalledCount() == MachineDescriptorApi.MAX_INSTALLED_COUNT
                 && descriptor.energyType() == null
                 && descriptor.variants().size() == 1

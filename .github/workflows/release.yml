@@ -237,3 +237,10 @@ jobs:
           dependencies: |
             emi(required){modrinth:fRiHVvU7}{curseforge:580555}#(ignore:github)
             patchouli(required){modrinth:nU0bVIaL}{curseforge:306770}#(ignore:github)
+
+      - name: Upload addon SDK assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.release-meta.outputs.version }}"
+          gh release upload "$GITHUB_REF_NAME" "build/libs/auto_storage-${VERSION}-api.jar" "build/libs/auto_storage-${VERSION}-api-sources.jar" "build/libs/auto_storage-${VERSION}-api-javadoc.jar"
