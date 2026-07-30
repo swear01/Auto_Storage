@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061705Z",
   "type": "block",
-  "subject": "Magic Storage bus side casing face",
+  "subject": "Auto Storage bus side casing face",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

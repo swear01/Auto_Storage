@@ -3,33 +3,33 @@ loaderVersion="[4,)"
 license="MIT"
 
 [[mods]]
-modId="magic_storage_powah_fixture"
+modId="auto_storage_powah_fixture"
 version="1.0.0"
 displayName="Auto Storage Powah Fixture"
 description='''Repository-owned Powah Energizing and FE compatibility fixture.'''
 
-[[dependencies.magic_storage_powah_fixture]]
+[[dependencies.auto_storage_powah_fixture]]
 modId="neoforge"
 type="required"
 versionRange="[21.1,)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.magic_storage_powah_fixture]]
+[[dependencies.auto_storage_powah_fixture]]
 modId="minecraft"
 type="required"
 versionRange="[1.21.1,1.22)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.magic_storage_powah_fixture]]
-modId="magic_storage"
+[[dependencies.auto_storage_powah_fixture]]
+modId="auto_storage"
 type="required"
 versionRange="[0.1,)"
 ordering="AFTER"
 side="BOTH"
 
-[[dependencies.magic_storage_powah_fixture]]
+[[dependencies.auto_storage_powah_fixture]]
 modId="powah"
 type="required"
 versionRange="[6.2,)"

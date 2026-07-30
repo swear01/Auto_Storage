@@ -1,0 +1,45 @@
+{
+  "variants": {
+    "directionless=false,facing=down": {
+      "model": "auto_storage:block/import_bus",
+      "x": 90
+    },
+    "directionless=true,facing=down": {
+      "model": "auto_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=up": {
+      "model": "auto_storage:block/import_bus",
+      "x": 270
+    },
+    "directionless=true,facing=up": {
+      "model": "auto_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=north": {
+      "model": "auto_storage:block/import_bus"
+    },
+    "directionless=true,facing=north": {
+      "model": "auto_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=south": {
+      "model": "auto_storage:block/import_bus",
+      "y": 180
+    },
+    "directionless=true,facing=south": {
+      "model": "auto_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=west": {
+      "model": "auto_storage:block/import_bus",
+      "y": 270
+    },
+    "directionless=true,facing=west": {
+      "model": "auto_storage:block/import_bus_directionless"
+    },
+    "directionless=false,facing=east": {
+      "model": "auto_storage:block/import_bus",
+      "y": 90
+    },
+    "directionless=true,facing=east": {
+      "model": "auto_storage:block/import_bus_directionless"
+    }
+  }
+}

@@ -54,7 +54,7 @@ Auto Storage adopts this world-repository ownership model, then adds bounded inv
 - Avoid copying the payload into a recovery entry or dropped ItemStack.
 - Preserve raw inventory and descriptor NBT when an add-on item or descriptor is unavailable.
 - Reject missing, corrupt, packed, or concurrently attached records instead of manufacturing an empty replacement.
-- Keep recovery tokens one-time claimable while allowing `/magic_storage recover_core` to reissue another reference to the same unclaimed recovery.
+- Keep recovery tokens one-time claimable while allowing `/auto_storage recover_core` to reissue another reference to the same unclaimed recovery.
 
 ## Non-goals
 
@@ -88,7 +88,7 @@ CoreStorageRecord
 
 `CoreStorageRepository`, `CoreStorageRecord`, and related names describe the intended implementation boundaries. The repository is the sole durable owner. `StorageCoreBlockEntity` holds a runtime reference to its attached record but does not own a second persistent copy.
 
-The first implementation uses one overworld SavedData named `magic_storage_core_storages`, stored by Minecraft as `data/magic_storage_core_storages.dat`. Record access and encoding remain isolated behind the repository boundary so a later design can shard files without changing Core or terminal behavior. No sharding switch or unused backend abstraction is added now.
+The first implementation uses one overworld SavedData named `auto_storage_core_storages`, stored by Minecraft as `data/auto_storage_core_storages.dat`. Record access and encoding remain isolated behind the repository boundary so a later design can shard files without changing Core or terminal behavior. No sharding switch or unused backend abstraction is added now.
 
 ## Persistent and runtime state boundaries
 
@@ -190,7 +190,7 @@ The placed Core keeps the same storage UUID and network UUID. The recovery UUID 
 
 Copied recovery-token ItemStacks all reference the same mapping. The first successful claim removes that mapping; every later copy fails with the existing localized consumed-token behavior and cannot create a blank Core.
 
-`/magic_storage recover_core` reissues another ItemStack containing the same unclaimed recovery UUID and current summary. It does not clone the record, create another recovery mapping, or change claim order.
+`/auto_storage recover_core` reissues another ItemStack containing the same unclaimed recovery UUID and current summary. It does not clone the record, create another recovery mapping, or change claim order.
 
 ### Empty Core removal
 

@@ -114,7 +114,7 @@ class ResolveEmiVersionTests(unittest.TestCase):
         self.assertIn("loaders=%5B%22neoforge%22%5D", url)
         self.assertIn("game_versions=%5B%221.21.1%22%5D", url)
         self.assertIn("include_changelog=false", url)
-        self.assertEqual("Magic-Storage-EMI-compatibility-check", headers["User-agent"])
+        self.assertEqual("Auto-Storage-EMI-compatibility-check", headers["User-agent"])
         self.assertEqual(30, timeout)
 
     def test_reads_the_release_range_as_inclusive_minimum_and_exclusive_upper_bound(self):

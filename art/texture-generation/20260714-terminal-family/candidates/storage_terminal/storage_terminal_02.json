@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061622Z",
   "type": "block",
-  "subject": "Magic Storage item-grid terminal face",
+  "subject": "Auto Storage item-grid terminal face",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

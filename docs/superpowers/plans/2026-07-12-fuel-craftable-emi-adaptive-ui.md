@@ -172,7 +172,7 @@ Only after confirmed RED, change `RecipeEnergyTable` and its callers.
 2. Test output absent/offscreen, same-output identity, stale/unsupported ID, wrong container, Fuel page, conflict, missing ingredients/energy, cursor incompatibility, and inventory capacity.
 3. Test NONE selects without consuming; CURSOR/INVENTORY commit only the simulated legal amount.
 4. Keep EMI classes out of dedicated-server SelfTest; use dist-neutral request/menu tests plus Python static integration checks for client registration and mapping.
-5. Only after server contracts are GREEN update `MagicStorageEmiPlugin`.
+5. Only after server contracts are GREEN update `AutoStorageEmiPlugin`.
 
 ### Task 5 — RED/GREEN adaptive layout and visuals
 

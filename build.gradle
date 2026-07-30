@@ -108,46 +108,46 @@ neoForge {
         "${mod_id}" {
             sourceSet(sourceSets.main)
         }
-        magic_storage_recipe_fixture {
+        auto_storage_recipe_fixture {
             sourceSet(sourceSets.recipeAddonFixture)
         }
-        magic_storage_mekanism_fixture {
+        auto_storage_mekanism_fixture {
             sourceSet(sourceSets.mekanismFixture)
         }
-        magic_storage_botania_fixture {
+        auto_storage_botania_fixture {
             sourceSet(sourceSets.botaniaFixture)
         }
-        magic_storage_iron_furnaces_fixture {
+        auto_storage_iron_furnaces_fixture {
             sourceSet(sourceSets.ironFurnacesFixture)
         }
-        magic_storage_farmers_delight_fixture {
+        auto_storage_farmers_delight_fixture {
             sourceSet(sourceSets.farmersDelightFixture)
         }
-        magic_storage_modern_industrialization_fixture {
+        auto_storage_modern_industrialization_fixture {
             sourceSet(sourceSets.modernIndustrializationFixture)
         }
-        magic_storage_ars_nouveau_fixture {
+        auto_storage_ars_nouveau_fixture {
             sourceSet(sourceSets.arsNouveauFixture)
         }
-        magic_storage_evilcraft_fixture {
+        auto_storage_evilcraft_fixture {
             sourceSet(sourceSets.evilCraftFixture)
         }
-        magic_storage_powah_fixture {
+        auto_storage_powah_fixture {
             sourceSet(sourceSets.powahFixture)
         }
-        magic_storage_industrial_foregoing_fixture {
+        auto_storage_industrial_foregoing_fixture {
             sourceSet(sourceSets.industrialForegoingFixture)
         }
-        magic_storage_create_fixture {
+        auto_storage_create_fixture {
             sourceSet(sourceSets.createFixture)
         }
-        magic_storage_pneumaticcraft_fixture {
+        auto_storage_pneumaticcraft_fixture {
             sourceSet(sourceSets.pneumaticCraftFixture)
         }
-        magic_storage_extended_crafting_fixture {
+        auto_storage_extended_crafting_fixture {
             sourceSet(sourceSets.extendedCraftingFixture)
         }
-        magic_storage_compatibility_matrix_fixture {
+        auto_storage_compatibility_matrix_fixture {
             sourceSet(sourceSets.compatibilityMatrixFixture)
         }
     }
@@ -181,109 +181,109 @@ neoForge {
         recipeAddonGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.recipeAddonFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_recipe_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_recipe_fixture'
+            loadedMods = [mods."${mod_id}", mods.auto_storage_recipe_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_recipe_fixture'
         }
 
         mekanismGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.mekanismFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_mekanism_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_mekanism_fixture'
+            loadedMods = [mods."${mod_id}", mods.auto_storage_mekanism_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_mekanism_fixture'
         }
 
         botaniaGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.botaniaFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_botania_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_botania_fixture'
+            loadedMods = [mods."${mod_id}", mods.auto_storage_botania_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_botania_fixture'
         }
 
         ironFurnacesGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.ironFurnacesFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_iron_furnaces_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_iron_furnaces_fixture'
+            loadedMods = [mods."${mod_id}", mods.auto_storage_iron_furnaces_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_iron_furnaces_fixture'
         }
 
         farmersDelightGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.farmersDelightFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_farmers_delight_fixture]
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'magic_storage_farmers_delight_fixture'
+            loadedMods = [mods."${mod_id}", mods.auto_storage_farmers_delight_fixture]
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'auto_storage_farmers_delight_fixture'
         }
 
         modernIndustrializationGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.modernIndustrializationFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_modern_industrialization_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_modern_industrialization_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_modern_industrialization_fixture'
+                    'auto_storage_modern_industrialization_fixture'
         }
 
         arsNouveauGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.arsNouveauFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_ars_nouveau_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_ars_nouveau_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_ars_nouveau_fixture'
+                    'auto_storage_ars_nouveau_fixture'
         }
 
         evilCraftGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.evilCraftFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_evilcraft_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_evilcraft_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_evilcraft_fixture'
+                    'auto_storage_evilcraft_fixture'
         }
 
         powahGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.powahFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_powah_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_powah_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_powah_fixture'
+                    'auto_storage_powah_fixture'
         }
 
         industrialForegoingGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.industrialForegoingFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_industrial_foregoing_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_industrial_foregoing_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_industrial_foregoing_fixture'
+                    'auto_storage_industrial_foregoing_fixture'
         }
 
         createGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.createFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_create_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_create_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_create_fixture'
+                    'auto_storage_create_fixture'
         }
 
         pneumaticCraftGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.pneumaticCraftFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_pneumaticcraft_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_pneumaticcraft_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_pneumaticcraft_fixture'
+                    'auto_storage_pneumaticcraft_fixture'
         }
 
         extendedCraftingGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.extendedCraftingFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_extended_crafting_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_extended_crafting_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_extended_crafting_fixture'
+                    'auto_storage_extended_crafting_fixture'
         }
 
         compatibilityMatrixGameTestServer {
             type = "gameTestServer"
             sourceSet = sourceSets.compatibilityMatrixFixture
-            loadedMods = [mods."${mod_id}", mods.magic_storage_compatibility_matrix_fixture]
+            loadedMods = [mods."${mod_id}", mods.auto_storage_compatibility_matrix_fixture]
             systemProperty 'neoforge.enabledGameTestNamespaces',
-                    'magic_storage_compatibility_matrix_fixture'
-            systemProperty 'magic_storage.terminalScaleTypes',
+                    'auto_storage_compatibility_matrix_fixture'
+            systemProperty 'auto_storage.terminalScaleTypes',
                     providers.gradleProperty('terminalScaleTypes').orElse('10000').get()
         }
 

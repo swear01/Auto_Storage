@@ -5,16 +5,16 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-GUIDE_ROOT = ROOT / "src/main/resources/assets/magic_storage/patchouli_books/guide"
-RECIPE_ROOT = ROOT / "src/main/resources/data/magic_storage/recipe"
-ITEM_MODEL_ROOT = ROOT / "src/main/resources/assets/magic_storage/models/item"
+GUIDE_ROOT = ROOT / "src/main/resources/assets/auto_storage/patchouli_books/guide"
+RECIPE_ROOT = ROOT / "src/main/resources/data/auto_storage/recipe"
+ITEM_MODEL_ROOT = ROOT / "src/main/resources/assets/auto_storage/models/item"
 
 CATEGORIES = {
-    "getting_started": (0, "magic_storage:storage_core"),
-    "storage_system": (1, "magic_storage:storage_unit_t3"),
-    "terminals": (2, "magic_storage:crafting_terminal"),
+    "getting_started": (0, "auto_storage:storage_core"),
+    "storage_system": (1, "auto_storage:storage_unit_t3"),
+    "terminals": (2, "auto_storage:crafting_terminal"),
     "energy": (3, "minecraft:furnace"),
-    "automation": (4, "magic_storage:import_bus"),
+    "automation": (4, "auto_storage:import_bus"),
     "troubleshooting": (5, "minecraft:redstone"),
 }
 
@@ -22,7 +22,7 @@ ENTRIES = {
     "first_network": (
         "getting_started",
         0,
-        "magic_storage:storage_core",
+        "auto_storage:storage_core",
         ("patchouli:text",) * 4,
     ),
     "recipes": (
@@ -46,25 +46,25 @@ ENTRIES = {
     "storage_core": (
         "storage_system",
         0,
-        "magic_storage:storage_core",
+        "auto_storage:storage_core",
         ("patchouli:spotlight", "patchouli:text", "patchouli:text", "patchouli:text", "patchouli:text"),
     ),
     "unit_tiers": (
         "storage_system",
         1,
-        "magic_storage:storage_unit_t1",
+        "auto_storage:storage_unit_t1",
         ("patchouli:spotlight",) + ("patchouli:text",) * 6,
     ),
     "connected_casing": (
         "storage_system",
         2,
-        "magic_storage:storage_unit_t3",
+        "auto_storage:storage_unit_t3",
         ("patchouli:text",) * 3,
     ),
     "storage_terminal": (
         "terminals",
         0,
-        "magic_storage:storage_terminal",
+        "auto_storage:storage_terminal",
         (
             "patchouli:spotlight",
             "patchouli:text",
@@ -76,7 +76,7 @@ ENTRIES = {
     "crafting_terminal": (
         "terminals",
         1,
-        "magic_storage:crafting_terminal",
+        "auto_storage:crafting_terminal",
         ("patchouli:spotlight",) + ("patchouli:text",) * 7,
     ),
     "terminal_controls": (
@@ -106,13 +106,13 @@ ENTRIES = {
     "import_bus": (
         "automation",
         0,
-        "magic_storage:import_bus",
+        "auto_storage:import_bus",
         ("patchouli:spotlight", "patchouli:text", "patchouli:text", "patchouli:text"),
     ),
     "export_bus": (
         "automation",
         1,
-        "magic_storage:export_bus",
+        "auto_storage:export_bus",
         (
             "patchouli:spotlight",
             "patchouli:text",
@@ -124,7 +124,7 @@ ENTRIES = {
     "remote_terminal": (
         "automation",
         2,
-        "magic_storage:remote_terminal",
+        "auto_storage:remote_terminal",
         (
             "patchouli:spotlight",
             "patchouli:text",
@@ -137,7 +137,7 @@ ENTRIES = {
         "troubleshooting",
         0,
         "minecraft:redstone",
-        ("patchouli:text",) * 6,
+        ("patchouli:text",) * 7,
     ),
     "progression_reference": (
         "troubleshooting",
@@ -315,7 +315,7 @@ class PatchouliGuideTests(unittest.TestCase):
             self.assertEqual({"name", "category", "icon", "sortnum", "pages"}, set(en_entry))
             self.assertEqual({"name", "category", "icon", "sortnum", "pages"}, set(zh_entry))
             expected_header = {
-                "category": f"magic_storage:{category_id}",
+                "category": f"auto_storage:{category_id}",
                 "icon": icon,
                 "sortnum": sortnum,
             }
@@ -334,13 +334,13 @@ class PatchouliGuideTests(unittest.TestCase):
             actual_sortnums = sorted(
                 entry["sortnum"]
                 for entry in en_entries.values()
-                if entry["category"] == f"magic_storage:{category_id}"
+                if entry["category"] == f"auto_storage:{category_id}"
             )
             self.assertEqual(expected_sortnums, actual_sortnums, category_id)
 
     def test_internal_links_icons_and_recipe_pages_resolve(self):
         categories, entries = self.load_locale("en_us")
-        entry_ids = {f"magic_storage:{entry_id}" for entry_id in entries}
+        entry_ids = {f"auto_storage:{entry_id}" for entry_id in entries}
         links = set()
         icons = {category["icon"] for category in categories.values()}
         icons.update(entry["icon"] for entry in entries.values())
@@ -364,13 +364,13 @@ class PatchouliGuideTests(unittest.TestCase):
         for icon in icons:
             self.assertRegex(icon, resource_location)
             namespace, path = icon.split(":", 1)
-            if namespace == "magic_storage":
+            if namespace == "auto_storage":
                 self.assertTrue((ITEM_MODEL_ROOT / f"{path}.json").is_file(), f"missing item model for {icon}")
             else:
                 self.assertIn(icon, VANILLA_ICONS, f"unverified vanilla guide icon {icon}")
 
         recipe_ids = {
-            f"magic_storage:{path.relative_to(RECIPE_ROOT).with_suffix('').as_posix()}"
+            f"auto_storage:{path.relative_to(RECIPE_ROOT).with_suffix('').as_posix()}"
             for path in RECIPE_ROOT.rglob("*.json")
         }
         for path in RECIPE_ROOT.rglob("*.json"):
@@ -389,15 +389,15 @@ class PatchouliGuideTests(unittest.TestCase):
                 if key in page
             ]
             expected = {
-                f"magic_storage:{path.stem}"
+                f"auto_storage:{path.stem}"
                 for path in RECIPE_ROOT.glob("*.json")
             }
             self.assertEqual(expected, set(references))
             self.assertEqual(len(expected), len(references))
 
-    def test_guide_book_is_a_craftable_magic_storage_item(self):
-        book = json.loads((ROOT / "src/main/resources/data/magic_storage/patchouli_books/guide/book.json").read_text())
-        self.assertEqual("magic_storage:guide_book", book.get("custom_book_item"))
+    def test_guide_book_is_a_craftable_auto_storage_item(self):
+        book = json.loads((ROOT / "src/main/resources/data/auto_storage/patchouli_books/guide/book.json").read_text())
+        self.assertEqual("auto_storage:guide_book", book.get("custom_book_item"))
         recipe = json.loads((RECIPE_ROOT / "guide_book.json").read_text())
         self.assertEqual(
             {
@@ -407,13 +407,13 @@ class PatchouliGuideTests(unittest.TestCase):
                     {"item": "minecraft:black_dye"},
                     {"item": "minecraft:copper_ingot"},
                 ],
-                "result": {"id": "magic_storage:guide_book"},
+                "result": {"id": "auto_storage:guide_book"},
             },
             recipe,
         )
-        magic_storage = (ROOT / "src/main/java/com/swearprom/magicstorage/magic_storage/MagicStorage.java").read_text()
-        self.assertIn('ITEMS.register("guide_book"', magic_storage)
-        self.assertIn("output.accept(GUIDE_BOOK.get())", magic_storage)
+        auto_storage = (ROOT / "src/main/java/com/swear/autostorage/AutoStorage.java").read_text()
+        self.assertIn('ITEMS.register("guide_book"', auto_storage)
+        self.assertIn("output.accept(GUIDE_BOOK.get())", auto_storage)
         self.assertTrue((ITEM_MODEL_ROOT / "guide_book.json").is_file())
 
     def test_required_patchouli_dependency_is_present_in_development_runs(self):

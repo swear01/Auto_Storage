@@ -1,0 +1,24 @@
+{
+  "name": "Your First Network",
+  "category": "auto_storage:getting_started",
+  "icon": "auto_storage:storage_core",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Auto Storage keeps many item types behind one shared interface. Your $(thing)starter shopping list$() is a $(l:auto_storage:storage_core)Storage Core$(), a $(l:auto_storage:storage_terminal)Storage Terminal$(), and two $(l:auto_storage:unit_tiers)T1 Storage Units$(). The starter set uses one Diamond total plus black concrete powder, obsidian, copper, redstone, glass, wood, and a Barrel; T1 needs no amethyst."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Place the Core first. Put both T1 Units against any face of the Core, then place the Storage Terminal against the Core or either Unit. Blocks may form any shape, but every step must touch by a full face; corners and gaps do not connect."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A connected network must have $(thing)one Core$(). A second Core makes it conflicted and pauses storage until the extra Core is removed. For the first test, open the terminal, insert a common block, and take it back out. If that works, capacity and access are ready."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Next, add a $(l:auto_storage:crafting_terminal)Crafting Terminal$() for recipes, $(l:auto_storage:import_bus)Import$() and $(l:auto_storage:export_bus)Export Buses$() for item movement, or a $(l:auto_storage:remote_terminal)Remote Terminal$() for travel. Read $(l:auto_storage:connecting_blocks)Connections and Safe Moving$() before relocating the Core."
+    }
+  ]
+}

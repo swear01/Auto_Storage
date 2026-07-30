@@ -67,7 +67,7 @@ DEFAULT_RUN_ROOT = Path("build/gui-runs")
 DEFAULT_TIMEOUT_SECONDS = 300
 DEFAULT_PROCESS_TERMINATION_TIMEOUT_SECONDS = 5
 DEFAULT_SHUTDOWN_STALL_TIMEOUT_SECONDS = 5
-DEFAULT_OFFLINE_PLAYER = "MagicStorageBot"
+DEFAULT_OFFLINE_PLAYER = "AutoStorageBot"
 DEFAULT_PRISM_APP = "/Applications/Prism Launcher.app"
 MINIMUM_PRISM_VERSION = (11, 0, 3)
 PRISM_AUTH_FORBIDDEN_PATTERNS = (
@@ -79,7 +79,7 @@ PRISM_AUTH_FORBIDDEN_PATTERNS = (
     "api.minecraftservices.com/entitlements",
 )
 PRISM_LAUNCH_ENV_KEYS = ("HOME", "PATH", "TMPDIR", "LANG", "LC_ALL", "USER", "LOGNAME", "SHELL")
-DEFAULT_REQUIRED_PATTERNS = ["SelfTest:", "MS_GUI_TEST_READY"]
+DEFAULT_REQUIRED_PATTERNS = ["SelfTest:", "AS_GUI_TEST_READY"]
 DEFAULT_FORBIDDEN_PATTERNS = ["advanced_container_set_data", "ERROR", "FATAL", "Caused by"]
 MANUAL_HANDOFF_MESSAGE = "Minecraft is ready in the fixed test world. Please take over for the fullscreen visual checks; close with F11, wait for the normal window, then Command-Q."
 OFFLINE_AUTH_PROPERTY_ERROR = "[net.minecraft.client.Minecraft/]: Failed to fetch user properties"
@@ -101,7 +101,7 @@ SCENARIOS = {
         "hotbar_keys": [],
         "checks": [
             "No manual visual pass is required unless this run is investigating visible UI behavior.",
-            "Review log-excerpt.log for SelfTest and MS_GUI_TEST_READY.",
+            "Review log-excerpt.log for SelfTest and AS_GUI_TEST_READY.",
         ],
     },
     "terminal-left-rail": {
@@ -197,7 +197,7 @@ SCENARIOS = {
             "Pass the fullscreen gate before pressing use, clicking, typing, or scrolling.",
             "Confirm the true-void fixture starts aimed at the Crafting Terminal with an empty player inventory except hotbar 1/2 navigation, every runtime registered item already stored, and all installable station fields already filled; press `u` without performing setup.",
             "On Storage, cycle Name, ID, Quantity, and Mod sorting in both directions and confirm each result remains responsive and stable.",
-            "Clear search between checks, then test plain partial text, `@magic_storage`, and `#minecraft:logs`; a bare operator must still show all types.",
+            "Clear search between checks, then test plain partial text, `@auto_storage`, and `#minecraft:logs`; a bare operator must still show all types.",
             "Scroll from the first and far-end type ranges, drag the scrollbar between distant positions, and confirm rows remain populated without pauses, snapping, or stale entries.",
             "Switch Storage to Craftable, select a green craftable output, and inspect its recipe preview, materials, station source, and output count; return to Storage and repeat once without a keep-up warning or layout drift.",
             CURRENT_RUN_LOG_CHECK,
@@ -694,7 +694,7 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def verify_deployed_magic_storage_jar(project_dir: Path, minecraft_dir: Path) -> None:
+def verify_deployed_auto_storage_jar(project_dir: Path, minecraft_dir: Path) -> None:
     project_dir = project_dir.expanduser().resolve()
     minecraft_dir = minecraft_dir.expanduser().resolve()
     properties_path = project_dir / "gradle.properties"
@@ -708,12 +708,24 @@ def verify_deployed_magic_storage_jar(project_dir: Path, minecraft_dir: Path) ->
     if len(versions) != 1 or not versions[0]:
         raise RuntimeError(f"Expected exactly one mod_version in {properties_path}. {DEPLOY_REQUIRED_MESSAGE}")
 
-    build_jar = project_dir / "build" / "libs" / f"magic_storage-{versions[0]}.jar"
+    build_jar = project_dir / "build" / "libs" / f"auto_storage-{versions[0]}.jar"
     if not build_jar.is_file():
         raise RuntimeError(f"Current Auto Storage build jar not found: {build_jar}. {DEPLOY_REQUIRED_MESSAGE}")
 
     mods_dir = minecraft_dir / "mods"
-    deployed_jars = sorted(mods_dir.glob("magic_storage-*.jar")) if mods_dir.is_dir() else []
+    legacy_basename = "magic" + "_storage"
+    legacy_jars = (
+        sorted(mods_dir.glob(f"{legacy_basename}-*.jar"))
+        if mods_dir.is_dir()
+        else []
+    )
+    if legacy_jars:
+        found = ", ".join(path.name for path in legacy_jars)
+        raise RuntimeError(
+            f"Found legacy Auto Storage jar in Prism dev mods at {mods_dir}: {found}. "
+            f"{DEPLOY_REQUIRED_MESSAGE}"
+        )
+    deployed_jars = sorted(mods_dir.glob("auto_storage-*.jar")) if mods_dir.is_dir() else []
     if len(deployed_jars) != 1:
         found = ", ".join(path.name for path in deployed_jars) or "none"
         raise RuntimeError(
@@ -849,7 +861,7 @@ def write_checklist(
         "",
         "## Fullscreen gate",
         "",
-        "Minecraft automatically starts in borderless Minecraft F11 fullscreen; wait for the current MS_GUI_TEST_READY log line before taking control.",
+        "Minecraft automatically starts in borderless Minecraft F11 fullscreen; wait for the current AS_GUI_TEST_READY log line before taking control.",
         "On macOS the client never attaches the GLFW window to the monitor, and the runner fails closed if the desktop display mode changes.",
         "Do not use the macOS green fullscreen button or Control-Command-F, and never combine native fullscreen with Minecraft F11 fullscreen.",
         "Do not perform hotbar/use/click/scroll/screenshot actions until the fullscreen gate is visually confirmed.",
@@ -862,7 +874,7 @@ def write_checklist(
     ]
     if scenario["manual_gui_required"]:
         lines.extend([
-            "Stop automation here and hand control to the user after Minecraft reaches MS_GUI_TEST_READY.",
+            "Stop automation here and hand control to the user after Minecraft reaches AS_GUI_TEST_READY.",
             "The user performs the fullscreen gate and the scenario steps below.",
             "",
         ])
@@ -946,18 +958,18 @@ def validate_scenario_manifest(
             manifest.get("bootstrap", {}).get("core_preloaded") is not True
             or manifest.get("bootstrap", {}).get(
                 "runtime_fixture_ready_log"
-            ) != "MS_GUI_RUNTIME_FIXTURE_READY"
+            ) != "AS_GUI_RUNTIME_FIXTURE_READY"
             or manifest.get("world_generator") != VOID_GENERATOR
             or player_kit != {
                 "hotbar": {
                     "1": {
                         "slot": "hotbar.0",
-                        "item": "magic_storage:storage_terminal",
+                        "item": "auto_storage:storage_terminal",
                         "count": 1,
                     },
                     "2": {
                         "slot": "hotbar.1",
-                        "item": "magic_storage:crafting_terminal",
+                        "item": "auto_storage:crafting_terminal",
                         "count": 1,
                     },
                 },
@@ -972,7 +984,7 @@ def validate_scenario_manifest(
                 "installable_descriptors": "all",
                 "processing_count": 130,
                 "instant_count": 1,
-                "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+                "ready_log": "AS_GUI_RUNTIME_FIXTURE_READY",
             }
             or "variants" in fixture
         ):
@@ -984,7 +996,7 @@ def validate_scenario_manifest(
         return
     baseline = manifest.get("baseline", {})
     crusher = baseline.get("installed_stations", {}).get(
-        "magic_storage:mekanism_crusher", {}
+        "auto_storage:mekanism_crusher", {}
     )
     coal = manifest.get("player_kit", {}).get("hotbar", {}).get("3", {})
     if (
@@ -1035,7 +1047,7 @@ def run_session(
 
     if not no_launch:
         require_running_normal_prism()
-        verify_deployed_magic_storage_jar(DEFAULT_PROJECT_DIR, minecraft_dir)
+        verify_deployed_auto_storage_jar(DEFAULT_PROJECT_DIR, minecraft_dir)
         verify_deployed_fusion_jar(minecraft_dir)
         if scenario_name in {"crafting-fuel-page", "terminal-scale"}:
             verify_deployed_gui_support_jars(DEFAULT_PROJECT_DIR, minecraft_dir)
@@ -1079,7 +1091,7 @@ def run_session(
             launcher(launch_command)
             required_patterns = list(DEFAULT_REQUIRED_PATTERNS)
             if scenario_name == "terminal-scale":
-                required_patterns.append("MS_GUI_RUNTIME_FIXTURE_READY")
+                required_patterns.append("AS_GUI_RUNTIME_FIXTURE_READY")
             log_excerpt = wait_for_log_func(
                 log_path=log_path,
                 offset=offset,

@@ -23,7 +23,7 @@ These IDs make CI reproducible; they are not an exact player dependency pin. The
 
 The Dissolution Chamber follows the machine implementation rather than vanilla crafting semantics: every occupied input slot consumes one item, so buckets and other crafting containers do not create a remainder. Repeated identical slots are grouped before the nine-input typed-plan limit is applied.
 
-Industrial Foregoing FE is the shared `magic_storage:neoforge_energy` resource. It is not Auto Storage Fuel or a legacy process-energy pool. All items, fluids, FE, station work, primary output, and byproducts use one simulate-then-commit transaction.
+Industrial Foregoing FE is the shared `auto_storage:neoforge_energy` resource. It is not Auto Storage Fuel or a legacy process-energy pool. All items, fluids, FE, station work, primary output, and byproducts use one simulate-then-commit transaction.
 
 ## Fail-closed boundary
 

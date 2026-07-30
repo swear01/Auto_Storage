@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061645Z",
   "type": "block",
-  "subject": "Magic Storage tiered cell unit face",
+  "subject": "Auto Storage tiered cell unit face",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

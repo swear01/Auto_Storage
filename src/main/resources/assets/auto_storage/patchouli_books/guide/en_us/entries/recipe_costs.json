@@ -1,0 +1,24 @@
+{
+  "name": "Recipe Costs and Support",
+  "category": "auto_storage:energy",
+  "icon": "minecraft:blast_furnace",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Smelting, blasting, smoking, and campfire recipes use the recipe's current cooking time. Each craft spends that amount from both the matching processing reserve and Fuel, so datapack changes to cooking time are reflected automatically."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Furnace supplies Smelting, Blast Furnace supplies Blasting, Smoker supplies Smoking, and Campfire supplies Campfire Cooking. Brewing Stand can accumulate Brewing work, but brewing execution is not currently available."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Crafting Table, Stonecutter, and exact Smithing Transform recipes need their matching Instant Station but spend no processing work. Built-in axe stripping, scraping, and wax removal spend Axe Uses instead. Botania recipes consume their exact Mana cost; Elven Trade also spends the runtime portal Mana cost."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "An $(thing)unsupported recipe$() shows a neutral message rather than guessing. Random, world-state-dependent, external-machine send-and-wait, Smithing Trim, arbitrary modded block axe actions, and brewing execution are not available. Supported crafts simulate every item, typed resource, catalyst, remainder, and output before one atomic commit."
+    }
+  ]
+}

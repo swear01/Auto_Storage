@@ -587,8 +587,8 @@ def main():
     members = {}
     for name, role in roles.items():
         category = "item" if name == "remote_terminal" else "block"
-        texture_id = f"magic_storage:{category}/{name}"
-        runtime = f"src/main/resources/assets/magic_storage/textures/{category}/{name}.png"
+        texture_id = f"auto_storage:{category}/{name}"
+        runtime = f"src/main/resources/assets/auto_storage/textures/{category}/{name}.png"
         source = member_paths[name]
         members[texture_id] = {
             "role": role,
@@ -602,7 +602,7 @@ def main():
         runtime_path = PROJECT / runtime
         runtime_path.parent.mkdir(parents=True, exist_ok=True)
         runtime_path.write_bytes(source.read_bytes())
-    control_runtime = PROJECT / "src/main/resources/assets/magic_storage/textures/gui/terminal_controls.png"
+    control_runtime = PROJECT / "src/main/resources/assets/auto_storage/textures/gui/terminal_controls.png"
     control_runtime.write_bytes(control_source.read_bytes())
     connected_names = [
         "storage_core",
@@ -624,7 +624,7 @@ def main():
         connected_paths.append(selected_connected)
         runtime = (
             "src/main/resources/resourcepacks/fusion_connected_casing/"
-            f"assets/magic_storage/textures/block/{name}_connected.png"
+            f"assets/auto_storage/textures/block/{name}_connected.png"
         )
         runtime_path = PROJECT / runtime
         runtime_path.write_bytes(selected_connected.read_bytes())
@@ -635,9 +635,9 @@ def main():
                 "layout": "pieced",
             }
         }, indent=2) + "\n")
-        texture_id = f"magic_storage:block/{name}_connected"
+        texture_id = f"auto_storage:block/{name}_connected"
         connected_members[texture_id] = {
-            "base": f"magic_storage:block/{name}",
+            "base": f"auto_storage:block/{name}",
             "runtime": runtime,
             "source": selected_connected.relative_to(ROOT).as_posix(),
             "metadata": metadata_path.relative_to(PROJECT).as_posix(),
@@ -684,7 +684,7 @@ def main():
         "members": members,
         "connected_textures": connected_members,
         "control_atlas": {
-            "runtime": "src/main/resources/assets/magic_storage/textures/gui/terminal_controls.png",
+            "runtime": "src/main/resources/assets/auto_storage/textures/gui/terminal_controls.png",
             "source": "selected/terminal_controls.png",
             "cell_size": 16,
             "icons": [

@@ -149,7 +149,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertEqual(19, len(crafting_manifest["baseline"]["stored_stacks"]))
             self.assertEqual(
                 "ironfurnaces:iron_furnace",
-                crafting_manifest["baseline"]["installed_stations"]["magic_storage:furnace"]["item"],
+                crafting_manifest["baseline"]["installed_stations"]["auto_storage:furnace"]["item"],
             )
             self.assertEqual(
                 32_000,
@@ -157,7 +157,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             )
             self.assertEqual(
                 1_561,
-                crafting_manifest["baseline"]["descriptor_consumables"]["magic_storage:axe"]["amount"],
+                crafting_manifest["baseline"]["descriptor_consumables"]["auto_storage:axe"]["amount"],
             )
             for chemical, amount in {
                 "oxygen": 5_000_000,
@@ -173,16 +173,16 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                     crafting_manifest["baseline"]["typed_resources"],
                 )
 
-            functions = crafting / "datapacks/magic_storage_gui_test/data/magic_storage_gui_test/function"
+            functions = crafting / "datapacks/auto_storage_gui_test/data/auto_storage_gui_test/function"
             player_ready = (functions / "player_ready.mcfunction").read_text()
             reset = (functions / "reset_from_hotbar.mcfunction").read_text()
             start = (functions / "view_crafting_terminal.mcfunction").read_text()
-            self.assertIn("function magic_storage_gui_test:reset_player", player_ready)
-            self.assertIn("function magic_storage_gui_test:reset_player", reset)
+            self.assertIn("function auto_storage_gui_test:reset_player", player_ready)
+            self.assertIn("function auto_storage_gui_test:reset_player", reset)
             self.assertIn("tp @s 1.5 80.0 4.5 facing 1.5 80.5 0.5", start)
             self.assertNotIn("view_storage_terminal", player_ready)
-            self.assertIn("function magic_storage_gui_test:view_crafting_terminal", player_ready)
-            self.assertNotIn("function magic_storage_gui_test:reset_from_hotbar", reset)
+            self.assertIn("function auto_storage_gui_test:view_crafting_terminal", player_ready)
+            self.assertNotIn("function auto_storage_gui_test:reset_from_hotbar", reset)
 
     def test_internal_world_build_apis_require_an_explicit_scenario(self):
         mod = self.load_script()
@@ -254,41 +254,41 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                     "installable_descriptors": "all",
                     "processing_count": 130,
                     "instant_count": 1,
-                    "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+                    "ready_log": "AS_GUI_RUNTIME_FIXTURE_READY",
                 },
                 manifest["baseline"]["runtime_fixture"],
             )
             self.assertEqual(
-                "MS_GUI_RUNTIME_FIXTURE_READY",
+                "AS_GUI_RUNTIME_FIXTURE_READY",
                 manifest["bootstrap"]["runtime_fixture_ready_log"],
             )
 
             functions = (
                 world_dir
-                / "datapacks/magic_storage_gui_test/data/magic_storage_gui_test/function"
+                / "datapacks/auto_storage_gui_test/data/auto_storage_gui_test/function"
             )
             setup = (functions / "setup.mcfunction").read_text()
             player_ready = (functions / "player_ready.mcfunction").read_text()
-            self.assertIn("magic_storage:storage_core{storageSchema:1,storageId:[I;", setup)
-            self.assertIn("setblock -1 80 0 magic_storage:storage_terminal", setup)
-            self.assertIn("setblock 1 80 0 magic_storage:crafting_terminal", setup)
-            self.assertIn("setblock 0 80 -1 magic_storage:creative_storage_unit", setup)
-            self.assertIn("magic_storage _gui_test_seed 0 80 0 64", setup)
+            self.assertIn("auto_storage:storage_core{storageSchema:1,storageId:[I;", setup)
+            self.assertIn("setblock -1 80 0 auto_storage:storage_terminal", setup)
+            self.assertIn("setblock 1 80 0 auto_storage:crafting_terminal", setup)
+            self.assertIn("setblock 0 80 -1 auto_storage:creative_storage_unit", setup)
+            self.assertIn("auto_storage _gui_test_seed 0 80 0 64", setup)
             self.assertIn(
-                "magic_storage _gui_test_warm_craftable 0 80 0",
+                "auto_storage _gui_test_warm_craftable 0 80 0",
                 player_ready,
             )
-            self.assertNotIn("magic_storage:storage_unit_t", setup)
-            self.assertNotIn("magic_storage:import_bus", setup)
-            self.assertNotIn("magic_storage:export_bus", setup)
+            self.assertNotIn("auto_storage:storage_unit_t", setup)
+            self.assertNotIn("auto_storage:import_bus", setup)
+            self.assertNotIn("auto_storage:export_bus", setup)
             reset_player = (functions / "reset_player.mcfunction").read_text()
             self.assertIn("clear @s", reset_player)
             self.assertIn(
-                "item replace entity @s hotbar.0 with magic_storage:storage_terminal 1",
+                "item replace entity @s hotbar.0 with auto_storage:storage_terminal 1",
                 reset_player,
             )
             self.assertIn(
-                "item replace entity @s hotbar.1 with magic_storage:crafting_terminal 1",
+                "item replace entity @s hotbar.1 with auto_storage:crafting_terminal 1",
                 reset_player,
             )
             self.assertTrue(
@@ -302,10 +302,10 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             "minecraft:spruce_log",
             "minecraft:stone",
             "minecraft:iron_ingot",
-            "magic_storage:storage_unit_t1",
-            "magic_storage:storage_unit_t2",
-            "magic_storage:storage_terminal",
-            "magic_storage:crafting_terminal",
+            "auto_storage:storage_unit_t1",
+            "auto_storage:storage_unit_t2",
+            "auto_storage:storage_terminal",
+            "auto_storage:crafting_terminal",
         )
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -319,7 +319,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 )
 
                 repository = mod._read_gzip_nbt(
-                    world_dir / "data/magic_storage_core_storages.dat"
+                    world_dir / "data/auto_storage_core_storages.dat"
                 )
                 repository_root = mod._require_compound(repository[2], "data")
                 storage_type, storages = mod._require_item(
@@ -415,12 +415,12 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
     def test_install_datapack_writes_void_lab_preload_and_fixed_navigation(self):
         mod = self.load_script()
         with tempfile.TemporaryDirectory() as tmp:
-            world_dir = Path(tmp) / "MagicStorageGuiTest"
+            world_dir = Path(tmp) / "AutoStorageGuiTest"
             world_dir.mkdir()
 
             manifest = mod.install_datapack(world_dir, "crafting-fuel-page")
 
-            pack_meta = json.loads((world_dir / "datapacks/magic_storage_gui_test/pack.mcmeta").read_text())
+            pack_meta = json.loads((world_dir / "datapacks/auto_storage_gui_test/pack.mcmeta").read_text())
             self.assertEqual(48, pack_meta["pack"]["pack_format"])
             self.assertEqual(5, manifest["schema_version"])
             self.assertEqual("crafting-fuel-page", manifest["scenario"])
@@ -430,7 +430,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertEqual([-1, 80, 0], manifest["targets"]["storage_terminal"]["block"])
             self.assertEqual([1, 80, 0], manifest["targets"]["crafting_terminal"]["block"])
             self.assertEqual(
-                "/function magic_storage_gui_test:view_storage_terminal",
+                "/function auto_storage_gui_test:view_storage_terminal",
                 manifest["commands"]["view_storage_terminal"],
             )
             self.assertEqual("view_storage_terminal", manifest["hotbar_views"]["1"]["function"])
@@ -451,7 +451,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                     "item": "ironfurnaces:iron_furnace",
                     "count": 3,
                 },
-                manifest["baseline"]["installed_stations"]["magic_storage:furnace"],
+                manifest["baseline"]["installed_stations"]["auto_storage:furnace"],
             )
             self.assertEqual(
                 {
@@ -459,34 +459,34 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                     "count": 2_147_483_647,
                 },
                 manifest["baseline"]["installed_stations"][
-                    "magic_storage:mekanism_crusher"
+                    "auto_storage:mekanism_crusher"
                 ],
             )
             self.assertTrue({
-                "magic_storage:mekanism_osmium_compressor",
-                "magic_storage:mekanism_purification_chamber",
-                "magic_storage:mekanism_chemical_injection_chamber",
-                "magic_storage:mekanism_metallurgic_infuser",
-                "magic_storage:mekanism_precision_sawmill",
-                "magic_storage:mekanism_rotary_condensentrator",
-                "magic_storage:mekanism_chemical_oxidizer",
-                "magic_storage:mekanism_chemical_infuser",
-                "magic_storage:mekanism_electrolytic_separator",
-                "magic_storage:mekanism_chemical_dissolution_chamber",
-                "magic_storage:mekanism_chemical_washer",
-                "magic_storage:mekanism_chemical_crystallizer",
-                "magic_storage:mekanism_isotopic_centrifuge",
-                "magic_storage:mekanism_antiprotonic_nucleosynthesizer",
-                "magic_storage:mekanism_pigment_extractor",
-                "magic_storage:mekanism_pigment_mixer",
-                "magic_storage:mekanism_painting_machine",
+                "auto_storage:mekanism_osmium_compressor",
+                "auto_storage:mekanism_purification_chamber",
+                "auto_storage:mekanism_chemical_injection_chamber",
+                "auto_storage:mekanism_metallurgic_infuser",
+                "auto_storage:mekanism_precision_sawmill",
+                "auto_storage:mekanism_rotary_condensentrator",
+                "auto_storage:mekanism_chemical_oxidizer",
+                "auto_storage:mekanism_chemical_infuser",
+                "auto_storage:mekanism_electrolytic_separator",
+                "auto_storage:mekanism_chemical_dissolution_chamber",
+                "auto_storage:mekanism_chemical_washer",
+                "auto_storage:mekanism_chemical_crystallizer",
+                "auto_storage:mekanism_isotopic_centrifuge",
+                "auto_storage:mekanism_antiprotonic_nucleosynthesizer",
+                "auto_storage:mekanism_pigment_extractor",
+                "auto_storage:mekanism_pigment_mixer",
+                "auto_storage:mekanism_painting_machine",
             }.issubset(manifest["baseline"]["installed_stations"]))
             self.assertTrue({
-                "magic_storage:botania_mana_pool",
-                "magic_storage:botania_runic_altar",
-                "magic_storage:botania_terrestrial_agglomeration_plate",
-                "magic_storage:botania_petal_apothecary",
-                "magic_storage:botania_elven_gateway",
+                "auto_storage:botania_mana_pool",
+                "auto_storage:botania_runic_altar",
+                "auto_storage:botania_terrestrial_agglomeration_plate",
+                "auto_storage:botania_petal_apothecary",
+                "auto_storage:botania_elven_gateway",
             }.issubset(manifest["baseline"]["installed_stations"]))
             self.assertEqual(
                 {
@@ -494,7 +494,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                     "count": 1,
                 },
                 manifest["baseline"]["installed_stations"][
-                    "magic_storage:botania_mana_pool"
+                    "auto_storage:botania_mana_pool"
                 ],
             )
             self.assertEqual(
@@ -503,7 +503,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                     "count": 1,
                 },
                 manifest["baseline"]["installed_stations"][
-                    "magic_storage:farmers_delight_cooking_pot"
+                    "auto_storage:farmers_delight_cooking_pot"
                 ],
             )
             self.assertEqual(
@@ -514,21 +514,21 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertEqual(9_600, manifest["baseline"]["energy"]["blaze_fuel"])
             self.assertEqual(
                 {"amount": 1_561, "infinite": False},
-                manifest["baseline"]["descriptor_consumables"]["magic_storage:axe"],
+                manifest["baseline"]["descriptor_consumables"]["auto_storage:axe"],
             )
             self.assertEqual(
                 10_000,
-                manifest["baseline"]["station_work"]["magic_storage:mekanism_crusher"],
+                manifest["baseline"]["station_work"]["auto_storage:mekanism_crusher"],
             )
             self.assertEqual(
                 {"item": "powah:furnator_starter", "count": 1},
-                manifest["baseline"]["installed_stations"]["magic_storage:powah_furnator"],
+                manifest["baseline"]["installed_stations"]["auto_storage:powah_furnator"],
             )
             self.assertEqual(
                 100_000,
-                manifest["baseline"]["station_work"]["magic_storage:powah_furnator"],
+                manifest["baseline"]["station_work"]["auto_storage:powah_furnator"],
             )
-            self.assertEqual("magic_storage:storage_terminal", manifest["player_kit"]["hotbar"]["1"]["item"])
+            self.assertEqual("auto_storage:storage_terminal", manifest["player_kit"]["hotbar"]["1"]["item"])
             self.assertEqual([], manifest["player_kit"]["inventory"])
             self.assertTrue(manifest["fullscreen_gate"]["required"])
             self.assertEqual("after_world_ready_before_first_gui_action", manifest["fullscreen_gate"]["when"])
@@ -543,41 +543,41 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertIn("macOS desktop display mode remains unchanged", manifest["fullscreen_gate"]["verify"])
             self.assertFalse(any("Computer Use" in check for check in manifest["fullscreen_gate"]["verify"]))
             self.assertEqual(
-                '"/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher" -l dev -w "MagicStorageGuiTest" -o MagicStorageBot',
+                '"/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher" -l dev -w "AutoStorageGuiTest" -o AutoStorageBot',
                 manifest["launch_command"],
             )
 
-            datapack = world_dir / "datapacks/magic_storage_gui_test"
+            datapack = world_dir / "datapacks/auto_storage_gui_test"
             self.assertTrue((datapack / "data/minecraft/tags/function/load.json").exists())
             self.assertTrue((datapack / "data/minecraft/tags/function/tick.json").exists())
-            setup = (datapack / "data/magic_storage_gui_test/function/setup.mcfunction").read_text()
+            setup = (datapack / "data/auto_storage_gui_test/function/setup.mcfunction").read_text()
             self.assertIn("fill -18 79 -12 18 79 12 minecraft:polished_blackstone_bricks outline", setup)
             self.assertIn("fill -17 79 -11 17 79 11 minecraft:smooth_stone", setup)
-            self.assertIn("setblock -1 80 0 magic_storage:storage_terminal", setup)
-            self.assertIn("setblock 1 80 0 magic_storage:crafting_terminal", setup)
-            self.assertIn("setblock 0 80 -1 magic_storage:creative_storage_unit", setup)
-            self.assertNotIn("magic_storage:import_bus", setup)
-            self.assertNotIn("magic_storage:export_bus", setup)
-            self.assertNotIn("magic_storage:storage_unit_t1", setup)
-            self.assertNotIn("magic_storage:storage_unit_t6", setup)
+            self.assertIn("setblock -1 80 0 auto_storage:storage_terminal", setup)
+            self.assertIn("setblock 1 80 0 auto_storage:crafting_terminal", setup)
+            self.assertIn("setblock 0 80 -1 auto_storage:creative_storage_unit", setup)
+            self.assertNotIn("auto_storage:import_bus", setup)
+            self.assertNotIn("auto_storage:export_bus", setup)
+            self.assertNotIn("auto_storage:storage_unit_t1", setup)
+            self.assertNotIn("auto_storage:storage_unit_t6", setup)
             self.assertIn(
-                "setblock 0 80 0 magic_storage:storage_core{storageSchema:1,storageId:[I;",
+                "setblock 0 80 0 auto_storage:storage_core{storageSchema:1,storageId:[I;",
                 setup,
             )
             self.assertNotIn("machines:{Items:", setup)
             self.assertNotIn("inventory:[", setup)
             self.assertNotIn("bottle_fuel", setup)
-            player_ready = (datapack / "data/magic_storage_gui_test/function/player_ready.mcfunction").read_text()
-            self.assertIn("function magic_storage_gui_test:reset_player", player_ready)
-            self.assertIn("function magic_storage_gui_test:view_crafting_terminal", player_ready)
-            reset_player = (datapack / "data/magic_storage_gui_test/function/reset_player.mcfunction").read_text()
-            self.assertIn("item replace entity @s hotbar.0 with magic_storage:storage_terminal 1", reset_player)
-            self.assertIn("item replace entity @s hotbar.1 with magic_storage:crafting_terminal 1", reset_player)
+            player_ready = (datapack / "data/auto_storage_gui_test/function/player_ready.mcfunction").read_text()
+            self.assertIn("function auto_storage_gui_test:reset_player", player_ready)
+            self.assertIn("function auto_storage_gui_test:view_crafting_terminal", player_ready)
+            reset_player = (datapack / "data/auto_storage_gui_test/function/reset_player.mcfunction").read_text()
+            self.assertIn("item replace entity @s hotbar.0 with auto_storage:storage_terminal 1", reset_player)
+            self.assertIn("item replace entity @s hotbar.1 with auto_storage:crafting_terminal 1", reset_player)
             self.assertNotIn("inventory.", reset_player)
             self.assertFalse(any(line.startswith("give @s") for line in reset_player.splitlines()))
 
             repository = mod._read_gzip_nbt(
-                world_dir / "data/magic_storage_core_storages.dat"
+                world_dir / "data/auto_storage_core_storages.dat"
             )
             repository_root = mod._require_compound(repository[2], "data")
             storage_type, storages = mod._require_item(
@@ -680,15 +680,15 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             }
             self.assertEqual(
                 "ironfurnaces:iron_furnace",
-                machine_items["magic_storage:furnace"],
+                machine_items["auto_storage:furnace"],
             )
             self.assertEqual(
                 "mekanism:ultimate_crushing_factory",
-                machine_items["magic_storage:mekanism_crusher"],
+                machine_items["auto_storage:mekanism_crusher"],
             )
             self.assertEqual(
                 2_147_483_647,
-                machine_counts["magic_storage:mekanism_crusher"],
+                machine_counts["auto_storage:mekanism_crusher"],
             )
             self.assertTrue(all(count == 1 for count in encoded_item_counts.values()))
             consumable_type, consumables = mod._require_item(
@@ -773,15 +773,15 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             }:
                 self.assertIn(item_id, stored_counts)
 
-            view = (datapack / "data/magic_storage_gui_test/function/view_storage_terminal.mcfunction").read_text()
+            view = (datapack / "data/auto_storage_gui_test/function/view_storage_terminal.mcfunction").read_text()
             self.assertIn("tp @s -0.5 80.0 4.5 facing -0.5 80.5 0.5", view)
             self.assertNotIn("sleep", view.lower())
-            hotbar = (datapack / "data/magic_storage_gui_test/function/hotbar_views.mcfunction").read_text()
+            hotbar = (datapack / "data/auto_storage_gui_test/function/hotbar_views.mcfunction").read_text()
             self.assertIn("SelectedItemSlot:0", hotbar)
-            self.assertIn("function magic_storage_gui_test:view_storage_terminal", hotbar)
-            self.assertNotIn("function magic_storage_gui_test:view_texture_gallery", hotbar)
-            self.assertNotIn("function magic_storage_gui_test:home", hotbar)
-            self.assertNotIn("function magic_storage_gui_test:reset_from_hotbar", hotbar)
+            self.assertIn("function auto_storage_gui_test:view_storage_terminal", hotbar)
+            self.assertNotIn("function auto_storage_gui_test:view_texture_gallery", hotbar)
+            self.assertNotIn("function auto_storage_gui_test:home", hotbar)
+            self.assertNotIn("function auto_storage_gui_test:reset_from_hotbar", hotbar)
 
             all_function_text = "\n".join(path.read_text() for path in datapack.rglob("*.mcfunction"))
             self.assertNotIn("command_block", all_function_text)
@@ -790,53 +790,53 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
     def test_crafting_fuel_page_preloads_audited_optional_mod_compatibility(self):
         mod = self.load_script()
         with tempfile.TemporaryDirectory() as tmp:
-            world_dir = Path(tmp) / "MagicStorageGuiTest"
+            world_dir = Path(tmp) / "AutoStorageGuiTest"
             world_dir.mkdir()
 
             manifest = mod.install_datapack(world_dir, "crafting-fuel-page")
             expected_stations = {
-                "magic_storage:modern_industrialization_assembler":
+                "auto_storage:modern_industrialization_assembler":
                     "modern_industrialization:assembler",
-                "magic_storage:modern_industrialization_centrifuge":
+                "auto_storage:modern_industrialization_centrifuge":
                     "modern_industrialization:centrifuge",
-                "magic_storage:modern_industrialization_chemical_reactor":
+                "auto_storage:modern_industrialization_chemical_reactor":
                     "modern_industrialization:chemical_reactor",
-                "magic_storage:modern_industrialization_compressor":
+                "auto_storage:modern_industrialization_compressor":
                     "modern_industrialization:bronze_compressor",
-                "magic_storage:modern_industrialization_cutting_machine":
+                "auto_storage:modern_industrialization_cutting_machine":
                     "modern_industrialization:bronze_cutting_machine",
-                "magic_storage:modern_industrialization_distillery":
+                "auto_storage:modern_industrialization_distillery":
                     "modern_industrialization:distillery",
-                "magic_storage:modern_industrialization_electrolyzer":
+                "auto_storage:modern_industrialization_electrolyzer":
                     "modern_industrialization:electrolyzer",
-                "magic_storage:modern_industrialization_furnace":
+                "auto_storage:modern_industrialization_furnace":
                     "modern_industrialization:bronze_furnace",
-                "magic_storage:modern_industrialization_macerator":
+                "auto_storage:modern_industrialization_macerator":
                     "modern_industrialization:bronze_macerator",
-                "magic_storage:modern_industrialization_mixer":
+                "auto_storage:modern_industrialization_mixer":
                     "modern_industrialization:bronze_mixer",
-                "magic_storage:modern_industrialization_packer":
+                "auto_storage:modern_industrialization_packer":
                     "modern_industrialization:steel_packer",
-                "magic_storage:modern_industrialization_polarizer":
+                "auto_storage:modern_industrialization_polarizer":
                     "modern_industrialization:polarizer",
-                "magic_storage:modern_industrialization_unpacker":
+                "auto_storage:modern_industrialization_unpacker":
                     "modern_industrialization:steel_unpacker",
-                "magic_storage:modern_industrialization_wiremill":
+                "auto_storage:modern_industrialization_wiremill":
                     "modern_industrialization:steel_wiremill",
-                "magic_storage:ars_nouveau_imbuement_chamber":
+                "auto_storage:ars_nouveau_imbuement_chamber":
                     "ars_nouveau:imbuement_chamber",
-                "magic_storage:ars_nouveau_enchanting_apparatus":
+                "auto_storage:ars_nouveau_enchanting_apparatus":
                     "ars_nouveau:enchanting_apparatus",
-                "magic_storage:powah_energizing": "powah:energizing_rod_starter",
-                "magic_storage:industrial_foregoing_dissolution_chamber":
+                "auto_storage:powah_energizing": "powah:energizing_rod_starter",
+                "auto_storage:industrial_foregoing_dissolution_chamber":
                     "industrialforegoing:dissolution_chamber",
-                "magic_storage:industrial_foregoing_material_stonework_factory":
+                "auto_storage:industrial_foregoing_material_stonework_factory":
                     "industrialforegoing:material_stonework_factory",
-                "magic_storage:create_milling": "create:millstone",
-                "magic_storage:create_crushing": "create:crushing_wheel",
-                "magic_storage:create_cutting": "create:mechanical_saw",
-                "magic_storage:create_filling": "create:spout",
-                "magic_storage:create_emptying": "create:item_drain",
+                "auto_storage:create_milling": "create:millstone",
+                "auto_storage:create_crushing": "create:crushing_wheel",
+                "auto_storage:create_cutting": "create:mechanical_saw",
+                "auto_storage:create_filling": "create:spout",
+                "auto_storage:create_emptying": "create:item_drain",
             }
             stations = manifest["baseline"]["installed_stations"]
             self.assertTrue(expected_stations.keys() <= stations.keys())
@@ -851,11 +851,11 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             ))
             self.assertEqual(
                 {"item": "extendedcrafting:ultimate_table", "count": 1},
-                stations["magic_storage:extended_crafting_table"],
+                stations["auto_storage:extended_crafting_table"],
             )
             self.assertFalse((
                 world_dir
-                / "datapacks/magic_storage_gui_test/data/magic_storage_gui_test/recipe/ultimate_grid.json"
+                / "datapacks/auto_storage_gui_test/data/auto_storage_gui_test/recipe/ultimate_grid.json"
             ).exists())
             singularities = manifest["baseline"]["stored_stacks"]
             self.assertEqual(19, len(singularities))
@@ -867,7 +867,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             ))
             tag_root = (
                 world_dir
-                / "datapacks/magic_storage_gui_test/data/c/tags/item/ingots"
+                / "datapacks/auto_storage_gui_test/data/c/tags/item/ingots"
             )
             expected_test_tags = {
                 "aluminum", "bronze", "electrum", "invar", "lead",
@@ -914,12 +914,12 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 for entry in manifest["baseline"]["typed_resources"]
             }
             for key in {
-                ("magic_storage:fluid", "minecraft:water"),
-                ("magic_storage:fluid", "minecraft:lava"),
-                ("magic_storage:fluid", "modern_industrialization:sugar_solution"),
-                ("magic_storage:fluid", "industrialforegoing:pink_slime"),
-                ("magic_storage:fluid", "create:honey"),
-                ("magic_storage:neoforge_energy", "neoforge:energy"),
+                ("auto_storage:fluid", "minecraft:water"),
+                ("auto_storage:fluid", "minecraft:lava"),
+                ("auto_storage:fluid", "modern_industrialization:sugar_solution"),
+                ("auto_storage:fluid", "industrialforegoing:pink_slime"),
+                ("auto_storage:fluid", "create:honey"),
+                ("auto_storage:neoforge_energy", "neoforge:energy"),
                 ("ars_nouveau:source", "ars_nouveau:source"),
                 ("mekanism:chemical", "mekanism:oxygen"),
                 ("mekanism:chemical", "mekanism:hydrogen"),
@@ -928,10 +928,10 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             }:
                 self.assertIn(key, resources)
                 self.assertGreater(resources[key], 0)
-            self.assertNotIn(("magic_storage:fluid", "evilcraft:blood"), resources)
+            self.assertNotIn(("auto_storage:fluid", "evilcraft:blood"), resources)
 
             repository = mod._read_gzip_nbt(
-                world_dir / "data/magic_storage_core_storages.dat"
+                world_dir / "data/auto_storage_core_storages.dat"
             )
             repository_root = mod._require_compound(repository[2], "data")
             storage_type, storages = mod._require_item(
@@ -969,23 +969,23 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             for scenario, required, forbidden in [
                 (
                     "terminal-left-rail",
-                    {"magic_storage:storage_core", "magic_storage:storage_terminal",
-                     "magic_storage:crafting_terminal", "magic_storage:creative_storage_unit"},
-                    {"magic_storage:import_bus", "magic_storage:export_bus", "magic_storage:storage_unit_t1"},
+                    {"auto_storage:storage_core", "auto_storage:storage_terminal",
+                     "auto_storage:crafting_terminal", "auto_storage:creative_storage_unit"},
+                    {"auto_storage:import_bus", "auto_storage:export_bus", "auto_storage:storage_unit_t1"},
                 ),
                 (
                     "bus-configuration",
-                    {"magic_storage:storage_core", "magic_storage:storage_unit_t1",
-                     "magic_storage:import_bus", "magic_storage:export_bus",
+                    {"auto_storage:storage_core", "auto_storage:storage_unit_t1",
+                     "auto_storage:import_bus", "auto_storage:export_bus",
                      "minecraft:barrel"},
-                    {"magic_storage:storage_terminal", "magic_storage:crafting_terminal",
-                     "magic_storage:creative_storage_unit"},
+                    {"auto_storage:storage_terminal", "auto_storage:crafting_terminal",
+                     "auto_storage:creative_storage_unit"},
                 ),
                 (
                     "patchouli-guide",
                     set(),
-                    {"magic_storage:storage_core", "magic_storage:storage_terminal",
-                     "magic_storage:crafting_terminal", "magic_storage:import_bus"},
+                    {"auto_storage:storage_core", "auto_storage:storage_terminal",
+                     "auto_storage:crafting_terminal", "auto_storage:import_bus"},
                 ),
             ]:
                 world_dir = root / scenario
@@ -993,7 +993,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 manifest = mod.install_datapack(world_dir, scenario)
                 setup = (
                     world_dir
-                    / "datapacks/magic_storage_gui_test/data/magic_storage_gui_test/function/setup.mcfunction"
+                    / "datapacks/auto_storage_gui_test/data/auto_storage_gui_test/function/setup.mcfunction"
                 ).read_text()
                 for block in required:
                     self.assertIn(block, setup)
@@ -1006,31 +1006,31 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
     def test_datapack_waits_three_ticks_and_reset_reuses_setup_without_looping(self):
         mod = self.load_script()
         with tempfile.TemporaryDirectory() as tmp:
-            world_dir = Path(tmp) / "MagicStorageGuiTest"
+            world_dir = Path(tmp) / "AutoStorageGuiTest"
             world_dir.mkdir()
             manifest = mod.install_datapack(world_dir, "bus-configuration")
-            datapack = world_dir / "datapacks/magic_storage_gui_test"
-            functions = datapack / "data/magic_storage_gui_test/function"
+            datapack = world_dir / "datapacks/auto_storage_gui_test"
+            functions = datapack / "data/auto_storage_gui_test/function"
 
             load_tag = json.loads((datapack / "data/minecraft/tags/function/load.json").read_text())
-            self.assertEqual(["magic_storage_gui_test:load"], load_tag["values"])
+            self.assertEqual(["auto_storage_gui_test:load"], load_tag["values"])
             load = (functions / "load.mcfunction").read_text()
             self.assertEqual(1, load.count("scoreboard objectives add ms_gui_timer dummy"))
-            self.assertIn("function magic_storage_gui_test:setup", load)
+            self.assertIn("function auto_storage_gui_test:setup", load)
             tick = (functions / "tick.mcfunction").read_text()
             self.assertIn("scoreboard players add @a[tag=!ms_gui_ready] ms_gui_timer 1", tick)
             self.assertIn("scores={ms_gui_timer=3..}", tick)
-            self.assertIn("function magic_storage_gui_test:player_ready", tick)
-            self.assertIn("function magic_storage_gui_test:hotbar_views", tick)
+            self.assertIn("function auto_storage_gui_test:player_ready", tick)
+            self.assertIn("function auto_storage_gui_test:hotbar_views", tick)
             setup = (functions / "setup.mcfunction").read_text()
             self.assertNotIn("player_ready", setup)
             reset = (functions / "reset_from_hotbar.mcfunction").read_text()
-            self.assertIn("function magic_storage_gui_test:setup", reset)
-            self.assertIn("function magic_storage_gui_test:reset_player", reset)
-            self.assertNotIn("function magic_storage_gui_test:player_ready", reset)
+            self.assertIn("function auto_storage_gui_test:setup", reset)
+            self.assertIn("function auto_storage_gui_test:reset_player", reset)
+            self.assertNotIn("function auto_storage_gui_test:player_ready", reset)
             player_ready = (functions / "player_ready.mcfunction").read_text()
             self.assertLess(
-                player_ready.index("function magic_storage_gui_test:prime_hotbar_latch"),
+                player_ready.index("function auto_storage_gui_test:prime_hotbar_latch"),
                 player_ready.index("tag @s add ms_gui_ready"),
             )
             prime = (functions / "prime_hotbar_latch.mcfunction").read_text()
@@ -1045,7 +1045,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             level_dat = Path(tmp) / "level.dat"
             level_dat.write_bytes(minimal_level_dat())
 
-            mod.update_level_dat(level_dat, "MagicStorageGuiTest", allow_commands=True)
+            mod.update_level_dat(level_dat, "AutoStorageGuiTest", allow_commands=True)
 
             self.assertEqual(
                 {
@@ -1071,7 +1071,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             level_dat.write_bytes(original)
 
             with self.assertRaisesRegex(ValueError, "WorldGenSettings"):
-                mod.update_level_dat(level_dat, "MagicStorageGuiTest", allow_commands=True)
+                mod.update_level_dat(level_dat, "AutoStorageGuiTest", allow_commands=True)
 
             self.assertEqual(original, level_dat.read_bytes())
 
@@ -1187,13 +1187,13 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 scenario_name="crafting-fuel-page",
                 display_mode_func=self.display_mode(mod),
             )
-            target = minecraft_dir / "saves" / "MagicStorageGuiTest"
+            target = minecraft_dir / "saves" / "AutoStorageGuiTest"
             self.assertEqual(str(target.resolve()), first["world_dir"])
-            self.assertTrue((target / ".magic_storage_gui_test_world").exists())
-            self.assertTrue((target / "datapacks/magic_storage_gui_test/pack.mcmeta").exists())
+            self.assertTrue((target / ".auto_storage_gui_test_world").exists())
+            self.assertTrue((target / "datapacks/auto_storage_gui_test/pack.mcmeta").exists())
             self.assertTrue((source / "level.dat").exists())
             self.assertEqual(
-                {"LevelName": "MagicStorageGuiTest", "allowCommands": 1},
+                {"LevelName": "AutoStorageGuiTest", "allowCommands": 1},
                 mod.read_level_dat_summary(target / "level.dat"),
             )
             self.assertEqual("minecraft:flat", first["world_generator"]["type"])
@@ -1250,7 +1250,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
                 display_mode_func=self.display_mode(mod),
             )
 
-            target = minecraft_dir / "saves" / "MagicStorageGuiTest"
+            target = minecraft_dir / "saves" / "AutoStorageGuiTest"
             for relative in directory_paths:
                 self.assertFalse((target / relative / "source-sentinel.txt").exists(), relative)
                 self.assertEqual(relative, (source / relative / "source-sentinel.txt").read_text())
@@ -1261,7 +1261,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             target_data = mod._data_compound(mod._read_gzip_nbt(target / "level.dat"))
             _, embedded_player = mod._find_compound_item(target_data, "Player")
             self.assertIsNone(embedded_player)
-            self.assertTrue((target / "datapacks/magic_storage_gui_test/pack.mcmeta").exists())
+            self.assertTrue((target / "datapacks/auto_storage_gui_test/pack.mcmeta").exists())
             self.assertEqual(list(expected_paths), manifest["stripped_template_paths"])
 
     def test_prepare_world_refuses_to_recreate_marked_target_when_open(self):
@@ -1269,12 +1269,12 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             minecraft_dir = Path(tmp) / "minecraft"
             source = minecraft_dir / "saves" / "New World"
-            target = minecraft_dir / "saves" / "MagicStorageGuiTest"
+            target = minecraft_dir / "saves" / "AutoStorageGuiTest"
             source.mkdir(parents=True)
             target.mkdir(parents=True)
             (source / "level.dat").write_bytes(minimal_level_dat())
-            (target / "level.dat").write_bytes(minimal_level_dat("MagicStorageGuiTest", 1))
-            (target / ".magic_storage_gui_test_world").write_text("generated")
+            (target / "level.dat").write_bytes(minimal_level_dat("AutoStorageGuiTest", 1))
+            (target / ".auto_storage_gui_test_world").write_text("generated")
             stale = target / "stale.txt"
             stale.write_text("keep")
             (minecraft_dir / "options.txt").write_text("fullscreen:true\n")
@@ -1337,12 +1337,12 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             minecraft_dir = Path(tmp) / "minecraft"
             source = minecraft_dir / "saves" / "New World"
-            target = minecraft_dir / "saves" / "MagicStorageGuiTest"
+            target = minecraft_dir / "saves" / "AutoStorageGuiTest"
             source.mkdir(parents=True)
             target.mkdir()
             (source / "level.dat").write_bytes(b"not gzip nbt")
             (target / mod.MARKER_FILE).write_text("generated")
-            (target / "level.dat").write_bytes(minimal_level_dat("MagicStorageGuiTest", 1))
+            (target / "level.dat").write_bytes(minimal_level_dat("AutoStorageGuiTest", 1))
             sentinel = target / "sentinel.txt"
             sentinel.write_text("keep")
             options = minecraft_dir / "options.txt"
@@ -1362,7 +1362,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             self.assertTrue(sentinel.exists())
             self.assertEqual("keep", sentinel.read_text())
             self.assertEqual(
-                {"LevelName": "MagicStorageGuiTest", "allowCommands": 1},
+                {"LevelName": "AutoStorageGuiTest", "allowCommands": 1},
                 mod.read_level_dat_summary(target / "level.dat"),
             )
             self.assertEqual("fullscreen:true\n", options.read_text())
@@ -1372,7 +1372,7 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             minecraft_dir = Path(tmp) / "minecraft"
             source = minecraft_dir / "saves" / "New World"
-            target = minecraft_dir / "saves" / "MagicStorageGuiTest"
+            target = minecraft_dir / "saves" / "AutoStorageGuiTest"
             source.mkdir(parents=True)
             target.mkdir()
             (source / "level.dat").write_bytes(minimal_level_dat())

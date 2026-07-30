@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["BIB","RUR","BIB"],"key":{"B":{"item":"minecraft:basalt"},"I":{"item":"minecraft:iron_ingot"},"R":{"item":"minecraft:redstone"},"U":{"item":"auto_storage:storage_unit_t1"}},"result":{"id":"auto_storage:storage_unit_t2"}}

@@ -22,14 +22,14 @@ class WrenchResourceTests(unittest.TestCase):
                     {"item": "minecraft:brush"},
                     {"item": "minecraft:tripwire_hook"},
                 ],
-                "result": {"id": "magic_storage:wrench"},
+                "result": {"id": "auto_storage:wrench"},
             },
-            self.read_json("data/magic_storage/recipe/wrench.json"),
+            self.read_json("data/auto_storage/recipe/wrench.json"),
         )
 
     def test_wrench_joins_common_interoperability_tag(self):
         self.assertEqual(
-            {"replace": False, "values": ["magic_storage:wrench"]},
+            {"replace": False, "values": ["auto_storage:wrench"]},
             self.read_json("data/c/tags/item/tools/wrench.json"),
         )
 
@@ -37,11 +37,11 @@ class WrenchResourceTests(unittest.TestCase):
         self.assertEqual(
             {
                 "parent": "minecraft:item/generated",
-                "textures": {"layer0": "magic_storage:item/wrench"},
+                "textures": {"layer0": "auto_storage:item/wrench"},
             },
-            self.read_json("assets/magic_storage/models/item/wrench.json"),
+            self.read_json("assets/auto_storage/models/item/wrench.json"),
         )
-        texture = RESOURCES / "assets/magic_storage/textures/item/wrench.png"
+        texture = RESOURCES / "assets/auto_storage/textures/item/wrench.png"
         self.assertTrue(texture.is_file(), f"missing {texture.relative_to(ROOT)}")
         with texture.open("rb") as stream:
             header = stream.read(24)
@@ -51,27 +51,27 @@ class WrenchResourceTests(unittest.TestCase):
         self.assertFalse(texture.with_suffix(".png.mcmeta").exists())
 
     def test_wrench_name_is_localized_with_language_parity(self):
-        english = self.read_json("assets/magic_storage/lang/en_us.json")
-        traditional_chinese = self.read_json("assets/magic_storage/lang/zh_tw.json")
-        key = "item.magic_storage.wrench"
+        english = self.read_json("assets/auto_storage/lang/en_us.json")
+        traditional_chinese = self.read_json("assets/auto_storage/lang/zh_tw.json")
+        key = "item.auto_storage.wrench"
         self.assertEqual("Wrench", english.get(key))
         self.assertEqual("扳手", traditional_chinese.get(key))
         self.assertEqual(set(english), set(traditional_chinese))
 
     def test_shared_hook_is_registered_and_uses_the_common_tag(self):
-        magic_storage = (
+        auto_storage = (
             ROOT
-            / "src/main/java/com/swearprom/magicstorage/magic_storage/MagicStorage.java"
+            / "src/main/java/com/swear/autostorage/AutoStorage.java"
         ).read_text()
         actions_path = (
             ROOT
-            / "src/main/java/com/swearprom/magicstorage/magic_storage/WrenchActions.java"
+            / "src/main/java/com/swear/autostorage/WrenchActions.java"
         )
-        self.assertIn('ITEMS.register("wrench"', magic_storage)
-        self.assertIn("output.accept(WRENCH.get())", magic_storage)
+        self.assertIn('ITEMS.register("wrench"', auto_storage)
+        self.assertIn("output.accept(WRENCH.get())", auto_storage)
         self.assertIn(
             "NeoForge.EVENT_BUS.addListener(WrenchActions::onRightClickBlock)",
-            magic_storage,
+            auto_storage,
         )
         self.assertTrue(actions_path.is_file(), f"missing {actions_path.relative_to(ROOT)}")
         actions = actions_path.read_text()

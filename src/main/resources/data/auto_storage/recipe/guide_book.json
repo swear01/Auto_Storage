@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:book" },
+    { "item": "minecraft:black_dye" },
+    { "item": "minecraft:copper_ingot" }
+  ],
+  "result": { "id": "auto_storage:guide_book" }
+}

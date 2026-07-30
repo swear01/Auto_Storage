@@ -67,7 +67,7 @@ def fetch_versions(minecraft_version: str) -> list[dict]:
     })
     request = Request(
         f"{VERSIONS_URL}?{query}",
-        headers={"User-Agent": "Magic-Storage-EMI-runtime-check"},
+        headers={"User-Agent": "Auto-Storage-EMI-runtime-check"},
     )
     with urlopen(request, timeout=30) as response:
         payload = json.load(response)

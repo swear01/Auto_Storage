@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "top": "magic_storage:block/import_bus_top",
-    "front": "magic_storage:block/import_bus_front",
-    "side": "magic_storage:block/import_bus_side"
-  }
-}

@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["OEO","RTR"," C "],"key":{"O":{"item":"minecraft:obsidian"},"E":{"item":"minecraft:ender_pearl"},"R":{"item":"minecraft:redstone"},"T":{"item":"auto_storage:crafting_terminal"},"C":{"item":"minecraft:compass"}},"result":{"id":"auto_storage:remote_terminal"}}

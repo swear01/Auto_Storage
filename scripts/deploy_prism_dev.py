@@ -77,8 +77,17 @@ def run_gradle_build(project_dir: Path, version: str) -> None:
     )
 
 
-def magic_storage_jars(mods_dir: Path) -> list[Path]:
-    return sorted(mods_dir.glob("magic_storage-*.jar"))
+def auto_storage_jars(mods_dir: Path) -> list[Path]:
+    return sorted(mods_dir.glob("auto_storage-*.jar"))
+
+
+def legacy_auto_storage_jars(mods_dir: Path) -> list[Path]:
+    legacy_basename = "magic" + "_storage"
+    return sorted(mods_dir.glob(f"{legacy_basename}-*.jar"))
+
+
+def managed_auto_storage_jars(mods_dir: Path) -> list[Path]:
+    return sorted({*auto_storage_jars(mods_dir), *legacy_auto_storage_jars(mods_dir)})
 
 
 def fusion_jars(mods_dir: Path) -> list[Path]:
@@ -240,7 +249,7 @@ def download_url(url: str, destination: Path) -> None:
 def create_backup_plan(jars: list[Path], prism_minecraft_dir: Path) -> list[Path]:
     if not jars:
         return []
-    backup_dir = prism_minecraft_dir / "magic_storage_backups" / datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup_dir = prism_minecraft_dir / "auto_storage_backups" / datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_dir.mkdir(parents=True, exist_ok=False)
     return [backup_dir / jar.name for jar in jars]
 
@@ -282,10 +291,6 @@ def backup_existing_jars(
     return backups
 
 
-def backup_existing_magic_jars(mods_dir: Path, prism_minecraft_dir: Path) -> list[Path]:
-    return backup_existing_jars(magic_storage_jars(mods_dir), prism_minecraft_dir)
-
-
 def deploy(
     project_dir: Path,
     prism_minecraft_dir: Path = DEFAULT_PRISM_MINECRAFT_DIR,
@@ -297,7 +302,7 @@ def deploy(
     mods_dir = prism_minecraft_dir / "mods"
     if not mods_dir.is_dir():
         raise RuntimeError(f"Prism dev mods directory not found: {mods_dir}")
-    original_jar_paths = set(magic_storage_jars(mods_dir))
+    original_jar_paths = set(managed_auto_storage_jars(mods_dir))
     original_fusion_paths = set(fusion_jars(mods_dir))
     original_support_paths = {
         *jei_jars(mods_dir),
@@ -318,10 +323,10 @@ def deploy(
     support_stagings = []
     try:
         version = bump_patch_version(properties_path)
-        destination = mods_dir / f"magic_storage-{version}.jar"
+        destination = mods_dir / f"auto_storage-{version}.jar"
         build_runner(project_dir, version)
 
-        source_jar = project_dir / "build" / "libs" / f"magic_storage-{version}.jar"
+        source_jar = project_dir / "build" / "libs" / f"auto_storage-{version}.jar"
         if not source_jar.is_file():
             raise RuntimeError(f"Built jar not found: {source_jar}")
         support_sources = [
@@ -368,13 +373,13 @@ def deploy(
                     f"Fusion SHA-512 mismatch: expected {FUSION_SHA512}, got {actual_fusion_sha512}"
                 )
 
-        magic_to_backup = magic_storage_jars(mods_dir)
+        project_jars_to_backup = managed_auto_storage_jars(mods_dir)
         fusion_to_backup = fusion_jars(mods_dir) if fusion_staging is not None else []
         support_to_backup = [*jei_jars(mods_dir), *support_jars(mods_dir)]
-        jars_to_backup = [*magic_to_backup, *fusion_to_backup, *support_to_backup]
+        jars_to_backup = [*project_jars_to_backup, *fusion_to_backup, *support_to_backup]
         all_backups = create_backup_plan(jars_to_backup, prism_minecraft_dir)
-        backups = all_backups[:len(magic_to_backup)]
-        fusion_start = len(magic_to_backup)
+        backups = all_backups[:len(project_jars_to_backup)]
+        fusion_start = len(project_jars_to_backup)
         support_start = fusion_start + len(fusion_to_backup)
         fusion_backups = all_backups[fusion_start:support_start]
         support_backups = all_backups[support_start:]
@@ -390,10 +395,14 @@ def deploy(
             support_staging.replace(support_destination)
         support_stagings = []
 
-        jars = magic_storage_jars(mods_dir)
+        jars = auto_storage_jars(mods_dir)
         if jars != [destination]:
             names = ", ".join(str(p) for p in jars)
             raise RuntimeError(f"Expected exactly one Auto Storage jar in {mods_dir}, found: {names}")
+        legacy_jars = legacy_auto_storage_jars(mods_dir)
+        if legacy_jars:
+            names = ", ".join(str(path) for path in legacy_jars)
+            raise RuntimeError(f"Legacy Auto Storage jars remain in {mods_dir}: {names}")
         installed_fusion = fusion_jars(mods_dir)
         if installed_fusion != [fusion_destination]:
             names = ", ".join(str(path) for path in installed_fusion)

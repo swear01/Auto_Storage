@@ -182,10 +182,15 @@ jobs:
       - name: Generate release notes
         run: |
           mkdir -p build
+          VERSION="${{ steps.release-meta.outputs.version }}"
+          RELEASE_NOTES_FILE="docs/release-notes/${VERSION}.md"
+          test -f "$RELEASE_NOTES_FILE"
           TAG_COMMIT="$(git rev-list -n 1 "$GITHUB_REF_NAME")"
           PREVIOUS_TAG="$(git describe --tags --abbrev=0 "${TAG_COMMIT}^" 2>/dev/null || true)"
           {
             echo "## Auto Storage ${GITHUB_REF_NAME}"
+            echo
+            cat "$RELEASE_NOTES_FILE"
             echo
             if [ -n "$PREVIOUS_TAG" ]; then
               echo "Changes since ${PREVIOUS_TAG}:"
@@ -200,7 +205,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: magic-storage-release-logs
+          name: auto-storage-release-logs
           path: |
             build/ci-logs/**
             run/logs/**
@@ -220,7 +225,7 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: ${{ vars.CURSEFORGE_PROJECT_ID }}
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          files: build/libs/magic_storage-${{ steps.release-meta.outputs.version }}.jar
+          files: build/libs/auto_storage-${{ steps.release-meta.outputs.version }}.jar
           name: Auto Storage ${{ steps.release-meta.outputs.version }} Alpha
           version: ${{ steps.release-meta.outputs.version }}
           version-type: alpha

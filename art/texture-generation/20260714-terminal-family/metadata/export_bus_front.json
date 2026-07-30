@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061727Z",
   "type": "block",
-  "subject": "Magic Storage outward export bus face",
+  "subject": "Auto Storage outward export bus face",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

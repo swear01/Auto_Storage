@@ -25,17 +25,17 @@ class SetupPrismComputerUseWrapperTests(unittest.TestCase):
             instance_dir.mkdir(parents=True)
             cfg = instance_dir / "instance.cfg"
             cfg.write_text("InstanceType=OneSix\nname=dev\nOverrideCommands=false\n")
-            app_path = root / "MagicStorageMinecraftCU.app"
-            wrapper_path = root / "magic_storage_minecraft_cu_wrapper.sh"
+            app_path = root / "AutoStorageMinecraftCU.app"
+            wrapper_path = root / "auto_storage_minecraft_cu_wrapper.sh"
 
             result = mod.setup(instance_dir=instance_dir, app_path=app_path, wrapper_path=wrapper_path)
 
-            self.assertEqual("run.hapi.magicstorage.minecraftcu", result.bundle_id)
+            self.assertEqual("run.hapi.autostorage.minecraftcu", result.bundle_id)
             self.assertTrue(result.app_executable.exists())
             self.assertTrue(result.wrapper_path.exists())
             self.assertTrue(result.app_executable.stat().st_mode & 0o111)
             self.assertTrue(result.wrapper_path.stat().st_mode & 0o111)
-            self.assertIn("run.hapi.magicstorage.minecraftcu", (app_path / "Contents/Info.plist").read_text())
+            self.assertIn("run.hapi.autostorage.minecraftcu", (app_path / "Contents/Info.plist").read_text())
             self.assertIn("--mscu-stdin", result.app_executable.read_text())
             self.assertIn("exec \"$@\" < \"$stdin_path\"", result.app_executable.read_text())
             self.assertIn("mkfifo", result.wrapper_path.read_text())
@@ -54,8 +54,8 @@ class SetupPrismComputerUseWrapperTests(unittest.TestCase):
             instance_dir = root / "instances" / "dev"
             instance_dir.mkdir(parents=True)
             cfg = instance_dir / "instance.cfg"
-            wrapper_path = root / "magic_storage_minecraft_cu_wrapper.sh"
-            app_path = root / "MagicStorageMinecraftCU.app"
+            wrapper_path = root / "auto_storage_minecraft_cu_wrapper.sh"
+            app_path = root / "AutoStorageMinecraftCU.app"
             cfg.write_text(f"InstanceType=OneSix\nWrapperCommand={wrapper_path}\nOverrideCommands=true\nJavaPath=/tmp/java\n")
 
             first = mod.setup(instance_dir=instance_dir, app_path=app_path, wrapper_path=wrapper_path)
@@ -70,8 +70,8 @@ class SetupPrismComputerUseWrapperTests(unittest.TestCase):
 
     def test_generated_shell_scripts_quote_custom_paths_with_spaces(self):
         mod = self.load_script()
-        app_path = Path("/tmp/Magic Storage Minecraft CU.app")
-        log_path = Path("/tmp/magic storage minecraft cu.log")
+        app_path = Path("/tmp/Auto Storage Minecraft CU.app")
+        log_path = Path("/tmp/auto storage minecraft cu.log")
 
         self.assertIn(f"APP={shlex.quote(str(app_path))}", mod.wrapper_text(app_path, log_path))
         self.assertIn(f"LOG={shlex.quote(str(log_path))}", mod.wrapper_text(app_path, log_path))

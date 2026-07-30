@@ -1,0 +1,63 @@
+{
+  "loader": "fusion:model",
+  "type": "connecting",
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "auto_storage:block/import_bus_top_connected",
+    "front": "auto_storage:block/import_bus_front",
+    "side": "auto_storage:block/import_bus_side_connected"
+  },
+  "connections": {
+    "top": [
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_core"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_unit_t1"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_unit_t2"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_unit_t3"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_unit_t4"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_unit_t5"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_unit_t6"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:creative_storage_unit"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:storage_terminal"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:crafting_terminal"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:import_bus"
+      },
+      {
+        "type": "match_block",
+        "block": "auto_storage:export_bus"
+      }
+    ],
+    "side": "#top"
+  }
+}

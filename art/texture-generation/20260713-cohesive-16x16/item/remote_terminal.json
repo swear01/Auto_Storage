@@ -22,7 +22,7 @@
     "bypass_prompt_expansion": true,
     "seed": 64060
   },
-  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/magic_storage/textures/item/remote_terminal.png",
+  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/auto_storage/textures/item/remote_terminal.png",
   "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/art/texture-generation/20260713-cohesive-16x16/item/remote_terminal.preview.png",
   "raw_png": null,
   "selected_candidate": "remote_terminal_02"

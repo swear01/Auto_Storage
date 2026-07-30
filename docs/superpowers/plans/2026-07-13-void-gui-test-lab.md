@@ -36,7 +36,7 @@ def test_update_level_dat_rewrites_overworld_to_true_void_flat_generator(self):
     with tempfile.TemporaryDirectory() as tmp:
         level_dat = Path(tmp) / "level.dat"
         level_dat.write_bytes(minimal_level_dat())
-        mod.update_level_dat(level_dat, "MagicStorageGuiTest", allow_commands=True)
+        mod.update_level_dat(level_dat, "AutoStorageGuiTest", allow_commands=True)
         self.assertEqual(
             {
                 "type": "minecraft:flat",
@@ -155,9 +155,9 @@ Add `LAB`, `TARGETS`, `GALLERY`, `BASELINE`, and `PLAYER_KIT` constants. The ori
 ```mcfunction
 fill -18 79 -12 18 79 12 minecraft:polished_blackstone_bricks outline
 fill -17 79 -11 17 79 11 minecraft:smooth_stone
-setblock -1 80 -1 magic_storage:import_bus[facing=west]
-setblock 1 80 -1 magic_storage:export_bus[facing=east]
-setblock 0 80 0 magic_storage:storage_core
+setblock -1 80 -1 auto_storage:import_bus[facing=west]
+setblock 1 80 -1 auto_storage:export_bus[facing=east]
+setblock 0 80 0 auto_storage:storage_core
 ```
 
 `BASELINE` now records empty stored items/stations and zero energy. Station pairs, ingredients, fuels, and axes come from `PLAYER_KIT` and are exercised through normal terminal actions; no inline inventory/machine/energy NBT is written.
@@ -189,13 +189,13 @@ Use:
 ```mcfunction
 # load
 scoreboard objectives add ms_gui_timer dummy
-function magic_storage_gui_test:setup
+function auto_storage_gui_test:setup
 
 # tick
 execute as @a[tag=!ms_gui_ready] unless score @s ms_gui_timer matches 0.. run scoreboard players set @s ms_gui_timer 0
 scoreboard players add @a[tag=!ms_gui_ready] ms_gui_timer 1
-execute as @a[tag=!ms_gui_ready,scores={ms_gui_timer=3..}] run function magic_storage_gui_test:player_ready
-execute as @a[tag=ms_gui_ready] run function magic_storage_gui_test:hotbar_views
+execute as @a[tag=!ms_gui_ready,scores={ms_gui_timer=3..}] run function auto_storage_gui_test:player_ready
+execute as @a[tag=ms_gui_ready] run function auto_storage_gui_test:hotbar_views
 ```
 
 Generate `prime_hotbar_latch` from `HOTBAR_VIEWS` and call it before adding `ms_gui_ready`.
@@ -237,7 +237,7 @@ Expected: all tests pass with an increased count.
 ### Task 6: Full verification and real-client replacement
 
 **Files:**
-- Runtime only: Prism `MagicStorageGuiTest` and `build/gui-runs/`
+- Runtime only: Prism `AutoStorageGuiTest` and `build/gui-runs/`
 
 - [x] **Step 1: Run project gates**
 
@@ -266,7 +266,7 @@ Run `prepare_prism_gui_world.py`, verify the manifest's void summary, confirm ta
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_prism_gui_session.py --scenario crafting-fuel-page
 ```
 
-Wait for current-run SelfTest, Patchouli 17 entries, and `MS_GUI_TEST_READY`; reject every non-whitelisted error. Keep Minecraft open for the user and report the new checklist path. GUI remains unverified until the user passes fullscreen and gives a verdict.
+Wait for current-run SelfTest, Patchouli 17 entries, and `AS_GUI_TEST_READY`; reject every non-whitelisted error. Keep Minecraft open for the user and report the new checklist path. GUI remains unverified until the user passes fullscreen and gives a verdict.
 
 - [x] **Step 5: Commit implementation and docs**
 

@@ -1,0 +1,6 @@
+{
+  "name": "Automation and Remote Access",
+  "description": "Move items automatically and reach a loaded network from afar.",
+  "icon": "auto_storage:import_bus",
+  "sortnum": 4
+}

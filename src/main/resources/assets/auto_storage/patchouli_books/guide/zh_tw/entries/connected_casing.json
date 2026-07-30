@@ -1,0 +1,20 @@
+{
+  "name": "連接外殼",
+  "category": "auto_storage:storage_system",
+  "icon": "auto_storage:storage_unit_t3",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "相鄰的 Auto Storage 方塊會共用連接外框，中央符號仍各自分開，因此核心、單元、終端機，以及匯流排向內或向外的正面都容易辨認。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "連接外殼是$(thing)適用 Minecraft 1.21.1 的 Fusion 1.2.12$()提供的可選視覺效果。未安裝時，所有 Auto Storage 方塊仍以普通外殼正常運作；安裝 Fusion 後會自動啟用連接邊緣。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "物品欄圖示仍是單一方塊外觀。外殼線條只表示實際相鄰，不代表剩餘容量、核心是否載入或網路是否衝突；這些狀態請從終端機與疑難排解頁確認。"
+    }
+  ]
+}

@@ -121,7 +121,7 @@ def fetch_versions(minecraft_version: str, opener=urlopen) -> list[dict]:
     })
     request = Request(
         f"{VERSIONS_URL}?{query}",
-        headers={"User-Agent": "Magic-Storage-EMI-compatibility-check"},
+        headers={"User-Agent": "Auto-Storage-EMI-compatibility-check"},
     )
     with opener(request, timeout=30) as response:
         payload = json.loads(response.read())

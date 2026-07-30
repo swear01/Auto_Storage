@@ -1,1 +1,0 @@
-{"type":"minecraft:crafting_shaped","pattern":["RGR","CSC","RTR"],"key":{"R":{"item":"minecraft:redstone"},"G":{"item":"minecraft:gold_ingot"},"C":{"item":"minecraft:copper_ingot"},"S":{"item":"magic_storage:storage_terminal"},"T":{"item":"minecraft:crafting_table"}},"result":{"id":"magic_storage:crafting_terminal"}}

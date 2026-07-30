@@ -85,7 +85,7 @@ class DeployPrismDevTests(unittest.TestCase):
             else:
                 deploy_prism_dev.FUSION_SHA512 = original_hash
 
-    def test_deploy_bumps_patch_builds_new_jar_and_leaves_one_magic_storage_jar(self):
+    def test_deploy_bumps_patch_builds_new_jar_and_leaves_one_auto_storage_jar(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             project = root / "project"
@@ -95,25 +95,30 @@ class DeployPrismDevTests(unittest.TestCase):
             project.mkdir()
             mods.mkdir(parents=True)
             build_libs.mkdir(parents=True)
-            (project / "gradle.properties").write_text("mod_id=magic_storage\nmod_version=0.1.0\n")
-            (mods / "magic_storage-0.1.0.jar").write_text("old")
+            (project / "gradle.properties").write_text("mod_id=auto_storage\nmod_version=0.1.0\n")
+            (mods / "auto_storage-0.1.0.jar").write_text("old")
+            legacy_jar = mods / (("magic" + "_storage") + "-0.2.0.jar")
+            legacy_jar.write_text("legacy")
             (mods / "Patchouli.jar").write_text("patchouli")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                self.assertEqual((project_dir / "gradle.properties").read_text(), "mod_id=magic_storage\nmod_version=0.1.1\n")
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new")
+                self.assertEqual((project_dir / "gradle.properties").read_text(), "mod_id=auto_storage\nmod_version=0.1.1\n")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new")
 
             result = self.deploy(project, prism_mc, fake_build)
 
             self.assertEqual(result.version, "0.1.1")
-            self.assertEqual((project / "gradle.properties").read_text(), "mod_id=magic_storage\nmod_version=0.1.1\n")
-            self.assertEqual((mods / "magic_storage-0.1.1.jar").read_text(), "new")
-            self.assertEqual(sorted(p.name for p in mods.glob("magic_storage-*.jar")), ["magic_storage-0.1.1.jar"])
+            self.assertEqual((project / "gradle.properties").read_text(), "mod_id=auto_storage\nmod_version=0.1.1\n")
+            self.assertEqual((mods / "auto_storage-0.1.1.jar").read_text(), "new")
+            self.assertEqual(sorted(p.name for p in mods.glob("auto_storage-*.jar")), ["auto_storage-0.1.1.jar"])
             self.assertEqual((mods / "Patchouli.jar").read_text(), "patchouli")
-            self.assertEqual(len(result.backups), 1)
-            self.assertFalse((mods / "magic_storage-0.1.0.jar").exists())
-            self.assertTrue(result.backups[0].exists())
-            self.assertEqual(result.backups[0].read_text(), "old")
+            self.assertEqual(len(result.backups), 2)
+            self.assertFalse((mods / "auto_storage-0.1.0.jar").exists())
+            self.assertFalse(legacy_jar.exists())
+            self.assertEqual(
+                {"auto_storage-0.1.0.jar": "old", legacy_jar.name: "legacy"},
+                {path.name: path.read_text() for path in result.backups},
+            )
             self.assertEqual(
                 self.FUSION_BYTES,
                 (mods / deploy_prism_dev.FUSION_FILENAME).read_bytes(),
@@ -155,8 +160,8 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            (project / "gradle.properties").write_text("mod_id=magic_storage\nmod_version=0.1.0\n")
-            (mods / "magic_storage-0.1.0.jar").write_text("old")
+            (project / "gradle.properties").write_text("mod_id=auto_storage\nmod_version=0.1.0\n")
+            (mods / "auto_storage-0.1.0.jar").write_text("old")
             (mods / "iron-furnaces-old.jar").write_text("old iron")
             (mods / "farmers-delight-old.jar").write_text("old farmers")
             (mods / "jei-old.jar").write_text("old jei")
@@ -169,7 +174,7 @@ class DeployPrismDevTests(unittest.TestCase):
             unrelated.write_text("keep")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new")
                 self.stage_support(project_dir)
 
             result = self.deploy(project, prism_mc, fake_build)
@@ -222,12 +227,12 @@ class DeployPrismDevTests(unittest.TestCase):
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
             (project / "gradle.properties").write_text(
-                "mod_id=magic_storage\nmod_version=0.1.0\n"
+                "mod_id=auto_storage\nmod_version=0.1.0\n"
             )
-            (mods / "magic_storage-0.1.0.jar").write_text("old")
+            (mods / "auto_storage-0.1.0.jar").write_text("old")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text(
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text(
                     "new"
                 )
 
@@ -254,10 +259,10 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             (project / "gradle.properties").write_text(original_properties)
-            old_magic = mods / "magic_storage-0.1.0.jar"
-            old_magic.write_text("old magic")
+            old_auto_storage = mods / "auto_storage-0.1.0.jar"
+            old_auto_storage.write_text("old auto storage")
             old_support = {}
             for name in self.BATCHED_SUPPORT:
                 active = mods / name.replace("-gui-test.jar", "-old.jar")
@@ -265,7 +270,7 @@ class DeployPrismDevTests(unittest.TestCase):
                 old_support[active] = active.read_bytes()
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text(
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text(
                     "new"
                 )
 
@@ -286,7 +291,7 @@ class DeployPrismDevTests(unittest.TestCase):
                 deploy_prism_dev.sha512 = original_sha512
 
             self.assertEqual(original_properties, (project / "gradle.properties").read_text())
-            self.assertEqual("old magic", old_magic.read_text())
+            self.assertEqual("old auto storage", old_auto_storage.read_text())
             self.assertEqual(old_support, {path: path.read_bytes() for path in old_support})
             self.assertFalse(any((mods / name).exists() for name in self.BATCHED_SUPPORT))
             self.assertEqual([], list(mods.glob(".*.staging")))
@@ -299,9 +304,9 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             project.mkdir()
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             (project / "gradle.properties").write_text(original_properties)
-            (mods / "magic_storage-0.1.0.jar").write_text("old")
+            (mods / "auto_storage-0.1.0.jar").write_text("old")
 
             def failing_build(project_dir: Path, version: str) -> None:
                 raise RuntimeError("build failed")
@@ -310,7 +315,7 @@ class DeployPrismDevTests(unittest.TestCase):
                 self.deploy(project, prism_mc, failing_build)
 
             self.assertEqual((project / "gradle.properties").read_text(), original_properties)
-            self.assertEqual((mods / "magic_storage-0.1.0.jar").read_text(), "old")
+            self.assertEqual((mods / "auto_storage-0.1.0.jar").read_text(), "old")
 
     def test_deploy_copy_failure_restores_version_and_active_jar(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -320,13 +325,13 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             (project / "gradle.properties").write_text(original_properties)
-            old_jar = mods / "magic_storage-0.1.0.jar"
+            old_jar = mods / "auto_storage-0.1.0.jar"
             old_jar.write_text("old")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new")
 
             original_copy2 = deploy_prism_dev.shutil.copy2
             deploy_prism_dev.shutil.copy2 = lambda source, destination: (_ for _ in ()).throw(OSError("copy failed"))
@@ -338,7 +343,7 @@ class DeployPrismDevTests(unittest.TestCase):
 
             self.assertEqual(original_properties, (project / "gradle.properties").read_text())
             self.assertEqual("old", old_jar.read_text())
-            self.assertEqual([old_jar], deploy_prism_dev.magic_storage_jars(mods))
+            self.assertEqual([old_jar], deploy_prism_dev.auto_storage_jars(mods))
 
     def test_deploy_rolls_back_when_bump_is_interrupted_after_writing_properties(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -348,15 +353,15 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             project.mkdir()
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             properties = project / "gradle.properties"
             properties.write_text(original_properties)
-            old_jar = mods / "magic_storage-0.1.0.jar"
+            old_jar = mods / "auto_storage-0.1.0.jar"
             old_jar.write_text("old")
             original_bump = deploy_prism_dev.bump_patch_version
 
             def interrupted_bump(properties_path: Path) -> str:
-                properties_path.write_text("mod_id=magic_storage\nmod_version=0.1.1\n")
+                properties_path.write_text("mod_id=auto_storage\nmod_version=0.1.1\n")
                 raise KeyboardInterrupt("interrupted after bump")
 
             deploy_prism_dev.bump_patch_version = interrupted_bump
@@ -368,7 +373,7 @@ class DeployPrismDevTests(unittest.TestCase):
 
             self.assertEqual(original_properties, properties.read_text())
             self.assertEqual("old", old_jar.read_text())
-            self.assertEqual([old_jar], deploy_prism_dev.magic_storage_jars(mods))
+            self.assertEqual([old_jar], deploy_prism_dev.auto_storage_jars(mods))
 
     def test_deploy_rolls_back_version_and_active_jar_on_keyboard_interrupt_after_swap(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -378,16 +383,16 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             properties = project / "gradle.properties"
             properties.write_text(original_properties)
-            old_jar = mods / "magic_storage-0.1.0.jar"
+            old_jar = mods / "auto_storage-0.1.0.jar"
             old_jar.write_text("old")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new")
 
-            original_jar_finder = deploy_prism_dev.magic_storage_jars
+            original_jar_finder = deploy_prism_dev.auto_storage_jars
             calls = 0
 
             def interrupted_jar_finder(mods_dir: Path) -> list[Path]:
@@ -397,16 +402,16 @@ class DeployPrismDevTests(unittest.TestCase):
                     raise KeyboardInterrupt("interrupted after swap")
                 return original_jar_finder(mods_dir)
 
-            deploy_prism_dev.magic_storage_jars = interrupted_jar_finder
+            deploy_prism_dev.auto_storage_jars = interrupted_jar_finder
             try:
                 with self.assertRaisesRegex(KeyboardInterrupt, "interrupted after swap"):
                     self.deploy(project, prism_mc, fake_build)
             finally:
-                deploy_prism_dev.magic_storage_jars = original_jar_finder
+                deploy_prism_dev.auto_storage_jars = original_jar_finder
 
             self.assertEqual(original_properties, properties.read_text())
             self.assertEqual("old", old_jar.read_text())
-            self.assertEqual([old_jar], deploy_prism_dev.magic_storage_jars(mods))
+            self.assertEqual([old_jar], deploy_prism_dev.auto_storage_jars(mods))
 
     def test_deploy_rolls_back_partial_backup_on_base_exception(self):
         class DeploymentAbort(BaseException):
@@ -419,18 +424,18 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             properties = project / "gradle.properties"
             properties.write_text(original_properties)
             old_jars = [
-                mods / "magic_storage-0.0.9.jar",
-                mods / "magic_storage-0.1.0.jar",
+                mods / "auto_storage-0.0.9.jar",
+                mods / "auto_storage-0.1.0.jar",
             ]
             for index, jar in enumerate(old_jars):
                 jar.write_text(f"old-{index}")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new")
 
             original_move = deploy_prism_dev.shutil.move
             calls = 0
@@ -451,7 +456,7 @@ class DeployPrismDevTests(unittest.TestCase):
 
             self.assertEqual(original_properties, properties.read_text())
             self.assertEqual(["old-0", "old-1"], [jar.read_text() for jar in old_jars])
-            self.assertEqual(old_jars, deploy_prism_dev.magic_storage_jars(mods))
+            self.assertEqual(old_jars, deploy_prism_dev.auto_storage_jars(mods))
 
     def test_fusion_artifact_pin_matches_the_approved_official_release(self):
         self.assertEqual("1.2.12", deploy_prism_dev.FUSION_VERSION)
@@ -484,15 +489,15 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             (project / "gradle.properties").write_text(original_properties)
-            old_magic = mods / "magic_storage-0.1.0.jar"
+            old_auto_storage = mods / "auto_storage-0.1.0.jar"
             old_fusion = mods / "fusion-1.2.11-neoforge-mc1.21.1.jar"
-            old_magic.write_text("old magic")
+            old_auto_storage.write_text("old auto storage")
             old_fusion.write_text("old fusion")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new")
                 self.stage_support(project_dir)
 
             def tampered_download(url: str, destination: Path) -> None:
@@ -507,11 +512,11 @@ class DeployPrismDevTests(unittest.TestCase):
                 )
 
             self.assertEqual(original_properties, (project / "gradle.properties").read_text())
-            self.assertTrue(old_magic.is_file(), "old Magic Storage jar was stranded outside mods")
+            self.assertTrue(old_auto_storage.is_file(), "old Auto Storage jar was stranded outside mods")
             self.assertTrue(old_fusion.is_file(), "old Fusion jar was stranded outside mods")
-            self.assertEqual("old magic", old_magic.read_text())
+            self.assertEqual("old auto storage", old_auto_storage.read_text())
             self.assertEqual("old fusion", old_fusion.read_text())
-            self.assertEqual([old_magic], deploy_prism_dev.magic_storage_jars(mods))
+            self.assertEqual([old_auto_storage], deploy_prism_dev.auto_storage_jars(mods))
             self.assertEqual([old_fusion], deploy_prism_dev.fusion_jars(mods))
 
     def test_base_exception_after_both_swaps_rolls_back_magic_fusion_and_version(self):
@@ -525,15 +530,15 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             (project / "gradle.properties").write_text(original_properties)
-            old_magic = mods / "magic_storage-0.1.0.jar"
+            old_auto_storage = mods / "auto_storage-0.1.0.jar"
             old_fusion = mods / "fusion-1.2.11-neoforge-mc1.21.1.jar"
-            old_magic.write_text("old magic")
+            old_auto_storage.write_text("old auto storage")
             old_fusion.write_text("old fusion")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new magic")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new auto storage")
                 self.stage_support(project_dir)
 
             original_hash = getattr(deploy_prism_dev, "FUSION_SHA512", None)
@@ -542,16 +547,16 @@ class DeployPrismDevTests(unittest.TestCase):
             def fake_download(url: str, destination: Path) -> None:
                 destination.write_bytes(self.FUSION_BYTES)
 
-            original_finder = deploy_prism_dev.magic_storage_jars
+            original_finder = deploy_prism_dev.auto_storage_jars
 
             def interrupted_finder(mods_dir: Path):
-                expected_magic = mods_dir / "magic_storage-0.1.1.jar"
+                expected_auto_storage = mods_dir / "auto_storage-0.1.1.jar"
                 expected_fusion = mods_dir / deploy_prism_dev.FUSION_FILENAME
-                if expected_magic.exists() and expected_fusion.exists():
+                if expected_auto_storage.exists() and expected_fusion.exists():
                     raise DeploymentAbort("interrupted after both swaps")
                 return original_finder(mods_dir)
 
-            deploy_prism_dev.magic_storage_jars = interrupted_finder
+            deploy_prism_dev.auto_storage_jars = interrupted_finder
             try:
                 with self.assertRaisesRegex(DeploymentAbort, "interrupted after both swaps"):
                     deploy_prism_dev.deploy(
@@ -561,16 +566,16 @@ class DeployPrismDevTests(unittest.TestCase):
                         fusion_downloader=fake_download,
                     )
             finally:
-                deploy_prism_dev.magic_storage_jars = original_finder
+                deploy_prism_dev.auto_storage_jars = original_finder
                 if original_hash is None:
                     del deploy_prism_dev.FUSION_SHA512
                 else:
                     deploy_prism_dev.FUSION_SHA512 = original_hash
 
             self.assertEqual(original_properties, (project / "gradle.properties").read_text())
-            self.assertEqual("old magic", old_magic.read_text())
+            self.assertEqual("old auto storage", old_auto_storage.read_text())
             self.assertEqual("old fusion", old_fusion.read_text())
-            self.assertEqual([old_magic], deploy_prism_dev.magic_storage_jars(mods))
+            self.assertEqual([old_auto_storage], deploy_prism_dev.auto_storage_jars(mods))
             self.assertEqual([old_fusion], deploy_prism_dev.fusion_jars(mods))
 
     def test_base_exception_at_backup_journal_handoff_restores_both_mods(self):
@@ -584,17 +589,17 @@ class DeployPrismDevTests(unittest.TestCase):
             mods = prism_mc / "mods"
             (project / "build" / "libs").mkdir(parents=True)
             mods.mkdir(parents=True)
-            original_properties = "mod_id=magic_storage\nmod_version=0.1.0\n"
+            original_properties = "mod_id=auto_storage\nmod_version=0.1.0\n"
             (project / "gradle.properties").write_text(original_properties)
-            old_magic = mods / "magic_storage-0.1.0.jar"
+            old_auto_storage = mods / "auto_storage-0.1.0.jar"
             old_fusion = mods / "fusion-1.2.11-neoforge-mc1.21.1.jar"
             unrelated = mods / "Patchouli.jar"
-            old_magic.write_text("old magic")
+            old_auto_storage.write_text("old auto storage")
             old_fusion.write_text("old fusion")
             unrelated.write_text("unrelated")
 
             def fake_build(project_dir: Path, version: str) -> None:
-                (project_dir / "build" / "libs" / f"magic_storage-{version}.jar").write_text("new magic")
+                (project_dir / "build" / "libs" / f"auto_storage-{version}.jar").write_text("new auto storage")
                 self.stage_support(project_dir)
 
             original_hash = deploy_prism_dev.FUSION_SHA512
@@ -626,15 +631,15 @@ class DeployPrismDevTests(unittest.TestCase):
                 deploy_prism_dev.FUSION_SHA512 = original_hash
 
             self.assertEqual(original_properties, (project / "gradle.properties").read_text())
-            self.assertTrue(old_magic.is_file(), "old Magic Storage jar was stranded outside mods")
+            self.assertTrue(old_auto_storage.is_file(), "old Auto Storage jar was stranded outside mods")
             self.assertTrue(old_fusion.is_file(), "old Fusion jar was stranded outside mods")
-            self.assertEqual("old magic", old_magic.read_text())
+            self.assertEqual("old auto storage", old_auto_storage.read_text())
             self.assertEqual("old fusion", old_fusion.read_text())
             self.assertEqual("unrelated", unrelated.read_text())
-            self.assertEqual([old_magic], deploy_prism_dev.magic_storage_jars(mods))
+            self.assertEqual([old_auto_storage], deploy_prism_dev.auto_storage_jars(mods))
             self.assertEqual([old_fusion], deploy_prism_dev.fusion_jars(mods))
             self.assertEqual([], list(mods.glob(".*.staging")))
-            backup_root = prism_mc / "magic_storage_backups"
+            backup_root = prism_mc / "auto_storage_backups"
             self.assertFalse(backup_root.exists() and any(backup_root.iterdir()))
 
 if __name__ == "__main__":

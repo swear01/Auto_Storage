@@ -163,7 +163,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: magic-storage-ci-logs
+          name: auto-storage-ci-logs
           path: |
             build/ci-logs/**
             run/logs/**
@@ -175,6 +175,6 @@ jobs:
       - name: Upload mod jar
         uses: actions/upload-artifact@v7
         with:
-          name: magic-storage-jar
-          path: build/libs/magic_storage-*.jar
+          name: auto-storage-jar
+          path: build/libs/auto_storage-*.jar
           if-no-files-found: error

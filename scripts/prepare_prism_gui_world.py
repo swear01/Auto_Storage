@@ -14,11 +14,11 @@ from typing import NamedTuple
 
 DEFAULT_PRISM_MINECRAFT_DIR = Path.home() / "Library/Application Support/PrismLauncher/instances/dev/minecraft"
 DEFAULT_SOURCE_WORLD = "New World"
-DEFAULT_WORLD_NAME = "MagicStorageGuiTest"
-DEFAULT_OFFLINE_PLAYER = "MagicStorageBot"
-DATAPACK_NAME = "magic_storage_gui_test"
-MARKER_FILE = ".magic_storage_gui_test_world"
-RUNTIME_FIXTURE_MARKER_FILE = ".magic_storage_runtime_fixture_pending"
+DEFAULT_WORLD_NAME = "AutoStorageGuiTest"
+DEFAULT_OFFLINE_PLAYER = "AutoStorageBot"
+DATAPACK_NAME = "auto_storage_gui_test"
+MARKER_FILE = ".auto_storage_gui_test_world"
+RUNTIME_FIXTURE_MARKER_FILE = ".auto_storage_runtime_fixture_pending"
 PACK_FORMAT = 48
 WORLD_DATA_VERSION = 3955
 GUI_CORE_STORAGE_ID = [1297303379, -1689374253, -1229988241, 1836016741]
@@ -33,10 +33,10 @@ TERMINAL_SCALE_BASE_ITEMS = (
     "minecraft:spruce_log",
     "minecraft:stone",
     "minecraft:iron_ingot",
-    "magic_storage:storage_unit_t1",
-    "magic_storage:storage_unit_t2",
-    "magic_storage:storage_terminal",
-    "magic_storage:crafting_terminal",
+    "auto_storage:storage_unit_t1",
+    "auto_storage:storage_unit_t2",
+    "auto_storage:storage_terminal",
+    "auto_storage:crafting_terminal",
 )
 
 OPTION_OVERRIDES = {
@@ -58,7 +58,7 @@ FULLSCREEN_GATE = {
     "automatic": True,
     "accepted_methods": ["minecraft_f11_borderless"],
     "forbidden_methods": ["macos_native_fullscreen", "combined_native_and_minecraft_fullscreen"],
-    "ready_log": "MS_GUI_TEST_READY",
+    "ready_log": "AS_GUI_TEST_READY",
     "verify": [
         "Minecraft content is not offset or clipped",
         "hotbar and GUI edges are fully visible",
@@ -305,341 +305,341 @@ CRAFTING_FUEL_CORE_BASELINE = {
         for singularity in EXTENDED_CRAFTING_SINGULARITIES
     ],
     "installed_stations": {
-        "magic_storage:furnace": {
+        "auto_storage:furnace": {
             "item": "ironfurnaces:iron_furnace",
             "count": 3,
         },
-        "magic_storage:blast_furnace": {
+        "auto_storage:blast_furnace": {
             "item": "minecraft:blast_furnace",
             "count": 1,
         },
-        "magic_storage:smoker": {
+        "auto_storage:smoker": {
             "item": "minecraft:smoker",
             "count": 1,
         },
-        "magic_storage:campfire": {
+        "auto_storage:campfire": {
             "item": "minecraft:campfire",
             "count": 1,
         },
-        "magic_storage:brewing_stand": {
+        "auto_storage:brewing_stand": {
             "item": "minecraft:brewing_stand",
             "count": 1,
         },
-        "magic_storage:crafting_table": {
+        "auto_storage:crafting_table": {
             "item": "minecraft:crafting_table",
             "count": 1,
         },
-        "magic_storage:stonecutter": {
+        "auto_storage:stonecutter": {
             "item": "minecraft:stonecutter",
             "count": 1,
         },
-        "magic_storage:smithing_table": {
+        "auto_storage:smithing_table": {
             "item": "minecraft:smithing_table",
             "count": 1,
         },
-        "magic_storage:extended_crafting_table": {
+        "auto_storage:extended_crafting_table": {
             "item": "extendedcrafting:ultimate_table",
             "count": 1,
         },
-        "magic_storage:farmers_delight_cooking_pot": {
+        "auto_storage:farmers_delight_cooking_pot": {
             "item": "farmersdelight:cooking_pot",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_assembler": {
+        "auto_storage:modern_industrialization_assembler": {
             "item": "modern_industrialization:assembler",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_centrifuge": {
+        "auto_storage:modern_industrialization_centrifuge": {
             "item": "modern_industrialization:centrifuge",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_chemical_reactor": {
+        "auto_storage:modern_industrialization_chemical_reactor": {
             "item": "modern_industrialization:chemical_reactor",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_compressor": {
+        "auto_storage:modern_industrialization_compressor": {
             "item": "modern_industrialization:bronze_compressor",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_cutting_machine": {
+        "auto_storage:modern_industrialization_cutting_machine": {
             "item": "modern_industrialization:bronze_cutting_machine",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_distillery": {
+        "auto_storage:modern_industrialization_distillery": {
             "item": "modern_industrialization:distillery",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_electrolyzer": {
+        "auto_storage:modern_industrialization_electrolyzer": {
             "item": "modern_industrialization:electrolyzer",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_furnace": {
+        "auto_storage:modern_industrialization_furnace": {
             "item": "modern_industrialization:bronze_furnace",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_macerator": {
+        "auto_storage:modern_industrialization_macerator": {
             "item": "modern_industrialization:bronze_macerator",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_mixer": {
+        "auto_storage:modern_industrialization_mixer": {
             "item": "modern_industrialization:bronze_mixer",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_packer": {
+        "auto_storage:modern_industrialization_packer": {
             "item": "modern_industrialization:steel_packer",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_polarizer": {
+        "auto_storage:modern_industrialization_polarizer": {
             "item": "modern_industrialization:polarizer",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_unpacker": {
+        "auto_storage:modern_industrialization_unpacker": {
             "item": "modern_industrialization:steel_unpacker",
             "count": 1,
         },
-        "magic_storage:modern_industrialization_wiremill": {
+        "auto_storage:modern_industrialization_wiremill": {
             "item": "modern_industrialization:steel_wiremill",
             "count": 1,
         },
-        "magic_storage:ars_nouveau_imbuement_chamber": {
+        "auto_storage:ars_nouveau_imbuement_chamber": {
             "item": "ars_nouveau:imbuement_chamber",
             "count": 1,
         },
-        "magic_storage:ars_nouveau_enchanting_apparatus": {
+        "auto_storage:ars_nouveau_enchanting_apparatus": {
             "item": "ars_nouveau:enchanting_apparatus",
             "count": 1,
         },
-        "magic_storage:powah_energizing": {
+        "auto_storage:powah_energizing": {
             "item": "powah:energizing_rod_starter",
             "count": 1,
         },
-        "magic_storage:powah_furnator": {
+        "auto_storage:powah_furnator": {
             "item": "powah:furnator_starter",
             "count": 1,
         },
-        "magic_storage:industrial_foregoing_dissolution_chamber": {
+        "auto_storage:industrial_foregoing_dissolution_chamber": {
             "item": "industrialforegoing:dissolution_chamber",
             "count": 1,
         },
-        "magic_storage:industrial_foregoing_material_stonework_factory": {
+        "auto_storage:industrial_foregoing_material_stonework_factory": {
             "item": "industrialforegoing:material_stonework_factory",
             "count": 1,
         },
-        "magic_storage:create_milling": {
+        "auto_storage:create_milling": {
             "item": "create:millstone",
             "count": 1,
         },
-        "magic_storage:create_crushing": {
+        "auto_storage:create_crushing": {
             "item": "create:crushing_wheel",
             "count": 1,
         },
-        "magic_storage:create_cutting": {
+        "auto_storage:create_cutting": {
             "item": "create:mechanical_saw",
             "count": 1,
         },
-        "magic_storage:create_filling": {
+        "auto_storage:create_filling": {
             "item": "create:spout",
             "count": 1,
         },
-        "magic_storage:create_emptying": {
+        "auto_storage:create_emptying": {
             "item": "create:item_drain",
             "count": 1,
         },
-        "magic_storage:mekanism_crusher": {
+        "auto_storage:mekanism_crusher": {
             "item": "mekanism:ultimate_crushing_factory",
             "count": 2_147_483_647,
         },
-        "magic_storage:mekanism_enrichment_chamber": {
+        "auto_storage:mekanism_enrichment_chamber": {
             "item": "mekanism:enrichment_chamber",
             "count": 1,
         },
-        "magic_storage:mekanism_energized_smelter": {
+        "auto_storage:mekanism_energized_smelter": {
             "item": "mekanism:energized_smelter",
             "count": 1,
         },
-        "magic_storage:mekanism_combiner": {
+        "auto_storage:mekanism_combiner": {
             "item": "mekanism:combiner",
             "count": 1,
         },
-        "magic_storage:mekanism_osmium_compressor": {
+        "auto_storage:mekanism_osmium_compressor": {
             "item": "mekanism:osmium_compressor",
             "count": 1,
         },
-        "magic_storage:mekanism_purification_chamber": {
+        "auto_storage:mekanism_purification_chamber": {
             "item": "mekanism:purification_chamber",
             "count": 1,
         },
-        "magic_storage:mekanism_chemical_injection_chamber": {
+        "auto_storage:mekanism_chemical_injection_chamber": {
             "item": "mekanism:chemical_injection_chamber",
             "count": 1,
         },
-        "magic_storage:mekanism_metallurgic_infuser": {
+        "auto_storage:mekanism_metallurgic_infuser": {
             "item": "mekanism:metallurgic_infuser",
             "count": 1,
         },
-        "magic_storage:mekanism_precision_sawmill": {
+        "auto_storage:mekanism_precision_sawmill": {
             "item": "mekanism:precision_sawmill",
             "count": 1,
         },
-        "magic_storage:mekanism_pressurized_reaction_chamber": {
+        "auto_storage:mekanism_pressurized_reaction_chamber": {
             "item": "mekanism:pressurized_reaction_chamber",
             "count": 1,
         },
-        "magic_storage:mekanism_rotary_condensentrator": {
+        "auto_storage:mekanism_rotary_condensentrator": {
             "item": "mekanism:rotary_condensentrator",
             "count": 1,
         },
-        "magic_storage:mekanism_chemical_oxidizer": {
+        "auto_storage:mekanism_chemical_oxidizer": {
             "item": "mekanism:chemical_oxidizer",
             "count": 1,
         },
-        "magic_storage:mekanism_chemical_infuser": {
+        "auto_storage:mekanism_chemical_infuser": {
             "item": "mekanism:chemical_infuser",
             "count": 1,
         },
-        "magic_storage:mekanism_electrolytic_separator": {
+        "auto_storage:mekanism_electrolytic_separator": {
             "item": "mekanism:electrolytic_separator",
             "count": 1,
         },
-        "magic_storage:mekanism_chemical_dissolution_chamber": {
+        "auto_storage:mekanism_chemical_dissolution_chamber": {
             "item": "mekanism:chemical_dissolution_chamber",
             "count": 1,
         },
-        "magic_storage:mekanism_chemical_washer": {
+        "auto_storage:mekanism_chemical_washer": {
             "item": "mekanism:chemical_washer",
             "count": 1,
         },
-        "magic_storage:mekanism_chemical_crystallizer": {
+        "auto_storage:mekanism_chemical_crystallizer": {
             "item": "mekanism:chemical_crystallizer",
             "count": 1,
         },
-        "magic_storage:mekanism_isotopic_centrifuge": {
+        "auto_storage:mekanism_isotopic_centrifuge": {
             "item": "mekanism:isotopic_centrifuge",
             "count": 1,
         },
-        "magic_storage:mekanism_antiprotonic_nucleosynthesizer": {
+        "auto_storage:mekanism_antiprotonic_nucleosynthesizer": {
             "item": "mekanism:antiprotonic_nucleosynthesizer",
             "count": 1,
         },
-        "magic_storage:mekanism_pigment_extractor": {
+        "auto_storage:mekanism_pigment_extractor": {
             "item": "mekanism:pigment_extractor",
             "count": 1,
         },
-        "magic_storage:mekanism_pigment_mixer": {
+        "auto_storage:mekanism_pigment_mixer": {
             "item": "mekanism:pigment_mixer",
             "count": 1,
         },
-        "magic_storage:mekanism_painting_machine": {
+        "auto_storage:mekanism_painting_machine": {
             "item": "mekanism:painting_machine",
             "count": 1,
         },
-        "magic_storage:botania_mana_pool": {
+        "auto_storage:botania_mana_pool": {
             "item": "botania:mana_pool",
             "count": 1,
         },
-        "magic_storage:botania_runic_altar": {
+        "auto_storage:botania_runic_altar": {
             "item": "botania:runic_altar",
             "count": 1,
         },
-        "magic_storage:botania_terrestrial_agglomeration_plate": {
+        "auto_storage:botania_terrestrial_agglomeration_plate": {
             "item": "botania:terrestrial_agglomeration_plate",
             "count": 1,
         },
-        "magic_storage:botania_petal_apothecary": {
+        "auto_storage:botania_petal_apothecary": {
             "item": "botania:petal_apothecary",
             "count": 1,
         },
-        "magic_storage:botania_elven_gateway": {
+        "auto_storage:botania_elven_gateway": {
             "item": "botania:elven_gateway_core",
             "count": 1,
         },
     },
     "descriptor_consumables": {
-        "magic_storage:axe": {"amount": 1_561, "infinite": False},
+        "auto_storage:axe": {"amount": 1_561, "infinite": False},
     },
     "station_work": {
-        "magic_storage:farmers_delight_cooking_pot": 10_000,
-        "magic_storage:modern_industrialization_assembler": 100_000,
-        "magic_storage:modern_industrialization_centrifuge": 100_000,
-        "magic_storage:modern_industrialization_chemical_reactor": 100_000,
-        "magic_storage:modern_industrialization_compressor": 100_000,
-        "magic_storage:modern_industrialization_cutting_machine": 100_000,
-        "magic_storage:modern_industrialization_distillery": 100_000,
-        "magic_storage:modern_industrialization_electrolyzer": 100_000,
-        "magic_storage:modern_industrialization_furnace": 100_000,
-        "magic_storage:modern_industrialization_macerator": 100_000,
-        "magic_storage:modern_industrialization_mixer": 100_000,
-        "magic_storage:modern_industrialization_packer": 100_000,
-        "magic_storage:modern_industrialization_polarizer": 100_000,
-        "magic_storage:modern_industrialization_unpacker": 100_000,
-        "magic_storage:modern_industrialization_wiremill": 100_000,
-        "magic_storage:ars_nouveau_imbuement_chamber": 10_000,
-        "magic_storage:ars_nouveau_enchanting_apparatus": 10_000,
-        "magic_storage:powah_energizing": 100_000,
-        "magic_storage:powah_furnator": 100_000,
-        "magic_storage:industrial_foregoing_dissolution_chamber": 10_000,
-        "magic_storage:industrial_foregoing_material_stonework_factory": 10_000,
-        "magic_storage:create_milling": 10_000,
-        "magic_storage:create_crushing": 10_000,
-        "magic_storage:create_cutting": 10_000,
-        "magic_storage:create_filling": 10_000,
-        "magic_storage:create_emptying": 10_000,
-        "magic_storage:mekanism_crusher": 10_000,
-        "magic_storage:mekanism_enrichment_chamber": 10_000,
-        "magic_storage:mekanism_energized_smelter": 10_000,
-        "magic_storage:mekanism_combiner": 10_000,
-        "magic_storage:mekanism_osmium_compressor": 10_000,
-        "magic_storage:mekanism_purification_chamber": 10_000,
-        "magic_storage:mekanism_chemical_injection_chamber": 10_000,
-        "magic_storage:mekanism_metallurgic_infuser": 10_000,
-        "magic_storage:mekanism_precision_sawmill": 10_000,
-        "magic_storage:mekanism_pressurized_reaction_chamber": 10_000,
-        "magic_storage:mekanism_rotary_condensentrator": 10_000,
-        "magic_storage:mekanism_chemical_oxidizer": 10_000,
-        "magic_storage:mekanism_chemical_infuser": 10_000,
-        "magic_storage:mekanism_electrolytic_separator": 10_000,
-        "magic_storage:mekanism_chemical_dissolution_chamber": 10_000,
-        "magic_storage:mekanism_chemical_washer": 10_000,
-        "magic_storage:mekanism_chemical_crystallizer": 10_000,
-        "magic_storage:mekanism_isotopic_centrifuge": 10_000,
-        "magic_storage:mekanism_antiprotonic_nucleosynthesizer": 10_000,
-        "magic_storage:mekanism_pigment_extractor": 10_000,
-        "magic_storage:mekanism_pigment_mixer": 10_000,
-        "magic_storage:mekanism_painting_machine": 10_000,
+        "auto_storage:farmers_delight_cooking_pot": 10_000,
+        "auto_storage:modern_industrialization_assembler": 100_000,
+        "auto_storage:modern_industrialization_centrifuge": 100_000,
+        "auto_storage:modern_industrialization_chemical_reactor": 100_000,
+        "auto_storage:modern_industrialization_compressor": 100_000,
+        "auto_storage:modern_industrialization_cutting_machine": 100_000,
+        "auto_storage:modern_industrialization_distillery": 100_000,
+        "auto_storage:modern_industrialization_electrolyzer": 100_000,
+        "auto_storage:modern_industrialization_furnace": 100_000,
+        "auto_storage:modern_industrialization_macerator": 100_000,
+        "auto_storage:modern_industrialization_mixer": 100_000,
+        "auto_storage:modern_industrialization_packer": 100_000,
+        "auto_storage:modern_industrialization_polarizer": 100_000,
+        "auto_storage:modern_industrialization_unpacker": 100_000,
+        "auto_storage:modern_industrialization_wiremill": 100_000,
+        "auto_storage:ars_nouveau_imbuement_chamber": 10_000,
+        "auto_storage:ars_nouveau_enchanting_apparatus": 10_000,
+        "auto_storage:powah_energizing": 100_000,
+        "auto_storage:powah_furnator": 100_000,
+        "auto_storage:industrial_foregoing_dissolution_chamber": 10_000,
+        "auto_storage:industrial_foregoing_material_stonework_factory": 10_000,
+        "auto_storage:create_milling": 10_000,
+        "auto_storage:create_crushing": 10_000,
+        "auto_storage:create_cutting": 10_000,
+        "auto_storage:create_filling": 10_000,
+        "auto_storage:create_emptying": 10_000,
+        "auto_storage:mekanism_crusher": 10_000,
+        "auto_storage:mekanism_enrichment_chamber": 10_000,
+        "auto_storage:mekanism_energized_smelter": 10_000,
+        "auto_storage:mekanism_combiner": 10_000,
+        "auto_storage:mekanism_osmium_compressor": 10_000,
+        "auto_storage:mekanism_purification_chamber": 10_000,
+        "auto_storage:mekanism_chemical_injection_chamber": 10_000,
+        "auto_storage:mekanism_metallurgic_infuser": 10_000,
+        "auto_storage:mekanism_precision_sawmill": 10_000,
+        "auto_storage:mekanism_pressurized_reaction_chamber": 10_000,
+        "auto_storage:mekanism_rotary_condensentrator": 10_000,
+        "auto_storage:mekanism_chemical_oxidizer": 10_000,
+        "auto_storage:mekanism_chemical_infuser": 10_000,
+        "auto_storage:mekanism_electrolytic_separator": 10_000,
+        "auto_storage:mekanism_chemical_dissolution_chamber": 10_000,
+        "auto_storage:mekanism_chemical_washer": 10_000,
+        "auto_storage:mekanism_chemical_crystallizer": 10_000,
+        "auto_storage:mekanism_isotopic_centrifuge": 10_000,
+        "auto_storage:mekanism_antiprotonic_nucleosynthesizer": 10_000,
+        "auto_storage:mekanism_pigment_extractor": 10_000,
+        "auto_storage:mekanism_pigment_mixer": 10_000,
+        "auto_storage:mekanism_painting_machine": 10_000,
     },
     "typed_resources": [
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "minecraft:water",
             "amount": 16_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "minecraft:lava",
             "amount": 4_000,
         },
         {
-            "kind": "magic_storage:neoforge_energy",
+            "kind": "auto_storage:neoforge_energy",
             "resource": "neoforge:energy",
             "amount": 500_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "modern_industrialization:sugar_solution",
             "amount": 16_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "modern_industrialization:ethanol",
             "amount": 16_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "modern_industrialization:benzene",
             "amount": 16_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "modern_industrialization:liquid_air",
             "amount": 16_000,
         },
@@ -649,17 +649,17 @@ CRAFTING_FUEL_CORE_BASELINE = {
             "amount": 50_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "industrialforegoing:pink_slime",
             "amount": 16_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "industrialforegoing:essence",
             "amount": 16_000,
         },
         {
-            "kind": "magic_storage:fluid",
+            "kind": "auto_storage:fluid",
             "resource": "create:honey",
             "amount": 16_000,
         },
@@ -708,16 +708,16 @@ SCENARIO_PROFILES = {
         "start_target": "storage_terminal",
         "target_names": ("storage_core", "storage_terminal", "crafting_terminal"),
         "setup_blocks": (
-            "setblock 0 80 0 magic_storage:storage_core",
-            "setblock -1 80 0 magic_storage:storage_terminal",
-            "setblock 1 80 0 magic_storage:crafting_terminal",
-            "setblock 0 80 -1 magic_storage:creative_storage_unit",
+            "setblock 0 80 0 auto_storage:storage_core",
+            "setblock -1 80 0 auto_storage:storage_terminal",
+            "setblock 1 80 0 auto_storage:crafting_terminal",
+            "setblock 0 80 -1 auto_storage:creative_storage_unit",
         ),
         "type_capacity": {"finite_type_slots": 0, "unlimited": True},
         "player_kit": {
             "hotbar": {
-                "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
-                "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
+                "1": {"slot": "hotbar.0", "item": "auto_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "auto_storage:crafting_terminal", "count": 1},
             },
             "inventory": [],
         },
@@ -730,19 +730,19 @@ SCENARIO_PROFILES = {
         "start_target": "import_bus",
         "target_names": ("storage_core", "import_bus", "export_bus"),
         "setup_blocks": (
-            "setblock 0 80 0 magic_storage:storage_core",
-            "setblock 0 80 -1 magic_storage:storage_unit_t1",
-            "setblock -1 80 -1 magic_storage:import_bus[facing=west]",
+            "setblock 0 80 0 auto_storage:storage_core",
+            "setblock 0 80 -1 auto_storage:storage_unit_t1",
+            "setblock -1 80 -1 auto_storage:import_bus[facing=west]",
             "setblock -2 80 -1 minecraft:barrel",
-            "setblock 1 80 -1 magic_storage:export_bus[facing=east]",
+            "setblock 1 80 -1 auto_storage:export_bus[facing=east]",
             "setblock 2 80 -1 minecraft:barrel",
         ),
         "type_capacity": {"finite_type_slots": 10, "unlimited": False},
         "player_kit": {
             "hotbar": {
-                "5": {"slot": "hotbar.4", "item": "magic_storage:import_bus", "count": 1},
-                "6": {"slot": "hotbar.5", "item": "magic_storage:export_bus", "count": 1},
-                "7": {"slot": "hotbar.6", "item": "magic_storage:wrench", "count": 1},
+                "5": {"slot": "hotbar.4", "item": "auto_storage:import_bus", "count": 1},
+                "6": {"slot": "hotbar.5", "item": "auto_storage:export_bus", "count": 1},
+                "7": {"slot": "hotbar.6", "item": "auto_storage:wrench", "count": 1},
                 "9": {"slot": "hotbar.8", "item": "minecraft:barrier", "count": 1},
             },
             "inventory": [
@@ -760,21 +760,21 @@ SCENARIO_PROFILES = {
         "start_target": "crafting_terminal",
         "target_names": ("storage_core", "storage_terminal", "crafting_terminal"),
         "setup_blocks": (
-            "setblock 0 80 0 magic_storage:storage_core"
+            "setblock 0 80 0 auto_storage:storage_core"
             "{storageSchema:1,storageId:[I;"
             + ",".join(str(value) for value in GUI_CORE_STORAGE_ID)
             + "]}",
-            "setblock -1 80 0 magic_storage:storage_terminal",
-            "setblock 1 80 0 magic_storage:crafting_terminal",
-            "setblock 0 80 -1 magic_storage:creative_storage_unit",
+            "setblock -1 80 0 auto_storage:storage_terminal",
+            "setblock 1 80 0 auto_storage:crafting_terminal",
+            "setblock 0 80 -1 auto_storage:creative_storage_unit",
         ),
         "type_capacity": {"finite_type_slots": 0, "unlimited": True},
         "core_baseline": CRAFTING_FUEL_CORE_BASELINE,
         "reset_world": False,
         "player_kit": {
             "hotbar": {
-                "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
-                "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
+                "1": {"slot": "hotbar.0", "item": "auto_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "auto_storage:crafting_terminal", "count": 1},
                 "3": {"slot": "hotbar.2", "item": "minecraft:coal", "count": 1},
             },
             "inventory": [],
@@ -788,20 +788,20 @@ SCENARIO_PROFILES = {
         "start_target": "crafting_terminal",
         "target_names": ("storage_core", "storage_terminal", "crafting_terminal"),
         "setup_blocks": (
-            "setblock 0 80 0 magic_storage:storage_core"
+            "setblock 0 80 0 auto_storage:storage_core"
             "{storageSchema:1,storageId:[I;"
             + ",".join(str(value) for value in GUI_CORE_STORAGE_ID)
             + "]}",
-            "setblock -1 80 0 magic_storage:storage_terminal",
-            "setblock 1 80 0 magic_storage:crafting_terminal",
-            "setblock 0 80 -1 magic_storage:creative_storage_unit",
+            "setblock -1 80 0 auto_storage:storage_terminal",
+            "setblock 1 80 0 auto_storage:crafting_terminal",
+            "setblock 0 80 -1 auto_storage:creative_storage_unit",
         ),
         "type_capacity": {"finite_type_slots": 0, "unlimited": True},
         "reset_world": False,
         "player_kit": {
             "hotbar": {
-                "1": {"slot": "hotbar.0", "item": "magic_storage:storage_terminal", "count": 1},
-                "2": {"slot": "hotbar.1", "item": "magic_storage:crafting_terminal", "count": 1},
+                "1": {"slot": "hotbar.0", "item": "auto_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "auto_storage:crafting_terminal", "count": 1},
             },
             "inventory": [],
         },
@@ -817,7 +817,7 @@ SCENARIO_PROFILES = {
         "type_capacity": {"finite_type_slots": 0, "unlimited": False},
         "player_kit": {
             "hotbar": {
-                "1": {"slot": "hotbar.0", "item": "magic_storage:guide_book", "count": 1},
+                "1": {"slot": "hotbar.0", "item": "auto_storage:guide_book", "count": 1},
             },
             "inventory": [],
         },
@@ -828,13 +828,13 @@ SCENARIO_PROFILES = {
 STATIC_FUNCTIONS = {
     "load": """
 scoreboard objectives add ms_gui_timer dummy
-function magic_storage_gui_test:setup
+function auto_storage_gui_test:setup
 """,
     "tick": """
 execute as @a[tag=!ms_gui_ready] unless score @s ms_gui_timer matches 0.. run scoreboard players set @s ms_gui_timer 0
 scoreboard players add @a[tag=!ms_gui_ready] ms_gui_timer 1
-execute as @a[tag=!ms_gui_ready,scores={ms_gui_timer=3..}] run function magic_storage_gui_test:player_ready
-execute as @a[tag=ms_gui_ready] run function magic_storage_gui_test:hotbar_views
+execute as @a[tag=!ms_gui_ready,scores={ms_gui_timer=3..}] run function auto_storage_gui_test:player_ready
+execute as @a[tag=ms_gui_ready] run function auto_storage_gui_test:hotbar_views
 """,
 }
 
@@ -1265,7 +1265,7 @@ def install_core_repository_baseline(world_dir: Path, profile: dict) -> None:
     if core_baseline is None:
         return
     _write_gzip_nbt(
-        world_dir / "data" / "magic_storage_core_storages.dat",
+        world_dir / "data" / "auto_storage_core_storages.dat",
         _core_repository_root(core_baseline),
     )
 
@@ -1427,7 +1427,7 @@ def build_setup_function(profile: dict) -> str:
     lines.extend(profile["setup_blocks"])
     if "runtime_items_per_type" in profile:
         lines.append(
-            "magic_storage _gui_test_seed 0 80 0 "
+            "auto_storage _gui_test_seed 0 80 0 "
             f"{profile['runtime_items_per_type']}"
         )
     lines.extend([
@@ -1508,10 +1508,10 @@ def build_player_ready_function(profile: dict) -> str:
         f"function {DATAPACK_NAME}:prime_hotbar_latch",
     ]
     if "runtime_items_per_type" in profile:
-        lines.append("magic_storage _gui_test_warm_craftable 0 80 0")
+        lines.append("auto_storage _gui_test_warm_craftable 0 80 0")
     lines.extend([
         "tag @s add ms_gui_ready",
-        "say MS_GUI_TEST_READY",
+        "say AS_GUI_TEST_READY",
     ])
     return "\n".join(lines) + "\n"
 
@@ -1619,7 +1619,7 @@ def build_manifest(
             "installable_descriptors": "all",
             "processing_count": TERMINAL_SCALE_PROCESSING_COUNT,
             "instant_count": 1,
-            "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+            "ready_log": "AS_GUI_RUNTIME_FIXTURE_READY",
         }
     commands = {
         name: f"/function {DATAPACK_NAME}:{name}"
@@ -1648,7 +1648,7 @@ def build_manifest(
         "player_kit": profile["player_kit"],
         "bootstrap": {
             "ready_delay_ticks": 3,
-            "ready_log": "MS_GUI_TEST_READY",
+            "ready_log": "AS_GUI_TEST_READY",
             "reset_function": (
                 "reset_from_hotbar"
                 if any(
@@ -1661,7 +1661,7 @@ def build_manifest(
             **(
                 {
                     "runtime_fixture_ready_log":
-                        "MS_GUI_RUNTIME_FIXTURE_READY",
+                        "AS_GUI_RUNTIME_FIXTURE_READY",
                 }
                 if scenario_name == "terminal-scale"
                 else {}
@@ -1716,7 +1716,7 @@ def install_datapack(
     )
     for name, body in function_bodies.items():
         _write_text(datapack / "data" / DATAPACK_NAME / "function" / f"{name}.mcfunction", body)
-    _write_text(datapack / "magic_storage_gui_test_manifest.json", json.dumps(manifest, indent=2))
+    _write_text(datapack / "auto_storage_gui_test_manifest.json", json.dumps(manifest, indent=2))
     runtime_marker = world_dir / RUNTIME_FIXTURE_MARKER_FILE
     if scenario_name == "terminal-scale":
         _write_text(
@@ -1857,9 +1857,9 @@ def prepare_world(
             }
         )
         manifest_text = json.dumps(manifest, indent=2)
-        _write_text(staging / "magic_storage_gui_test_manifest.json", manifest_text)
+        _write_text(staging / "auto_storage_gui_test_manifest.json", manifest_text)
         _write_text(
-            staging / "datapacks" / DATAPACK_NAME / "magic_storage_gui_test_manifest.json",
+            staging / "datapacks" / DATAPACK_NAME / "auto_storage_gui_test_manifest.json",
             manifest_text,
         )
         _swap_staged_world(staging, target)

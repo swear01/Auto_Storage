@@ -1,6 +1,6 @@
 # macOS Minecraft F11 全螢幕與關閉指南
 
-本指南是 Prism dev 視覺 GUI session 在 macOS 的現行契約。它只適用開發測試 instance `MagicStorageGuiTest`；不改變玩家一般啟動方式。
+本指南是 Prism dev 視覺 GUI session 在 macOS 的現行契約。它只適用開發測試 instance `AutoStorageGuiTest`；不改變玩家一般啟動方式。
 
 ## 保證與原因
 
@@ -26,11 +26,11 @@ runner 會：
 2. `crafting-fuel-page`先驗證Prism dev中的18份support jars各只有一份，且SHA-256和`./gradlew stagePrismGuiSupportMods`產生的`build/prism-gui-mods`完全一致；其中包含MacFix 0.1.0，以及各一份GuideME、Curios、Extended Crafting與Cucumber。PneumaticCraft因零accepted production contract不加入；EvilCraft/Cyclops Core因TMRV 0.9.0 JEI stub會讓EvilCraft 1.2.91 Spirit Furnace packet在registrar建立前造成client FATAL，也不加入combined pack。任何JEI jar都會因與TMRV不相容而fail。`python3 scripts/deploy_prism_dev.py`會把全部support jars與Auto Storage、Fusion放在同一transaction部署/rollback，成功時移除舊JEI、EvilCraft與Cyclops Core。
 3. runner固定將dev instance的`LowMemWarning`設為`false`。Prism 11.0.3在macOS memory pressure不是Normal時會開一個parentless `High memory pressure` modal；CLI無法回答時，launch會永久停在`EnsureAvailableMemory`而沒有Minecraft process。測試runner只略過這個launcher確認框，不關閉其他應用程式，也不降低Minecraft配置；若舊run已卡在該modal，先由使用者在Prism取消該launch，再重跑runner。
 4. 要求一般Prism Launcher已開啟且account initialization完成；若沒有warm normal-root process，runner在改世界與啟client前fail。這避免Prism cold start即使帶`-o`仍刷新Microsoft/Xbox ownership。runner不建立`-d` data root，也不建立或改寫`accounts.json`。Offline-only root沒有owning account，Prism會進Demo/account-selection，不能拿來啟動完整遊戲。
-5. 對該已執行process送出 `"/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher" -l dev -w MagicStorageGuiTest -o MagicStorageBot`。這是Prism官方CLI的既有instance離線launch路徑，不透過`open -n`。
+5. 對該已執行process送出 `"/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher" -l dev -w AutoStorageGuiTest -o AutoStorageBot`。這是Prism官方CLI的既有instance離線launch路徑，不透過`open -n`。
 6. launcher subprocess只帶HOME/PATH/TMPDIR/locale等必要環境；run artifact會移除Prism列出的process/native environment。
 7. 寫入 `fullscreen:true`，移除任何舊的 `fullscreenResolution`；`overrideWidth=1280`、`overrideHeight=720` 僅供離開全螢幕後的 windowed fallback。
 8. 在準備世界時記錄 macOS 桌面 display mode（點數、像素、refresh、depth）。
-9. 等 `MS_GUI_TEST_READY` 後只掃normal-root `PrismLauncher-0.log`的本次cursor片段；任何`AuthFlow:`實際step或Microsoft/Xbox/XSTS/Minecraft-services endpoint都fail closed。generic Offline task與`RefreshSchedule` bookkeeping不代表網路登入。
+9. 等 `AS_GUI_TEST_READY` 後只掃normal-root `PrismLauncher-0.log`的本次cursor片段；任何`AuthFlow:`實際step或Microsoft/Xbox/XSTS/Minecraft-services endpoint都fail closed。generic Offline task與`RefreshSchedule` bookkeeping不代表網路登入。
 10. 再讀一次 desktop mode；任一欄不同也fail closed。
 11. 將 `manifest.json`、`session.json`、`checklist.md`、Minecraft log、已清理的`prism-launcher.log` 與 shutdown artifacts 寫進同一run directory。
 
@@ -76,4 +76,4 @@ Modrinth project目前仍在審核、公開API回404，所以本輪依使用者�
 - 畫面遭裁切或全螢幕 gate 不通過：停止該 run，不要改用 macOS native fullscreen。
 - 關閉後黑窗或 watchdog 介入：保留該 run directory 的 `shutdown.json`、`shutdown-watchdog.log` 與 `log-excerpt.log` 再排查。
 
-相關實作：`src/main/java/com/swearprom/magicstorage/magic_storage/mixin/MacOsWindowMixin.java`；流程細節：[`docs/notes.md`](notes.md#prism-dev--manual-handoff)。
+相關實作：`src/main/java/com/swear/autostorage/mixin/MacOsWindowMixin.java`；流程細節：[`docs/notes.md`](notes.md#prism-dev--manual-handoff)。

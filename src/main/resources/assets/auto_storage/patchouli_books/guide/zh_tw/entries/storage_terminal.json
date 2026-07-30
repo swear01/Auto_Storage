@@ -1,0 +1,29 @@
+{
+  "name": "儲存終端機",
+  "category": "auto_storage:terminals",
+  "icon": "auto_storage:storage_terminal",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "auto_storage:storage_terminal",
+      "text": "儲存終端機是直接管理資源的介面。視窗變高時網格會增加，所選資源群組超出空間時可捲動瀏覽。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "完整合成排列請見$(l:auto_storage:recipes)配方總覽$()。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "用左側資源選擇器切換物品、流體、能量、氣體、加工或其他已註冊的 addon 種類；全部會一起列出目前可用的群組。能量包含 FE、燃料／釀造、魔力與源力；加工只包含工作站累積值；其他包含斧頭使用次數與未分類 addon 值。流體使用青綠框、能量紫色、氣體／其他藍色、加工琥珀色。物品頁可正常取出與放入；其他頁只顯示代表物。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "搜尋欄支援一般名稱、@模組與 #標籤；只有 @、# 或 $ 時等同空白並顯示全部。點擊欄外只會解除焦點，不會清除篩選。自動鎖定只在開啟終端機時給搜尋欄初始焦點；搜尋同步則另外控制 EMI。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "可依名稱、數量、模組或 ID 排序，並選擇遞增或遞減。屬性不同的變體會保持分開；中鍵點資源選擇器會回到物品。要使用可合成、轉換與工作站分頁，請升級為$(l:auto_storage:crafting_terminal)合成終端機$()。"
+    }
+  ]
+}

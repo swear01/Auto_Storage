@@ -1,0 +1,25 @@
+{
+  "name": "匯入匯流排",
+  "category": "auto_storage:automation",
+  "icon": "auto_storage:import_bus",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "auto_storage:import_bus",
+      "text": "匯入匯流排會主動從正面容器拉取物品。漏斗、管線與其他自動化也能從任一面作為網路的$(thing)被動輸入$()。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "完整合成排列請見$(l:auto_storage:recipes)配方總覽$()。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "把箭頭正面貼著要抽取的容器，並讓其他任一面連上 Auto Storage 網路。若正面朝錯方向，用相容扳手右鍵旋轉。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "主動拉取每 10 刻執行一次，最多搬運核心能完整接收的一疊。匯流排沒有本地緩衝，也不會讓外部抽出網路庫存。沒有已載入且可用的核心，或種類容量已滿時，來源物品會留在原處。"
+    }
+  ]
+}

@@ -7,17 +7,17 @@ import zlib
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RESOURCES = ROOT / "src/main/resources/assets/magic_storage"
+RESOURCES = ROOT / "src/main/resources/assets/auto_storage"
 FUSION_PACK = ROOT / "src/main/resources/resourcepacks/fusion_connected_casing"
-FUSION_RESOURCES = FUSION_PACK / "assets/magic_storage"
+FUSION_RESOURCES = FUSION_PACK / "assets/auto_storage"
 NETWORK_BLOCKS = [
-    "magic_storage:storage_core",
-    *[f"magic_storage:storage_unit_t{tier}" for tier in range(1, 7)],
-    "magic_storage:creative_storage_unit",
-    "magic_storage:storage_terminal",
-    "magic_storage:crafting_terminal",
-    "magic_storage:import_bus",
-    "magic_storage:export_bus",
+    "auto_storage:storage_core",
+    *[f"auto_storage:storage_unit_t{tier}" for tier in range(1, 7)],
+    "auto_storage:creative_storage_unit",
+    "auto_storage:storage_terminal",
+    "auto_storage:crafting_terminal",
+    "auto_storage:import_bus",
+    "auto_storage:export_bus",
 ]
 CUBE_BLOCKS = [
     "storage_core",
@@ -150,16 +150,16 @@ class ConnectedTextureTests(unittest.TestCase):
             self.assertNotIn("loader", model, block)
             self.assertNotIn("type", model, block)
             self.assertEqual("minecraft:block/cube_all", model.get("parent"), block)
-            self.assertEqual({"all": f"magic_storage:block/{block}"}, model.get("textures"), block)
+            self.assertEqual({"all": f"auto_storage:block/{block}"}, model.get("textures"), block)
         for bus in BUS_BLOCKS:
             model = self.load_json(RESOURCES / f"models/block/{bus}.json")
             self.assertNotIn("loader", model, bus)
             self.assertNotIn("type", model, bus)
             self.assertEqual("minecraft:block/orientable", model.get("parent"), bus)
             self.assertEqual({
-                "top": f"magic_storage:block/{bus}_top",
-                "front": f"magic_storage:block/{bus}_front",
-                "side": f"magic_storage:block/{bus}_side",
+                "top": f"auto_storage:block/{bus}_top",
+                "front": f"auto_storage:block/{bus}_front",
+                "side": f"auto_storage:block/{bus}_side",
             }, model.get("textures"), bus)
 
     def test_cube_models_connect_across_the_entire_network_family_when_fusion_overlay_is_active(self):
@@ -172,7 +172,7 @@ class ConnectedTextureTests(unittest.TestCase):
             self.assertEqual("fusion:model", model.get("loader"), block)
             self.assertEqual("connecting", model.get("type"), block)
             self.assertEqual("minecraft:block/cube_all", model.get("parent"), block)
-            self.assertEqual({"all": f"magic_storage:block/{block}_connected"}, model.get("textures"), block)
+            self.assertEqual({"all": f"auto_storage:block/{block}_connected"}, model.get("textures"), block)
             self.assertEqual(expected_predicate, model.get("connections"), block)
 
     def test_fusion_overlay_bus_models_connect_only_their_casing_and_keep_directional_fronts(self):
@@ -186,9 +186,9 @@ class ConnectedTextureTests(unittest.TestCase):
             self.assertEqual("connecting", model.get("type"), bus)
             self.assertEqual("minecraft:block/orientable", model.get("parent"), bus)
             self.assertEqual({
-                "top": f"magic_storage:block/{bus}_top_connected",
-                "front": f"magic_storage:block/{bus}_front",
-                "side": f"magic_storage:block/{bus}_side_connected",
+                "top": f"auto_storage:block/{bus}_top_connected",
+                "front": f"auto_storage:block/{bus}_front",
+                "side": f"auto_storage:block/{bus}_side_connected",
             }, model.get("textures"), bus)
             self.assertEqual({
                 "top": expected_predicate,
@@ -290,7 +290,7 @@ class ConnectedTextureTests(unittest.TestCase):
     def test_fusion_overlay_is_a_required_client_pack_registered_only_when_fusion_is_loaded(self):
         metadata = self.load_json(FUSION_PACK / "pack.mcmeta")
         self.assertIn("pack", metadata)
-        client_setup = (ROOT / "src/main/java/com/swearprom/magicstorage/magic_storage/ClientSetup.java").read_text()
+        client_setup = (ROOT / "src/main/java/com/swear/autostorage/ClientSetup.java").read_text()
         self.assertIn("AddPackFindersEvent", client_setup)
         self.assertIn('ModList.get().isLoaded("fusion")', client_setup)
         self.assertIn('"resourcepacks/fusion_connected_casing"', client_setup)
@@ -304,16 +304,16 @@ class ConnectedTextureTests(unittest.TestCase):
             self.assertNotIn("loader", model, block)
             self.assertNotIn("type", model, block)
             self.assertEqual("minecraft:block/cube_all", model.get("parent"), block)
-            self.assertEqual({"all": f"magic_storage:block/{block}"}, model.get("textures"), block)
+            self.assertEqual({"all": f"auto_storage:block/{block}"}, model.get("textures"), block)
         for bus in BUS_BLOCKS:
             model = self.load_json(RESOURCES / f"models/item/{bus}.json")
             self.assertNotIn("loader", model, bus)
             self.assertNotIn("type", model, bus)
             self.assertEqual("minecraft:block/orientable", model.get("parent"), bus)
             self.assertEqual({
-                "top": f"magic_storage:block/{bus}_top",
-                "front": f"magic_storage:block/{bus}_front",
-                "side": f"magic_storage:block/{bus}_side",
+                "top": f"auto_storage:block/{bus}_top",
+                "front": f"auto_storage:block/{bus}_front",
+                "side": f"auto_storage:block/{bus}_side",
             }, model.get("textures"), bus)
             self.assertNotIn("_connected", json.dumps(model), bus)
 
@@ -321,7 +321,7 @@ class ConnectedTextureTests(unittest.TestCase):
             model = self.load_json(path)
             self.assertNotEqual("fusion:model", model.get("loader"), path.name)
             self.assertNotEqual("connecting", model.get("type"), path.name)
-            self.assertFalse(str(model.get("parent", "")).startswith("magic_storage:block/"), path.name)
+            self.assertFalse(str(model.get("parent", "")).startswith("auto_storage:block/"), path.name)
             self.assertNotIn("_connected", json.dumps(model), path.name)
 
     def test_storage_tiers_declare_increasing_semantic_ornaments_not_capacity_bands(self):
@@ -332,7 +332,7 @@ class ConnectedTextureTests(unittest.TestCase):
         old_bar_mask = {(x, y) for y in range(5, 11) for x in range(4, 12)}
         detail_counts = []
         for tier, ornament in enumerate(ornaments, 1):
-            texture_id = f"magic_storage:block/storage_unit_t{tier}"
+            texture_id = f"auto_storage:block/storage_unit_t{tier}"
             self.assertEqual(tier, ornament.get("tier"))
             self.assertEqual(TIER_ROLES[tier - 1], ornament.get("role"))
             self.assertEqual(TIER_ACCENTS[tier - 1], set(ornament.get("accents", [])))

@@ -1,0 +1,50 @@
+{
+  "name": "配方總覽",
+  "category": "auto_storage:getting_started",
+  "icon": "minecraft:crafting_table",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:storage_core",
+      "text": "依本總覽從起步網路逐步製作儲存升級與實用設備。",
+      "recipe2": "auto_storage:storage_terminal"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:storage_unit_t1",
+      "text": "依本總覽從起步網路逐步製作儲存升級與實用設備。",
+      "recipe2": "auto_storage:storage_unit_t2"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:storage_unit_t3",
+      "text": "依本總覽從起步網路逐步製作儲存升級與實用設備。",
+      "recipe2": "auto_storage:storage_unit_t4"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:storage_unit_t5",
+      "text": "依本總覽從起步網路逐步製作儲存升級與實用設備。",
+      "recipe2": "auto_storage:storage_unit_t6"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:crafting_terminal",
+      "text": "依本總覽從起步網路逐步製作儲存升級與實用設備。",
+      "recipe2": "auto_storage:wrench"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:import_bus",
+      "text": "依本總覽從起步網路逐步製作儲存升級與實用設備。",
+      "recipe2": "auto_storage:export_bus"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:remote_terminal",
+      "text": "製作遠端終端機供外出使用，也可為之後加入的玩家補做一本指南。",
+      "recipe2": "auto_storage:guide_book"
+    }
+  ]
+}

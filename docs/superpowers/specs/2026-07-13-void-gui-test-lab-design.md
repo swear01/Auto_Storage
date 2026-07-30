@@ -4,7 +4,7 @@
 
 ## Goal
 
-Replace the mutable terrain-based `MagicStorageGuiTest` world with a deterministic, transactionally regenerated true-void laboratory that makes manual fullscreen GUI checks fast, spatially predictable, and repeatable.
+Replace the mutable terrain-based `AutoStorageGuiTest` world with a deterministic, transactionally regenerated true-void laboratory that makes manual fullscreen GUI checks fast, spatially predictable, and repeatable.
 
 ## Chosen approach
 
@@ -13,7 +13,7 @@ The preparer continues to use Prism's `New World/level.dat` only as a current Mi
 1. rewrites the overworld generator to `minecraft:flat`;
 2. uses biome `minecraft:the_void`, one `minecraft:air` layer, no features, no lakes, and an explicitly empty structure override set;
 3. removes copied chunk, entity, point-of-interest, player, scoreboard, datapack, dimension, and other runtime state, including both the `playerdata/` directory and the singleplayer snapshot embedded at `level.dat/Data/Player`;
-4. installs only the generated `magic_storage_gui_test` datapack.
+4. installs only the generated `auto_storage_gui_test` datapack.
 
 This is preferred over clearing a normal world at high altitude because distant terrain would still exist, and over adding a test world preset to the mod because GUI-test infrastructure must not ship in the production jar.
 
@@ -78,7 +78,7 @@ Hotbar slots contain semantic navigation items in fixed positions. Main-inventor
 
 Datapack load initializes one timer objective and calls `setup`. `setup` clears the complete lab volume, removes nearby dropped items, rebuilds the platform/network/gallery, clears ready/view tags, and resets the timer. It does not immediately announce readiness.
 
-The tick function waits three server ticks before `player_ready`. This lets scheduled network growth and block-entity loading settle without a fixed wall-clock sleep. `player_ready` applies creative/night-vision state, installs the fixed inventory, primes the current hotbar latch, teleports home, then emits `MS_GUI_TEST_READY`.
+The tick function waits three server ticks before `player_ready`. This lets scheduled network growth and block-entity loading settle without a fixed wall-clock sleep. `player_ready` applies creative/night-vision state, installs the fixed inventory, primes the current hotbar latch, teleports home, then emits `AS_GUI_TEST_READY`.
 
 Hotbar `9` calls the same setup path. Reset is therefore the same operation as first boot, not a partial cleanup path.
 
@@ -113,7 +113,7 @@ Python tests must first fail, then cover:
 8. no command blocks or fixed sleeps;
 9. existing transaction/open-world/options/fullscreen contracts.
 
-After the focused suite passes, run all Python tests, Gradle build, GameTest server, and datagen drift checks. The final real-client gate must prove the current jar, SelfTest, Patchouli resources, and `MS_GUI_TEST_READY`; visual approval remains owned by the user after entering fullscreen.
+After the focused suite passes, run all Python tests, Gradle build, GameTest server, and datagen drift checks. The final real-client gate must prove the current jar, SelfTest, Patchouli resources, and `AS_GUI_TEST_READY`; visual approval remains owned by the user after entering fullscreen.
 
 ## Out of scope
 

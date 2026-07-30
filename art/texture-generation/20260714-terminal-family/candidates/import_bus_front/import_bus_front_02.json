@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061717Z",
   "type": "block",
-  "subject": "Magic Storage inward import bus face",
+  "subject": "Auto Storage inward import bus face",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

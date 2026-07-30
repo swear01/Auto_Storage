@@ -1,1 +1,0 @@
-{"type":"minecraft:crafting_shaped","pattern":["OCO","RDR","OCO"],"key":{"O":{"item":"minecraft:obsidian"},"C":{"item":"minecraft:copper_ingot"},"R":{"item":"minecraft:redstone"},"D":{"item":"minecraft:diamond"}},"result":{"id":"magic_storage:storage_core"}}

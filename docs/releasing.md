@@ -3,6 +3,19 @@
 This is the maintainer runbook for the tag-driven alpha publisher in
 `.github/workflows/release.yml`.
 
+## Next release target
+
+- Version: `v0.3.0`
+- Mod ID and registry namespace: `auto_storage`
+- Java package: `com.swear.autostorage`
+- Artifact: `build/libs/auto_storage-0.3.0.jar`
+- Tracking issue: <https://github.com/swear01/Auto_Storage/issues/31>
+
+This is an intentional breaking identity release. It does not migrate or alias
+0.2.x worlds, registries, configs, commands, addon IDs, or saved data. Release
+notes and both external listings must tell players to start a new world and
+must not present 0.3.0 as a drop-in replacement for 0.2.x.
+
 ## Current release evidence
 
 - Version: `v0.2.0`
@@ -20,10 +33,11 @@ can remain unavailable until their listing reviews finish.
 
 The 2026-07-30 listing audit completed the missing platform metadata. Modrinth
 now has the long description, MIT license, categories and featured tags,
-source/issues links, and corrected `0.2.0` Minecraft 1.21.1 + NeoForge
-metadata; the project is submitted for moderation. CurseForge now has the same
-long description, public GitHub source, comments enabled, MIT/open-distribution
-settings, and its `0.2.0` file remains under review.
+canonical source/issues/wiki links, and corrected `0.2.0` Minecraft 1.21.1 +
+NeoForge metadata; the project is submitted for moderation. CurseForge now has
+the same long description, canonical public GitHub source and Wiki links,
+comments enabled, MIT/open-distribution settings, and its `0.2.0` file remains
+under review.
 
 ## Public project metadata
 
@@ -32,6 +46,7 @@ settings, and its `0.2.0` file remains under review.
 - Modrinth project ID/slug: `auto-storage`
 - CurseForge author project: <https://authors.curseforge.com/#/projects/1630575/files>
 - CurseForge project ID: `1630575`
+- Wiki: <https://github.com/swear01/Auto_Storage/wiki>
 - Summary: Server-authoritative storage, terminals, deterministic crafting, typed
   resources, and automation for NeoForge 1.21.1.
 - Project type: Mod
@@ -45,7 +60,7 @@ settings, and its `0.2.0` file remains under review.
 - Modrinth featured tags: Storage, Technology, Utility
 - CurseForge categories: Storage; Utility & QoL; Processing; Automation
 - CurseForge comments: enabled
-- Icon: `art/release/magic-storage-project-icon.png`
+- Icon: `art/release/auto-storage-project-icon.png`
 - Icon SHA-256:
   `5bbd61d561cf5f6f3f3b87bbfc439c05b1f48b4a650d76e8e3ca665a5847945c`
 
@@ -92,6 +107,10 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_github_workflows
 
 Before tagging, require a clean `main`, green CI, the version-specific visual
 verdict, and `mod_version` equal to the intended tag without the leading `v`.
+The matching `docs/release-notes/<mod_version>.md` file is mandatory; the
+workflow prepends it to generated commit history and fails before publishing if
+it is missing. Breaking and migration warnings belong in that versioned file so
+GitHub, Modrinth, and CurseForge receive the same player-facing notice.
 The workflow reruns build, minimum/latest EMI compilation, every isolated and
 combined GameTest gate, Python tests, and datagen drift before publishing.
 

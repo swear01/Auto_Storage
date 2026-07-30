@@ -1,0 +1,58 @@
+{
+  "loader": "fusion:model",
+  "type": "connecting",
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "auto_storage:block/storage_unit_t2_connected"
+  },
+  "connections": [
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_core"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_unit_t1"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_unit_t2"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_unit_t3"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_unit_t4"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_unit_t5"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_unit_t6"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:creative_storage_unit"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:storage_terminal"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:crafting_terminal"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:import_bus"
+    },
+    {
+      "type": "match_block",
+      "block": "auto_storage:export_bus"
+    }
+  ]
+}

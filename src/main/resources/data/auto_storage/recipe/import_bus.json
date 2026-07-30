@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":[" H ","RIR"],"key":{"H":{"item":"minecraft:hopper"},"R":{"item":"minecraft:redstone"},"I":{"item":"minecraft:iron_ingot"}},"result":{"id":"auto_storage:import_bus"}}

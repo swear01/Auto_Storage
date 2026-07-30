@@ -1,0 +1,29 @@
+{
+  "name": "Storage Terminal",
+  "category": "auto_storage:terminals",
+  "icon": "auto_storage:storage_terminal",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "auto_storage:storage_terminal",
+      "text": "The Storage Terminal is the direct resource interface. Its grid grows with the window and scrolls when the selected resource group has more visible types than fit."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "See $(l:auto_storage:recipes)Recipe Catalog$() for the exact crafting layout."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Use the left resource selector for Items, Fluids, Energy, Gases, Processing, or Other registered addon kinds. All shows every available group together. Energy includes FE, Fuel/Brew, Mana, and Source; Processing contains only accumulated station work; Other contains Axe Uses and unclassified addon values. Fluids use teal frames, Energy violet, Gas/Other blue, and Processing amber. Item view supports normal extraction and inventory insertion. Other views use display-only representatives."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The search field parses ordinary names, @mod, and #tag. A bare @, #, or $ behaves like an empty search. Click outside to release Search without clearing its filter. Auto Focus gives Search initial focus only when the terminal opens; Search Sync separately controls EMI."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Sort by Name, Quantity, Mod, or ID and choose ascending or descending order. Variants with different properties stay separate. Middle-click the resource selector to return to Items. For Craftable recipes, Transform conversions, and Stations, upgrade to the $(l:auto_storage:crafting_terminal)Crafting Terminal$()."
+    }
+  ]
+}

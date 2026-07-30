@@ -20,10 +20,10 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             "minecraft:spruce_log",
             "minecraft:stone",
             "minecraft:iron_ingot",
-            "magic_storage:storage_unit_t1",
-            "magic_storage:storage_unit_t2",
-            "magic_storage:storage_terminal",
-            "magic_storage:crafting_terminal",
+            "auto_storage:storage_unit_t1",
+            "auto_storage:storage_unit_t2",
+            "auto_storage:storage_terminal",
+            "auto_storage:crafting_terminal",
         )
         digest = hashlib.sha256()
         amount_sum = 0
@@ -127,12 +127,12 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     else {
                         "1": {
                             "slot": "hotbar.0",
-                            "item": "magic_storage:storage_terminal",
+                            "item": "auto_storage:storage_terminal",
                             "count": 1,
                         },
                         "2": {
                             "slot": "hotbar.1",
-                            "item": "magic_storage:crafting_terminal",
+                            "item": "auto_storage:crafting_terminal",
                             "count": 1,
                         },
                     }
@@ -144,7 +144,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             "baseline": {
                 "installed_stations": (
                     {
-                        "magic_storage:mekanism_crusher": {
+                        "auto_storage:mekanism_crusher": {
                             "item": "mekanism:ultimate_crushing_factory",
                             "count": 2_147_483_647,
                         }
@@ -165,7 +165,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                             "installable_descriptors": "all",
                             "processing_count": 130,
                             "instant_count": 1,
-                            "ready_log": "MS_GUI_RUNTIME_FIXTURE_READY",
+                            "ready_log": "AS_GUI_RUNTIME_FIXTURE_READY",
                         },
                     }
                     if scenario_name == "terminal-scale"
@@ -180,7 +180,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 **(
                     {
                         "runtime_fixture_ready_log":
-                            "MS_GUI_RUNTIME_FIXTURE_READY",
+                            "AS_GUI_RUNTIME_FIXTURE_READY",
                     }
                     if scenario_name == "terminal-scale"
                     else {}
@@ -329,7 +329,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
         manifest = self.fake_prepare(
             Path("/tmp/minecraft"),
             "New World",
-            "MagicStorageGuiTest",
+            "AutoStorageGuiTest",
             "terminal-scale",
             10_000,
             64,
@@ -395,7 +395,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             self.assertIn("30,000 exact component-bearing types", checklist)
             self.assertIn("empty player inventory", checklist)
             self.assertIn("Name, ID, Quantity, and Mod", checklist)
-            self.assertIn("@magic_storage", checklist)
+            self.assertIn("@auto_storage", checklist)
             self.assertIn("#minecraft:logs", checklist)
             self.assertIn("Storage", checklist)
             self.assertIn("Craftable", checklist)
@@ -415,8 +415,8 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             (root / "logs").mkdir()
             (root / "logs" / "PrismLauncher-0.log").write_text("")
             preflights = []
-            mod.verify_deployed_magic_storage_jar = (
-                lambda project_dir, target: preflights.append("magic-storage")
+            mod.verify_deployed_auto_storage_jar = (
+                lambda project_dir, target: preflights.append("auto-storage")
             )
             mod.verify_deployed_fusion_jar = (
                 lambda target: preflights.append("fusion")
@@ -439,8 +439,8 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 launcher=lambda command: None,
                 wait_for_log_func=lambda **kwargs: (
                     "SelfTest: 104 passed\n"
-                    "MS_GUI_RUNTIME_FIXTURE_READY\n"
-                    "MS_GUI_TEST_READY\n"
+                    "AS_GUI_RUNTIME_FIXTURE_READY\n"
+                    "AS_GUI_TEST_READY\n"
                 ),
                 auth_verifier=lambda text: None,
                 display_mode_verifier=lambda manifest: None,
@@ -449,7 +449,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             )
 
             self.assertEqual(
-                ["magic-storage", "fusion", "support-pack"],
+                ["auto-storage", "fusion", "support-pack"],
                 preflights,
             )
 
@@ -476,8 +476,8 @@ class RunPrismGuiSessionTests(unittest.TestCase):
         (root / "logs" / "PrismLauncher-0.log").write_text("")
         (project_dir / "gradle.properties").write_text("mod_version=0.1.7\n")
         jar_bytes = b"matching build"
-        (project_dir / "build" / "libs" / "magic_storage-0.1.7.jar").write_bytes(jar_bytes)
-        (minecraft_dir / "mods" / "magic_storage-0.1.7.jar").write_bytes(jar_bytes)
+        (project_dir / "build" / "libs" / "auto_storage-0.1.7.jar").write_bytes(jar_bytes)
+        (minecraft_dir / "mods" / "auto_storage-0.1.7.jar").write_bytes(jar_bytes)
         fusion_bytes = b"matching Fusion test artifact"
         mod.FUSION_FILENAME = "fusion-1.2.12-neoforge-mc1.21.1.jar"
         mod.FUSION_SHA512 = hashlib.sha512(fusion_bytes).hexdigest()
@@ -487,7 +487,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
     def process_snapshots(self, minecraft_dir: Path):
         runner_prism = (
             "/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher "
-            "-l dev -w MagicStorageGuiTest -o MagicStorageBot"
+            "-l dev -w AutoStorageGuiTest -o AutoStorageBot"
         )
         baseline = {
             110: (1, "/usr/bin/python3 unrelated.py"),
@@ -509,7 +509,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             minecraft_dir = root / "minecraft"
             (minecraft_dir / "logs").mkdir(parents=True)
             latest_log = minecraft_dir / "logs" / "latest.log"
-            latest_log.write_text("old run\nMS_GUI_TEST_READY\n")
+            latest_log.write_text("old run\nAS_GUI_TEST_READY\n")
             self.configure_matching_deployment(mod, root, minecraft_dir)
             mod.snapshot_processes = lambda: {}
             launched = []
@@ -526,7 +526,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 cleanup_existing_func=lambda *args: cleaned.append(args),
                 configure_instance_func=lambda instance_dir: configured.append(instance_dir) or True,
                 launcher=lambda command: launched.append(command),
-                wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                 display_mode_verifier=lambda manifest: verified_modes.append(manifest["desktop_display_mode"]),
                 timestamp_func=lambda: "20260711-010203",
             )
@@ -545,15 +545,15 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     "-l",
                     "dev",
                     "-w",
-                    "MagicStorageGuiTest",
+                    "AutoStorageGuiTest",
                     "-o",
-                    "MagicStorageBot",
+                    "AutoStorageBot",
                 ],
                 launched[0],
             )
             self.assertTrue(result.run_dir.name.endswith("terminal-left-rail"))
             checklist = (result.run_dir / "checklist.md").read_text()
-            self.assertIn("-o MagicStorageBot", checklist)
+            self.assertIn("-o AutoStorageBot", checklist)
             self.assertIn("fullscreen gate", checklist)
             self.assertIn("hotbar `1`", checklist)
             self.assertIn("hotbar `2`", checklist)
@@ -618,7 +618,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 prepare_world_func=self.fake_prepare,
                 configure_instance_func=lambda instance_dir: True,
                 launcher=lambda command: None,
-                wait_for_log_func=lambda **kwargs: wait_calls.append(kwargs) or "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                wait_for_log_func=lambda **kwargs: wait_calls.append(kwargs) or "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                 display_mode_verifier=lambda manifest: None,
                 timestamp_func=lambda: "20260711-010203",
             )
@@ -640,8 +640,8 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             (minecraft_dir / "logs").mkdir(parents=True)
             (minecraft_dir / "mods").mkdir()
             (project_dir / "gradle.properties").write_text("mod_version=0.1.7\n")
-            (project_dir / "build" / "libs" / "magic_storage-0.1.7.jar").write_bytes(b"current build")
-            (minecraft_dir / "mods" / "magic_storage-0.1.7.jar").write_bytes(b"stale deployed build")
+            (project_dir / "build" / "libs" / "auto_storage-0.1.7.jar").write_bytes(b"current build")
+            (minecraft_dir / "mods" / "auto_storage-0.1.7.jar").write_bytes(b"stale deployed build")
             mod.DEFAULT_PROJECT_DIR = project_dir
             launched = []
 
@@ -654,13 +654,13 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     prepare_world_func=self.fake_prepare,
                     configure_instance_func=lambda instance_dir: True,
                     launcher=lambda command: launched.append(command),
-                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                     timestamp_func=lambda: "20260712-020304",
                 )
 
             self.assertEqual([], launched)
 
-    def test_run_session_rejects_multiple_deployed_magic_storage_jars_before_launch(self):
+    def test_run_session_rejects_multiple_deployed_auto_storage_jars_before_launch(self):
         mod = self.load_script()
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -671,9 +671,9 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             (minecraft_dir / "mods").mkdir()
             (project_dir / "gradle.properties").write_text("mod_version=0.1.7\n")
             jar_bytes = b"current build"
-            (project_dir / "build" / "libs" / "magic_storage-0.1.7.jar").write_bytes(jar_bytes)
-            (minecraft_dir / "mods" / "magic_storage-0.1.7.jar").write_bytes(jar_bytes)
-            (minecraft_dir / "mods" / "magic_storage-0.1.6.jar").write_bytes(b"old build")
+            (project_dir / "build" / "libs" / "auto_storage-0.1.7.jar").write_bytes(jar_bytes)
+            (minecraft_dir / "mods" / "auto_storage-0.1.7.jar").write_bytes(jar_bytes)
+            (minecraft_dir / "mods" / "auto_storage-0.1.6.jar").write_bytes(b"old build")
             mod.DEFAULT_PROJECT_DIR = project_dir
             launched = []
 
@@ -686,8 +686,47 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     prepare_world_func=self.fake_prepare,
                     configure_instance_func=lambda instance_dir: True,
                     launcher=lambda command: launched.append(command),
-                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                     timestamp_func=lambda: "20260712-020305",
+                )
+
+            self.assertEqual([], launched)
+
+    def test_run_session_rejects_legacy_auto_storage_jar_before_launch(self):
+        mod = self.load_script()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            project_dir = root / "project"
+            minecraft_dir = root / "minecraft"
+            (project_dir / "build" / "libs").mkdir(parents=True)
+            (minecraft_dir / "logs").mkdir(parents=True)
+            (minecraft_dir / "mods").mkdir()
+            (project_dir / "gradle.properties").write_text("mod_version=0.3.0\n")
+            jar_bytes = b"current build"
+            (project_dir / "build" / "libs" / "auto_storage-0.3.0.jar").write_bytes(
+                jar_bytes
+            )
+            (minecraft_dir / "mods" / "auto_storage-0.3.0.jar").write_bytes(
+                jar_bytes
+            )
+            legacy_name = ("magic" + "_storage") + "-0.2.0.jar"
+            (minecraft_dir / "mods" / legacy_name).write_bytes(b"legacy build")
+            mod.DEFAULT_PROJECT_DIR = project_dir
+            launched = []
+
+            with self.assertRaisesRegex(
+                RuntimeError, r"legacy Auto Storage jar.*deploy_prism_dev\.py"
+            ):
+                mod.run_session(
+                    scenario_name="boot-smoke",
+                    minecraft_dir=minecraft_dir,
+                    instance_dir=root / "instances" / "dev",
+                    run_root=root / "gui-runs",
+                    prepare_world_func=self.fake_prepare,
+                    configure_instance_func=lambda instance_dir: True,
+                    launcher=lambda command: launched.append(command),
+                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
+                    timestamp_func=lambda: "20260730-143000",
                 )
 
             self.assertEqual([], launched)
@@ -711,7 +750,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     prepare_world_func=self.fake_prepare,
                     configure_instance_func=lambda instance_dir: True,
                     launcher=lambda command: launched.append(command),
-                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                     timestamp_func=lambda: "20260714-010101",
                 )
 
@@ -736,7 +775,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     prepare_world_func=self.fake_prepare,
                     configure_instance_func=lambda instance_dir: True,
                     launcher=lambda command: launched.append(command),
-                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                     timestamp_func=lambda: "20260714-010102",
                 )
 
@@ -763,7 +802,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 prepare_world_func=self.fake_prepare,
                 configure_instance_func=lambda instance_dir: True,
                 launcher=lambda command: None,
-                wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                 display_mode_verifier=lambda manifest: None,
                 timestamp_func=lambda: "20260712-030405",
             )
@@ -827,7 +866,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 cleanup_existing_func=lambda *args: None,
                 configure_instance_func=lambda instance_dir: True,
                 launcher=lambda command: None,
-                wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                 display_mode_verifier=lambda manifest: None,
                 watchdog_launcher=lambda expected, log_path, cursor, run_dir: watchdogs.append(
                     (expected, log_path, cursor, run_dir)
@@ -843,7 +882,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
 
     def test_verify_desktop_display_mode_rejects_resolution_change(self):
         mod = self.load_script()
-        manifest = self.fake_prepare(Path("/tmp/minecraft"), "New World", "MagicStorageGuiTest")
+        manifest = self.fake_prepare(Path("/tmp/minecraft"), "New World", "AutoStorageGuiTest")
 
         with self.assertRaisesRegex(RuntimeError, "changed the macOS desktop display mode"):
             mod.verify_desktop_display_mode(
@@ -1165,7 +1204,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "AutoCloseConsole=false\n"
                 "LowMemWarning=true\n"
                 "JavaPath=/tmp/java\n"
-                "WrapperCommand=/tmp/magic_storage_minecraft_cu_wrapper.sh\n"
+                "WrapperCommand=/tmp/auto_storage_minecraft_cu_wrapper.sh\n"
             )
 
             changed = mod.configure_instance_for_manual_handoff(instance_dir)
@@ -1194,14 +1233,14 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "-l",
                 "dev",
                 "-w",
-                "MagicStorageGuiTest",
+                "AutoStorageGuiTest",
                 "-o",
-                "MagicStorageBot",
+                "AutoStorageBot",
             ],
             mod.build_launch_command(
                 "/Applications/Prism Launcher.app",
                 "dev",
-                "MagicStorageGuiTest",
+                "AutoStorageGuiTest",
             ),
         )
 
@@ -1266,7 +1305,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             'Starting Prism Launcher\n'
             'Process environment:\n'
             'QList("HOME=/Users/test", "SECRET_API_KEY=must-not-persist")\n'
-            'Launching with world "MagicStorageGuiTest"\n'
+            'Launching with world "AutoStorageGuiTest"\n'
             'Native environment:\n'
             'QList("PATH=/usr/bin", "TOKEN=must-not-persist")\n'
             'Instance started\n'
@@ -1276,7 +1315,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
 
         self.assertEqual(
             'Starting Prism Launcher\n'
-            'Launching with world "MagicStorageGuiTest"\n'
+            'Launching with world "AutoStorageGuiTest"\n'
             'Instance started\n',
             sanitized,
         )
@@ -1289,8 +1328,8 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             'Task "AuthFlow(0x1)" starting for the first time\n'
             'Task "AuthFlow(0x1)" succeeded\n'
             'RefreshSchedule: Background account refresh succeeded\n'
-            'RefreshSchedule: Processing account "MagicStorageBot"\n'
-            'Launching with account "MagicStorageBot"\n'
+            'RefreshSchedule: Processing account "AutoStorageBot"\n'
+            'Launching with account "AutoStorageBot"\n'
         )
         mod.verify_no_prism_auth_refresh(accepted)
 
@@ -1323,7 +1362,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
 
             def wait_for_log(**kwargs):
                 prism_log.write_text(prism_log.read_text() + "current offline launcher log\n")
-                return "SelfTest: 104 passed\nMS_GUI_TEST_READY\n"
+                return "SelfTest: 104 passed\nAS_GUI_TEST_READY\n"
 
             result = mod.run_session(
                 scenario_name="terminal-left-rail",
@@ -1405,7 +1444,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     cleanup_existing_func=lambda *args: events.append("cleanup"),
                     configure_instance_func=lambda instance_dir: events.append("configure") or True,
                     launcher=lambda command: events.append("launch"),
-                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nMS_GUI_TEST_READY\n",
+                    wait_for_log_func=lambda **kwargs: "SelfTest: 104 passed\nAS_GUI_TEST_READY\n",
                     timestamp_func=lambda: "20260722-010203",
                 )
 
@@ -1451,7 +1490,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     instance_dir,
                     minecraft_dir,
                     "dev",
-                    "MagicStorageGuiTest",
+                    "AutoStorageGuiTest",
                 ),
             )
 
@@ -1462,7 +1501,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             instance_dir = root / "instances" / "dev"
             minecraft_dir = instance_dir / "minecraft"
             current = {
-                200: (1, "/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher -l dev -w MagicStorageGuiTest -o MagicStorageBot"),
+                200: (1, "/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher -l dev -w AutoStorageGuiTest -o AutoStorageBot"),
                 201: (200, f"/usr/bin/java -Duser.dir={minecraft_dir} org.prismlauncher.EntryPoint"),
                 300: (1, "/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher -l other -w OtherWorld"),
                 301: (300, "/usr/bin/java -Duser.dir=/tmp/other-instance org.prismlauncher.EntryPoint"),
@@ -1473,7 +1512,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 instance_dir,
                 minecraft_dir,
                 "dev",
-                "MagicStorageGuiTest",
+                "AutoStorageGuiTest",
                 snapshot_func=lambda: current,
                 terminate_func=lambda pids: terminated.append(pids),
             )
@@ -1489,7 +1528,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             current = {
                 200: (
                     1,
-                    "/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher -l dev -w MagicStorageGuiTest -o MagicStorageBot",
+                    "/Applications/Prism Launcher.app/Contents/MacOS/prismlauncher -l dev -w AutoStorageGuiTest -o AutoStorageBot",
                 ),
             }
             terminated = []
@@ -1498,7 +1537,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 instance_dir,
                 minecraft_dir,
                 "dev",
-                "MagicStorageGuiTest",
+                "AutoStorageGuiTest",
                 snapshot_func=lambda: current,
                 terminate_func=lambda pids: terminated.append(pids),
             )
@@ -1630,13 +1669,13 @@ class RunPrismGuiSessionTests(unittest.TestCase):
         mod = self.load_script()
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "latest.log"
-            log.write_text("old ERROR before this run\nMS_GUI_TEST_READY\n")
+            log.write_text("old ERROR before this run\nAS_GUI_TEST_READY\n")
             cursor = mod.log_cursor(log)
-            log.write_text(log.read_text() + "SelfTest: 104 passed\nMS_GUI_TEST_READY\n")
+            log.write_text(log.read_text() + "SelfTest: 104 passed\nAS_GUI_TEST_READY\n")
             text = mod.wait_for_log_patterns(
                 log_path=log,
                 offset=cursor,
-                required_patterns=["SelfTest:", "MS_GUI_TEST_READY"],
+                required_patterns=["SelfTest:", "AS_GUI_TEST_READY"],
                 forbidden_patterns=["ERROR", "FATAL", "advanced_container_set_data"],
                 timeout_seconds=0,
                 poll_seconds=0,
@@ -1673,7 +1712,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 mod.wait_for_log_patterns(
                     log_path=log,
                     offset=cursor,
-                    required_patterns=["SelfTest:", "MS_GUI_TEST_READY"],
+                    required_patterns=["SelfTest:", "AS_GUI_TEST_READY"],
                     forbidden_patterns=["ERROR", "FATAL"],
                     timeout_seconds=0,
                     poll_seconds=0,
@@ -1692,13 +1731,13 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "\tat authlib.fetchProperties(YggdrasilUserApiService.java:150)\n"
                 "Caused by: com.mojang.authlib.exceptions.MinecraftClientHttpException: Status: 401\n"
                 "\tat authlib.readInputStream(MinecraftClient.java:100)\n"
-                "[11Jul2026 00:54:38.495] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [MagicStorageBot] MS_GUI_TEST_READY\n"
-                "[11Jul2026 00:54:34.271] [modloading-worker-0/INFO] [com.swearprom.magicstorage.magic_storage.MagicStorage/]: SelfTest: 104 passed, 0 failed, 104 total\n"
+                "[11Jul2026 00:54:38.495] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [AutoStorageBot] AS_GUI_TEST_READY\n"
+                "[11Jul2026 00:54:34.271] [modloading-worker-0/INFO] [com.swear.autostorage.AutoStorage/]: SelfTest: 104 passed, 0 failed, 104 total\n"
             )
             text = mod.wait_for_log_patterns(
                 log_path=log,
                 offset=cursor,
-                required_patterns=["SelfTest:", "MS_GUI_TEST_READY"],
+                required_patterns=["SelfTest:", "AS_GUI_TEST_READY"],
                 forbidden_patterns=["ERROR", "Caused by"],
                 timeout_seconds=0,
                 poll_seconds=0,
@@ -1729,16 +1768,16 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "[24Jul2026 21:11:27.837] [Worker-Main-7/ERROR] [net.minecraft.Util/]: "
                 "Invalid path in pack: botania:patchouli_books/lexica_botania/en_us/README, ignoring\n"
                 "[24Jul2026 21:11:28.356] [Render thread/INFO] "
-                "[com.swearprom.magicstorage.magic_storage.MagicStorage/]: "
+                "[com.swear.autostorage.AutoStorage/]: "
                 "SelfTest: 104 passed, 0 failed, 104 total\n"
                 "[24Jul2026 21:11:29.000] [Server thread/INFO] "
-                "[net.minecraft.server.MinecraftServer/]: [MagicStorageBot] MS_GUI_TEST_READY\n"
+                "[net.minecraft.server.MinecraftServer/]: [AutoStorageBot] AS_GUI_TEST_READY\n"
             )
 
             mod.wait_for_log_patterns(
                 log_path=log,
                 offset=cursor,
-                required_patterns=["SelfTest:", "MS_GUI_TEST_READY"],
+                required_patterns=["SelfTest:", "AS_GUI_TEST_READY"],
                 forbidden_patterns=["ERROR"],
                 timeout_seconds=0,
                 poll_seconds=0,
@@ -1774,13 +1813,13 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "[24Jul2026 21:14:36.901] [Render thread/ERROR] [Curios API/]: "
                 "feet is not a registered slot type!\n"
                 "SelfTest: 104 passed, 0 failed, 104 total\n"
-                "MS_GUI_TEST_READY\n"
+                "AS_GUI_TEST_READY\n"
             )
 
             mod.wait_for_log_patterns(
                 log_path=log,
                 offset=cursor,
-                required_patterns=["SelfTest:", "MS_GUI_TEST_READY"],
+                required_patterns=["SelfTest:", "AS_GUI_TEST_READY"],
                 forbidden_patterns=["ERROR"],
                 timeout_seconds=0,
                 poll_seconds=0,
@@ -1815,7 +1854,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             replacement.write_text(
                 "ERROR current failure before stale offset\n"
                 + "y" * 130
-                + "\nSelfTest: 104 passed\nMS_GUI_TEST_READY\n"
+                + "\nSelfTest: 104 passed\nAS_GUI_TEST_READY\n"
             )
             replacement.replace(log)
 
@@ -1823,7 +1862,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 mod.wait_for_log_patterns(
                     log_path=log,
                     offset=cursor,
-                    required_patterns=["SelfTest:", "MS_GUI_TEST_READY"],
+                    required_patterns=["SelfTest:", "AS_GUI_TEST_READY"],
                     forbidden_patterns=["ERROR"],
                     timeout_seconds=0,
                     poll_seconds=0,

@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061610Z",
   "type": "block",
-  "subject": "Magic Storage core rune crystal face",
+  "subject": "Auto Storage core rune crystal face",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

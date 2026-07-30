@@ -1,4 +1,4 @@
-# Magic Storage Mod — 設計計劃書
+# Auto Storage Mod — 設計計劃書
 
 > 靈感來源：Terraria Magic Storage  
 > 目標平台：Minecraft（NeoForge）  
@@ -45,7 +45,7 @@ Storage Core 透過 Fuel 頁中實際安裝的處理機器累積「工作站能�
 
 ### Fuel Value
 
-`furnace_fuel` 的唯一 authoritative value 是 server commit 當下的 `ItemStack#getBurnTime(null)`；大於 0 就接受並按每件實際 burn ticks 加值。因此原木、datapack/NeoForge data-map 燃料、modded fuel 與 stack-sensitive override 不需要 Magic Storage 白名單。容器 remainder、overflow 與 conflict 仍沿用 simulate-then-commit/fail-closed 契約。Brew 是尚未接 production brewing 的 explicit reserved mapping，不可反過來覆蓋有效的 runtime Fuel value。退役的 legacy `bottle_fuel` 不在現行repository schema中，早期開發資料不遷移。
+`furnace_fuel` 的唯一 authoritative value 是 server commit 當下的 `ItemStack#getBurnTime(null)`；大於 0 就接受並按每件實際 burn ticks 加值。因此原木、datapack/NeoForge data-map 燃料、modded fuel 與 stack-sensitive override 不需要 Auto Storage 白名單。容器 remainder、overflow 與 conflict 仍沿用 simulate-then-commit/fail-closed 契約。Brew 是尚未接 production brewing 的 explicit reserved mapping，不可反過來覆蓋有效的 runtime Fuel value。退役的 legacy `bottle_fuel` 不在現行repository schema中，早期開發資料不遷移。
 
 ### 燃料塞入方式
 
@@ -53,7 +53,7 @@ Crafting Terminal（含綁定後的 Remote Terminal）有獨立 **Fuel 頁**：
 - Fuel workspace沿用player inventory的vanilla light container grammar。獨立compact Fuel Target bar位於Consumables panel內；**Consumables**、**Timed Stations**、**Instant Stations** 三個全寬category panels由Crafting Terminal標題下方開始，平均分配到Inventory label band之前的完整垂直空間。每個panel左側是bounded category label，右側是會依實際寬高決定欄列數的multi-row paged flow；Consumables放input、Fuel/Brew reserves與Axe Energy，Timed Stations放Furnace/Blast Furnace/Smoker/Campfire/Brewing Stand，Instant Stations放Crafting Table/Stonecutter/Smithing Table。每格固定為上方18px slot/16px代表物、下方置中的自動縮放數字；空machine slot以dim代表物提示用途但不冒充installed item。Axe是CONSUMABLE input，不留persistent slot；finite value = remaining durability × (vanilla Unbreaking level + 1)，Unbreakable設∞。拒絕的input原樣保留；現行repository不讀legacy slot 8。
 - 先選 `Auto` / `Fuel` / `Brew Energy`，再把燃料放進專用輸入槽；Fuel 頁 Shift+背包燃料也走同一 server-authoritative 轉換路徑。
 - `Auto` 是每次開啟 menu 的預設。候選池依「可供應該池的 FuelTable distinct item 種類越少，優先度越高」排序；再以目前累計量較少、`EnergyType` enum 順序作穩定 tie-break。烈焰桿因此預設補 `blaze_fuel`。
-- 三個category panels都由server-owned `magic_storage:machine_descriptor` registry的ordered snapshot產生geometry；內建九個descriptor固定在legacy順序，第三方依stable ResourceLocation排序。每頁容量為adaptive columns × rows，稀疏內容平均使用右側content bounds，overflow由各自wheel paging與頁碼處理，slot/tooltip只認實際slot/icon。Core/menu實體bank固定256格，opening payload同步immutable snapshot，通用consumable long/∞另由clientbound packet同步；mod數量不會改變container parity。SelfTest以每類64個descriptors鎖定多頁、全descriptor可達與不重疊。Type capacity不再佔用Instant Stations格位，而是在player inventory正右方的獨立info panel顯示完整localized `stored / max types`訊息；Instant Stations因此使用完整category width。Fuel Target的current-value selector與bounded foreground list popup位於獨立bar；left/right/wheel為next/previous，middle-click明確reset Auto，server仍只接Auto/exact IDs。第三方契約見`docs/machine-descriptor-api.md`。
+- 三個category panels都由server-owned `auto_storage:machine_descriptor` registry的ordered snapshot產生geometry；內建九個descriptor固定在legacy順序，第三方依stable ResourceLocation排序。每頁容量為adaptive columns × rows，稀疏內容平均使用右側content bounds，overflow由各自wheel paging與頁碼處理，slot/tooltip只認實際slot/icon。Core/menu實體bank固定256格，opening payload同步immutable snapshot，通用consumable long/∞另由clientbound packet同步；mod數量不會改變container parity。SelfTest以每類64個descriptors鎖定多頁、全descriptor可達與不重疊。Type capacity不再佔用Instant Stations格位，而是在player inventory正右方的獨立info panel顯示完整localized `stored / max types`訊息；Instant Stations因此使用完整category width。Fuel Target的current-value selector與bounded foreground list popup位於獨立bar；left/right/wheel為next/previous，middle-click明確reset Auto，server仍只接Auto/exact IDs。第三方契約見`docs/machine-descriptor-api.md`。
 - Storage 頁不轉換燃料；Shift+燃料和一般物品一樣存入網路。舊的燃料投入即時轉換 popup 不保留；目前 popup 只負責選擇 target。
 - explicit target 不相容、non-fuel、overflow 或 stale request 全部 fail closed；container remainder 回專用槽/原玩家槽，溢出再回背包或顯式掉出。
 
@@ -193,7 +193,7 @@ Crafting Terminal 配方詳情區使用deep blue-charcoal workspace，由上到�
 
 Crafting Terminal 由左側 rail 的第一群組切換 **Storage / Craftable / Transform / Stations** 四頁，並用明顯間隔和 item-page 排序、搜尋 controls 分開。Storage只列已儲存物；Craftable列目前可合成outputs並顯示該output現有Core庫存，首個正常server tick預取最多81個visible entries，實際切頁不得同步重建全表。所有cycle controls統一left-next/right-previous/wheel-down-next/wheel-up-previous/middle-reset；defaults為Name、Ascending、Search Sync Off、Auto Focus On、Auto Transform Target、Player Craft Output與既有player-source default。只有boolean on/off控制可畫彩色狀態燈；page tabs用neutral selection，Craft Output/sort/search/Transform Target等value selectors不亮燈。Recipe client只讀server-synced exact presentation；empty prompt與有效diagram/typed ledger都使用compact dark card，footer的`×1 / ×8 / ×64 / Max`是同palette的單一segmented strip且依live craftable count整體dim。Transform提供明確input到typed resource的快捷轉換；Stations只分Processing與Instant兩區，各自支援前後頁與滾輪。
 
-Block/item材質固定為原版16×16與同一dark chassis/cyan-amethyst palette；T1→T6由copper cell、iron brace、gold/lapis lattice、diamond/quartz cross、prismarine/ender halo、netherite/amethyst crown逐級增加對稱ornament，Creative Storage Unit則使用同family的cyan-amethyst infinity cell。World casing預設使用ordinary 16×16 vanilla models；安裝可選 Fusion 1.2.12 時，client 會自動啟用內建 `fusion_connected_casing` resource-pack overlay，以 `pieced` 80×16 connected sheets覆寫world model。item models維持ordinary 16×16，bus front保留方向語意；overlay跨全部12種network blocks的model必須用釘選1.2.12支援的single-`block` predicate array，禁止誤用1.3的`blocks`或`true`/`false` schema。Published metadata不得要求Fusion；Gradle只在隔離的`fusionRuntime` source set供client/data runs載入，server/GameTest runs與Magic Storage jar不包含它。Magic Storage Wrench加入並接受`c:tools/wrench`：右鍵旋轉directional bus，Shift+右鍵安全拆除；含資料Core掉落物只取得指向既有server repository record的compact recovery token。生成候選/metadata/contact sheets只留在`art/texture-generation/`。
+Block/item材質固定為原版16×16與同一dark chassis/cyan-amethyst palette；T1→T6由copper cell、iron brace、gold/lapis lattice、diamond/quartz cross、prismarine/ender halo、netherite/amethyst crown逐級增加對稱ornament，Creative Storage Unit則使用同family的cyan-amethyst infinity cell。World casing預設使用ordinary 16×16 vanilla models；安裝可選 Fusion 1.2.12 時，client 會自動啟用內建 `fusion_connected_casing` resource-pack overlay，以 `pieced` 80×16 connected sheets覆寫world model。item models維持ordinary 16×16，bus front保留方向語意；overlay跨全部12種network blocks的model必須用釘選1.2.12支援的single-`block` predicate array，禁止誤用1.3的`blocks`或`true`/`false` schema。Published metadata不得要求Fusion；Gradle只在隔離的`fusionRuntime` source set供client/data runs載入，server/GameTest runs與Auto Storage jar不包含它。Auto Storage Wrench加入並接受`c:tools/wrench`：右鍵旋轉directional bus，Shift+右鍵安全拆除；含資料Core掉落物只取得指向既有server repository record的compact recovery token。生成候選/metadata/contact sheets只留在`art/texture-generation/`。
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -394,7 +394,7 @@ class VariantStore {
 }
 ```
 
-Core建立時便由overworld `CoreStorageRepository`永久擁有完整payload；`StorageCoreBlockEntity`只保存storage UUID/schema。含資料Core在survival、creative、explosion或Wrench拆除時只新增recovery UUID→既有storage UUID的indirection，掉落Core攜帶該UUID與type/item summary，不建立第二份payload。放置成功後原子claim同一record，複製token不能複製內容；玩家遺失owned token時可執行`/magic_storage recover_core`重發同一未claim capability。每個inventory persistence segment最多63種但segment數不限；missing/corrupt/packed/duplicate attachment全部fail closed，raw addon entries原樣保留。舊inline Core NBT與舊full-snapshot recovery格式刻意不遷移。
+Core建立時便由overworld `CoreStorageRepository`永久擁有完整payload；`StorageCoreBlockEntity`只保存storage UUID/schema。含資料Core在survival、creative、explosion或Wrench拆除時只新增recovery UUID→既有storage UUID的indirection，掉落Core攜帶該UUID與type/item summary，不建立第二份payload。放置成功後原子claim同一record，複製token不能複製內容；玩家遺失owned token時可執行`/auto_storage recover_core`重發同一未claim capability。每個inventory persistence segment最多63種但segment數不限；missing/corrupt/packed/duplicate attachment全部fail closed，raw addon entries原樣保留。舊inline Core NBT與舊full-snapshot recovery格式刻意不遷移。
 
 #### 關鍵效能策略
 

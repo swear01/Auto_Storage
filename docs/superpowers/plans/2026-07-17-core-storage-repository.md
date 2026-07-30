@@ -12,10 +12,10 @@
 
 ## File map
 
-- Create `src/main/java/com/swearprom/magicstorage/magic_storage/CoreStorageRecord.java`: owns and encodes one Core's durable inventory, energy, machine, descriptor, and unresolved state.
-- Create `src/main/java/com/swearprom/magicstorage/magic_storage/CoreStorageRepository.java`: overworld SavedData, UUID lookup, attachment leases, raw-record preservation, packing, claiming, reissue, and empty cleanup.
-- Delete `src/main/java/com/swearprom/magicstorage/magic_storage/CoreRecoverySavedData.java`: full-snapshot recovery is replaced, with no migration.
-- Modify `StorageCoreBlockEntity.java`, `StorageCoreBlock.java`, `StorageCoreBlockItem.java`, `WrenchActions.java`, and `MagicStorage.java`: fixed reference lifecycle and token-only recovery.
+- Create `src/main/java/com/swear/autostorage/CoreStorageRecord.java`: owns and encodes one Core's durable inventory, energy, machine, descriptor, and unresolved state.
+- Create `src/main/java/com/swear/autostorage/CoreStorageRepository.java`: overworld SavedData, UUID lookup, attachment leases, raw-record preservation, packing, claiming, reissue, and empty cleanup.
+- Delete `src/main/java/com/swear/autostorage/CoreRecoverySavedData.java`: full-snapshot recovery is replaced, with no migration.
+- Modify `StorageCoreBlockEntity.java`, `StorageCoreBlock.java`, `StorageCoreBlockItem.java`, `WrenchActions.java`, and `AutoStorage.java`: fixed reference lifecycle and token-only recovery.
 - Modify `TerminalBlock.java`, `RemoteTerminalItem.java`, `StorageTerminalMenu.java`, `ImportBusBlockEntity.java`, and `ExportBusBlockEntity.java`: reject unavailable storage before identity or mutation access.
 - Modify `gametest/PersistenceTests.java` and affected setup in `BehavioralTests.java`, `CraftingTests.java`, `FuelPageTests.java`, `TerminalFlowTests.java`, and `WrenchTests.java`.
 - Modify `scripts/test_static_regressions.py`, English/Traditional Chinese lang files, and the active overview/structure/notes/roadmap/design documents.
@@ -23,7 +23,7 @@
 ### Task 1: Lock the persistence boundary with RED tests
 
 **Files:**
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/PersistenceTests.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/PersistenceTests.java`
 - Modify: `scripts/test_static_regressions.py`
 
 - [ ] **Step 1: Add compile-time and static failing tests**
@@ -63,15 +63,15 @@ Expected: Java fails on missing record/test access symbols; Python fails on miss
 - [ ] **Step 3: Commit RED**
 
 ```bash
-git add src/main/java/com/swearprom/magicstorage/magic_storage/gametest/PersistenceTests.java scripts/test_static_regressions.py
+git add src/main/java/com/swear/autostorage/gametest/PersistenceTests.java scripts/test_static_regressions.py
 git commit -m "test: require out-of-chunk core storage"
 ```
 
 ### Task 2: Implement bounded record encoding
 
 **Files:**
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/CoreStorageRecord.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/PersistenceTests.java`
+- Create: `src/main/java/com/swear/autostorage/CoreStorageRecord.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/PersistenceTests.java`
 
 - [ ] **Step 1: Add failing round-trip tests**
 
@@ -132,7 +132,7 @@ Always emit all mandatory v1 fields. Preserve unparseable items/descriptors as r
 ```bash
 ./gradlew compileJava
 ./gradlew runGameTestServer
-git add src/main/java/com/swearprom/magicstorage/magic_storage/CoreStorageRecord.java src/main/java/com/swearprom/magicstorage/magic_storage/gametest/PersistenceTests.java
+git add src/main/java/com/swear/autostorage/CoreStorageRecord.java src/main/java/com/swear/autostorage/gametest/PersistenceTests.java
 git commit -m "feat: add bounded core storage records"
 ```
 
@@ -141,8 +141,8 @@ Expected: record and segmentation tests pass.
 ### Task 3: Implement the SavedData repository and leases
 
 **Files:**
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/CoreStorageRepository.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/PersistenceTests.java`
+- Create: `src/main/java/com/swear/autostorage/CoreStorageRepository.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/PersistenceTests.java`
 
 - [ ] **Step 1: Add failing repository tests**
 
@@ -160,7 +160,7 @@ Expected: missing repository API.
 
 ```java
 final class CoreStorageRepository extends SavedData {
-    static final String DATA_NAME = MagicStorage.MODID + "_core_storages";
+    static final String DATA_NAME = AutoStorage.MODID + "_core_storages";
 
     static CoreStorageRepository get(ServerLevel level);
     static CoreStorageRepository load(CompoundTag tag, HolderLookup.Provider registries);
@@ -195,15 +195,15 @@ Keep attachment leases runtime-only and owner-token-specific. Persist schema v1,
 ```bash
 ./gradlew compileJava
 ./gradlew runGameTestServer
-git add src/main/java/com/swearprom/magicstorage/magic_storage/CoreStorageRepository.java src/main/java/com/swearprom/magicstorage/magic_storage/gametest/PersistenceTests.java
+git add src/main/java/com/swear/autostorage/CoreStorageRepository.java src/main/java/com/swear/autostorage/gametest/PersistenceTests.java
 git commit -m "feat: add core storage world repository"
 ```
 
 ### Task 4: Bind Core state to repository records
 
 **Files:**
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockEntity.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlock.java`
+- Modify: `src/main/java/com/swear/autostorage/StorageCoreBlockEntity.java`
+- Modify: `src/main/java/com/swear/autostorage/StorageCoreBlock.java`
 - Modify: all affected GameTest setup files listed in the file map.
 
 - [ ] **Step 1: Add failing lifecycle tests**
@@ -250,15 +250,15 @@ Delete the legacy bottle-fuel, slot-machine, axe-field, and inline payload migra
 ```bash
 ./gradlew compileJava
 ./gradlew runGameTestServer
-git add src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockEntity.java src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlock.java src/main/java/com/swearprom/magicstorage/magic_storage/gametest
+git add src/main/java/com/swear/autostorage/StorageCoreBlockEntity.java src/main/java/com/swear/autostorage/StorageCoreBlock.java src/main/java/com/swear/autostorage/gametest
 git commit -m "refactor: bind cores to repository records"
 ```
 
 ### Task 5: Replace full recovery snapshots with record claims
 
 **Files:**
-- Delete: `src/main/java/com/swearprom/magicstorage/magic_storage/CoreRecoverySavedData.java`
-- Modify: `StorageCoreBlock.java`, `StorageCoreBlockItem.java`, `WrenchActions.java`, `MagicStorage.java`
+- Delete: `src/main/java/com/swear/autostorage/CoreRecoverySavedData.java`
+- Modify: `StorageCoreBlock.java`, `StorageCoreBlockItem.java`, `WrenchActions.java`, `AutoStorage.java`
 - Modify: `PersistenceTests.java`, `WrenchTests.java`
 
 - [ ] **Step 1: Add failing no-copy movement tests**
@@ -280,7 +280,7 @@ Expected: tests detect the full `contents` recovery snapshot and inline loot fal
 Delete the retired class with:
 
 ```bash
-git rm src/main/java/com/swearprom/magicstorage/magic_storage/CoreRecoverySavedData.java
+git rm src/main/java/com/swear/autostorage/CoreRecoverySavedData.java
 ```
 
 - [ ] **Step 4: Run GREEN and commit**
@@ -288,7 +288,7 @@ git rm src/main/java/com/swearprom/magicstorage/magic_storage/CoreRecoverySavedD
 ```bash
 ./gradlew compileJava
 ./gradlew runGameTestServer
-git add -A src/main/java/com/swearprom/magicstorage/magic_storage
+git add -A src/main/java/com/swear/autostorage
 git commit -m "fix: keep packed core contents in world storage"
 ```
 
@@ -296,13 +296,13 @@ git commit -m "fix: keep packed core contents in world storage"
 
 **Files:**
 - Modify: `TerminalBlock.java`, `RemoteTerminalItem.java`, `StorageTerminalMenu.java`, `ImportBusBlockEntity.java`, `ExportBusBlockEntity.java`
-- Modify: `src/main/resources/assets/magic_storage/lang/en_us.json`
-- Modify: `src/main/resources/assets/magic_storage/lang/zh_tw.json`
+- Modify: `src/main/resources/assets/auto_storage/lang/en_us.json`
+- Modify: `src/main/resources/assets/auto_storage/lang/zh_tw.json`
 - Modify: `TerminalFlowTests.java`, `BehavioralTests.java`
 
 - [ ] **Step 1: Add failing fail-closed tests**
 
-Create unavailable references and verify local terminal opening, Remote binding/use, menu resolution, passive/active Import, and Export refuse access without mutation. Direct player paths must report `msg.magic_storage.core_storage_unavailable`.
+Create unavailable references and verify local terminal opening, Remote binding/use, menu resolution, passive/active Import, and Export refuse access without mutation. Direct player paths must report `msg.auto_storage.core_storage_unavailable`.
 
 - [ ] **Step 2: Run RED**
 
@@ -318,7 +318,7 @@ Before `getNetworkId`, menu construction, or bus transfer, require `core.isStora
 
 ```java
 player.displayClientMessage(
-        Component.translatable("msg.magic_storage.core_storage_unavailable"), true);
+        Component.translatable("msg.auto_storage.core_storage_unavailable"), true);
 ```
 
 English is `Core storage data unavailable`; Traditional Chinese is `核心儲存資料目前無法使用`. Log UUID, dimension, position, and stable failure enum once per attachment-state transition.
@@ -328,7 +328,7 @@ English is `Core storage data unavailable`; Traditional Chinese is `核心儲存
 ```bash
 ./gradlew compileJava
 ./gradlew runGameTestServer
-git add src/main/java/com/swearprom/magicstorage/magic_storage src/main/resources/assets/magic_storage/lang
+git add src/main/java/com/swear/autostorage src/main/resources/assets/auto_storage/lang
 git commit -m "fix: fail closed when core storage is unavailable"
 ```
 
@@ -349,7 +349,7 @@ Expected: retired recovery/inline assertions and stale active docs fail.
 
 - [ ] **Step 2: Update exact current truth**
 
-Document: Core chunks contain only storage UUID plus schema; `magic_storage_core_storages.dat` owns all server state; persistence segments contain at most 63 types without changing gameplay capacity; recovery UUIDs point to the same record; missing/corrupt/duplicate attachment fails closed; no old-format migration exists.
+Document: Core chunks contain only storage UUID plus schema; `auto_storage_core_storages.dat` owns all server state; persistence segments contain at most 63 types without changing gameplay capacity; recovery UUIDs point to the same record; missing/corrupt/duplicate attachment fails closed; no old-format migration exists.
 
 Static tests require those boundaries and reject `contents` snapshots, inline Core inventory payload, and the retired Java file.
 
@@ -409,7 +409,7 @@ Expected: exit 0 and identical status.
 - [ ] **Step 5: Mechanically review invariants**
 
 ```bash
-rg -n 'tag\.put\("inventory"|tag\.put\("energy"|TAG_NETWORK_ID|CoreRecoverySavedData|BLOCK_ENTITY_DATA' src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockEntity.java src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlock.java src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockItem.java
+rg -n 'tag\.put\("inventory"|tag\.put\("energy"|TAG_NETWORK_ID|CoreRecoverySavedData|BLOCK_ENTITY_DATA' src/main/java/com/swear/autostorage/StorageCoreBlockEntity.java src/main/java/com/swear/autostorage/StorageCoreBlock.java src/main/java/com/swear/autostorage/StorageCoreBlockItem.java
 git diff --check
 git status --short
 ```

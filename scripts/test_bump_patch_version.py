@@ -13,7 +13,7 @@ class BumpPatchVersionTests(unittest.TestCase):
             props = Path(tmp) / "gradle.properties"
             props.write_text(textwrap.dedent("""\
                 org.gradle.jvmargs=-Xmx3G
-                mod_id=magic_storage
+                mod_id=auto_storage
                 mod_version=0.1.0
                 neo_version=21.1.228
             """))
@@ -29,7 +29,7 @@ class BumpPatchVersionTests(unittest.TestCase):
             self.assertEqual(result.stdout.strip(), "0.1.1")
             self.assertEqual(props.read_text(), textwrap.dedent("""\
                 org.gradle.jvmargs=-Xmx3G
-                mod_id=magic_storage
+                mod_id=auto_storage
                 mod_version=0.1.1
                 neo_version=21.1.228
             """))

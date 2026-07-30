@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","pattern":["PCP","RBR","PCP"],"key":{"P":{"item":"minecraft:black_concrete_powder"},"C":{"item":"minecraft:copper_ingot"},"R":{"item":"minecraft:redstone"},"B":{"item":"minecraft:barrel"}},"result":{"id":"auto_storage:storage_unit_t1","count":2}}

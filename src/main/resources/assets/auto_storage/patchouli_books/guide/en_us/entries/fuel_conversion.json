@@ -1,0 +1,32 @@
+{
+  "name": "Transforms",
+  "category": "auto_storage:energy",
+  "icon": "minecraft:coal",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Open $(thing)Transform$() and place one exact input in the upper slot. It stays visible until converted or returned. $(thing)Auto$() shows every compatible use of that item; choosing Fuel, Energy, Mana, or another produced target only filters those uses. Neither mode selects or consumes anything. Click one whole horizontal card, then use the upper ×1, ×8, ×64, or Max strip."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Runtime Fuel:$() any item with a positive current $(thing)runtime burn time$() is accepted, including logs, datapack fuels, and compatible modded fuels. Each item adds that many Fuel ticks. Container items return normally, and an overflowing conversion leaves the input untouched."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Brew Energy:$() Blaze Rod adds 1,200 and Blaze Powder adds 600. A Blaze Rod may therefore show both Fuel and Brew Energy cards in Auto. The player chooses the conversion; there is no hidden priority."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Axe Uses:$() an accepted axe is consumed. Finite value comes from remaining $(thing)durability$() × ($(thing)Unbreaking$() level + 1) × stack count; Mending adds nothing. An $(thing)Unbreakable$() axe supplies infinity. Supported strip, scrape, and wax-off recipes spend one Axe Use each."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Some modded transforms are timed. For example, a generator can convert fuel into FE only after its installed processing station has accumulated enough work at that exact variant's rate. Storage container transfer is not a transform: batteries, tanks, and Mana containers use direct deposit or withdrawal instead."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The target sidebar is always visible. Search uses localized produced-resource names, arrows or the wheel change pages, and middle-click returns to Auto. Every card names its direct source or required station and work on its second line; selection uses the card's inset state instead of a separate lower preview."
+    }
+  ]
+}

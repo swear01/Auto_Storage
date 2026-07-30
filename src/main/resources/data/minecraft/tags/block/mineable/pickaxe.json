@@ -1,17 +1,17 @@
 {
   "replace": false,
   "values": [
-    "magic_storage:storage_core",
-    "magic_storage:storage_unit_t1",
-    "magic_storage:storage_unit_t2",
-    "magic_storage:storage_unit_t3",
-    "magic_storage:storage_unit_t4",
-    "magic_storage:storage_unit_t5",
-    "magic_storage:storage_unit_t6",
-    "magic_storage:creative_storage_unit",
-    "magic_storage:storage_terminal",
-    "magic_storage:crafting_terminal",
-    "magic_storage:import_bus",
-    "magic_storage:export_bus"
+    "auto_storage:storage_core",
+    "auto_storage:storage_unit_t1",
+    "auto_storage:storage_unit_t2",
+    "auto_storage:storage_unit_t3",
+    "auto_storage:storage_unit_t4",
+    "auto_storage:storage_unit_t5",
+    "auto_storage:storage_unit_t6",
+    "auto_storage:creative_storage_unit",
+    "auto_storage:storage_terminal",
+    "auto_storage:crafting_terminal",
+    "auto_storage:import_bus",
+    "auto_storage:export_bus"
   ]
 }

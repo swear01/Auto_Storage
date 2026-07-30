@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061427Z",
   "type": "block",
-  "subject": "Magic Storage shared dark arcane machine chassis",
+  "subject": "Auto Storage shared dark arcane machine chassis",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

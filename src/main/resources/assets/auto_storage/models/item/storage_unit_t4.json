@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "auto_storage:block/storage_unit_t4"
+  }
+}

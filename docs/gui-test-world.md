@@ -1,6 +1,6 @@
 # GUI Test World Contract
 
-`MagicStorageGuiTest` 是由 `scripts/prepare_prism_gui_world.py` 每次依 scenario
+`AutoStorageGuiTest` 是由 `scripts/prepare_prism_gui_world.py` 每次依 scenario
 重新產生的 true-void 測試世界，不是人工維護的 save。產生器與
 `scripts/test_prepare_prism_gui_world.py` 一起構成 executable test；世界內容不符合
 本文件時，應先修改 profile 與測試，不能進遊戲臨時補物品。
@@ -39,7 +39,7 @@
 
 ## `crafting-fuel-page` 高風險 fixture
 
-- `magic_storage:mekanism_crusher` 預載
+- `auto_storage:mekanism_crusher` 預載
   `mekanism:ultimate_crushing_factory × Integer.MAX_VALUE`。這是 aggregate count，
   item prototype 的 encoded count 仍必須是 1。
 - Processing icon overlay、總 rate 與 station work 必須在此數量下不溢位且可讀。
@@ -83,9 +83,9 @@
   上限約束）、Instant各1台，並填入全部built-in energy與descriptor station-work reserves。
   玩家不需要安裝機器、等tick或搬運資源。
 - hidden seed/warm commands只在world root有
-  `.magic_storage_runtime_fixture_pending`時可用；`_gui_test_warm_craftable`完成一次
+  `.auto_storage_runtime_fixture_pending`時可用；`_gui_test_warm_craftable`完成一次
   server-side Craftable prepare後才消耗marker並輸出
-  `MS_GUI_RUNTIME_FIXTURE_READY`。runner在此log之前不得handoff。
+  `AS_GUI_RUNTIME_FIXTURE_READY`。runner在此log之前不得handoff。
 - hotbar 1/2只提供Storage Terminal與Crafting Terminal導航，玩家背包其餘位置保持全空；
   進場已面向Crafting Terminal。玩家只做F11批准、開頁、搜尋、排序、
   wheel/track/thumb、選取綠色Craftable輸出並檢查recipe preview，不負責填資料。

@@ -7,12 +7,12 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-BUNDLE_ID = "run.hapi.magicstorage.minecraftcu"
-APP_NAME = "MagicStorageMinecraftCU"
+BUNDLE_ID = "run.hapi.autostorage.minecraftcu"
+APP_NAME = "AutoStorageMinecraftCU"
 DEFAULT_INSTANCE_DIR = Path.home() / "Library/Application Support/PrismLauncher/instances/dev"
-DEFAULT_APP_PATH = Path("/tmp/MagicStorageMinecraftCU.app")
-DEFAULT_WRAPPER_PATH = Path("/tmp/magic_storage_minecraft_cu_wrapper.sh")
-LOG_PATH = Path("/tmp/magic_storage_minecraft_cu.log")
+DEFAULT_APP_PATH = Path("/tmp/AutoStorageMinecraftCU.app")
+DEFAULT_WRAPPER_PATH = Path("/tmp/auto_storage_minecraft_cu_wrapper.sh")
+LOG_PATH = Path("/tmp/auto_storage_minecraft_cu.log")
 
 
 class SetupResult(NamedTuple):
@@ -108,7 +108,7 @@ set -u
 APP={quoted_app_path}
 LOG={quoted_log_path}
 cwd=\"$(pwd)\"
-fifo=\"/tmp/magic_storage_minecraft_cu_stdin.$$\"
+fifo=\"/tmp/auto_storage_minecraft_cu_stdin.$$\"
 mkfifo \"$fifo\" || exit 112
 cleanup() {{
   [[ -n \"${{cat_pid:-}}\" ]] && kill \"$cat_pid\" 2>/dev/null || true

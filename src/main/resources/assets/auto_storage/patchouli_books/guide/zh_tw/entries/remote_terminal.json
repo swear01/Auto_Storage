@@ -1,0 +1,29 @@
+{
+  "name": "遠端終端機",
+  "category": "auto_storage:automation",
+  "icon": "auto_storage:remote_terminal",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "auto_storage:remote_terminal",
+      "text": "遠端終端機是手持式合成終端機，能存取一個已綁定核心，不必回到終端機方塊旁。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "完整合成排列請見$(l:auto_storage:recipes)配方總覽$()。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "綁定時，手持遠端終端機，對目標儲存核心 Shift 右鍵。提示會記錄核心位置；要改綁其他核心時，對新核心重做相同動作。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "手持已綁定物品右鍵即可開啟完整合成終端機。你必須位於$(thing)相同維度$()，核心區塊必須載入，而且用來存取的連接網路仍需存在。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "綁定會跟隨那一個確切核心。若核心被摧毀，即使在同座標放入另一個核心，也必須重新綁定。遠端終端機不會強制載入已關閉或卸載的路徑。"
+    }
+  ]
+}

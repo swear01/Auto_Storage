@@ -6,7 +6,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RECIPE_DIR = ROOT / "src/main/resources/data/magic_storage/recipe"
+RECIPE_DIR = ROOT / "src/main/resources/data/auto_storage/recipe"
 
 EXPECTED_RECIPES = {
     "storage_core": {
@@ -18,7 +18,7 @@ EXPECTED_RECIPES = {
             "R": {"item": "minecraft:redstone"},
             "D": {"item": "minecraft:diamond"},
         },
-        "result": {"id": "magic_storage:storage_core"},
+        "result": {"id": "auto_storage:storage_core"},
     },
     "storage_terminal": {
         "type": "minecraft:crafting_shaped",
@@ -31,7 +31,7 @@ EXPECTED_RECIPES = {
             "H": {"item": "minecraft:chest"},
             "C": {"item": "minecraft:copper_ingot"},
         },
-        "result": {"id": "magic_storage:storage_terminal"},
+        "result": {"id": "auto_storage:storage_terminal"},
     },
     "crafting_terminal": {
         "type": "minecraft:crafting_shaped",
@@ -40,10 +40,10 @@ EXPECTED_RECIPES = {
             "R": {"item": "minecraft:redstone"},
             "G": {"item": "minecraft:gold_ingot"},
             "C": {"item": "minecraft:copper_ingot"},
-            "S": {"item": "magic_storage:storage_terminal"},
+            "S": {"item": "auto_storage:storage_terminal"},
             "T": {"item": "minecraft:crafting_table"},
         },
-        "result": {"id": "magic_storage:crafting_terminal"},
+        "result": {"id": "auto_storage:crafting_terminal"},
     },
     "remote_terminal": {
         "type": "minecraft:crafting_shaped",
@@ -52,10 +52,10 @@ EXPECTED_RECIPES = {
             "O": {"item": "minecraft:obsidian"},
             "E": {"item": "minecraft:ender_pearl"},
             "R": {"item": "minecraft:redstone"},
-            "T": {"item": "magic_storage:crafting_terminal"},
+            "T": {"item": "auto_storage:crafting_terminal"},
             "C": {"item": "minecraft:compass"},
         },
-        "result": {"id": "magic_storage:remote_terminal"},
+        "result": {"id": "auto_storage:remote_terminal"},
     },
     "storage_unit_t1": {
         "type": "minecraft:crafting_shaped",
@@ -66,7 +66,7 @@ EXPECTED_RECIPES = {
             "R": {"item": "minecraft:redstone"},
             "B": {"item": "minecraft:barrel"},
         },
-        "result": {"id": "magic_storage:storage_unit_t1", "count": 2},
+        "result": {"id": "auto_storage:storage_unit_t1", "count": 2},
     },
     "storage_unit_t2": {
         "type": "minecraft:crafting_shaped",
@@ -75,9 +75,9 @@ EXPECTED_RECIPES = {
             "I": {"item": "minecraft:iron_ingot"},
             "B": {"item": "minecraft:basalt"},
             "R": {"item": "minecraft:redstone"},
-            "U": {"item": "magic_storage:storage_unit_t1"},
+            "U": {"item": "auto_storage:storage_unit_t1"},
         },
-        "result": {"id": "magic_storage:storage_unit_t2"},
+        "result": {"id": "auto_storage:storage_unit_t2"},
     },
     "storage_unit_t3": {
         "type": "minecraft:crafting_shaped",
@@ -86,9 +86,9 @@ EXPECTED_RECIPES = {
             "G": {"item": "minecraft:gold_ingot"},
             "L": {"item": "minecraft:lapis_lazuli"},
             "O": {"item": "minecraft:obsidian"},
-            "U": {"item": "magic_storage:storage_unit_t2"},
+            "U": {"item": "auto_storage:storage_unit_t2"},
         },
-        "result": {"id": "magic_storage:storage_unit_t3"},
+        "result": {"id": "auto_storage:storage_unit_t3"},
     },
     "storage_unit_t4": {
         "type": "minecraft:crafting_shaped",
@@ -97,9 +97,9 @@ EXPECTED_RECIPES = {
             "Q": {"item": "minecraft:quartz"},
             "D": {"item": "minecraft:diamond"},
             "S": {"item": "minecraft:slime_ball"},
-            "U": {"item": "magic_storage:storage_unit_t3"},
+            "U": {"item": "auto_storage:storage_unit_t3"},
         },
-        "result": {"id": "magic_storage:storage_unit_t4"},
+        "result": {"id": "auto_storage:storage_unit_t4"},
     },
     "storage_unit_t5": {
         "type": "minecraft:crafting_shaped",
@@ -108,9 +108,9 @@ EXPECTED_RECIPES = {
             "P": {"item": "minecraft:prismarine_crystals"},
             "H": {"item": "minecraft:honeycomb"},
             "E": {"item": "minecraft:ender_pearl"},
-            "U": {"item": "magic_storage:storage_unit_t4"},
+            "U": {"item": "auto_storage:storage_unit_t4"},
         },
-        "result": {"id": "magic_storage:storage_unit_t5"},
+        "result": {"id": "auto_storage:storage_unit_t5"},
     },
     "storage_unit_t6": {
         "type": "minecraft:crafting_shaped",
@@ -119,9 +119,9 @@ EXPECTED_RECIPES = {
             "A": {"item": "minecraft:amethyst_block"},
             "N": {"item": "minecraft:netherite_scrap"},
             "E": {"item": "minecraft:ender_eye"},
-            "U": {"item": "magic_storage:storage_unit_t5"},
+            "U": {"item": "auto_storage:storage_unit_t5"},
         },
-        "result": {"id": "magic_storage:storage_unit_t6"},
+        "result": {"id": "auto_storage:storage_unit_t6"},
     },
 }
 
@@ -194,12 +194,12 @@ class ProgressionRecipeTests(unittest.TestCase):
             recipe = self.read_recipe(recipe_id)
             with self.subTest(recipe_id=recipe_id):
                 self.assertEqual(
-                    {"item": f"magic_storage:storage_unit_t{tier - 1}"},
+                    {"item": f"auto_storage:storage_unit_t{tier - 1}"},
                     recipe["key"]["U"],
                 )
                 self.assertEqual(1, "".join(recipe["pattern"]).count("U"))
                 self.assertEqual(
-                    f"magic_storage:storage_unit_t{tier}", recipe["result"]["id"]
+                    f"auto_storage:storage_unit_t{tier}", recipe["result"]["id"]
                 )
 
     def test_functional_midgame_recipes_have_no_expensive_or_completion_gates(self):
@@ -248,11 +248,11 @@ class ProgressionRecipeTests(unittest.TestCase):
         }
         self.assertEqual(
             {
-                "magic_storage:storage_unit_t1",
-                "magic_storage:storage_unit_t2",
-                "magic_storage:storage_unit_t3",
-                "magic_storage:storage_unit_t4",
-                "magic_storage:storage_unit_t5",
+                "auto_storage:storage_unit_t1",
+                "auto_storage:storage_unit_t2",
+                "auto_storage:storage_unit_t3",
+                "auto_storage:storage_unit_t4",
+                "auto_storage:storage_unit_t5",
                 "minecraft:amethyst_block",
                 "minecraft:barrel",
                 "minecraft:basalt",
@@ -276,8 +276,8 @@ class ProgressionRecipeTests(unittest.TestCase):
                 "minecraft:redstone_torch",
                 "minecraft:slime_ball",
                 "minecraft:crafting_table",
-                "magic_storage:storage_terminal",
-                "magic_storage:crafting_terminal",
+                "auto_storage:storage_terminal",
+                "auto_storage:crafting_terminal",
             },
             ingredient_ids,
         )

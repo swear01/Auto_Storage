@@ -22,7 +22,7 @@
     "bypass_prompt_expansion": true,
     "seed": 64051
   },
-  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/magic_storage/textures/block/import_bus_side.png",
+  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/auto_storage/textures/block/import_bus_side.png",
   "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/art/texture-generation/20260713-cohesive-16x16/block/import_bus_side.preview.png",
   "raw_png": null,
   "selected_candidate": "import_bus_side_01"

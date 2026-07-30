@@ -1,0 +1,28 @@
+{
+  "name": "發展路線與詞彙",
+  "category": "auto_storage:troubleshooting",
+  "icon": "minecraft:diamond",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)詞彙：$()網路是所有以方塊面連接的 Auto Storage 方塊；核心是保存物品與能量的唯一中心；種類是一個精確物品身分；種類容量是相鄰單元可支援的不同身分數量。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)起步里程碑：$()建立一個核心、一個儲存終端機與兩個 T1 單元，合計只需一顆鑽石，加上黑色混凝土粉末、黑曜石、銅、紅石、玻璃、木材與木桶；T1 不需要紫水晶。擴充前先測試放入與取出各一次。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)實用中期：$()加入合成終端機、相容扳手、匯入匯流排、匯出匯流排、遠端終端機與 T1-T3 儲存；不需要獄髓、伏守古城戰利品、試煉密室戰利品或完成終界。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)選擇性高階：$()T4 首次需要地獄石英與終界珍珠；T5 加入海磷晶與烈焰材料；T6 加入紫水晶方塊、獄髓碎片與終界之眼。它們提供容量與外觀，不會卡住終端機或自動化。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)快速路線：$()先完成$(l:auto_storage:first_network)你的第一個網路$()，熟悉$(l:auto_storage:terminal_controls)終端機控制$()，透過$(l:auto_storage:energy_overview)工作站分頁$()安裝工作站，再依需要加入$(l:auto_storage:import_bus)自動化$()與$(l:auto_storage:remote_terminal)遠端存取$()。"
+    }
+  ]
+}

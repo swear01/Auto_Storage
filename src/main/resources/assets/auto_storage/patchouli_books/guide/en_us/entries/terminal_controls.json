@@ -1,0 +1,28 @@
+{
+  "name": "Terminal Controls",
+  "category": "auto_storage:terminals",
+  "icon": "minecraft:redstone",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Value selectors share one control grammar: $(thing)left-click$() goes to the next value, $(thing)right-click$() goes to the previous value, wheel down or up moves next or previous while hovered, and $(thing)middle-click$() resets the selector."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Reset defaults are Name sort, Ascending order, Search Sync Off, Items resource view, $(thing)Auto Transform target$(), and Player craft output. Auto Focus is a separate on/off control and starts enabled."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Sorting offers $(thing)Name, Quantity, Mod, and ID$(). Type names normally, or begin a term with $(thing)@mod$() or $(thing)#tag$(). Auto Focus gives Search initial keyboard focus when a terminal opens; clicking outside releases focus without clearing the query. Search Sync separately offers Off, terminal-to-EMI, and EMI two-way."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A colored light means a true on/off control such as Auto Focus or Use Player Inventory. Resource view, sort, Search Sync, Transform Target, and Craft Output are selected values, so they use labels or icons instead. The active page uses a neutral selected-tab frame."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Your Auto Focus choice, sort, order, Search Sync mode, resource view, Crafting tab, ingredient source, output destination, and Transform Target are remembered for every terminal on this Minecraft client. Search text, target/card pages, scroll position, and selected recipes reset when the screen closes."
+    }
+  ]
+}

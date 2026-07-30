@@ -9,9 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 class MacOsBorderlessFullscreenTests(unittest.TestCase):
     def test_client_mixin_replaces_monitor_backed_f11_without_native_fullscreen(self):
         metadata = (ROOT / "src/main/templates/META-INF/neoforge.mods.toml").read_text()
-        self.assertIn('config="magic_storage.mixins.json"', metadata)
+        self.assertIn('config="auto_storage.mixins.json"', metadata)
 
-        config = json.loads((ROOT / "src/main/resources/magic_storage.mixins.json").read_text())
+        config = json.loads((ROOT / "src/main/resources/auto_storage.mixins.json").read_text())
         self.assertTrue(config["required"])
         self.assertEqual(
             ["MacOsWindowMixin", "MinecraftDisconnectMixin"],
@@ -21,7 +21,7 @@ class MacOsBorderlessFullscreenTests(unittest.TestCase):
 
         source = (
             ROOT
-            / "src/main/java/com/swearprom/magicstorage/magic_storage/mixin/MacOsWindowMixin.java"
+            / "src/main/java/com/swear/autostorage/mixin/MacOsWindowMixin.java"
         ).read_text()
         self.assertIn("glfwSetWindowMonitor", source)
         self.assertIn("glfwGetWindowMonitor", source)
@@ -43,7 +43,7 @@ class MacOsBorderlessFullscreenTests(unittest.TestCase):
     def test_disconnect_leaves_borderless_fullscreen_before_the_forced_render_tick(self):
         source = (
             ROOT
-            / "src/main/java/com/swearprom/magicstorage/magic_storage/mixin/MinecraftDisconnectMixin.java"
+            / "src/main/java/com/swear/autostorage/mixin/MinecraftDisconnectMixin.java"
         ).read_text()
         self.assertIn('method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V"', source)
         self.assertIn("@At(\"HEAD\")", source)
@@ -56,7 +56,7 @@ class MacOsBorderlessFullscreenTests(unittest.TestCase):
 
         access = (
             ROOT
-            / "src/main/java/com/swearprom/magicstorage/magic_storage/mixin/MacOsWindowAccess.java"
+            / "src/main/java/com/swear/autostorage/mixin/MacOsWindowAccess.java"
         )
         self.assertFalse(access.exists())
 

@@ -3,27 +3,27 @@ loaderVersion="[4,)"
 license="MIT"
 
 [[mods]]
-modId="magic_storage_recipe_fixture"
+modId="auto_storage_recipe_fixture"
 version="1.0.0"
 displayName="Auto Storage Recipe Family Fixture"
 description='''Repository-owned integration fixture for the public recipe-family API.'''
 
-[[dependencies.magic_storage_recipe_fixture]]
+[[dependencies.auto_storage_recipe_fixture]]
 modId="neoforge"
 type="required"
 versionRange="[21.1,)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.magic_storage_recipe_fixture]]
+[[dependencies.auto_storage_recipe_fixture]]
 modId="minecraft"
 type="required"
 versionRange="[1.21.1,1.22)"
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.magic_storage_recipe_fixture]]
-modId="magic_storage"
+[[dependencies.auto_storage_recipe_fixture]]
+modId="auto_storage"
 type="required"
 versionRange="[0.1,)"
 ordering="AFTER"

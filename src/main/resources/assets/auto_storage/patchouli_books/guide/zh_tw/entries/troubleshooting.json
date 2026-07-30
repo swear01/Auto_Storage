@@ -1,0 +1,36 @@
+{
+  "name": "常見問題",
+  "category": "auto_storage:troubleshooting",
+  "icon": "minecraft:redstone",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)核心或路徑問題：$()確認需要的每個方塊都以完整側面相接，而且路徑已載入。一個網路必須恰好有一個核心；若核心警告已達掃描上限，請縮短或拆分路徑直到警告消失。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)已封裝核心遺失：$()在放置其他權杖前執行 $(thing)/auto_storage recover_core$()；它會重發你最新、屬於你且尚未領取的伺服器快照。已領取權杖及更新前遺失的資料無法復原。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)種類容量已滿：$()核心可繼續保留既有種類，但無法接收全新種類。增加或升級儲存單元，或移除不需要的變體後再試一次。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)不支援的配方：$()先安裝相符工作站。預覽仍為中性時，配方可能是特殊、動態、不完整、鍛造紋飾、釀造或其他不支援形式，請改用一般支援配方。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)輸出沒有空間：$()一次$(thing)整批合成$()必須連同所有容器剩餘物完整放入。清出玩家或核心空間，或切換合成輸出後重試；容量檢查失敗不會消耗材料、能量或斧頭使用次數。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)轉換、遠端或外殼問題：$()確認轉換目標、點選相容用途卡片並檢查物品燃燒值；讓已綁定核心與路徑在相同維度保持載入；只在需要連接外殼時安裝可選 Fusion。"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)從 0.2.x 升級：$()0.3.0 使用新的技術識別，不遷移舊世界、registry、設定、指令、addon ID 或存檔資料。請建立新世界、移除舊 jar，並在 instance 內只保留一個 Auto Storage 版本。"
+    }
+  ]
+}

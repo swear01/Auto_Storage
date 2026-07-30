@@ -1,0 +1,6 @@
+{
+  "name": "自動化與遠端存取",
+  "description": "自動搬運物品，並從遠處存取已載入的網路。",
+  "icon": "auto_storage:import_bus",
+  "sortnum": 4
+}

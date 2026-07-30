@@ -1,7 +1,7 @@
 {
   "created_at_utc": "20260714T061632Z",
   "type": "block",
-  "subject": "Magic Storage crafting terminal face",
+  "subject": "Auto Storage crafting terminal face",
   "model": "retro-diffusion/rd-fast",
   "style": "mc_texture",
   "tileable": false,

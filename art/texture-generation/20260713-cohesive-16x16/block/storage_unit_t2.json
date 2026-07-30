@@ -24,7 +24,7 @@
     "input_image": "[data:uri omitted]",
     "strength": 0.42
   },
-  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/magic_storage/textures/block/storage_unit_t2.png",
+  "final_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/src/main/resources/assets/auto_storage/textures/block/storage_unit_t2.png",
   "preview_png": "/Users/swear/Documents/diy_minecraft_mods/Auto_Storage/art/texture-generation/20260713-cohesive-16x16/block/storage_unit_t2.preview.png",
   "raw_png": null,
   "selected_candidate": "storage_unit_t2_02"

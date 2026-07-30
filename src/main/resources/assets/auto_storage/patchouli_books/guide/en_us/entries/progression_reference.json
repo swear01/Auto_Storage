@@ -1,0 +1,28 @@
+{
+  "name": "Progression and Glossary",
+  "category": "auto_storage:troubleshooting",
+  "icon": "minecraft:diamond",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Glossary:$() Network means all face-connected Auto Storage blocks. Core means the one block carrying items and energy. Type means one exact item identity. Type capacity means how many distinct identities the attached Units can support."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Starter milestone:$() build one Core, one Storage Terminal, and two T1 Units. Together they use one Diamond plus black concrete powder, obsidian, copper, redstone, glass, wood, and a Barrel; T1 needs no amethyst. Test one insert and one extraction before expanding."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Functional midgame:$() add a Crafting Terminal, compatible wrench, Import Bus, Export Bus, Remote Terminal, and T1-T3 storage without Netherite, Ancient City loot, Trial Chamber loot, or End completion."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Optional upper tiers:$() T4 first asks for Nether Quartz and Ender Pearls; T5 adds prismarine and Blaze materials; T6 adds amethyst blocks, Netherite Scraps, and Eyes of Ender. These tiers add capacity and prestige, not access to terminals or automation."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(thing)Quick route:$() finish $(l:auto_storage:first_network)Your First Network$(), learn $(l:auto_storage:terminal_controls)Terminal Controls$(), install stations through the $(l:auto_storage:energy_overview)Stations tab$(), then add $(l:auto_storage:import_bus)automation$() and $(l:auto_storage:remote_terminal)remote access$() as needed."
+    }
+  ]
+}

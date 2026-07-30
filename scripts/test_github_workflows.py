@@ -130,12 +130,12 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("./gradlew runData --console=plain --no-daemon 2>&1 | tee build/ci-logs/datagen.log", text)
         self.assertIn("git status --porcelain -- src/generated/resources src/main/resources", text)
         self.assertIn("actions/upload-artifact@v7", text)
-        self.assertIn("name: magic-storage-ci-logs", text)
+        self.assertIn("name: auto-storage-ci-logs", text)
         self.assertIn("${{ always() }}", text)
         self.assertIn("build/ci-logs/**", text)
         self.assertIn("run/logs/**", text)
         self.assertIn("build/reports/**", text)
-        self.assertIn("build/libs/magic_storage-*.jar", text)
+        self.assertIn("build/libs/auto_storage-*.jar", text)
         self.assertIn("contents: read", text)
         self.assertIn("Verify minimum and latest compatible EMI releases", text)
         self.assertIn('MIN_EMI="$(sed -n \'s/^emi_version=//p\' gradle.properties)"', text)
@@ -210,9 +210,9 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("nU0bVIaL", text)
         self.assertIn("306770", text)
         self.assertIn("changelog-file: build/release-notes.md", text)
-        self.assertIn("name: magic-storage-release-logs", text)
+        self.assertIn("name: auto-storage-release-logs", text)
         self.assertIn(
-            "files: build/libs/magic_storage-${{ steps.release-meta.outputs.version }}.jar",
+            "files: build/libs/auto_storage-${{ steps.release-meta.outputs.version }}.jar",
             text,
         )
         self.assertIn("github-token: ${{ secrets.GITHUB_TOKEN }}", text)
@@ -262,7 +262,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("Visual verification owner: user", combined)
         self.assertIn("datagen drift", combined)
         self.assertIn("release notes", combined)
-        self.assertIn("-o MagicStorageBot", combined)
+        self.assertIn("-o AutoStorageBot", combined)
         self.assertIn("scripts/stage_emi_runtime.sh", combined)
         self.assertIn("same Gradle command once", combined)
         self.assertIn("Modrinth / CurseForge", self.read_required("docs/roadmap.md"))
@@ -295,7 +295,7 @@ class GitHubWorkflowTests(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, guide)
 
-        icon = ROOT / "art/release/magic-storage-project-icon.png"
+        icon = ROOT / "art/release/auto-storage-project-icon.png"
         self.assertTrue(icon.exists(), "missing release project icon")
         data = icon.read_bytes()
         self.assertEqual(b"\x89PNG\r\n\x1a\n", data[:8])
@@ -305,9 +305,23 @@ class GitHubWorkflowTests(unittest.TestCase):
         ))
         self.assertLess(len(data), 2 * 1024 * 1024)
 
+    def test_release_requires_versioned_breaking_notes(self):
+        release = self.read_required(".github/workflows/release.yml")
+        self.assertIn(
+            'RELEASE_NOTES_FILE="docs/release-notes/${VERSION}.md"',
+            release,
+        )
+        self.assertIn('test -f "$RELEASE_NOTES_FILE"', release)
+        self.assertIn('cat "$RELEASE_NOTES_FILE"', release)
+
+        notes = self.read_required("docs/release-notes/0.3.0.md")
+        self.assertIn("does not migrate", notes)
+        self.assertIn("0.2.x", notes)
+        self.assertIn("new world", notes)
+
     def test_public_name_and_mit_license_are_consistent(self):
         properties = self.read_required("gradle.properties")
-        self.assertIn("mod_id=magic_storage", properties)
+        self.assertIn("mod_id=auto_storage", properties)
         self.assertIn("mod_name=Auto Storage", properties)
         self.assertIn("mod_license=MIT", properties)
 
@@ -329,18 +343,18 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn('echo "## Auto Storage ${GITHUB_REF_NAME}"', release)
 
         player_facing = "\n".join([
-            self.read_required("src/main/resources/assets/magic_storage/lang/en_us.json"),
-            self.read_required("src/main/resources/assets/magic_storage/lang/zh_tw.json"),
-            self.read_required("src/main/resources/data/magic_storage/patchouli_books/guide/book.json"),
+            self.read_required("src/main/resources/assets/auto_storage/lang/en_us.json"),
+            self.read_required("src/main/resources/assets/auto_storage/lang/zh_tw.json"),
+            self.read_required("src/main/resources/data/auto_storage/patchouli_books/guide/book.json"),
             self.read_required("src/main/templates/META-INF/neoforge.mods.toml"),
         ])
         self.assertIn("Auto Storage", player_facing)
         self.assertNotIn("Magic Storage", player_facing)
         for locale in ("en_us", "zh_tw"):
             lang = json.loads(self.read_required(
-                f"src/main/resources/assets/magic_storage/lang/{locale}.json"
+                f"src/main/resources/assets/auto_storage/lang/{locale}.json"
             ))
-            self.assertEqual("Auto Storage", lang["itemGroup.magic_storage"])
+            self.assertEqual("Auto Storage", lang["itemGroup.auto_storage"])
 
         for path in ROOT.glob("src/*/resources/META-INF/neoforge.mods.toml"):
             with self.subTest(path=path.relative_to(ROOT)):
@@ -402,7 +416,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("actions/setup-java@v5", text)
         self.assertIn("gradle/actions/setup-gradle@v6", text)
         self.assertIn("./gradlew build --console=plain --no-daemon", text)
-        self.assertIn("cp build/libs/magic_storage-*.jar run/mods/", text)
+        self.assertIn("cp build/libs/auto_storage-*.jar run/mods/", text)
         self.assertIn(
             "./gradlew stageClientSmokeSupportMods --console=plain --no-daemon",
             text,

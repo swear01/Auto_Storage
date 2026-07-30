@@ -34,7 +34,7 @@ jobs:
       - name: Stage required client mods
         run: |
           mkdir -p run/mods
-          cp build/libs/magic_storage-*.jar run/mods/
+          cp build/libs/auto_storage-*.jar run/mods/
           ./gradlew stageClientSmokeSupportMods --console=plain --no-daemon
           cp build/client-smoke-mods/patchouli-neoforge.jar run/mods/
           cp build/client-smoke-mods/fusion-connected-textures.jar run/mods/

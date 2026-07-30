@@ -28,14 +28,14 @@
 
 **Files:**
 
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/SortMode.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockEntity.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalDisplayStack.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalEntryComparator.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/SelfTest.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/TerminalFlowTests.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/CraftingTests.java`
+- Modify: `src/main/java/com/swear/autostorage/SortMode.java`
+- Modify: `src/main/java/com/swear/autostorage/StorageCoreBlockEntity.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalMenu.java`
+- Create: `src/main/java/com/swear/autostorage/TerminalDisplayStack.java`
+- Create: `src/main/java/com/swear/autostorage/TerminalEntryComparator.java`
+- Modify: `src/main/java/com/swear/autostorage/SelfTest.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/TerminalFlowTests.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/CraftingTests.java`
 - Modify: `docs/overview.md`
 - Modify: `docs/notes.md`
 
@@ -51,13 +51,13 @@
 
 **Files:**
 
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalProfile.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/StorageTerminalScreen.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java`
-- Modify: `src/main/resources/assets/magic_storage/lang/en_us.json`
+- Modify: `src/main/java/com/swear/autostorage/TerminalLayout.java`
+- Create: `src/main/java/com/swear/autostorage/TerminalProfile.java`
+- Modify: `src/main/java/com/swear/autostorage/StorageTerminalScreen.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalScreen.java`
+- Modify: `src/main/resources/assets/auto_storage/lang/en_us.json`
 - Modify: `scripts/test_static_regressions.py`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/SelfTest.java`
+- Modify: `src/main/java/com/swear/autostorage/SelfTest.java`
 - Modify: `docs/overview.md`
 - Modify: `docs/structure.md`
 - Modify: `docs/notes.md`
@@ -74,12 +74,12 @@
 
 **Files:**
 
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/RecipePresentation.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/RecipePresentationKind.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/CraftingTests.java`
+- Create: `src/main/java/com/swear/autostorage/RecipePresentation.java`
+- Create: `src/main/java/com/swear/autostorage/RecipePresentationKind.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalMenu.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalScreen.java`
+- Modify: `src/main/java/com/swear/autostorage/TerminalLayout.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/CraftingTests.java`
 - Modify: `scripts/test_static_regressions.py`
 - Modify: `docs/overview.md`
 - Modify: `docs/structure.md`
@@ -98,13 +98,13 @@
 **Files:**
 
 - Modify: `build.gradle`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/RecipeDiagramRenderer.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/NativeRecipeDiagramRenderer.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/compat/EmiRecipeDiagramBootstrap.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/compat/EmiRecipeDiagramRenderer.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/ClientSetup.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/compat/MagicStorageEmiPlugin.java`
+- Create: `src/main/java/com/swear/autostorage/RecipeDiagramRenderer.java`
+- Create: `src/main/java/com/swear/autostorage/NativeRecipeDiagramRenderer.java`
+- Create: `src/main/java/com/swear/autostorage/compat/EmiRecipeDiagramBootstrap.java`
+- Create: `src/main/java/com/swear/autostorage/compat/EmiRecipeDiagramRenderer.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalScreen.java`
+- Modify: `src/main/java/com/swear/autostorage/ClientSetup.java`
+- Modify: `src/main/java/com/swear/autostorage/compat/AutoStorageEmiPlugin.java`
 - Modify: `scripts/test_static_regressions.py`
 - Modify: `docs/notes.md`
 - Modify: `docs/rs2-design-gap.md`
@@ -121,13 +121,13 @@
 
 **Files:**
 
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalOutputDestination.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/MagicStorage.java`
-- Modify: `src/main/resources/assets/magic_storage/lang/en_us.json`
-- Modify: `src/main/resources/assets/magic_storage/lang/zh_tw.json`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/CraftingTests.java`
+- Create: `src/main/java/com/swear/autostorage/TerminalOutputDestination.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalMenu.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalScreen.java`
+- Modify: `src/main/java/com/swear/autostorage/AutoStorage.java`
+- Modify: `src/main/resources/assets/auto_storage/lang/en_us.json`
+- Modify: `src/main/resources/assets/auto_storage/lang/zh_tw.json`
+- Modify: `src/main/java/com/swear/autostorage/gametest/CraftingTests.java`
 - Modify: `docs/overview.md`
 - Modify: `docs/notes.md`
 
@@ -143,20 +143,20 @@
 
 **Files:**
 
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/MachineEnergyTable.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingStationTable.java`
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/AxeEnergy.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/AxeTransformationCatalog.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockEntity.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/FuelPageTests.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/CraftingTests.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/PersistenceTests.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/gametest/TerminalFlowTests.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/SelfTest.java`
-- Modify: `src/main/resources/assets/magic_storage/lang/en_us.json`
-- Modify: `src/main/resources/assets/magic_storage/lang/zh_tw.json`
+- Modify: `src/main/java/com/swear/autostorage/MachineEnergyTable.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingStationTable.java`
+- Create: `src/main/java/com/swear/autostorage/AxeEnergy.java`
+- Modify: `src/main/java/com/swear/autostorage/AxeTransformationCatalog.java`
+- Modify: `src/main/java/com/swear/autostorage/StorageCoreBlockEntity.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalMenu.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalScreen.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/FuelPageTests.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/CraftingTests.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/PersistenceTests.java`
+- Modify: `src/main/java/com/swear/autostorage/gametest/TerminalFlowTests.java`
+- Modify: `src/main/java/com/swear/autostorage/SelfTest.java`
+- Modify: `src/main/resources/assets/auto_storage/lang/en_us.json`
+- Modify: `src/main/resources/assets/auto_storage/lang/zh_tw.json`
 - Modify: `scripts/prepare_prism_gui_world.py`
 - Modify: `scripts/run_prism_gui_session.py`
 - Modify: `scripts/test_prepare_prism_gui_world.py`
@@ -177,11 +177,11 @@
 
 **Files:**
 
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java`
-- Modify: `src/main/resources/assets/magic_storage/lang/en_us.json`
-- Modify: `src/main/resources/assets/magic_storage/lang/zh_tw.json`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/SelfTest.java`
+- Modify: `src/main/java/com/swear/autostorage/TerminalLayout.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalScreen.java`
+- Modify: `src/main/resources/assets/auto_storage/lang/en_us.json`
+- Modify: `src/main/resources/assets/auto_storage/lang/zh_tw.json`
+- Modify: `src/main/java/com/swear/autostorage/SelfTest.java`
 - Modify: `scripts/test_static_regressions.py`
 - Modify: `scripts/run_prism_gui_session.py`
 - Modify: `scripts/test_run_prism_gui_session.py`
@@ -199,9 +199,9 @@
 
 **Files:**
 
-- Modify: `src/main/resources/assets/magic_storage/textures/block/*.png`
-- Modify: `src/main/resources/assets/magic_storage/textures/item/*.png`
-- Create or modify: `src/main/resources/assets/magic_storage/textures/gui/terminal_controls.png`
+- Modify: `src/main/resources/assets/auto_storage/textures/block/*.png`
+- Modify: `src/main/resources/assets/auto_storage/textures/item/*.png`
+- Create or modify: `src/main/resources/assets/auto_storage/textures/gui/terminal_controls.png`
 - Modify: `scripts/test_static_regressions.py`
 - Create: `art/texture-generation/20260714-terminal-family/*`
 - Modify: `docs/notes.md`
@@ -240,7 +240,7 @@
 6. Run JSON/model/texture validation and the project pre-push review.
 7. Bump the patch version transactionally through the project deployment script; never hand-edit a deployed jar/version mismatch.
 8. Rebuild the void-lab baseline only if the changed station/data model requires migration, deploy the unique jar to Prism dev, and launch the offline scenario runner.
-9. Stop automation at `MS_GUI_TEST_READY`; the runner has already entered Minecraft F11 fullscreen, and the user confirms that gate and owns the visual verdict for Storage/Craftable/Fuel layouts, recipe diagram, all counts, popup, focus, output destination, station categories, infinity display, icons, and block/item family textures. macOS native fullscreen is forbidden.
+9. Stop automation at `AS_GUI_TEST_READY`; the runner has already entered Minecraft F11 fullscreen, and the user confirms that gate and owns the visual verdict for Storage/Craftable/Fuel layouts, recipe diagram, all counts, popup, focus, output destination, station categories, infinity display, icons, and block/item family textures. macOS native fullscreen is forbidden.
 10. Close every terminal/process window opened by automation after the handoff or failure path.
 
 **Commit:** `chore: finalize terminal platform release`
@@ -251,19 +251,19 @@
 
 **Files:**
 
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/EnergyType.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/FuelTable.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/StorageCoreBlockEntity.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/ImportBusBlockEntity.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/MagicStorage.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalMenu.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/CraftingTerminalScreen.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/StorageTerminalScreen.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/NativeRecipeDiagramRenderer.java`
-- Modify: `src/main/java/com/swearprom/magicstorage/magic_storage/TerminalLayout.java`
-- Modify: `src/main/resources/assets/magic_storage/lang/en_us.json`
-- Modify: `src/main/resources/assets/magic_storage/lang/zh_tw.json`
-- Modify: `src/main/resources/assets/magic_storage/patchouli_books/guide/en_us/entries/*.json`
+- Modify: `src/main/java/com/swear/autostorage/EnergyType.java`
+- Modify: `src/main/java/com/swear/autostorage/FuelTable.java`
+- Modify: `src/main/java/com/swear/autostorage/StorageCoreBlockEntity.java`
+- Modify: `src/main/java/com/swear/autostorage/ImportBusBlockEntity.java`
+- Modify: `src/main/java/com/swear/autostorage/AutoStorage.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalMenu.java`
+- Modify: `src/main/java/com/swear/autostorage/CraftingTerminalScreen.java`
+- Modify: `src/main/java/com/swear/autostorage/StorageTerminalScreen.java`
+- Modify: `src/main/java/com/swear/autostorage/NativeRecipeDiagramRenderer.java`
+- Modify: `src/main/java/com/swear/autostorage/TerminalLayout.java`
+- Modify: `src/main/resources/assets/auto_storage/lang/en_us.json`
+- Modify: `src/main/resources/assets/auto_storage/lang/zh_tw.json`
+- Modify: `src/main/resources/assets/auto_storage/patchouli_books/guide/en_us/entries/*.json`
 - Modify: `scripts/prepare_prism_gui_world.py`
 - Modify: `scripts/run_prism_gui_session.py`
 - Modify: `scripts/test_prepare_prism_gui_world.py`
@@ -276,7 +276,7 @@
 
 **GREEN:** Remove Bottle Energy from live enum, fuel mappings, targets, labels, guide, and test world. Preserve the existing 100-data-slot menu wire with one retired zero-filled four-word region. Migrate legacy NBT one-for-one into plain Glass Bottles and keep any `Long.MAX_VALUE` collision in an escrow that drains as bottle count space opens; defer refill until the outermost mutation batch ends so crafting commit/rollback remains atomic. Register one stable Import Bus item handler on all faces/null side; it accepts insert only, never stores a stack, never mutates caller input, follows Core simulate-then-commit exact remainder semantics, and shares the active path's 10-tick missing-Core negative cache while the original front pull remains. The historical Fuel popup in this task was later removed by GitHub #23 in favor of a persistent Transform target sidebar and explicit use cards. Keep the neutral no-recipe state, one dim lower-right station badge, destination-specific player-head/Core icons, and exact English/Traditional-Chinese parity. Revise the 16×16 family with fixed revision seeds, x-axis symmetry, stronger terminal/tier differentiation, and cyan-in/orange-out bus grammar. Run every focused test and then the complete gates.
 
-**Visual boundary:** Static pixel/geometry tests cannot approve actual Minecraft appearance. Run the deployed 0.1.17 through `crafting-fuel-page`, stop at `MS_GUI_TEST_READY`, and let the user verify fullscreen popup layering, recipe station/no-recipe/output icons, centered controls, and the differentiated symmetric block/bus family.
+**Visual boundary:** Static pixel/geometry tests cannot approve actual Minecraft appearance. Run the deployed 0.1.17 through `crafting-fuel-page`, stop at `AS_GUI_TEST_READY`, and let the user verify fullscreen popup layering, recipe station/no-recipe/output icons, centered controls, and the differentiated symmetric block/bus family.
 
 **Commit:** `feat: refine fuel automation and terminal visuals`
 

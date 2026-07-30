@@ -1,6 +1,6 @@
 # Machine Descriptor API
 
-Auto Storage exposes a NeoForge custom registry at `magic_storage:machine_descriptor` for addon-owned station and Transform descriptors. Registration is performed during the normal mod registry lifecycle; descriptor order, persistence, deterministic conversion, and live values remain server-owned.
+Auto Storage exposes a NeoForge custom registry at `auto_storage:machine_descriptor` for addon-owned station and Transform descriptors. Registration is performed during the normal mod registry lifecycle; descriptor order, persistence, deterministic conversion, and live values remain server-owned.
 
 ## Register from an addon
 
@@ -42,7 +42,7 @@ TransformProviderApi.register(
         ResourceLocation.fromNamespaceAndPath(MOD_ID, "generator_recipe"),
         StorageResourceKindApi.ENERGY_KIND,
         new ItemStack(Items.REDSTONE),
-        Component.translatable("gui.magic_storage.resource_view.energy"),
+        Component.translatable("gui.auto_storage.resource_view.energy"),
         Component.translatable("gui.example.transform_source.generator"),
         input -> resolveGeneratorUse(input));
 ```
@@ -91,4 +91,4 @@ Current built-in optional integrations use this boundary in four ways: Iron Furn
 
 On the Stations page, Shift+left-click routes an accepted machine to its exact descriptor even when that group's local page is showing another descriptor. Installation fills only the remaining aggregate capacity; a near-cap Shift-click that reaches `Integer.MAX_VALUE` keeps the exact unaccepted remainder in the source stack without overflow or loss. Removal presents the oversized aggregate to vanilla player slots in ordinary item-stack-sized chunks, so partial player stacks cannot overflow vanilla's `int` merge sum; an inventory-full remainder stays installed. Processing and Instant groups each keep wheel paging and previous/next buttons. Processing uses up to three columns: the installed aggregate count overlays the item and the adjacent value is accumulated work. Instant has no work value and uses a compact icon grid. The item hitbox keeps the exact installed item's normal tooltip; the Processing value hitbox shows the descriptor's logical family label and aggregate rate. The resource selector names this group **Processing**, not the internal persistence term `station_work`. Station search replaces both groups with one unified paged result grid of stations while preserving one logical descriptor/slot identity.
 
-Custom exact classes/types use the public NeoForge `magic_storage:recipe_family` registry and bounded deterministic factories described in [`recipe-family-api.md`](recipe-family-api.md). `singleItemToItem` and `deterministicResources` map a complete family to a descriptor without exposing Core/player mutation authority. Client EMI state is never authoritative. External-machine processing patterns and asynchronous send-and-wait orchestration remain outside the product.
+Custom exact classes/types use the public NeoForge `auto_storage:recipe_family` registry and bounded deterministic factories described in [`recipe-family-api.md`](recipe-family-api.md). `singleItemToItem` and `deterministicResources` map a complete family to a descriptor without exposing Core/player mutation authority. Client EMI state is never authoritative. External-machine processing patterns and asynchronous send-and-wait orchestration remain outside the product.

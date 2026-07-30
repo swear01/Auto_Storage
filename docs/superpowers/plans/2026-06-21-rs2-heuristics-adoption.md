@@ -52,7 +52,7 @@ public enum MatchMode { EXACT, IGNORE_NBT, IGNORE_DAMAGE }
 ### Task 1: Action + Actor on storage ops (A2)
 
 **Files:**
-- Create: `src/main/java/com/swearprom/magicstorage/magic_storage/Action.java` (enum SIMULATE, EXECUTE)
+- Create: `src/main/java/com/swear/autostorage/Action.java` (enum SIMULATE, EXECUTE)
 - Create: `.../Actor.java` (sealed interface + PlayerActor/BusActor/CraftingActor records)
 - Modify: `.../StorageCoreBlockEntity.java` (insert/extract signatures + keep boolean bridge)
 - Test: `.../gametest/PersistenceTests.java` (or a new StorageApiTests)
@@ -142,11 +142,11 @@ public enum MatchMode { EXACT, IGNORE_NBT, IGNORE_DAMAGE }
 
 ---
 
-## Phase 4 — Incremental network graph (A1; sequential — touches MagicStorage + Core + buses; largest)
+## Phase 4 — Incremental network graph (A1; sequential — touches AutoStorage + Core + buses; largest)
 
 ### Task 8: Persistent node graph, incremental on block add/remove
 
-**Files:** Create `.../StorageNetwork.java` (adjacency + member set, held by the core), Modify `MagicStorage.java` (place/break events update the graph incrementally instead of full BFS; keep full BFS only as the initial build / fallback), `StorageCoreBlockEntity.java` (`rebuildNetwork` becomes "ensure graph"), buses query the graph. Test: `.../gametest/TerminalFlowTests.java` + a perf-shaped assertion.
+**Files:** Create `.../StorageNetwork.java` (adjacency + member set, held by the core), Modify `AutoStorage.java` (place/break events update the graph incrementally instead of full BFS; keep full BFS only as the initial build / fallback), `StorageCoreBlockEntity.java` (`rebuildNetwork` becomes "ensure graph"), buses query the graph. Test: `.../gametest/TerminalFlowTests.java` + a perf-shaped assertion.
 
 - [ ] **Step 1: failing test** — build core + 3 units; break the middle unit; assert capacity updates correctly AND `rebuildNetwork` full-BFS is NOT invoked (a counter / spy), only an incremental update.
 - [ ] **Step 2: run, expect FAIL.**
