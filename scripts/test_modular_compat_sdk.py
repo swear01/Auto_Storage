@@ -66,6 +66,13 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn("tasks.named(spec.runTask)", build)
         self.assertIn("spec.expectedTests", build)
         self.assertIn("descriptor.auditArtifact", build)
+        self.assertIn("descriptor.repositories", build)
+        self.assertIn(
+            "descriptor.repositories == null ? [] : descriptor.repositories",
+            build,
+        )
+        self.assertIn("compatModules.collectMany { it.repositories }", build)
+        self.assertIn("url = uri(repository)", build)
         self.assertIn("verifyCompatArtifact", build)
         self.assertIn("MessageDigest.getInstance(\"SHA-256\")", build)
         self.assertRegex(

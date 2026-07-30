@@ -16,6 +16,8 @@ integration or independent addon. It scans one reproducible target jar/source
 revision, creates an explicit reviewed recipe contract, generates a deliberately
 RED SDK-only scaffold, and runs the contract's verification gates. It does not
 infer consumption, catalysts, outputs, units, station costs, or determinism.
+The contract inventory digest prevents a recipe candidate from disappearing
+through an accidental hand edit.
 
 ```bash
 tools/compat-kit/compat-kit scan --help
@@ -250,7 +252,10 @@ hand-written central module list. The loader checks every required mod ID before
 resolving the module class. A present module uses
 `AutoStorageCompatModule` plus the same registration facade available to
 external addons. Every bundled entry must declare at least one required target
-mod; an empty requirement list is rejected before classloading.
+mod; an empty requirement list is rejected before classloading. Compat Kit
+descriptors also carry the reviewed target repositories and artifact SHA, so a
+non-central Maven target resolves through contract-owned configuration rather
+than a root-build guess.
 
 External addons do not add entries to Auto Storage's bundled module index.
 They are ordinary NeoForge mods with their own entrypoint and dependency

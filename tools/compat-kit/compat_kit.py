@@ -115,6 +115,7 @@ CONTRACT_TOP_KEYS = {
     "kind",
     "target",
     "source_audit_sha256",
+    "source_recipe_inventory_sha256",
     "families",
     "verification",
 }
@@ -156,6 +157,12 @@ VERIFICATION_EVIDENCE_KEYS = {"task", "source", "marker"}
 
 def canonical_json(value) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _recipe_inventory_sha256(class_names) -> str:
+    return hashlib.sha256(
+        canonical_json(sorted(class_names)).encode()
+    ).hexdigest()
 
 
 def _sha256_file(path: Path) -> str:
@@ -557,6 +564,9 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
         "kind": "auto_storage_compat_contract",
         "target": audit["target"],
         "source_audit_sha256": audit["artifact"]["sha256"],
+        "source_recipe_inventory_sha256": _recipe_inventory_sha256(
+            candidate["class"] for candidate in recipe_candidates
+        ),
         "families": families,
         "verification": {
             "fixture": None,
@@ -733,6 +743,16 @@ def validate_contract(contract: dict, *, require_complete: bool):
         source_audit_sha256,
     ):
         raise ValueError("contract source_audit_sha256 must be a SHA-256 digest")
+    source_recipe_inventory_sha256 = contract.get(
+        "source_recipe_inventory_sha256"
+    )
+    if not isinstance(source_recipe_inventory_sha256, str) or not re.fullmatch(
+        r"[0-9a-f]{64}",
+        source_recipe_inventory_sha256,
+    ):
+        raise ValueError(
+            "contract source_recipe_inventory_sha256 must be a SHA-256 digest"
+        )
     if not isinstance(contract.get("families"), list):
         raise ValueError("contract families must be a list")
     target = contract.get("target")
@@ -760,6 +780,7 @@ def validate_contract(contract: dict, *, require_complete: bool):
             raise ValueError("contract target repositories must use HTTPS URLs")
     unresolved = []
     seen_ids = set()
+    seen_classes = set()
     for index, family in enumerate(contract["families"]):
         if not isinstance(family, dict):
             raise ValueError(f"family {index} must be an object")
@@ -770,7 +791,11 @@ def validate_contract(contract: dict, *, require_complete: bool):
         if family_id in seen_ids:
             raise ValueError(f"duplicate family id: {family_id}")
         seen_ids.add(family_id)
-        _validate_nonempty_string(family.get("class"), f"family {family_id} class")
+        family_class = family.get("class")
+        _validate_nonempty_string(family_class, f"family {family_id} class")
+        if family_class in seen_classes:
+            raise ValueError(f"duplicate family class: {family_class}")
+        seen_classes.add(family_class)
         recipe_type = family.get("recipe_type")
         if recipe_type is not None:
             _validate_nonempty_string(recipe_type, f"family {family_id} recipe_type")
@@ -810,6 +835,10 @@ def validate_contract(contract: dict, *, require_complete: bool):
                 for output in outputs
             ):
                 raise ValueError(f"accepted family {family_id} requires one primary output")
+    if _recipe_inventory_sha256(seen_classes) != source_recipe_inventory_sha256:
+        raise ValueError(
+            "contract recipe family inventory does not match source audit"
+        )
     if require_complete and unresolved:
         raise ValueError("contract has unresolved families: " + ", ".join(unresolved))
     if require_complete:
@@ -946,6 +975,7 @@ def _bundled_files(contract: dict) -> dict[str, bytes]:
         "expectedTests": contract["verification"]["expected_game_tests"],
         "dependencies": [target["dependency"]],
         "runtimeDependencies": [target["dependency"]],
+        "repositories": target["repositories"],
         "auditArtifact": {
             "dependency": target["dependency"],
             "sha256": contract["source_audit_sha256"],
@@ -1399,6 +1429,7 @@ def _materialize(
 
 def scaffold_bundled(contract: dict, root) -> list[Path]:
     validate_contract(contract, require_complete=True)
+    _validate_bundled_verification(contract)
     mod_id = contract["target"]["mod_id"]
     return _materialize(
         Path(root),
@@ -1406,6 +1437,14 @@ def scaffold_bundled(contract: dict, root) -> list[Path]:
         f"src/compat/{mod_id}/.compat-kit-manifest.json",
         contract,
     )
+
+
+def _validate_bundled_verification(contract: dict):
+    fixture = contract["verification"]["fixture"]
+    if not re.fullmatch(r"[a-z][A-Za-z0-9]*Fixture", fixture):
+        raise ValueError(
+            "bundled fixture must be a Java-safe identifier ending in Fixture"
+        )
 
 
 def _validate_addon_verification(contract: dict):
@@ -1546,6 +1585,8 @@ def verify_contract(
     mode = "bundled" if bundled_root is not None else "addon"
     if mode == "addon":
         _validate_addon_verification(contract)
+    else:
+        _validate_bundled_verification(contract)
     root = Path(bundled_root if bundled_root is not None else addon_root)
     if not root.is_dir():
         raise ValueError(f"verification root does not exist: {root}")

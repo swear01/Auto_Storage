@@ -381,6 +381,10 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(1, contract["schema"])
         self.assertEqual("auto_storage_compat_contract", contract["kind"])
         self.assertEqual(audit["target"], contract["target"])
+        self.assertRegex(
+            contract["source_recipe_inventory_sha256"],
+            r"^[0-9a-f]{64}$",
+        )
         self.assertTrue(contract["families"])
         self.assertTrue(all(family["status"] == "needs_decision" for family in contract["families"]))
         self.assertIn("samplemod.recipe.ChanceRecipe", actions)
@@ -422,6 +426,23 @@ class CompatKitAuditTests(unittest.TestCase):
         family["status"] = "accepted"
         with self.assertRaisesRegex(ValueError, "accepted family.*station"):
             self.compat_kit.validate_contract(contract, require_complete=False)
+
+    def test_contract_validation_rejects_an_omitted_audited_recipe_candidate(self):
+        contract = self.accepted_contract()
+        contract["families"] = [
+            family
+            for family in contract["families"]
+            if family["class"] != "samplemod.recipe.ChanceRecipe"
+        ]
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "recipe family inventory does not match source audit",
+        ):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+            )
 
     def test_contract_validation_rejects_malformed_nested_semantics(self):
         mutations = (
@@ -663,6 +684,10 @@ class CompatKitAuditTests(unittest.TestCase):
             descriptor["runtimeDependencies"],
         )
         self.assertEqual(
+            ["https://repo.example.com/releases"],
+            descriptor["repositories"],
+        )
+        self.assertEqual(
             {
                 "dependency": "com.example:samplemod:1.2.3",
                 "sha256": contract["source_audit_sha256"],
@@ -758,6 +783,20 @@ class CompatKitAuditTests(unittest.TestCase):
                 self.root / "addon",
             )
 
+    def test_bundled_scaffold_rejects_unsafe_fixture_paths(self):
+        contract = self.accepted_contract()
+        contract["verification"]["fixture"] = "../../outside"
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "bundled fixture must be a Java-safe identifier ending in Fixture",
+        ):
+            self.compat_kit.scaffold_bundled(
+                contract,
+                self.root / "bundled",
+            )
+        self.assertFalse((self.root / "outside").exists())
+
     def test_scaffold_rejects_unresolved_or_semantically_incomplete_contracts(self):
         audit = self.compat_kit.scan_jar(
             self.jar,
@@ -803,6 +842,10 @@ class CompatKitAuditTests(unittest.TestCase):
                 "evidence",
             },
             set(verification_schema["required"]),
+        )
+        self.assertIn(
+            "source_recipe_inventory_sha256",
+            contract_schema["required"],
         )
         audit_schema = json.loads(
             (schema_root / "compat-audit.schema.json").read_text()

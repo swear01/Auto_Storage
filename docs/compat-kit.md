@@ -100,6 +100,9 @@ tools/compat-kit/compat-kit decide \
 The draft contains one entry for every recipe-class candidate. Complete each
 entry as `accepted` or `rejected`; do not delete inconvenient candidates.
 `next-actions.md` is the compact review surface and lists only unresolved work.
+`source_recipe_inventory_sha256` binds the sorted audited recipe-class
+inventory; deleting or duplicating a family makes validation fail even if the
+remaining entries are complete.
 
 An accepted family records:
 
@@ -140,7 +143,9 @@ tools/compat-kit/compat-kit scaffold \
 
 Bundled output owns its `src/compat/<mod-id>/compat-module.json`, isolated source
 set, one-call `AutoStorageCompatModule`, present-mod fixture, and GameTest
-structure. Gradle discovers the source set, target dependencies, fixture mod,
+structure. The fixture must be a Java-safe camel-case identifier ending in
+`Fixture`; path-like values fail before any file is created. Gradle discovers
+the source set, reviewed HTTPS repositories, target dependencies, fixture mod,
 run task, expected test gate, and audited target artifact from that descriptor;
 the target is on both compile and fixture runtime classpaths. `build` and the
 module GameTest resolve exactly one target jar and reject a SHA different from

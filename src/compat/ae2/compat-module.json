@@ -10,6 +10,7 @@
   "dependencies": [
     "org.appliedenergistics:appliedenergistics2:19.2.17"
   ],
+  "repositories": [],
   "runtimeDependencies": [
     "org.appliedenergistics:appliedenergistics2:19.2.17",
     "maven.modrinth:guideme:${guideme_ci_version}"

@@ -37,6 +37,7 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
     def descriptor = new JsonSlurper().parse(descriptorFile)
     def directoryId = descriptorFile.parentFile.name
     def auditArtifact = descriptor.auditArtifact
+    def descriptorRepositories = descriptor.repositories == null ? [] : descriptor.repositories
     if (descriptor.schema != 1
             || descriptor.id != "auto_storage:${directoryId}"
             || !(descriptor.entrypoint instanceof String)
@@ -48,6 +49,11 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || descriptor.expectedTests.intValue() <= 0
             || !(descriptor.dependencies instanceof List)
             || descriptor.dependencies.isEmpty()
+            || !(descriptorRepositories instanceof List)
+            || descriptorRepositories.any {
+                !(it instanceof String) || !(it ==~ /https:\/\/\S+/)
+            }
+            || descriptorRepositories.toSet().size() != descriptorRepositories.size()
             || (descriptor.runtimeDependencies != null
             && !(descriptor.runtimeDependencies instanceof List))
             || (auditArtifact != null
@@ -82,6 +88,9 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             dependencies: descriptor.dependencies.collect {
                 expandCompatDependency(it.toString())
             },
+            repositories: descriptorRepositories.collect {
+                it.toString()
+            }.sort(),
             runtimeDependencies: (descriptor.runtimeDependencies ?: []).collect {
                 expandCompatDependency(it.toString())
             },
@@ -543,6 +552,11 @@ repositories {
     maven {
         name = "C4"
         url = "https://maven.theillusivec4.top/"
+    }
+    compatModules.collectMany { it.repositories }.toSet().sort().each { repository ->
+        maven {
+            url = uri(repository)
+        }
     }
 }
 
