@@ -1,6 +1,6 @@
 # Notes
 
-2026-07-30 GitHub #32 modular compatibility SDK feature branch implementation：依AE2的獨立API artifact/explicit lifecycle與RS2的focused registries/單一入口模式，新增`AutoStorageAddon.register(...)`、`com.swear.autostorage.api` facade、classified API/sources/Javadocs、完整external addon example及public surface snapshot。十一個bundled integrations現在各自位於`src/compat/<mod-id>`，只對classified API jar與該target/必要companion dependencies編譯，最後仍合併成一個player jar；main/common不再編譯optional target API。每個module由自己的`compat-module.json`同時擁有entrypoint、requirements、source set、fixture與dependencies，Gradle驗證後生成runtime index，不再雙重維護central build table與metadata。生成的`META-INF/auto_storage/compat-modules.json`先驗schema、唯一module ID、非空required mods與physical side，再決定是否classload entrypoint；present但binary-incompatible的module會保留module/target identity與原始cause直接fail，不silent fallback。Transform providers與machine-variant contributors改為ordered custom registries，舊四個central optional dispatchers已刪除。Capability bridge只交付server-owned `StorageResourceHandler`，不暴露Core/Bus BE；exact client glyph使用generic `TerminalResourceRendererApi`，公開API bytecode仍不連`net.minecraft.client`。Strict RED包含缺少`MachineCategory`、module空requirements、capability facade、API surface drift、compat仍可見main output、central metadata、late registration/reload ordering與未知variant target；pre-push review的四個Major已全數修正：registry/client renderer按lifecycle關閉、recipe hooks先於Craftable cache invalidate/prewarm、未知descriptor contribution明確失敗、metadata由module-owned descriptors生成；final GREEN為`build`、minimum/latest EMI compile、Python 319/319、SelfTest 204927/204927、base 405、recipe addon 17、optional fixtures `47/14/3/7/7/11/10/11/9/13/9/4`、compatibility matrix 3、API-only fixture/example compile、artifact isolation/Maven publication與`runData` hash-idempotent。Authoritative guide是[`docs/addon-development.md`](addon-development.md)；GitHub Wiki `Addon Development`頁已由此文件同步，但開發文件刻意不列入玩家手冊的Home目錄或sidebar。GitHub #32在feature branch合併並通過main CI前保持open。
+2026-07-30 GitHub #32 modular compatibility SDK feature branch implementation：依AE2的獨立API artifact/explicit lifecycle與RS2的focused registries/單一入口模式，新增`AutoStorageAddon.register(...)`、`com.swear.autostorage.api` facade、classified API/sources/Javadocs、完整external addon example及public surface snapshot。十一個bundled integrations現在各自位於`src/compat/<mod-id>`，只對classified API jar與該target/必要companion dependencies編譯，最後仍合併成一個player jar；main/common不再編譯optional target API。每個module由自己的`compat-module.json`同時擁有entrypoint、requirements、source set、fixture與dependencies，Gradle驗證後生成runtime index，不再雙重維護central build table與metadata。生成的`META-INF/auto_storage/compat-modules.json`先驗schema、唯一module ID、非空required mods與physical side，再決定是否classload entrypoint；present但binary-incompatible的module會保留module/target identity與原始cause直接fail，不silent fallback。Transform providers與machine-variant contributors改為ordered custom registries，舊四個central optional dispatchers已刪除。Capability bridge只交付server-owned `StorageResourceHandler`，不暴露Core/Bus BE；exact client glyph使用generic `TerminalResourceRendererApi`，公開API bytecode仍不連`net.minecraft.client`。Strict RED包含缺少`MachineCategory`、module空requirements、capability facade、API surface drift、compat仍可見main output、central metadata、late registration/reload ordering與未知variant target；pre-push review的四個Major已全數修正：registry/client renderer按lifecycle關閉、recipe hooks先於Craftable cache invalidate/prewarm、未知descriptor contribution明確失敗、metadata由module-owned descriptors生成；final GREEN為`build`、minimum/latest EMI compile、Python 319/319、SelfTest 204927/204927、base 405、recipe addon 17、optional fixtures `47/14/3/7/7/11/10/11/9/13/9/4`、compatibility matrix 3、API-only fixture/example compile、artifact isolation/Maven publication與`runData` hash-idempotent。Authoritative guide是[`docs/addon-development.md`](addon-development.md)；GitHub Wiki `Addon Development`頁已由此文件同步，但開發文件刻意不列入玩家手冊的Home目錄或sidebar。GitHub #32已由PR #35合併並由main CI驗證；由於當時錯把local CLI摘要當成GitHub bot gate，exact diff另由review-only PR #36補做真正的GitHub-triggered review。
 
 2026-07-30 0.3.0 breaking identity rename：GitHub canonical repository與本機checkout已統一為[`swear01/Auto_Storage`](https://github.com/swear01/Auto_Storage)及`/Users/swear/Documents/diy_minecraft_mods/Auto_Storage`；GitHub #31進一步把mod ID、registry namespace、設定/存檔/command/addon IDs統一為`auto_storage`，Java package統一為`com.swear.autostorage`，artifact統一為`auto_storage-0.3.0.jar`。這是使用者明確要求的破壞性重命名：不遷移0.2.x world/registry/config/SavedData，不保留legacy alias或silent fallback；玩家必須建立新世界，也不得把0.2.x與0.3.x jar放在同一instance。0.3.0新建Core recovery token與Bus recovery drop只寫`autoStorage...` NBT keys，不讀舊key。Prism部署器會把舊basename與目前`auto_storage-*.jar`一起交易式備份，GUI runner只要看到舊basename jar仍留在mods就會在啟動前fail closed，避免NeoForge同時載入兩個不同mod ID。0.2.0舊jar名稱只在下方版本化發布證據中保留。
 
@@ -117,6 +117,35 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 
 GitHub public repo:https://github.com/swear01/Auto_Storage 。目前版本以 `gradle.properties` 的唯一 `mod_version` 為準；release tag 必須是同值的 `v<mod_version>`，不可在文件硬編某個 patch。CI/CD 會保存 `build/ci-logs/**`、`run/logs/**`、`run/crash-reports/**`、`build/reports/**` 方便遠端失敗排查。`client-smoke.yml` 是 workflow_dispatch-only 的 client boot/resource smoke；必須把metadata required的Patchouli、資源測試需要的Fusion與exact EMI一起放入，不能只啟Auto Storage + EMI後把missing dependency畫面誤當smoke。HeadlessMC未自行退出時由10分鐘step timeout明確失敗。GUI/Patchouli/視覺變更仍必須跑下方 Prism dev / manual handoff session runner;CI/GameTest/client-smoke 都不能替代目視 GUI 驗證。
 
+### GitHub-triggered PR review gate
+
+PR diff review 使用共享`github-pr-review-loop` Skill。每一輪只選 exactly one available
+GitHub bot，依Codex、Cursor Bugbot、Gemini的順序判定；同一head不可同時觸發多個
+provider。選定bot必須留下明示涵蓋latest head SHA的completed review/comment/check；
+Bot回報disabled、usage limit、auth failure或其他availability error時保存GitHub URL
+與原文，再依Skill明示切到下一個provider，不能改用local review silent fallback。
+參與provider的automatic review必須先停用，否則無法證明exactly-one selection。
+本機Antigravity、Gemini CLI、Cursor CLI或其他local CLI輸出、手動貼上的摘要、只有
+eyes reaction尚未完成的工作，以及下方full-repo audit issue都 **does not satisfy**
+此gate。consumer Gemini Code Assist的GitHub reviewer已
+[sunset](https://developers.google.com/gemini-code-assist/docs/deprecations/consumer-code-review)，
+所以其停止服務訊息不是 completed review，也不可再列入 reviewer 清單。
+
+2026-07-30 remediation evidence：Codex dashboard 的
+personal Auto review目前為Off，`swear01/Auto_Storage`為`Follow personal`，因此後續
+只由Skill手動觸發。review-only [PR #36](https://github.com/swear01/Auto_Storage/pull/36)
+明確以`review/pr35-base`的`297b7a2b74`為base、`review/pr35-head`的
+`0d26517a88`為head，讓`chatgpt-codex-connector[bot]`精確審查原PR #35的
+兩個SDK commits並回覆
+`Didn't find any major issues`。Cursor dashboard同時顯示此repo enabled，但
+PR #36的verbose request
+`serverGenReqId_c4c2d4b9-c5f5-496b-9a71-62c5d96183e2`與新開的PR #37都由
+`cursor[bot]`回覆`Bugbot is disabled for this repository`；這符合Cursor已知的
+[GitHub installation routing問題](https://forum.cursor.com/t/bugbot-reports-disabled-for-this-repository-despite-being-enabled-in-dashboard/154426)，
+因此Cursor在該輪是有GitHub原始證據的unavailable provider，不得冒充completed
+review；Codex已是Skill順序中的首個available bot且exact diff clean，所以PR #35的
+retrospective review loop已完成。
+
 ### Cursor Cloud full-repo audit
 
 手動全庫審查使用 repo 內的 `.cursor/skills/full-repo-audit/SKILL.md`。先確認
@@ -137,6 +166,7 @@ GitHub public repo:https://github.com/swear01/Auto_Storage 。目前版本以 `g
 已用 `gh issue view` 驗證的 Issue URL。執行狀態可在
 `https://cursor.com/agents` 查看。若 Cloud token 無法建立 Issue，該次 audit 必須
 回報 `BLOCKED` 與原始權限錯誤，不可改用 commit、PR 或本機報告假裝成功。
+這是 whole-repository audit，not a PR diff review，也不取代上方 GitHub bot gate。
 
 Prism runner 的 Python unittest 必須與 host 安裝狀態無關。測 `verify_prism_version` 時要在 temporary directory 建立假的 `.app/Contents/MacOS/prismlauncher` 並 mock subprocess output；不可直接依賴 macOS 的 `/Applications/Prism Launcher.app`，否則本機會綠、Linux GitHub runner會在版本斷言前因 executable 不存在而失敗。
 

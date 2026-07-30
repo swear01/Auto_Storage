@@ -94,6 +94,46 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
         self.assertIn("`.cursor/skills/full-repo-audit/`", structure)
         self.assertIn("Cursor Cloud", structure)
 
+    def test_github_pr_bot_gate_is_distinct_from_local_and_full_repo_review(self):
+        agents = (ROOT / "AGENTS.md").read_text()
+        notes = (ROOT / "docs/notes.md").read_text()
+        for required in (
+            "github-pr-review-loop",
+            "GitHub-triggered PR review",
+            "local agent review",
+            "do not satisfy",
+            "consumer Gemini Code Assist",
+            "sunset",
+        ):
+            self.assertIn(required, agents)
+        for required in (
+            "github-pr-review-loop",
+            "GitHub-triggered PR review gate",
+            "exactly one available",
+            "chatgpt-codex-connector[bot]",
+            "cursor[bot]",
+            "local CLI",
+            "does not satisfy",
+            "consumer Gemini Code Assist",
+            "sunset",
+        ):
+            self.assertIn(required, notes)
+        self.assertIn("not a PR diff review", self.skill_text())
+
+        roadmap = (ROOT / "docs/roadmap.md").read_text()
+        self.assertIn("GitHub #32，complete / merged", roadmap)
+        self.assertNotIn("GitHub #32，feature complete / main pending", roadmap)
+
+        plan = (ROOT / "docs/plan.md").read_text()
+        self.assertIn("GitHub #32 modular compatibility SDK complete / merged", plan)
+        self.assertNotIn("GitHub #32 modular compatibility SDK feature branch complete / main merge pending", plan)
+
+        releasing = (ROOT / "docs/releasing.md").read_text()
+        self.assertIn("GitHub-triggered bot review evidence", releasing)
+        self.assertIn("selected bot", releasing)
+        self.assertIn("PR #36", releasing)
+        self.assertNotIn("tagging remains blocked while Cursor", releasing)
+
 
 if __name__ == "__main__":
     unittest.main()

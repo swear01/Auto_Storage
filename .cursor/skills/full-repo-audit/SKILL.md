@@ -13,6 +13,7 @@ metadata:
 Perform a broad, evidence-first, read-only audit of the complete repository. Find
 concrete failures and risks rather than style preferences. The only permitted
 external write is the final GitHub issue described below.
+This is not a PR diff review and does not satisfy the GitHub PR bot gate.
 
 ## Safety Contract
 
