@@ -16,7 +16,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.fml.ModList;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -724,15 +723,11 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             float partialTick
     ) {
         StorageResourceKey key = TerminalResourceDisplay.key(stack).orElse(null);
-        if (key != null
-                && StorageResourceKinds.isChemicalKindId(key.kindId())
-                && ModList.get().isLoaded("mekanism")) {
-            if (MekanismChemicalClientCompat.render(
+        if (key != null && !key.kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
+            if (TerminalResourceRendererApi.render(
                     graphics, key, TerminalDisplayStack.amount(stack), x, y, partialTick)) {
                 return true;
             }
-            graphics.renderItem(Items.BARRIER.getDefaultInstance(), x, y);
-            return true;
         }
         graphics.renderItem(TerminalDisplayStack.strip(stack).copyWithCount(1), x, y);
         return false;

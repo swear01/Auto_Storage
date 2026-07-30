@@ -76,7 +76,7 @@ final class CoreStorageRecord {
             @Override
             public void setItem(int slot, ItemStack stack) {
                 MachineDescriptor descriptor = MachineEnergyTable.get(slot);
-                if (descriptor != null && descriptor.category() != MachineEnergyTable.Category.TRANSFORM) {
+                if (descriptor != null && descriptor.category() != MachineCategory.TRANSFORM) {
                     stack.limitSize(descriptor.maxInstalledCount());
                 }
                 super.setItem(slot, stack);
@@ -86,7 +86,7 @@ final class CoreStorageRecord {
             public boolean canPlaceItem(int slot, ItemStack stack) {
                 MachineDescriptor descriptor = MachineEnergyTable.get(slot);
                 return descriptor != null
-                        && descriptor.category() != MachineEnergyTable.Category.TRANSFORM
+                        && descriptor.category() != MachineCategory.TRANSFORM
                         && descriptor.maxInstalledCount() > 0
                         && descriptor.accepts(stack);
             }
@@ -277,7 +277,7 @@ final class CoreStorageRecord {
             CompoundTag entry = entries.getCompound(index);
             ResourceLocation descriptorId = ResourceLocation.tryParse(entry.getString(TAG_DESCRIPTOR_ID));
             MachineDescriptor descriptor = descriptorId == null ? null : MachineEnergyTable.get(descriptorId);
-            if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.TRANSFORM
+            if (descriptor == null || descriptor.category() != MachineCategory.TRANSFORM
                     || !entry.contains(TAG_AMOUNT, Tag.TAG_LONG)
                     || !entry.contains(TAG_INFINITE, Tag.TAG_BYTE)
                     || entry.getLong(TAG_AMOUNT) < 0
@@ -315,7 +315,7 @@ final class CoreStorageRecord {
                 long persistedCount = entry.contains(TAG_COUNT, Tag.TAG_LONG)
                         ? entry.getLong(TAG_COUNT) : stack.getCount();
                 int slot = descriptorId == null ? -1 : MachineEnergyTable.findSlot(descriptorId);
-                if (descriptor == null || descriptor.category() == MachineEnergyTable.Category.TRANSFORM
+                if (descriptor == null || descriptor.category() == MachineCategory.TRANSFORM
                         || stack.isEmpty() || slot < 0 || !descriptor.accepts(stack)
                         || persistedCount <= 0 || persistedCount > Integer.MAX_VALUE) {
                     unresolvedMachineEntries.add(entry.copy());
@@ -346,7 +346,7 @@ final class CoreStorageRecord {
             CompoundTag entry = entries.getCompound(index);
             ResourceLocation descriptorId = ResourceLocation.tryParse(entry.getString(TAG_DESCRIPTOR_ID));
             MachineDescriptor descriptor = descriptorId == null ? null : MachineEnergyTable.get(descriptorId);
-            if (descriptor == null || descriptor.category() != MachineEnergyTable.Category.PROCESS
+            if (descriptor == null || descriptor.category() != MachineCategory.PROCESS
                     || !entry.contains(TAG_AMOUNT, Tag.TAG_LONG)
                     || entry.getLong(TAG_AMOUNT) < 0) {
                 unresolvedMachineWorkEntries.add(entry.copy());

@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.evilcraft;
 
+import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.Action;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
@@ -53,7 +54,7 @@ public final class EvilCraftIntegrationGameTests {
         MachineDescriptor descriptor = MachineEnergyTable.get(BLOOD_INFUSER);
         ItemStack station = new ItemStack(evilItem("blood_infuser"));
         if (descriptor == null
-                || descriptor.category() != MachineEnergyTable.Category.PROCESS
+                || descriptor.category() != MachineCategory.PROCESS
                 || !descriptor.accepts(station)
                 || !descriptor.rateFor(station).orElseThrow().equals(MachineWorkRate.ONE)
                 || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(BLOOD_INFUSER)) {

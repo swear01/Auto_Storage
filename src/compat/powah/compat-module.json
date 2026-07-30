@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "id": "auto_storage:powah",
+  "entrypoint": "com.swear.autostorage.compat.powah.PowahCompatModule",
+  "requires": ["powah"],
+  "side": "both",
+  "sourceSet": "compatPowah",
+  "fixture": "powahFixture",
+  "dependencies": [
+    "maven.modrinth:powah:${powah_ci_version}",
+    "maven.modrinth:cloth-config:${powah_cloth_config_ci_version}",
+    "maven.modrinth:guideme:${guideme_ci_version}"
+  ]
+}

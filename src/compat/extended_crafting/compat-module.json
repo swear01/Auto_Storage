@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "id": "auto_storage:extended_crafting",
+  "entrypoint": "com.swear.autostorage.compat.extendedcrafting.ExtendedCraftingCompatModule",
+  "requires": ["extendedcrafting"],
+  "side": "both",
+  "sourceSet": "compatExtendedCrafting",
+  "fixture": "extendedCraftingFixture",
+  "dependencies": [
+    "maven.modrinth:extended-crafting:${extended_crafting_ci_version}",
+    "maven.modrinth:cucumber:${cucumber_ci_version}"
+  ]
+}

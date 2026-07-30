@@ -114,9 +114,9 @@ public class TerminalFlowTests {
             }
             for (int slot = 0; slot < MachineEnergyTable.entries().size(); slot++) {
                 MachineDescriptor descriptor = MachineEnergyTable.get(slot);
-                if (descriptor.category() == MachineEnergyTable.Category.TRANSFORM) continue;
+                if (descriptor.category() == MachineCategory.TRANSFORM) continue;
                 ItemStack installed = core.getMachineContainer().getItem(slot);
-                int expectedCount = descriptor.category() == MachineEnergyTable.Category.PROCESS
+                int expectedCount = descriptor.category() == MachineCategory.PROCESS
                         ? Math.min(130, descriptor.maxInstalledCount()) : 1;
                 if (!descriptor.accepts(installed)
                         || installed.getCount() != expectedCount) {

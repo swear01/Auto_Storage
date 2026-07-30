@@ -4,23 +4,16 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 final class StorageResourceKinds {
     private static final ResourceLocation CHEMICAL_REGISTRY_ID =
             ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, "chemical");
-    private static final ResourceLocation MEKANISM_CHEMICAL_TANK_ID =
-            ResourceLocation.fromNamespaceAndPath("mekanism", "basic_chemical_tank");
     private static final ResourceLocation BOTANIA_MANA_REGISTRY_ID =
             ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, "mana");
-    private static final ResourceLocation BOTANIA_MANA_POWDER_ID =
-            ResourceLocation.fromNamespaceAndPath("botania", "mana_powder");
     private static final ResourceLocation ARS_NOUVEAU_SOURCE_REGISTRY_ID =
             ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, "source");
-    private static final ResourceLocation ARS_NOUVEAU_SOURCE_GEM_ID =
-            ResourceLocation.fromNamespaceAndPath("ars_nouveau", "source_gem");
 
     private StorageResourceKinds() {
     }
@@ -36,39 +29,6 @@ final class StorageResourceKinds {
                         Component.translatable("gui.auto_storage.resource.neoforge_energy"))));
         kinds.register(StorageResourceKindApi.WORK_KIND.getPath(), () ->
                 StorageResourceKind.variantAware(() -> new ItemStack(Items.CLOCK)));
-    }
-
-    static void registerChemical(DeferredRegister<StorageResourceKind> kinds) {
-        kinds.register(StorageResourceKindApi.CHEMICAL_KIND.getPath(), () ->
-                StorageResourceKind.variantless(StorageResourceKinds::chemicalTank));
-        kinds.addAlias(StorageResourceKindApi.CHEMICAL_KIND, CHEMICAL_REGISTRY_ID);
-    }
-
-    private static ItemStack chemicalTank() {
-        var item = BuiltInRegistries.ITEM.get(MEKANISM_CHEMICAL_TANK_ID);
-        if (item == Items.AIR) {
-            throw new IllegalStateException(
-                    "Loaded Mekanism did not register " + MEKANISM_CHEMICAL_TANK_ID);
-        }
-        return new ItemStack(item);
-    }
-
-    static void registerBotaniaMana(DeferredRegister<StorageResourceKind> kinds) {
-        kinds.register(StorageResourceKindApi.BOTANIA_MANA_KIND.getPath(), () ->
-                StorageResourceKind.variantless(() -> namedRepresentative(
-                        BOTANIA_MANA_POWDER_ID,
-                        Component.translatable("gui.auto_storage.resource.mana"))));
-        kinds.addAlias(StorageResourceKindApi.BOTANIA_MANA_KIND, BOTANIA_MANA_REGISTRY_ID);
-    }
-
-    static void registerArsNouveauSource(DeferredRegister<StorageResourceKind> kinds) {
-        kinds.register(StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND.getPath(), () ->
-                StorageResourceKind.variantless(() -> namedRepresentative(
-                        ARS_NOUVEAU_SOURCE_GEM_ID,
-                        Component.translatable("gui.auto_storage.resource.source"))));
-        kinds.addAlias(
-                StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND,
-                ARS_NOUVEAU_SOURCE_REGISTRY_ID);
     }
 
     static boolean isKindAvailable(ResourceLocation kindId) {
@@ -164,14 +124,6 @@ final class StorageResourceKinds {
                     Component.translatable(key.resourceId().toLanguageKey("chemical")));
         }
         return representative;
-    }
-
-    private static ItemStack namedRepresentative(ResourceLocation itemId, Component name) {
-        var item = BuiltInRegistries.ITEM.get(itemId);
-        if (item == Items.AIR) {
-            throw new IllegalStateException("Loaded resource provider did not register " + itemId);
-        }
-        return named(new ItemStack(item), name);
     }
 
     private static ItemStack named(ItemStack stack, Component name) {

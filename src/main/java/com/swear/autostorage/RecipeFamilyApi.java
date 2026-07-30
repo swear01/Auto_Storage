@@ -4,12 +4,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import com.swear.autostorage.api.AutoStorageApi;
 
 public final class RecipeFamilyApi {
     public static final int MAX_FAMILIES = 256;
     public static final ResourceKey<Registry<RecipeFamily>> REGISTRY_KEY =
             ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "recipe_family"));
+                    AutoStorageApi.MOD_ID, "recipe_family"));
 
     private RecipeFamilyApi() {
     }

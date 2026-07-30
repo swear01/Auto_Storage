@@ -4,6 +4,10 @@
 
 Auto Storage (`auto_storage`) is a NeoForge 1.21.1 storage + crafting mod. It provides a server-authoritative storage network, storage/crafting terminals, crafting energy, import/export buses, and an in-game Patchouli guide.
 
+Addon authors can extend stations, exact deterministic recipe families, typed
+resources, transfers, transforms, and station variants through the public
+[Addon Development SDK](docs/addon-development.md).
+
 > **0.3.0 breaking identity change:** the technical mod ID and registry namespace are
 > `auto_storage`, the Java package is `com.swear.autostorage`, and the release artifact is
 > `auto_storage-0.3.0.jar`. Auto Storage 0.3.0 intentionally does not migrate or alias
@@ -69,7 +73,7 @@ GitHub Actions runs on pushes to `main`, pull requests, and manual dispatch:
 
 - `.github/workflows/ci.yml` builds the mod, compiles against both the minimum and newest compatible EMI 1.21.1 releases from exact Modrinth version IDs, runs the base, recipe-addon, Mekanism, Botania, Iron Furnaces, Farmer's Delight, Modern Industrialization, Ars Nouveau, EvilCraft, Powah, Industrial Foregoing, Create, PneumaticCraft, and Extended Crafting GameTest fixtures sequentially, then loads all twelve optional mods together in a three-test compatibility-matrix run (two coexistence tests plus the Craftable speed/heap benchmark that writes `build/reports/terminal-scale-10000.json`) before Python tests and the `./gradlew runData` drift check. Each optional-mod job deliberately uses one representative artifact rather than a multi-version matrix: it is CI evidence, not an exact player dependency, and incompatibilities in other versions are fixed from user reports. Botania's official mutable snapshot is additionally guarded by an expected jar SHA-256 and excludes JEI from its fixture runtime. Compile-only and client/data EMI jars all come from exact Modrinth version IDs; `scripts/stage_emi_runtime.sh` stages the latter, after a transient failure the script retries the same Gradle command once and then fails explicitly.
 - `.github/workflows/client-smoke.yml` is manual-only (`workflow_dispatch`); it stages required Patchouli, pinned Fusion, and the exact NeoForge 1.21.1 Modrinth runtime matching the newest compatible EMI release before launching HeadlessMC / MC-Runtime-Test. The client step is capped at 10 minutes; it catches client boot/resource crashes but is not GUI layout approval.
-- `.github/workflows/release.yml` runs when a tag `v<mod_version>` is pushed, verifies the tag matches `gradle.properties`, repeats every CI gate including all fifteen GameTest runs, generates release notes, and publishes one alpha jar to GitHub, Modrinth, and CurseForge. The `publishing` environment must provide secrets `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`, plus variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_ID`; missing configuration fails closed before publication.
+- `.github/workflows/release.yml` runs when a tag `v<mod_version>` is pushed, verifies the tag matches `gradle.properties`, repeats every CI gate including all fifteen GameTest runs, generates release notes, publishes the player alpha jar to GitHub/Modrinth/CurseForge, and attaches the compile-only API/sources/Javadocs only to the GitHub Release. The `publishing` environment must provide secrets `MODRINTH_TOKEN` and `CURSEFORGE_TOKEN`, plus variables `MODRINTH_PROJECT_ID` and `CURSEFORGE_PROJECT_ID`; missing configuration fails closed before publication.
 
 Maintainer setup, publication, hash verification, retry, rollback, and secret
 rotation are documented in [`docs/releasing.md`](docs/releasing.md).

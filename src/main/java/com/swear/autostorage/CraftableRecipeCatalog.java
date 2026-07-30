@@ -28,6 +28,12 @@ final class CraftableRecipeCatalog {
         new CraftableRecipeCatalog().ensureCurrent(level);
     }
 
+    static void invalidate() {
+        synchronized (CACHE) {
+            CACHE.clear();
+        }
+    }
+
     List<Candidate> getCandidates(
             Level level,
             Collection<Item> availableItems

@@ -11,13 +11,13 @@ final class FuelSearchModel {
     record Entry(
             EnergyType energyType,
             int machineSlot,
-            MachineEnergyTable.Category category
+            MachineCategory category
     ) {
         static Entry energy(EnergyType energyType) {
-            return new Entry(energyType, -1, MachineEnergyTable.Category.TRANSFORM);
+            return new Entry(energyType, -1, MachineCategory.TRANSFORM);
         }
 
-        static Entry machine(int machineSlot, MachineEnergyTable.Category category) {
+        static Entry machine(int machineSlot, MachineCategory category) {
             return new Entry(null, machineSlot, category);
         }
 
@@ -46,8 +46,8 @@ final class FuelSearchModel {
             List<MachineDescriptor> descriptors
     ) {
         List<IndexedEntry> entries = new ArrayList<>();
-        appendMachines(entries, descriptors, MachineEnergyTable.Category.PROCESS);
-        appendMachines(entries, descriptors, MachineEnergyTable.Category.INSTANT);
+        appendMachines(entries, descriptors, MachineCategory.PROCESS);
+        appendMachines(entries, descriptors, MachineCategory.INSTANT);
         return new Index(entries);
     }
 
@@ -76,7 +76,7 @@ final class FuelSearchModel {
     private static void appendMachines(
             List<IndexedEntry> result,
             List<MachineDescriptor> descriptors,
-            MachineEnergyTable.Category category
+            MachineCategory category
     ) {
         for (int machineSlot = 0; machineSlot < descriptors.size(); machineSlot++) {
             MachineDescriptor descriptor = descriptors.get(machineSlot);
@@ -91,7 +91,7 @@ final class FuelSearchModel {
         List<TerminalSearchEntry> result = new ArrayList<>();
         Set<net.minecraft.world.item.Item> seen = new HashSet<>();
         appendSearchEntry(result, seen, descriptor.representativeStack());
-        if (descriptor.category() != MachineEnergyTable.Category.TRANSFORM) {
+        if (descriptor.category() != MachineCategory.TRANSFORM) {
             for (MachineVariant variant : descriptor.variants()) {
                 appendSearchEntry(result, seen, variant.stack());
             }

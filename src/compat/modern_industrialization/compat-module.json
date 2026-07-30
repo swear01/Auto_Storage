@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "id": "auto_storage:modern_industrialization",
+  "entrypoint": "com.swear.autostorage.compat.modernindustrialization.ModernIndustrializationCompatModule",
+  "requires": ["modern_industrialization"],
+  "side": "both",
+  "sourceSet": "compatModernIndustrialization",
+  "fixture": "modernIndustrializationFixture",
+  "dependencies": [
+    "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}",
+    "maven.modrinth:guideme:${guideme_ci_version}"
+  ]
+}

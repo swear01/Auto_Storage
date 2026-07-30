@@ -16,13 +16,14 @@ public static final DeferredHolder<MachineDescriptor, MachineDescriptor> COPPER_
                 COPPER_PRESS_ID,
                 new ItemStack(ModItems.COPPER_PRESS.get()),
                 Ingredient.of(ModItems.COPPER_PRESS.get()),
-                MachineEnergyTable.Category.PROCESS,
+                MachineCategory.PROCESS,
                 MachineDescriptorApi.MAX_INSTALLED_COUNT,
                 EnergyType.SMELTING_ENERGY,
                 2));
 
 public AddonMod(IEventBus modBus) {
-    MACHINE_DESCRIPTORS.register(modBus);
+    AutoStorageAddon.register(MOD_ID, modBus, addon ->
+            addon.machineDescriptors(MACHINE_DESCRIPTORS));
 }
 ```
 
@@ -35,19 +36,42 @@ The registry key and `MachineDescriptor.id()` must be identical. IDs are persist
 
 ## Transform providers and shared targets
 
-Use `TransformProviderApi.register(...)` when an addon conversion needs a typed output and optional station-work cost:
+Use an addon-owned Transform-provider registry when a conversion needs a typed
+output and optional station-work cost:
 
 ```java
-TransformProviderApi.register(
-        ResourceLocation.fromNamespaceAndPath(MOD_ID, "generator_recipe"),
-        StorageResourceKindApi.ENERGY_KIND,
+public static final DeferredRegister<TransformProvider> TRANSFORMS =
+        TransformProviderApi.createDeferredRegister(MOD_ID);
+
+TRANSFORMS.register("generator_recipe", () -> TransformProvider.of(
+        ResourceLocation.fromNamespaceAndPath(MOD_ID, "generated_energy"),
         new ItemStack(Items.REDSTONE),
         Component.translatable("gui.auto_storage.resource_view.energy"),
         Component.translatable("gui.example.transform_source.generator"),
-        input -> resolveGeneratorUse(input));
+        input -> resolveGeneratorUse(input)));
+
+public AddonMod(IEventBus modBus) {
+    AutoStorageAddon.register(MOD_ID, modBus, addon -> addon
+            .machineDescriptors(MACHINE_DESCRIPTORS)
+            .transformProviders(TRANSFORMS));
+}
 ```
 
-The first ID identifies one selectable conversion card. It must be unique and stable. `targetId` identifies the produced target shown in the persistent Transform sidebar; multiple provider cards may share one target. `targetLabel` names that produced resource independently of the representative icon. `sourceLabel` starts from the owning recipe viewer's EMI category display name when the conversion has one; common/server code supplies the equivalent localized `Component` and never links EMI client classes. Check that name against all accepted workstation variants: use the shortest category or workstation-family name true for every match, remove tier/speed suffixes, and never derive it from the first, representative, or currently installed stack. If no single truthful label covers every match, register separate logical families rather than inventing a generic name. The resolver receives a one-count copy of the exact inserted item and returns either no use or a positive typed output plus an optional matching station ID/work cost. It must be deterministic and side-effect free.
+The `DeferredRegister` entry ID identifies one selectable conversion card. It
+must be unique and stable. `TransformProvider.targetId()` identifies the
+produced target shown in the persistent Transform sidebar; multiple provider
+cards may share one target. `targetLabel` names that produced resource
+independently of the representative icon. `sourceLabel` starts from the owning
+recipe viewer's EMI category display name when the conversion has one;
+common/server code supplies the equivalent localized `Component` and never
+links EMI client classes. Check that name against all accepted workstation
+variants: use the shortest category or workstation-family name true for every
+match, remove tier/speed suffixes, and never derive it from the first,
+representative, or currently installed stack. If no single truthful label
+covers every match, register separate logical families rather than inventing a
+generic name. The resolver receives a one-count copy of the exact inserted item
+and returns either no use or a positive typed output plus an optional matching
+station ID/work cost. It must be deterministic and side-effect free.
 
 Auto lists every compatible exact-input use without selecting or executing one. An explicit target filters those same uses by `targetId`; it is not a global recipe catalog. The server validates the visible card index, stable use ID, current exact input, output capacity, and station work again before simulate-then-commit.
 
@@ -66,7 +90,7 @@ MachineDescriptor.installableVariants(
                 MachineVariant.derived(
                         new ItemStack(ModItems.REINFORCED_PRESS.get()),
                         () -> MachineWorkRate.of(200, AddonConfig.pressTicks.get()))),
-        MachineEnergyTable.Category.PROCESS,
+        MachineCategory.PROCESS,
         64,
         null);
 ```
@@ -74,6 +98,11 @@ MachineDescriptor.installableVariants(
 The second argument is the required localized logical station-family label. Start from the owning recipe viewer's category or workstation name, then verify that it is true for every accepted variant. Tier, speed, material, and currently installed suffixes do not belong in this label: Starter through Nitro variants share `Furnator`, for example. A descriptor with no truthful common label must be split. Fixed `installable(...)` descriptors derive the same label from their single representative item; polymorphic descriptors must declare it explicitly. The server synchronizes the `Component` with the descriptor snapshot, so the client never guesses from an ID or representative variant.
 
 The supplier is materialized after registry/config loading and synchronized as values; the client never executes it. Capturing a config holder is allowed, but reading its value during a DeferredRegister callback is not. Empty lists, more than 64 concrete variants, duplicate items, zero-rate PROCESS variants, or nonzero INSTANT rates fail explicitly. The 64-variant limit is independent of the installed aggregate count. Work generation keeps an exact fractional remainder per descriptor plus installed item/rate. Changing the concrete item or live configured rate discards only the incompatible remainder before applying the new rate.
+
+`MachineVariantContributor` entries must target an existing descriptor ID.
+Auto Storage validates every contribution before building the ordered snapshot;
+an unknown target fails with the contribution and descriptor IDs instead of
+silently contributing no variants.
 
 The recipe preview always starts with the actually installed variant, then cycles the remaining synchronized variants in descriptor order every 1,000 milliseconds. This index is display-only. Station availability, accumulated work, rate, recipe execution, and persistence remain server-owned.
 
@@ -92,3 +121,7 @@ Current built-in optional integrations use this boundary in four ways: Iron Furn
 On the Stations page, Shift+left-click routes an accepted machine to its exact descriptor even when that group's local page is showing another descriptor. Installation fills only the remaining aggregate capacity; a near-cap Shift-click that reaches `Integer.MAX_VALUE` keeps the exact unaccepted remainder in the source stack without overflow or loss. Removal presents the oversized aggregate to vanilla player slots in ordinary item-stack-sized chunks, so partial player stacks cannot overflow vanilla's `int` merge sum; an inventory-full remainder stays installed. Processing and Instant groups each keep wheel paging and previous/next buttons. Processing uses up to three columns: the installed aggregate count overlays the item and the adjacent value is accumulated work. Instant has no work value and uses a compact icon grid. The item hitbox keeps the exact installed item's normal tooltip; the Processing value hitbox shows the descriptor's logical family label and aggregate rate. The resource selector names this group **Processing**, not the internal persistence term `station_work`. Station search replaces both groups with one unified paged result grid of stations while preserving one logical descriptor/slot identity.
 
 Custom exact classes/types use the public NeoForge `auto_storage:recipe_family` registry and bounded deterministic factories described in [`recipe-family-api.md`](recipe-family-api.md). `singleItemToItem` and `deterministicResources` map a complete family to a descriptor without exposing Core/player mutation authority. Client EMI state is never authoritative. External-machine processing patterns and asynchronous send-and-wait orchestration remain outside the product.
+
+The one-call facade, public release dependency, lifecycle hooks, complete example,
+and alpha API policy are documented in
+[`addon-development.md`](addon-development.md).

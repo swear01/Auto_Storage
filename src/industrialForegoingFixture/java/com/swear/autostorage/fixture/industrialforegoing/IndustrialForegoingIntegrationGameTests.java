@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.industrialforegoing;
 
+import com.swear.autostorage.MachineCategory;
 import com.buuz135.industrial.config.machine.core.DissolutionChamberConfig;
 import com.buuz135.industrial.config.machine.resourceproduction.MaterialStoneWorkFactoryConfig;
 import com.swear.autostorage.Action;
@@ -305,7 +306,7 @@ public final class IndustrialForegoingIntegrationGameTests {
     private static boolean validStation(MachineDescriptor descriptor, String itemPath) {
         ItemStack station = new ItemStack(ifItem(itemPath));
         return descriptor != null
-                && descriptor.category() == MachineEnergyTable.Category.PROCESS
+                && descriptor.category() == MachineCategory.PROCESS
                 && descriptor.maxInstalledCount() == MachineDescriptorApi.MAX_INSTALLED_COUNT
                 && descriptor.energyType() == null
                 && descriptor.variants().size() == 1

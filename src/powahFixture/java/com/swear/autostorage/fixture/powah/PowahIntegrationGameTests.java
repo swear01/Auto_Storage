@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.powah;
 
+import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.Action;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
@@ -62,7 +63,7 @@ public final class PowahIntegrationGameTests {
     ) {
         MachineDescriptor descriptor = MachineEnergyTable.get(ENERGIZING);
         if (descriptor == null
-                || descriptor.category() != MachineEnergyTable.Category.PROCESS
+                || descriptor.category() != MachineCategory.PROCESS
                 || descriptor.maxInstalledCount() != MachineDescriptorApi.MAX_INSTALLED_COUNT
                 || descriptor.energyType() != null
                 || descriptor.variants().size() != Tier.getNormalVariants().length

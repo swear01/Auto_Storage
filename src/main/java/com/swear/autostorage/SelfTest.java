@@ -1,6 +1,10 @@
 package com.swear.autostorage;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
+import com.swear.autostorage.api.AutoStorageCompatContext;
+import com.swear.autostorage.api.AutoStorageCompatModule;
+import com.swear.autostorage.api.AutoStorageAddon;
+import net.neoforged.bus.api.IEventBus;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
@@ -34,10 +38,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.io.StringReader;
+import java.lang.reflect.Proxy;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class SelfTest {
     private static int passed = 0;
     private static int failed = 0;
+
+    static void runConstructionPhaseTests() {
+        testAddonRegistrationFacade();
+    }
 
     static void runAll() {
         testItemKey();
@@ -60,11 +71,15 @@ class SelfTest {
         testLargeTypedRecipePlan();
         testEnergyType();
         testMachineVariantContract();
+        testMachineVariantContributorTargets();
         testMachineWorkAccumulator();
         testMachineRateFormatter();
         testEnergyCost();
         testFuelValue();
         testTransformProviderApi();
+        testTerminalResourceRendererApi();
+        testAddonRegistrationFreeze();
+        testCompatibilityModuleLoader();
         testEnergyTypeUniqueness();
         testSortMode();
         testSortOrder();
@@ -159,6 +174,312 @@ class SelfTest {
         assertTrue("Transform targets carry a localized produced-resource label",
                 fuel.label().equals(
                         Component.translatable("gui.auto_storage.energy.furnace_fuel")));
+    }
+
+    private static void testTerminalResourceRendererApi() {
+        ResourceLocation kindId =
+                ResourceLocation.fromNamespaceAndPath("selftest", "rendered_resource");
+        StorageResourceKey key = StorageResourceKey.of(
+                kindId,
+                ResourceLocation.fromNamespaceAndPath("selftest", "blue"),
+                new CompoundTag());
+        AtomicInteger renders = new AtomicInteger();
+        TerminalResourceRendererApi.register(
+                kindId,
+                String.class,
+                (context, resource, amount, x, y, partialTick) -> {
+                    renders.incrementAndGet();
+                    return context.equals("render")
+                            && resource.equals(key)
+                            && amount == 7;
+                });
+        assertTrue("generic terminal renderer invokes the exact typed context",
+                TerminalResourceRendererApi.render(
+                        "render", key, 7, 1, 2, 0.5F)
+                        && renders.get() == 1);
+        assertTrue("generic terminal renderer rejects the wrong client context type",
+                !TerminalResourceRendererApi.render(
+                        new Object(), key, 7, 1, 2, 0.5F)
+                        && renders.get() == 1);
+        try {
+            TerminalResourceRendererApi.register(
+                    kindId,
+                    Object.class,
+                    (context, resource, amount, x, y, partialTick) -> false);
+            assertTrue("duplicate terminal renderer IDs fail explicitly", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("duplicate terminal renderer IDs fail explicitly",
+                    expected.getMessage().contains(kindId.toString()));
+        }
+    }
+
+    private static void testCompatibilityModuleLoader() {
+        IEventBus modBus = (IEventBus) Proxy.newProxyInstance(
+                SelfTest.class.getClassLoader(),
+                new Class<?>[]{IEventBus.class},
+                (proxy, method, arguments) -> method.getReturnType().isPrimitive()
+                        ? primitiveDefault(method.getReturnType()) : null);
+        AtomicInteger resolutions = new AtomicInteger();
+        TestCompatModule.registrations = 0;
+        String entrypoint = TestCompatModule.class.getName();
+        String absent = """
+                {"schema":1,"modules":[{"id":"auto_storage:test","entrypoint":"%s",
+                "requires":["missing_target"],"side":"both"}]}
+                """.formatted(entrypoint);
+        CompatibilityModuleLoader.load(
+                new StringReader(absent),
+                ignored -> false,
+                CompatibilityModuleLoader.Side.SERVER,
+                modBus,
+                name -> {
+                    resolutions.incrementAndGet();
+                    return TestCompatModule.class;
+                });
+        assertTrue("absent optional mods never resolve compatibility entrypoints",
+                resolutions.get() == 0 && TestCompatModule.registrations == 0);
+
+        String present = absent.replace("missing_target", "loaded_target");
+        CompatibilityModuleLoader.load(
+                new StringReader(present),
+                id -> id.equals("loaded_target"),
+                CompatibilityModuleLoader.Side.SERVER,
+                modBus,
+                name -> {
+                    resolutions.incrementAndGet();
+                    return TestCompatModule.class;
+                });
+        assertTrue("present optional modules resolve and register exactly once",
+                resolutions.get() == 1 && TestCompatModule.registrations == 1);
+
+        String duplicate = """
+                {"schema":1,"modules":[
+                {"id":"auto_storage:test","entrypoint":"%s","requires":["loaded_target"],"side":"both"},
+                {"id":"auto_storage:test","entrypoint":"%s","requires":["loaded_target"],"side":"both"}]}
+                """.formatted(entrypoint, entrypoint);
+        try {
+            CompatibilityModuleLoader.load(
+                    new StringReader(duplicate),
+                    ignored -> true,
+                    CompatibilityModuleLoader.Side.SERVER,
+                    modBus,
+                    name -> TestCompatModule.class);
+            assertTrue("duplicate compatibility module IDs fail before classloading", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("duplicate compatibility module IDs fail before classloading",
+                    expected.getMessage().contains("auto_storage:test"));
+        }
+
+        String duplicateEntrypoint = """
+                {"schema":1,"modules":[
+                {"id":"auto_storage:first","entrypoint":"%s","requires":["loaded_target"],"side":"both"},
+                {"id":"auto_storage:second","entrypoint":"%s","requires":["loaded_target"],"side":"both"}]}
+                """.formatted(entrypoint, entrypoint);
+        try {
+            CompatibilityModuleLoader.load(
+                    new StringReader(duplicateEntrypoint),
+                    ignored -> true,
+                    CompatibilityModuleLoader.Side.SERVER,
+                    modBus,
+                    name -> TestCompatModule.class);
+            assertTrue("one compatibility entrypoint cannot load twice", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("one compatibility entrypoint cannot load twice",
+                    expected.getMessage().contains(entrypoint));
+        }
+
+        String malformed = """
+                {"schema":1,"modules":[{"id":"auto_storage:test","entrypoint":"%s",
+                "requires":["loaded_target"],"side":"both","unexpected":true}]}
+                """.formatted(entrypoint);
+        try {
+            CompatibilityModuleLoader.load(
+                    new StringReader(malformed),
+                    ignored -> true,
+                    CompatibilityModuleLoader.Side.SERVER,
+                    modBus,
+                    name -> TestCompatModule.class);
+            assertTrue("unknown compatibility metadata fields fail closed", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("unknown compatibility metadata fields fail closed",
+                    expected.getMessage().contains("unexpected"));
+        }
+
+        String unconditional = """
+                {"schema":1,"modules":[{"id":"auto_storage:test","entrypoint":"%s",
+                "requires":[],"side":"both"}]}
+                """.formatted(entrypoint);
+        try {
+            CompatibilityModuleLoader.load(
+                    new StringReader(unconditional),
+                    ignored -> true,
+                    CompatibilityModuleLoader.Side.SERVER,
+                    modBus,
+                    name -> TestCompatModule.class);
+            assertTrue("bundled compatibility modules require a target mod", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("bundled compatibility modules require a target mod",
+                    expected.getMessage().contains("requires at least one mod ID"));
+        }
+
+        int resolutionsBeforeSideCheck = resolutions.get();
+        String clientOnly = present.replace("\"both\"", "\"client\"");
+        CompatibilityModuleLoader.load(
+                new StringReader(clientOnly),
+                id -> id.equals("loaded_target"),
+                CompatibilityModuleLoader.Side.SERVER,
+                modBus,
+                name -> {
+                    resolutions.incrementAndGet();
+                    return TestCompatModule.class;
+                });
+        assertTrue("wrong-side modules never resolve compatibility entrypoints",
+                resolutions.get() == resolutionsBeforeSideCheck);
+
+        ClassNotFoundException missingEntrypoint =
+                new ClassNotFoundException("missing test entrypoint");
+        try {
+            CompatibilityModuleLoader.load(
+                    new StringReader(present),
+                    id -> id.equals("loaded_target"),
+                    CompatibilityModuleLoader.Side.SERVER,
+                    modBus,
+                    name -> {
+                        throw missingEntrypoint;
+                    });
+            assertTrue("missing compatibility entrypoints preserve module and target context", false);
+        } catch (IllegalStateException expected) {
+            assertTrue("missing compatibility entrypoints preserve module and target context",
+                    expected.getMessage().contains("auto_storage:test")
+                            && expected.getMessage().contains("loaded_target")
+                            && expected.getCause() == missingEntrypoint);
+        }
+
+        NoClassDefFoundError binaryFailure =
+                new NoClassDefFoundError("changed target API");
+        try {
+            CompatibilityModuleLoader.load(
+                    new StringReader(present),
+                    id -> id.equals("loaded_target"),
+                    CompatibilityModuleLoader.Side.SERVER,
+                    modBus,
+                    name -> {
+                        throw binaryFailure;
+                    });
+            assertTrue("binary-incompatible targets preserve the original linkage failure", false);
+        } catch (IllegalStateException expected) {
+            assertTrue("binary-incompatible targets preserve the original linkage failure",
+                    expected.getMessage().contains("auto_storage:test")
+                            && expected.getMessage().contains("loaded_target")
+                            && expected.getCause() == binaryFailure);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void testAddonRegistrationFacade() {
+        AtomicInteger busListeners = new AtomicInteger();
+        IEventBus modBus = (IEventBus) Proxy.newProxyInstance(
+                SelfTest.class.getClassLoader(),
+                new Class<?>[]{IEventBus.class},
+                (proxy, method, arguments) -> {
+                    if (method.getName().equals("addListener")) {
+                        busListeners.incrementAndGet();
+                    }
+                    return method.getReturnType().isPrimitive()
+                            ? primitiveDefault(method.getReturnType()) : null;
+                });
+        var machines = MachineDescriptorApi.createDeferredRegister("selftest_addon");
+        var recipes = RecipeFamilyApi.createDeferredRegister("selftest_addon");
+        AutoStorageAddon.register("selftest_addon", modBus, addon -> addon
+                .machineDescriptors(machines)
+                .recipeFamilies(recipes));
+        assertTrue("one addon facade call wires every supplied deferred register",
+                busListeners.get() == 4);
+
+        try {
+            AutoStorageAddon.register(
+                    "selftest_addon",
+                    modBus,
+                    addon -> addon.machineDescriptors(
+                            MachineDescriptorApi.createDeferredRegister("wrong_namespace")));
+            assertTrue("addon facade rejects mismatched namespaces", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("addon facade rejects mismatched namespaces",
+                    expected.getMessage().contains("wrong_namespace"));
+        }
+
+        try {
+            var wrongRegistry = RecipeFamilyApi.createDeferredRegister("selftest_addon");
+            AutoStorageAddon.register(
+                    "selftest_addon",
+                    modBus,
+                    addon -> addon.machineDescriptors((net.neoforged.neoforge.registries.DeferredRegister)
+                            wrongRegistry));
+            assertTrue("addon facade rejects the wrong custom registry", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("addon facade rejects the wrong custom registry",
+                    expected.getMessage().contains("instead of"));
+        }
+
+        try {
+            var duplicate = MachineDescriptorApi.createDeferredRegister("selftest_addon");
+            AutoStorageAddon.register("selftest_addon", modBus, addon -> addon
+                    .machineDescriptors(duplicate)
+                    .machineDescriptors(duplicate));
+            assertTrue("addon facade rejects duplicate register wiring", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("addon facade rejects duplicate register wiring",
+                    expected.getMessage().contains("added twice"));
+        }
+
+        try {
+            AutoStorageAddon.register("selftest_addon", modBus, addon -> {
+            });
+            assertTrue("addon facade rejects empty registrations", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("addon facade rejects empty registrations",
+                    expected.getMessage().contains("no Auto Storage registries"));
+        }
+    }
+
+    private static void testAddonRegistrationFreeze() {
+        IEventBus modBus = (IEventBus) Proxy.newProxyInstance(
+                SelfTest.class.getClassLoader(),
+                new Class<?>[]{IEventBus.class},
+                (proxy, method, arguments) -> method.getReturnType().isPrimitive()
+                        ? primitiveDefault(method.getReturnType()) : null);
+        try {
+            AutoStorageAddon.register(
+                    "late_selftest_addon",
+                    modBus,
+                    addon -> addon.machineDescriptors(
+                            MachineDescriptorApi.createDeferredRegister(
+                                    "late_selftest_addon")));
+            assertTrue("late addon registration fails explicitly", false);
+        } catch (IllegalStateException expected) {
+            assertTrue("late addon registration fails explicitly",
+                    expected.getMessage().contains("late_selftest_addon"));
+        }
+    }
+
+    private static Object primitiveDefault(Class<?> type) {
+        if (type == boolean.class) return false;
+        if (type == char.class) return '\0';
+        if (type == byte.class) return (byte) 0;
+        if (type == short.class) return (short) 0;
+        if (type == int.class) return 0;
+        if (type == long.class) return 0L;
+        if (type == float.class) return 0F;
+        if (type == double.class) return 0D;
+        return null;
+    }
+
+    public static final class TestCompatModule implements AutoStorageCompatModule {
+        private static int registrations;
+
+        @Override
+        public void register(AutoStorageCompatContext context) {
+            registrations++;
+        }
     }
 
     private static void testItemKey() {
@@ -1052,16 +1373,16 @@ class SelfTest {
                                 .accepts(new ItemStack(Items.DIAMOND_PICKAXE)));
         assertTrue("process machines stack",
                 MachineEnergyTable.get(MachineEnergyTable.FURNACE_SLOT).category()
-                        == MachineEnergyTable.Category.PROCESS
+                        == MachineCategory.PROCESS
                         && MachineEnergyTable.get(MachineEnergyTable.FURNACE_SLOT)
                         .maxInstalledCount() >= 130);
         assertTrue("instant stations install exactly one",
                 MachineEnergyTable.get(MachineEnergyTable.CRAFTING_TABLE_SLOT).category()
-                        == MachineEnergyTable.Category.INSTANT
+                        == MachineCategory.INSTANT
                         && MachineEnergyTable.get(MachineEnergyTable.CRAFTING_TABLE_SLOT).maxInstalledCount() == 1);
         assertTrue("axes are consumable energy input, not installed stations",
                 MachineEnergyTable.get(MachineEnergyTable.AXE_SLOT).category()
-                        == MachineEnergyTable.Category.TRANSFORM
+                        == MachineCategory.TRANSFORM
                         && MachineEnergyTable.get(MachineEnergyTable.AXE_SLOT).maxInstalledCount() == 0);
         assertTrue("machine rate is one per installed block",
                 MachineEnergyTable.get(0).rateFor(new ItemStack(Items.FURNACE))
@@ -1085,7 +1406,7 @@ class SelfTest {
                 id,
                 stationLabel,
                 () -> List.of(copper, iron),
-                MachineEnergyTable.Category.PROCESS,
+                MachineCategory.PROCESS,
                 64,
                 EnergyType.SMELTING_ENERGY);
 
@@ -1115,7 +1436,7 @@ class SelfTest {
                     () -> List.of(
                             MachineVariant.of(new ItemStack(Items.FURNACE), MachineWorkRate.ONE),
                             MachineVariant.of(new ItemStack(Items.FURNACE), MachineWorkRate.of(2, 1))),
-                    MachineEnergyTable.Category.PROCESS,
+                    MachineCategory.PROCESS,
                     64,
                     EnergyType.SMELTING_ENERGY).variants();
         } catch (IllegalArgumentException exception) {
@@ -1130,13 +1451,36 @@ class SelfTest {
                     Component.literal("Invalid Instant Station"),
                     () -> List.of(MachineVariant.of(
                             new ItemStack(Items.CRAFTING_TABLE), MachineWorkRate.ONE)),
-                    MachineEnergyTable.Category.INSTANT,
+                    MachineCategory.INSTANT,
                     1,
                     null).variants();
         } catch (IllegalArgumentException exception) {
             instantRateRejected = true;
         }
         assertTrue("instant variants reject process work rates", instantRateRejected);
+    }
+
+    private static void testMachineVariantContributorTargets() {
+        ResourceLocation contributionId =
+                ResourceLocation.fromNamespaceAndPath("selftest", "missing_variant");
+        ResourceLocation missingDescriptor =
+                ResourceLocation.fromNamespaceAndPath("selftest", "missing_station");
+        try {
+            MachineVariantContributors.validateDescriptorTargets(
+                    List.of(Map.entry(
+                            contributionId,
+                            MachineVariantContributor.of(
+                                    missingDescriptor,
+                                    () -> List.of(MachineVariant.of(
+                                            new ItemStack(Items.FURNACE),
+                                            MachineWorkRate.ONE))))),
+                    ignored -> false);
+            assertTrue("variant contributors reject missing descriptor targets", false);
+        } catch (IllegalStateException expected) {
+            assertTrue("variant contributors reject missing descriptor targets",
+                    expected.getMessage().contains(contributionId.toString())
+                            && expected.getMessage().contains(missingDescriptor.toString()));
+        }
     }
 
     private static void testMachineWorkAccumulator() {
@@ -1384,7 +1728,7 @@ class SelfTest {
                 () -> List.of(
                         MachineVariant.of(new ItemStack(Items.FURNACE), MachineWorkRate.ONE),
                         MachineVariant.of(new ItemStack(Items.IRON_BLOCK), MachineWorkRate.of(2, 1))),
-                MachineEnergyTable.Category.PROCESS,
+                MachineCategory.PROCESS,
                 64,
                 EnergyType.SMELTING_ENERGY);
         MachineDescriptor consumable = MachineEnergyTable.get(MachineEnergyTable.AXE_SLOT);
@@ -1396,9 +1740,9 @@ class SelfTest {
         assertTrue("Station search includes only timed and instant stations",
                 all.size() == 2
                         && all.get(0).machineSlot() == 1
-                        && all.get(0).category() == MachineEnergyTable.Category.PROCESS
+                        && all.get(0).category() == MachineCategory.PROCESS
                         && all.get(1).machineSlot() == 2
-                        && all.get(1).category() == MachineEnergyTable.Category.INSTANT);
+                        && all.get(1).category() == MachineCategory.INSTANT);
         List<FuelSearchModel.Entry> variantMatch = FuelSearchModel.search(
                 "iron block", List.of(EnergyType.FURNACE_FUEL), descriptors);
         assertTrue("Fuel search matches every concrete polymorphic station variant",
@@ -1413,7 +1757,7 @@ class SelfTest {
         assertTrue("Fuel search reuses terminal name and mod-prefix semantics",
                 instantMatch.size() == 1
                         && instantMatch.getFirst().category()
-                        == MachineEnergyTable.Category.INSTANT);
+                        == MachineCategory.INSTANT);
     }
 
     private static void testRecipeStationCycle() {

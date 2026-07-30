@@ -43,7 +43,12 @@ class ProjectIdentityTests(unittest.TestCase):
         text = main_class.read_text()
         self.assertIn("package com.swear.autostorage;", text)
         self.assertIn("public class AutoStorage", text)
-        self.assertIn('public static final String MODID = "auto_storage";', text)
+        self.assertIn("public static final String MODID = AutoStorageApi.MOD_ID;", text)
+        api = (
+            ROOT
+            / "src/api/java/com/swear/autostorage/api/AutoStorageApi.java"
+        ).read_text()
+        self.assertIn('public static final String MOD_ID = "auto_storage";', api)
 
         self.assertTrue((ROOT / "src/main/resources/assets/auto_storage").is_dir())
         self.assertTrue((ROOT / "src/main/resources/data/auto_storage").is_dir())

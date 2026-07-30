@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "id": "auto_storage:industrial_foregoing",
+  "entrypoint": "com.swear.autostorage.compat.industrialforegoing.IndustrialForegoingCompatModule",
+  "requires": ["industrialforegoing"],
+  "side": "both",
+  "sourceSet": "compatIndustrialForegoing",
+  "fixture": "industrialForegoingFixture",
+  "dependencies": [
+    "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}",
+    "maven.modrinth:titanium:${titanium_ci_version}"
+  ]
+}

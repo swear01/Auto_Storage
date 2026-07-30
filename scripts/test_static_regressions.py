@@ -16,6 +16,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertTrue(path.exists(), f"missing {relative_path}")
         return path.read_text()
 
+    def read_compat_module(self, module_id: str) -> str:
+        return self.read_required(f"src/compat/{module_id}/compat-module.json")
+
     def png_dimensions(self, path: Path) -> tuple[int, int]:
         with path.open("rb") as texture_file:
             header = texture_file.read(24)
@@ -342,25 +345,25 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("TerminalEntryComparator.forMode", crafting_menu)
 
     def test_chemical_internal_carrier_preserves_identity_without_becoming_a_station(self):
-        kinds = self.read_required(
-            "src/main/java/com/swear/autostorage/StorageResourceKinds.java"
-        )
         screen = self.read_required(
             "src/main/java/com/swear/autostorage/StorageTerminalScreen.java"
         )
+        module = self.read_required(
+            "src/compat/mekanism/java/com/swear/autostorage/compat/"
+            "mekanism/MekanismCompatModule.java"
+        )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/MekanismRecipeCompat.java"
+            "src/compat/mekanism/java/com/swear/autostorage/"
+            "MekanismRecipeCompat.java"
         )
 
-        chemical_registration = self.java_block(
-            kinds,
-            r"\bstatic\s+void\s+registerChemical\s*\(",
-            "StorageResourceKinds.registerChemical",
+        self.assertIn(
+            "KINDS.register(StorageResourceKindApi.CHEMICAL_KIND.getPath()",
+            module,
         )
-        self.assertIn("StorageResourceKinds::chemicalTank", chemical_registration)
-        self.assertIn('"basic_chemical_tank"', kinds)
-        self.assertNotIn("Items.BREWING_STAND", chemical_registration)
-        self.assertIn("DataComponents.CUSTOM_NAME", kinds)
+        self.assertIn("StorageResourceKind.variantless(", module)
+        self.assertIn('"basic_chemical_tank"', module)
+        self.assertNotIn("Items.BREWING_STAND", module)
         self.assertNotIn("case GAS -> Items.BREWING_STAND", screen)
         self.assertNotIn("new ItemStack(Items.BREWING_STAND)", compat)
 
@@ -752,8 +755,8 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertNotIn("Category.CONSUMABLE", screen)
         self.assertNotIn("CONSUMABLE", table)
-        self.assertIn("MachineEnergyTable.Category.PROCESS", screen)
-        self.assertIn("MachineEnergyTable.Category.INSTANT", screen)
+        self.assertIn("MachineCategory.PROCESS", screen)
+        self.assertIn("MachineCategory.INSTANT", screen)
 
     def test_emi_uses_terminal_display_slot_contract_without_54_slot_hardcode(self):
         text = self.read_required("src/main/java/com/swear/autostorage/compat/AutoStorageEmiPlugin.java")
@@ -1019,24 +1022,27 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(f"All {count} required tests passed", body, task)
             self.assertIn("expectedSelfTestSummary", body, task)
             self.assertIn("TESTS FAILED!", body, task)
-        self.assertIn("SelfTest: 204908 passed, 0 failed, 204908 total", build)
+        self.assertIn("SelfTest: 204927 passed, 0 failed, 204927 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/OptionalModCapabilities.java"
+        module_index = self.read_compat_module("mekanism")
+        module = self.read_required(
+            "src/compat/mekanism/java/com/swear/autostorage/compat/"
+            "mekanism/MekanismCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/MekanismChemicalCompat.java"
+            "src/compat/mekanism/java/com/swear/autostorage/"
+            "MekanismChemicalCompat.java"
         )
         fixture_metadata = self.read_required(
             "src/mekanismFixture/resources/META-INF/neoforge.mods.toml"
         )
 
-        self.assertIn('compileOnly "maven.modrinth:mekanism:${mekanism_ci_version}"', build)
+        self.assertIn('"maven.modrinth:mekanism:${mekanism_ci_version}"', build)
         self.assertIn(
             'mekanismFixtureRuntimeOnly "maven.modrinth:mekanism:${mekanism_ci_version}"',
             build,
@@ -1044,9 +1050,14 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotRegex(build, r'(?m)^\s*runtimeOnly\s+"[^"]*mekanism')
         self.assertRegex(properties, r"(?m)^mekanism_ci_version=[A-Za-z0-9]+$")
         self.assertNotIn('modId="mekanism"', metadata)
-        self.assertIn('ModList.get().isLoaded(MEKANISM_MOD_ID)', bootstrap)
-        self.assertNotIn("import mekanism.", bootstrap)
-        self.assertIn("Class.forName(MEKANISM_COMPAT_CLASS)", bootstrap)
+        self.assertIn('"requires": ["mekanism"]', module_index)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn(".capabilities(MekanismChemicalCompat::register)", module)
+        self.assertNotIn("import mekanism.", module)
+        self.assertIn(
+            "AutoStorageCapabilityApi.registerSidedResourceCapability(",
+            compat,
+        )
         self.assertIn("WeakReference<IChemicalHandler>", compat)
         self.assertNotIn(
             "Map<StorageCoreBlockEntity, IChemicalHandler>",
@@ -1070,17 +1081,14 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModRecipeCompatibility.java"
-        )
-        containers = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModContainerStrategies.java"
+        module_index = self.read_compat_module("botania")
+        module = self.read_required(
+            "src/compat/botania/java/com/swear/autostorage/compat/"
+            "botania/BotaniaCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "compat/botania/BotaniaCompat.java"
+            "src/compat/botania/java/com/swear/autostorage/compat/"
+            "botania/BotaniaCompat.java"
         )
         kinds = self.read_required(
             "src/main/java/com/swear/autostorage/"
@@ -1101,7 +1109,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertRegex(properties, r"(?m)^neo_version=21\.1\.(?:22[9]|2[3-9]\d|[3-9]\d\d)$")
         self.assertIn(
-            'compileOnly "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"',
+            '"vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"',
             build,
         )
         self.assertRegex(
@@ -1143,19 +1151,15 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("tasks.named('runBotaniaGameTestServer').configure", build)
         self.assertNotIn('modId="botania"', metadata)
-        self.assertIn('ModList.get().isLoaded(BOTANIA_MOD_ID)', bootstrap)
-        self.assertNotIn("import vazkii.botania.", bootstrap)
-        self.assertRegex(
-            bootstrap,
-            r"(?s)invokeRegistrar\(\s*BOTANIA_MOD_ID,.*?"
-            r"BOTANIA_COMPAT_CLASS,\s*\"register\"\s*\)",
-        )
-        self.assertIn("Class.forName(className)", bootstrap)
+        self.assertIn('"requires": ["botania"]', module_index)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("BotaniaCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn(".containerStrategies(CONTAINERS)", module)
+        self.assertNotIn("import vazkii.botania.", module)
         self.assertIn("BOTANIA_MANA_KIND", kinds)
         self.assertIn("ManaItem.LOOKUP.find", compat)
         self.assertIn("copyWithCount(1)", compat)
         self.assertNotIn("ManaReceiver", compat)
-        self.assertIn("BOTANIA_COMPAT_CLASS", containers)
         self.assertIn('modId="botania"', fixture_metadata)
         self.assertIn('versionRange="[455-SNAPSHOT,)"', fixture_metadata)
         self.assertNotIn("455-20260723.172746-31", fixture_metadata)
@@ -1165,12 +1169,13 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModRecipeCompatibility.java"
+        module_index = self.read_compat_module("modern_industrialization")
+        module = self.read_required(
+            "src/compat/modern_industrialization/java/com/swear/autostorage/"
+            "compat/modernindustrialization/ModernIndustrializationCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/compat/"
+            "src/compat/modern_industrialization/java/com/swear/autostorage/compat/"
             "modernindustrialization/ModernIndustrializationCompat.java"
         )
         fixture_metadata = self.read_required(
@@ -1186,7 +1191,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertRegex(properties, r"(?m)^guideme_ci_version=[A-Za-z0-9]+$")
         self.assertIn(
-            'compileOnly "maven.modrinth:modern-industrialization:'
+            '"maven.modrinth:modern-industrialization:'
             '${modern_industrialization_ci_version}"',
             build,
         )
@@ -1212,11 +1217,15 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertNotIn('modId="modern_industrialization"', metadata)
         self.assertIn(
-            "ModList.get().isLoaded(MODERN_INDUSTRIALIZATION_MOD_ID)",
-            bootstrap,
+            '"requires": ["modern_industrialization"]',
+            module_index,
         )
-        self.assertNotIn("import aztech.modern_industrialization.", bootstrap)
-        self.assertIn("MODERN_INDUSTRIALIZATION_COMPAT_CLASS", bootstrap)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn(
+            "ModernIndustrializationCompat.register(MACHINES, RECIPES)",
+            module,
+        )
+        self.assertNotIn("import aztech.modern_industrialization.", module)
         self.assertIn("MachineRecipe.class", compat)
         self.assertIn("MIMachineRecipeTypes", compat)
         self.assertIn('modId="modern_industrialization"', fixture_metadata)
@@ -1229,16 +1238,13 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModRecipeCompatibility.java"
-        )
-        block_bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModBlockStrategies.java"
+        module_index = self.read_compat_module("ars_nouveau")
+        module = self.read_required(
+            "src/compat/ars_nouveau/java/com/swear/autostorage/compat/"
+            "arsnouveau/ArsNouveauCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/compat/"
+            "src/compat/ars_nouveau/java/com/swear/autostorage/compat/"
             "arsnouveau/ArsNouveauCompat.java"
         )
         kinds = self.read_required(
@@ -1254,7 +1260,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertRegex(properties, r"(?m)^geckolib_ci_version=[A-Za-z0-9]+$")
         self.assertRegex(properties, r"(?m)^ars_curios_ci_version=[A-Za-z0-9]+$")
         self.assertIn(
-            'compileOnly "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}"',
+            '"maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}"',
             build,
         )
         self.assertIn(
@@ -1288,9 +1294,11 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("All 11 required tests passed", build)
         self.assertNotIn('modId="ars_nouveau"', metadata)
-        self.assertIn("ModList.get().isLoaded(ARS_NOUVEAU_MOD_ID)", bootstrap)
-        self.assertNotIn("import com.hollingsworth.arsnouveau.", bootstrap)
-        self.assertNotIn("import com.hollingsworth.arsnouveau.", block_bootstrap)
+        self.assertIn('"requires": ["ars_nouveau"]', module_index)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("ArsNouveauCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn(".blockStrategies(BLOCKS)", module)
+        self.assertNotIn("import com.hollingsworth.arsnouveau.", module)
         self.assertIn("ImbuementRecipe.class", compat)
         self.assertIn("EnchantingApparatusRecipe.class", compat)
         self.assertIn("CapabilityRegistry.SOURCE_CAPABILITY", compat)
@@ -1305,12 +1313,13 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModRecipeCompatibility.java"
+        module_index = self.read_compat_module("evilcraft")
+        module = self.read_required(
+            "src/compat/evilcraft/java/com/swear/autostorage/compat/"
+            "evilcraft/EvilCraftCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/compat/"
+            "src/compat/evilcraft/java/com/swear/autostorage/compat/"
             "evilcraft/EvilCraftCompat.java"
         )
         fixture_metadata = self.read_required(
@@ -1321,11 +1330,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertRegex(properties, r"(?m)^evilcraft_ci_version=[A-Za-z0-9]+$")
         self.assertRegex(properties, r"(?m)^cyclops_core_ci_version=[A-Za-z0-9]+$")
         self.assertIn(
-            'compileOnly "maven.modrinth:evilcraft:${evilcraft_ci_version}"',
+            '"maven.modrinth:evilcraft:${evilcraft_ci_version}"',
             build,
         )
         self.assertIn(
-            'compileOnly "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"',
+            '"maven.modrinth:cyclops-core:${cyclops_core_ci_version}"',
             build,
         )
         self.assertIn(
@@ -1351,8 +1360,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("tasks.named('runEvilCraftGameTestServer').configure", build)
         self.assertIn("All 10 required tests passed", build)
         self.assertNotIn('modId="evilcraft"', metadata)
-        self.assertIn("ModList.get().isLoaded(EVILCRAFT_MOD_ID)", bootstrap)
-        self.assertNotIn("import org.cyclops.", bootstrap)
+        self.assertIn('"requires": ["evilcraft"]', module_index)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("EvilCraftCompat.register(MACHINES, RECIPES)", module)
+        self.assertNotIn("import org.cyclops.", module)
         self.assertIn("RecipeBloodInfuser.class", compat)
         self.assertIn("RegistryEntries.RECIPETYPE_BLOOD_INFUSER", compat)
         self.assertIn("getOutputItem().left()", compat)
@@ -1366,12 +1377,13 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModRecipeCompatibility.java"
+        module_index = self.read_compat_module("powah")
+        module = self.read_required(
+            "src/compat/powah/java/com/swear/autostorage/compat/"
+            "powah/PowahCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/compat/"
+            "src/compat/powah/java/com/swear/autostorage/compat/"
             "powah/PowahCompat.java"
         )
         fixture_metadata = self.read_required(
@@ -1385,7 +1397,7 @@ class StaticRegressionTests(unittest.TestCase):
             r"(?m)^powah_cloth_config_ci_version=[A-Za-z0-9]+$",
         )
         self.assertIn(
-            'compileOnly "maven.modrinth:powah:${powah_ci_version}"',
+            '"maven.modrinth:powah:${powah_ci_version}"',
             build,
         )
         self.assertIn(
@@ -1415,10 +1427,16 @@ class StaticRegressionTests(unittest.TestCase):
             r"sourceSets\.main\.runtimeClasspath.*?\}",
         )
         self.assertIn("tasks.named('runPowahGameTestServer').configure", build)
-        self.assertIn("All 9 required tests passed", build)
+        self.assertIn("All 11 required tests passed", build)
         self.assertNotIn('modId="powah"', metadata)
-        self.assertIn("ModList.get().isLoaded(POWAH_MOD_ID)", bootstrap)
-        self.assertNotIn("import owmii.powah.", bootstrap)
+        self.assertIn('"requires": ["powah"]', module_index)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn(
+            "PowahCompat.register(MACHINES, RECIPES, TRANSFORMS)",
+            module,
+        )
+        self.assertIn(".transformProviders(TRANSFORMS)", module)
+        self.assertNotIn("import owmii.powah.", module)
         self.assertIn("EnergizingRecipe.class", compat)
         self.assertIn("recipe.getScaledEnergy()", compat)
         self.assertIn("StorageResourceKey.neoforgeEnergy()", compat)
@@ -1433,12 +1451,13 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModRecipeCompatibility.java"
+        module_index = self.read_compat_module("industrial_foregoing")
+        module = self.read_required(
+            "src/compat/industrial_foregoing/java/com/swear/autostorage/"
+            "compat/industrialforegoing/IndustrialForegoingCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/compat/"
+            "src/compat/industrial_foregoing/java/com/swear/autostorage/compat/"
             "industrialforegoing/IndustrialForegoingCompat.java"
         )
         fixture_metadata = self.read_required(
@@ -1454,7 +1473,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertRegex(properties, r"(?m)^titanium_ci_version=[A-Za-z0-9]+$")
         self.assertIn(
-            'compileOnly "maven.modrinth:industrial-foregoing:'
+            '"maven.modrinth:industrial-foregoing:'
             '${industrial_foregoing_ci_version}"',
             build,
         )
@@ -1486,11 +1505,13 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("All 9 required tests passed", build)
         self.assertNotIn('modId="industrialforegoing"', metadata)
+        self.assertIn('"requires": ["industrialforegoing"]', module_index)
+        self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn(
-            "ModList.get().isLoaded(INDUSTRIAL_FOREGOING_MOD_ID)",
-            bootstrap,
+            "IndustrialForegoingCompat.register(MACHINES, RECIPES)",
+            module,
         )
-        self.assertNotIn("import com.buuz135.", bootstrap)
+        self.assertNotIn("import com.buuz135.", module)
         self.assertIn("DissolutionChamberRecipe.class", compat)
         self.assertIn("StoneWorkGenerateRecipe.class", compat)
         self.assertIn("CrusherRecipe.class", compat)
@@ -1509,12 +1530,13 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
-        bootstrap = self.read_required(
-            "src/main/java/com/swear/autostorage/"
-            "OptionalModRecipeCompatibility.java"
+        module_index = self.read_compat_module("create")
+        module = self.read_required(
+            "src/compat/create/java/com/swear/autostorage/compat/"
+            "create/CreateCompatModule.java"
         )
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/compat/"
+            "src/compat/create/java/com/swear/autostorage/compat/"
             "create/CreateCompat.java"
         )
         fixture_metadata = self.read_required(
@@ -1524,7 +1546,7 @@ class StaticRegressionTests(unittest.TestCase):
 
         self.assertRegex(properties, r"(?m)^create_ci_version=[A-Za-z0-9]+$")
         self.assertIn(
-            'compileOnly "maven.modrinth:create:${create_ci_version}"',
+            '"maven.modrinth:create:${create_ci_version}"',
             build,
         )
         self.assertIn(
@@ -1544,8 +1566,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("tasks.named('runCreateGameTestServer').configure", build)
         self.assertIn("All 13 required tests passed", build)
         self.assertNotIn('modId="create"', metadata)
-        self.assertIn("ModList.get().isLoaded(CREATE_MOD_ID)", bootstrap)
-        self.assertNotIn("import com.simibubi.create.", bootstrap)
+        self.assertIn('"requires": ["create"]', module_index)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("CreateCompat.register(MACHINES, RECIPES)", module)
+        self.assertNotIn("import com.simibubi.create.", module)
         self.assertIn("MillingRecipe.class", compat)
         self.assertIn("CrushingRecipe.class", compat)
         self.assertIn("CuttingRecipe.class", compat)
@@ -1580,8 +1604,9 @@ class StaticRegressionTests(unittest.TestCase):
             r"(?m)^pneumaticcraft_ci_version=[A-Za-z0-9]+$",
         )
         self.assertIn(
-            'compileOnly "maven.modrinth:pneumaticcraft-repressurized:'
-            '${pneumaticcraft_ci_version}"',
+            'pneumaticCraftFixtureCompileOnly(\n'
+            '            "maven.modrinth:pneumaticcraft-repressurized:'
+            '${pneumaticcraft_ci_version}")',
             build,
         )
         self.assertIn(
@@ -2166,7 +2191,7 @@ class StaticRegressionTests(unittest.TestCase):
 
     def test_mekanism_chemical_terminal_visual_uses_the_exact_emi_stack(self):
         compat = self.read_required(
-            "src/main/java/com/swear/autostorage/"
+            "src/compat/mekanism/java/com/swear/autostorage/"
             "MekanismChemicalClientCompat.java"
         )
         self.assertIn("ChemicalEmiStack", compat)
@@ -2177,9 +2202,12 @@ class StaticRegressionTests(unittest.TestCase):
             "src/main/java/com/swear/autostorage/"
             "StorageTerminalScreen.java"
         )
-        self.assertIn("MekanismChemicalClientCompat.render", screen)
+        self.assertIn("TerminalResourceRendererApi.render(", screen)
         self.assertIn("TerminalResourceDisplay.key(stack)", screen)
-        self.assertIn("Items.BARRIER.getDefaultInstance()", screen)
+        self.assertIn(
+            "TerminalDisplayStack.strip(stack).copyWithCount(1)",
+            screen,
+        )
 
         crafting_screen = self.read_required(
             "src/main/java/com/swear/autostorage/"
@@ -2776,8 +2804,12 @@ class StaticRegressionTests(unittest.TestCase):
         provider = self.read_required(
             "src/main/java/com/swear/autostorage/TransformProviderApi.java"
         )
+        provider_value = self.read_required(
+            "src/main/java/com/swear/autostorage/TransformProvider.java"
+        )
         powah = self.read_required(
-            "src/main/java/com/swear/autostorage/compat/powah/PowahCompat.java"
+            "src/compat/powah/java/com/swear/autostorage/compat/"
+            "powah/PowahCompat.java"
         )
         agents = self.read_required("AGENTS.md")
         api_docs = self.read_required("docs/machine-descriptor-api.md")
@@ -2795,8 +2827,8 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("TransformProviderApi.sourceLabel(use.id())", source)
         self.assertIn("use.stationId()", source)
         self.assertIn("use.stationWorkPerItem()", source)
-        self.assertIn("Component sourceLabel", provider)
-        self.assertIn("Provider::sourceLabel", provider)
+        self.assertIn("Component sourceLabel", provider_value)
+        self.assertIn("provider.sourceLabel()", provider)
         self.assertNotIn("stationLabel", provider)
         self.assertIn("Optional<Component> sourceLabel", provider)
         self.assertIn('"gui.auto_storage.station.powah_furnator"', powah)
@@ -2804,7 +2836,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("every accepted workstation variant", agents)
         self.assertIn("first/representative/installed stack", agents)
         self.assertIn("EMI category display name", api_docs)
-        self.assertIn("all accepted workstation variants", api_docs)
+        self.assertIn("every accepted variant", api_docs)
         self.assertNotIn("renderTransformPreview", screen)
         self.assertNotIn("gui.auto_storage.transform_select_recipe", en_us)
         self.assertNotIn("gui.auto_storage.transform_select_recipe", zh_tw)
@@ -2836,7 +2868,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("graphics.renderItem(icon", category_render)
         self.assertIn("renderNetworkAmount(", category_render)
         self.assertNotIn("renderItemDecorations", category_render)
-        self.assertIn("category == MachineEnergyTable.Category.PROCESS", category_render)
+        self.assertIn("category == MachineCategory.PROCESS", category_render)
         self.assertIn("machineStoredAmount(entry)", category_render)
 
     def test_transform_and_empty_station_icons_have_visible_background_rendering(self):
@@ -3850,36 +3882,30 @@ class StaticRegressionTests(unittest.TestCase):
         )
 
     def test_optional_mod_linkage_failures_are_reported_explicitly(self):
-        for path in [
-            "src/main/java/com/swear/autostorage/OptionalModCapabilities.java",
-            "src/main/java/com/swear/autostorage/OptionalModBlockStrategies.java",
-            "src/main/java/com/swear/autostorage/OptionalModContainerStrategies.java",
-        ]:
-            text = self.read_required(path)
-            self.assertIn("catch (LinkageError error)", text, path)
-            self.assertIn("binary-incompatible", text, path)
-
-        capabilities = self.read_required(
-            "src/main/java/com/swear/autostorage/OptionalModCapabilities.java"
+        loader = self.read_required(
+            "src/main/java/com/swear/autostorage/CompatibilityModuleLoader.java"
         )
+        load_module = self.java_block(
+            loader,
+            r"\bprivate\s+static\s+void\s+loadModule\s*\(",
+            "CompatibilityModuleLoader.loadModule",
+        )
+        failure = self.java_block(
+            loader,
+            r"\bprivate\s+static\s+IllegalStateException\s+failure\s*\(",
+            "CompatibilityModuleLoader.failure",
+        )
+        self.assertIn("catch (LinkageError error)", load_module)
+        self.assertIn("throw failure(module, targets, error)", load_module)
         self.assertRegex(
-            capabilities,
-            r'(?s)if \(exception\.getCause\(\) instanceof LinkageError error\) \{\s*'
-            r'throw new IllegalStateException\(\s*"[^"]*binary-incompatible[^"]*", error\);\s*\}',
-            "InvocationTargetException must preserve binary-incompatible classification",
+            load_module,
+            r"catch \(InvocationTargetException exception\) \{\s*"
+            r"throw failure\(module, targets, exception\.getCause\(\)\);",
+            "reflected failures must preserve their original cause",
         )
-        for path in [
-            "src/main/java/com/swear/autostorage/OptionalModBlockStrategies.java",
-            "src/main/java/com/swear/autostorage/OptionalModContainerStrategies.java",
-        ]:
-            text = self.read_required(path)
-            self.assertRegex(
-                text,
-                r'(?s)catch \(InvocationTargetException exception\) \{\s*'
-                r'if \(exception\.getCause\(\) instanceof LinkageError error\) \{\s*'
-                r'throw new IllegalStateException\(\s*"[^"]*binary-incompatible[^"]*", error\);\s*\}',
-                f"reflected LinkageError must remain binary-incompatible: {path}",
-            )
+        self.assertIn('"Compatibility module " + module.id()', failure)
+        self.assertIn('" failed for loaded target mods [" + targets + "]"', failure)
+        self.assertIn("cause);", failure)
 
     def test_storage_unit_guide_matches_self_drop_and_capacity_contract(self):
         for tier in range(1, 7):
@@ -4237,7 +4263,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("renderItemDecorations", category_render)
         self.assertRegex(
             category_render,
-            r"if\s*\(\s*category\s*==\s*MachineEnergyTable\.Category\.PROCESS\s*\)"
+            r"if\s*\(\s*category\s*==\s*MachineCategory\.PROCESS\s*\)"
             r"\s*\{[\s\S]*?renderNetworkAmount",
         )
 
@@ -4250,7 +4276,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("graphics.renderItem(icon", search_results)
         self.assertIn("renderNetworkAmount(", search_results)
         self.assertNotIn("graphics.renderItemDecorations", search_results)
-        self.assertIn("descriptor.category() == MachineEnergyTable.Category.PROCESS", search_results)
+        self.assertIn("descriptor.category() == MachineCategory.PROCESS", search_results)
         self.assertIn("machineStoredAmount(descriptor)", search_results)
 
     def test_gui_world_has_an_active_executable_scenario_contract(self):

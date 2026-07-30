@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.arsnouveau;
 
+import com.swear.autostorage.MachineCategory;
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import com.swear.autostorage.Action;
@@ -81,7 +82,7 @@ public final class ArsNouveauIntegrationGameTests {
             MachineDescriptor descriptor = MachineEnergyTable.get(station.descriptorId());
             ItemStack stack = new ItemStack(arsItem(station.itemPath()));
             if (descriptor == null
-                    || descriptor.category() != MachineEnergyTable.Category.PROCESS
+                    || descriptor.category() != MachineCategory.PROCESS
                     || !descriptor.accepts(stack)
                     || !descriptor.rateFor(stack).orElseThrow().equals(MachineWorkRate.of(1, 1))
                     || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(station.descriptorId())) {

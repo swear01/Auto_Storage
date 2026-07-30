@@ -551,7 +551,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             int mappedSlot = machineSlot;
             MachineDescriptor descriptor = descriptorAt(mappedSlot);
             boolean consumable = descriptor != null
-                    && descriptor.category() == MachineEnergyTable.Category.TRANSFORM;
+                    && descriptor.category() == MachineCategory.TRANSFORM;
             Container slotContainer = consumable ? consumableInputContainer : machineContainer;
             int containerSlot = mappedSlot;
             this.addSlot(new Slot(slotContainer, containerSlot,
@@ -587,7 +587,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 public boolean isActive() {
                     MachineDescriptor entry = descriptorAt(mappedSlot);
                     return entry != null
-                            && entry.category() != MachineEnergyTable.Category.TRANSFORM
+                            && entry.category() != MachineCategory.TRANSFORM
                             && page == CraftingTerminalPage.STATIONS;
                 }
 
@@ -598,7 +598,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     MachineDescriptor entry = descriptorAt(mappedSlot);
                     if (currentCore == null || currentCore.isConflicted()
                             || entry == null
-                            || entry.category() == MachineEnergyTable.Category.TRANSFORM
+                            || entry.category() == MachineCategory.TRANSFORM
                             || !entry.accepts(stack)) return false;
                     if (hasRetainedLegacyInput()) return false;
                     return entry.maxInstalledCount() > 0;
@@ -608,7 +608,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 public int getMaxStackSize(ItemStack stack) {
                     MachineDescriptor entry = descriptorAt(mappedSlot);
                     if (entry == null) return 0;
-                    if (entry.category() == MachineEnergyTable.Category.TRANSFORM) {
+                    if (entry.category() == MachineCategory.TRANSFORM) {
                         return Math.min(64, stack.getMaxStackSize());
                     }
                     return entry.maxInstalledCount();
@@ -1016,7 +1016,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private MachineDescriptor transformDescriptor(TransformProviderApi.Use use) {
         return descriptorSnapshot.stream()
                 .filter(candidate -> candidate.id().equals(use.id())
-                        && candidate.category() == MachineEnergyTable.Category.TRANSFORM)
+                        && candidate.category() == MachineCategory.TRANSFORM)
                 .findFirst()
                 .orElse(null);
     }
@@ -1150,7 +1150,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     ItemStack stack = slot.getItem();
                     MachineDescriptor entry = descriptorAt(machineSlot);
                     if (entry == null
-                            || entry.category() == MachineEnergyTable.Category.TRANSFORM) {
+                            || entry.category() == MachineCategory.TRANSFORM) {
                         return ItemStack.EMPTY;
                     }
                     if (!moveStackToMachineSlot(stack, machineSlot)) return ItemStack.EMPTY;
@@ -2204,7 +2204,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {
         MachineDescriptor station = MachineEnergyTable.get(match.stationDescriptorId());
         if (station == null) throw new IllegalStateException("Recipe presentation has no station descriptor");
-        if (station.category() == MachineEnergyTable.Category.TRANSFORM) {
+        if (station.category() == MachineCategory.TRANSFORM) {
             if (!isStationAvailable(core, match)) {
                 throw new IllegalStateException("Recipe presentation tool station is unavailable");
             }
@@ -2953,7 +2953,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         if (core == null) return false;
         MachineDescriptor station = MachineEnergyTable.get(stationDescriptorId);
         if (station == null) return false;
-        if (station.category() == MachineEnergyTable.Category.TRANSFORM) {
+        if (station.category() == MachineCategory.TRANSFORM) {
             return toolCost != null
                     && toolCost.descriptorId().equals(station.id())
                     && core.hasDescriptorAmount(toolCost.descriptorId(), toolCost.amountPerCraft());
@@ -3147,20 +3147,20 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             states.add(new MachineDescriptorStatePacket.State(
                     descriptor.id(),
                     descriptorStateAmount(core, descriptor),
-                    descriptor.category() == MachineEnergyTable.Category.TRANSFORM
+                    descriptor.category() == MachineCategory.TRANSFORM
                             && core.hasInfiniteDescriptor(descriptor.id())));
         }
         PacketDistributor.sendToPlayer(serverPlayer, new MachineDescriptorStatePacket(containerId, states));
     }
 
     private static boolean hasDescriptorState(MachineDescriptor descriptor) {
-        return descriptor.category() == MachineEnergyTable.Category.TRANSFORM
-                || descriptor.category() == MachineEnergyTable.Category.PROCESS
+        return descriptor.category() == MachineCategory.TRANSFORM
+                || descriptor.category() == MachineCategory.PROCESS
                 && descriptor.energyType() == null;
     }
 
     private static long descriptorStateAmount(StorageCoreBlockEntity core, MachineDescriptor descriptor) {
-        return descriptor.category() == MachineEnergyTable.Category.PROCESS
+        return descriptor.category() == MachineCategory.PROCESS
                 ? core.getStationWork(descriptor.id())
                 : core.getDescriptorAmount(descriptor.id());
     }
@@ -3188,7 +3188,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             descriptorStates.put(descriptor.id(), new MachineDescriptorStatePacket.State(
                     descriptor.id(),
                     descriptorStateAmount(core, descriptor),
-                    descriptor.category() == MachineEnergyTable.Category.TRANSFORM
+                    descriptor.category() == MachineCategory.TRANSFORM
                             && core.hasInfiniteDescriptor(descriptor.id())));
         }
     }

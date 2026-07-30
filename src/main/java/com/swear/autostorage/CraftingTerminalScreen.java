@@ -80,8 +80,8 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
 
     @Override
     protected TerminalLayout.FuelDescriptorCounts fuelDescriptorCounts() {
-        int timedStations = machineSlotsForCategory(MachineEnergyTable.Category.PROCESS).size();
-        int instantStations = machineSlotsForCategory(MachineEnergyTable.Category.INSTANT).size();
+        int timedStations = machineSlotsForCategory(MachineCategory.PROCESS).size();
+        int instantStations = machineSlotsForCategory(MachineCategory.INSTANT).size();
         int transformUses = Math.max(1, menu.getVisibleTransformUses().size());
         return new TerminalLayout.FuelDescriptorCounts(
                 transformUses,
@@ -396,7 +396,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     private void refreshFuelSearchResults(TerminalSearchQuery query) {
         filteredFuelEntries = FuelSearchModel.search(query, fuelSearchIndex).stream()
                 .filter(entry -> !entry.isEnergy()
-                        && entry.category() != MachineEnergyTable.Category.TRANSFORM)
+                        && entry.category() != MachineCategory.TRANSFORM)
                 .filter(entry -> stationDisplayMode.shows(
                         isStationInstalled(entry.machineSlot())))
                 .sorted(TerminalEntryComparator.forMode(
@@ -457,19 +457,19 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         }
 
         positionMachineCategory(
-                MachineEnergyTable.Category.PROCESS,
+                MachineCategory.PROCESS,
                 geometry.timedStationsGrid(),
                 timedStationPage,
                 0);
         positionMachineCategory(
-                MachineEnergyTable.Category.INSTANT,
+                MachineCategory.INSTANT,
                 geometry.instantStationsGrid(),
                 instantStationPage,
                 0);
     }
 
     private void positionMachineCategory(
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             TerminalLayout.FlowGrid grid,
             int page,
             int descriptorOffset
@@ -791,7 +791,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             if (!installed.isEmpty()) {
                 ItemStack icon = installed.copyWithCount(1);
                 graphics.renderItem(icon, leftPos + slot.x(), topPos + slot.y());
-                if (descriptor.category() == MachineEnergyTable.Category.PROCESS) {
+                if (descriptor.category() == MachineCategory.PROCESS) {
                     renderNetworkAmount(
                             graphics,
                             leftPos + slot.x(),
@@ -801,7 +801,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             } else {
                 renderDimmedItem(graphics, descriptor.representativeStack(), slot);
             }
-            if (descriptor.category() == MachineEnergyTable.Category.PROCESS) {
+            if (descriptor.category() == MachineCategory.PROCESS) {
                 drawFlowAmount(
                         graphics,
                         cell,
@@ -1002,7 +1002,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 grid.pageCount());
         renderMachineCategoryCells(
                 graphics,
-                MachineEnergyTable.Category.PROCESS,
+                MachineCategory.PROCESS,
                 grid,
                 timedStationPage);
     }
@@ -1020,7 +1020,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 grid.pageCount());
         renderMachineCategoryCells(
                 graphics,
-                MachineEnergyTable.Category.INSTANT,
+                MachineCategory.INSTANT,
                 grid,
                 instantStationPage);
     }
@@ -1098,7 +1098,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
 
     private void renderMachineCategoryCells(
             GuiGraphics graphics,
-            MachineEnergyTable.Category category,
+            MachineCategory category,
             TerminalLayout.FlowGrid grid,
             int page
     ) {
@@ -1118,7 +1118,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             if (!installed.isEmpty()) {
                 ItemStack icon = installed.copyWithCount(1);
                 graphics.renderItem(icon, leftPos + slot.x(), topPos + slot.y());
-                if (category == MachineEnergyTable.Category.PROCESS) {
+                if (category == MachineCategory.PROCESS) {
                     renderNetworkAmount(
                             graphics,
                             leftPos + slot.x(),
@@ -1129,7 +1129,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 renderDimmedItem(graphics, entry.representativeStack(), slot);
             }
             if (entry != null) {
-                if (category == MachineEnergyTable.Category.PROCESS) {
+                if (category == MachineCategory.PROCESS) {
                     drawFlowAmount(
                             graphics,
                             cell,
@@ -1468,14 +1468,14 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 graphics,
                 mouseX,
                 mouseY,
-                machineSlotsForCategory(MachineEnergyTable.Category.PROCESS),
+                machineSlotsForCategory(MachineCategory.PROCESS),
                 geometry.timedStationsGrid(),
                 timedStationPage)
                 || renderStationGridTooltip(
                         graphics,
                         mouseX,
                         mouseY,
-                        machineSlotsForCategory(MachineEnergyTable.Category.INSTANT),
+                        machineSlotsForCategory(MachineCategory.INSTANT),
                         geometry.instantStationsGrid(),
                         instantStationPage);
     }
@@ -1506,7 +1506,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 graphics.renderTooltip(font, displayStack, mouseX, mouseY);
                 return true;
             }
-            if (descriptor.category() != MachineEnergyTable.Category.PROCESS
+            if (descriptor.category() != MachineCategory.PROCESS
                     || !TerminalLayout.fuelAmountBounds(cell).contains(localX, localY)) {
                 continue;
             }
@@ -1586,7 +1586,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         return slot >= 0 && slot < descriptors.size() ? descriptors.get(slot) : null;
     }
 
-    private List<Integer> machineSlotsForCategory(MachineEnergyTable.Category category) {
+    private List<Integer> machineSlotsForCategory(MachineCategory category) {
         List<Integer> result = new ArrayList<>();
         List<MachineDescriptor> entries = menu.getMachineDescriptors();
         for (int slot = 0; slot < entries.size(); slot++) {
