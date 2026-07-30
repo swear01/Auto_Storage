@@ -43,6 +43,8 @@ every later command. Validation compares that audit's exact candidate set with
 the contract, including every per-family scanner risk, so recomputing a
 contract-only inventory digest cannot hide an omitted recipe family or risk.
 Process station rates must be positive and Instant station rates must be zero.
+Accepted families keep the `costs` field, but may use an empty list when the
+reviewed runtime family is genuinely free.
 
 The scan publishes only public signatures and compact risk evidence. Bounded
 private bytecode is inspected for hidden randomness, world/entity access,
@@ -79,9 +81,11 @@ Storage repository. Bundled verification runs each declared Gradle task
 separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing
 count. Bundled descriptors preserve reviewed HTTPS repository order, and fixture
-names must be Java-safe identifiers ending in `Fixture`. The published archive
-includes its own Gradle wrapper template, so an extracted copy can scaffold an
-addon without an Auto Storage checkout.
+names must be Java-safe identifiers ending in `Fixture`. Their authoritative
+GameTest task is derived from the same fixture name (`evilCraftFixture` becomes
+`runEvilCraftGameTestServer`) and mismatches fail before materialization. The
+published archive includes its own Gradle wrapper template, so an extracted copy
+can scaffold an addon without an Auto Storage checkout.
 
 ## Review an update
 

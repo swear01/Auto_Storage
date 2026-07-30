@@ -254,8 +254,12 @@ external machine and wait for world state.
 
 The reviewed contract must preserve every scanner risk attached to each recipe
 family. Process station variants use positive work rates; Instant variants use
-zero rates. Compat Kit rejects drift before generating code that runtime
-descriptor validation would reject.
+zero rates. Accepted families keep an explicit `costs` list, which may be empty
+only for a reviewed runtime family that is genuinely free. A bundled contract's
+GameTest task must be the task derived from its fixture name; another fixture
+with the same expected count cannot provide its runtime evidence. Compat Kit
+rejects drift before generating code that runtime descriptor validation would
+reject.
 
 Registration, linkage, or validation failures are startup errors. Auto Storage
 does not silently skip a loaded but incompatible integration. Runtime crafting

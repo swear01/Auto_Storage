@@ -1045,7 +1045,7 @@ def validate_contract(
         else:
             for key in ("station", "recipe_type", "inputs", "outputs", "costs", "decision"):
                 value = family.get(key)
-                if value is None or value == [] or value == "":
+                if value is None or value == "" or (key != "costs" and value == []):
                     raise ValueError(f"accepted family {family_id} requires {key}")
             outputs = family["outputs"]
             if not isinstance(outputs, list) or not any(
@@ -1769,11 +1769,18 @@ def scaffold_bundled(
 
 
 def _validate_bundled_verification(contract: dict):
-    fixture = contract["verification"]["fixture"]
+    verification = contract["verification"]
+    fixture = verification["fixture"]
     if not re.fullmatch(r"[a-z][A-Za-z0-9]*Fixture", fixture):
         raise ValueError(
             "bundled fixture must be a Java-safe identifier ending in Fixture"
         )
+    fixture_name = fixture.removesuffix("Fixture")
+    expected_task = (
+        f"run{fixture_name[0].upper()}{fixture_name[1:]}GameTestServer"
+    )
+    if verification["game_test_task"] != expected_task:
+        raise ValueError("bundled game_test_task must match fixture")
 
 
 def _validate_addon_verification(contract: dict):

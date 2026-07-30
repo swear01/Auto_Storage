@@ -123,7 +123,8 @@ An accepted family records:
 2. station descriptor, category, variants, and rational rates;
 3. every consumed input, catalyst, tool/durability, and remainder;
 4. every primary and secondary output with exact typed units;
-5. station-work and item/fluid/energy/chemical/addon-resource costs;
+5. station-work and item/fluid/energy/chemical/addon-resource costs; use an
+   empty `costs` list only when the reviewed runtime family is genuinely free;
 6. deterministic bounds and source/class/method evidence;
 7. target Maven repositories as explicit HTTPS URLs;
 8. every additional required runtime artifact as an explicit dependency;
@@ -133,6 +134,11 @@ An accepted family records:
 Process station variants require a positive rational rate. Instant station
 variants require a zero numerator. These rules match runtime
 `MachineDescriptor` validation and fail before scaffolding.
+
+For a bundled module, `verification.game_test_task` is not arbitrary evidence:
+it must match the task derived from the fixture's preserved camel case
+(`evilCraftFixture` becomes `runEvilCraftGameTestServer`). This prevents a
+same-count fixture from supplying another integration's runtime result.
 
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
 

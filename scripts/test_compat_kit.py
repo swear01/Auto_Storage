@@ -660,6 +660,22 @@ class CompatKitAuditTests(unittest.TestCase):
                         source_audit=audit,
                     )
 
+    def test_accepted_family_can_declare_no_resource_costs(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        family = next(
+            family
+            for family in contract["families"]
+            if family["status"] == "accepted"
+        )
+        family["costs"] = []
+
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=True,
+            source_audit=audit,
+        )
+
     def test_contract_validation_rejects_malformed_nested_semantics(self):
         mutations = (
             ("station", "invalid", "station must be an object"),
@@ -1170,6 +1186,29 @@ class CompatKitAuditTests(unittest.TestCase):
                 source_audit=self.source_audit(),
             )
         self.assertFalse((self.root / "outside").exists())
+
+    def test_bundled_scaffold_binds_game_test_task_to_fixture(self):
+        contract = self.accepted_contract()
+        contract["verification"]["game_test_task"] = (
+            "runFarmersDelightGameTestServer"
+        )
+        contract["verification"]["gradle_tasks"] = [
+            "compileCompatSamplemodJava",
+            "runFarmersDelightGameTestServer",
+        ]
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["task"] = "runFarmersDelightGameTestServer"
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "bundled game_test_task must match fixture",
+        ):
+            self.compat_kit.scaffold_bundled(
+                contract,
+                self.root / "bundled",
+                source_audit=self.source_audit(),
+            )
 
     def test_scaffold_rejects_unresolved_or_semantically_incomplete_contracts(self):
         audit = self.compat_kit.scan_jar(
