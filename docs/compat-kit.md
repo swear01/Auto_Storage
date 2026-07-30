@@ -113,8 +113,9 @@ entry as `accepted` or `rejected`; do not delete inconvenient candidates.
 `source_recipe_inventory_sha256` binds the sorted recipe-class inventory, and
 every complete `scaffold`/`verify` invocation must also load the committed
 source audit. Validation compares the contract's exact family-class set,
-target identity, artifact SHA, and inventory digest with that separate audit;
-deleting a family and recomputing a contract field still fails.
+per-family scanner risk set, target identity, artifact SHA, and inventory digest
+with that separate audit; deleting a family or risk and recomputing a contract
+field still fails.
 
 An accepted family records:
 
@@ -129,14 +130,22 @@ An accepted family records:
 9. fixture, exact GameTest count, authoritative GameTest task, Gradle gates,
    and every required check mapped to `{task, source, marker}` evidence.
 
+Process station variants require a positive rational rate. Instant station
+variants require a zero numerator. These rules match runtime
+`MachineDescriptor` validation and fail before scaffolding.
+
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
 
 Repository declarations are build inputs, not discovery hints. A target
 published through Modrinth Maven, Curse Maven, or its own Maven must list the
 required repository in `target.repositories`; an empty list means Maven
-Central is sufficient. Generated addons copy only these reviewed repositories in declared order
-and never guess, sort, or otherwise change repository precedence from the
-dependency coordinate. Required
+Central is sufficient. Generated addons put these reviewed repositories first
+in declared order and restrict them to target and explicit runtime dependency
+groups. Explicit runtime groups cannot fall back to Maven Central; the target
+may fall back only under its exact SHA gate. Fixed Maven Central, BlameJared,
+and release-Ivy filters reserve Patchouli and Auto Storage for their owning
+repositories. The generator never guesses, sorts, or otherwise changes target
+repository precedence from the dependency coordinate. Required
 target-side runtime artifacts belong in `target.runtime_dependencies`; bundled
 descriptors and external addon builds copy the exact reviewed list instead of
 depending on transitive metadata or hand edits. Target and explicit runtime
@@ -236,6 +245,11 @@ scans are scoped to `src/`; ignored `build/` outputs and previously extracted
 scaffolds cannot poison a later verification. The manifest also hashes the
 bundled descriptor or external `build.gradle`, so the target-SHA gate cannot be
 removed after scaffolding while retaining a passing report.
+
+The repository compatibility-matrix task also depends directly on every
+descriptor-generated audited-artifact verifier and the separately pinned
+Botania verifier. Running either the normal 10k matrix or 30k stress command
+directly therefore verifies the exact audited target bytes first.
 
 ### 7. Review an upstream update
 

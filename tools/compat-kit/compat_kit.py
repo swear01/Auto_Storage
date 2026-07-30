@@ -701,13 +701,21 @@ def _family_id(class_name: str) -> str:
     return re.sub(r"[^a-z0-9_]+", "_", words).strip("_")
 
 
-def decide_audit(audit: dict) -> tuple[dict, str]:
-    _validate_audit(audit)
+def _audited_risks_by_class(audit: dict) -> dict[str, list[str]]:
     risks_by_class: dict[str, list[str]] = {}
     for risk in audit["risks"]:
         for evidence in risk["evidence"]:
             class_name = evidence.split("#", 1)[0].split(":", 1)[0]
             risks_by_class.setdefault(class_name, []).append(risk["code"])
+    return {
+        class_name: sorted(set(risks))
+        for class_name, risks in risks_by_class.items()
+    }
+
+
+def decide_audit(audit: dict) -> tuple[dict, str]:
+    _validate_audit(audit)
+    risks_by_class = _audited_risks_by_class(audit)
     recipe_candidates = audit["candidates"]["recipe_classes"]
     simple_ids = [_family_id(candidate["class"]) for candidate in recipe_candidates]
     duplicate_ids = {
@@ -724,7 +732,7 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
     ]
     for candidate in recipe_candidates:
         class_name = candidate["class"]
-        risks = sorted(set(risks_by_class.get(class_name, [])))
+        risks = risks_by_class.get(class_name, [])
         family_id = _family_id(class_name)
         if family_id in duplicate_ids:
             family_id = f"{family_id}_{class_name.encode('utf-8').hex()}"
@@ -886,6 +894,14 @@ def _validate_station(value, location: str):
             or denominator <= 0
         ):
             raise ValueError(f"{variant_location} rate denominator must be positive")
+        if value["category"] == "process" and numerator == 0:
+            raise ValueError(
+                f"{location} process station variants require positive rates"
+            )
+        if value["category"] == "instant" and numerator != 0:
+            raise ValueError(
+                f"{location} instant station variants require zero rates"
+            )
         if "bounds" in variant:
             _validate_nonempty_string(variant["bounds"], f"{variant_location} bounds")
 
@@ -1057,6 +1073,16 @@ def validate_contract(
             raise ValueError(
                 "contract families do not match audited recipe candidates"
             )
+        audited_risks = _audited_risks_by_class(source_audit)
+        contract_risks = {
+            family["class"]: set(family["risks"])
+            for family in contract["families"]
+        }
+        if any(
+            contract_risks[class_name] != set(audited_risks.get(class_name, []))
+            for class_name in audited_recipe_classes
+        ):
+            raise ValueError("contract family risks do not match source audit")
         if (
             source_recipe_inventory_sha256
             != _recipe_inventory_sha256(audited_recipe_classes)
@@ -1395,9 +1421,45 @@ mod_id={addon_id}
 mod_version=0.1.0
 mod_group_id={package}
 """
+    reviewed_groups = sorted({
+        dependency.split(":", 1)[0]
+        for dependency in [
+            target["dependency"],
+            *target["runtime_dependencies"],
+        ]
+    })
+    reviewed_group_includes = "".join(
+        f'            includeGroup("{group}")\n'
+        for group in reviewed_groups
+    )
+    fallback_excluded_groups = {
+        "com.swear.autostorage",
+        "vazkii.patchouli",
+    }
+    if target["repositories"]:
+        fallback_excluded_groups.update(
+            dependency.split(":", 1)[0]
+            for dependency in target["runtime_dependencies"]
+        )
+    fallback_group_excludes = "".join(
+        f'            excludeGroup("{group}")\n'
+        for group in sorted(fallback_excluded_groups)
+    )
     repository_lines = "".join(
-        f'    maven {{ url = uri("{repository}") }}\n'
+        "    maven {\n"
+        f'        url = uri("{repository}")\n'
+        "        content {\n"
+        f"{reviewed_group_includes}"
+        "        }\n"
+        "    }\n"
         for repository in target["repositories"]
+    )
+    central_declaration = (
+        "    mavenCentral {\n"
+        "        content {\n"
+        f"{fallback_group_excludes}"
+        "        }\n"
+        "    }\n"
     )
     runtime_dependency_lines = "".join(
         f'    runtimeOnly("{dependency}") {{ transitive = false }}\n'
@@ -1420,9 +1482,14 @@ configurations {{
 }}
 
 repositories {{
-    mavenCentral()
 {repository_lines}
-    maven {{ url = uri("https://maven.blamejared.com") }}
+{central_declaration}
+    maven {{
+        url = uri("https://maven.blamejared.com")
+        content {{
+            includeGroup("vazkii.patchouli")
+        }}
+    }}
     ivy {{
         name = "AutoStorageReleases"
         url = uri("https://github.com/swear01/Auto_Storage/releases/download/v${{auto_storage_version}}")
@@ -1431,6 +1498,9 @@ repositories {{
         }}
         metadataSources {{
             artifact()
+        }}
+        content {{
+            includeGroup("com.swear.autostorage")
         }}
     }}
 }}

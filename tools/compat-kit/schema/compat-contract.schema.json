@@ -86,7 +86,51 @@
                       }
                     }
                   }
-                }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {"category": {"const": "process"}},
+                      "required": ["category"]
+                    },
+                    "then": {
+                      "properties": {
+                        "variants": {
+                          "items": {
+                            "properties": {
+                              "rate": {
+                                "properties": {
+                                  "numerator": {"minimum": 1}
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {"category": {"const": "instant"}},
+                      "required": ["category"]
+                    },
+                    "then": {
+                      "properties": {
+                        "variants": {
+                          "items": {
+                            "properties": {
+                              "rate": {
+                                "properties": {
+                                  "numerator": {"const": 0}
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },

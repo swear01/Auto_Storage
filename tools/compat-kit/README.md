@@ -40,8 +40,9 @@ Markers assigned to `run*GameTestServer` tasks must occur inside annotated
 `@GameTest` method bodies. After
 the contract has no `needs_decision` entry, pass the same committed audit to
 every later command. Validation compares that audit's exact candidate set with
-the contract, so recomputing a contract-only inventory digest cannot hide an
-omitted recipe family:
+the contract, including every per-family scanner risk, so recomputing a
+contract-only inventory digest cannot hide an omitted recipe family or risk.
+Process station rates must be positive and Instant station rates must be zero.
 
 The scan publishes only public signatures and compact risk evidence. Bounded
 private bytecode is inspected for hidden randomness, world/entity access,
@@ -64,6 +65,10 @@ Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
 reviewed target jar SHA; target compile/runtime and explicit runtime
 dependencies are non-transitive, and evidence task names are never remapped.
+Reviewed repositories are emitted first and own target/runtime groups.
+Explicit runtime groups cannot fall back to Maven Central; target fallback is
+still protected by its exact SHA gate, and fixed repositories are filtered to
+their Auto Storage or Patchouli artifacts.
 Verification
 also checks the manifest hash of the generated `build.gradle` (or bundled
 descriptor), so removing that SHA gate is explicit drift rather than a pass.

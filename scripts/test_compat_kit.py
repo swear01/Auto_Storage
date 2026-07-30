@@ -619,6 +619,47 @@ class CompatKitAuditTests(unittest.TestCase):
                 source_audit=audit,
             )
 
+    def test_complete_contract_preserves_audited_family_risks(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        family = next(
+            family for family in contract["families"] if family["risks"]
+        )
+        family["risks"] = []
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "family risks do not match source audit",
+        ):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=audit,
+            )
+
+    def test_contract_station_rates_match_runtime_categories(self):
+        audit = self.source_audit()
+        mutations = (
+            ("process", 0, "process station variants require positive rates"),
+            ("instant", 1, "instant station variants require zero rates"),
+        )
+        for category, numerator, expected in mutations:
+            with self.subTest(category=category):
+                contract = self.accepted_contract()
+                family = next(
+                    family
+                    for family in contract["families"]
+                    if family["status"] == "accepted"
+                )
+                family["station"]["category"] = category
+                family["station"]["variants"][0]["rate"]["numerator"] = numerator
+                with self.assertRaisesRegex(ValueError, expected):
+                    self.compat_kit.validate_contract(
+                        contract,
+                        require_complete=True,
+                        source_audit=audit,
+                    )
+
     def test_contract_validation_rejects_malformed_nested_semantics(self):
         mutations = (
             ("station", "invalid", "station must be an object"),
@@ -986,6 +1027,16 @@ class CompatKitAuditTests(unittest.TestCase):
             'url = uri("https://repo.example.com/releases")',
             build,
         )
+        self.assertLess(
+            build.index('url = uri("https://repo.example.com/releases")'),
+            build.index("mavenCentral"),
+        )
+        self.assertIn('includeGroup("com.example")', build)
+        self.assertNotIn('excludeGroup("com.example")', build)
+        self.assertIn('excludeGroup("vazkii.patchouli")', build)
+        self.assertIn('excludeGroup("com.swear.autostorage")', build)
+        self.assertIn('includeGroup("vazkii.patchouli")', build)
+        self.assertIn('includeGroup("com.swear.autostorage")', build)
         self.assertIn("gameTestServer", build)
         self.assertNotIn("src/main", build)
         self.assertEqual(1, entrypoint.count("AutoStorageAddon.register("))
@@ -1002,7 +1053,7 @@ class CompatKitAuditTests(unittest.TestCase):
     def test_scaffolds_preserve_reviewed_target_runtime_dependencies(self):
         contract = self.addon_contract()
         contract["target"]["runtime_dependencies"] = [
-            "com.example:samplemod-runtime:4.5.6"
+            "org.example:samplemod-runtime:4.5.6"
         ]
         output = self.root / "samplemod-runtime-addon"
 
@@ -1014,10 +1065,12 @@ class CompatKitAuditTests(unittest.TestCase):
 
         build = (output / "build.gradle").read_text()
         self.assertIn(
-            'runtimeOnly("com.example:samplemod-runtime:4.5.6") '
+            'runtimeOnly("org.example:samplemod-runtime:4.5.6") '
             "{ transitive = false }",
             build,
         )
+        self.assertIn('includeGroup("org.example")', build)
+        self.assertIn('excludeGroup("org.example")', build)
 
         bundled = self.root / "samplemod-runtime-bundled"
         contract["verification"]["fixture"] = "samplemodFixture"
@@ -1040,7 +1093,7 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             [
                 "com.example:samplemod:1.2.3",
-                "com.example:samplemod-runtime:4.5.6",
+                "org.example:samplemod-runtime:4.5.6",
             ],
             descriptor["runtimeDependencies"],
         )
@@ -1180,6 +1233,16 @@ class CompatKitAuditTests(unittest.TestCase):
             "runtime_dependencies",
             contract_schema["properties"]["target"]["properties"],
         )
+        station_schema = family_schema["properties"]["station"]["oneOf"][1]
+        station_rate_rules = {
+            rule["if"]["properties"]["category"]["const"]:
+            rule["then"]["properties"]["variants"]["items"]["properties"]["rate"][
+                "properties"
+            ]["numerator"]
+            for rule in station_schema["allOf"]
+        }
+        self.assertEqual({"minimum": 1}, station_rate_rules["process"])
+        self.assertEqual({"const": 0}, station_rate_rules["instant"])
         audit_schema = json.loads(
             (schema_root / "compat-audit.schema.json").read_text()
         )
@@ -1660,6 +1723,15 @@ class CompatKitAuditTests(unittest.TestCase):
             source_audit=self.source_audit(),
         )
         self.assertTrue((self.root / "extracted-addon/gradlew").is_file())
+
+    def test_compatibility_matrix_verifies_every_audited_compat_artifact(self):
+        build = (ROOT / "build.gradle").read_text()
+        matrix = build.split(
+            "tasks.named('runCompatibilityMatrixGameTestServer').configure {",
+            1,
+        )[1].split("\n}", 1)[0]
+
+        self.assertIn("dependsOn compatArtifactVerificationTasks", matrix)
 
 
 if __name__ == "__main__":

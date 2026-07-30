@@ -1088,6 +1088,7 @@ tasks.named('runPneumaticCraftGameTestServer').configure {
 def compatibilityMatrixLatestLog =
         layout.projectDirectory.file('run/logs/latest.log').asFile
 tasks.named('runCompatibilityMatrixGameTestServer').configure {
+    dependsOn compatArtifactVerificationTasks
     dependsOn tasks.named('verifyBotaniaFixtureArtifact')
     doLast {
         if (!compatibilityMatrixLatestLog.exists()) {

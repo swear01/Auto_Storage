@@ -74,7 +74,11 @@ Compat Kit contracts list every target Maven repository as an explicit HTTPS
 URL. The generated addon copies those repositories into `build.gradle`; it
 does not infer Modrinth, Curse Maven, or an upstream repository from a
 dependency coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
-because it can change which repository serves a coordinate. The generated
+because it can change which repository serves a coordinate. Reviewed
+repositories are emitted before defaults and restricted to target/runtime
+groups. Explicit runtime groups cannot fall back to Maven Central; the target
+can fall back only under its exact SHA check. Fixed repository filters reserve
+Patchouli and Auto Storage for BlameJared and the release Ivy repository. The generated
 build also copies every explicit `target.runtime_dependencies` entry, so
 required libraries such as GuideME do not depend on transitive metadata or an
 undocumented post-scaffold edit. Target and explicit runtime dependencies are
@@ -247,6 +251,11 @@ Addon code must provide complete deterministic contracts. Auto Storage does not
 infer recipes through reflection, generic `Recipe#getIngredients()`, EMI
 widgets, serializer names, or machine names. It does not send resources into an
 external machine and wait for world state.
+
+The reviewed contract must preserve every scanner risk attached to each recipe
+family. Process station variants use positive work rates; Instant variants use
+zero rates. Compat Kit rejects drift before generating code that runtime
+descriptor validation would reject.
 
 Registration, linkage, or validation failures are startup errors. Auto Storage
 does not silently skip a loaded but incompatible integration. Runtime crafting
