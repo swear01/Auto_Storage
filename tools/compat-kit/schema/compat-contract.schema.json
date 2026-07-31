@@ -62,7 +62,7 @@
           "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
           "class": {"type": "string", "minLength": 1},
           "status": {"enum": ["accepted", "rejected", "needs_decision"]},
-          "recipe_type": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]},
+          "recipe_type": {"oneOf": [{"type": "null"}, {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"}]},
           "station": {
             "oneOf": [
               {"type": "null"},
@@ -71,7 +71,7 @@
                 "additionalProperties": false,
                 "required": ["descriptor_id", "category", "variants"],
                 "properties": {
-                  "descriptor_id": {"type": "string", "minLength": 1},
+                  "descriptor_id": {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"},
                   "category": {"enum": ["instant", "process", "transform"]},
                   "variants": {
                     "type": "array",
@@ -81,7 +81,7 @@
                       "additionalProperties": false,
                       "required": ["item", "rate"],
                       "properties": {
-                        "item": {"type": "string", "minLength": 1},
+                        "item": {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"},
                         "rate": {
                           "type": "object",
                           "additionalProperties": false,
@@ -167,7 +167,7 @@
             },
             "then": {
               "properties": {
-                "recipe_type": {"type": "string", "minLength": 1},
+                "recipe_type": {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"},
                 "station": {"type": "object"},
                 "inputs": {"minItems": 1},
                 "outputs": {

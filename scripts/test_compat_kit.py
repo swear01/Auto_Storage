@@ -159,6 +159,12 @@ def write_external_hierarchy_fixture_jars(
         "public final class OreHandler extends fixture.base.BaseTransformer { "
         "private static final String EDGE = \"\\u0000\\ud83d\\ude00\"; }\n"
     )
+    viewer = target_source / "samplemod/client/RecipeViewer.java"
+    viewer.parent.mkdir(parents=True, exist_ok=True)
+    viewer.write_text(
+        "package samplemod.client; "
+        "public final class RecipeViewer extends fixture.base.BaseTransformer {}\n"
+    )
     target_classes.mkdir()
     subprocess.run(
         [
@@ -168,6 +174,7 @@ def write_external_hierarchy_fixture_jars(
             "-d",
             str(target_classes),
             str(process),
+            str(viewer),
         ],
         check=True,
     )
@@ -488,7 +495,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            ["samplemod.handler.OreHandler"],
+            ["samplemod.client.RecipeViewer", "samplemod.handler.OreHandler"],
             [entry["class"] for entry in audit["candidates"]["recipe_classes"]],
         )
         self.assertEqual(
@@ -497,8 +504,67 @@ class CompatKitAuditTests(unittest.TestCase):
                 "fixture.base.BaseTransformer",
                 "net.minecraft.world.item.crafting.Recipe",
             ],
-            audit["candidates"]["recipe_classes"][0]["classification"]["evidence"],
+            audit["candidates"]["recipe_classes"][1]["classification"]["evidence"],
         )
+
+    def test_scan_does_not_skip_unresolved_client_viewer_ancestry(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+        client_only = self.root / "client-only.jar"
+        with zipfile.ZipFile(target_jar) as source, zipfile.ZipFile(client_only, "w") as target:
+            for name in (
+                "META-INF/neoforge.mods.toml",
+                "samplemod/client/RecipeViewer.class",
+            ):
+                target.writestr(name, source.read(name))
+
+        with self.assertRaisesRegex(ValueError, "unresolved ancestry"):
+            self.compat_kit.scan_jar(
+                client_only,
+                signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+                risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+            )
+
+    def test_scan_rechecks_classpath_artifact_after_inspection(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+        replacement = self.root / "external-support-replacement.jar"
+        with zipfile.ZipFile(classpath_jar) as source, zipfile.ZipFile(replacement, "w") as target:
+            for name in source.namelist():
+                target.writestr(name, source.read(name))
+            target.writestr("replacement-marker.txt", "changed")
+        original_sha256 = self.compat_kit._sha256_file
+        replaced = False
+
+        def replacing_hash(path):
+            nonlocal replaced
+            digest = original_sha256(path)
+            if Path(path) == classpath_jar and not replaced:
+                replacement.replace(classpath_jar)
+                replaced = True
+            return digest
+
+        self.compat_kit._sha256_file = replacing_hash
+        try:
+            with self.assertRaisesRegex(ValueError, "classpath jar changed during scan"):
+                self.compat_kit.scan_jar(
+                    target_jar,
+                    classpath=[classpath_jar],
+                    signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+                    risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+                )
+        finally:
+            self.compat_kit._sha256_file = original_sha256
 
     def test_scan_summarizes_recipe_json_and_explicit_data_root_overrides(self):
         self.assertIn(
@@ -1710,6 +1776,31 @@ displayName="Sample Machines"
                         source_audit=audit,
                     )
 
+    def test_complete_contract_requires_resource_location_recipe_and_descriptor_ids(self):
+        audit = self.source_audit()
+        mutations = (
+            ("recipe_type", "missing_colon", "recipe_type must be a resource location"),
+            ("descriptor_id", "Bad:descriptor", "descriptor_id must be a resource location"),
+        )
+        for field, value, expected in mutations:
+            with self.subTest(field=field):
+                contract = self.accepted_contract()
+                family = next(
+                    family
+                    for family in contract["families"]
+                    if family["status"] == "accepted"
+                )
+                if field == "recipe_type":
+                    family[field] = value
+                else:
+                    family["station"][field] = value
+                with self.assertRaisesRegex(ValueError, expected):
+                    self.compat_kit.validate_contract(
+                        contract,
+                        require_complete=True,
+                        source_audit=audit,
+                    )
+
     def test_accepted_family_can_declare_no_resource_costs(self):
         audit = self.source_audit()
         contract = self.accepted_contract()
@@ -2213,6 +2304,10 @@ displayName="Sample Machines"
     def test_worker_package_is_compact_byte_deterministic_and_source_free(self):
         audit = self.source_audit()
         contract, _ = self.compat_kit.decide_audit(audit)
+        contract["verification"]["gradle_tasks"] = [
+            "build",
+            "runSamplemodGameTestServer",
+        ]
         output = self.root / "worker-package"
 
         audit_path = Path("compat/audits/samplemod/1.2.3.json")
@@ -2266,6 +2361,11 @@ displayName="Sample Machines"
             commands,
         )
         self.assertNotIn("propose audit.json", commands)
+        self.assertIn("./gradlew build --console=plain --no-daemon", commands)
+        self.assertIn(
+            "./gradlew runSamplemodGameTestServer --console=plain --no-daemon",
+            commands,
+        )
 
         args = self.compat_kit._build_parser().parse_args([
             "worker-package",
@@ -2541,6 +2641,15 @@ displayName="Sample Machines"
         with self.assertRaisesRegex(ValueError, "fixed rate does not match contract"):
             self.compat_kit.generate_compatibility(
                 contract, audit, plan, self.root / "rate-drift"
+            )
+
+        plan = self.generation_plan(contract)
+        plan["families"][0]["rate_bindings"].append(
+            copy.deepcopy(plan["families"][0]["rate_bindings"][0])
+        )
+        with self.assertRaisesRegex(ValueError, "duplicate rate binding item"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "duplicate-rate-item"
             )
 
         plan = self.generation_plan(contract)
@@ -4044,8 +4153,23 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         }
         accepted = family_status_rules["accepted"]
         self.assertEqual(
-            {"type": "string", "minLength": 1},
+            family_schema["properties"]["recipe_type"]["oneOf"][1],
             accepted["recipe_type"],
+        )
+        resource_location_pattern = "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+        self.assertEqual(
+            resource_location_pattern,
+            accepted["recipe_type"]["pattern"],
+        )
+        self.assertEqual(
+            resource_location_pattern,
+            station_schema["properties"]["descriptor_id"]["pattern"],
+        )
+        self.assertEqual(
+            resource_location_pattern,
+            station_schema["properties"]["variants"]["items"]["properties"][
+                "item"
+            ]["pattern"],
         )
         self.assertEqual({"type": "object"}, accepted["station"])
         self.assertEqual({"minItems": 1}, accepted["inputs"])

@@ -264,6 +264,7 @@ def _require_unchanged_artifact(
     path: Path,
     expected_sha256: str,
     expected_size: int,
+    label: str = "target jar",
 ):
     try:
         if (
@@ -271,9 +272,9 @@ def _require_unchanged_artifact(
             or path.stat().st_size != expected_size
             or _sha256_file(path) != expected_sha256
         ):
-            raise ValueError(f"target jar changed during scan: {path}")
+            raise ValueError(f"{label} changed during scan: {path}")
     except OSError as error:
-        raise ValueError(f"target jar changed during scan: {path}") from error
+        raise ValueError(f"{label} changed during scan: {path}") from error
 
 
 def _validate_archive(path: Path, archive: zipfile.ZipFile):
@@ -552,6 +553,7 @@ def _classpath_metadata(paths) -> tuple[dict[str, dict], list[dict]]:
                         "ancestry classpath has conflicting class " + class_name
                     )
                 metadata_by_class[class_name] = metadata
+        _require_unchanged_artifact(path, digest, size, "classpath jar")
         records.append({"sha256": digest, "size": size})
     return metadata_by_class, sorted(
         records,
@@ -660,13 +662,6 @@ def _require_resolved_ancestry(
         resolved.add(class_name)
 
     for class_name in target_classes:
-        name_bucket = _current_name_bucket(class_name)
-        if name_bucket is not None and name_bucket[0] in {
-            "client_viewer_classes",
-            "recipe_builders",
-            "datagen_classes",
-        }:
-            continue
         if metadata_by_class.get(class_name) is not None:
             visit(class_name, class_name)
 
@@ -2148,6 +2143,8 @@ def _validate_station(value, location: str):
     _validate_nonempty_string(
         value["descriptor_id"], f"{location} station descriptor_id"
     )
+    if not RESOURCE_LOCATION.fullmatch(value["descriptor_id"]):
+        raise ValueError(f"{location} station descriptor_id must be a resource location")
     if value["category"] not in ("instant", "process", "transform"):
         raise ValueError(f"{location} station has invalid category")
     variants = value["variants"]
@@ -2161,6 +2158,8 @@ def _validate_station(value, location: str):
         if not {"item", "rate"} <= set(variant):
             raise ValueError(f"{variant_location} requires item and rate")
         _validate_nonempty_string(variant["item"], f"{variant_location} item")
+        if not RESOURCE_LOCATION.fullmatch(variant["item"]):
+            raise ValueError(f"{variant_location} item must be a resource location")
         rate = variant["rate"]
         if not isinstance(rate, dict):
             raise ValueError(f"{variant_location} rate must be an object")
@@ -2322,6 +2321,10 @@ def validate_contract(
         recipe_type = family.get("recipe_type")
         if recipe_type is not None:
             _validate_nonempty_string(recipe_type, f"family {family_id} recipe_type")
+            if not RESOURCE_LOCATION.fullmatch(recipe_type):
+                raise ValueError(
+                    f"family {family_id} recipe_type must be a resource location"
+                )
         station = family.get("station")
         if station is not None:
             _validate_station(station, f"family {family_id}")
@@ -4740,6 +4743,22 @@ def worker_package(
     ):
         raise ValueError("worker-package audit path must be a safe repository-relative JSON path")
     audit_argument = shlex.quote(audit_reference.as_posix())
+    declared_tasks = contract["verification"]["gradle_tasks"]
+    _validate_unique_strings(
+        declared_tasks,
+        "worker-package verification gradle_tasks",
+        allow_empty=True,
+    )
+    if any(not re.fullmatch(r"[A-Za-z][A-Za-z0-9]*", task) for task in declared_tasks):
+        raise ValueError("worker-package has invalid verification gradle task names")
+    worker_tasks = declared_tasks or [
+        "build",
+        "runCompatibilityMatrixGameTestServer",
+    ]
+    task_commands = "\n".join(
+        f"./gradlew {task} --console=plain --no-daemon"
+        for task in worker_tasks
+    )
     summary = _worker_candidate_summary(contract, audit)
     target = audit["target"]
     unresolved = summary["unresolved_families"]
@@ -4809,11 +4828,13 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export PATH="$JAVA_HOME/bin:$PATH"
 tools/compat-kit/compat-kit propose {audit_argument} --output proposals.json
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_compat_kit
-./gradlew build --console=plain --no-daemon
-./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon
+{task_commands}
 ./gradlew runData --console=plain --no-daemon
 git diff --check
-""".format(audit_argument=audit_argument)
+""".format(
+        audit_argument=audit_argument,
+        task_commands=task_commands,
+    )
     pr_body = "\n".join([
         f"## Summary",
         "",
@@ -5231,7 +5252,10 @@ def _validate_generation_plan(plan: dict, contract: dict):
             variant["item"]
             for variant in contract_family["station"]["variants"]
         }
-        if {rate["item"] for rate in rates} != contract_items:
+        rate_items = [rate["item"] for rate in rates]
+        if len(rate_items) != len(set(rate_items)):
+            raise ValueError(f"{location} has duplicate rate binding item")
+        if set(rate_items) != contract_items:
             raise ValueError(f"{location} rate items do not match contract station")
         contract_rates = {
             variant["item"]: variant["rate"]

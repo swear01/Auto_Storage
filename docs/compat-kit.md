@@ -94,9 +94,14 @@ tools/compat-kit/compat-kit scan \
 ancestry without turning dependency classes into target candidates. Every
 non-JDK superclass and interface reachable from the target jar must resolve;
 an incomplete classpath fails instead of silently omitting a structurally
-hidden recipe family. At most 128 jars and 200,000 classes are read, duplicate/conflicting
-classes fail, and the sorted artifact SHA/size set is persisted in the audit
-and cache identity. Class-name constants are decoded as JVM modified UTF-8, so
+hidden recipe family. This check runs before name-bucket classification, so a
+class named like a client viewer, builder, or datagen helper cannot bypass
+ancestry validation. At most 128 jars and 200,000 classes are read,
+duplicate/conflicting classes fail, and the sorted artifact SHA/size set is
+persisted in the audit and cache identity. Every classpath jar is rehashed
+after inspection just like the target; replacing a dependency during a scan
+fails instead of mixing two artifacts in one audit. Class-name constants are
+decoded as JVM modified UTF-8, so
 unrelated NUL or supplementary string constants cannot abort a valid scan.
 `--data-root` is repeatable and follows data-pack precedence: the target jar is
 the first layer and later supplied roots override earlier recipes by exact ID.
@@ -142,7 +147,8 @@ malformed metadata, ambiguous multi-mod jars, missing JDK tools, and `javap`
 failures all fail closed. Metadata and class sizes are checked before
 decompression. The target path is rehashed after inspection; a replaced or
 mutated jar cannot combine one artifact SHA with another artifact's metadata
-or candidates. Current-format cache entries and committed audits are also fully
+or candidates. Every supplied ancestry jar has the same post-inspection
+size/SHA check. Current-format cache entries and committed audits are also fully
 validated down through target, artifact, source, candidate, and risk records;
 a matching cache path does not authorize malformed or partial evidence. Every
 candidate must remain in the bucket computed by the current scanner; moving a
@@ -310,7 +316,10 @@ unresolved decisions, commands, issue/worker context, and a PR checklist. They
 never embed public-signature bodies or complete upstream source. Existing drift
 and symlinked output paths fail before any file is written. `commands.sh` uses
 the exact safe repository-relative audit path supplied by `--audit`; it never
-refers to a package-local `audit.json` that was not emitted.
+refers to a package-local `audit.json` that was not emitted. For a complete
+contract it runs every declared `verification.gradle_tasks` entry as its own
+Gradle invocation, followed by datagen and diff checks; the package cannot
+replace an authoritative target GameTest with only the compatibility matrix.
 
 ### 3a. Generate reviewed mechanical code
 
@@ -350,6 +359,11 @@ registration boilerplate. Every generated family therefore declares an exact
 be guessed to be the runtime registry path. The registration namespace must
 match the reviewed station descriptor namespace. Commit plans and generated source, then keep a
 byte-for-byte regeneration test so drift is visible.
+
+Contract recipe type IDs, station descriptor IDs, and station variant item IDs
+must use normal lowercase resource-location grammar. Generation plans must bind
+each station item exactly once; duplicate rate-item bindings fail before any
+Java is emitted instead of being collapsed by set comparison.
 
 ### 3b. Generate conformance and resource scaffolds
 

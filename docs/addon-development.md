@@ -60,11 +60,20 @@ committed generated-scaffold fixture against the public API jar.
 
 Supply the target's complete non-JDK compile ancestry through repeatable
 `scan --classpath`; every unresolved external superclass or interface fails
-instead of silently hiding a structural recipe family. The audit records only exact
-classpath artifact SHA/size evidence. Completed contracts separately bind the
+instead of silently hiding a structural recipe family, including classes whose
+names look like client viewers, builders, or datagen helpers. The audit records
+only exact classpath artifact SHA/size evidence, and each ancestry jar is
+rehashed after inspection so an in-flight replacement fails. Completed
+contracts separately bind the
 recipe-class inventory and effective recipe-data/data-pack digest. Runtime
 probe JSON must pass `validate-probe` with the same audit and optional plan;
 schema validation alone does not prove those cross-file identities.
+
+Complete contracts use lowercase resource locations for recipe types, station
+descriptor IDs, and station variant items. Generated rate bindings are
+one-to-one with those station items; duplicate item bindings are rejected.
+`worker-package` runs every Gradle task declared by the reviewed contract, so
+the target's authoritative GameTest remains part of a delegated worker gate.
 
 ## Add the SDK
 
