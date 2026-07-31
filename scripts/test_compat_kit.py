@@ -1,6 +1,8 @@
 import hashlib
 import importlib.util
 import json
+import os
+import selectors
 import subprocess
 import tempfile
 import tomllib
@@ -8,6 +10,7 @@ import unittest
 import weakref
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -335,6 +338,75 @@ class CompatKitAuditTests(unittest.TestCase):
             ["samplemod.recipe.CrushingRecipe#getIngredients"],
             risks["generic_ingredients"]["evidence"],
         )
+
+    def test_javap_is_terminated_when_streamed_output_exceeds_limit(self):
+        marker = self.root / "javap-state"
+        fake_javap = self.root / "javap"
+        fake_javap.write_text(
+            "#!/usr/bin/env python3\n"
+            "import os\n"
+            "import signal\n"
+            "import time\n"
+            "from pathlib import Path\n"
+            "marker = Path(os.environ['FAKE_JAVAP_MARKER'])\n"
+            "def stop(*_):\n"
+            "    marker.write_text('terminated')\n"
+            "    raise SystemExit(0)\n"
+            "signal.signal(signal.SIGTERM, stop)\n"
+            "for _ in range(512):\n"
+            "    os.write(1, b'x' * 4096)\n"
+            "    time.sleep(0.002)\n"
+            "marker.write_text('completed')\n"
+        )
+        fake_javap.chmod(0o755)
+        environment = {
+            "PATH": str(self.root) + os.pathsep + os.environ["PATH"],
+            "FAKE_JAVAP_MARKER": str(marker),
+        }
+
+        with mock.patch.dict(os.environ, environment):
+            with self.assertRaisesRegex(
+                ValueError,
+                "private bytecode exceeds 1024 bytes",
+            ):
+                self.compat_kit._run_javap(
+                    self.jar,
+                    "samplemod.recipe.CrushingRecipe",
+                    "-c",
+                    "-p",
+                    output_limit=1024,
+                    output_label="private bytecode",
+                )
+
+        self.assertEqual("terminated", marker.read_text())
+
+    def test_javap_streaming_does_not_require_selectable_subprocess_pipes(self):
+        fake_javap = self.root / "javap"
+        fake_javap.write_text(
+            "#!/usr/bin/env python3\n"
+            "print('portable output')\n"
+        )
+        fake_javap.chmod(0o755)
+        environment = {
+            "PATH": str(self.root) + os.pathsep + os.environ["PATH"],
+        }
+
+        with mock.patch.dict(os.environ, environment):
+            with mock.patch.object(
+                selectors,
+                "DefaultSelector",
+                side_effect=OSError("subprocess pipes are not selectable"),
+            ):
+                output = self.compat_kit._run_javap(
+                    self.jar,
+                    "samplemod.recipe.CrushingRecipe",
+                    "-c",
+                    "-p",
+                    output_limit=1024,
+                    output_label="private bytecode",
+                )
+
+        self.assertEqual("portable output", output)
 
     def test_scan_allows_bounded_large_private_bytecode(self):
         large_private_bytecode = (
@@ -2251,6 +2323,11 @@ displayName="Sample Machines"
         self.assertEqual(
             set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
             set(self.compat_kit._verification_evidence(contract, ROOT, "bundled")),
+        )
+        guide = (ROOT / "docs/ae2-compatibility.md").read_text()
+        self.assertIn(
+            f"Scanner format v{self.compat_kit.SCAN_CACHE_VERSION}",
+            guide,
         )
 
     def test_recipe_family_verification_commands_include_ae2_fixture(self):

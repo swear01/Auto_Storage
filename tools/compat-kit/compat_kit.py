@@ -9,6 +9,8 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
+import time
 import tomllib
 import zipfile
 from pathlib import Path
@@ -362,28 +364,126 @@ def _run_javap(
 ) -> str:
     command = ["javap", *options, "-classpath", str(jar), class_name]
     try:
-        result = subprocess.run(
+        process = subprocess.Popen(
             command,
-            capture_output=True,
-            check=False,
-            text=True,
-            timeout=20,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
     except FileNotFoundError as error:
         raise RuntimeError(
             "javap was not found; set JAVA_HOME to JDK 21 before scanning"
         ) from error
-    except subprocess.TimeoutExpired as error:
-        raise RuntimeError(f"javap timed out for {class_name}") from error
-    if result.returncode != 0:
-        detail = result.stderr.strip() or result.stdout.strip()
+
+    def terminate():
+        if process.poll() is not None:
+            return
+        process.terminate()
+        try:
+            process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+
+    streams = {
+        "stdout": {
+            "file": process.stdout,
+            "chunks": [],
+            "size": 0,
+            "limit": output_limit,
+            "overflow": False,
+            "error": None,
+        },
+        "stderr": {
+            "file": process.stderr,
+            "chunks": [],
+            "size": 0,
+            "limit": MAX_SIGNATURE_BYTES,
+            "overflow": False,
+            "error": None,
+        },
+    }
+    reader_event = threading.Event()
+
+    def read_stream(name):
+        state = streams[name]
+        try:
+            while True:
+                read_size = min(
+                    64 * 1024,
+                    state["limit"] - state["size"] + 1,
+                )
+                chunk = state["file"].read1(max(1, read_size))
+                if not chunk:
+                    return
+                state["size"] += len(chunk)
+                if state["size"] > state["limit"]:
+                    state["overflow"] = True
+                    reader_event.set()
+                    return
+                state["chunks"].append(chunk)
+        except (OSError, ValueError) as error:
+            state["error"] = error
+            reader_event.set()
+
+    readers = [
+        threading.Thread(target=read_stream, args=(name,), daemon=True)
+        for name in streams
+    ]
+    for reader in readers:
+        reader.start()
+    deadline = time.monotonic() + 20
+    timed_out = False
+    try:
+        while any(reader.is_alive() for reader in readers):
+            if reader_event.wait(timeout=0.01):
+                terminate()
+                break
+            if time.monotonic() >= deadline:
+                timed_out = True
+                terminate()
+                break
+        for reader in readers:
+            reader.join(timeout=1)
+        if timed_out:
+            raise RuntimeError(f"javap timed out for {class_name}")
+        for name, state in streams.items():
+            if state["error"] is not None:
+                raise RuntimeError(
+                    f"failed to read javap {name} for {class_name}"
+                ) from state["error"]
+            if not state["overflow"]:
+                continue
+            if name == "stdout":
+                raise ValueError(
+                    f"{output_label} exceeds {output_limit} bytes: "
+                    f"{class_name}"
+                )
+            raise RuntimeError(
+                f"javap error output exceeds {MAX_SIGNATURE_BYTES} "
+                f"bytes: {class_name}"
+            )
+        remaining = deadline - time.monotonic()
+        try:
+            return_code = process.wait(timeout=max(remaining, 0.001))
+        except subprocess.TimeoutExpired as error:
+            terminate()
+            raise RuntimeError(f"javap timed out for {class_name}") from error
+    finally:
+        for state in streams.values():
+            state["file"].close()
+
+    stdout = b"".join(streams["stdout"]["chunks"]).decode(
+        "utf-8",
+        errors="replace",
+    )
+    stderr = b"".join(streams["stderr"]["chunks"]).decode(
+        "utf-8",
+        errors="replace",
+    )
+    if return_code != 0:
+        detail = stderr.strip() or stdout.strip()
         raise RuntimeError(f"javap failed for {class_name}: {detail}")
-    encoded = result.stdout.encode("utf-8")
-    if len(encoded) > output_limit:
-        raise ValueError(
-            f"{output_label} exceeds {output_limit} bytes: {class_name}"
-        )
-    return result.stdout.strip()
+    return stdout.strip()
 
 
 def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:

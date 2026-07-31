@@ -26,7 +26,7 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-Scanner format v6 audits named nested classes while excluding anonymous/local
+Scanner format v7 audits named nested classes while excluding anonymous/local
 classes by name and JVM `ACC_SYNTHETIC` class files by access flag. It also
 recognizes the method-descriptor form that `javap` emits for chance,
 randomness, generic-ingredient, and capability-mutation calls. The reviewed

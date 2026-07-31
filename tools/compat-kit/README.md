@@ -66,11 +66,12 @@ private bytecode is inspected for hidden randomness, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded output,
 and capability mutations requiring simulation, but each class is reduced
 immediately and the bytecode is never stored in the audit or retained until the
-next class. `RandomSource`, `ThreadLocalRandom`, and `RandomGenerator` are
-recognized. Named nested classes are included and mapped to their top-level
-source; anonymous/local classes, class files carrying `ACC_SYNTHETIC`, and
-`META-INF/versions/` aliases are excluded; the root binary name is scanned
-once.
+next class. Platform-neutral concurrent pipe readers retain at most the
+configured limit plus one byte and terminate `javap` on overflow.
+`RandomSource`, `ThreadLocalRandom`, and `RandomGenerator` are recognized.
+Named nested classes are included and mapped to their top-level source;
+anonymous/local classes, class files carrying `ACC_SYNTHETIC`, and
+`META-INF/versions/` aliases are excluded; the root binary name is scanned once.
 Chance, randomness, generic-ingredient, and capability-mutation method calls
 accept the descriptor syntax emitted by `javap -c -p`.
 

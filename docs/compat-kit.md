@@ -91,9 +91,12 @@ are not missed; only compact flags for randomness/chance, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded
 outputs, and capability mutations requiring simulation are persisted. Each
 private-bytecode result is reduced to compact flags before the next class is
-read; the scanner never retains all bounded outputs together. `RandomSource`,
-`ThreadLocalRandom`, and `RandomGenerator` are all randomness evidence. Without
-`--source`, scans are cached by jar SHA under `build/compat-kit/cache/`;
+read; platform-neutral concurrent pipe readers retain at most the configured
+limit plus one byte and terminate `javap` immediately on overflow, so neither
+one process nor all classes can bypass the memory bound. `RandomSource`,
+`ThreadLocalRandom`, and
+`RandomGenerator` are all randomness evidence. Without `--source`, scans are
+cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
 The scanner format is also stored in every audit and required by its published
