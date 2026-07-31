@@ -1,5 +1,6 @@
 import hashlib
 import importlib.util
+import inspect
 import json
 import os
 import selectors
@@ -170,6 +171,155 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertNotIn(str(self.root), json.dumps(first))
         self.assertNotIn("consumes", json.dumps(first))
         self.assertNotIn("catalyst", json.dumps(first))
+
+    def test_scan_uses_class_structure_and_separates_recipe_serializers(self):
+        self.assertIn(
+            "class_metadata_reader",
+            inspect.signature(self.compat_kit.scan_jar).parameters,
+        )
+        structural_jar = self.root / "samplemod-structural.jar"
+        write_fixture_jar(structural_jar)
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                "samplemod/process/OreProcess.class",
+                b"recipe without recipe in its name",
+            )
+            archive.writestr(
+                "samplemod/client/RecipeWidget.class",
+                b"name-only client helper",
+            )
+            archive.writestr(
+                "samplemod/serialization/CrusherCodec.class",
+                b"serializer without serializer in its name",
+            )
+
+        metadata = {
+            "samplemod.process.OreProcess": {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": ["net.minecraft.world.item.crafting.Recipe"],
+            },
+            "samplemod.client.RecipeWidget": {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": [],
+            },
+            "samplemod.serialization.CrusherCodec": {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": [
+                    "net.minecraft.world.item.crafting.RecipeSerializer"
+                ],
+            },
+        }
+
+        def structural_metadata(class_name: str):
+            return metadata.get(class_name, {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": [],
+            })
+
+        audit = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=lambda class_name: f"public final class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public final class {class_name} {{ }}",
+            class_metadata_reader=structural_metadata,
+        )
+
+        recipe_classes = {
+            candidate["class"]
+            for candidate in audit["candidates"]["recipe_classes"]
+        }
+        serializer_classes = {
+            candidate["class"]
+            for candidate in audit["candidates"]["recipe_serializers"]
+        }
+        self.assertIn("samplemod.process.OreProcess", recipe_classes)
+        self.assertNotIn("samplemod.client.RecipeWidget", recipe_classes)
+        self.assertEqual(
+            {"samplemod.serialization.CrusherCodec"},
+            serializer_classes,
+        )
+
+    def test_scan_summarizes_recipe_json_and_explicit_data_root_overrides(self):
+        self.assertIn(
+            "data_roots",
+            inspect.signature(self.compat_kit.scan_jar).parameters,
+        )
+        recipe_jar = self.root / "samplemod-recipes.jar"
+        write_fixture_jar(recipe_jar)
+        with zipfile.ZipFile(recipe_jar, "a") as archive:
+            archive.writestr(
+                "data/samplemod/recipe/crushed_iron.json",
+                json.dumps({
+                    "type": "samplemod:crushing",
+                    "ingredient": {"item": "minecraft:iron_ingot"},
+                    "result": {"id": "samplemod:iron_dust", "count": 2},
+                    "processing_time": 100,
+                }),
+            )
+            archive.writestr(
+                "data/samplemod/recipe/alloy.json",
+                json.dumps({
+                    "type": "samplemod:alloying",
+                    "ingredients": [
+                        {"item": "minecraft:iron_ingot"},
+                        {"item": "minecraft:coal"},
+                    ],
+                    "result": {"id": "samplemod:steel_ingot"},
+                    "energy": 400,
+                    "neoforge:conditions": [{"type": "neoforge:mod_loaded"}],
+                }),
+            )
+
+        data_root = self.root / "atm-data"
+        override = data_root / "data/samplemod/recipe/crushed_iron.json"
+        override.parent.mkdir(parents=True)
+        override.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "ingredient": {"item": "minecraft:raw_iron"},
+            "result": {"id": "samplemod:iron_dust", "count": 3},
+            "processing_time": 80,
+            "energy": 240,
+        }))
+
+        audit = self.compat_kit.scan_jar(
+            recipe_jar,
+            signature_reader=self.signatures,
+            data_roots=[data_root],
+        )
+
+        self.assertEqual(2, audit["recipe_data"]["total_recipes"])
+        self.assertEqual(
+            [{
+                "recipe_id": "samplemod:crushed_iron",
+                "sources": ["target_jar", "data_root_1"],
+            }],
+            audit["recipe_data"]["overrides"],
+        )
+        serializers = {
+            entry["serializer_id"]: entry
+            for entry in audit["recipe_data"]["serializers"]
+        }
+        self.assertEqual(1, serializers["samplemod:alloying"]["recipe_count"])
+        self.assertEqual(1, serializers["samplemod:alloying"]["conditioned_recipes"])
+        self.assertEqual(2, serializers["samplemod:alloying"]["max_array_sizes"]["ingredients"])
+        self.assertEqual(
+            ["samplemod:alloy"],
+            serializers["samplemod:alloying"]["sample_recipe_ids"],
+        )
+        self.assertEqual(
+            [
+                "energy",
+                "ingredient",
+                "processing_time",
+                "result",
+                "type",
+            ],
+            serializers["samplemod:crushing"]["fields"],
+        )
+        self.assertNotIn(str(self.root), json.dumps(audit))
 
     def test_scan_records_risks_with_exact_evidence_but_does_not_decide_semantics(self):
         audit = self.compat_kit.scan_jar(
