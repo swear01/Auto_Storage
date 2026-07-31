@@ -278,6 +278,83 @@
               "repositories",
               "runtime_dependencies"
             ]
+          },
+          "verification": {
+            "properties": {
+              "fixture": {"type": "string", "minLength": 1},
+              "expected_game_tests": {"type": "integer", "minimum": 1},
+              "game_test_task": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+              },
+              "gradle_tasks": {"minItems": 1},
+              "checks": {
+                "minItems": 12,
+                "maxItems": 12,
+                "items": {
+                  "enum": [
+                    "absent_target_no_classload",
+                    "present_target_load_once",
+                    "ingredient_shortage_atomic",
+                    "destination_capacity_atomic",
+                    "checked_overflow_atomic",
+                    "stale_recipe_holder_atomic",
+                    "catalyst_tool_remainder_exact",
+                    "multi_output_merge_exact",
+                    "mixed_resource_rollback_atomic",
+                    "dedicated_server_client_isolation",
+                    "api_only_compilation",
+                    "all_mod_coexistence"
+                  ]
+                },
+                "allOf": [
+                  {"contains": {"const": "absent_target_no_classload"}},
+                  {"contains": {"const": "present_target_load_once"}},
+                  {"contains": {"const": "ingredient_shortage_atomic"}},
+                  {"contains": {"const": "destination_capacity_atomic"}},
+                  {"contains": {"const": "checked_overflow_atomic"}},
+                  {"contains": {"const": "stale_recipe_holder_atomic"}},
+                  {"contains": {"const": "catalyst_tool_remainder_exact"}},
+                  {"contains": {"const": "multi_output_merge_exact"}},
+                  {"contains": {"const": "mixed_resource_rollback_atomic"}},
+                  {"contains": {"const": "dedicated_server_client_isolation"}},
+                  {"contains": {"const": "api_only_compilation"}},
+                  {"contains": {"const": "all_mod_coexistence"}}
+                ]
+              },
+              "evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "absent_target_no_classload",
+                  "present_target_load_once",
+                  "ingredient_shortage_atomic",
+                  "destination_capacity_atomic",
+                  "checked_overflow_atomic",
+                  "stale_recipe_holder_atomic",
+                  "catalyst_tool_remainder_exact",
+                  "multi_output_merge_exact",
+                  "mixed_resource_rollback_atomic",
+                  "dedicated_server_client_isolation",
+                  "api_only_compilation",
+                  "all_mod_coexistence"
+                ],
+                "properties": {
+                  "absent_target_no_classload": {},
+                  "present_target_load_once": {},
+                  "ingredient_shortage_atomic": {},
+                  "destination_capacity_atomic": {},
+                  "checked_overflow_atomic": {},
+                  "stale_recipe_holder_atomic": {},
+                  "catalyst_tool_remainder_exact": {},
+                  "multi_output_merge_exact": {},
+                  "mixed_resource_rollback_atomic": {},
+                  "dedicated_server_client_isolation": {},
+                  "api_only_compilation": {},
+                  "all_mod_coexistence": {}
+                }
+              }
+            }
           }
         }
       }

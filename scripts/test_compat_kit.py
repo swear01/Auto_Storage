@@ -2023,6 +2023,48 @@ displayName="Sample Machines"
             target["dependency"]["pattern"],
             target["runtime_dependencies"]["items"]["pattern"],
         )
+        verification = completion_rule["else"]["properties"]["verification"]
+        self.assertEqual(
+            {"type": "string", "minLength": 1},
+            verification["properties"]["fixture"],
+        )
+        self.assertEqual(
+            {"type": "integer", "minimum": 1},
+            verification["properties"]["expected_game_tests"],
+        )
+        self.assertEqual(
+            {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"},
+            verification["properties"]["game_test_task"],
+        )
+        self.assertEqual(
+            1,
+            verification["properties"]["gradle_tasks"]["minItems"],
+        )
+        checks = verification["properties"]["checks"]
+        self.assertEqual(
+            len(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            checks["minItems"],
+        )
+        self.assertEqual(checks["minItems"], checks["maxItems"])
+        self.assertEqual(
+            set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            {
+                rule["contains"]["properties"]["id"]["const"]
+                if "properties" in rule["contains"]
+                else rule["contains"]["const"]
+                for rule in checks["allOf"]
+            },
+        )
+        evidence = verification["properties"]["evidence"]
+        self.assertFalse(evidence["additionalProperties"])
+        self.assertEqual(
+            set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            set(evidence["required"]),
+        )
+        self.assertEqual(
+            set(evidence["required"]),
+            set(evidence["properties"]),
+        )
 
     def test_report_schema_requires_target_identity(self):
         schema = json.loads(

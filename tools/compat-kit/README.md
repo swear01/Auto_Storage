@@ -146,7 +146,9 @@ outputs are excluded.
 
 The audit, contract, delta, and report schemas are under `schema/`. Once all
 family decisions are complete, the contract schema requires dependency and
-repository inputs; report targets require mod ID, display name, and version. A
+repository inputs plus the non-null fixture, positive GameTest count,
+authoritative task, nonempty task list, all twelve exact checks, and every
+evidence mapping; report targets require mod ID, display name, and version. A
 complete public-SDK registration example is under `examples/addon/`; its
 reusable workflow is under `examples/github-actions/`. Downloaded jars, source
 checkouts, caches, and reports are evidence or build products; do not put them

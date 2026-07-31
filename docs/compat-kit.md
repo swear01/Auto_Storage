@@ -136,7 +136,10 @@ accepted families require recipe type, station, nonempty inputs/outputs with a
 primary output, and a decision; rejected families require their decision. Once
 no family remains `needs_decision`, the schema also requires the target
 `dependency`, `repositories`, and `runtime_dependencies` scaffold inputs; RED
-drafts with unresolved families remain valid.
+drafts with unresolved families remain valid. The same completed-contract
+branch requires a non-null fixture, positive GameTest count, authoritative task,
+nonempty Gradle tasks, all twelve exact checks, and one evidence mapping for
+every check.
 `source_recipe_inventory_sha256` binds the sorted recipe-class inventory, and
 every complete `scaffold`/`verify` invocation must also load the committed
 source audit. Validation compares the contract's exact family-class set,
