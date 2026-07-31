@@ -118,7 +118,9 @@ tasks. A `runGameTestServer` evidence marker must live inside the annotated
 GameTest method that executes the assertion; file-level constants, comments,
 and detached helpers are rejected. Its fresh-world cleanup rejects symlinked
 parents and paths outside the addon root before deletion. Bundled task names
-are not translated or treated as equivalent. A published passing report must
+are not translated or treated as equivalent. GameTest output must contain
+exactly one success summary with the reviewed count; conflicting summaries fail
+even when one count matches. A published passing report must
 contain all twelve mandated check records and exactly the addon `build` and
 `runGameTestServer` command records. Commented or string-literal `@GameTest`
 text is ignored by both source counting and method-body evidence extraction;
@@ -313,6 +315,9 @@ descriptors also carry the reviewed target repositories and artifact SHA, so a
 non-central Maven target resolves through contract-owned configuration rather
 than a root-build guess. Compat Kit rejects target IDs that would become Java
 reserved package segments instead of emitting uncompilable source.
+Before scaffold writes, the generated module ID, entrypoint, source set, and
+fixture are compared with all existing descriptors so normalized Java/Gradle
+identifier collisions fail closed.
 
 External addons do not add entries to Auto Storage's bundled module index.
 They are ordinary NeoForge mods with their own entrypoint and dependency
@@ -328,6 +333,9 @@ The API artifact version equals the Auto Storage mod version.
   release in the same minor line.
 - Compat Kit therefore generates a current-minor dependency range; version
   0.3.0 produces `[0.3.0,0.4)`, not an open-ended pre-1.0 range.
+- Compat Kit publication receives the authoritative Gradle `mod_version` and
+  fails if it differs from the tool version. Its addon example uses an explicit
+  tracked template list, never a recursive local-output scan.
 - Registry IDs and persisted resource/descriptor IDs are data contracts and
   must not be reused for different semantics.
 - Optional target-mod versions in CI are representative evidence only. Addons

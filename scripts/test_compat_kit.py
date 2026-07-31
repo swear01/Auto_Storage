@@ -1697,6 +1697,76 @@ displayName="Sample Machines"
                 source_audit=self.source_audit(),
             )
 
+    def test_bundled_scaffold_rejects_normalized_identifier_collision(self):
+        contract = self.accepted_contract()
+        audit = self.source_audit()
+        contract["target"]["mod_id"] = "foo__bar"
+        audit["target"]["mod_id"] = "foo__bar"
+        output = self.root / "bundled"
+        existing = output / "src/compat/foo_bar/compat-module.json"
+        existing.parent.mkdir(parents=True)
+        existing.write_text(
+            json.dumps(
+                {
+                    "schema": 1,
+                    "id": "auto_storage:foo_bar",
+                    "entrypoint": (
+                        "com.swear.autostorage.compat.foobar."
+                        "FooBarCompatModule"
+                    ),
+                    "requires": ["foo_bar"],
+                    "side": "both",
+                    "sourceSet": "compatFooBar",
+                    "fixture": "fooBarFixture",
+                    "expectedTests": 1,
+                    "dependencies": ["com.example:foo_bar:1.0.0"],
+                    "runtimeDependencies": ["com.example:foo_bar:1.0.0"],
+                    "repositories": ["https://repo.example.com/releases"],
+                    "auditArtifact": {
+                        "dependency": "com.example:foo_bar:1.0.0",
+                        "sha256": "0" * 64,
+                    },
+                }
+            )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "bundled compatibility identifier collision",
+        ):
+            self.compat_kit.scaffold_bundled(
+                contract,
+                output,
+                source_audit=audit,
+            )
+
+        self.assertFalse((output / "src/compat/foo__bar").exists())
+
+    def test_bundled_collision_scan_rejects_symlinked_existing_module(self):
+        contract = self.accepted_contract()
+        output = self.root / "bundled"
+        external = self.root / "external-module"
+        external.mkdir()
+        (external / "compat-module.json").write_text("{}")
+        compat_root = output / "src/compat"
+        compat_root.mkdir(parents=True)
+        (compat_root / "external").symlink_to(
+            external,
+            target_is_directory=True,
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "existing compatibility module is a symlink",
+        ):
+            self.compat_kit.scaffold_bundled(
+                contract,
+                output,
+                source_audit=self.source_audit(),
+            )
+
+        self.assertFalse((output / "src/compat/samplemod").exists())
+
     def test_bundled_scaffold_rejects_java_keyword_package_segment(self):
         contract = self.accepted_contract()
         audit = self.source_audit()
@@ -2076,6 +2146,58 @@ displayName="Sample Machines"
                 bundled_root=output_root,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 2 required tests passed :)\n", ""
+                ),
+            )
+
+    def test_verify_rejects_conflicting_gametest_success_summaries(self):
+        contract = self.accepted_contract()
+        output_root = self.root / "conflicting-summary"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "conflicting GameTest success summaries",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command,
+                    0,
+                    (
+                        "All 1 required tests passed :)\n"
+                        "All 0 required tests passed :)\n"
+                    ),
+                    "",
                 ),
             )
 
@@ -2684,10 +2806,17 @@ displayName="Sample Machines"
         second = self.root / "compat-kit-second.zip"
         build = (ROOT / "build.gradle").read_text()
 
-        self.assertIn("fileTree('examples/addon')", build)
+        self.assertNotIn("fileTree('examples/addon')", build)
+        self.assertIn(
+            "file('examples/addon/src/main/java/example/autostorage/"
+            "ExampleAddon.java')",
+            build,
+        )
+        self.assertIn("'--version'", build)
+        self.assertIn("mod_version.toString()", build)
 
-        self.compat_kit.publish_archive(first)
-        self.compat_kit.publish_archive(second)
+        self.compat_kit.publish_archive(first, self.compat_kit.TOOL_VERSION)
+        self.compat_kit.publish_archive(second, self.compat_kit.TOOL_VERSION)
 
         self.assertEqual(first.read_bytes(), second.read_bytes())
         with zipfile.ZipFile(first) as archive:
@@ -2728,6 +2857,39 @@ displayName="Sample Machines"
             source_audit=self.source_audit(),
         )
         self.assertTrue((self.root / "extracted-addon/gradlew").is_file())
+
+    def test_publish_excludes_local_example_outputs(self):
+        example_root = self.root / "example"
+        tracked = (
+            example_root
+            / "src/main/java/example/autostorage/ExampleAddon.java"
+        )
+        tracked.parent.mkdir(parents=True)
+        tracked.write_text("package example.autostorage;\n")
+        sentinel = example_root / "build/review-sentinel.txt"
+        sentinel.parent.mkdir(parents=True)
+        sentinel.write_text("local\n")
+
+        files = self.compat_kit._published_addon_example_files(example_root)
+
+        self.assertEqual(
+            {
+                "examples/addon/src/main/java/example/autostorage/"
+                "ExampleAddon.java"
+            },
+            set(files),
+        )
+        self.assertNotIn("review-sentinel.txt", "\n".join(files))
+
+    def test_publish_rejects_release_version_drift(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "release version does not match compat-kit tool version",
+        ):
+            self.compat_kit.publish_archive(
+                self.root / "compat-kit.zip",
+                "0.3.1",
+            )
 
     def test_compatibility_matrix_verifies_every_audited_compat_artifact(self):
         build = (ROOT / "build.gradle").read_text()

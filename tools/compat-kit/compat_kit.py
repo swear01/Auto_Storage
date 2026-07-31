@@ -25,6 +25,9 @@ MAX_SIGNATURE_BYTES = 256 * 1024
 MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
 MAX_SOURCE_FILES = 10_000
 TOOL_VERSION = "0.3.0"
+PUBLISHED_ADDON_EXAMPLE_FILES = (
+    "src/main/java/example/autostorage/ExampleAddon.java",
+)
 REQUIRED_VERIFICATION_CHECKS = (
     "absent_target_no_classload",
     "present_target_load_once",
@@ -1868,15 +1871,7 @@ def _materialize(
 ) -> list[Path]:
     complete = dict(files)
     complete[manifest_path] = _manifest(files, contract)
-    for ancestor in root.absolute().parents:
-        if ancestor.is_symlink():
-            raise ValueError(
-                f"generated path ancestor is a symlink: {ancestor}"
-            )
-    if root.is_symlink():
-        raise ValueError("generated path parent is a symlink: .")
-    if root.exists() and not root.is_dir():
-        raise ValueError("generated path parent is not a directory: .")
+    _validate_materialization_root(root)
     for relative, payload in sorted(complete.items()):
         target = root / relative
         ancestor = root
@@ -1910,6 +1905,75 @@ def _materialize(
     return generated
 
 
+def _validate_materialization_root(root: Path):
+    for ancestor in root.absolute().parents:
+        if ancestor.is_symlink():
+            raise ValueError(
+                f"generated path ancestor is a symlink: {ancestor}"
+            )
+    if root.is_symlink():
+        raise ValueError("generated path parent is a symlink: .")
+    if root.exists() and not root.is_dir():
+        raise ValueError("generated path parent is not a directory: .")
+
+
+def _validate_bundled_identifier_collisions(
+    root: Path,
+    generated_descriptor: dict,
+    mod_id: str,
+):
+    _validate_materialization_root(root)
+    own_descriptor = root / f"src/compat/{mod_id}/compat-module.json"
+    compat_root = root
+    for part in ("src", "compat"):
+        compat_root /= part
+        if compat_root.is_symlink():
+            raise ValueError(
+                "generated path parent is a symlink: "
+                + compat_root.relative_to(root).as_posix()
+            )
+        if compat_root.exists() and not compat_root.is_dir():
+            raise ValueError(
+                "generated path parent is not a directory: "
+                + compat_root.relative_to(root).as_posix()
+            )
+    module_roots = (
+        sorted(compat_root.iterdir()) if compat_root.is_dir() else []
+    )
+    for module_root in module_roots:
+        if module_root.is_symlink():
+            raise ValueError(
+                "existing compatibility module is a symlink: "
+                + module_root.relative_to(root).as_posix()
+            )
+        descriptor_path = module_root / "compat-module.json"
+        if not descriptor_path.exists():
+            continue
+        if descriptor_path.is_symlink():
+            raise ValueError(
+                "existing compatibility module is a symlink: "
+                + descriptor_path.relative_to(root).as_posix()
+            )
+        if descriptor_path == own_descriptor:
+            continue
+        try:
+            existing = json.loads(descriptor_path.read_text())
+        except (OSError, json.JSONDecodeError) as error:
+            raise ValueError(
+                f"invalid existing compatibility descriptor: {descriptor_path}"
+            ) from error
+        if not isinstance(existing, dict):
+            raise ValueError(
+                f"invalid existing compatibility descriptor: {descriptor_path}"
+            )
+        for key in ("id", "entrypoint", "sourceSet", "fixture"):
+            if existing.get(key) == generated_descriptor[key]:
+                raise ValueError(
+                    "bundled compatibility identifier collision: "
+                    f"{key} {generated_descriptor[key]}"
+                )
+
+
 def scaffold_bundled(
     contract: dict,
     root,
@@ -1923,9 +1987,18 @@ def scaffold_bundled(
     )
     _validate_bundled_verification(contract)
     mod_id = contract["target"]["mod_id"]
+    root = Path(root)
+    files = _bundled_files(contract)
+    descriptor_path = f"src/compat/{mod_id}/compat-module.json"
+    descriptor = json.loads(files[descriptor_path])
+    _validate_bundled_identifier_collisions(
+        root,
+        descriptor,
+        mod_id,
+    )
     return _materialize(
-        Path(root),
-        _bundled_files(contract),
+        root,
+        files,
         f"src/compat/{mod_id}/.compat-kit-manifest.json",
         contract,
     )
@@ -2447,12 +2520,17 @@ def verify_contract(
             game_test_output = stdout + "\n" + stderr
     if game_test_output is None:
         raise ValueError(f"verification did not run game_test_task: {game_test_task}")
-    passed_match = re.search(
+    passed_matches = re.findall(
         r"All\s+(\d+)\s+required tests passed\s+:\)",
         game_test_output,
     )
-    if passed_match is None or int(passed_match.group(1)) != expected_game_tests:
-        actual = passed_match.group(1) if passed_match is not None else "missing"
+    if len(passed_matches) > 1:
+        raise ValueError(
+            "verification found conflicting GameTest success summaries: "
+            + ", ".join(passed_matches)
+        )
+    if not passed_matches or int(passed_matches[0]) != expected_game_tests:
+        actual = passed_matches[0] if passed_matches else "missing"
         raise ValueError(
             f"verification expected {expected_game_tests} GameTests to pass, "
             f"but command reported {actual}"
@@ -2477,6 +2555,16 @@ def verify_contract(
     }
 
 
+def _published_addon_example_files(root: Path) -> dict[str, bytes]:
+    files = {}
+    for relative in PUBLISHED_ADDON_EXAMPLE_FILES:
+        source = root / relative
+        if not source.is_file() or source.is_symlink():
+            raise ValueError(f"missing published addon example file: {source}")
+        files[f"examples/addon/{relative}"] = source.read_bytes()
+    return files
+
+
 def _publish_files() -> dict[str, bytes]:
     tool_root = Path(__file__).resolve().parent
     repo_root = tool_root.parents[1]
@@ -2491,13 +2579,9 @@ def _publish_files() -> dict[str, bytes]:
     }
     for schema in sorted((tool_root / "schema").glob("*.json")):
         files[f"schema/{schema.name}"] = schema.read_bytes()
-    addon_example_root = repo_root / "examples/addon"
-    for example in sorted(addon_example_root.rglob("*")):
-        if example.is_file():
-            files[
-                "examples/addon/"
-                + example.relative_to(addon_example_root).as_posix()
-            ] = example.read_bytes()
+    files.update(
+        _published_addon_example_files(repo_root / "examples/addon")
+    )
     files["templates/craftingtests.platform.nbt"] = base64.b64decode(
         "H4sICMY9CmoC/2JlaGF2aW9yYWx0ZXN0cy5wbGF0Zm9ybS5uYnQAjdPLCsJADAXQm0zV"
         "VpF+gH/i2rVL92OJMGhb7WTl1/uA+gDBG5hFSGYuHJg5ELDYRI87G3LqO6C+VChyulrA"
@@ -2510,7 +2594,12 @@ def _publish_files() -> dict[str, bytes]:
     return files
 
 
-def publish_archive(output):
+def publish_archive(output, release_version):
+    if release_version != TOOL_VERSION:
+        raise ValueError(
+            "release version does not match compat-kit tool version: "
+            f"{release_version} != {TOOL_VERSION}"
+        )
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     root = "auto-storage-compat-kit"
@@ -2644,6 +2733,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     publish = subparsers.add_parser("publish")
     publish.add_argument("--output", required=True)
+    publish.add_argument("--version", required=True)
     return parser
 
 
@@ -2705,7 +2795,7 @@ def main(argv=None) -> int:
             )
             _write_json(args.output, report)
         elif args.command == "publish":
-            publish_archive(args.output)
+            publish_archive(args.output, args.version)
         else:
             parser.error(f"unsupported command: {args.command}")
     except (OSError, RuntimeError, ValueError, zipfile.BadZipFile) as error:

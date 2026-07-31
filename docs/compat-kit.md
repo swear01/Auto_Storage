@@ -214,7 +214,11 @@ run task, expected test gate, and audited target artifact from that descriptor;
 `expectedTests` must be a positive JSON integer representable by Gradle's
 `Integer` parser; fractions and wider overflow values are rejected rather than
 truncated.
-the target is on both compile and fixture runtime classpaths, with both
+Before writing a bundled module, Compat Kit compares its derived module ID,
+entrypoint, source-set name, and fixture name with every existing descriptor;
+different mod IDs that normalize to the same Java/Gradle identifiers fail
+before materialization. The target is on both compile and fixture runtime
+classpaths, with both
 declarations non-transitive. `build` and the
 module GameTest resolve exactly one target jar and reject a SHA different from
 the reviewed audit. For an audited descriptor, that same coordinate must be the
@@ -287,8 +291,10 @@ contract, contract/source-audit mismatch, contract/manifest mismatch,
 remaining RED marker, forbidden
 implementation links, missing evidence source/marker, a source annotation
 count different from `expected_game_tests`, GameTest output that does not
-report that exact passing count, an undeclared evidence task, or any non-zero
-command. A marker assigned to a `run*GameTestServer` task must occur inside an
+report one and only one exact passing summary, an undeclared evidence task, or
+any non-zero command. Multiple success summaries are rejected even when one
+matches, because editable fixture output cannot outrank the framework result.
+A marker assigned to a `run*GameTestServer` task must occur inside an
 annotated `@GameTest` method body; a detached constant, helper, or comment does
 not prove that the behavior ran. A check is marked passed only when all of its
 declared source markers exist in the correct execution boundary and the
@@ -347,6 +353,10 @@ This produces
 `build/distributions/auto-storage-compat-kit-<mod_version>.zip` with the CLI,
 schemas, Gradle wrapper, RED templates, complete public-SDK addon example, CI
 example, README, and license.
+Only the explicit repository-owned addon example template is packaged; local
+`build/` or untracked files under `examples/addon` are never traversed. Gradle
+passes `mod_version` to `publish`, and publication fails unless it exactly
+matches the tool version embedded in generated projects.
 `assemble`/`build` includes the archive, CI uploads it, and tagged releases add
 it beside API, sources, and Javadocs artifacts.
 

@@ -106,8 +106,10 @@ Use `scaffold --bundled contract.json --audit audit.json` and
 Storage repository. Bundled verification runs each declared Gradle task
 separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing
-count. World cleanup rejects symlinked parents and paths outside the verification
-root. Passing reports require all twelve exact checks and nonempty command
+count. Runtime output must contain exactly one matching success summary;
+missing, duplicate, or conflicting summaries fail. World cleanup rejects
+symlinked parents and paths outside the verification root. Passing reports
+require all twelve exact checks and nonempty command
 evidence; addon reports require exactly `build` and `runGameTestServer`.
 Comment/string-aware annotation extraction ignores fake `@GameTest` text when
 counting tests and locating marker-bearing method bodies, skips brace-bearing
@@ -124,6 +126,10 @@ evidence markers must occur between the annotated method's braces; a marker
 that appears only in its declaration is not execution evidence. The published
 archive includes its own Gradle wrapper template, so an extracted copy can
 scaffold an addon without an Auto Storage checkout.
+Bundled scaffolding also compares derived module IDs, entrypoints, source sets,
+and fixtures with existing descriptors before writing. Publication requires
+`publish --version <mod_version>` to match the embedded tool version and
+includes only the explicit addon example template; local outputs are excluded.
 
 ## Review an update
 
