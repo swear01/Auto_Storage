@@ -1,0 +1,755 @@
+{
+  "families": [
+    {
+      "class": "rearth.oritech.api.recipe.AssemblerRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.AssemblerRecipeBuilder#public_signature"
+      ],
+      "id": "assembler_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.AtomicForgeRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.AtomicForgeRecipeBuilder#public_signature"
+      ],
+      "id": "atomic_forge_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.AugmentRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.AugmentRecipeBuilder#public_signature"
+      ],
+      "id": "augment_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.BioGeneratorRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.BioGeneratorRecipeBuilder#public_signature"
+      ],
+      "id": "bio_generator_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.CentrifugeFluidRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.CentrifugeFluidRecipeBuilder#public_signature"
+      ],
+      "id": "centrifuge_fluid_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.CentrifugeRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.CentrifugeRecipeBuilder#public_signature"
+      ],
+      "id": "centrifuge_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.CoolerRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.CoolerRecipeBuilder#public_signature"
+      ],
+      "id": "cooler_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.DeepDrillRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.DeepDrillRecipeBuilder#public_signature"
+      ],
+      "id": "deep_drill_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.FoundryRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.FoundryRecipeBuilder#public_signature"
+      ],
+      "id": "foundry_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.FuelGeneratorRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.FuelGeneratorRecipeBuilder#public_signature"
+      ],
+      "id": "fuel_generator_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.GrinderRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.GrinderRecipeBuilder#public_signature"
+      ],
+      "id": "grinder_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.LaserRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.LaserRecipeBuilder#public_signature"
+      ],
+      "id": "laser_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.LavaGeneratorRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.LavaGeneratorRecipeBuilder#public_signature"
+      ],
+      "id": "lava_generator_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.OritechRecipeBuilder",
+      "costs": [],
+      "decision": "Shared datagen builder base; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.OritechRecipeBuilder#public_signature"
+      ],
+      "id": "oritech_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.OritechRecipeGenerator",
+      "costs": [],
+      "decision": "Datagen provider; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.OritechRecipeGenerator#public_signature"
+      ],
+      "id": "oritech_recipe_generator",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.ParticleCollisionRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.ParticleCollisionRecipeBuilder#public_signature"
+      ],
+      "id": "particle_collision_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.PulverizerRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.PulverizerRecipeBuilder#public_signature"
+      ],
+      "id": "pulverizer_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.ReactorGeneratorRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.ReactorGeneratorRecipeBuilder#public_signature"
+      ],
+      "id": "reactor_generator_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.RefineryRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.RefineryRecipeBuilder#public_signature"
+      ],
+      "id": "refinery_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.SteamGeneratorRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.SteamGeneratorRecipeBuilder#public_signature"
+      ],
+      "id": "steam_generator_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.util.MetalProcessingChainBuilder",
+      "costs": [],
+      "decision": "Datagen helper; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.util.MetalProcessingChainBuilder#public_signature"
+      ],
+      "id": "metal_processing_chain_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.api.recipe.util.RecipeHelpers",
+      "costs": [],
+      "decision": "Datagen helper; not a runtime Recipe family.",
+      "evidence": [
+        "rearth.oritech.api.recipe.util.RecipeHelpers#public_signature"
+      ],
+      "id": "recipe_helpers",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.compat.emi.OritechEMIParticleCollisionRecipe",
+      "costs": [],
+      "decision": "Client EMI presentation helper; not a server Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.compat.emi.OritechEMIParticleCollisionRecipe#public_signature"
+      ],
+      "id": "oritech_e_m_i_particle_collision_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.compat.emi.OritechEMIRecipe",
+      "costs": [],
+      "decision": "Client EMI presentation helper; not a server Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.compat.emi.OritechEMIRecipe#public_signature"
+      ],
+      "id": "oritech_e_m_i_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.compat.emi.OritechEmiLaserRecipe",
+      "costs": [],
+      "decision": "Client EMI presentation helper; not a server Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.compat.emi.OritechEmiLaserRecipe#public_signature"
+      ],
+      "id": "oritech_emi_laser_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.compat.jei.OritechJeiLaserRecipe",
+      "costs": [],
+      "decision": "Client JEI presentation helper; not a server Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.compat.jei.OritechJeiLaserRecipe#public_signature"
+      ],
+      "id": "oritech_jei_laser_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.compat.jei.OritechJeiParticleCollisionRecipe",
+      "costs": [],
+      "decision": "Client JEI presentation helper; not a server Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.compat.jei.OritechJeiParticleCollisionRecipe#public_signature"
+      ],
+      "id": "oritech_jei_particle_collision_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.compat.jei.OritechJeiRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI presentation helper; not a server Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.compat.jei.OritechJeiRecipeCategory#public_signature"
+      ],
+      "id": "oritech_jei_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.AugmentDataRecipe",
+      "costs": [],
+      "decision": "Player-attribute augment research/apply payload with research stations and no craftable item/fluid primary; outside Auto Storage transaction scope.",
+      "evidence": [
+        "rearth.oritech.init.recipes.AugmentDataRecipe#public_signature"
+      ],
+      "id": "augment_data_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.AugmentDataRecipe$CustomAugmentDefinition",
+      "costs": [],
+      "decision": "Nested augment value object; parent AugmentDataRecipe remains rejected.",
+      "evidence": [
+        "rearth.oritech.init.recipes.AugmentDataRecipe$CustomAugmentDefinition#public_signature"
+      ],
+      "id": "augment_data_recipe__custom_augment_definition",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.AugmentDataRecipe$EffectDefinition",
+      "costs": [],
+      "decision": "Nested augment value object; parent AugmentDataRecipe remains rejected.",
+      "evidence": [
+        "rearth.oritech.init.recipes.AugmentDataRecipe$EffectDefinition#public_signature"
+      ],
+      "id": "augment_data_recipe__effect_definition",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.AugmentDataRecipe$ModifierDefinition",
+      "costs": [],
+      "decision": "Nested augment value object; parent AugmentDataRecipe remains rejected.",
+      "evidence": [
+        "rearth.oritech.init.recipes.AugmentDataRecipe$ModifierDefinition#public_signature"
+      ],
+      "id": "augment_data_recipe__modifier_definition",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.AugmentDataRecipeType",
+      "costs": [],
+      "decision": "RecipeType/serializer registration helper; not a Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.recipes.AugmentDataRecipeType#public_signature"
+      ],
+      "id": "augment_data_recipe_type",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.OritechRecipe",
+      "costs": [
+        {
+          "amount": "OritechConfig.processingMachines.pulverizerData.energyPerTick * recipe.time",
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": "OritechConfig.processingMachines.pulverizerData.energyPerTick * recipe.time",
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept exact oritech:pulverizer holders of the shared OritechRecipe class when every ingredient is simple and non-empty, fluidInput is empty/zero, results are one or more non-empty deterministic item stacks, and time is positive. Costs use loaded pulverizer energyPerTick from OritechConfig: station work and FE each equal energyPerTick * time at base addon multipliers (1). Combine-small-dusts post-craft inventory compaction, speed/efficiency/burst/yield addons, and every other RecipeContent type that reuses OritechRecipe (grinder/assembler/foundry/atomic_forge/centrifuge/cooler/refinery/generators/deep_drill/laser/particle_collision/reactor/steam_engine) remain unsupported because Compat Kit binds one audited class to one recipe_type/station and those types need distinct fluid, generator, multiblock, or live-addon contracts.",
+      "evidence": [
+        "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#getInputs",
+        "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#getResults",
+        "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#getFluidInput",
+        "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#getTime",
+        "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#isSpecial",
+        "common/src/main/java/rearth/oritech/init/recipes/RecipeContent.java#PULVERIZER",
+        "common/src/main/java/rearth/oritech/block/entity/processing/PulverizerBlockEntity.java#getOwnRecipeType",
+        "common/src/main/java/rearth/oritech/block/base/entity/MachineBlockEntity.java#calculateEnergyUsage",
+        "common/src/main/java/rearth/oritech/block/base/entity/MachineBlockEntity.java#checkCraftingFinished",
+        "common/src/main/java/rearth/oritech/init/OritechConfig.java#pulverizerData",
+        "common/src/main/java/rearth/oritech/util/MachineAddonController.java#DEFAULT_ADDON_DATA"
+      ],
+      "id": "oritech_recipe",
+      "inputs": [
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.inputs[*] simple Ingredient alternatives"
+        },
+        {
+          "amount": "OritechConfig.processingMachines.pulverizerData.energyPerTick * recipe.time",
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.results[0].count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.results[0]"
+        },
+        {
+          "amount": "recipe.results[i].count for i>0",
+          "resource_kind": "item",
+          "role": "remainder",
+          "selector": "recipe.results[1..]"
+        }
+      ],
+      "recipe_type": "oritech:pulverizer",
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:oritech_pulverizer",
+        "variants": [
+          {
+            "bounds": "plain pulverizer_block item; addon speed/efficiency/burst/chamber state is not inferred",
+            "item": "oritech:pulverizer_block",
+            "rate": {
+              "denominator": 1,
+              "numerator": 32
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.OritechRecipeType",
+      "costs": [],
+      "decision": "Shared RecipeType/serializer identity object; not itself a Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.recipes.OritechRecipeType#public_signature"
+      ],
+      "id": "oritech_recipe_type",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.init.recipes.RecipeContent",
+      "costs": [],
+      "decision": "RecipeType registry container; not a Recipe family.",
+      "evidence": [
+        "rearth.oritech.init.recipes.RecipeContent#public_signature"
+      ],
+      "id": "recipe_content",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "rearth.oritech.util.registry.ArchitecturyRecipeRegistryContainer",
+      "costs": [],
+      "decision": "Registry wiring helper; not a Recipe family.",
+      "evidence": [
+        "rearth.oritech.util.registry.ArchitecturyRecipeRegistryContainer#public_signature"
+      ],
+      "id": "architectury_recipe_registry_container",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "fcb30b4f6ae89d115164b82f3c1f9938e9b8a80662047e204562361845764963",
+  "source_recipe_inventory_sha256": "4e86724e13ee47933b8cefe71933041475f26dfb3aa6c3c47576d668388a5b92",
+  "target": {
+    "dependency": "maven.modrinth:oritech:gMBPdWrE",
+    "display_name": "Oritech",
+    "mod_id": "oritech",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:architectury-api:ZxYGwlk0",
+      "maven.modrinth:geckolib:qj2pTqCr"
+    ],
+    "version": "1.2.9"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Combined compatibility registry is missing",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Oritech pulverizer did not emit exact multi-output remainder",
+          "source": "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java",
+          "task": "runOritechGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Long.MAX_VALUE",
+          "source": "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java",
+          "task": "runOritechGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Oritech full destination transaction was not an atomic no-op",
+          "source": "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java",
+          "task": "runOritechGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Oritech missing-ingredient transaction was not an atomic no-op",
+          "source": "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java",
+          "task": "runOritechGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Oritech pulverizer registration or non-pulverizer exclusion was incorrect",
+          "source": "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java",
+          "task": "runOritechGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 8,
+    "fixture": "oritechFixture",
+    "game_test_task": "runOritechGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runOritechGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

@@ -1,0 +1,195 @@
+package com.swear.autostorage.compat.oritech;
+
+import com.swear.autostorage.MachineCategory;
+import com.swear.autostorage.MachineDescriptor;
+import com.swear.autostorage.MachineDescriptorApi;
+import com.swear.autostorage.MachineVariant;
+import com.swear.autostorage.MachineWorkRate;
+import com.swear.autostorage.RecipeFamily;
+import com.swear.autostorage.RecipeFamilyApi;
+import com.swear.autostorage.RecipeFamilyCost;
+import com.swear.autostorage.RecipeFamilyFactories;
+import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.TypedRecipeInput;
+import com.swear.autostorage.TypedRecipeOutput;
+import com.swear.autostorage.TypedRecipePlan;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import rearth.oritech.init.OritechConfig;
+import rearth.oritech.init.recipes.OritechRecipe;
+import rearth.oritech.init.recipes.RecipeContent;
+import rearth.oritech.util.FluidIngredient;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+public final class OritechCompat {
+    private static final ResourceLocation PULVERIZER_ITEM =
+            ResourceLocation.fromNamespaceAndPath("oritech", "pulverizer_block");
+
+    private OritechCompat() {
+    }
+
+    public static void register(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {
+        Objects.requireNonNull(machineDescriptors, "machineDescriptors");
+        Objects.requireNonNull(recipeFamilies, "recipeFamilies");
+        if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
+            throw new IllegalArgumentException(
+                    "Oritech descriptor register targets the wrong registry");
+        }
+        if (!recipeFamilies.getRegistryKey().equals(RecipeFamilyApi.REGISTRY_KEY)) {
+            throw new IllegalArgumentException(
+                    "Oritech family register targets the wrong registry");
+        }
+        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())) {
+            throw new IllegalArgumentException(
+                    "Oritech descriptors and families must share one namespace");
+        }
+
+        ResourceLocation descriptorId = ResourceLocation.fromNamespaceAndPath(
+                machineDescriptors.getNamespace(), "oritech_pulverizer");
+        machineDescriptors.register(descriptorId.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        descriptorId,
+                        Component.translatable("gui.auto_storage.station.oritech_pulverizer"),
+                        () -> List.of(MachineVariant.derived(
+                                new ItemStack(requiredItem(PULVERIZER_ITEM)),
+                                () -> MachineWorkRate.of(energyPerTick(), 1))),
+                        MachineCategory.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
+        recipeFamilies.register(descriptorId.getPath(), () ->
+                RecipeFamilyFactories.deterministicResources(
+                        OritechRecipe.class,
+                        () -> RecipeContent.PULVERIZER,
+                        descriptorId,
+                        OritechCompat::supports,
+                        OritechCompat::plan,
+                        recipe -> RecipeFamilyCost.stationWork(requiredWork(recipe)),
+                        RecipePresentationKind.CRAFTING));
+    }
+
+    private static boolean supports(OritechRecipe recipe) {
+        if (recipe == null
+                || recipe.getTime() <= 0
+                || recipe.getInputs() == null
+                || recipe.getInputs().isEmpty()
+                || recipe.getResults() == null
+                || recipe.getResults().isEmpty()
+                || !emptyFluid(recipe.getFluidInput())
+                || energyPerTick() <= 0) {
+            return false;
+        }
+        for (Ingredient ingredient : recipe.getInputs()) {
+            if (!exact(ingredient)) {
+                return false;
+            }
+        }
+        for (ItemStack result : recipe.getResults()) {
+            if (result == null || result.isEmpty() || result.getCount() <= 0) {
+                return false;
+            }
+        }
+        try {
+            requiredWork(recipe);
+            return true;
+        } catch (ArithmeticException ignored) {
+            return false;
+        }
+    }
+
+    private static TypedRecipePlan plan(
+            OritechRecipe recipe,
+            HolderLookup.Provider registries
+    ) {
+        long energy = requiredWork(recipe);
+        TypedRecipePlan.Builder builder = TypedRecipePlan.builder();
+        for (Ingredient ingredient : recipe.getInputs()) {
+            builder.input(TypedRecipeInput.consumeAny(keys(ingredient, registries), 1));
+        }
+        builder.input(TypedRecipeInput.consume(
+                StorageResourceKey.neoforgeEnergy(), energy));
+
+        List<ItemStack> results = recipe.getResults();
+        ItemStack primary = results.getFirst().copy();
+        builder.output(TypedRecipeOutput.primary(
+                StorageResourceKey.item(primary.copyWithCount(1), registries),
+                primary.getCount()));
+        for (int index = 1; index < results.size(); index++) {
+            ItemStack secondary = results.get(index).copy();
+            builder.output(TypedRecipeOutput.remainder(
+                    StorageResourceKey.item(secondary.copyWithCount(1), registries),
+                    secondary.getCount()));
+        }
+
+        int inputCount = recipe.getInputs().size() + 1;
+        int width = Math.min(3, inputCount);
+        return builder
+                .presentationOutput(primary)
+                .layout(width, (inputCount + width - 1) / width, true)
+                .build();
+    }
+
+    private static long requiredWork(OritechRecipe recipe) {
+        return Math.multiplyExact((long) energyPerTick(), recipe.getTime());
+    }
+
+    private static int energyPerTick() {
+        return OritechConfig.processingMachines.pulverizerData.energyPerTick.get();
+    }
+
+    private static boolean emptyFluid(FluidIngredient fluidInput) {
+        if (fluidInput == null || fluidInput.isEmpty() || fluidInput.amount() <= 0) {
+            return true;
+        }
+        return !fluidInput.hasTag() && fluidInput.getFluid() == Fluids.EMPTY;
+    }
+
+    private static boolean exact(Ingredient ingredient) {
+        return ingredient != null
+                && !ingredient.isEmpty()
+                && ingredient.isSimple()
+                && !keysWithoutRegistries(ingredient).isEmpty();
+    }
+
+    private static List<StorageResourceKey> keys(
+            Ingredient ingredient,
+            HolderLookup.Provider registries
+    ) {
+        return Arrays.stream(ingredient.getItems())
+                .filter(stack -> !stack.isEmpty())
+                .map(stack -> StorageResourceKey.item(
+                        stack.copyWithCount(1), registries))
+                .distinct()
+                .toList();
+    }
+
+    private static List<ItemStack> keysWithoutRegistries(Ingredient ingredient) {
+        return Arrays.stream(ingredient.getItems())
+                .filter(stack -> !stack.isEmpty())
+                .map(stack -> stack.copyWithCount(1))
+                .distinct()
+                .toList();
+    }
+
+    private static Item requiredItem(ResourceLocation id) {
+        Item item = BuiltInRegistries.ITEM.get(id);
+        if (item == Items.AIR) {
+            throw new IllegalStateException("Missing Oritech station item " + id);
+        }
+        return item;
+    }
+}

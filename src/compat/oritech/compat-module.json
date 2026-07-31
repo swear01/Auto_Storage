@@ -1,0 +1,27 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:oritech:gMBPdWrE",
+    "sha256": "fcb30b4f6ae89d115164b82f3c1f9938e9b8a80662047e204562361845764963"
+  },
+  "dependencies": [
+    "maven.modrinth:oritech:gMBPdWrE"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.oritech.OritechCompatModule",
+  "expectedTests": 8,
+  "fixture": "oritechFixture",
+  "id": "auto_storage:oritech",
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "oritech"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:oritech:gMBPdWrE",
+    "maven.modrinth:architectury-api:ZxYGwlk0",
+    "maven.modrinth:geckolib:qj2pTqCr"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatOritech"
+}
