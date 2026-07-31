@@ -18,6 +18,7 @@ SCAN_CACHE_VERSION = 6
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
+MAX_MOD_METADATA_BYTES = 1024 * 1024
 MAX_CANDIDATE_CLASSES = 2_000
 MAX_SIGNATURE_BYTES = 256 * 1024
 MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
@@ -208,6 +209,11 @@ def _read_mod_metadata(archive: zipfile.ZipFile) -> dict:
     )
     if metadata_path is None:
         raise ValueError("target jar has no NeoForge mod metadata")
+    metadata_entry = archive.getinfo(metadata_path)
+    if metadata_entry.file_size > MAX_MOD_METADATA_BYTES:
+        raise ValueError(
+            f"mod metadata exceeds {MAX_MOD_METADATA_BYTES} bytes: {metadata_path}"
+        )
     try:
         metadata = tomllib.loads(archive.read(metadata_path).decode("utf-8"))
     except (UnicodeDecodeError, tomllib.TOMLDecodeError) as error:
@@ -420,6 +426,8 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
             + (result.stderr.strip() or result.stdout.strip())
         )
     revision = result.stdout.strip()
+    if candidate_names and not files:
+        raise ValueError("source checkout has no candidate matches")
     return {"revision": revision, "files": files}
 
 
@@ -1424,6 +1432,14 @@ def _toml_basic_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
+def _groovy_string(value: str) -> str:
+    return (
+        '"'
+        + value.replace("\\", "\\\\").replace("$", "\\$").replace('"', '\\"')
+        + '"'
+    )
+
+
 def _addon_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
     target = contract["target"]
     mod_id = target["mod_id"]
@@ -1471,7 +1487,7 @@ mod_group_id={package}
         ]
     })
     reviewed_group_includes = "".join(
-        f'            includeGroup("{group}")\n'
+        f"            includeGroup({_groovy_string(group)})\n"
         for group in reviewed_groups
     )
     fallback_excluded_groups = {
@@ -1484,12 +1500,12 @@ mod_group_id={package}
             for dependency in target["runtime_dependencies"]
         )
     fallback_group_excludes = "".join(
-        f'            excludeGroup("{group}")\n'
+        f"            excludeGroup({_groovy_string(group)})\n"
         for group in sorted(fallback_excluded_groups)
     )
     repository_lines = "".join(
         "    maven {\n"
-        f'        url = uri("{repository}")\n'
+        f"        url = uri({_groovy_string(repository)})\n"
         "        content {\n"
         f"{reviewed_group_includes}"
         "        }\n"
@@ -1504,9 +1520,11 @@ mod_group_id={package}
         "    }\n"
     )
     runtime_dependency_lines = "".join(
-        f'    runtimeOnly("{dependency}") {{ transitive = false }}\n'
+        f"    runtimeOnly({_groovy_string(dependency)}) "
+        "{ transitive = false }\n"
         for dependency in target["runtime_dependencies"]
     )
+    target_dependency = _groovy_string(target["dependency"])
     build = f"""plugins {{
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.141'
@@ -1568,10 +1586,10 @@ dependencies {{
     compileOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}:api")
     runtimeOnly("com.swear.autostorage:auto_storage:${{auto_storage_version}}")
     runtimeOnly("vazkii.patchouli:Patchouli:${{patchouli_version}}")
-    compileOnly("{target['dependency']}") {{ transitive = false }}
-    runtimeOnly("{target['dependency']}") {{ transitive = false }}
+    compileOnly({target_dependency}) {{ transitive = false }}
+    runtimeOnly({target_dependency}) {{ transitive = false }}
 {runtime_dependency_lines}
-    compatKitTargetArtifact("{target['dependency']}")
+    compatKitTargetArtifact({target_dependency})
 }}
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -1935,6 +1953,26 @@ def _default_command_runner(command, cwd):
     )
 
 
+def _clear_game_test_world(root: Path):
+    resolved_root = root.resolve()
+    run = root / "run"
+    world = run / "world"
+    for path in (run, world):
+        if path.is_symlink():
+            raise ValueError(
+                f"GameTest world path has symlinked ancestor: {path}"
+            )
+    resolved_world = world.resolve()
+    if resolved_world != resolved_root and resolved_root not in resolved_world.parents:
+        raise ValueError(
+            f"GameTest world path escapes verification root: {world}"
+        )
+    if world.exists():
+        if not world.is_dir():
+            raise ValueError(f"GameTest world path is not a directory: {world}")
+        shutil.rmtree(world)
+
+
 def _source_text(root: Path) -> str:
     sources = sorted(root.rglob("*.java"))
     if len(sources) > MAX_SOURCE_FILES:
@@ -2089,13 +2127,22 @@ def verify_contract(
         if mode == "bundled"
         else _addon_files(contract, source_audit)
     )
-    verification_path = (
-        f"src/compat/{mod_id}/compat-module.json"
+    verification_paths = (
+        (f"src/compat/{mod_id}/compat-module.json",)
         if mode == "bundled"
-        else "build.gradle"
+        else (
+            "build.gradle",
+            "settings.gradle",
+            "gradle.properties",
+            "gradlew",
+            "gradlew.bat",
+            "gradle/wrapper/gradle-wrapper.jar",
+            "gradle/wrapper/gradle-wrapper.properties",
+        )
     )
     verification_files = {
-        verification_path: generated_files[verification_path],
+        relative: generated_files[relative]
+        for relative in verification_paths
     }
     manifest_sha = _load_and_verify_manifest(
         root,
@@ -2154,11 +2201,7 @@ def verify_contract(
     game_test_output = None
     for command in commands:
         if mode == "bundled" or (len(command) > 1 and command[1].startswith("run")):
-            world = root / "run/world"
-            if world.exists():
-                if not world.is_dir():
-                    raise ValueError(f"GameTest world path is not a directory: {world}")
-                shutil.rmtree(world)
+            _clear_game_test_world(root)
         result = runner(command, root)
         stdout = result.stdout or ""
         stderr = result.stderr or ""

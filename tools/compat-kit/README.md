@@ -32,7 +32,10 @@ uses the enclosing Git worktree's status and HEAD; evidence paths remain
 relative to the supplied module. Supplying a non-Git source directory fails;
 omit `--source` when no versioned source is available. Current-format cache
 entries and committed audits carry the scanner format and are fully
-schema-validated before reuse.
+schema-validated before reuse. If the target has classified candidates, a
+supplied source module must contain at least one matching Java source file;
+an unrelated clean checkout is rejected. NeoForge metadata entries are limited
+to 1 MiB before decompression.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
@@ -80,29 +83,33 @@ dependencies are non-transitive, and evidence task names are never remapped.
 Reviewed repositories are emitted first and own target/runtime groups.
 Explicit runtime groups cannot fall back to Maven Central; target fallback is
 still protected by its exact SHA gate, and fixed repositories are filtered to
-their Auto Storage or Patchouli artifacts.
-Verification
-regenerates the expected `build.gradle` (or bundled descriptor) from the
-reviewed contract and current generator, then checks both its bytes and
-manifest entry. Removing the SHA gate and self-attesting a new manifest hash is
-therefore explicit drift rather than a pass.
+their Auto Storage or Patchouli artifacts. Reviewed repository, dependency, and
+group values are emitted as escaped literal Groovy strings.
+Verification regenerates the expected bundled descriptor or external
+`build.gradle`, `settings.gradle`, `gradle.properties`, launchers, and wrapper
+artifacts from the reviewed contract and current generator, then checks every
+byte and manifest entry. Replacing the launcher or SHA gate and self-attesting
+a new manifest hash is therefore explicit drift rather than a pass.
 
 Use `scaffold --bundled contract.json --audit audit.json` and
 `verify contract.json --audit audit.json --bundled <repo>` inside the Auto
 Storage repository. Bundled verification runs each declared Gradle task
 separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing
-count. Bundled descriptors preserve reviewed HTTPS repository order, and fixture
-names must be Java-safe identifiers ending in `Fixture`. Their authoritative
-GameTest task is derived from the same fixture name (`evilCraftFixture` becomes
+count. World cleanup rejects symlinked parents and paths outside the verification
+root. Passing reports require all twelve exact checks and nonempty command
+evidence; addon reports require exactly `build` and `runGameTestServer`.
+Bundled descriptors preserve reviewed HTTPS repository order, and fixture names
+must be Java-safe identifiers ending in `Fixture`. Their authoritative GameTest
+task is derived from the same fixture name (`evilCraftFixture` becomes
 `runEvilCraftGameTestServer`) and mismatches fail before materialization. The
 target mod ID must also produce a non-reserved Java package segment. An audited
 descriptor must use the audited target coordinate as its primary compile
 dependency and include that exact coordinate in runtime dependencies. GameTest
 evidence markers must occur between the annotated method's braces; a marker
-that appears only in its declaration is not execution evidence. The
-published archive includes its own Gradle wrapper template, so an extracted copy
-can scaffold an addon without an Auto Storage checkout.
+that appears only in its declaration is not execution evidence. The published
+archive includes its own Gradle wrapper template, so an extracted copy can
+scaffold an addon without an Auto Storage checkout.
 
 ## Review an update
 

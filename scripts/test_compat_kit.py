@@ -402,6 +402,39 @@ class CompatKitAuditTests(unittest.TestCase):
                 signature_reader=self.signatures,
             )
 
+    def test_scan_rejects_source_checkout_without_candidate_matches(self):
+        source = self.root / "source"
+        source_file = source / "src/main/java/unrelated/Decor.java"
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text("package unrelated;\nfinal class Decor {}\n")
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "source checkout has no candidate matches",
+        ):
+            self.compat_kit.scan_jar(
+                self.jar,
+                source=source,
+                signature_reader=self.signatures,
+            )
+
     def test_scan_discovers_enclosing_git_root_for_source_subdirectory(self):
         repository = self.root / "repository"
         source = repository / "module"
@@ -638,6 +671,25 @@ class CompatKitAuditTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(ValueError, "exactly one mod"):
             self.compat_kit.scan_jar(ambiguous, signature_reader=lambda _: "")
+
+    def test_scan_rejects_oversized_mod_metadata_before_decompression(self):
+        oversized = self.root / "oversized-metadata.jar"
+        with zipfile.ZipFile(
+            oversized,
+            "w",
+            compression=zipfile.ZIP_DEFLATED,
+        ) as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                b"x" * (self.compat_kit.MAX_MOD_METADATA_BYTES + 1),
+            )
+            archive.writestr("samplemod/Recipe.class", b"recipe")
+
+        with self.assertRaisesRegex(ValueError, "mod metadata exceeds"):
+            self.compat_kit.scan_jar(
+                oversized,
+                signature_reader=lambda _: "public class Recipe {}",
+            )
 
     def test_audit_validation_rejects_candidate_bucket_drift(self):
         audit = self.source_audit()
@@ -1329,6 +1381,26 @@ class CompatKitAuditTests(unittest.TestCase):
             metadata["mods"][0]["displayName"],
         )
 
+    def test_external_scaffold_escapes_reviewed_values_as_groovy_strings(self):
+        contract = self.addon_contract()
+        contract["target"]["repositories"] = [
+            'https://repo.example.com/$channel/\\"quoted\\"'
+        ]
+        output = self.root / "groovy-escaped-addon"
+
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=self.source_audit(),
+        )
+
+        build = (output / "build.gradle").read_text()
+        self.assertIn(
+            'url = uri("https://repo.example.com/\\$channel/'
+            '\\\\\\\"quoted\\\\\\\"")',
+            build,
+        )
+
     def test_bundled_scaffold_escapes_target_description_as_toml(self):
         contract = self.accepted_contract()
         audit = self.source_audit()
@@ -1528,7 +1600,39 @@ class CompatKitAuditTests(unittest.TestCase):
         report_schema = json.loads(
             (schema_root / "compat-report.schema.json").read_text()
         )
-        self.assertFalse(report_schema["properties"]["checks"]["items"]["additionalProperties"])
+        checks_schema = report_schema["properties"]["checks"]
+        self.assertFalse(checks_schema["items"]["additionalProperties"])
+        self.assertEqual(
+            len(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            checks_schema["minItems"],
+        )
+        self.assertEqual(checks_schema["minItems"], checks_schema["maxItems"])
+        required_report_checks = {
+            rule["contains"]["properties"]["id"]["const"]
+            for rule in checks_schema["allOf"]
+        }
+        self.assertEqual(
+            set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            required_report_checks,
+        )
+        self.assertEqual(
+            1,
+            report_schema["properties"]["commands"]["minItems"],
+        )
+        addon_commands = report_schema["allOf"][0]["then"]["properties"][
+            "commands"
+        ]
+        self.assertEqual(2, addon_commands["minItems"])
+        self.assertEqual(2, addon_commands["maxItems"])
+        self.assertEqual(
+            ["build", "runGameTestServer"],
+            [
+                command["contains"]["properties"]["command"]["prefixItems"][1][
+                    "const"
+                ]
+                for command in addon_commands["allOf"]
+            ],
+        )
 
     def test_committed_ae2_contract_covers_every_audited_recipe_candidate(self):
         audit = json.loads(
@@ -2022,6 +2126,40 @@ class CompatKitAuditTests(unittest.TestCase):
                 ),
             )
 
+    def test_external_verify_rejects_manifest_self_attested_wrapper_changes(self):
+        contract = self.addon_contract()
+        output = self.root / "addon"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=source_audit,
+        )
+        wrapper = output / "gradlew"
+        wrapper.write_text("#!/bin/sh\nprintf 'forged verification output\\n'\n")
+        manifest = output / ".compat-kit-manifest.json"
+        manifest_data = json.loads(manifest.read_text())
+        manifest_data["files"]["gradlew"] = hashlib.sha256(
+            wrapper.read_bytes()
+        ).hexdigest()
+        manifest.write_text(
+            json.dumps(manifest_data, ensure_ascii=False, indent=2, sort_keys=True)
+            + "\n"
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "generated verification file drift: gradlew",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                addon_root=output,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 1 required tests passed :)\n", ""
+                ),
+            )
+
     def test_external_verify_runs_build_and_fresh_gametest_world(self):
         contract = self.addon_contract()
         output = self.root / "addon"
@@ -2080,6 +2218,63 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(["build", "runGameTestServer"], [
             command[1] for command in commands
         ])
+
+    def test_external_verify_refuses_symlinked_gametest_world_parent(self):
+        contract = self.addon_contract()
+        output = self.root / "addon"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "addon.recipeFamilies(null);",
+            )
+        )
+        fixture = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+        external = self.root / "external-run"
+        world = external / "world"
+        world.mkdir(parents=True)
+        sentinel = world / "sentinel"
+        sentinel.write_text("keep")
+        (output / "run").symlink_to(external, target_is_directory=True)
+        commands = []
+
+        def runner(command, cwd):
+            commands.append(command)
+            return subprocess.CompletedProcess(command, 0, "green\n", "")
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "GameTest world path has symlinked ancestor",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                addon_root=output,
+                command_runner=runner,
+            )
+
+        self.assertEqual(["build"], [command[1] for command in commands])
+        self.assertEqual("keep", sentinel.read_text())
 
     def test_publish_archive_is_reproducible_and_self_contained(self):
         first = self.root / "compat-kit-first.zip"

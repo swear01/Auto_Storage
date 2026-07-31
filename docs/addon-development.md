@@ -21,7 +21,9 @@ audited recipe-candidate set, target identity, artifact SHA, and inventory
 digest must match the contract, so recomputing a contract-only field cannot
 hide an omitted candidate. Candidate records must also remain in the bucket
 computed by the current scanner; changing a recipe into a station/resource
-record is rejected.
+record is rejected. When source is supplied, at least one classified candidate
+must map into that Git module; an unrelated clean checkout cannot contribute
+its revision as target evidence.
 
 ```bash
 tools/compat-kit/compat-kit scan --help
@@ -89,23 +91,30 @@ companion must be listed. The generated build resolves the reviewed
 target dependency separately and checks its exact
 jar SHA against `source_audit_sha256` during both `build` and
 `runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
+Reviewed repository URLs, dependency coordinates, and group filters are
+serialized as literal Groovy strings rather than interpolated text.
 Because Auto Storage requires Patchouli on both sides, the generated
 GameTest runtime includes the matching Patchouli artifact and its repository.
 A different target artifact or source audit fails before compatibility
-evidence can pass. Verification regenerates the expected `build.gradle` from
-the reviewed contract and generator before comparing it with both the file and
-manifest, so an addon cannot remove the artifact gate and authorize that edit
-by updating its own manifest hash. Scaffold generation preflights all
-destinations and parent directories before its first write, so an existing
-conflicting file or file-valued `src` ancestor fails without leaving workflow,
-manifest, or wrapper fragments behind.
+evidence can pass. Verification regenerates the expected `build.gradle`,
+`settings.gradle`, `gradle.properties`, `gradlew`, `gradlew.bat`, and Gradle
+wrapper jar/properties from the reviewed contract and generator before
+comparing each with both the file and manifest. An addon therefore cannot
+replace the launcher or artifact gate and authorize that edit by updating its
+own manifest hash. Scaffold generation preflights all destinations and parent
+directories before its first write, so an existing conflicting file or
+file-valued `src` ancestor fails without leaving workflow, manifest, or wrapper
+fragments behind.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
 tasks. A `runGameTestServer` evidence marker must live inside the annotated
 GameTest method that executes the assertion; file-level constants, comments,
-and detached helpers are rejected. Bundled task names are not translated or
-treated as equivalent.
+and detached helpers are rejected. Its fresh-world cleanup rejects symlinked
+parents and paths outside the addon root before deletion. Bundled task names
+are not translated or treated as equivalent. A published passing report must
+contain all twelve mandated check records and exactly the addon `build` and
+`runGameTestServer` command records.
 
 ## Register through one facade
 

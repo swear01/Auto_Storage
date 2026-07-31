@@ -67,7 +67,10 @@ subdirectory, Compat Kit discovers the enclosing Git worktree, requires that
 whole worktree to be clean, and records its HEAD while keeping evidence paths
 relative to the supplied module. A supplied `--source` must belong to a Git
 worktree; omit it rather than presenting uncommitted/unversioned contents as
-source evidence. Never silently replace a failed source.
+source evidence. When the target jar has classified candidates, at least one
+candidate must map to a Java source file under the supplied module; a clean but
+unrelated checkout is rejected instead of borrowing its HEAD. Never silently
+replace a failed source.
 
 ### 2. Scan
 
@@ -100,14 +103,15 @@ Named nested classes are audited and mapped back to their top-level Java source;
 anonymous/local `$<number>` classes and every class carrying the JVM
 `ACC_SYNTHETIC` access flag are excluded.
 
-Archive limits, candidate counts, signature size, source-file counts, malformed
-metadata, ambiguous multi-mod jars, missing JDK tools, and `javap` failures all
-fail closed. Current-format cache entries and committed audits are also fully
-validated down through target, artifact, source, candidate, and risk records;
-a matching cache path does not authorize malformed or partial evidence. Every
-candidate must remain in the bucket computed by the current scanner; moving a
-recipe candidate into a station or resource list cannot hide it from contract
-review.
+Archive limits, the 1 MiB per-entry NeoForge metadata limit, candidate counts,
+signature size, source-file counts, malformed metadata, ambiguous multi-mod
+jars, missing JDK tools, and `javap` failures all fail closed. Metadata size is
+checked before decompression. Current-format cache entries and committed audits
+are also fully validated down through target, artifact, source, candidate, and
+risk records; a matching cache path does not authorize malformed or partial
+evidence. Every candidate must remain in the bucket computed by the current
+scanner; moving a recipe candidate into a station or resource list cannot hide
+it from contract review.
 
 ### 3. Decide
 
@@ -172,7 +176,9 @@ target-side runtime artifacts belong in `target.runtime_dependencies`; bundled
 descriptors and external addon builds copy the exact reviewed list instead of
 depending on transitive metadata or hand edits. Target and explicit runtime
 dependencies are non-transitive; every required companion must therefore appear
-in the contract.
+in the contract. Repository URLs, dependency coordinates, and derived group
+filters are serialized as literal Groovy strings, so `$`, quotes, and
+backslashes cannot alter the reviewed build input.
 
 ### 4. Scaffold a RED integration
 
@@ -223,12 +229,14 @@ The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the
 scaffold to the reviewed contract; implementation edits are expected after the
 initial RED generation. Verification regenerates the security-sensitive
-bundled descriptor or external `build.gradle` from the reviewed contract and
-generator, then checks both its bytes and manifest entry. Editing the file and
-self-attesting a new manifest hash therefore cannot bypass artifact or task
-gates. Before writing anything, scaffolding preflights every destination for
-type/content drift and every required parent as a directory; a late-sorting
-conflict or file occupying `src` cannot leave a partial project behind.
+bundled descriptor or external Gradle execution chain (`build.gradle`,
+`settings.gradle`, `gradle.properties`, both launchers, and both wrapper
+artifacts) from the reviewed contract and generator, then checks every byte and
+manifest entry. Editing a launcher or gate and self-attesting a new manifest
+hash therefore cannot bypass artifact or task gates. Before writing anything,
+scaffolding preflights every destination for type/content drift and every
+required parent as a directory; a late-sorting conflict or file occupying
+`src` cannot leave a partial project behind.
 
 Generated independent addons require the current compatible Auto Storage minor
 line. A 0.3.0 kit emits `[0.3.0,0.4)`: patches remain compatible, while the
@@ -274,13 +282,18 @@ associated Gradle task succeeds. The report records those
 per-check evidence links, exact commands, exit codes, output hashes, tool
 version, target, and manifest hash. Bundled verification runs every declared
 Gradle task as a separate process and removes only `run/world` before each task
-so stale GameTest state cannot leak between fixtures. RED and forbidden-link
-scans are scoped to `src/`; ignored `build/` outputs and previously extracted
-scaffolds cannot poison a later verification. The manifest also hashes the
-bundled descriptor or external `build.gradle`; the expected hash is recomputed
-from the reviewed contract and current generator rather than trusted from the
-manifest. The target-SHA gate therefore cannot be removed after scaffolding
-while retaining a passing report, even if the manifest is edited too.
+so stale GameTest state cannot leak between fixtures. Cleanup rejects a
+symlinked `run`/`world` path or any resolved path outside the verification root
+before deletion. RED and forbidden-link scans are scoped to `src/`; ignored
+`build/` outputs and previously extracted scaffolds cannot poison a later
+verification. The expected hashes for the bundled descriptor or complete
+external Gradle execution chain are recomputed from the reviewed contract and
+current generator rather than trusted from the manifest. The target-SHA gate
+or launcher therefore cannot be replaced after scaffolding while retaining a
+passing report, even if the manifest is edited too. The published report schema
+requires all twelve exact check IDs and at least one successful command;
+external-addon reports additionally require exactly the authoritative `build`
+and `runGameTestServer` command records.
 
 The repository compatibility-matrix task also depends directly on every
 descriptor-generated audited-artifact verifier and the separately pinned

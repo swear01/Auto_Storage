@@ -14,12 +14,43 @@
     "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "checks": {
       "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "allOf": [
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "absent_target_no_classload"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "present_target_load_once"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "ingredient_shortage_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "destination_capacity_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "checked_overflow_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "stale_recipe_holder_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "catalyst_tool_remainder_exact"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "multi_output_merge_exact"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "mixed_resource_rollback_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "dedicated_server_client_isolation"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "api_only_compilation"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "all_mod_coexistence"}}}}
+      ],
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["id", "status", "evidence"],
         "properties": {
-          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "id": {
+            "enum": [
+              "absent_target_no_classload",
+              "present_target_load_once",
+              "ingredient_shortage_atomic",
+              "destination_capacity_atomic",
+              "checked_overflow_atomic",
+              "stale_recipe_holder_atomic",
+              "catalyst_tool_remainder_exact",
+              "multi_output_merge_exact",
+              "mixed_resource_rollback_atomic",
+              "dedicated_server_client_isolation",
+              "api_only_compilation",
+              "all_mod_coexistence"
+            ]
+          },
           "status": {"const": "passed"},
           "evidence": {
             "type": "array",
@@ -31,6 +62,7 @@
     },
     "commands": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -48,5 +80,55 @@
       }
     },
     "status": {"const": "passed"}
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["mode"],
+        "properties": {"mode": {"const": "addon"}}
+      },
+      "then": {
+        "properties": {
+          "commands": {
+            "minItems": 2,
+            "maxItems": 2,
+            "allOf": [
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["command"],
+                  "properties": {
+                    "command": {
+                      "type": "array",
+                      "minItems": 2,
+                      "prefixItems": [
+                        {"const": "./gradlew"},
+                        {"const": "build"}
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["command"],
+                  "properties": {
+                    "command": {
+                      "type": "array",
+                      "minItems": 2,
+                      "prefixItems": [
+                        {"const": "./gradlew"},
+                        {"const": "runGameTestServer"}
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
 }
