@@ -1048,12 +1048,16 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("SelfTest: 204927 passed, 0 failed, 204927 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
-    def test_compatibility_matrix_locks_the_thirteen_mod_recipe_workload(self):
+    def test_compatibility_matrix_locks_the_fourteen_mod_recipe_workload(self):
         matrix = self.read_required(
             "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
             "compatibilitymatrix/CraftablePerformanceGameTests.java"
         )
-        self.assertIn("EXPECTED_RECIPE_COUNT = 11_657", matrix)
+        self.assertIn("EXPECTED_RECIPE_COUNT = 12_736", matrix)
+        self.assertIn(
+            "MAX_BASELINE_INDEX_RETAINED_BYTES = 9L * 1024L * 1024L",
+            matrix,
+        )
         self.assertIn("recipeCount != EXPECTED_RECIPE_COUNT", matrix)
         self.assertIn("Compatibility recipe workload drifted", matrix)
 
@@ -1581,6 +1585,52 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("6.0.10", fixture_metadata)
         self.assertIn("representative CI artifact", compatibility_doc)
         self.assertIn("not an exact player dependency pin", compatibility_doc)
+
+    def test_theurgy_compat_is_optional_and_isolated(self):
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("theurgy")
+        module = self.read_required(
+            "src/compat/theurgy/java/com/swear/autostorage/compat/"
+            "theurgy/TheurgyCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/theurgy/java/com/swear/autostorage/compat/"
+            "theurgy/TheurgyCompat.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/theurgyFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required("docs/theurgy-compatibility.md")
+        build = self.read_required("build.gradle")
+
+        self.assert_descriptor_driven_fixture(
+            build, "theurgy", "theurgyFixture", 9
+        )
+        self.assertNotIn('modId="theurgy"', metadata)
+        self.assertIn('"theurgy"', module_index)
+        self.assertIn('"requires"', module_index)
+        self.assertIn("maven.modrinth:theurgy:KvM1ocNj", module_index)
+        self.assertIn(
+            "6cbe0abe5fa53ba3d9308c7fe2b9a8f2df4d568f69fdb99a2fe6c6d1e59fdbc5",
+            module_index,
+        )
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("TheurgyCompat.register(MACHINES, RECIPES)", module)
+        self.assertNotIn("import com.klikli_dev.theurgy.", module)
+        self.assertIn("CalcinationRecipe.class", compat)
+        self.assertIn("DistillationRecipe.class", compat)
+        self.assertIn("LiquefactionRecipe.class", compat)
+        self.assertNotIn("IncubationRecipe.class", compat)
+        self.assertNotIn("ReformationRecipe.class", compat)
+        self.assertNotIn("AccumulationRecipe.class", compat)
+        self.assertIn('modId="theurgy"', fixture_metadata)
+        self.assertIn('versionRange="[1.73,)"', fixture_metadata)
+        self.assertNotIn("1.73.1", fixture_metadata)
+        self.assertIn("representative CI artifact", compatibility_doc)
+        self.assertIn("not an exact player dependency pin", compatibility_doc)
+        self.assertIn("Calcination", compatibility_doc)
+        self.assertIn("Distillation", compatibility_doc)
+        self.assertIn("Liquefaction", compatibility_doc)
 
     def test_pneumaticcraft_fixture_locks_unsafe_contracts_out(self):
         build = self.read_required("build.gradle")
