@@ -367,6 +367,51 @@ class CompatKitAuditTests(unittest.TestCase):
                 signature_reader=self.signatures,
             )
 
+    def test_scan_discovers_enclosing_git_root_for_source_subdirectory(self):
+        repository = self.root / "repository"
+        source = repository / "module"
+        source_file = source / "src/main/java/samplemod/recipe/CrushingRecipe.java"
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(
+            "package samplemod.recipe;\nfinal class CrushingRecipe {}\n"
+        )
+        subprocess.run(["git", "init", "-q", repository], check=True)
+        subprocess.run(["git", "-C", repository, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                repository,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
+        expected_revision = subprocess.check_output(
+            ["git", "-C", repository, "rev-parse", "HEAD"],
+            text=True,
+        ).strip()
+
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            source=source,
+            signature_reader=self.signatures,
+        )
+
+        self.assertEqual(expected_revision, audit["source"]["revision"])
+        (repository / "untracked-outside-module.txt").write_text("dirty\n")
+        with self.assertRaisesRegex(ValueError, "source checkout is dirty"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                source=source,
+                signature_reader=self.signatures,
+            )
+
     def test_scan_rejects_malformed_current_cache_structure(self):
         cache = self.root / "cache"
         artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
@@ -1073,6 +1118,33 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertTrue((output / "compat/audit.json").is_file())
         self.assertNotIn("implementation project", build)
+
+    def test_external_scaffold_preflights_all_drift_before_writing(self):
+        contract = self.addon_contract()
+        output = self.root / "samplemod-auto-storage"
+        output.mkdir()
+        build = output / "build.gradle"
+        build.write_text("existing project\n")
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "generated file drift: build.gradle",
+        ):
+            self.compat_kit.scaffold_addon(
+                contract,
+                output,
+                source_audit=self.source_audit(),
+            )
+
+        self.assertEqual(
+            ["build.gradle"],
+            [
+                path.relative_to(output).as_posix()
+                for path in sorted(output.rglob("*"))
+                if path.is_file()
+            ],
+        )
+        self.assertEqual("existing project\n", build.read_text())
 
     def test_scaffolds_preserve_reviewed_target_runtime_dependencies(self):
         contract = self.addon_contract()

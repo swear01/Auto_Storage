@@ -27,8 +27,10 @@ python3 --version
 ```
 
 When `--source` points at a Git checkout, tracked and untracked state must be
-clean so its HEAD identifies the exact inspected source. Current-format cache
-entries are fully schema-validated before reuse.
+clean so its HEAD identifies the exact inspected source. A module subdirectory
+uses the enclosing Git worktree's status and HEAD; evidence paths remain
+relative to the supplied module. Current-format cache entries are fully
+schema-validated before reuse.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
@@ -65,6 +67,8 @@ accept the descriptor syntax emitted by `javap -c -p`.
   --output report.json
 ```
 
+Scaffolding preflights every destination before writing the first file. Any
+existing path with different content fails without leaving a partial project.
 Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
 reviewed target jar SHA; target compile/runtime and explicit runtime

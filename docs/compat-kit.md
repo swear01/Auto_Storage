@@ -62,7 +62,10 @@ Download one official representative jar and, when available, check out its
 matching source tag or commit. Record the artifact URL, SHA-256, and source
 revision in the compatibility document. The checkout passed to `scan` or
 `diff` must be clean, including untracked files, so the recorded revision fully
-describes the inspected source. Never silently replace a failed source.
+describes the inspected source. When the supplied source is a module
+subdirectory, Compat Kit discovers the enclosing Git worktree, requires that
+whole worktree to be clean, and records its HEAD while keeping evidence paths
+relative to the supplied module. Never silently replace a failed source.
 
 ### 2. Scan
 
@@ -215,7 +218,9 @@ initial RED generation. Verification regenerates the security-sensitive
 bundled descriptor or external `build.gradle` from the reviewed contract and
 generator, then checks both its bytes and manifest entry. Editing the file and
 self-attesting a new manifest hash therefore cannot bypass artifact or task
-gates.
+gates. Before writing anything, scaffolding preflights every destination for
+type/content drift; a late-sorting conflicting path cannot leave a partial
+project behind.
 
 ### 5. Implement with strict TDD
 

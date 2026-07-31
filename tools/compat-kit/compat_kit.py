@@ -361,13 +361,33 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
         )
     ]
     revision = None
-    git_dir = source / ".git"
-    if git_dir.exists():
+    git_root_result = subprocess.run(
+        ["git", "-C", str(source), "rev-parse", "--show-toplevel"],
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=10,
+    )
+    git_root = None
+    if git_root_result.returncode == 0:
+        git_root = Path(git_root_result.stdout.strip()).resolve()
+    elif (
+        git_root_result.returncode != 128
+        or "not a git repository" not in git_root_result.stderr
+    ):
+        raise RuntimeError(
+            "failed to discover source checkout: "
+            + (
+                git_root_result.stderr.strip()
+                or git_root_result.stdout.strip()
+            )
+        )
+    if git_root is not None:
         status = subprocess.run(
             [
                 "git",
                 "-C",
-                str(source),
+                str(git_root),
                 "status",
                 "--porcelain",
                 "--untracked-files=all",
@@ -387,7 +407,7 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
                 "source checkout is dirty: " + status.stdout.splitlines()[0]
             )
         result = subprocess.run(
-            ["git", "-C", str(source), "rev-parse", "HEAD"],
+            ["git", "-C", str(git_root), "rev-parse", "HEAD"],
             capture_output=True,
             check=False,
             text=True,
@@ -1747,13 +1767,16 @@ def _materialize(
 ) -> list[Path]:
     complete = dict(files)
     complete[manifest_path] = _manifest(files, contract)
+    for relative, payload in sorted(complete.items()):
+        target = root / relative
+        if target.exists() and (
+            not target.is_file() or target.read_bytes() != payload
+        ):
+            raise ValueError(f"generated file drift: {relative}")
     generated = []
     for relative, payload in sorted(complete.items()):
         target = root / relative
-        if target.exists():
-            if not target.is_file() or target.read_bytes() != payload:
-                raise ValueError(f"generated file drift: {relative}")
-        else:
+        if not target.exists():
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(payload)
             if relative in ("gradlew", "tools/compat-kit/compat-kit"):

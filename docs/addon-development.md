@@ -95,7 +95,9 @@ A different target artifact or source audit fails before compatibility
 evidence can pass. Verification regenerates the expected `build.gradle` from
 the reviewed contract and generator before comparing it with both the file and
 manifest, so an addon cannot remove the artifact gate and authorize that edit
-by updating its own manifest hash.
+by updating its own manifest hash. Scaffold generation preflights all
+destinations before its first write, so an existing conflicting file fails
+without leaving workflow, manifest, or wrapper fragments behind.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
