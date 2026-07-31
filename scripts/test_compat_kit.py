@@ -857,7 +857,7 @@ class CompatKitAuditTests(unittest.TestCase):
                     {
                         "task": "runSamplemodGameTestServer",
                         "source": "**/SamplemodIntegrationGameTests.java",
-                        "marker": "compat_kit_scaffold_remains_red",
+                        "marker": "helper.succeed();",
                     }
                 ]
                 for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS
@@ -883,7 +883,7 @@ class CompatKitAuditTests(unittest.TestCase):
                 {
                     "task": "runGameTestServer",
                     "source": "**/SamplemodIntegrationGameTests.java",
-                    "marker": "compat_kit_scaffold_remains_red",
+                    "marker": "helper.succeed();",
                 }
             ]
             for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS
@@ -1210,6 +1210,19 @@ class CompatKitAuditTests(unittest.TestCase):
                 source_audit=self.source_audit(),
             )
 
+    def test_bundled_scaffold_rejects_java_keyword_package_segment(self):
+        contract = self.accepted_contract()
+        audit = self.source_audit()
+        contract["target"]["mod_id"] = "class"
+        audit["target"]["mod_id"] = "class"
+
+        with self.assertRaisesRegex(ValueError, "invalid Java package segment"):
+            self.compat_kit.scaffold_bundled(
+                contract,
+                self.root / "bundled",
+                source_audit=audit,
+            )
+
     def test_scaffold_rejects_unresolved_or_semantically_incomplete_contracts(self):
         audit = self.compat_kit.scan_jar(
             self.jar,
@@ -1338,6 +1351,29 @@ class CompatKitAuditTests(unittest.TestCase):
             ],
             descriptor["runtimeDependencies"],
         )
+        self.assertEqual(8, contract["verification"]["expected_game_tests"])
+        self.assertEqual(8, descriptor["expectedTests"])
+        self.assertEqual(
+            "AE2 missing-ingredient transaction was not an atomic no-op",
+            contract["verification"]["evidence"]["ingredient_shortage_atomic"][0][
+                "marker"
+            ],
+        )
+        fixture = (
+            ROOT
+            / "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/"
+            "Ae2IntegrationGameTests.java"
+        ).read_text()
+        shortage_body = fixture.split(
+            "public static void missing_press_middle_ingredient_is_atomic",
+            1,
+        )[1].split("\n    @GameTest", 1)[0]
+        self.assertNotIn("seedPressInputs", shortage_body)
+        self.assertIn("Items.REDSTONE", shortage_body)
+        self.assertIn('ae2Item("printed_silicon")', shortage_body)
+        self.assertIn('ae2Item("printed_logic_processor")', shortage_body)
+        self.assertIn("getResourceAmount", shortage_body)
+        self.assertIn("getStationWork", shortage_body)
         self.compat_kit.validate_contract(
             contract,
             require_complete=True,
@@ -1530,6 +1566,56 @@ class CompatKitAuditTests(unittest.TestCase):
                 '    private static final String MARKER = "detached_behavior_marker";',
             )
             .replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "evidence marker is not inside an @GameTest method",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 1 required tests passed :)\n", ""
+                ),
+            )
+
+    def test_verify_rejects_gametest_marker_only_in_method_declaration(self):
+        contract = self.accepted_contract()
+        marker = "compat_kit_scaffold_remains_red"
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["marker"] = marker
+        output_root = self.root / "declaration-only-evidence"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
                 'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
                 "helper.succeed();",
             )

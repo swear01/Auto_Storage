@@ -154,6 +154,15 @@ VERIFICATION_KEYS = {
     "evidence",
 }
 VERIFICATION_EVIDENCE_KEYS = {"task", "source", "marker"}
+JAVA_RESERVED_IDENTIFIERS = frozenset(
+    """
+    abstract assert boolean break byte case catch char class const continue
+    default do double else enum extends final finally float for goto if
+    implements import instanceof int interface long native new package private
+    protected public return short static strictfp super switch synchronized this
+    throw throws transient try void volatile while true false null
+    """.split()
+)
 
 
 def canonical_json(value) -> str:
@@ -1162,7 +1171,7 @@ def _pascal(identifier: str) -> str:
 
 def _java_segment(identifier: str) -> str:
     value = re.sub(r"[^a-z0-9]", "", identifier.lower())
-    if not value or value[0].isdigit():
+    if not value or value[0].isdigit() or value in JAVA_RESERVED_IDENTIFIERS:
         raise ValueError(f"invalid Java package segment: {identifier}")
     return value
 
@@ -1938,7 +1947,7 @@ def _game_test_blocks(text: str) -> list[str]:
         if opening < 0:
             raise ValueError("@GameTest annotation has no method body")
         closing = _java_block_end(text, opening)
-        blocks.append(text[annotation.start():closing + 1])
+        blocks.append(text[opening + 1:closing])
     return blocks
 
 

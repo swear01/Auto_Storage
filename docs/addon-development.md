@@ -282,7 +282,8 @@ external addons. Every bundled entry must declare at least one required target
 mod; an empty requirement list is rejected before classloading. Compat Kit
 descriptors also carry the reviewed target repositories and artifact SHA, so a
 non-central Maven target resolves through contract-owned configuration rather
-than a root-build guess.
+than a root-build guess. Compat Kit rejects target IDs that would become Java
+reserved package segments instead of emitting uncompilable source.
 
 External addons do not add entries to Auto Storage's bundled module index.
 They are ordinary NeoForge mods with their own entrypoint and dependency

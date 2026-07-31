@@ -84,6 +84,9 @@ count. Bundled descriptors preserve reviewed HTTPS repository order, and fixture
 names must be Java-safe identifiers ending in `Fixture`. Their authoritative
 GameTest task is derived from the same fixture name (`evilCraftFixture` becomes
 `runEvilCraftGameTestServer`) and mismatches fail before materialization. The
+target mod ID must also produce a non-reserved Java package segment. GameTest
+evidence markers must occur between the annotated method's braces; a marker
+that appears only in its declaration is not execution evidence. The
 published archive includes its own Gradle wrapper template, so an extracted copy
 can scaffold an addon without an Auto Storage checkout.
 

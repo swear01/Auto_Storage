@@ -1684,7 +1684,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "optional_compatibility_registrations_coexist",
+          "marker": "Combined compatibility registry is missing",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }
@@ -1698,7 +1698,7 @@
       ],
       "catalyst_tool_remainder_exact": [
         {
-          "marker": "inscribe_retains_press_and_consumes_middle_fe_and_work",
+          "marker": "AE2 INSCRIBE did not preserve its press or consume exact costs",
           "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
           "task": "runAe2GameTestServer"
         }
@@ -1719,48 +1719,48 @@
       ],
       "destination_capacity_atomic": [
         {
-          "marker": "destination_overflow_is_atomic",
+          "marker": "AE2 full destination transaction was not an atomic no-op",
           "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
           "task": "runAe2GameTestServer"
         }
       ],
       "ingredient_shortage_atomic": [
         {
-          "marker": "insufficient_fe_is_atomic",
+          "marker": "AE2 missing-ingredient transaction was not an atomic no-op",
           "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
           "task": "runAe2GameTestServer"
         }
       ],
       "mixed_resource_rollback_atomic": [
         {
-          "marker": "typed_family_capacity_failure_changes_no_input_output_or_player_state",
+          "marker": "Failed typed family commit partially mutated resources",
           "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
           "task": "runRecipeAddonGameTestServer"
         }
       ],
       "multi_output_merge_exact": [
         {
-          "marker": "typed_family_commits_multiple_inputs_outputs_and_retained_roles_atomically",
+          "marker": "Typed family changed the wrong exact resources or output amounts",
           "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
           "task": "runRecipeAddonGameTestServer"
         }
       ],
       "present_target_load_once": [
         {
-          "marker": "inscriber_registers_exact_rate_and_charger_stays_excluded",
+          "marker": "AE2 Inscriber registration or Charger exclusion was incorrect",
           "source": "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java",
           "task": "runAe2GameTestServer"
         }
       ],
       "stale_recipe_holder_atomic": [
         {
-          "marker": "exact_recipe_selection_accepts_supported_backing_recipe_and_rejects_stale_id",
+          "marker": "Unknown recipe id must fail closed",
           "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
           "task": "runGameTestServer"
         }
       ]
     },
-    "expected_game_tests": 7,
+    "expected_game_tests": 8,
     "fixture": "ae2Fixture",
     "game_test_task": "runAe2GameTestServer",
     "gradle_tasks": [

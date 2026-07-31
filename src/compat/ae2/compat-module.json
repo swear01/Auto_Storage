@@ -6,7 +6,7 @@
   "side": "both",
   "sourceSet": "compatAe2",
   "fixture": "ae2Fixture",
-  "expectedTests": 7,
+  "expectedTests": 8,
   "dependencies": [
     "org.appliedenergistics:appliedenergistics2:19.2.17"
   ],

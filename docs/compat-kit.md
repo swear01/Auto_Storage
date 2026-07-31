@@ -139,6 +139,8 @@ For a bundled module, `verification.game_test_task` is not arbitrary evidence:
 it must match the task derived from the fixture's preserved camel case
 (`evilCraftFixture` becomes `runEvilCraftGameTestServer`). This prevents a
 same-count fixture from supplying another integration's runtime result.
+The target mod ID must produce a valid, non-reserved Java package segment;
+identifiers such as `class`, `true`, or `null` fail before files are written.
 
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
 
@@ -308,5 +310,10 @@ target. The accepted slice is only `InscriberRecipe`:
 - the plain Inscriber contributes 2 work per tick; speed-card state is not
   inferred from its item;
 - Charger and every unaudited AE2 family remain rejected.
+
+Its required-check evidence uses markers inside annotated method braces, not
+method names or declarations. The ingredient-shortage check omits the PRESS
+middle ingredient and asserts that both remaining items, FE, station work, and
+output are unchanged.
 
 See [AE2 compatibility](ae2-compatibility.md).

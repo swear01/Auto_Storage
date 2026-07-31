@@ -135,6 +135,30 @@ public final class Ae2IntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
+    public static void missing_press_middle_ingredient_is_atomic(GameTestHelper helper) {
+        withCore(helper, context -> {
+            long energy = expectedEnergy();
+            seedItem(context.core(), ae2Item("printed_logic_processor"), 1);
+            seedItem(context.core(), ae2Item("printed_silicon"), 1);
+            seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), energy);
+            installInscriber(context);
+            tick(context.core(), 100);
+            if (craft(context, PRESS_RECIPE)
+                    || itemCount(context.core(), Items.REDSTONE) != 0
+                    || itemCount(context.core(), ae2Item("printed_logic_processor")) != 1
+                    || itemCount(context.core(), ae2Item("printed_silicon")) != 1
+                    || itemCount(context.core(), ae2Item("logic_processor")) != 0
+                    || context.core().getResourceAmount(
+                    StorageResourceKey.neoforgeEnergy()) != energy
+                    || context.core().getStationWork(INSCRIBER) != 200) {
+                helper.fail("AE2 missing-ingredient transaction was not an atomic no-op");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
     public static void insufficient_station_work_is_atomic(GameTestHelper helper) {
         withCore(helper, context -> {
             long energy = expectedEnergy();

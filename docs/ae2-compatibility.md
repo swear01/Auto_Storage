@@ -84,11 +84,14 @@ range, or fractional. Auto Storage never rounds an AE cost.
 ./gradlew runAe2GameTestServer
 ```
 
-Seven real GameTests cover registration/Charger exclusion, retained INSCRIBE
-presses, consumed PRESS inputs, exact FE/work, insufficient FE, insufficient
-work, destination overflow rollback, and runtime conversion representation.
+Eight real GameTests cover registration/Charger exclusion, retained INSCRIBE
+presses, consumed PRESS inputs, exact FE/work, missing middle ingredient,
+insufficient FE, insufficient work, destination overflow rollback, and runtime
+conversion representation. The missing-ingredient case keeps both remaining
+inputs, FE, station work, and output unchanged.
 The base
 `exact_recipe_selection_accepts_supported_backing_recipe_and_rejects_stale_id`
 GameTest also executes the absent-target no-classload assertion, so its contract
-marker is bound to an actual annotated GameTest body. The all-mod compatibility
-matrix protects coexistence.
+marker is bound inside an actual annotated GameTest method's braces. Method
+declarations are not accepted as evidence. The all-mod compatibility matrix
+protects coexistence.
