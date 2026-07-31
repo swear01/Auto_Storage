@@ -9,7 +9,35 @@
     "schema": {"const": 1},
     "kind": {"const": "auto_storage_compat_report"},
     "tool_version": {"type": "string", "minLength": 1},
-    "target": {"type": "object"},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mod_id", "display_name", "version"],
+      "properties": {
+        "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+        "display_name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "dependency": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+        },
+        "repositories": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^https://\\S+$"},
+          "uniqueItems": true
+        },
+        "runtime_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
     "mode": {"enum": ["bundled", "addon"]},
     "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "checks": {

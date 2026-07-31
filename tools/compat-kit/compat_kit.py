@@ -4,6 +4,7 @@ import argparse
 import base64
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -922,6 +923,12 @@ def _validate_nonempty_string(value, location: str):
         raise ValueError(f"{location} must be a non-empty string")
 
 
+def _validate_dependency_coordinate(value, location: str):
+    _validate_nonempty_string(value, location)
+    if re.search(r"[\x00-\x1f\x7f]", value):
+        raise ValueError(f"{location} must not contain control characters")
+
+
 def _validate_amount(value, location: str):
     if isinstance(value, bool) or not isinstance(value, (int, str)):
         raise ValueError(f"{location} amount must be a positive integer or expression")
@@ -1108,7 +1115,10 @@ def validate_contract(
     if not re.fullmatch(r"[a-z0-9_-]+", target["mod_id"]):
         raise ValueError("contract target has invalid mod_id")
     if "dependency" in target:
-        _validate_nonempty_string(target["dependency"], "contract target dependency")
+        _validate_dependency_coordinate(
+            target["dependency"],
+            "contract target dependency",
+        )
     if "repositories" in target:
         repositories = target["repositories"]
         _validate_unique_strings(
@@ -1127,6 +1137,11 @@ def validate_contract(
             "contract target runtime_dependencies",
             allow_empty=True,
         )
+        for index, dependency in enumerate(target["runtime_dependencies"]):
+            _validate_dependency_coordinate(
+                dependency,
+                f"contract target runtime_dependencies {index}",
+            )
     unresolved = []
     seen_ids = set()
     seen_classes = set()
@@ -1575,11 +1590,10 @@ mod_group_id={package}
         "com.swear.autostorage",
         "vazkii.patchouli",
     }
-    if target["repositories"]:
-        fallback_excluded_groups.update(
-            dependency.split(":", 1)[0]
-            for dependency in target["runtime_dependencies"]
-        )
+    fallback_excluded_groups.update(
+        dependency.split(":", 1)[0]
+        for dependency in target["runtime_dependencies"]
+    )
     fallback_group_excludes = "".join(
         f"            excludeGroup({_groovy_string(group)})\n"
         for group in sorted(fallback_excluded_groups)
@@ -1877,7 +1891,7 @@ def _materialize(
 ) -> list[Path]:
     complete = dict(files)
     complete[manifest_path] = _manifest(files, contract)
-    _validate_materialization_root(root)
+    root = _validate_materialization_root(root)
     for relative, payload in sorted(complete.items()):
         target = root / relative
         ancestor = root
@@ -1911,8 +1925,9 @@ def _materialize(
     return generated
 
 
-def _validate_materialization_root(root: Path):
-    for ancestor in root.absolute().parents:
+def _validate_materialization_root(root: Path) -> Path:
+    root = Path(os.path.abspath(root))
+    for ancestor in root.parents:
         if ancestor.is_symlink():
             raise ValueError(
                 f"generated path ancestor is a symlink: {ancestor}"
@@ -1921,6 +1936,7 @@ def _validate_materialization_root(root: Path):
         raise ValueError("generated path parent is a symlink: .")
     if root.exists() and not root.is_dir():
         raise ValueError("generated path parent is not a directory: .")
+    return root
 
 
 def _validate_bundled_identifier_collisions(
@@ -1928,7 +1944,7 @@ def _validate_bundled_identifier_collisions(
     generated_descriptor: dict,
     mod_id: str,
 ):
-    _validate_materialization_root(root)
+    root = _validate_materialization_root(root)
     own_descriptor = root / f"src/compat/{mod_id}/compat-module.json"
     compat_root = root
     for part in ("src", "compat"):
@@ -2183,6 +2199,9 @@ def _java_block_end(text: str, opening: int) -> int:
                 index += 2
                 continue
         elif state == "text":
+            if text[index] == "\\":
+                index += 2
+                continue
             if text.startswith('"""', index):
                 state = "code"
                 index += 3
@@ -2239,6 +2258,13 @@ def _java_code_mask(text: str) -> str:
             if text[index] != "\n":
                 masked[index] = " "
         elif state == "text":
+            if text[index] == "\\":
+                masked[index] = " "
+                if index + 1 < len(text):
+                    if text[index + 1] != "\n":
+                        masked[index + 1] = " "
+                    index += 2
+                    continue
             if text.startswith('"""', index):
                 masked[index:index + 3] = "   "
                 state = "code"

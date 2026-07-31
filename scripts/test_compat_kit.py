@@ -1470,6 +1470,27 @@ displayName="Sample Machines"
 
         self.assertEqual([], list(external.iterdir()))
 
+    def test_external_scaffold_normalizes_output_before_symlink_preflight(self):
+        contract = self.addon_contract()
+        external = self.root / "external"
+        external.mkdir()
+        link = self.root / "link"
+        link.symlink_to(external, target_is_directory=True)
+        output = self.root / "missing" / ".." / "link" / "samplemod-auto-storage"
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "generated path ancestor is a symlink",
+        ):
+            self.compat_kit.scaffold_addon(
+                contract,
+                output,
+                source_audit=self.source_audit(),
+            )
+
+        self.assertFalse((self.root / "missing").exists())
+        self.assertEqual([], list(external.iterdir()))
+
     def test_external_scaffold_repairs_reused_launcher_modes(self):
         contract = self.addon_contract()
         output = self.root / "samplemod-auto-storage"
@@ -1558,6 +1579,46 @@ displayName="Sample Machines"
             ],
             descriptor["runtimeDependencies"],
         )
+
+    def test_external_scaffold_excludes_runtime_groups_from_central_without_repositories(self):
+        contract = self.addon_contract()
+        contract["target"]["repositories"] = []
+        contract["target"]["runtime_dependencies"] = [
+            "org.runtime:samplemod-runtime:4.5.6"
+        ]
+        output = self.root / "central-target-runtime-addon"
+
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=self.source_audit(),
+        )
+
+        build = (output / "build.gradle").read_text()
+        self.assertIn('excludeGroup("org.runtime")', build)
+        self.assertNotIn('excludeGroup("com.example")', build)
+
+    def test_contract_validation_rejects_control_characters_in_dependencies(self):
+        cases = (
+            ("dependency", "com.example:samplemod:1.2.3\ninvalid"),
+            (
+                "runtime_dependencies",
+                ["org.example:samplemod-runtime:4.5.6\tinvalid"],
+            ),
+        )
+        for field, value in cases:
+            with self.subTest(field=field):
+                contract = self.addon_contract()
+                contract["target"][field] = value
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "must not contain control characters",
+                ):
+                    self.compat_kit.validate_contract(
+                        contract,
+                        require_complete=True,
+                        source_audit=self.source_audit(),
+                    )
 
     def test_external_scaffold_escapes_target_display_name_as_toml(self):
         contract = self.addon_contract()
@@ -1924,6 +1985,65 @@ displayName="Sample Machines"
                 ]
                 for command in addon_commands["allOf"]
             ],
+        )
+
+    def test_contract_schema_requires_scaffold_inputs_after_family_decisions(self):
+        schema = json.loads(
+            (
+                ROOT / "tools/compat-kit/schema/compat-contract.schema.json"
+            ).read_text()
+        )
+
+        completion_rule = schema["allOf"][0]
+        self.assertEqual(
+            "needs_decision",
+            completion_rule["if"]["properties"]["families"]["contains"][
+                "properties"
+            ]["status"]["const"],
+        )
+        self.assertEqual(
+            {
+                "mod_id",
+                "display_name",
+                "version",
+                "dependency",
+                "repositories",
+                "runtime_dependencies",
+            },
+            set(
+                completion_rule["else"]["properties"]["target"]["required"]
+            ),
+        )
+        target = schema["properties"]["target"]["properties"]
+        self.assertEqual(
+            "^[^\\u0000-\\u001F\\u007F]+$",
+            target["dependency"]["pattern"],
+        )
+        self.assertEqual(
+            target["dependency"]["pattern"],
+            target["runtime_dependencies"]["items"]["pattern"],
+        )
+
+    def test_report_schema_requires_target_identity(self):
+        schema = json.loads(
+            (
+                ROOT / "tools/compat-kit/schema/compat-report.schema.json"
+            ).read_text()
+        )
+
+        target = schema["properties"]["target"]
+        self.assertFalse(target["additionalProperties"])
+        self.assertEqual(
+            {"mod_id", "display_name", "version"},
+            set(target["required"]),
+        )
+        self.assertEqual(
+            "^[a-z0-9_-]+$",
+            target["properties"]["mod_id"]["pattern"],
+        )
+        self.assertEqual(
+            set(self.addon_contract()["target"]),
+            set(target["properties"]),
         )
 
     def test_committed_ae2_contract_covers_every_audited_recipe_candidate(self):
@@ -2418,6 +2538,29 @@ displayName="Sample Machines"
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
             )
+
+    def test_gametest_parser_keeps_escaped_text_block_delimiter_inside_literal(self):
+        source = (
+            "final class TextBlockGameTests {\n"
+            '    @GameTest(template = "craftingtests.platform")\n'
+            "    static void realTest(GameTestHelper helper) {\n"
+            '        String value = """\n'
+            '                escaped \\""" delimiter\n'
+            '                """;\n'
+            "        helper.succeed();\n"
+            "    }\n"
+            "    static void unrelatedHelper() {\n"
+            "        forged_marker();\n"
+            '        // """\n'
+            "    }\n"
+            "}\n"
+        )
+
+        blocks = self.compat_kit._game_test_blocks(source)
+
+        self.assertEqual(1, len(blocks))
+        self.assertIn("helper.succeed();", blocks[0])
+        self.assertNotIn("forged_marker();", blocks[0])
 
     def test_verify_binds_gametest_evidence_source_to_declared_task(self):
         contract = self.accepted_contract()

@@ -133,7 +133,10 @@ entry as `accepted` or `rejected`; do not delete inconvenient candidates.
 `next-actions.md` is the compact review surface and lists only unresolved work.
 The published contract schema applies the same status-dependent boundary:
 accepted families require recipe type, station, nonempty inputs/outputs with a
-primary output, and a decision; rejected families require their decision.
+primary output, and a decision; rejected families require their decision. Once
+no family remains `needs_decision`, the schema also requires the target
+`dependency`, `repositories`, and `runtime_dependencies` scaffold inputs; RED
+drafts with unresolved families remain valid.
 `source_recipe_inventory_sha256` binds the sorted recipe-class inventory, and
 every complete `scaffold`/`verify` invocation must also load the committed
 source audit. Validation compares the contract's exact family-class set,
@@ -173,8 +176,9 @@ published through Modrinth Maven, Curse Maven, or its own Maven must list the
 required repository in `target.repositories`; an empty list means Maven
 Central is sufficient. Generated addons put these reviewed repositories first
 in declared order and restrict them to target and explicit runtime dependency
-groups. Explicit runtime groups cannot fall back to Maven Central; the target
-may fall back only under its exact SHA gate. Fixed Maven Central, BlameJared,
+groups. Explicit runtime groups cannot fall back to Maven Central even when
+`target.repositories` is empty; the target may fall back only under its exact
+SHA gate. Fixed Maven Central, BlameJared,
 and release-Ivy filters reserve Patchouli and Auto Storage for their owning
 repositories. The generator never guesses, sorts, or otherwise changes target
 repository precedence from the dependency coordinate. Required
@@ -183,8 +187,9 @@ descriptors and external addon builds copy the exact reviewed list instead of
 depending on transitive metadata or hand edits. Target and explicit runtime
 dependencies are non-transitive; every required companion must therefore appear
 in the contract. Repository URLs, dependency coordinates, and derived group
-filters are serialized as literal Groovy strings, so `$`, quotes, and
-backslashes cannot alter the reviewed build input.
+filters are serialized as escaped Groovy literals, so `$`, quotes, and
+backslashes cannot alter the reviewed build input; Maven coordinates containing
+control characters are rejected before scaffolding.
 
 ### 4. Scaffold a RED integration
 
@@ -252,9 +257,11 @@ scaffolding preflights every destination for type/content drift and every
 required parent as a real directory. Symlinked roots, ancestors, and generated
 targets are rejected before the first write; a late-sorting conflict, file
 occupying `src`, or `src` symlink cannot leave a partial project or write
-outside the requested output root. Existing ancestors above a not-yet-created
-output root are checked too. Rerunning an unchanged scaffold restores `0755`
-on `gradlew` and `tools/compat-kit/compat-kit`.
+outside the requested output root. The lexical output path is normalized
+before checking existing ancestors, so `missing/../link/output` cannot hide a
+symlink. Existing ancestors above a not-yet-created output root are checked too.
+Rerunning an unchanged scaffold restores `0755` on `gradlew` and
+`tools/compat-kit/compat-kit`.
 
 Generated independent addons require the current compatible Auto Storage minor
 line. A 0.3.0 kit emits `[0.3.0,0.4)`: patches remain compatible, while the
@@ -311,16 +318,19 @@ external Gradle execution chain are recomputed from the reviewed contract and
 current generator rather than trusted from the manifest. The target-SHA gate
 or launcher therefore cannot be replaced after scaffolding while retaining a
 passing report, even if the manifest is edited too. The published report schema
-requires all twelve exact check IDs and at least one successful command;
+requires a strict target identity, all twelve exact check IDs, and at least one
+successful command;
 external-addon reports additionally require exactly the authoritative `build`
 and `runGameTestServer` command records. GameTest counting and body extraction
 share one comment/string-aware Java mask, so `@GameTest` text inside a comment
 or literal cannot lend a helper method's markers to a passing runtime count.
 The extractor tracks annotation and method parentheses until the actual method
 body, so a brace-bearing intermediate annotation cannot become the evidence
-body. Each GameTest evidence file must also be under the fixture source set
-executed by its declared `run*GameTestServer` task; a marker in base or another
-fixture source set cannot prove behavior for the target run.
+body. Escaped triple quotes inside Java text blocks remain literal content and
+cannot extend evidence into a detached helper. Each GameTest evidence file must
+also be under the fixture source set executed by its declared
+`run*GameTestServer` task; a marker in base or another fixture source set cannot
+prove behavior for the target run.
 
 The repository compatibility-matrix task also depends directly on every
 descriptor-generated audited-artifact verifier and the separately pinned

@@ -16,7 +16,11 @@
         "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
         "display_name": {"type": "string", "minLength": 1},
         "version": {"type": "string", "minLength": 1},
-        "dependency": {"type": "string", "minLength": 1},
+        "dependency": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+        },
         "repositories": {
           "type": "array",
           "items": {"type": "string", "pattern": "^https://\\S+$"},
@@ -24,7 +28,11 @@
         },
         "runtime_dependencies": {
           "type": "array",
-          "items": {"type": "string", "minLength": 1},
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+          },
           "uniqueItems": true
         }
       }
@@ -243,6 +251,38 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "required": ["families"],
+        "properties": {
+          "families": {
+            "contains": {
+              "type": "object",
+              "required": ["status"],
+              "properties": {
+                "status": {"const": "needs_decision"}
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "target": {
+            "required": [
+              "mod_id",
+              "display_name",
+              "version",
+              "dependency",
+              "repositories",
+              "runtime_dependencies"
+            ]
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
     "terms": {
       "type": "array",

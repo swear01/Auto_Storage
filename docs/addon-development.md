@@ -84,8 +84,9 @@ does not infer Modrinth, Curse Maven, or an upstream repository from a
 dependency coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
 because it can change which repository serves a coordinate. Reviewed
 repositories are emitted before defaults and restricted to target/runtime
-groups. Explicit runtime groups cannot fall back to Maven Central; the target
-can fall back only under its exact SHA check. Fixed repository filters reserve
+groups. Explicit runtime groups cannot fall back to Maven Central even when
+the reviewed repository list is empty; the target can fall back only under its
+exact SHA check. Fixed repository filters reserve
 Patchouli and Auto Storage for BlameJared and the release Ivy repository. The generated
 build also copies every explicit `target.runtime_dependencies` entry, so
 required libraries such as GuideME do not depend on transitive metadata or an
@@ -96,7 +97,8 @@ target dependency separately and checks its exact
 jar SHA against `source_audit_sha256` during both `build` and
 `runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
 Reviewed repository URLs, dependency coordinates, and group filters are
-serialized as literal Groovy strings rather than interpolated text.
+serialized as literal Groovy strings rather than interpolated text. Maven
+coordinates containing control characters are rejected before generation.
 Because Auto Storage requires Patchouli on both sides, the generated
 GameTest runtime includes the matching Patchouli artifact and its repository.
 A different target artifact or source audit fails before compatibility
@@ -109,7 +111,8 @@ own manifest hash. Scaffold generation preflights all destinations and parent
 directories before its first write. Existing conflicting files, symlinked
 roots/ancestors/targets, or a file-valued `src` ancestor fail without leaving
 workflow, manifest, wrapper fragments, or writes outside the output root. This
-includes existing symlink ancestors above a not-yet-created output root.
+includes existing symlink ancestors above a not-yet-created output root, and
+lexical `..` segments are normalized before that preflight.
 Byte-identical reruns repair both generated launchers to mode `0755`.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
@@ -120,13 +123,14 @@ and detached helpers are rejected. Its fresh-world cleanup rejects symlinked
 parents and paths outside the addon root before deletion. Bundled task names
 are not translated or treated as equivalent. GameTest output must contain
 exactly one success summary with the reviewed count; conflicting summaries fail
-even when one count matches. A published passing report must
-contain all twelve mandated check records and exactly the addon `build` and
-`runGameTestServer` command records. Commented or string-literal `@GameTest`
-text is ignored by both source counting and method-body evidence extraction;
-intermediate annotation initializers are skipped until the real method body,
-and every GameTest evidence file must belong to the fixture source set executed
-by its declared task.
+even when one count matches. A published passing report must carry the strict
+target identity, all twelve mandated check records, and exactly the addon
+`build` and `runGameTestServer` command records. Commented or string-literal
+`@GameTest` text is ignored by both source counting and method-body evidence
+extraction; intermediate annotation initializers are skipped until the real
+method body, escaped triple quotes stay inside Java text blocks, and every
+GameTest evidence file must belong to the fixture source set executed by its
+declared task.
 
 ## Register through one facade
 

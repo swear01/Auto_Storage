@@ -81,9 +81,10 @@ accept the descriptor syntax emitted by `javap -c -p`.
 Scaffolding preflights every destination before writing the first file. Any
 existing path with different content, symlinked root/ancestor/target, or
 file-valued parent directory fails without leaving a partial project or writing
-outside the requested output root. Existing ancestors above a not-yet-created
-root are included. Byte-identical reruns repair both generated launchers to
-mode `0755`. Generated TOML also escapes DEL (`U+007F`).
+outside the requested output root. Lexical `..` segments are normalized before
+preflight, and existing ancestors above a not-yet-created root are included.
+Byte-identical reruns repair both generated launchers to mode `0755`. Generated
+TOML also escapes DEL (`U+007F`).
 Generated addon metadata accepts only the current compatible Auto Storage minor
 (`[0.3.0,0.4)` for this kit).
 Addon contracts use fixture `main` and exactly the `build` and
@@ -91,10 +92,12 @@ Addon contracts use fixture `main` and exactly the `build` and
 reviewed target jar SHA; target compile/runtime and explicit runtime
 dependencies are non-transitive, and evidence task names are never remapped.
 Reviewed repositories are emitted first and own target/runtime groups.
-Explicit runtime groups cannot fall back to Maven Central; target fallback is
-still protected by its exact SHA gate, and fixed repositories are filtered to
-their Auto Storage or Patchouli artifacts. Reviewed repository, dependency, and
-group values are emitted as escaped literal Groovy strings.
+Explicit runtime groups cannot fall back to Maven Central even with no reviewed
+repositories; target fallback is still protected by its exact SHA gate, and
+fixed repositories are filtered to their Auto Storage or Patchouli artifacts.
+Reviewed repository, dependency, and group values are emitted as escaped
+literal Groovy strings; dependency coordinates containing control characters
+are rejected.
 Verification regenerates the expected bundled descriptor or external
 `build.gradle`, `settings.gradle`, `gradle.properties`, launchers, and wrapper
 artifacts from the reviewed contract and current generator, then checks every
@@ -109,12 +112,13 @@ marker, and checks both the source GameTest annotation count and runtime passing
 count. Runtime output must contain exactly one matching success summary;
 missing, duplicate, or conflicting summaries fail. World cleanup rejects
 symlinked parents and paths outside the verification root. Passing reports
-require all twelve exact checks and nonempty command
+require strict target identity, all twelve exact checks, and nonempty command
 evidence; addon reports require exactly `build` and `runGameTestServer`.
 Comment/string-aware annotation extraction ignores fake `@GameTest` text when
 counting tests and locating marker-bearing method bodies, skips brace-bearing
-intermediate annotations, and requires each GameTest evidence file to belong to
-the source set executed by its declared task.
+intermediate annotations, keeps escaped triple quotes inside Java text blocks,
+and requires each GameTest evidence file to belong to the source set executed by
+its declared task.
 Bundled descriptors preserve reviewed HTTPS repository order, and fixture names
 must be Java-safe identifiers ending in `Fixture`. Their authoritative GameTest
 task is derived from the same fixture name (`evilCraftFixture` becomes
@@ -140,9 +144,11 @@ outputs are excluded.
   --output delta.json
 ```
 
-The audit, contract, delta, and report schemas are under `schema/`. A complete
-public-SDK registration example is under `examples/addon/`; its reusable
-workflow is under `examples/github-actions/`. Downloaded jars, source checkouts,
-caches, and reports are evidence or build products; do not put them in a
-Minecraft instance. Any different target jar SHA requires contract review even
-when the compact public-signature/risk delta is empty.
+The audit, contract, delta, and report schemas are under `schema/`. Once all
+family decisions are complete, the contract schema requires dependency and
+repository inputs; report targets require mod ID, display name, and version. A
+complete public-SDK registration example is under `examples/addon/`; its
+reusable workflow is under `examples/github-actions/`. Downloaded jars, source
+checkouts, caches, and reports are evidence or build products; do not put them
+in a Minecraft instance. Any different target jar SHA requires contract review
+even when the compact public-signature/risk delta is empty.
