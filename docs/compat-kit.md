@@ -65,7 +65,9 @@ revision in the compatibility document. The checkout passed to `scan` or
 describes the inspected source. When the supplied source is a module
 subdirectory, Compat Kit discovers the enclosing Git worktree, requires that
 whole worktree to be clean, and records its HEAD while keeping evidence paths
-relative to the supplied module. Never silently replace a failed source.
+relative to the supplied module. A supplied `--source` must belong to a Git
+worktree; omit it rather than presenting uncommitted/unversioned contents as
+source evidence. Never silently replace a failed source.
 
 ### 2. Scan
 
@@ -86,6 +88,9 @@ outputs, and capability mutations requiring simulation are persisted. Without
 `--source`, scans are cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
+The scanner format is also stored in every audit and required by its published
+schema, so an older structurally valid committed audit cannot authorize current
+contract review.
 Multi-release `META-INF/versions/` aliases are not treated as binary class names;
 the root binary name is scanned once.
 Chance, randomness, generic-ingredient, and capability-mutation detection read
@@ -116,6 +121,9 @@ tools/compat-kit/compat-kit decide \
 The draft contains one entry for every recipe-class candidate. Complete each
 entry as `accepted` or `rejected`; do not delete inconvenient candidates.
 `next-actions.md` is the compact review surface and lists only unresolved work.
+The published contract schema applies the same status-dependent boundary:
+accepted families require recipe type, station, nonempty inputs/outputs with a
+primary output, and a decision; rejected families require their decision.
 `source_recipe_inventory_sha256` binds the sorted recipe-class inventory, and
 every complete `scaffold`/`verify` invocation must also load the committed
 source audit. Validation compares the contract's exact family-class set,
@@ -219,8 +227,12 @@ bundled descriptor or external `build.gradle` from the reviewed contract and
 generator, then checks both its bytes and manifest entry. Editing the file and
 self-attesting a new manifest hash therefore cannot bypass artifact or task
 gates. Before writing anything, scaffolding preflights every destination for
-type/content drift; a late-sorting conflicting path cannot leave a partial
-project behind.
+type/content drift and every required parent as a directory; a late-sorting
+conflict or file occupying `src` cannot leave a partial project behind.
+
+Generated independent addons require the current compatible Auto Storage minor
+line. A 0.3.0 kit emits `[0.3.0,0.4)`: patches remain compatible, while the
+next pre-1.0 minor requires an explicit addon review.
 
 ### 5. Implement with strict TDD
 

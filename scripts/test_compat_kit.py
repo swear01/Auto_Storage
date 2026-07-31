@@ -101,6 +101,23 @@ class CompatKitAuditTests(unittest.TestCase):
         unrelated_same_name.write_text(
             "package samplemod.unrelated;\nfinal class CrushingRecipe {}\n"
         )
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
 
         first = self.compat_kit.scan_jar(
             self.jar,
@@ -367,6 +384,24 @@ class CompatKitAuditTests(unittest.TestCase):
                 signature_reader=self.signatures,
             )
 
+    def test_scan_rejects_source_outside_git_worktree(self):
+        source = self.root / "source"
+        source_file = source / "src/main/java/samplemod/recipe/CrushingRecipe.java"
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(
+            "package samplemod.recipe;\nfinal class CrushingRecipe {}\n"
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "source must be inside a Git worktree",
+        ):
+            self.compat_kit.scan_jar(
+                self.jar,
+                source=source,
+                signature_reader=self.signatures,
+            )
+
     def test_scan_discovers_enclosing_git_root_for_source_subdirectory(self):
         repository = self.root / "repository"
         source = repository / "module"
@@ -412,6 +447,23 @@ class CompatKitAuditTests(unittest.TestCase):
                 signature_reader=self.signatures,
             )
 
+    def test_scan_records_and_validates_current_scanner_format(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+
+        self.assertEqual(
+            self.compat_kit.SCAN_CACHE_VERSION,
+            audit["scanner_format"],
+        )
+        audit["scanner_format"] -= 1
+        with self.assertRaisesRegex(
+            ValueError,
+            "unsupported audit scanner format",
+        ):
+            self.compat_kit._validate_audit(audit)
+
     def test_scan_rejects_malformed_current_cache_structure(self):
         cache = self.root / "cache"
         artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
@@ -424,6 +476,7 @@ class CompatKitAuditTests(unittest.TestCase):
         cached.parent.mkdir(parents=True)
         malformed = {
             "schema": 1,
+            "scanner_format": self.compat_kit.SCAN_CACHE_VERSION,
             "kind": "auto_storage_compat_audit",
             "target": {},
             "artifact": {"sha256": artifact_sha, "size": 1},
@@ -469,6 +522,23 @@ class CompatKitAuditTests(unittest.TestCase):
         source_file.write_text(
             "package samplemod.recipe;\n"
             "final class CrusherRecipes { static final class PolishingRecipe {} }\n"
+        )
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
         )
 
         def nested_signatures(class_name: str) -> str:
@@ -1146,6 +1216,49 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertEqual("existing project\n", build.read_text())
 
+    def test_external_scaffold_preflights_conflicting_ancestor_before_writing(self):
+        contract = self.addon_contract()
+        output = self.root / "samplemod-auto-storage"
+        output.mkdir()
+        ancestor = output / "src"
+        ancestor.write_text("existing file\n")
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "generated path parent is not a directory: src",
+        ):
+            self.compat_kit.scaffold_addon(
+                contract,
+                output,
+                source_audit=self.source_audit(),
+            )
+
+        self.assertEqual(
+            ["src"],
+            [
+                path.relative_to(output).as_posix()
+                for path in sorted(output.rglob("*"))
+                if path.is_file()
+            ],
+        )
+        self.assertEqual("existing file\n", ancestor.read_text())
+
+    def test_external_scaffold_bounds_auto_storage_to_current_minor(self):
+        contract = self.addon_contract()
+        output = self.root / "samplemod-auto-storage"
+
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=self.source_audit(),
+        )
+
+        metadata = (
+            output / "src/main/resources/META-INF/neoforge.mods.toml"
+        ).read_text()
+        self.assertIn('versionRange="[0.3.0,0.4)"', metadata)
+        self.assertNotIn('versionRange="[0.3.0,1)"', metadata)
+
     def test_scaffolds_preserve_reviewed_target_runtime_dependencies(self):
         contract = self.addon_contract()
         contract["target"]["runtime_dependencies"] = [
@@ -1375,8 +1488,39 @@ class CompatKitAuditTests(unittest.TestCase):
         }
         self.assertEqual({"minimum": 1}, station_rate_rules["process"])
         self.assertEqual({"const": 0}, station_rate_rules["instant"])
+        family_status_rules = {
+            rule["if"]["properties"]["status"]["const"]: rule["then"][
+                "properties"
+            ]
+            for rule in family_schema["allOf"]
+        }
+        accepted = family_status_rules["accepted"]
+        self.assertEqual(
+            {"type": "string", "minLength": 1},
+            accepted["recipe_type"],
+        )
+        self.assertEqual({"type": "object"}, accepted["station"])
+        self.assertEqual({"minItems": 1}, accepted["inputs"])
+        self.assertEqual(1, accepted["outputs"]["minItems"])
+        self.assertEqual(
+            "primary",
+            accepted["outputs"]["contains"]["properties"]["role"]["const"],
+        )
+        self.assertEqual(
+            {"type": "string", "minLength": 1},
+            accepted["decision"],
+        )
+        self.assertEqual(
+            {"type": "string", "minLength": 1},
+            family_status_rules["rejected"]["decision"],
+        )
         audit_schema = json.loads(
             (schema_root / "compat-audit.schema.json").read_text()
+        )
+        self.assertIn("scanner_format", audit_schema["required"])
+        self.assertEqual(
+            {"const": self.compat_kit.SCAN_CACHE_VERSION},
+            audit_schema["properties"]["scanner_format"],
         )
         self.assertFalse(
             audit_schema["properties"]["candidates"]["additionalProperties"]

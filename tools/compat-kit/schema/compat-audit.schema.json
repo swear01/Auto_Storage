@@ -4,9 +4,10 @@
   "title": "Auto Storage compatibility audit",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "kind", "target", "artifact", "source", "candidates", "risks"],
+  "required": ["schema", "scanner_format", "kind", "target", "artifact", "source", "candidates", "risks"],
   "properties": {
     "schema": {"const": 1},
+    "scanner_format": {"const": 6},
     "kind": {"const": "auto_storage_compat_audit"},
     "target": {"$ref": "#/$defs/target"},
     "artifact": {

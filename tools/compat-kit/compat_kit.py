@@ -103,6 +103,7 @@ RISK_PATTERNS = (
 )
 AUDIT_TOP_KEYS = {
     "schema",
+    "scanner_format",
     "kind",
     "target",
     "artifact",
@@ -368,13 +369,14 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
         text=True,
         timeout=10,
     )
-    git_root = None
     if git_root_result.returncode == 0:
         git_root = Path(git_root_result.stdout.strip()).resolve()
     elif (
-        git_root_result.returncode != 128
-        or "not a git repository" not in git_root_result.stderr
+        git_root_result.returncode == 128
+        and "not a git repository" in git_root_result.stderr
     ):
+        raise ValueError("source must be inside a Git worktree")
+    else:
         raise RuntimeError(
             "failed to discover source checkout: "
             + (
@@ -382,43 +384,42 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
                 or git_root_result.stdout.strip()
             )
         )
-    if git_root is not None:
-        status = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(git_root),
-                "status",
-                "--porcelain",
-                "--untracked-files=all",
-            ],
-            capture_output=True,
-            check=False,
-            text=True,
-            timeout=10,
+    status = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(git_root),
+            "status",
+            "--porcelain",
+            "--untracked-files=all",
+        ],
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=10,
+    )
+    if status.returncode != 0:
+        raise RuntimeError(
+            "failed to inspect source checkout status: "
+            + (status.stderr.strip() or status.stdout.strip())
         )
-        if status.returncode != 0:
-            raise RuntimeError(
-                "failed to inspect source checkout status: "
-                + (status.stderr.strip() or status.stdout.strip())
-            )
-        if status.stdout.strip():
-            raise ValueError(
-                "source checkout is dirty: " + status.stdout.splitlines()[0]
-            )
-        result = subprocess.run(
-            ["git", "-C", str(git_root), "rev-parse", "HEAD"],
-            capture_output=True,
-            check=False,
-            text=True,
-            timeout=10,
+    if status.stdout.strip():
+        raise ValueError(
+            "source checkout is dirty: " + status.stdout.splitlines()[0]
         )
-        if result.returncode != 0:
-            raise RuntimeError(
-                "failed to resolve source checkout revision: "
-                + (result.stderr.strip() or result.stdout.strip())
-            )
-        revision = result.stdout.strip()
+    result = subprocess.run(
+        ["git", "-C", str(git_root), "rev-parse", "HEAD"],
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=10,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "failed to resolve source checkout revision: "
+            + (result.stderr.strip() or result.stdout.strip())
+        )
+    revision = result.stdout.strip()
     return {"revision": revision, "files": files}
 
 
@@ -473,6 +474,11 @@ def _validate_audit(audit: dict):
         raise ValueError("audit has unknown keys: " + ", ".join(unknown))
     if audit.get("schema") != SCHEMA_VERSION:
         raise ValueError(f"unsupported audit schema: {audit.get('schema')}")
+    if audit.get("scanner_format") != SCAN_CACHE_VERSION:
+        raise ValueError(
+            "unsupported audit scanner format: "
+            f"{audit.get('scanner_format')}"
+        )
     if audit.get("kind") != "auto_storage_compat_audit":
         raise ValueError(f"invalid audit kind: {audit.get('kind')}")
     for key in ("target", "artifact", "source", "candidates", "risks"):
@@ -710,6 +716,7 @@ def scan_jar(
     source_path = Path(source) if source is not None else None
     audit = {
         "schema": SCHEMA_VERSION,
+        "scanner_format": SCAN_CACHE_VERSION,
         "kind": "auto_storage_compat_audit",
         "target": target,
         "artifact": {
@@ -1658,6 +1665,10 @@ public final class {class_prefix}IntegrationGameTests {{
     }}
 }}
 """
+    version_parts = TOOL_VERSION.split(".")
+    compatible_minor_upper = (
+        f"{version_parts[0]}.{int(version_parts[1]) + 1}"
+    )
     mods_toml = f"""modLoader="javafml"
 loaderVersion="[4,)"
 license="MIT"
@@ -1670,7 +1681,7 @@ displayName={_toml_basic_string(target['display_name'] + ' Auto Storage Integrat
 [[dependencies.{addon_id}]]
 modId="auto_storage"
 type="required"
-versionRange="[{TOOL_VERSION},1)"
+versionRange="[{TOOL_VERSION},{compatible_minor_upper})"
 ordering="AFTER"
 side="BOTH"
 
@@ -1767,8 +1778,18 @@ def _materialize(
 ) -> list[Path]:
     complete = dict(files)
     complete[manifest_path] = _manifest(files, contract)
+    if root.exists() and not root.is_dir():
+        raise ValueError("generated path parent is not a directory: .")
     for relative, payload in sorted(complete.items()):
         target = root / relative
+        ancestor = root
+        for part in Path(relative).parts[:-1]:
+            ancestor /= part
+            if ancestor.exists() and not ancestor.is_dir():
+                raise ValueError(
+                    "generated path parent is not a directory: "
+                    + ancestor.relative_to(root).as_posix()
+                )
         if target.exists() and (
             not target.is_file() or target.read_bytes() != payload
         ):

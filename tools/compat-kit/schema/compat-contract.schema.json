@@ -149,7 +149,42 @@
             "uniqueItems": true
           },
           "decision": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]}
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"status": {"const": "accepted"}},
+              "required": ["status"]
+            },
+            "then": {
+              "properties": {
+                "recipe_type": {"type": "string", "minLength": 1},
+                "station": {"type": "object"},
+                "inputs": {"minItems": 1},
+                "outputs": {
+                  "minItems": 1,
+                  "contains": {
+                    "type": "object",
+                    "properties": {"role": {"const": "primary"}},
+                    "required": ["role"]
+                  }
+                },
+                "decision": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"status": {"const": "rejected"}},
+              "required": ["status"]
+            },
+            "then": {
+              "properties": {
+                "decision": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        ]
       }
     },
     "verification": {

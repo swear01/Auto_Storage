@@ -96,8 +96,9 @@ evidence can pass. Verification regenerates the expected `build.gradle` from
 the reviewed contract and generator before comparing it with both the file and
 manifest, so an addon cannot remove the artifact gate and authorize that edit
 by updating its own manifest hash. Scaffold generation preflights all
-destinations before its first write, so an existing conflicting file fails
-without leaving workflow, manifest, or wrapper fragments behind.
+destinations and parent directories before its first write, so an existing
+conflicting file or file-valued `src` ancestor fails without leaving workflow,
+manifest, or wrapper fragments behind.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
@@ -304,6 +305,8 @@ The API artifact version equals the Auto Storage mod version.
   minor-version increase and release-note migration section.
 - Patch releases must remain source- and binary-compatible with the preceding
   release in the same minor line.
+- Compat Kit therefore generates a current-minor dependency range; version
+  0.3.0 produces `[0.3.0,0.4)`, not an open-ended pre-1.0 range.
 - Registry IDs and persisted resource/descriptor IDs are data contracts and
   must not be reused for different semantics.
 - Optional target-mod versions in CI are representative evidence only. Addons

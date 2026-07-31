@@ -29,7 +29,9 @@ python3 --version
 When `--source` points at a Git checkout, tracked and untracked state must be
 clean so its HEAD identifies the exact inspected source. A module subdirectory
 uses the enclosing Git worktree's status and HEAD; evidence paths remain
-relative to the supplied module. Current-format cache entries are fully
+relative to the supplied module. Supplying a non-Git source directory fails;
+omit `--source` when no versioned source is available. Current-format cache
+entries and committed audits carry the scanner format and are fully
 schema-validated before reuse.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
@@ -68,7 +70,9 @@ accept the descriptor syntax emitted by `javap -c -p`.
 ```
 
 Scaffolding preflights every destination before writing the first file. Any
-existing path with different content fails without leaving a partial project.
+existing path with different content or a file-valued parent directory fails
+without leaving a partial project. Generated addon metadata accepts only the
+current compatible Auto Storage minor (`[0.3.0,0.4)` for this kit).
 Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
 reviewed target jar SHA; target compile/runtime and explicit runtime
