@@ -1,0 +1,518 @@
+{
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "target": {
+    "dependency": "curse.maven:productivemetalworks-1184570:7884786",
+    "display_name": "Productive Metalworks",
+    "mod_id": "productivemetalworks",
+    "repositories": [
+      "https://www.cursemaven.com/"
+    ],
+    "runtime_dependencies": [],
+    "version": "1.21.1-1.15.0"
+  },
+  "source_audit_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124",
+  "source_recipe_inventory_sha256": "bb5095461644293b2c359adf391c3687ac6ad787fe7d94494a13ab19fe30735f",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "productivemetalworks"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "productivemetalworks"
+      ],
+      "sha256": "f76a10fbc51986b830bd27b6c47447a886fd4ce177f33c30edd0c93e6545fcda"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "families": [
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.RecipeProvider",
+      "costs": [],
+      "decision": "Datagen provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.datagen.RecipeProvider#public_signature"
+      ],
+      "id": "recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder#public_signature"
+      ],
+      "id": "block_casting_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder#public_signature"
+      ],
+      "id": "fluid_alloying_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder#public_signature"
+      ],
+      "id": "item_casting_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder#public_signature"
+      ],
+      "id": "item_melting_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.event.CastingRecipeEvent",
+      "costs": [],
+      "decision": "Mod-bus event that can inject or replace casting recipes from live Level/cast/fluid state; not a deterministic recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.event.CastingRecipeEvent#public_signature",
+        "src/main/java/cy/jdkdigital/productivemetalworks/event/CastingRecipeEvent.java"
+      ],
+      "id": "casting_recipe_event",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.BlockCastingRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.integration.jei.BlockCastingRecipeCategory#public_signature"
+      ],
+      "id": "block_casting_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.EntityMeltingRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category for entity melting; entity mutation is outside Auto Storage transactions.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.integration.jei.EntityMeltingRecipeCategory#public_signature"
+      ],
+      "id": "entity_melting_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.FluidAlloyingRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.integration.jei.FluidAlloyingRecipeCategory#public_signature"
+      ],
+      "id": "fluid_alloying_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemCastingRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.integration.jei.ItemCastingRecipeCategory#public_signature"
+      ],
+      "id": "item_casting_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemMeltingRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.integration.jei.ItemMeltingRecipeCategory#public_signature"
+      ],
+      "id": "item_melting_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+      "costs": [],
+      "decision": "Basin casting depends on live CastingBlockEntity coolingTime, Config.foundryCoolingModifier, optional CastingRecipeEvent injection, cast-replacement mold semantics, and fluid normally poured from Foundry taps; no complete simulate-then-commit station contract without live block/multiblock state.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/BlockCastingRecipe.java",
+        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/CastingBlockEntity.java#serverTick"
+      ],
+      "id": "block_casting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BlockCastingRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer#public_signature"
+      ],
+      "id": "block_casting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+      "costs": [],
+      "decision": "Entity melting consumes live entities and is entity/world mutation outside Auto Storage recipe transactions.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/EntityMeltingRecipe.java"
+      ],
+      "id": "entity_melting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected EntityMeltingRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer#public_signature"
+      ],
+      "id": "entity_melting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+      "costs": [],
+      "decision": "Fluid alloying executes inside the Foundry multiblock against live tank contents, upgrade-modified speed, and controller fuel state; payload alone cannot bypass retained multiblock execution.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/FluidAlloyingRecipe.java#matches",
+        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryControllerBlockEntity.java"
+      ],
+      "id": "fluid_alloying_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected FluidAlloyingRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer#public_signature"
+      ],
+      "id": "fluid_alloying_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+      "costs": [],
+      "decision": "Casting interface requires Level-bearing match/result APIs and is owned by rejected casting families; not independently registrable.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe#public_signature"
+      ],
+      "id": "i_casting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+      "costs": [],
+      "decision": "Table casting depends on live CastingBlockEntity coolingTime, Config.foundryCoolingModifier, optional CastingRecipeEvent injection, consumeCast/mold replacement, bucket FluidUtil fill side path, and fluid normally poured from Foundry taps; no complete simulate-then-commit contract without live block state.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemCastingRecipe.java#matches",
+        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/CastingBlockEntity.java#serverTick",
+        "src/main/java/cy/jdkdigital/productivemetalworks/event/CastingRecipeEvent.java"
+      ],
+      "id": "item_casting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected ItemCastingRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer#public_signature"
+      ],
+      "id": "item_casting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+      "costs": [],
+      "decision": "Item melting requires a formed Foundry multiblock, live FuelMap temperature/speed/consumption, upgrade speed modifiers, and tank/capacitor fuel drain; temperature-gated match cannot be represented as an unconfigured installed station transaction.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemMeltingRecipe.java#matches",
+        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryControllerBlockEntity.java#meltItems"
+      ],
+      "id": "item_melting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected ItemMeltingRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer#public_signature"
+      ],
+      "id": "item_melting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.RecipeHelper",
+      "costs": [],
+      "decision": "Runtime lookup helper over Level caches and Foundry fuel state; not a recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.util.RecipeHelper#public_signature"
+      ],
+      "id": "recipe_helper",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Productive Metalworks fail-closed boundary changed",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Missing representative Productive Metalworks recipe casting/cast/ingot",
+          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+          "task": "runProductivemetalworksGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Audited Productive Metalworks recipe type is empty",
+          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+          "task": "runProductivemetalworksGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Unsafe Productive Metalworks recipe type accepted",
+          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+          "task": "runProductivemetalworksGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Unsafe Productive Metalworks recipe was accepted: melting/ancient_debris",
+          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+          "task": "runProductivemetalworksGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Productive Metalworks unsafe foundry contract was registered",
+          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+          "task": "runProductivemetalworksGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 8,
+    "fixture": "productivemetalworksFixture",
+    "game_test_task": "runProductivemetalworksGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runProductivemetalworksGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

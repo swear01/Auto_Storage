@@ -1,0 +1,41 @@
+{
+  "auditArtifact": {
+    "dependency": "curse.maven:productivemetalworks-1184570:7884786",
+    "sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+  },
+  "dependencies": [
+    "curse.maven:productivemetalworks-1184570:7884786"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.productivemetalworks.ProductivemetalworksCompatModule",
+  "expectedTests": 8,
+  "fixture": "productivemetalworksFixture",
+  "id": "auto_storage:productivemetalworks",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "productivemetalworks"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "productivemetalworks"
+      ],
+      "sha256": "f76a10fbc51986b830bd27b6c47447a886fd4ce177f33c30edd0c93e6545fcda"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://www.cursemaven.com/"
+  ],
+  "requires": [
+    "productivemetalworks"
+  ],
+  "runtimeDependencies": [
+    "curse.maven:productivemetalworks-1184570:7884786"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatProductivemetalworks"
+}

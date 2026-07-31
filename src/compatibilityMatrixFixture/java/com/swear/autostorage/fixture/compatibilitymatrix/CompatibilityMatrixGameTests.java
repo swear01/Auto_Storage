@@ -40,6 +40,13 @@ public final class CompatibilityMatrixGameTests {
         if (!manifest.assertCoexistence(helper, "Descriptor matrix coexistence")) {
             return;
         }
+        if (AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
+                        .anyMatch(id -> id.getPath().startsWith("productivemetalworks_"))
+                || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
+                        .anyMatch(id -> id.getPath().startsWith("productivemetalworks_"))) {
+            helper.fail("Productive Metalworks fail-closed boundary changed");
+            return;
+        }
         var furnace = MachineEnergyTable.get(MachineEnergyTable.FURNACE_ID);
         ItemStack ironFurnace = new ItemStack(BuiltInRegistries.ITEM.get(
                 ResourceLocation.fromNamespaceAndPath("ironfurnaces", "iron_furnace")));
