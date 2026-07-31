@@ -116,6 +116,77 @@ displayName="Sample Machines"
             archive.write(class_file, class_file.relative_to(classes).as_posix())
 
 
+def write_external_hierarchy_fixture_jars(
+    root: Path,
+    target_jar: Path,
+    classpath_jar: Path,
+):
+    support_source = root / "external-support-source"
+    support_classes = root / "external-support-classes"
+    support_sources = {
+        "net/minecraft/world/item/crafting/Recipe.java": (
+            "package net.minecraft.world.item.crafting; public interface Recipe {}\n"
+        ),
+        "fixture/base/BaseTransformer.java": (
+            "package fixture.base; public abstract class BaseTransformer implements "
+            "net.minecraft.world.item.crafting.Recipe {}\n"
+        ),
+    }
+    for relative, source in support_sources.items():
+        path = support_source / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(source)
+    support_classes.mkdir()
+    subprocess.run(
+        [
+            "javac",
+            "-d",
+            str(support_classes),
+            *[str(support_source / relative) for relative in sorted(support_sources)],
+        ],
+        check=True,
+    )
+    with zipfile.ZipFile(classpath_jar, "w") as archive:
+        for class_file in sorted(support_classes.rglob("*.class")):
+            archive.write(class_file, class_file.relative_to(support_classes).as_posix())
+
+    target_source = root / "external-target-source"
+    target_classes = root / "external-target-classes"
+    process = target_source / "samplemod/handler/OreHandler.java"
+    process.parent.mkdir(parents=True, exist_ok=True)
+    process.write_text(
+        "package samplemod.handler; "
+        "public final class OreHandler extends fixture.base.BaseTransformer { "
+        "private static final String EDGE = \"\\u0000\\ud83d\\ude00\"; }\n"
+    )
+    target_classes.mkdir()
+    subprocess.run(
+        [
+            "javac",
+            "-cp",
+            str(support_classes),
+            "-d",
+            str(target_classes),
+            str(process),
+        ],
+        check=True,
+    )
+    mods_toml = """
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="samplemod"
+version="1.2.3"
+displayName="Sample Machines"
+""".strip()
+    with zipfile.ZipFile(target_jar, "w") as archive:
+        archive.writestr("META-INF/neoforge.mods.toml", mods_toml)
+        for class_file in sorted(target_classes.rglob("*.class")):
+            archive.write(class_file, class_file.relative_to(target_classes).as_posix())
+
+
 class CompatKitAuditTests(unittest.TestCase):
     def setUp(self):
         self.compat_kit = load_compat_kit()
@@ -391,6 +462,42 @@ class CompatKitAuditTests(unittest.TestCase):
                 entry["class"]
                 for entry in audit["candidates"]["client_viewer_classes"]
             ],
+        )
+
+    def test_scan_resolves_recipe_hierarchy_from_explicit_classpath(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+
+        with self.assertRaisesRegex(ValueError, "unresolved ancestry"):
+            self.compat_kit.scan_jar(
+                target_jar,
+                signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+                risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+            )
+
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[classpath_jar],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+        )
+
+        self.assertEqual(
+            ["samplemod.handler.OreHandler"],
+            [entry["class"] for entry in audit["candidates"]["recipe_classes"]],
+        )
+        self.assertEqual(
+            [
+                "samplemod.handler.OreHandler",
+                "fixture.base.BaseTransformer",
+                "net.minecraft.world.item.crafting.Recipe",
+            ],
+            audit["candidates"]["recipe_classes"][0]["classification"]["evidence"],
         )
 
     def test_scan_summarizes_recipe_json_and_explicit_data_root_overrides(self):
@@ -1120,6 +1227,7 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertIn("recipe_serializers", legacy["candidates"])
         legacy["scanner_format"] = 7
         legacy.pop("recipe_data")
+        legacy.pop("ancestry_classpath")
         for bucket in tuple(legacy["candidates"]):
             if bucket not in {
                 "recipe_classes",
@@ -1147,6 +1255,7 @@ class CompatKitAuditTests(unittest.TestCase):
         legacy = copy.deepcopy(current)
         legacy["scanner_format"] = 7
         legacy.pop("recipe_data")
+        legacy.pop("ancestry_classpath")
         for bucket in tuple(legacy["candidates"]):
             if bucket not in {
                 "recipe_classes",
@@ -1461,6 +1570,10 @@ displayName="Sample Machines"
             contract["source_recipe_inventory_sha256"],
             r"^[0-9a-f]{64}$",
         )
+        self.assertEqual(
+            audit["recipe_data"]["digest"],
+            contract["source_recipe_data_sha256"],
+        )
         self.assertTrue(contract["families"])
         self.assertTrue(all(family["status"] == "needs_decision" for family in contract["families"]))
         self.assertIn("samplemod.recipe.ChanceRecipe", actions)
@@ -1552,6 +1665,21 @@ displayName="Sample Machines"
         with self.assertRaisesRegex(
             ValueError,
             "family risks do not match source audit",
+        ):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=audit,
+            )
+
+    def test_complete_contract_rejects_recipe_data_digest_drift(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        audit["recipe_data"]["digest"] = "f" * 64
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "recipe data does not match source audit",
         ):
             self.compat_kit.validate_contract(
                 contract,
@@ -2053,17 +2181,57 @@ displayName="Sample Machines"
                 plan=plan,
             )
 
+        audit_path = self.root / "probe-audit.json"
+        plan_path = self.root / "probe-plan.json"
+        runtime_path = self.root / "probe-runtime.json"
+        audit_path.write_text(self.compat_kit.canonical_json(audit))
+        plan_path.write_text(self.compat_kit.canonical_json(plan))
+        runtime_output["config_values"] = [{
+            "id": "crusher_ticks",
+            "value": 100,
+            "source": "samplemod.Config#crusherTicks",
+        }]
+        runtime_output["capability_surfaces"] = [{
+            "id": "samplemod:crusher",
+            "surface": "neoforge:item_handler",
+            "available": True,
+            "source": "samplemod.CompatProbe#hasItemHandler",
+        }]
+        runtime_path.write_text(self.compat_kit.canonical_json(runtime_output))
+        self.assertEqual(
+            0,
+            self.compat_kit.main([
+                "validate-probe",
+                str(runtime_path),
+                "--audit",
+                str(audit_path),
+                "--plan",
+                str(plan_path),
+            ]),
+        )
+
     def test_worker_package_is_compact_byte_deterministic_and_source_free(self):
         audit = self.source_audit()
         contract, _ = self.compat_kit.decide_audit(audit)
         output = self.root / "worker-package"
 
-        first = self.compat_kit.worker_package(contract, audit, output)
+        audit_path = Path("compat/audits/samplemod/1.2.3.json")
+        first = self.compat_kit.worker_package(
+            contract,
+            audit,
+            output,
+            audit_path=audit_path,
+        )
         first_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
             for path in first
         }
-        second = self.compat_kit.worker_package(contract, audit, output)
+        second = self.compat_kit.worker_package(
+            contract,
+            audit,
+            output,
+            audit_path=audit_path,
+        )
         second_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
             for path in second
@@ -2092,6 +2260,12 @@ displayName="Sample Machines"
             len(summary["unresolved_families"]),
         )
         self.assertTrue(os.access(output / "commands.sh", os.X_OK))
+        commands = (output / "commands.sh").read_text()
+        self.assertIn(
+            "propose compat/audits/samplemod/1.2.3.json",
+            commands,
+        )
+        self.assertNotIn("propose audit.json", commands)
 
         args = self.compat_kit._build_parser().parse_args([
             "worker-package",
@@ -2112,7 +2286,12 @@ displayName="Sample Machines"
         output.symlink_to(outside, target_is_directory=True)
 
         with self.assertRaisesRegex(ValueError, "symlink"):
-            self.compat_kit.worker_package(contract, audit, output)
+            self.compat_kit.worker_package(
+                contract,
+                audit,
+                output,
+                audit_path=Path("compat/audits/samplemod/1.2.3.json"),
+            )
 
         self.assertEqual([], list(outside.iterdir()))
 
@@ -4185,13 +4364,21 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertEqual(
             {
                 "appeng.recipes.entropy.EntropyRecipe",
+                "appeng.recipes.game.AddItemUpgradeRecipe",
+                "appeng.recipes.game.CraftingUnitTransformRecipe",
+                "appeng.recipes.game.FacadeRecipe",
+                "appeng.recipes.game.RemoveItemUpgradeRecipe",
+                "appeng.recipes.game.StorageCellDisassemblyRecipe",
+                "appeng.recipes.game.StorageCellUpgradeRecipe",
                 "appeng.recipes.handlers.ChargerRecipe",
                 "appeng.recipes.handlers.InscriberRecipe",
                 "appeng.recipes.mattercannon.MatterCannonAmmo",
+                "appeng.recipes.quartzcutting.QuartzCuttingRecipe",
                 "appeng.recipes.transform.TransformRecipe",
             },
             audited_recipe_classes,
         )
+        self.assertEqual(92, len(audit["ancestry_classpath"]))
         self.assertEqual(
             audited_recipe_classes,
             {family["class"] for family in contract["families"]},
@@ -4325,6 +4512,18 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 committed = committed_root / path.relative_to(source_root)
                 self.assertTrue(committed.is_file(), committed)
                 self.assertEqual(committed.read_bytes(), path.read_bytes())
+        generated_resource_tests = (
+            generated_root
+            / "resource/src/main/java/com/swear/autostorage/compatkitfixture/generated/"
+            "GeneratedSteamResourceGameTests.java"
+        ).read_text()
+        rollback = generated_resource_tests.split(
+            "compat_kit_fixture_steam_mixed_resource_rollback_is_atomic",
+            1,
+        )[1].split("helper.succeed();", 1)[0]
+        self.assertIn("scenario.reset();", rollback)
+        self.assertIn("scenario.seed();", rollback)
+        self.assertLess(rollback.index("scenario.seed();"), rollback.index("scenario.snapshot();"))
         build = (ROOT / "build.gradle").read_text()
         self.assertIn("compatKitGeneratedFixture", build)
         self.assertIn("compileCompatKitGeneratedFixtureJava", build)

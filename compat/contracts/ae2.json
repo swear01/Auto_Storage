@@ -19,6 +19,112 @@
       "status": "rejected"
     },
     {
+      "class": "appeng.recipes.game.AddItemUpgradeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.AddItemUpgradeRecipe#public_signature"
+      ],
+      "id": "add_item_upgrade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.CraftingUnitTransformRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.CraftingUnitTransformRecipe#public_signature"
+      ],
+      "id": "crafting_unit_transform_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.FacadeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.FacadeRecipe#public_signature"
+      ],
+      "id": "facade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.RemoveItemUpgradeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.RemoveItemUpgradeRecipe#public_signature"
+      ],
+      "id": "remove_item_upgrade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.StorageCellDisassemblyRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.StorageCellDisassemblyRecipe#public_signature"
+      ],
+      "id": "storage_cell_disassembly_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "appeng.recipes.game.StorageCellUpgradeRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.game.StorageCellUpgradeRecipe#public_signature"
+      ],
+      "id": "storage_cell_upgrade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "appeng.recipes.handlers.ChargerRecipe",
       "costs": [],
       "decision": "Charger is excluded from this slice because completion timing is probabilistic and manual-crank power has no exact transaction cost.",
@@ -127,6 +233,25 @@
       "status": "rejected"
     },
     {
+      "class": "appeng.recipes.quartzcutting.QuartzCuttingRecipe",
+      "costs": [],
+      "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
+      "evidence": [
+        "appeng.recipes.quartzcutting.QuartzCuttingRecipe#public_signature"
+      ],
+      "id": "quartz_cutting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "appeng.recipes.transform.TransformRecipe",
       "costs": [],
       "decision": "Outside the reviewed AE2 Inscriber slice; no complete deterministic Auto Storage transaction contract was established.",
@@ -148,7 +273,8 @@
   "kind": "auto_storage_compat_contract",
   "schema": 1,
   "source_audit_sha256": "460d779a0609b81409907d9956de8f6f70a1b0912257e3e5c3c7e75ac9630e95",
-  "source_recipe_inventory_sha256": "4e09b0a944120074d42dc5212094e0ad0a9b0a4c55203d3cc366d2286463f215",
+  "source_recipe_data_sha256": "c188fa3453e0f64c12f748ca9f4835875762fad2586aeece7dc0be06d6c4180f",
+  "source_recipe_inventory_sha256": "2e7eb865d1f3879f208a2c1e0c4fc822c3d611ce288f954fffb0cda6f5d720c4",
   "target": {
     "dependency": "org.appliedenergistics:appliedenergistics2:19.2.17",
     "display_name": "Applied Energistics 2",

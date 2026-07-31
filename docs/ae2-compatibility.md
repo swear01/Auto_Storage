@@ -26,22 +26,31 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-The committed audit uses Scanner format v8. Class-file hierarchy inspection finds
-exactly five concrete `Recipe` implementations:
+The committed audit uses Scanner format v8 and binds all 92 unique jars needed
+to resolve AE2's complete non-JDK compile ancestry, including its optional
+viewer APIs. Class-file hierarchy inspection finds exactly twelve concrete
+`Recipe` implementations:
 
 - `appeng.recipes.entropy.EntropyRecipe`;
+- `appeng.recipes.game.AddItemUpgradeRecipe`;
+- `appeng.recipes.game.CraftingUnitTransformRecipe`;
+- `appeng.recipes.game.FacadeRecipe`;
+- `appeng.recipes.game.RemoveItemUpgradeRecipe`;
+- `appeng.recipes.game.StorageCellDisassemblyRecipe`;
+- `appeng.recipes.game.StorageCellUpgradeRecipe`;
 - `appeng.recipes.handlers.ChargerRecipe`;
 - `appeng.recipes.handlers.InscriberRecipe`;
 - `appeng.recipes.mattercannon.MatterCannonAmmo`;
+- `appeng.recipes.quartzcutting.QuartzCuttingRecipe`;
 - `appeng.recipes.transform.TransformRecipe`.
 
 Builders, datagen classes, client/viewer wrappers, serializers, station
 candidates, block entities, and resource APIs remain separate evidence buckets;
 they no longer become recipe families merely because their names contain
 `Recipe`. The bounded data inventory records 556 declared/effective recipes in
-18 serializer groups. The migrated contract therefore contains five exact
+18 serializer groups. The migrated contract therefore contains twelve exact
 decisions rather than the old name-based candidate surface: Inscriber is
-accepted and the other four classes are rejected.
+accepted and the other eleven classes are rejected.
 
 The reviewed runtime list carries GuideME through exact Modrinth artifact
 `rduAfwb7`; bundled and generated-addon fixtures reproduce AE2's required
@@ -89,8 +98,9 @@ range, or fractional. Auto Storage never rounds an AE cost.
   synthetic transaction cost.
 - Speed-card variants: not representable by an unconfigured Inscriber
   `ItemStack`.
-- Entropy, Matter Cannon Ammo, and Transform: rejected until each has its own
-  complete deterministic contract.
+- Entropy, the six custom crafting families, Quartz Cutting, Matter Cannon
+  Ammo, and Transform: rejected until each has its own complete deterministic
+  contract.
 - AE2 networks, storage, spatial, world/entity, and live-machine operations:
   outside this recipe-family module.
 

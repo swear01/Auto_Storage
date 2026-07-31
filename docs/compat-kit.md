@@ -85,10 +85,19 @@ as `notsamplemod/recipe/CrushingRecipe.java` cannot satisfy the candidate
 tools/compat-kit/compat-kit scan \
   --jar build/compat-kit/artifacts/target.jar \
   --source build/compat-kit/sources/target \
+  --classpath build/compat-kit/classpath/dependency.jar \
   --data-root build/compat-kit/datapacks/target-override \
   --output compat/audits/target/1.2.3.json
 ```
 
+`--classpath` is repeatable and supplies the target's complete compile-time
+ancestry without turning dependency classes into target candidates. Every
+non-JDK superclass and interface reachable from the target jar must resolve;
+an incomplete classpath fails instead of silently omitting a structurally
+hidden recipe family. At most 128 jars and 200,000 classes are read, duplicate/conflicting
+classes fail, and the sorted artifact SHA/size set is persisted in the audit
+and cache identity. Class-name constants are decoded as JVM modified UTF-8, so
+unrelated NUL or supplementary string constants cannot abort a valid scan.
 `--data-root` is repeatable and follows data-pack precedence: the target jar is
 the first layer and later supplied roots override earlier recipes by exact ID.
 Roots and recipe files must be real, non-symlink paths. The deterministic audit
@@ -111,7 +120,8 @@ one process nor all classes can bypass the memory bound. `RandomSource`,
 cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
-Data-root scans bind the ordered layer digests into their cache identity. The
+Data-root scans bind the ordered layer digests into their cache identity;
+ancestry classpaths bind their exact artifact set. The
 current scanner format is `8`; format `7` remains readable only as explicit
 legacy evidence while committed contracts are migrated. The scanner format is
 also stored in every audit and required by its published
@@ -182,6 +192,11 @@ tools/compat-kit/compat-kit probe \
   compat/audits/target/1.2.3.json \
   --plan compat/probes/target.json \
   --output build/compat-kit/target-probe
+
+tools/compat-kit/compat-kit validate-probe \
+  build/compat-kit/target-probe/runtime-probe.json \
+  --audit compat/audits/target/1.2.3.json \
+  --plan compat/probes/target.json
 ```
 
 The generated GameTest is server-only and evidence-only. It requires an
@@ -195,8 +210,10 @@ add reviewed direct calls for public config values or capability surfaces. The
 only accessor shapes are a value-wrapper static field, static method, registry
 block method, or enum-constant numeric field. Target config and capability
 candidates remain listed as unresolved in `probe-spec.json` until those
-bindings are supplied; empty arrays do not authorize those semantics. Validate
-collected JSON against both the committed audit, the exact canonical probe-plan
+bindings are supplied; empty arrays do not authorize those semantics.
+`validate-probe` is the mandatory cross-file gate for collected JSON: it loads
+the committed audit and optional exact plan instead of relying on the output
+schema alone. It validates the exact canonical probe-plan
 digest recorded as `source_probe_plan_digest`, and
 `compat-runtime-probe.schema.json` before using it as review evidence. Config
 records accept only finite JSON numbers and capability records accept only
@@ -224,7 +241,9 @@ drafts with unresolved families remain valid. The same completed-contract
 branch requires a non-null fixture, positive GameTest count, authoritative task,
 nonempty Gradle tasks, all twelve exact checks, and one evidence mapping for
 every check.
-`source_recipe_inventory_sha256` binds the sorted recipe-class inventory, and
+`source_recipe_inventory_sha256` binds the sorted recipe-class inventory;
+`source_recipe_data_sha256` separately binds the effective recipe-data and
+data-pack override digest. Every
 every complete `scaffold`/`verify` invocation must also load the committed
 source audit. Validation compares the contract's exact family-class set,
 per-family scanner risk set, target identity, artifact SHA, and inventory digest
@@ -289,7 +308,9 @@ tools/compat-kit/compat-kit worker-package \
 The seven deterministic files contain hashes, compact class/recipe summaries,
 unresolved decisions, commands, issue/worker context, and a PR checklist. They
 never embed public-signature bodies or complete upstream source. Existing drift
-and symlinked output paths fail before any file is written.
+and symlinked output paths fail before any file is written. `commands.sh` uses
+the exact safe repository-relative audit path supplied by `--audit`; it never
+refers to a package-local `audit.json` that was not emitted.
 
 ### 3a. Generate reviewed mechanical code
 
@@ -595,7 +616,8 @@ generator's Java/API surface.
 
 The committed AE2 19.2.17 scanner-format-8 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
-Structural classification reduces the prior name-based recipe surface to five
+Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
+finds twelve
 actual `Recipe` implementations while inventorying 556 effective recipe JSONs
 across 18 serializer groups. The accepted slice remains only
 `InscriberRecipe`:
@@ -607,7 +629,8 @@ across 18 serializer groups. The accepted slice remains only
   AE2's public `PowerUnit` API to a finite positive exact integer FE amount;
 - the plain Inscriber contributes 2 work per tick; speed-card state is not
   inferred from its item;
-- Charger, Entropy, Matter Cannon Ammo, and Transform remain rejected.
+- Charger, Entropy, six custom crafting families, Quartz Cutting, Matter Cannon
+  Ammo, and Transform remain rejected.
 
 `Ae2GeneratedCompat.java` owns deterministic descriptor/family registration;
 the handwritten `Ae2Compat` methods own exact eligibility, typed transaction

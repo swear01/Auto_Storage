@@ -10,6 +10,7 @@
     "kind",
     "target",
     "artifact",
+    "ancestry_classpath",
     "source",
     "candidates",
     "recipe_data",
@@ -43,6 +44,20 @@
         "size": {
           "type": "integer",
           "minimum": 1
+        }
+      }
+    },
+    "ancestry_classpath": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sha256", "size"],
+        "properties": {
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "size": {"type": "integer", "minimum": 1}
         }
       }
     },

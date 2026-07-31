@@ -29,7 +29,7 @@
   "kind": "auto_storage_compat_conformance_plan",
   "package": "com.swear.autostorage.compatkitfixture.generated",
   "schema": 1,
-  "source_contract_digest": "e90c6022a56c50d065f25937e2bfc3e20fff8dc04bbdaf284cc6ae10674dac4f",
+  "source_contract_digest": "8381437f5d558276f83aa3bb7289ca6788254e9de8529cb5e97648f77a85ea10",
   "target": {
     "display_name": "Applied Energistics 2",
     "mod_id": "ae2",

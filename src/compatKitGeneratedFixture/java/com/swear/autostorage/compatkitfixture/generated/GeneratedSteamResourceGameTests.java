@@ -99,6 +99,8 @@ public final class GeneratedSteamResourceGameTests {
     @GameTest(template = "empty")
     public static void compat_kit_fixture_steam_mixed_resource_rollback_is_atomic(GameTestHelper helper) {
         var scenario = scenario0(helper);
+        scenario.reset();
+        scenario.seed();
         var before = scenario.snapshot();
         if (scenario.attemptMixedRollback()) helper.fail("Mixed resource rollback unexpectedly committed");
         if (!before.equals(scenario.snapshot())) helper.fail("Mixed resource rollback mutated state");

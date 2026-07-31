@@ -34,6 +34,7 @@ atomically replaced jar cannot mix two artifacts in one audit.
 tools/compat-kit/compat-kit scan --help
 tools/compat-kit/compat-kit decide --help
 tools/compat-kit/compat-kit migrate-contract --help
+tools/compat-kit/compat-kit validate-probe --help
 tools/compat-kit/compat-kit generate --help
 tools/compat-kit/compat-kit conformance --help
 tools/compat-kit/compat-kit resource-scaffold --help
@@ -56,6 +57,14 @@ sample-keyed persistence/transfer assertions, and rejects built-in Item, Fluid,
 and NeoForge Energy support. None of these commands add runtime reflection or
 make the client authoritative. Repository tests regenerate and compile the
 committed generated-scaffold fixture against the public API jar.
+
+Supply the target's complete non-JDK compile ancestry through repeatable
+`scan --classpath`; every unresolved external superclass or interface fails
+instead of silently hiding a structural recipe family. The audit records only exact
+classpath artifact SHA/size evidence. Completed contracts separately bind the
+recipe-class inventory and effective recipe-data/data-pack digest. Runtime
+probe JSON must pass `validate-probe` with the same audit and optional plan;
+schema validation alone does not prove those cross-file identities.
 
 ## Add the SDK
 

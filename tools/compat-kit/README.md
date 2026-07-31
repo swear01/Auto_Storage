@@ -20,10 +20,13 @@ python3 --version
 ./compat-kit scan \
   --jar target.jar \
   --source target-source \
+  --classpath compile-dependency.jar \
   --data-root optional-datapack \
   --output audit.json
 ./compat-kit propose audit.json --output proposals.json
 ./compat-kit probe audit.json --plan probe-plan.json --output runtime-probe
+./compat-kit validate-probe runtime-probe.json --audit audit.json \
+  --plan probe-plan.json
 ./compat-kit decide audit.json \
   --output contract-draft.json \
   --next-actions next-actions.md
@@ -44,7 +47,12 @@ NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
 Scanner format 8 structurally classifies concrete `Recipe` and
-`RecipeSerializer` implementations. Repeatable `--data-root` inputs use normal
+`RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
+complete non-JDK ancestry of target classes; every unresolved external base
+fails instead of letting a structurally hidden recipe disappear, and exact
+classpath artifact identities enter the audit/cache.
+JVM modified UTF-8 class constants are handled correctly. Repeatable
+`--data-root` inputs use normal
 data-pack precedence and add bounded recipe counts, sample IDs, fields,
 top-level array sizes, NeoForge conditions, and override provenance to the
 audit. Their ordered content digests participate in cache identity. Legacy
@@ -73,6 +81,9 @@ the contract has no `needs_decision` entry, pass the same committed audit to
 every later command. Validation compares that audit's exact candidate set with
 the contract, including every per-family scanner risk, so recomputing a
 contract-only inventory digest cannot hide an omitted recipe family or risk.
+The contract separately binds the effective recipe-data/data-pack digest, so a
+changed override invalidates a previously complete contract even when the
+target jar and recipe classes are unchanged.
 Each candidate must remain in the bucket computed by the scanner; moving a
 recipe record into a station/resource list is rejected.
 Process station rates must be positive and Instant station rates must be zero.
@@ -107,9 +118,12 @@ empty or unresolved candidates remain evidence gaps. It has no
 client/reflection path and does not turn unresolved config/capability candidates
 into accepted evidence. Runtime output records the exact canonical plan digest;
 validation requires the same digest and exact planned ID/source/surface sets,
-finite numeric config values, and boolean capability values. `worker-package`
+finite numeric config values, and boolean capability values. Run
+`validate-probe` for this cross-file gate; JSON schema validation alone is not
+sufficient. `worker-package`
 emits seven compact deterministic
-issue/worktree/PR handoff files without upstream source or signature bodies.
+issue/worktree/PR handoff files without upstream source or signature bodies;
+its gate script points at the exact repository-relative audit path.
 
 For a complete reviewed contract:
 

@@ -9,6 +9,7 @@ import json
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -27,6 +28,8 @@ MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
 MAX_MOD_METADATA_BYTES = 1024 * 1024
 MAX_CLASS_BYTES = 16 * 1024 * 1024
+MAX_CLASSPATH_JARS = 128
+MAX_CLASSPATH_CLASSES = 200_000
 MAX_CANDIDATE_CLASSES = 2_000
 MAX_SIGNATURE_BYTES = 256 * 1024
 MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
@@ -168,6 +171,7 @@ AUDIT_TOP_KEYS = {
     "kind",
     "target",
     "artifact",
+    "ancestry_classpath",
     "source",
     "candidates",
     "recipe_data",
@@ -179,6 +183,7 @@ CONTRACT_TOP_KEYS = {
     "target",
     "source_audit_sha256",
     "source_recipe_inventory_sha256",
+    "source_recipe_data_sha256",
     "families",
     "verification",
 }
@@ -325,13 +330,66 @@ def _class_name(entry_name: str) -> str:
     return entry_name[:-6].replace("/", ".")
 
 
+def _decode_modified_utf8(payload: bytes, entry_name: str) -> str:
+    units = []
+    offset = 0
+    while offset < len(payload):
+        first = payload[offset]
+        offset += 1
+        if 0x01 <= first <= 0x7F:
+            units.append(first)
+            continue
+        if 0xC0 <= first <= 0xDF:
+            if offset >= len(payload) or payload[offset] & 0xC0 != 0x80:
+                raise ValueError(f"invalid class modified UTF-8 value: {entry_name}")
+            value = ((first & 0x1F) << 6) | (payload[offset] & 0x3F)
+            offset += 1
+            if value < 0x80 and value != 0:
+                raise ValueError(f"invalid class modified UTF-8 value: {entry_name}")
+            units.append(value)
+            continue
+        if 0xE0 <= first <= 0xEF:
+            if (
+                offset + 1 >= len(payload)
+                or payload[offset] & 0xC0 != 0x80
+                or payload[offset + 1] & 0xC0 != 0x80
+            ):
+                raise ValueError(f"invalid class modified UTF-8 value: {entry_name}")
+            value = (
+                ((first & 0x0F) << 12)
+                | ((payload[offset] & 0x3F) << 6)
+                | (payload[offset + 1] & 0x3F)
+            )
+            offset += 2
+            if value < 0x800:
+                raise ValueError(f"invalid class modified UTF-8 value: {entry_name}")
+            units.append(value)
+            continue
+        raise ValueError(f"invalid class modified UTF-8 value: {entry_name}")
+    characters = []
+    index = 0
+    while index < len(units):
+        unit = units[index]
+        if 0xD800 <= unit <= 0xDBFF and index + 1 < len(units):
+            following = units[index + 1]
+            if 0xDC00 <= following <= 0xDFFF:
+                characters.append(chr(
+                    0x10000 + ((unit - 0xD800) << 10) + following - 0xDC00
+                ))
+                index += 2
+                continue
+        characters.append(chr(unit))
+        index += 1
+    return "".join(characters)
+
+
 def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
     if not payload.startswith(b"\xca\xfe\xba\xbe"):
         return None
     if len(payload) < 10:
         raise ValueError(f"truncated class header: {entry_name}")
     constant_pool_count = int.from_bytes(payload[8:10], "big")
-    utf8_entries: dict[int, str] = {}
+    utf8_entries: dict[int, bytes] = {}
     class_entries: dict[int, int] = {}
     offset = 10
     index = 1
@@ -347,10 +405,7 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
             offset += 2
             if offset + length > len(payload):
                 raise ValueError(f"truncated class UTF-8 value: {entry_name}")
-            try:
-                utf8_entries[index] = payload[offset:offset + length].decode("utf-8")
-            except UnicodeDecodeError as error:
-                raise ValueError(f"invalid class UTF-8 value: {entry_name}") from error
+            utf8_entries[index] = payload[offset:offset + length]
             offset += length
         elif tag in (3, 4, 9, 10, 11, 12, 17, 18):
             offset += 4
@@ -394,9 +449,10 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
         if class_index == 0:
             return None
         name_index = class_entries.get(class_index)
-        name = utf8_entries.get(name_index) if name_index is not None else None
-        if not name:
+        encoded_name = utf8_entries.get(name_index) if name_index is not None else None
+        if not encoded_name:
             raise ValueError(f"invalid class name reference: {entry_name}")
+        name = _decode_modified_utf8(encoded_name, entry_name)
         return name.replace("/", ".")
 
     interfaces = []
@@ -451,6 +507,58 @@ def _is_inspectable_class(
     )
 
 
+def _classpath_metadata(paths) -> tuple[dict[str, dict], list[dict]]:
+    raw_paths = list(paths or ())
+    if len(raw_paths) > MAX_CLASSPATH_JARS:
+        raise ValueError(
+            f"ancestry classpath exceeds {MAX_CLASSPATH_JARS} jars"
+        )
+    metadata_by_class = {}
+    records = []
+    class_count = 0
+    seen_artifacts = set()
+    for raw_path in raw_paths:
+        unresolved = Path(raw_path)
+        if unresolved.is_symlink():
+            raise ValueError(f"ancestry classpath jar is a symlink: {raw_path}")
+        path = unresolved.resolve()
+        if not path.is_file():
+            raise ValueError(f"ancestry classpath jar does not exist: {raw_path}")
+        size = path.stat().st_size
+        digest = _sha256_file(path)
+        identity = (digest, size)
+        if identity in seen_artifacts:
+            raise ValueError("ancestry classpath repeats an artifact")
+        seen_artifacts.add(identity)
+        with zipfile.ZipFile(path) as archive:
+            _validate_archive(path, archive)
+            for entry_name in sorted(archive.namelist()):
+                if not _is_inspectable_class(archive, entry_name):
+                    continue
+                class_count += 1
+                if class_count > MAX_CLASSPATH_CLASSES:
+                    raise ValueError(
+                        "ancestry classpath exceeds "
+                        f"{MAX_CLASSPATH_CLASSES} classes"
+                    )
+                class_name = _class_name(entry_name)
+                metadata = _class_metadata(
+                    archive.read(entry_name),
+                    entry_name,
+                )
+                previous = metadata_by_class.get(class_name)
+                if previous is not None and previous != metadata:
+                    raise ValueError(
+                        "ancestry classpath has conflicting class " + class_name
+                    )
+                metadata_by_class[class_name] = metadata
+        records.append({"sha256": digest, "size": size})
+    return metadata_by_class, sorted(
+        records,
+        key=lambda record: (record["sha256"], record["size"]),
+    )
+
+
 def _candidate_bucket(class_name: str) -> str | None:
     lowered = class_name.lower()
     if any(term in lowered for term in RECIPE_TERMS):
@@ -466,6 +574,13 @@ RECIPE_INTERFACE = "net.minecraft.world.item.crafting.Recipe"
 RECIPE_TYPE_INTERFACE = "net.minecraft.world.item.crafting.RecipeType"
 RECIPE_SERIALIZER_INTERFACE = "net.minecraft.world.item.crafting.RecipeSerializer"
 BLOCK_ENTITY_CLASS = "net.minecraft.world.level.block.entity.BlockEntity"
+KNOWN_ANCESTRY_ROOTS = frozenset({
+    RECIPE_INTERFACE,
+    RECIPE_TYPE_INTERFACE,
+    RECIPE_SERIALIZER_INTERFACE,
+    BLOCK_ENTITY_CLASS,
+})
+KNOWN_ANCESTRY_PREFIXES = ("java.", "javax.", "jdk.", "sun.")
 
 
 def _current_name_bucket(class_name: str) -> tuple[str, str] | None:
@@ -510,6 +625,50 @@ def _inheritance_path(
         return None
 
     return visit(class_name, ())
+
+
+def _require_resolved_ancestry(
+    target_classes: list[str],
+    metadata_by_class: dict[str, dict | None],
+):
+    resolved = set()
+    visiting = set()
+
+    def visit(class_name: str, owner: str):
+        if (
+            class_name in resolved
+            or class_name in KNOWN_ANCESTRY_ROOTS
+            or class_name.startswith(KNOWN_ANCESTRY_PREFIXES)
+        ):
+            return
+        if class_name in visiting:
+            return
+        metadata = metadata_by_class.get(class_name)
+        if metadata is None:
+            raise ValueError(
+                "unresolved ancestry; supply --classpath for "
+                f"{owner} -> {class_name}"
+            )
+        visiting.add(class_name)
+        parents = [
+            *metadata["interfaces"],
+            *([metadata["super_class"]] if metadata["super_class"] else []),
+        ]
+        for parent in parents:
+            visit(parent, owner)
+        visiting.remove(class_name)
+        resolved.add(class_name)
+
+    for class_name in target_classes:
+        name_bucket = _current_name_bucket(class_name)
+        if name_bucket is not None and name_bucket[0] in {
+            "client_viewer_classes",
+            "recipe_builders",
+            "datagen_classes",
+        }:
+            continue
+        if metadata_by_class.get(class_name) is not None:
+            visit(class_name, class_name)
 
 
 def _classify_candidate(
@@ -1318,6 +1477,43 @@ def _validate_audit(audit: dict):
     ):
         raise ValueError("audit artifact size must be a positive integer")
 
+    if scanner_format == SCAN_CACHE_VERSION:
+        classpath = audit.get("ancestry_classpath")
+        if not isinstance(classpath, list):
+            raise ValueError("audit is missing ancestry_classpath")
+        if len(classpath) > MAX_CLASSPATH_JARS:
+            raise ValueError("audit ancestry_classpath has too many artifacts")
+        normalized_classpath = []
+        for index, record in enumerate(classpath):
+            if not isinstance(record, dict) or set(record) != {"sha256", "size"}:
+                raise ValueError(
+                    f"audit ancestry_classpath {index} requires sha256 and size"
+                )
+            if not isinstance(record["sha256"], str) or not re.fullmatch(
+                r"[0-9a-f]{64}", record["sha256"]
+            ):
+                raise ValueError(
+                    f"audit ancestry_classpath {index} has invalid SHA"
+                )
+            if (
+                isinstance(record["size"], bool)
+                or not isinstance(record["size"], int)
+                or record["size"] <= 0
+            ):
+                raise ValueError(
+                    f"audit ancestry_classpath {index} has invalid size"
+                )
+            normalized_classpath.append(record)
+        if classpath != sorted(
+            normalized_classpath,
+            key=lambda record: (record["sha256"], record["size"]),
+        ) or len({(record["sha256"], record["size"]) for record in classpath}) != len(classpath):
+            raise ValueError(
+                "audit ancestry_classpath must be sorted and unique"
+            )
+    elif "ancestry_classpath" in audit:
+        raise ValueError("legacy audit must not contain ancestry_classpath")
+
     source = audit["source"]
     if not isinstance(source, dict) or set(source) != {"revision", "files"}:
         raise ValueError("audit source requires revision and files")
@@ -1444,6 +1640,7 @@ def scan_jar(
     jar,
     *,
     source=None,
+    classpath=None,
     cache_dir=None,
     signature_reader=None,
     risk_reader=None,
@@ -1457,6 +1654,10 @@ def scan_jar(
     if artifact_size > MAX_JAR_BYTES:
         raise ValueError(f"target jar exceeds {MAX_JAR_BYTES} bytes: {jar}")
     artifact_sha = _sha256_file(jar)
+    external_metadata, ancestry_classpath = _classpath_metadata(classpath)
+    classpath_digest = hashlib.sha256(
+        canonical_json(ancestry_classpath).encode("utf-8")
+    ).hexdigest()
     cache_path = None
 
     reader = signature_reader or (
@@ -1483,8 +1684,15 @@ def scan_jar(
             data_roots,
         )
         if cache_dir is not None and source is None:
-            cache_identity = (
+            base_cache_identity = (
                 recipe_data["digest"] if data_roots else artifact_sha
+            )
+            cache_identity = (
+                hashlib.sha256(
+                    (base_cache_identity + ":" + classpath_digest).encode("utf-8")
+                ).hexdigest()
+                if ancestry_classpath
+                else base_cache_identity
             )
             cache_path = (
                 Path(cache_dir)
@@ -1499,6 +1707,8 @@ def scan_jar(
                     raise ValueError(f"cached audit SHA mismatch: {cache_path}")
                 if cached["recipe_data"]["digest"] != recipe_data["digest"]:
                     raise ValueError(f"cached recipe-data digest mismatch: {cache_path}")
+                if cached["ancestry_classpath"] != ancestry_classpath:
+                    raise ValueError(f"cached ancestry classpath mismatch: {cache_path}")
                 if data_roots and _recipe_data_inventory(
                     archive,
                     artifact_sha,
@@ -1514,7 +1724,7 @@ def scan_jar(
             if _is_inspectable_class(archive, name)
         }
         class_names = sorted(class_entries)
-        metadata_by_class = {
+        target_metadata = {
             class_name: (
                 class_metadata_reader(class_name)
                 if class_metadata_reader is not None
@@ -1525,6 +1735,9 @@ def scan_jar(
             )
             for class_name in class_names
         }
+        metadata_by_class = dict(external_metadata)
+        metadata_by_class.update(target_metadata)
+        _require_resolved_ancestry(class_names, metadata_by_class)
         candidates = [
             (class_name, classification[0], classification[1])
             for class_name in class_names
@@ -1595,6 +1808,7 @@ def scan_jar(
             "sha256": artifact_sha,
             "size": artifact_size,
         },
+        "ancestry_classpath": ancestry_classpath,
         "source": _source_evidence(
             source_path,
             {candidate["class"] for candidate in all_candidates},
@@ -1616,6 +1830,7 @@ def migrate_audit(
     jar,
     *,
     source=None,
+    classpath=None,
     cache_dir=None,
     signature_reader=None,
     risk_reader=None,
@@ -1628,6 +1843,7 @@ def migrate_audit(
     migrated = scan_jar(
         jar,
         source=source,
+        classpath=classpath,
         cache_dir=cache_dir,
         signature_reader=signature_reader,
         risk_reader=risk_reader,
@@ -1712,6 +1928,7 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
         "source_recipe_inventory_sha256": _recipe_inventory_sha256(
             candidate["class"] for candidate in recipe_candidates
         ),
+        "source_recipe_data_sha256": audit["recipe_data"]["digest"],
         "families": families,
         "verification": {
             "fixture": None,
@@ -2037,6 +2254,14 @@ def validate_contract(
         raise ValueError(
             "contract source_recipe_inventory_sha256 must be a SHA-256 digest"
         )
+    source_recipe_data_sha256 = contract.get("source_recipe_data_sha256")
+    if not isinstance(source_recipe_data_sha256, str) or not re.fullmatch(
+        r"[0-9a-f]{64}",
+        source_recipe_data_sha256,
+    ):
+        raise ValueError(
+            "contract source_recipe_data_sha256 must be a SHA-256 digest"
+        )
     if not isinstance(contract.get("families"), list):
         raise ValueError("contract families must be a list")
     target = contract.get("target")
@@ -2145,6 +2370,8 @@ def validate_contract(
                 raise ValueError(f"contract target {key} does not match source audit")
         if source_audit["artifact"]["sha256"] != source_audit_sha256:
             raise ValueError("contract target artifact does not match source audit")
+        if source_audit["recipe_data"]["digest"] != source_recipe_data_sha256:
+            raise ValueError("contract recipe data does not match source audit")
         audited_recipe_classes = {
             candidate["class"]
             for candidate in source_audit["candidates"]["recipe_classes"]
@@ -4494,10 +4721,25 @@ def _worker_candidate_summary(contract: dict, audit: dict) -> dict:
     }
 
 
-def worker_package(contract: dict, audit: dict, output) -> list[Path]:
+def worker_package(
+    contract: dict,
+    audit: dict,
+    output,
+    *,
+    audit_path,
+) -> list[Path]:
     validate_contract(contract, require_complete=False, source_audit=audit)
     if audit["scanner_format"] != SCAN_CACHE_VERSION:
         raise ValueError("worker-package requires a current scanner-format audit")
+    audit_reference = Path(audit_path)
+    if (
+        audit_reference.is_absolute()
+        or ".." in audit_reference.parts
+        or audit_reference.suffix != ".json"
+        or not audit_reference.parts
+    ):
+        raise ValueError("worker-package audit path must be a safe repository-relative JSON path")
+    audit_argument = shlex.quote(audit_reference.as_posix())
     summary = _worker_candidate_summary(contract, audit)
     target = audit["target"]
     unresolved = summary["unresolved_families"]
@@ -4565,13 +4807,13 @@ def worker_package(contract: dict, audit: dict, output) -> list[Path]:
 set -eu
 export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export PATH="$JAVA_HOME/bin:$PATH"
-tools/compat-kit/compat-kit propose audit.json --output proposals.json
+tools/compat-kit/compat-kit propose {audit_argument} --output proposals.json
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_compat_kit
 ./gradlew build --console=plain --no-daemon
 ./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon
 ./gradlew runData --console=plain --no-daemon
 git diff --check
-"""
+""".format(audit_argument=audit_argument)
     pr_body = "\n".join([
         f"## Summary",
         "",
@@ -5940,6 +6182,8 @@ def _resource_tests_java(plan: dict) -> str:
     @GameTest(template = "empty")
     public static void {name}_mixed_resource_rollback_is_atomic(GameTestHelper helper) {{
         var scenario = scenario{index}(helper);
+        scenario.reset();
+        scenario.seed();
         var before = scenario.snapshot();
         if (scenario.attemptMixedRollback()) helper.fail("Mixed resource rollback unexpectedly committed");
         if (!before.equals(scenario.snapshot())) helper.fail("Mixed resource rollback mutated state");
@@ -6076,6 +6320,7 @@ def _build_parser() -> argparse.ArgumentParser:
     scan = subparsers.add_parser("scan")
     scan.add_argument("--jar", required=True)
     scan.add_argument("--source")
+    scan.add_argument("--classpath", action="append", default=[])
     scan.add_argument("--data-root", action="append", default=[])
     scan.add_argument("--output", required=True)
     scan.add_argument("--cache", default="build/compat-kit/cache")
@@ -6093,6 +6338,7 @@ def _build_parser() -> argparse.ArgumentParser:
     migrate.add_argument("audit")
     migrate.add_argument("--jar", required=True)
     migrate.add_argument("--source")
+    migrate.add_argument("--classpath", action="append", default=[])
     migrate.add_argument("--data-root", action="append", default=[])
     migrate.add_argument("--output", required=True)
     migrate.add_argument("--cache", default="build/compat-kit/cache")
@@ -6108,6 +6354,11 @@ def _build_parser() -> argparse.ArgumentParser:
     probe.add_argument("audit")
     probe.add_argument("--plan")
     probe.add_argument("--output", required=True)
+
+    validate_probe = subparsers.add_parser("validate-probe")
+    validate_probe.add_argument("output")
+    validate_probe.add_argument("--audit", required=True)
+    validate_probe.add_argument("--plan")
 
     worker = subparsers.add_parser("worker-package")
     worker.add_argument("contract")
@@ -6136,6 +6387,7 @@ def _build_parser() -> argparse.ArgumentParser:
     delta.add_argument("old_audit")
     delta.add_argument("new_target")
     delta.add_argument("--source")
+    delta.add_argument("--classpath", action="append", default=[])
     delta.add_argument("--data-root", action="append", default=[])
     delta.add_argument("--output", required=True)
     delta.add_argument("--cache", default="build/compat-kit/cache")
@@ -6169,6 +6421,7 @@ def main(argv=None) -> int:
             audit = scan_jar(
                 args.jar,
                 source=args.source,
+                classpath=args.classpath,
                 cache_dir=args.cache,
                 data_roots=args.data_root,
             )
@@ -6188,6 +6441,7 @@ def main(argv=None) -> int:
                     _read_json(args.audit),
                     args.jar,
                     source=args.source,
+                    classpath=args.classpath,
                     cache_dir=args.cache,
                     data_roots=args.data_root,
                 ),
@@ -6208,11 +6462,18 @@ def main(argv=None) -> int:
                 args.output,
                 plan=_read_json(args.plan) if args.plan else None,
             )
+        elif args.command == "validate-probe":
+            validate_runtime_probe_output(
+                _read_json(args.output),
+                _read_json(args.audit),
+                plan=_read_json(args.plan) if args.plan else None,
+            )
         elif args.command == "worker-package":
             worker_package(
                 _read_json(args.contract),
                 _read_json(args.audit),
                 args.output,
+                audit_path=args.audit,
             )
         elif args.command == "generate":
             generate_compatibility(
@@ -6244,6 +6505,7 @@ def main(argv=None) -> int:
                 new = scan_jar(
                     new_path,
                     source=args.source,
+                    classpath=args.classpath,
                     cache_dir=args.cache,
                     data_roots=args.data_root,
                 )

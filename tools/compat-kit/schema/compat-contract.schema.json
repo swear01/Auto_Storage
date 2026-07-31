@@ -4,7 +4,7 @@
   "title": "Auto Storage compatibility contract",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "kind", "target", "source_audit_sha256", "source_recipe_inventory_sha256", "families", "verification"],
+  "required": ["schema", "kind", "target", "source_audit_sha256", "source_recipe_inventory_sha256", "source_recipe_data_sha256", "families", "verification"],
   "properties": {
     "schema": {"const": 1},
     "kind": {"const": "auto_storage_compat_contract"},
@@ -39,6 +39,7 @@
     },
     "source_audit_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "source_recipe_inventory_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_recipe_data_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "families": {
       "type": "array",
       "items": {

@@ -1,4 +1,374 @@
 {
+  "ancestry_classpath": [
+    {
+      "sha256": "051aceb8bbcc62d0f5b2b8ac72c53767f9c59bfbd050151e65bef6f51c8ed9c9",
+      "size": 1078328
+    },
+    {
+      "sha256": "05d7b89f09c6de1a9b61d0e786c8fd808aed044babf321653e14abd6740d5546",
+      "size": 15648
+    },
+    {
+      "sha256": "0818930dc8d7debb403204611691da58e49d42c50b6ffcfdce02dadb7c3c2b6c",
+      "size": 64579
+    },
+    {
+      "sha256": "08e156ab5332f614eac1ad9917d1a9d0642067c2da69b2c428c92fe2bd3b32a8",
+      "size": 1151107
+    },
+    {
+      "sha256": "0cff7aa46ea9d70fcc20857015293ea80fbf21adcac34600c84da9b81a44ca93",
+      "size": 120283
+    },
+    {
+      "sha256": "12125170e795519ba6dc8010c070b53c76aae92b485c1e37530e54ab5dd08d43",
+      "size": 228481
+    },
+    {
+      "sha256": "14b7880cb7c85eed101e2710432fc3ffb83275532a6a894dc4c4095d49ad59f1",
+      "size": 51934
+    },
+    {
+      "sha256": "16d70e7968b45caffc81576268eb000f473fb60bf257182d3447dea8ec919d5a",
+      "size": 4439
+    },
+    {
+      "sha256": "182fcee7ed6e2be4c815bd08d2c766d355c58ab1e227b6ffd84ed26a0f71b6d6",
+      "size": 504899
+    },
+    {
+      "sha256": "1920cd69d8682c7ef249bb407a3d0685723aa1785867cf4c53258da6bf14da97",
+      "size": 27364
+    },
+    {
+      "sha256": "197fd2d6c6b4afe677d9e95bf2e36b49a0bcabdfce0583683fb73f29a3f5a407",
+      "size": 489624
+    },
+    {
+      "sha256": "1afea1bca095068f7f4483f061feed94753be34233ddb0df9ec380fc14d5a985",
+      "size": 16949
+    },
+    {
+      "sha256": "1d45cfe3ae4a2eab38dc74276803748cf799088986260d6d912e50ddb35d15c5",
+      "size": 1494751
+    },
+    {
+      "sha256": "1fafb07b9d13c66d4435b0db38860d15607d9c5834d5aadeb89ce1bb3d16543d",
+      "size": 116961
+    },
+    {
+      "sha256": "20b9df04c829dcd0d0668817b869e567c6f04f131ffd45eaf84b418834fb8b84",
+      "size": 22701973
+    },
+    {
+      "sha256": "27a770dc7ce50500918bb8c3c0660c98290630ec796b5e3cf6b90f403b3033c6",
+      "size": 30570
+    },
+    {
+      "sha256": "29280822f4b0796acef1f79b90b1d0c1edd86c10e876a848e04b8a6298a16bf9",
+      "size": 14567819
+    },
+    {
+      "sha256": "319ea7b53b5e52f62ad3e2b81e9db7f0751240edac548bd74f5f19e35dc21a3b",
+      "size": 115242
+    },
+    {
+      "sha256": "3301a1c1cb4c59fcc5292648dac1d7c5aed4c0f067dfbe88873b8cdfe77404f4",
+      "size": 73498
+    },
+    {
+      "sha256": "34ed1e1f27fa896bca50dbc4e99cf3732967cec387a7a0d5e3486c09673fe8c6",
+      "size": 1878533
+    },
+    {
+      "sha256": "38a018c6d9fb2cb11b72881354782b45080bbd20b9a0ad6cde28b80d431ed0b1",
+      "size": 37792
+    },
+    {
+      "sha256": "38d427319b6218b2af9ab105fa817a2f321a9d82ce1a8201d91fc00154030d32",
+      "size": 2342926
+    },
+    {
+      "sha256": "3d70aaea3904918587a21bdf99ab6ade9ab1dd0eaf6119344ba513f60f575816",
+      "size": 250861
+    },
+    {
+      "sha256": "3dc3190204bac5f4184d8405bfe1f724f73a6a15a0d3f36ec7f69e6872c1a76c",
+      "size": 15343
+    },
+    {
+      "sha256": "408300867804be05d1083cc0287dd3a21295a9e76090e288013ba5a4182dc96d",
+      "size": 18281
+    },
+    {
+      "sha256": "412fe140257c2dda5a5e15bee911298bd61928d03ee6be4db588e82c196c5dc6",
+      "size": 43897
+    },
+    {
+      "sha256": "4241c14a7727c34feea6507ec801318a3d4a90f070e4525681079fb94ee4c593",
+      "size": 283367
+    },
+    {
+      "sha256": "46dccecac556623d8e2ce8648496824a82951d139062a4e61148aff1a25ed18d",
+      "size": 1900022
+    },
+    {
+      "sha256": "5062da750e5f7ec89e27e8b67b7d40fa8c4b16890159e35f828116ce6c8eca1e",
+      "size": 929192
+    },
+    {
+      "sha256": "54665d2838cc66458343468efc539e454fc95b46a8a04b13c6ac43fc9be63505",
+      "size": 326305
+    },
+    {
+      "sha256": "56595fb20b0b85bc91d0d503dad50bb7f1b9afc0eed5dffa6cbb25929000484d",
+      "size": 360738
+    },
+    {
+      "sha256": "5d7beae7ff15d8516d6517121d7f12a79a6ac180df64b5fcec55d5be21056e53",
+      "size": 335001
+    },
+    {
+      "sha256": "6062c9d0205e352cc3e89aca59346559eed11aa47c7564ea6261de881affaa80",
+      "size": 322592
+    },
+    {
+      "sha256": "62229015025b7c0a741590b626b6719631f6b8a945c483ece12e7035d4fd903d",
+      "size": 4646983
+    },
+    {
+      "sha256": "6410270f0749c4d4666ad9259a97f4066cd2c8cdb88b70b017145df6cf1502ec",
+      "size": 261718
+    },
+    {
+      "sha256": "6826661fac4c14d1a86ed8e2026047d791d75f28886070c91f5bc5980c0aa08f",
+      "size": 101479
+    },
+    {
+      "sha256": "6c9b3dd142a09dc468e23ad39aad6f75a0f2b85125104469f026e52a474e464f",
+      "size": 327891
+    },
+    {
+      "sha256": "6f816e84dfd63a81d4eaa7829c08337bbaff3ec683ff3bf6bbd90d017a00dc6f",
+      "size": 2167292
+    },
+    {
+      "sha256": "6fe9026a566c6a5001608cf3fc32196641f6c1e5e1986d1037ccdbd5f31ef743",
+      "size": 780321
+    },
+    {
+      "sha256": "705e24f37752809499a5cd0c7dd31eaabf3d933c5d3b2060168e94e9ef62593a",
+      "size": 30340
+    },
+    {
+      "sha256": "766ad2a0783f2687962c8ad74ceecc38a28b9f72a2d085ee438b7813e928d0c7",
+      "size": 19936
+    },
+    {
+      "sha256": "76d174792540e2775af94d03d10fb2d3c776e2cd0ac0ebf427d3e570072bb9ce",
+      "size": 263253
+    },
+    {
+      "sha256": "77e34a13bccffc6c8b1a0e3ed46ddb0ea7dd56f2104ecdfacaaec9e4054ac332",
+      "size": 1330045
+    },
+    {
+      "sha256": "7b96bf3ee68949abb5bc465559ac270e0551596fa34523fddf890ec418dde13c",
+      "size": 657952
+    },
+    {
+      "sha256": "830bfd639c8db49236bbd8e45d3a2b8c96c56ff654a10118654958a6235d4c44",
+      "size": 964
+    },
+    {
+      "sha256": "876eab6a83daecad5ca67eb9fcabb063c97b5aeb8cf1fca7a989ecde17522051",
+      "size": 126113
+    },
+    {
+      "sha256": "89fb0dc3d68f8a5961f309ee110dad7d2c1094ba204595602b71e02e104838a1",
+      "size": 67234
+    },
+    {
+      "sha256": "8ba0460ecb28fd0e2980e5f3ef3433a513a457bc077f81a53bdc75b587a08d15",
+      "size": 94559
+    },
+    {
+      "sha256": "91172bc294d6eab02fc9f45f4ea01fd0e418962d128cf489abea7b6957d988ee",
+      "size": 58077
+    },
+    {
+      "sha256": "945c63d6deafc821616b0380c23867d9b8c2852438f8a6df72732ab933fc587d",
+      "size": 103765
+    },
+    {
+      "sha256": "971dc88c1c22085611ee1c300f5bbf8595938178e819befbb5e98c3cbd272b79",
+      "size": 382911
+    },
+    {
+      "sha256": "9822e773bd9f42d36ed53ea3d67486207291747a7bfacc29beeb92040721bc9b",
+      "size": 725927
+    },
+    {
+      "sha256": "9e6814cb71816988a4fd1b07a993a8f21bb7058d522c162b1de849e19bea54ae",
+      "size": 16017
+    },
+    {
+      "sha256": "a171ee4c734dd2da837e4b16be9df4661afab72a41adaf31eb84dfdaf936ca26",
+      "size": 4617
+    },
+    {
+      "sha256": "a4393f5b395486cc74d0325c9b41311abb9513ba0fd7ef8cf46e9345c3bffbea",
+      "size": 306590
+    },
+    {
+      "sha256": "a58af12ee1b68cfd2ebb0c27caef164f084381a00ec81a48cc275fd7ea54e154",
+      "size": 501218
+    },
+    {
+      "sha256": "a8aca0c8e9347acc75c885ecc749195d9775369aa520b9276f2d1128210a6c17",
+      "size": 659930
+    },
+    {
+      "sha256": "acd1c94d1e228aa7b7962f69b21ed3a9fd828eb3a63e4baf9086954e626af1f0",
+      "size": 171052
+    },
+    {
+      "sha256": "ae0e82767cacf08921f578fba9d84753ddeb00ceada0510a2b4a882be28fbf95",
+      "size": 110586
+    },
+    {
+      "sha256": "ae4caceb3840730c2537f9b7fb55a01baba580286b4122951488bcee558c2449",
+      "size": 1369287
+    },
+    {
+      "sha256": "b0f671edb606a236ac815deebcf29d629b623d616ac271179c3e5f79ff059962",
+      "size": 592035
+    },
+    {
+      "sha256": "b372a037d4230aa57fbeffdef30fd6123f9c0c2db85d0aced00c91b974f33f99",
+      "size": 2199
+    },
+    {
+      "sha256": "b5543ee08d062d551cf0a5c9bc0fb70588b0382079029ba48941fa9c9be8a5d4",
+      "size": 23326598
+    },
+    {
+      "sha256": "bc65dea7cfd9e4dacf8419d8af0e741655857d27885bb35d943d7187fc3a8fce",
+      "size": 3041591
+    },
+    {
+      "sha256": "bcc96737a0f912fcf031cf8c45ebda352a90a40437db0832caad3d5a63618b38",
+      "size": 345274
+    },
+    {
+      "sha256": "bd4771d19149cbc9c7464ed2d58035d79cdfed7adb59d38718b0d8e7a3dcc2de",
+      "size": 560040
+    },
+    {
+      "sha256": "bedc757fd2b1b255146db26b74b9cbd1fcf5644b89b47b104fa721c741604259",
+      "size": 135546
+    },
+    {
+      "sha256": "c2a95b499e76fada7dd63e9b0ec797b678d411c2b0ee6f37f4dc674662bfb0af",
+      "size": 12243
+    },
+    {
+      "sha256": "c8ee4136e474ac7723ca2b432ec8d1a2bc88ef7d1ec57c314ba9e33cdc83dd75",
+      "size": 80082
+    },
+    {
+      "sha256": "cac9f22f83a7aa33eebda73c16ff5261e3cb4911b6bafcf4c79ea486099d0c9a",
+      "size": 712082
+    },
+    {
+      "sha256": "ccb92882264bf071e3916ab122fe5ea3e211b8ebf199201698a1324f151f928f",
+      "size": 39516
+    },
+    {
+      "sha256": "d24c0d3e31af23cac36a0f9f98654b875f678b27ddccd8b28d331c1878a6de4a",
+      "size": 22659
+    },
+    {
+      "sha256": "d3f29309140540570fd6c709509706aa8fb133c1c8aef24491688f1a3f4e1d49",
+      "size": 11116
+    },
+    {
+      "sha256": "d74a3334fb35195009b338a951f918203d6bbca3d1d359033dc33edd1cadc9ef",
+      "size": 682804
+    },
+    {
+      "sha256": "d9f88af1223ff23395c64ff0b0fe367563288a37bd38709bf667b6b39944bfab",
+      "size": 31807
+    },
+    {
+      "sha256": "daddea1ea0be0f56978ab3006b8ac92834afeefbd9b7e4e6316fca57df0fa636",
+      "size": 61829
+    },
+    {
+      "sha256": "dc9c7b2d48e8396d68895f8902ffa01e46253de44dfe927533ff09457ebfeec4",
+      "size": 785029
+    },
+    {
+      "sha256": "df26cc58f235f477db07f753ba5a3ab243ebe5789d9f89ecf68dd62ea9a66c28",
+      "size": 78146
+    },
+    {
+      "sha256": "e067f29a3701426b67ed973036949c6e58ca5bb53eef7240b2e71e286d252a9e",
+      "size": 99701
+    },
+    {
+      "sha256": "e13e61c0437d6db17e7b3581ff261292015dcd9e11683f5a365b4b9a5c192283",
+      "size": 2550
+    },
+    {
+      "sha256": "e1a7ab07106349d9a8a68f6860b7b73b353c502b81e662aca77f931c6fdd3de8",
+      "size": 450896
+    },
+    {
+      "sha256": "e316255bbfcd9fe50d165314b85abb2b33cb2a66a93c491db648e498a82c2de1",
+      "size": 223979
+    },
+    {
+      "sha256": "e640732fbcd3c6271925a504f125e38384688f4dfbbf92c8622dfcee0d09edb9",
+      "size": 35151
+    },
+    {
+      "sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44",
+      "size": 644158
+    },
+    {
+      "sha256": "e99e31269e6678a4bfc62ef24c50a481c01cbdd004861ece9a59ba12768c6516",
+      "size": 43896
+    },
+    {
+      "sha256": "ee0515054ee19a3f4088426fee9d879eb2ee657b07e5064e4e2c851f6adcf14b",
+      "size": 13400
+    },
+    {
+      "sha256": "ee65fa17fe65f18fd22269f92bddad85bfb3a263cf65eba01e116a2f30b86ff5",
+      "size": 147139
+    },
+    {
+      "sha256": "f02a95fa1a5e95edb3ed859fd0fb7df709d121a35290eff8b74dce2ab7f4d6ed",
+      "size": 9301
+    },
+    {
+      "sha256": "f34bab02a5e967650dc52b7cb37a200051a7078f7d1868597699d78697da2400",
+      "size": 17168
+    },
+    {
+      "sha256": "fd9b9fc7cf043d2264ea0113eac6b258f0a71fece5b00e831bfbdf9726c78a24",
+      "size": 116486
+    },
+    {
+      "sha256": "fef001a7a13515c273f30915915580782afbc45273cc07aa15994e51563ef310",
+      "size": 979212
+    },
+    {
+      "sha256": "ffc138bc2596c291781b0d5e211ccac51f0f2345f27fc2742f335cedf7e2870d",
+      "size": 724313
+    }
+  ],
   "artifact": {
     "sha256": "460d779a0609b81409907d9956de8f6f70a1b0912257e3e5c3c7e75ac9630e95",
     "size": 8230896
@@ -4273,6 +4643,84 @@
         "public_signature": "Compiled from \"EntropyRecipe.java\"\npublic class appeng.recipes.entropy.EntropyRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.entropy.EntropyRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.entropy.EntropyRecipe> STREAM_CODEC;\n  public static final net.minecraft.resources.ResourceLocation TYPE_ID;\n  public static final net.minecraft.world.item.crafting.RecipeType<appeng.recipes.entropy.EntropyRecipe> TYPE;\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public appeng.recipes.entropy.EntropyMode getMode();\n  public net.minecraft.world.level.block.state.BlockState getOutputBlockState(net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.world.level.material.FluidState getOutputFluidState(net.minecraft.world.level.material.FluidState);\n  public java.util.List<net.minecraft.world.item.ItemStack> getDrops();\n  public boolean matches(appeng.recipes.entropy.EntropyMode, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.material.FluidState);\n  public appeng.recipes.entropy.EntropyRecipe$Input getInput();\n  public appeng.recipes.entropy.EntropyRecipe$Output getOutput();\n}"
       },
       {
+        "class": "appeng.recipes.game.AddItemUpgradeRecipe",
+        "classification": {
+          "evidence": [
+            "appeng.recipes.game.AddItemUpgradeRecipe",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"AddItemUpgradeRecipe.java\"\npublic class appeng.recipes.game.AddItemUpgradeRecipe extends net.minecraft.world.item.crafting.CustomRecipe {\n  public static final appeng.recipes.game.AddItemUpgradeRecipe INSTANCE;\n  public static final net.minecraft.resources.ResourceLocation SERIALIZER_ID;\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.game.AddItemUpgradeRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.game.AddItemUpgradeRecipe> STREAM_CODEC;\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "appeng.recipes.game.CraftingUnitTransformRecipe",
+        "classification": {
+          "evidence": [
+            "appeng.recipes.game.CraftingUnitTransformRecipe",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"CraftingUnitTransformRecipe.java\"\npublic class appeng.recipes.game.CraftingUnitTransformRecipe extends net.minecraft.world.item.crafting.CustomRecipe {\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.game.CraftingUnitTransformRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.game.CraftingUnitTransformRecipe> STREAM_CODEC;\n  public appeng.recipes.game.CraftingUnitTransformRecipe(net.minecraft.world.level.block.Block, net.minecraft.world.item.Item);\n  public net.minecraft.world.level.block.Block getUpgradedBlock();\n  public net.minecraft.world.item.Item getUpgradeItem();\n  public static net.minecraft.world.item.ItemStack getRemovedUpgrade(net.minecraft.world.level.Level, net.minecraft.world.level.block.Block);\n  public static net.minecraft.world.level.block.Block getUpgradedBlock(net.minecraft.world.level.Level, net.minecraft.world.item.ItemStack);\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "appeng.recipes.game.FacadeRecipe",
+        "classification": {
+          "evidence": [
+            "appeng.recipes.game.FacadeRecipe",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FacadeRecipe.java\"\npublic final class appeng.recipes.game.FacadeRecipe extends net.minecraft.world.item.crafting.CustomRecipe {\n  public static net.minecraft.world.item.crafting.RecipeSerializer<appeng.recipes.game.FacadeRecipe> SERIALIZER;\n  public appeng.recipes.game.FacadeRecipe(net.minecraft.world.item.crafting.CraftingBookCategory, appeng.items.parts.FacadeItem);\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.crafting.RecipeSerializer<appeng.recipes.game.FacadeRecipe> getSerializer();\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "appeng.recipes.game.RemoveItemUpgradeRecipe",
+        "classification": {
+          "evidence": [
+            "appeng.recipes.game.RemoveItemUpgradeRecipe",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"RemoveItemUpgradeRecipe.java\"\npublic class appeng.recipes.game.RemoveItemUpgradeRecipe extends net.minecraft.world.item.crafting.CustomRecipe {\n  public static final appeng.recipes.game.RemoveItemUpgradeRecipe INSTANCE;\n  public static final net.minecraft.resources.ResourceLocation SERIALIZER_ID;\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.game.RemoveItemUpgradeRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.game.RemoveItemUpgradeRecipe> STREAM_CODEC;\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.core.NonNullList getRemainingItems(net.minecraft.world.item.crafting.RecipeInput);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "appeng.recipes.game.StorageCellDisassemblyRecipe",
+        "classification": {
+          "evidence": [
+            "appeng.recipes.game.StorageCellDisassemblyRecipe",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"StorageCellDisassemblyRecipe.java\"\npublic class appeng.recipes.game.StorageCellDisassemblyRecipe extends net.minecraft.world.item.crafting.CustomRecipe {\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.game.StorageCellDisassemblyRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.game.StorageCellDisassemblyRecipe> STREAM_CODEC;\n  public appeng.recipes.game.StorageCellDisassemblyRecipe(net.minecraft.world.item.Item, java.util.List<net.minecraft.world.item.ItemStack>);\n  public net.minecraft.world.item.Item getStorageCell();\n  public java.util.List<net.minecraft.world.item.ItemStack> getCellDisassemblyItems();\n  public boolean canDisassemble();\n  public static java.util.List<net.minecraft.world.item.ItemStack> getDisassemblyResult(net.minecraft.world.level.Level, net.minecraft.world.item.Item);\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "appeng.recipes.game.StorageCellUpgradeRecipe",
+        "classification": {
+          "evidence": [
+            "appeng.recipes.game.StorageCellUpgradeRecipe",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"StorageCellUpgradeRecipe.java\"\npublic class appeng.recipes.game.StorageCellUpgradeRecipe extends net.minecraft.world.item.crafting.CustomRecipe {\n  public static final net.minecraft.resources.ResourceLocation SERIALIZER_ID;\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.game.StorageCellUpgradeRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.game.StorageCellUpgradeRecipe> STREAM_CODEC;\n  public appeng.recipes.game.StorageCellUpgradeRecipe(net.minecraft.world.item.Item, net.minecraft.world.item.Item, net.minecraft.world.item.Item, net.minecraft.world.item.Item);\n  public net.minecraft.world.item.Item getInputCell();\n  public net.minecraft.world.item.Item getInputComponent();\n  public net.minecraft.world.item.Item getResultCell();\n  public net.minecraft.world.item.Item getResultComponent();\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.core.NonNullList getRemainingItems(net.minecraft.world.item.crafting.RecipeInput);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
         "class": "appeng.recipes.handlers.ChargerRecipe",
         "classification": {
           "evidence": [
@@ -4304,6 +4752,18 @@
           "method": "class_hierarchy"
         },
         "public_signature": "Compiled from \"MatterCannonAmmo.java\"\npublic class appeng.recipes.mattercannon.MatterCannonAmmo implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public static final net.minecraft.resources.ResourceLocation TYPE_ID;\n  public static final net.minecraft.world.item.crafting.RecipeType<appeng.recipes.mattercannon.MatterCannonAmmo> TYPE;\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.mattercannon.MatterCannonAmmo> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.mattercannon.MatterCannonAmmo> STREAM_CODEC;\n  public appeng.recipes.mattercannon.MatterCannonAmmo(net.minecraft.world.item.crafting.Ingredient, float);\n  public static void ammo(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation, net.minecraft.world.level.ItemLike, float);\n  public static void ammo(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation, net.minecraft.world.item.crafting.Ingredient, float);\n  public static void ammo(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation, net.minecraft.tags.TagKey<net.minecraft.world.item.Item>, float);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public net.minecraft.world.item.crafting.Ingredient getAmmo();\n  public float getWeight();\n}"
+      },
+      {
+        "class": "appeng.recipes.quartzcutting.QuartzCuttingRecipe",
+        "classification": {
+          "evidence": [
+            "appeng.recipes.quartzcutting.QuartzCuttingRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"QuartzCuttingRecipe.java\"\npublic class appeng.recipes.quartzcutting.QuartzCuttingRecipe implements net.minecraft.world.item.crafting.CraftingRecipe {\n  public static final com.mojang.serialization.MapCodec<appeng.recipes.quartzcutting.QuartzCuttingRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, appeng.recipes.quartzcutting.QuartzCuttingRecipe> STREAM_CODEC;\n  public appeng.recipes.quartzcutting.QuartzCuttingRecipe(net.minecraft.world.item.ItemStack, net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient>);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.CraftingBookCategory category();\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput);\n  public net.minecraft.core.NonNullList getRemainingItems(net.minecraft.world.item.crafting.RecipeInput);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
       },
       {
         "class": "appeng.recipes.transform.TransformRecipe",
@@ -6135,14 +6595,32 @@
   },
   "risks": [
     {
+      "code": "entity_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "appeng.recipes.quartzcutting.QuartzCuttingRecipe: entity API"
+      ]
+    },
+    {
       "code": "generic_ingredients",
       "disposition": "needs_decision",
       "evidence": [
         "appeng.recipes.entropy.EntropyRecipe#getIngredients",
+        "appeng.recipes.game.AddItemUpgradeRecipe#getIngredients",
+        "appeng.recipes.game.RemoveItemUpgradeRecipe#getIngredients",
+        "appeng.recipes.game.StorageCellUpgradeRecipe#getIngredients",
         "appeng.recipes.handlers.ChargerRecipe#getIngredients",
         "appeng.recipes.handlers.InscriberRecipe#getIngredients",
         "appeng.recipes.mattercannon.MatterCannonAmmo#getIngredients",
+        "appeng.recipes.quartzcutting.QuartzCuttingRecipe#getIngredients",
         "appeng.recipes.transform.TransformRecipe#getIngredients"
+      ]
+    },
+    {
+      "code": "simulation_required",
+      "disposition": "needs_decision",
+      "evidence": [
+        "appeng.recipes.game.RemoveItemUpgradeRecipe#extractItem"
       ]
     },
     {
@@ -6150,9 +6628,16 @@
       "disposition": "needs_decision",
       "evidence": [
         "appeng.recipes.entropy.EntropyRecipe: world API",
+        "appeng.recipes.game.AddItemUpgradeRecipe: world API",
+        "appeng.recipes.game.CraftingUnitTransformRecipe: world API",
+        "appeng.recipes.game.FacadeRecipe: world API",
+        "appeng.recipes.game.RemoveItemUpgradeRecipe: world API",
+        "appeng.recipes.game.StorageCellDisassemblyRecipe: world API",
+        "appeng.recipes.game.StorageCellUpgradeRecipe: world API",
         "appeng.recipes.handlers.ChargerRecipe: world API",
         "appeng.recipes.handlers.InscriberRecipe: world API",
         "appeng.recipes.mattercannon.MatterCannonAmmo: world API",
+        "appeng.recipes.quartzcutting.QuartzCuttingRecipe: world API",
         "appeng.recipes.transform.TransformRecipe: world API"
       ]
     }
@@ -6607,10 +7092,16 @@
       "src/main/java/appeng/recipes/entropy/EntropyRecipe.java",
       "src/main/java/appeng/recipes/entropy/EntropyRecipeBuilder.java",
       "src/main/java/appeng/recipes/entropy/EntropyRecipeSerializer.java",
+      "src/main/java/appeng/recipes/game/AddItemUpgradeRecipe.java",
       "src/main/java/appeng/recipes/game/AddItemUpgradeRecipeSerializer.java",
+      "src/main/java/appeng/recipes/game/CraftingUnitTransformRecipe.java",
       "src/main/java/appeng/recipes/game/CraftingUnitTransformRecipeSerializer.java",
+      "src/main/java/appeng/recipes/game/FacadeRecipe.java",
+      "src/main/java/appeng/recipes/game/RemoveItemUpgradeRecipe.java",
       "src/main/java/appeng/recipes/game/RemoveItemUpgradeRecipeSerializer.java",
+      "src/main/java/appeng/recipes/game/StorageCellDisassemblyRecipe.java",
       "src/main/java/appeng/recipes/game/StorageCellDisassemblyRecipeSerializer.java",
+      "src/main/java/appeng/recipes/game/StorageCellUpgradeRecipe.java",
       "src/main/java/appeng/recipes/game/StorageCellUpgradeRecipeSerializer.java",
       "src/main/java/appeng/recipes/handlers/ChargerRecipe.java",
       "src/main/java/appeng/recipes/handlers/ChargerRecipeBuilder.java",
@@ -6621,6 +7112,7 @@
       "src/main/java/appeng/recipes/handlers/InscriberRecipeSerializer.java",
       "src/main/java/appeng/recipes/mattercannon/MatterCannonAmmo.java",
       "src/main/java/appeng/recipes/mattercannon/MatterCannonAmmoSerializer.java",
+      "src/main/java/appeng/recipes/quartzcutting/QuartzCuttingRecipe.java",
       "src/main/java/appeng/recipes/quartzcutting/QuartzCuttingRecipeSerializer.java",
       "src/main/java/appeng/recipes/transform/TransformCircumstance.java",
       "src/main/java/appeng/recipes/transform/TransformRecipe.java",
