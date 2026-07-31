@@ -75,9 +75,11 @@ accept the descriptor syntax emitted by `javap -c -p`.
 ```
 
 Scaffolding preflights every destination before writing the first file. Any
-existing path with different content or a file-valued parent directory fails
-without leaving a partial project. Generated addon metadata accepts only the
-current compatible Auto Storage minor (`[0.3.0,0.4)` for this kit).
+existing path with different content, symlinked root/ancestor/target, or
+file-valued parent directory fails without leaving a partial project or writing
+outside the requested output root. Generated TOML also escapes DEL (`U+007F`).
+Generated addon metadata accepts only the current compatible Auto Storage minor
+(`[0.3.0,0.4)` for this kit).
 Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
 reviewed target jar SHA; target compile/runtime and explicit runtime
@@ -102,7 +104,9 @@ count. World cleanup rejects symlinked parents and paths outside the verificatio
 root. Passing reports require all twelve exact checks and nonempty command
 evidence; addon reports require exactly `build` and `runGameTestServer`.
 Comment/string-aware annotation extraction ignores fake `@GameTest` text when
-counting tests and locating marker-bearing method bodies.
+counting tests and locating marker-bearing method bodies, skips brace-bearing
+intermediate annotations, and requires each GameTest evidence file to belong to
+the source set executed by its declared task.
 Bundled descriptors preserve reviewed HTTPS repository order, and fixture names
 must be Java-safe identifiers ending in `Fixture`. Their authoritative GameTest
 task is derived from the same fixture name (`evilCraftFixture` becomes

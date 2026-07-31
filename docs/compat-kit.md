@@ -226,7 +226,8 @@ source audit is copied to `compat/audit.json`; its `build` and
 `source_audit_sha256`. Every target-derived metadata value, including addon display names and bundled
 fixture descriptions, is serialized as a TOML basic string, so quotes,
 backslashes, control characters, newlines, and multiline-literal delimiters
-cannot break generated metadata.
+cannot break generated metadata. DEL (`U+007F`) is escaped explicitly because
+TOML forbids it even though JSON serializers commonly leave it literal.
 
 The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the
@@ -238,8 +239,10 @@ artifacts) from the reviewed contract and generator, then checks every byte and
 manifest entry. Editing a launcher or gate and self-attesting a new manifest
 hash therefore cannot bypass artifact or task gates. Before writing anything,
 scaffolding preflights every destination for type/content drift and every
-required parent as a directory; a late-sorting conflict or file occupying
-`src` cannot leave a partial project behind.
+required parent as a real directory. Symlinked roots, ancestors, and generated
+targets are rejected before the first write; a late-sorting conflict, file
+occupying `src`, or `src` symlink cannot leave a partial project or write
+outside the requested output root.
 
 Generated independent addons require the current compatible Auto Storage minor
 line. A 0.3.0 kit emits `[0.3.0,0.4)`: patches remain compatible, while the
@@ -299,6 +302,11 @@ external-addon reports additionally require exactly the authoritative `build`
 and `runGameTestServer` command records. GameTest counting and body extraction
 share one comment/string-aware Java mask, so `@GameTest` text inside a comment
 or literal cannot lend a helper method's markers to a passing runtime count.
+The extractor tracks annotation and method parentheses until the actual method
+body, so a brace-bearing intermediate annotation cannot become the evidence
+body. Each GameTest evidence file must also be under the fixture source set
+executed by its declared `run*GameTestServer` task; a marker in base or another
+fixture source set cannot prove behavior for the target run.
 
 The repository compatibility-matrix task also depends directly on every
 descriptor-generated audited-artifact verifier and the separately pinned

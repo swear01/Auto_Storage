@@ -104,9 +104,9 @@ wrapper jar/properties from the reviewed contract and generator before
 comparing each with both the file and manifest. An addon therefore cannot
 replace the launcher or artifact gate and authorize that edit by updating its
 own manifest hash. Scaffold generation preflights all destinations and parent
-directories before its first write, so an existing conflicting file or
-file-valued `src` ancestor fails without leaving workflow, manifest, or wrapper
-fragments behind.
+directories before its first write. Existing conflicting files, symlinked
+roots/ancestors/targets, or a file-valued `src` ancestor fail without leaving
+workflow, manifest, wrapper fragments, or writes outside the output root.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
@@ -117,7 +117,10 @@ parents and paths outside the addon root before deletion. Bundled task names
 are not translated or treated as equivalent. A published passing report must
 contain all twelve mandated check records and exactly the addon `build` and
 `runGameTestServer` command records. Commented or string-literal `@GameTest`
-text is ignored by both source counting and method-body evidence extraction.
+text is ignored by both source counting and method-body evidence extraction;
+intermediate annotation initializers are skipped until the real method body,
+and every GameTest evidence file must belong to the fixture source set executed
+by its declared task.
 
 ## Register through one facade
 

@@ -1382,6 +1382,26 @@ displayName="Sample Machines"
         )
         self.assertEqual("existing file\n", ancestor.read_text())
 
+    def test_external_scaffold_rejects_symlinked_ancestor_before_writing(self):
+        contract = self.addon_contract()
+        output = self.root / "samplemod-auto-storage"
+        output.mkdir()
+        external = self.root / "external"
+        external.mkdir()
+        (output / "src").symlink_to(external, target_is_directory=True)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "generated path parent is a symlink: src",
+        ):
+            self.compat_kit.scaffold_addon(
+                contract,
+                output,
+                source_audit=self.source_audit(),
+            )
+
+        self.assertEqual([], list(external.iterdir()))
+
     def test_external_scaffold_bounds_auto_storage_to_current_minor(self):
         contract = self.addon_contract()
         output = self.root / "samplemod-auto-storage"
@@ -1463,6 +1483,28 @@ displayName="Sample Machines"
         metadata = tomllib.loads(
             (output / "src/main/resources/META-INF/neoforge.mods.toml").read_text()
         )
+        self.assertEqual(
+            display_name + " Auto Storage Integration",
+            metadata["mods"][0]["displayName"],
+        )
+
+    def test_external_scaffold_escapes_del_as_toml(self):
+        contract = self.addon_contract()
+        audit = self.source_audit()
+        display_name = "Sample\u007fMachines"
+        contract["target"]["display_name"] = display_name
+        audit["target"]["display_name"] = display_name
+        output = self.root / "del-addon"
+
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=audit,
+        )
+
+        metadata_path = output / "src/main/resources/META-INF/neoforge.mods.toml"
+        self.assertIn("\\u007f", metadata_path.read_text())
+        metadata = tomllib.loads(metadata_path.read_text())
         self.assertEqual(
             display_name + " Auto Storage Integration",
             metadata["mods"][0]["displayName"],
@@ -1796,7 +1838,7 @@ displayName="Sample Machines"
         )
         self.assertEqual(
             set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
-            set(self.compat_kit._verification_evidence(contract, ROOT)),
+            set(self.compat_kit._verification_evidence(contract, ROOT, "bundled")),
         )
 
     def test_recipe_family_verification_commands_include_ae2_fixture(self):
@@ -2096,6 +2138,130 @@ displayName="Sample Machines"
         with self.assertRaisesRegex(
             ValueError,
             "evidence marker is not inside an @GameTest method",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 1 required tests passed :)\n", ""
+                ),
+            )
+
+    def test_verify_skips_braces_in_annotations_before_gametest_method(self):
+        contract = self.accepted_contract()
+        marker = "brace_annotation_marker"
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["marker"] = marker
+        output_root = self.root / "brace-annotation-evidence"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text()
+            .replace(
+                '@GameTest(template = "craftingtests.platform")\n',
+                '@GameTest(template = "craftingtests.platform")\n'
+                f'    @SuppressWarnings({{"{marker}"}})\n',
+            )
+            .replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "evidence marker is not inside an @GameTest method",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 1 required tests passed :)\n", ""
+                ),
+            )
+
+    def test_verify_binds_gametest_evidence_source_to_declared_task(self):
+        contract = self.accepted_contract()
+        marker = "wrongSourceMarker();"
+        contract["verification"]["evidence"]["ingredient_shortage_atomic"] = [
+            {
+                "task": "runSamplemodGameTestServer",
+                "source": "**/BaseGameTests.java",
+                "marker": marker,
+            }
+        ]
+        output_root = self.root / "wrong-task-source-evidence"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+        base = (
+            output_root
+            / "src/main/java/com/example/BaseGameTests.java"
+        )
+        base.parent.mkdir(parents=True)
+        base.write_text(
+            "package com.example;\n"
+            "final class BaseGameTests {\n"
+            "    @GameTest(template = \"craftingtests.platform\")\n"
+            "    static void wrongSource(GameTestHelper helper) {\n"
+            f"        {marker}\n"
+            "    }\n"
+            "}\n"
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "verification evidence source is outside task source set",
         ):
             self.compat_kit.verify_contract(
                 contract,

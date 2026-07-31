@@ -1491,7 +1491,7 @@ def _wrapper_files() -> dict[str, bytes]:
 
 
 def _toml_basic_string(value: str) -> str:
-    return json.dumps(value, ensure_ascii=False)
+    return json.dumps(value, ensure_ascii=False).replace("\u007f", "\\u007f")
 
 
 def _groovy_string(value: str) -> str:
@@ -1858,6 +1858,8 @@ def _materialize(
 ) -> list[Path]:
     complete = dict(files)
     complete[manifest_path] = _manifest(files, contract)
+    if root.is_symlink():
+        raise ValueError("generated path parent is a symlink: .")
     if root.exists() and not root.is_dir():
         raise ValueError("generated path parent is not a directory: .")
     for relative, payload in sorted(complete.items()):
@@ -1865,11 +1867,18 @@ def _materialize(
         ancestor = root
         for part in Path(relative).parts[:-1]:
             ancestor /= part
+            if ancestor.is_symlink():
+                raise ValueError(
+                    "generated path parent is a symlink: "
+                    + ancestor.relative_to(root).as_posix()
+                )
             if ancestor.exists() and not ancestor.is_dir():
                 raise ValueError(
                     "generated path parent is not a directory: "
                     + ancestor.relative_to(root).as_posix()
                 )
+        if target.is_symlink():
+            raise ValueError(f"generated path is a symlink: {relative}")
         if target.exists() and (
             not target.is_file() or target.read_bytes() != payload
         ):
@@ -2163,21 +2172,56 @@ def _java_code_mask(text: str) -> str:
     return "".join(masked)
 
 
+def _game_test_method_opening(code: str, annotation_end: int) -> int:
+    parentheses = 1
+    for index in range(annotation_end, len(code)):
+        character = code[index]
+        if character == "(":
+            parentheses += 1
+        elif character == ")":
+            parentheses -= 1
+            if parentheses < 0:
+                raise ValueError("invalid @GameTest method declaration")
+        elif character == "{" and parentheses == 0:
+            return index
+        elif character == ";" and parentheses == 0:
+            raise ValueError("@GameTest annotation has no method body")
+    raise ValueError("@GameTest annotation has no method body")
+
+
 def _game_test_blocks(text: str) -> list[str]:
     code = _java_code_mask(text)
     blocks = []
     for annotation in re.finditer(r"@GameTest\s*\(", code):
-        opening = code.find("{", annotation.end())
-        if opening < 0:
-            raise ValueError("@GameTest annotation has no method body")
+        opening = _game_test_method_opening(code, annotation.end())
         closing = _java_block_end(text, opening)
         blocks.append(text[opening + 1:closing])
     return blocks
 
 
+def _game_test_task_source_root(
+    contract: dict,
+    root: Path,
+    mode: str,
+    task: str,
+) -> Path | None:
+    if not re.fullmatch(r"run(?:[A-Za-z0-9]+)?GameTestServer", task):
+        return None
+    if mode == "addon" or task == "runGameTestServer":
+        return root / "src/main/java"
+    verification = contract["verification"]
+    if task == verification["game_test_task"]:
+        fixture = verification["fixture"]
+    else:
+        task_name = task.removeprefix("run").removesuffix("GameTestServer")
+        fixture = task_name[0].lower() + task_name[1:] + "Fixture"
+    return root / f"src/{fixture}/java"
+
+
 def _verification_evidence(
     contract: dict,
     root: Path,
+    mode: str,
 ) -> dict[str, list[str]]:
     resolved = {}
     for check, records in contract["verification"]["evidence"].items():
@@ -2192,6 +2236,38 @@ def _verification_evidence(
                 raise ValueError(
                     f"verification evidence source matched no files: {record['source']}"
                 )
+            task = record["task"]
+            task_source_root = _game_test_task_source_root(
+                contract,
+                root,
+                mode,
+                task,
+            )
+            if task_source_root is not None:
+                resolved_root = root.resolve()
+                resolved_task_source = task_source_root.resolve()
+                if (
+                    resolved_task_source != resolved_root
+                    and resolved_root not in resolved_task_source.parents
+                ):
+                    raise ValueError(
+                        "verification evidence source is outside task source set: "
+                        f"{record['source']}"
+                    )
+                task_matches = [
+                    path
+                    for path in matches
+                    if (
+                        path.resolve() == resolved_task_source
+                        or resolved_task_source in path.resolve().parents
+                    )
+                ]
+                if not task_matches:
+                    raise ValueError(
+                        "verification evidence source is outside task source set: "
+                        f"{record['source']}"
+                    )
+                matches = task_matches
             if len(matches) > MAX_SOURCE_FILES:
                 raise ValueError(
                     f"verification evidence source exceeds {MAX_SOURCE_FILES} files: "
@@ -2203,7 +2279,6 @@ def _verification_evidence(
                     f"verification evidence marker not found for {check}: "
                     f"{record['marker']}"
                 )
-            task = record["task"]
             if re.fullmatch(r"run(?:[A-Za-z0-9]+)?GameTestServer", task) and not any(
                 record["marker"] in block
                 for text in matching_texts
@@ -2329,7 +2404,7 @@ def verify_contract(
             f"verification expected {expected_game_tests} GameTests, "
             f"but source declares {source_game_tests}"
         )
-    evidence = _verification_evidence(contract, root)
+    evidence = _verification_evidence(contract, root, mode)
     runner = command_runner or _default_command_runner
     command_reports = []
     game_test_output = None
