@@ -62,7 +62,10 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || !(auditArtifact.dependency instanceof String)
             || auditArtifact.dependency.isBlank()
             || !(auditArtifact.sha256 instanceof String)
-            || !(auditArtifact.sha256 ==~ /[0-9a-f]{64}/)))) {
+            || !(auditArtifact.sha256 ==~ /[0-9a-f]{64}/)
+            || descriptor.dependencies[0] != auditArtifact.dependency
+            || !(descriptor.runtimeDependencies instanceof List)
+            || !descriptor.runtimeDependencies.contains(auditArtifact.dependency)))) {
         throw new GradleException(
                 "Invalid compatibility module descriptor: ${descriptorFile}")
     }

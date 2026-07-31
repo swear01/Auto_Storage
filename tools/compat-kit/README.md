@@ -42,6 +42,8 @@ the contract has no `needs_decision` entry, pass the same committed audit to
 every later command. Validation compares that audit's exact candidate set with
 the contract, including every per-family scanner risk, so recomputing a
 contract-only inventory digest cannot hide an omitted recipe family or risk.
+Each candidate must remain in the bucket computed by the scanner; moving a
+recipe record into a station/resource list is rejected.
 Process station rates must be positive and Instant station rates must be zero.
 Accepted families keep the `costs` field, but may use an empty list when the
 reviewed runtime family is genuinely free.
@@ -72,8 +74,10 @@ Explicit runtime groups cannot fall back to Maven Central; target fallback is
 still protected by its exact SHA gate, and fixed repositories are filtered to
 their Auto Storage or Patchouli artifacts.
 Verification
-also checks the manifest hash of the generated `build.gradle` (or bundled
-descriptor), so removing that SHA gate is explicit drift rather than a pass.
+regenerates the expected `build.gradle` (or bundled descriptor) from the
+reviewed contract and current generator, then checks both its bytes and
+manifest entry. Removing the SHA gate and self-attesting a new manifest hash is
+therefore explicit drift rather than a pass.
 
 Use `scaffold --bundled contract.json --audit audit.json` and
 `verify contract.json --audit audit.json --bundled <repo>` inside the Auto
@@ -84,7 +88,9 @@ count. Bundled descriptors preserve reviewed HTTPS repository order, and fixture
 names must be Java-safe identifiers ending in `Fixture`. Their authoritative
 GameTest task is derived from the same fixture name (`evilCraftFixture` becomes
 `runEvilCraftGameTestServer`) and mismatches fail before materialization. The
-target mod ID must also produce a non-reserved Java package segment. GameTest
+target mod ID must also produce a non-reserved Java package segment. An audited
+descriptor must use the audited target coordinate as its primary compile
+dependency and include that exact coordinate in runtime dependencies. GameTest
 evidence markers must occur between the annotated method's braces; a marker
 that appears only in its declaration is not execution evidence. The
 published archive includes its own Gradle wrapper template, so an extracted copy

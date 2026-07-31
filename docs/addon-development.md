@@ -19,7 +19,9 @@ infer consumption, catalysts, outputs, units, station costs, or determinism.
 Every scaffold/verify command also loads the committed source audit. The exact
 audited recipe-candidate set, target identity, artifact SHA, and inventory
 digest must match the contract, so recomputing a contract-only field cannot
-hide an omitted candidate.
+hide an omitted candidate. Candidate records must also remain in the bucket
+computed by the current scanner; changing a recipe into a station/resource
+record is rejected.
 
 ```bash
 tools/compat-kit/compat-kit scan --help
@@ -90,7 +92,10 @@ jar SHA against `source_audit_sha256` during both `build` and
 Because Auto Storage requires Patchouli on both sides, the generated
 GameTest runtime includes the matching Patchouli artifact and its repository.
 A different target artifact or source audit fails before compatibility
-evidence can pass.
+evidence can pass. Verification regenerates the expected `build.gradle` from
+the reviewed contract and generator before comparing it with both the file and
+manifest, so an addon cannot remove the artifact gate and authorize that edit
+by updating its own manifest hash.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual

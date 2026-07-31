@@ -96,7 +96,10 @@ Archive limits, candidate counts, signature size, source-file counts, malformed
 metadata, ambiguous multi-mod jars, missing JDK tools, and `javap` failures all
 fail closed. Current-format cache entries and committed audits are also fully
 validated down through target, artifact, source, candidate, and risk records;
-a matching cache path does not authorize malformed or partial evidence.
+a matching cache path does not authorize malformed or partial evidence. Every
+candidate must remain in the bucket computed by the current scanner; moving a
+recipe candidate into a station or resource list cannot hide it from contract
+review.
 
 ### 3. Decide
 
@@ -188,7 +191,9 @@ run task, expected test gate, and audited target artifact from that descriptor;
 the target is on both compile and fixture runtime classpaths, with both
 declarations non-transitive. `build` and the
 module GameTest resolve exactly one target jar and reject a SHA different from
-the reviewed audit. No central compatibility switch is added.
+the reviewed audit. For an audited descriptor, that same coordinate must be the
+primary compile dependency and must also appear unchanged in the explicit
+runtime dependencies. No central compatibility switch is added.
 
 External output is an ordinary NeoForge project with the Gradle wrapper,
 compile-only Auto Storage API dependency, reviewed target repositories and
@@ -206,7 +211,11 @@ cannot break generated metadata.
 The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the
 scaffold to the reviewed contract; implementation edits are expected after the
-initial RED generation.
+initial RED generation. Verification regenerates the security-sensitive
+bundled descriptor or external `build.gradle` from the reviewed contract and
+generator, then checks both its bytes and manifest entry. Editing the file and
+self-attesting a new manifest hash therefore cannot bypass artifact or task
+gates.
 
 ### 5. Implement with strict TDD
 
@@ -251,8 +260,10 @@ Gradle task as a separate process and removes only `run/world` before each task
 so stale GameTest state cannot leak between fixtures. RED and forbidden-link
 scans are scoped to `src/`; ignored `build/` outputs and previously extracted
 scaffolds cannot poison a later verification. The manifest also hashes the
-bundled descriptor or external `build.gradle`, so the target-SHA gate cannot be
-removed after scaffolding while retaining a passing report.
+bundled descriptor or external `build.gradle`; the expected hash is recomputed
+from the reviewed contract and current generator rather than trusted from the
+manifest. The target-SHA gate therefore cannot be removed after scaffolding
+while retaining a passing report, even if the manifest is edited too.
 
 The repository compatibility-matrix task also depends directly on every
 descriptor-generated audited-artifact verifier and the separately pinned

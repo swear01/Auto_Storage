@@ -537,6 +537,12 @@ def _validate_audit(audit: dict):
                 class_name,
             ):
                 raise ValueError(f"{location} has invalid class")
+            expected_bucket = _candidate_bucket(class_name)
+            if expected_bucket != bucket:
+                raise ValueError(
+                    f"{location} candidate bucket mismatch: "
+                    f"expected {expected_bucket}"
+                )
             if class_name in seen_classes:
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
@@ -1829,7 +1835,7 @@ def _load_and_verify_manifest(
     root: Path,
     manifest_path: Path,
     contract: dict,
-    verification_files: tuple[str, ...],
+    verification_files: dict[str, bytes],
 ) -> str:
     if not manifest_path.is_file():
         raise ValueError(f"missing compat-kit manifest: {manifest_path}")
@@ -1852,17 +1858,22 @@ def _load_and_verify_manifest(
         raise ValueError(
             "compat-kit contract drift: scaffold was generated from a different contract"
         )
-    for relative in verification_files:
-        expected = manifest["files"].get(relative)
-        if not isinstance(expected, str) or not re.fullmatch(
+    for relative, payload in verification_files.items():
+        manifest_sha = manifest["files"].get(relative)
+        if not isinstance(manifest_sha, str) or not re.fullmatch(
             r"[0-9a-f]{64}",
-            expected,
+            manifest_sha,
         ):
             raise ValueError(
                 f"compat-kit manifest is missing verification file: {relative}"
             )
+        generated_sha = hashlib.sha256(payload).hexdigest()
         target = root / relative
-        if not target.is_file() or _sha256_file(target) != expected:
+        if (
+            manifest_sha != generated_sha
+            or not target.is_file()
+            or _sha256_file(target) != generated_sha
+        ):
             raise ValueError(
                 f"generated verification file drift: {relative}"
             )
@@ -2029,11 +2040,19 @@ def verify_contract(
         if mode == "bundled"
         else root / ".compat-kit-manifest.json"
     )
-    verification_files = (
-        (f"src/compat/{mod_id}/compat-module.json",)
+    generated_files = (
+        _bundled_files(contract)
         if mode == "bundled"
-        else ("build.gradle",)
+        else _addon_files(contract, source_audit)
     )
+    verification_path = (
+        f"src/compat/{mod_id}/compat-module.json"
+        if mode == "bundled"
+        else "build.gradle"
+    )
+    verification_files = {
+        verification_path: generated_files[verification_path],
+    }
     manifest_sha = _load_and_verify_manifest(
         root,
         manifest_path,

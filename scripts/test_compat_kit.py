@@ -524,6 +524,14 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exactly one mod"):
             self.compat_kit.scan_jar(ambiguous, signature_reader=lambda _: "")
 
+    def test_audit_validation_rejects_candidate_bucket_drift(self):
+        audit = self.source_audit()
+        candidate = audit["candidates"]["recipe_classes"].pop(0)
+        audit["candidates"]["station_classes"].append(candidate)
+
+        with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
+            self.compat_kit._validate_audit(audit)
+
     def test_decide_outputs_strict_needs_decision_contract_and_actions(self):
         audit = self.compat_kit.scan_jar(
             self.jar,
@@ -1737,6 +1745,64 @@ class CompatKitAuditTests(unittest.TestCase):
                 addon_root=output,
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
+                ),
+            )
+
+    def test_external_verify_rejects_manifest_self_attested_build_changes(self):
+        contract = self.addon_contract()
+        output = self.root / "addon"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "addon.recipeFamilies(null);",
+            )
+        )
+        fixture = (
+            output
+            / "src/main/java/com/example/samplemodautostorage/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture.write_text(
+            fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        )
+        build = output / "build.gradle"
+        original = build.read_text()
+        changed = original.replace(
+            "    dependsOn verifyCompatKitTargetArtifact\n",
+            "",
+        )
+        self.assertNotEqual(original, changed)
+        build.write_text(changed)
+        manifest = output / ".compat-kit-manifest.json"
+        manifest_data = json.loads(manifest.read_text())
+        relative = build.relative_to(output).as_posix()
+        manifest_data["files"][relative] = hashlib.sha256(build.read_bytes()).hexdigest()
+        manifest.write_text(
+            json.dumps(manifest_data, ensure_ascii=False, indent=2, sort_keys=True)
+            + "\n"
+        )
+
+        with self.assertRaisesRegex(ValueError, "generated verification file drift"):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                addon_root=output,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 1 required tests passed :)\n", ""
                 ),
             )
 
