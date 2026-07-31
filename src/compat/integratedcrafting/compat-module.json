@@ -1,0 +1,44 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:integrated-crafting:se5g7ewq",
+    "sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+  },
+  "dependencies": [
+    "maven.modrinth:integrated-crafting:se5g7ewq"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.integratedcrafting.IntegratedcraftingCompatModule",
+  "expectedTests": 4,
+  "fixture": "integratedCraftingFixture",
+  "id": "auto_storage:integratedcrafting",
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "integratedcrafting"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:integrated-crafting:se5g7ewq",
+    "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "maven.modrinth:cyclops-core:vEjxRv40",
+    "maven.modrinth:common-capabilities:c50bCinZ"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatIntegratedcrafting",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "integratedcrafting"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "integratedcrafting"
+      ],
+      "sha256": "3593986292d1f9d2cf093b3a9d16b0828c3410817eb57cb1d6b4b70b23719aa7"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  }
+}

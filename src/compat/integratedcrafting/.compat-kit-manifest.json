@@ -1,0 +1,14 @@
+{
+  "contract_sha256": "e31fd132b60388fb1a9dba16b04573f833422de31e407530f477c65851d63003",
+  "files": {
+    "src/compat/integratedcrafting/compat-module.json": "2c396b55f8491e1a3ead393b2e26231803bf448a3ad4c5078d4129af1d1881da",
+    "src/compat/integratedcrafting/java/com/swear/autostorage/compat/integratedcrafting/IntegratedcraftingCompat.java": "07c9810240bc7b737f128705d675203da91dfa16780a4966bcfae7570685962a",
+    "src/compat/integratedcrafting/java/com/swear/autostorage/compat/integratedcrafting/IntegratedcraftingCompatModule.java": "c4058a4d5353239e38ebae0dbc22431858048c2b558096a80a9ef1b31de04abd",
+    "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingFixtureMod.java": "ff3d4284addb3d3de35ac2c42e92e39258a42c0b43f7c6055d59b71264a167ed",
+    "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java": "88b0678d05a5485ad8772870d7ba30aba1bf620a59f9325ea725503eb9a341d4",
+    "src/integratedCraftingFixture/resources/META-INF/neoforge.mods.toml": "c9bf089a654d8e292a066ca1a75dbec10009768edba968c4b8c42d018ebe68cf",
+    "src/integratedCraftingFixture/resources/data/auto_storage_integratedcrafting_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
+}
