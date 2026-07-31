@@ -435,6 +435,46 @@ class CompatKitAuditTests(unittest.TestCase):
                 signature_reader=self.signatures,
             )
 
+    def test_scan_rejects_ignored_candidate_source(self):
+        source = self.root / "source"
+        (source / ".gitignore").parent.mkdir(parents=True)
+        (source / ".gitignore").write_text("build/\n")
+        tracked = source / "src/main/java/unrelated/Decor.java"
+        tracked.parent.mkdir(parents=True)
+        tracked.write_text("package unrelated;\nfinal class Decor {}\n")
+        ignored = source / "build/samplemod/recipe/CrushingRecipe.java"
+        ignored.parent.mkdir(parents=True)
+        ignored.write_text(
+            "package samplemod.recipe;\nfinal class CrushingRecipe {}\n"
+        )
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "source checkout has no candidate matches",
+        ):
+            self.compat_kit.scan_jar(
+                self.jar,
+                source=source,
+                signature_reader=self.signatures,
+            )
+
     def test_scan_discovers_enclosing_git_root_for_source_subdirectory(self):
         repository = self.root / "repository"
         source = repository / "module"
@@ -689,6 +729,53 @@ class CompatKitAuditTests(unittest.TestCase):
             self.compat_kit.scan_jar(
                 oversized,
                 signature_reader=lambda _: "public class Recipe {}",
+            )
+
+    def test_scan_rejects_oversized_class_before_decompression(self):
+        oversized = self.root / "oversized-class.jar"
+        mods_toml = """
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="samplemod"
+version="1.2.3"
+displayName="Sample Machines"
+""".strip()
+        with zipfile.ZipFile(
+            oversized,
+            "w",
+            compression=zipfile.ZIP_DEFLATED,
+        ) as archive:
+            archive.writestr("META-INF/neoforge.mods.toml", mods_toml)
+            archive.writestr(
+                "samplemod/recipe/OversizedRecipe.class",
+                b"x" * (self.compat_kit.MAX_CLASS_BYTES + 1),
+            )
+
+        with self.assertRaisesRegex(ValueError, "class entry exceeds"):
+            self.compat_kit.scan_jar(
+                oversized,
+                signature_reader=lambda _: "public class OversizedRecipe {}",
+            )
+
+    def test_scan_rejects_target_replaced_during_inspection(self):
+        replacement = self.root / "replacement.jar"
+        write_fixture_jar(replacement, version="1.2.4")
+        replaced = False
+
+        def replacing_reader(class_name: str):
+            nonlocal replaced
+            if not replaced:
+                replacement.replace(self.jar)
+                replaced = True
+            return self.signatures(class_name)
+
+        with self.assertRaisesRegex(ValueError, "target jar changed during scan"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                signature_reader=replacing_reader,
             )
 
     def test_audit_validation_rejects_candidate_bucket_drift(self):
@@ -1947,6 +2034,63 @@ class CompatKitAuditTests(unittest.TestCase):
                 'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
                 "helper.succeed();",
             )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "evidence marker is not inside an @GameTest method",
+        ):
+            self.compat_kit.verify_contract(
+                contract,
+                source_audit=source_audit,
+                bundled_root=output_root,
+                command_runner=lambda command, cwd: subprocess.CompletedProcess(
+                    command, 0, "All 1 required tests passed :)\n", ""
+                ),
+            )
+
+    def test_verify_ignores_commented_gametest_annotations(self):
+        contract = self.accepted_contract()
+        marker = "commented_annotation_marker();"
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["marker"] = marker
+        output_root = self.root / "commented-annotation-evidence"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=source_audit,
+        )
+        adapter = (
+            output_root
+            / "src/compat/samplemod/java/com/swear/autostorage/compat/samplemod/"
+            "SamplemodCompat.java"
+        )
+        adapter.write_text(
+            adapter.read_text().replace(
+                'throw new IllegalStateException(\n'
+                '                "compat-kit scaffold is intentionally RED: implement crushing_recipe");',
+                "machines.getRegistryKey();\n        recipes.getRegistryKey();",
+            )
+        )
+        fixture = (
+            output_root
+            / "src/samplemodFixture/java/com/swear/autostorage/fixture/samplemod/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        fixture_text = fixture.read_text().replace(
+                'helper.fail("compat-kit scaffold is intentionally RED: " + REQUIRED_CHECKS);',
+                "helper.succeed();",
+            )
+        fixture.write_text(
+            fixture_text.rsplit("\n}\n", 1)[0]
+            + "\n"
+            "    // @GameTest(template = \"craftingtests.platform\")\n"
+            "    public static void fakeEvidence(GameTestHelper helper) {\n"
+            f"        {marker}\n"
+            "    }\n"
+            "}\n"
         )
 
         with self.assertRaisesRegex(

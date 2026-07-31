@@ -33,9 +33,11 @@ relative to the supplied module. Supplying a non-Git source directory fails;
 omit `--source` when no versioned source is available. Current-format cache
 entries and committed audits carry the scanner format and are fully
 schema-validated before reuse. If the target has classified candidates, a
-supplied source module must contain at least one matching Java source file;
-an unrelated clean checkout is rejected. NeoForge metadata entries are limited
-to 1 MiB before decompression.
+supplied source module must contain at least one matching tracked, non-ignored
+Java source file; ignored outputs and unrelated clean checkouts are rejected.
+NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
+before decompression. The target is rehashed after inspection so a path
+replacement cannot mix one artifact hash with another artifact's evidence.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
@@ -99,6 +101,8 @@ marker, and checks both the source GameTest annotation count and runtime passing
 count. World cleanup rejects symlinked parents and paths outside the verification
 root. Passing reports require all twelve exact checks and nonempty command
 evidence; addon reports require exactly `build` and `runGameTestServer`.
+Comment/string-aware annotation extraction ignores fake `@GameTest` text when
+counting tests and locating marker-bearing method bodies.
 Bundled descriptors preserve reviewed HTTPS repository order, and fixture names
 must be Java-safe identifiers ending in `Fixture`. Their authoritative GameTest
 task is derived from the same fixture name (`evilCraftFixture` becomes

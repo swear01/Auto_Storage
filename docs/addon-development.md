@@ -22,8 +22,10 @@ digest must match the contract, so recomputing a contract-only field cannot
 hide an omitted candidate. Candidate records must also remain in the bucket
 computed by the current scanner; changing a recipe into a station/resource
 record is rejected. When source is supplied, at least one classified candidate
-must map into that Git module; an unrelated clean checkout cannot contribute
-its revision as target evidence.
+must map to a tracked, non-ignored Java file in that Git module; ignored build
+output or an unrelated clean checkout cannot contribute its revision as target
+evidence. The scanner also rehashes the target after inspection, so an
+atomically replaced jar cannot mix two artifacts in one audit.
 
 ```bash
 tools/compat-kit/compat-kit scan --help
@@ -114,7 +116,8 @@ and detached helpers are rejected. Its fresh-world cleanup rejects symlinked
 parents and paths outside the addon root before deletion. Bundled task names
 are not translated or treated as equivalent. A published passing report must
 contain all twelve mandated check records and exactly the addon `build` and
-`runGameTestServer` command records.
+`runGameTestServer` command records. Commented or string-literal `@GameTest`
+text is ignored by both source counting and method-body evidence extraction.
 
 ## Register through one facade
 

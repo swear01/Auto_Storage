@@ -19,6 +19,7 @@ MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
 MAX_MOD_METADATA_BYTES = 1024 * 1024
+MAX_CLASS_BYTES = 16 * 1024 * 1024
 MAX_CANDIDATE_CLASSES = 2_000
 MAX_SIGNATURE_BYTES = 256 * 1024
 MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
@@ -185,6 +186,22 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _require_unchanged_artifact(
+    path: Path,
+    expected_sha256: str,
+    expected_size: int,
+):
+    try:
+        if (
+            not path.is_file()
+            or path.stat().st_size != expected_size
+            or _sha256_file(path) != expected_sha256
+        ):
+            raise ValueError(f"target jar changed during scan: {path}")
+    except OSError as error:
+        raise ValueError(f"target jar changed during scan: {path}") from error
+
+
 def _validate_archive(path: Path, archive: zipfile.ZipFile):
     if not path.is_file():
         raise ValueError(f"target jar does not exist: {path}")
@@ -295,6 +312,11 @@ def _is_inspectable_class(
     )
     if not named:
         return False
+    entry = archive.getinfo(entry_name)
+    if entry.file_size > MAX_CLASS_BYTES:
+        raise ValueError(
+            f"class entry exceeds {MAX_CLASS_BYTES} bytes: {entry_name}"
+        )
     return not (
         _class_access_flags(archive.read(entry_name), entry_name) & 0x1000
     )
@@ -350,24 +372,6 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
     source = source.resolve()
     if not source.is_dir():
         raise ValueError(f"source checkout does not exist: {source}")
-    java_files = sorted(source.rglob("*.java"))
-    if len(java_files) > MAX_SOURCE_FILES:
-        raise ValueError(
-            f"source checkout exceeds {MAX_SOURCE_FILES} Java files: {source}"
-        )
-    source_suffixes = {
-        name.split("$", 1)[0].replace(".", "/") + ".java"
-        for name in candidate_names
-    }
-    files = [
-        path.relative_to(source).as_posix()
-        for path in java_files
-        if any(
-            path.as_posix().endswith(suffix)
-            for suffix in source_suffixes
-        )
-    ]
-    revision = None
     git_root_result = subprocess.run(
         ["git", "-C", str(source), "rev-parse", "--show-toplevel"],
         capture_output=True,
@@ -413,6 +417,59 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
         raise ValueError(
             "source checkout is dirty: " + status.stdout.splitlines()[0]
         )
+    try:
+        source_relative = source.relative_to(git_root)
+    except ValueError as error:
+        raise RuntimeError(
+            f"source checkout is outside its Git worktree: {source}"
+        ) from error
+    pathspec = source_relative.as_posix() if source_relative.parts else "."
+    tracked = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(git_root),
+            "ls-files",
+            "-z",
+            "--cached",
+            "--",
+            pathspec,
+        ],
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=10,
+    )
+    if tracked.returncode != 0:
+        raise RuntimeError(
+            "failed to list tracked source files: "
+            + (tracked.stderr.strip() or tracked.stdout.strip())
+        )
+    java_files = [
+        git_root / relative
+        for relative in tracked.stdout.split("\0")
+        if relative.endswith(".java")
+    ]
+    if len(java_files) > MAX_SOURCE_FILES:
+        raise ValueError(
+            f"source checkout exceeds {MAX_SOURCE_FILES} Java files: {source}"
+        )
+    source_suffixes = {
+        name.split("$", 1)[0].replace(".", "/") + ".java"
+        for name in candidate_names
+    }
+    files = [
+        path.relative_to(source).as_posix()
+        for path in java_files
+        if (
+            path.is_file()
+            and not path.is_symlink()
+            and any(
+                path.as_posix().endswith(suffix)
+                for suffix in source_suffixes
+            )
+        )
+    ]
     result = subprocess.run(
         ["git", "-C", str(git_root), "rev-parse", "HEAD"],
         capture_output=True,
@@ -629,6 +686,9 @@ def scan_jar(
     jar = Path(jar).resolve()
     if not jar.is_file():
         raise ValueError(f"target jar does not exist: {jar}")
+    artifact_size = jar.stat().st_size
+    if artifact_size > MAX_JAR_BYTES:
+        raise ValueError(f"target jar exceeds {MAX_JAR_BYTES} bytes: {jar}")
     artifact_sha = _sha256_file(jar)
     cache_path = None
     if cache_dir is not None and source is None:
@@ -643,6 +703,7 @@ def scan_jar(
             _validate_audit(cached)
             if cached["artifact"]["sha256"] != artifact_sha:
                 raise ValueError(f"cached audit SHA mismatch: {cache_path}")
+            _require_unchanged_artifact(jar, artifact_sha, artifact_size)
             return cached
 
     reader = signature_reader or (
@@ -729,7 +790,7 @@ def scan_jar(
         "target": target,
         "artifact": {
             "sha256": artifact_sha,
-            "size": jar.stat().st_size,
+            "size": artifact_size,
         },
         "source": _source_evidence(
             source_path,
@@ -738,6 +799,7 @@ def scan_jar(
         "candidates": classified,
         "risks": _risk_evidence(risk_candidates),
     }
+    _require_unchanged_artifact(jar, artifact_sha, artifact_size)
     _validate_audit(audit)
     if cache_path is not None:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -2033,10 +2095,79 @@ def _java_block_end(text: str, opening: int) -> int:
     raise ValueError("unterminated @GameTest method body")
 
 
+def _java_code_mask(text: str) -> str:
+    masked = list(text)
+    index = 0
+    state = "code"
+    while index < len(text):
+        if state == "code":
+            if text.startswith('"""', index):
+                masked[index:index + 3] = "   "
+                state = "text"
+                index += 3
+                continue
+            if text.startswith("//", index):
+                masked[index:index + 2] = "  "
+                state = "line"
+                index += 2
+                continue
+            if text.startswith("/*", index):
+                masked[index:index + 2] = "  "
+                state = "block"
+                index += 2
+                continue
+            if text[index] == '"':
+                masked[index] = " "
+                state = "string"
+            elif text[index] == "'":
+                masked[index] = " "
+                state = "char"
+        elif state == "line":
+            if text[index] == "\n":
+                state = "code"
+            else:
+                masked[index] = " "
+        elif state == "block":
+            if text.startswith("*/", index):
+                masked[index:index + 2] = "  "
+                state = "code"
+                index += 2
+                continue
+            if text[index] != "\n":
+                masked[index] = " "
+        elif state == "text":
+            if text.startswith('"""', index):
+                masked[index:index + 3] = "   "
+                state = "code"
+                index += 3
+                continue
+            if text[index] != "\n":
+                masked[index] = " "
+        elif text[index] == "\\":
+            masked[index] = " "
+            if index + 1 < len(text):
+                if text[index + 1] != "\n":
+                    masked[index + 1] = " "
+                index += 2
+                continue
+        elif state == "string" and text[index] == '"':
+            masked[index] = " "
+            state = "code"
+        elif state == "char" and text[index] == "'":
+            masked[index] = " "
+            state = "code"
+        else:
+            if text[index] != "\n":
+                masked[index] = " "
+        index += 1
+    return "".join(masked)
+
+
 def _game_test_blocks(text: str) -> list[str]:
+    code = _java_code_mask(text)
     blocks = []
-    for annotation in re.finditer(r"@GameTest\s*\(", text):
-        opening = text.find("{", annotation.end())
+    for annotation in re.finditer(r"@GameTest\s*\(", code):
+        opening = code.find("{", annotation.end())
         if opening < 0:
             raise ValueError("@GameTest annotation has no method body")
         closing = _java_block_end(text, opening)
@@ -2090,7 +2221,10 @@ def _verification_evidence(
 
 
 def _game_test_count(root: Path) -> int:
-    return len(re.findall(r"(?m)^\s*@GameTest\s*\(", _source_text(root)))
+    sources = sorted(root.rglob("*.java"))
+    if len(sources) > MAX_SOURCE_FILES:
+        raise ValueError(f"verification root exceeds {MAX_SOURCE_FILES} Java files")
+    return sum(len(_game_test_blocks(path.read_text())) for path in sources)
 
 
 def verify_contract(

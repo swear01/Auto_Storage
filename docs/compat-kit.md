@@ -68,9 +68,9 @@ whole worktree to be clean, and records its HEAD while keeping evidence paths
 relative to the supplied module. A supplied `--source` must belong to a Git
 worktree; omit it rather than presenting uncommitted/unversioned contents as
 source evidence. When the target jar has classified candidates, at least one
-candidate must map to a Java source file under the supplied module; a clean but
-unrelated checkout is rejected instead of borrowing its HEAD. Never silently
-replace a failed source.
+candidate must map to a tracked, non-ignored, non-symlink Java source file under
+the supplied module; ignored build output and a clean but unrelated checkout
+are rejected instead of borrowing HEAD. Never silently replace a failed source.
 
 ### 2. Scan
 
@@ -103,15 +103,18 @@ Named nested classes are audited and mapped back to their top-level Java source;
 anonymous/local `$<number>` classes and every class carrying the JVM
 `ACC_SYNTHETIC` access flag are excluded.
 
-Archive limits, the 1 MiB per-entry NeoForge metadata limit, candidate counts,
-signature size, source-file counts, malformed metadata, ambiguous multi-mod
-jars, missing JDK tools, and `javap` failures all fail closed. Metadata size is
-checked before decompression. Current-format cache entries and committed audits
-are also fully validated down through target, artifact, source, candidate, and
-risk records; a matching cache path does not authorize malformed or partial
-evidence. Every candidate must remain in the bucket computed by the current
-scanner; moving a recipe candidate into a station or resource list cannot hide
-it from contract review.
+Archive limits, the 1 MiB per-entry NeoForge metadata limit, the 16 MiB
+per-entry class limit, candidate counts, signature size, source-file counts,
+malformed metadata, ambiguous multi-mod jars, missing JDK tools, and `javap`
+failures all fail closed. Metadata and class sizes are checked before
+decompression. The target path is rehashed after inspection; a replaced or
+mutated jar cannot combine one artifact SHA with another artifact's metadata
+or candidates. Current-format cache entries and committed audits are also fully
+validated down through target, artifact, source, candidate, and risk records;
+a matching cache path does not authorize malformed or partial evidence. Every
+candidate must remain in the bucket computed by the current scanner; moving a
+recipe candidate into a station or resource list cannot hide it from contract
+review.
 
 ### 3. Decide
 
@@ -293,7 +296,9 @@ or launcher therefore cannot be replaced after scaffolding while retaining a
 passing report, even if the manifest is edited too. The published report schema
 requires all twelve exact check IDs and at least one successful command;
 external-addon reports additionally require exactly the authoritative `build`
-and `runGameTestServer` command records.
+and `runGameTestServer` command records. GameTest counting and body extraction
+share one comment/string-aware Java mask, so `@GameTest` text inside a comment
+or literal cannot lend a helper method's markers to a passing runtime count.
 
 The repository compatibility-matrix task also depends directly on every
 descriptor-generated audited-artifact verifier and the separately pinned
