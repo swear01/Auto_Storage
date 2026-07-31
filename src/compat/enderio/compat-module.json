@@ -10,6 +10,26 @@
   "expectedTests": 6,
   "fixture": "enderIoFixture",
   "id": "auto_storage:enderio",
+  "matrix": {
+    "acceptedRecipes": [
+      "enderio:alloy_smelting/conductive_alloy_ingot"
+    ],
+    "descriptors": [
+      "auto_storage:enderio_alloy_smelting"
+    ],
+    "mods": [
+      "enderio"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "enderio"
+      ],
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
     "https://api.modrinth.com/maven"
   ],
