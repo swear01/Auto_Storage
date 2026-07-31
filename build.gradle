@@ -45,8 +45,8 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || descriptor.side != 'both'
             || !(descriptor.sourceSet instanceof String)
             || !(descriptor.fixture instanceof String)
-            || !(descriptor.expectedTests instanceof Number)
-            || descriptor.expectedTests.intValue() <= 0
+            || !(descriptor.expectedTests instanceof Integer)
+            || descriptor.expectedTests <= 0
             || !(descriptor.dependencies instanceof List)
             || descriptor.dependencies.isEmpty()
             || !(descriptorRepositories instanceof List)
@@ -87,7 +87,7 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             fixtureModId: "auto_storage_${directoryId}_fixture",
             runName     : runName,
             runTask     : "run${runName.substring(0, 1).toUpperCase()}${runName.substring(1)}",
-            expectedTests: descriptor.expectedTests.intValue(),
+            expectedTests: descriptor.expectedTests,
             dependencies: descriptor.dependencies.collect {
                 expandCompatDependency(it.toString())
             },

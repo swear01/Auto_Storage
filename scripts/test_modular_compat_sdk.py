@@ -65,6 +65,14 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn('"${spec.runName}"', build)
         self.assertIn("tasks.named(spec.runTask)", build)
         self.assertIn("spec.expectedTests", build)
+        self.assertIn(
+            "descriptor.expectedTests instanceof Integer",
+            build,
+        )
+        self.assertNotIn(
+            "descriptor.expectedTests instanceof Number",
+            build,
+        )
         self.assertIn("descriptor.auditArtifact", build)
         self.assertIn(
             "descriptor.dependencies[0] != auditArtifact.dependency",

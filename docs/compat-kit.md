@@ -70,7 +70,9 @@ worktree; omit it rather than presenting uncommitted/unversioned contents as
 source evidence. When the target jar has classified candidates, at least one
 candidate must map to a tracked, non-ignored, non-symlink Java source file under
 the supplied module; ignored build output and a clean but unrelated checkout
-are rejected instead of borrowing HEAD. Never silently replace a failed source.
+are rejected instead of borrowing HEAD. Matching is segment-aware: a path such
+as `notsamplemod/recipe/CrushingRecipe.java` cannot satisfy the candidate
+`samplemod.recipe.CrushingRecipe`. Never silently replace a failed source.
 
 ### 2. Scan
 
@@ -114,7 +116,8 @@ validated down through target, artifact, source, candidate, and risk records;
 a matching cache path does not authorize malformed or partial evidence. Every
 candidate must remain in the bucket computed by the current scanner; moving a
 recipe candidate into a station or resource list cannot hide it from contract
-review.
+review. Every risk-evidence owner must also be one of the audited recipe
+candidates, so risk cannot be detached from the class under review.
 
 ### 3. Decide
 
@@ -208,6 +211,9 @@ structure. The fixture must be a Java-safe camel-case identifier ending in
 `Fixture`; path-like values fail before any file is created. Gradle discovers
 the source set, reviewed HTTPS repositories, target dependencies, fixture mod,
 run task, expected test gate, and audited target artifact from that descriptor;
+`expectedTests` must be a positive JSON integer representable by Gradle's
+`Integer` parser; fractions and wider overflow values are rejected rather than
+truncated.
 the target is on both compile and fixture runtime classpaths, with both
 declarations non-transitive. `build` and the
 module GameTest resolve exactly one target jar and reject a SHA different from
@@ -242,7 +248,9 @@ scaffolding preflights every destination for type/content drift and every
 required parent as a real directory. Symlinked roots, ancestors, and generated
 targets are rejected before the first write; a late-sorting conflict, file
 occupying `src`, or `src` symlink cannot leave a partial project or write
-outside the requested output root.
+outside the requested output root. Existing ancestors above a not-yet-created
+output root are checked too. Rerunning an unchanged scaffold restores `0755`
+on `gradlew` and `tools/compat-kit/compat-kit`.
 
 Generated independent addons require the current compatible Auto Storage minor
 line. A 0.3.0 kit emits `[0.3.0,0.4)`: patches remain compatible, while the

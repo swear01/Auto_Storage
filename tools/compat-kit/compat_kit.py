@@ -458,18 +458,18 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
         name.split("$", 1)[0].replace(".", "/") + ".java"
         for name in candidate_names
     }
-    files = [
-        path.relative_to(source).as_posix()
-        for path in java_files
+    files = []
+    for path in java_files:
+        relative = path.relative_to(source).as_posix()
         if (
             path.is_file()
             and not path.is_symlink()
             and any(
-                path.as_posix().endswith(suffix)
+                relative == suffix or relative.endswith("/" + suffix)
                 for suffix in source_suffixes
             )
-        )
-    ]
+        ):
+            files.append(relative)
     result = subprocess.run(
         ["git", "-C", str(git_root), "rev-parse", "HEAD"],
         capture_output=True,
@@ -643,6 +643,9 @@ def _validate_audit(audit: dict):
             ):
                 raise ValueError(f"{location} has empty public_signature")
 
+    recipe_classes = {
+        record["class"] for record in candidates["recipe_classes"]
+    }
     risks = audit["risks"]
     if not isinstance(risks, list):
         raise ValueError("audit risks must be a list")
@@ -673,6 +676,13 @@ def _validate_audit(audit: dict):
             or len(set(evidence)) != len(evidence)
         ):
             raise ValueError(f"{location} evidence must be a unique string list")
+        for item in evidence:
+            owner = item.split("#", 1)[0].split(":", 1)[0]
+            if owner not in recipe_classes:
+                raise ValueError(
+                    f"{location} risk evidence owner is not an audited "
+                    "recipe candidate"
+                )
 
 
 def scan_jar(
@@ -1858,6 +1868,11 @@ def _materialize(
 ) -> list[Path]:
     complete = dict(files)
     complete[manifest_path] = _manifest(files, contract)
+    for ancestor in root.absolute().parents:
+        if ancestor.is_symlink():
+            raise ValueError(
+                f"generated path ancestor is a symlink: {ancestor}"
+            )
     if root.is_symlink():
         raise ValueError("generated path parent is a symlink: .")
     if root.exists() and not root.is_dir():
@@ -1889,8 +1904,8 @@ def _materialize(
         if not target.exists():
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(payload)
-            if relative in ("gradlew", "tools/compat-kit/compat-kit"):
-                target.chmod(0o755)
+        if relative in ("gradlew", "tools/compat-kit/compat-kit"):
+            target.chmod(0o755)
         generated.append(target)
     return generated
 

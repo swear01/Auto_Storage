@@ -35,6 +35,8 @@ entries and committed audits carry the scanner format and are fully
 schema-validated before reuse. If the target has classified candidates, a
 supplied source module must contain at least one matching tracked, non-ignored
 Java source file; ignored outputs and unrelated clean checkouts are rejected.
+Candidate paths match only at a package-path segment boundary, and every
+risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
@@ -45,6 +47,8 @@ repositories, additional required runtime artifacts, and evidence. Each
 required verification check must name the successful Gradle task plus a source
 glob and marker; the declared
 `game_test_task` must report exactly `expected_game_tests` passing tests.
+Bundled descriptor `expectedTests` is emitted and accepted only as a positive
+JSON integer; fractions and wider overflow values fail validation.
 Markers assigned to `run*GameTestServer` tasks must occur inside annotated
 `@GameTest` method bodies. After
 the contract has no `needs_decision` entry, pass the same committed audit to
@@ -77,7 +81,9 @@ accept the descriptor syntax emitted by `javap -c -p`.
 Scaffolding preflights every destination before writing the first file. Any
 existing path with different content, symlinked root/ancestor/target, or
 file-valued parent directory fails without leaving a partial project or writing
-outside the requested output root. Generated TOML also escapes DEL (`U+007F`).
+outside the requested output root. Existing ancestors above a not-yet-created
+root are included. Byte-identical reruns repair both generated launchers to
+mode `0755`. Generated TOML also escapes DEL (`U+007F`).
 Generated addon metadata accepts only the current compatible Auto Storage minor
 (`[0.3.0,0.4)` for this kit).
 Addon contracts use fixture `main` and exactly the `build` and

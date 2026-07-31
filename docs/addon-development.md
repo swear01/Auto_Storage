@@ -24,7 +24,9 @@ computed by the current scanner; changing a recipe into a station/resource
 record is rejected. When source is supplied, at least one classified candidate
 must map to a tracked, non-ignored Java file in that Git module; ignored build
 output or an unrelated clean checkout cannot contribute its revision as target
-evidence. The scanner also rehashes the target after inspection, so an
+evidence. Candidate-source suffixes match only at path-segment boundaries, and
+risk evidence must remain owned by an audited recipe candidate. The scanner
+also rehashes the target after inspection, so an
 atomically replaced jar cannot mix two artifacts in one audit.
 
 ```bash
@@ -106,7 +108,9 @@ replace the launcher or artifact gate and authorize that edit by updating its
 own manifest hash. Scaffold generation preflights all destinations and parent
 directories before its first write. Existing conflicting files, symlinked
 roots/ancestors/targets, or a file-valued `src` ancestor fail without leaving
-workflow, manifest, wrapper fragments, or writes outside the output root.
+workflow, manifest, wrapper fragments, or writes outside the output root. This
+includes existing symlink ancestors above a not-yet-created output root.
+Byte-identical reruns repair both generated launchers to mode `0755`.
 
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
@@ -297,7 +301,9 @@ isolated `src/compat/<mod-id>` source sets. Each module owns one
 `src/compat/<mod-id>/compat-module.json` descriptor containing its entrypoint,
 required mods, source-set/fixture names, and representative compile
 dependencies. Gradle validates every descriptor and deterministically generates
-the runtime `META-INF/auto_storage/compat-modules.json` index; there is no second
+the runtime index. Descriptor `expectedTests` is a positive JSON integer;
+fractional or wider numeric values fail instead of being truncated.
+The generated `META-INF/auto_storage/compat-modules.json` has no second
 hand-written central module list. The loader checks every required mod ID before
 resolving the module class. A present module uses
 `AutoStorageCompatModule` plus the same registration facade available to

@@ -55,7 +55,7 @@ class CompatKitAuditTests(unittest.TestCase):
     def setUp(self):
         self.compat_kit = load_compat_kit()
         self.temp = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.jar = self.root / "samplemod.jar"
         write_fixture_jar(self.jar)
 
@@ -435,6 +435,44 @@ class CompatKitAuditTests(unittest.TestCase):
                 signature_reader=self.signatures,
             )
 
+    def test_scan_requires_candidate_source_path_segment_boundary(self):
+        source = self.root / "source"
+        source_file = (
+            source
+            / "src/main/java/notsamplemod/recipe/CrushingRecipe.java"
+        )
+        source_file.parent.mkdir(parents=True)
+        source_file.write_text(
+            "package notsamplemod.recipe;\nfinal class CrushingRecipe {}\n"
+        )
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "source checkout has no candidate matches",
+        ):
+            self.compat_kit.scan_jar(
+                self.jar,
+                source=source,
+                signature_reader=self.signatures,
+            )
+
     def test_scan_rejects_ignored_candidate_source(self):
         source = self.root / "source"
         (source / ".gitignore").parent.mkdir(parents=True)
@@ -784,6 +822,16 @@ displayName="Sample Machines"
         audit["candidates"]["station_classes"].append(candidate)
 
         with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
+            self.compat_kit._validate_audit(audit)
+
+    def test_audit_validation_binds_risk_evidence_to_recipe_candidates(self):
+        audit = self.source_audit()
+        audit["risks"][0]["evidence"] = ["not.a.Candidate#getChance"]
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "risk evidence owner is not an audited recipe candidate",
+        ):
             self.compat_kit._validate_audit(audit)
 
     def test_decide_outputs_strict_needs_decision_contract_and_actions(self):
@@ -1401,6 +1449,51 @@ displayName="Sample Machines"
             )
 
         self.assertEqual([], list(external.iterdir()))
+
+    def test_external_scaffold_rejects_symlink_above_output_root(self):
+        contract = self.addon_contract()
+        external = self.root / "external"
+        external.mkdir()
+        link = self.root / "link"
+        link.symlink_to(external, target_is_directory=True)
+        output = link / "samplemod-auto-storage"
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "generated path ancestor is a symlink",
+        ):
+            self.compat_kit.scaffold_addon(
+                contract,
+                output,
+                source_audit=self.source_audit(),
+            )
+
+        self.assertEqual([], list(external.iterdir()))
+
+    def test_external_scaffold_repairs_reused_launcher_modes(self):
+        contract = self.addon_contract()
+        output = self.root / "samplemod-auto-storage"
+        source_audit = self.source_audit()
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=source_audit,
+        )
+        launchers = (
+            output / "gradlew",
+            output / "tools/compat-kit/compat-kit",
+        )
+        for launcher in launchers:
+            launcher.chmod(0o644)
+
+        self.compat_kit.scaffold_addon(
+            contract,
+            output,
+            source_audit=source_audit,
+        )
+
+        for launcher in launchers:
+            self.assertEqual(0o755, launcher.stat().st_mode & 0o777)
 
     def test_external_scaffold_bounds_auto_storage_to_current_minor(self):
         contract = self.addon_contract()
