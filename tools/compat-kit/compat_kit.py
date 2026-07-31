@@ -436,6 +436,9 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
             "access_flags": access_flags,
             "super_class": None,
             "interfaces": [],
+            "inner_class_entry": False,
+            "inner_name": None,
+            "enclosing_method": False,
         }
     if offset + 8 > len(payload):
         raise ValueError(f"truncated class declaration: {entry_name}")
@@ -456,6 +459,12 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
         name = _decode_modified_utf8(encoded_name, entry_name)
         return name.replace("/", ".")
 
+    def resolve_utf8(utf8_index: int) -> str:
+        encoded = utf8_entries.get(utf8_index)
+        if encoded is None:
+            raise ValueError(f"invalid class UTF-8 reference: {entry_name}")
+        return _decode_modified_utf8(encoded, entry_name)
+
     interfaces = []
     for interface_index in range(interface_count):
         class_index = int.from_bytes(
@@ -463,16 +472,102 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
             "big",
         )
         interfaces.append(resolve_class(class_index))
+    offset += interface_count * 2
     declared_name = resolve_class(this_class)
     expected_name = _class_name(entry_name)
     if declared_name != expected_name:
         raise ValueError(
             f"class declaration name mismatch: {entry_name} declares {declared_name}"
         )
+    def skip_members(member_offset: int, kind: str) -> int:
+        if member_offset + 2 > len(payload):
+            raise ValueError(f"truncated class {kind}: {entry_name}")
+        count = int.from_bytes(payload[member_offset:member_offset + 2], "big")
+        member_offset += 2
+        for _ in range(count):
+            if member_offset + 8 > len(payload):
+                raise ValueError(f"truncated class {kind}: {entry_name}")
+            attribute_count = int.from_bytes(
+                payload[member_offset + 6:member_offset + 8],
+                "big",
+            )
+            member_offset += 8
+            for _ in range(attribute_count):
+                if member_offset + 6 > len(payload):
+                    raise ValueError(
+                        f"truncated class {kind} attribute: {entry_name}"
+                    )
+                length = int.from_bytes(
+                    payload[member_offset + 2:member_offset + 6],
+                    "big",
+                )
+                member_offset += 6
+                if member_offset + length > len(payload):
+                    raise ValueError(
+                        f"truncated class {kind} attribute: {entry_name}"
+                    )
+                member_offset += length
+        return member_offset
+
+    offset = skip_members(offset, "fields")
+    offset = skip_members(offset, "methods")
+    if offset + 2 > len(payload):
+        raise ValueError(f"truncated class attributes: {entry_name}")
+    attribute_count = int.from_bytes(payload[offset:offset + 2], "big")
+    offset += 2
+    inner_class_entry = False
+    inner_name = None
+    enclosing_method = False
+    for _ in range(attribute_count):
+        if offset + 6 > len(payload):
+            raise ValueError(f"truncated class attribute: {entry_name}")
+        name_index = int.from_bytes(payload[offset:offset + 2], "big")
+        length = int.from_bytes(payload[offset + 2:offset + 6], "big")
+        offset += 6
+        if offset + length > len(payload):
+            raise ValueError(f"truncated class attribute: {entry_name}")
+        attribute_name = resolve_utf8(name_index)
+        attribute = payload[offset:offset + length]
+        offset += length
+        if attribute_name == "EnclosingMethod":
+            if length != 4:
+                raise ValueError(
+                    f"invalid EnclosingMethod attribute: {entry_name}"
+                )
+            enclosing_method = True
+        elif attribute_name == "InnerClasses":
+            if length < 2:
+                raise ValueError(f"invalid InnerClasses attribute: {entry_name}")
+            classes_count = int.from_bytes(attribute[:2], "big")
+            if length != 2 + classes_count * 8:
+                raise ValueError(f"invalid InnerClasses attribute: {entry_name}")
+            for index in range(classes_count):
+                entry_offset = 2 + index * 8
+                inner_class_index = int.from_bytes(
+                    attribute[entry_offset:entry_offset + 2],
+                    "big",
+                )
+                if inner_class_index != this_class:
+                    continue
+                inner_class_entry = True
+                inner_name_index = int.from_bytes(
+                    attribute[entry_offset + 4:entry_offset + 6],
+                    "big",
+                )
+                inner_name = (
+                    None
+                    if inner_name_index == 0
+                    else resolve_utf8(inner_name_index)
+                )
+    if offset != len(payload):
+        raise ValueError(f"trailing class data: {entry_name}")
     return {
         "access_flags": access_flags,
         "super_class": resolve_class(super_class),
         "interfaces": interfaces,
+        "inner_class_entry": inner_class_entry,
+        "inner_name": inner_name,
+        "enclosing_method": enclosing_method,
     }
 
 
@@ -491,20 +586,25 @@ def _is_inspectable_class(
         or entry_name.endswith("module-info.class")
     ):
         return False
-    nested_segments = _class_name(entry_name).split("$")[1:]
-    named = all(
-        re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
-        for segment in nested_segments
-    )
-    if not named:
-        return False
     entry = archive.getinfo(entry_name)
     if entry.file_size > MAX_CLASS_BYTES:
         raise ValueError(
             f"class entry exceeds {MAX_CLASS_BYTES} bytes: {entry_name}"
         )
+    metadata = _class_metadata(archive.read(entry_name), entry_name)
+    if metadata is None:
+        nested_segments = _class_name(entry_name).split("$")[1:]
+        return all(
+            re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
+            for segment in nested_segments
+        )
     return not (
-        _class_access_flags(archive.read(entry_name), entry_name) & 0x1000
+        metadata["access_flags"] & 0x1000
+        or metadata["enclosing_method"]
+        or (
+            metadata["inner_class_entry"]
+            and metadata["inner_name"] is None
+        )
     )
 
 
@@ -583,6 +683,44 @@ KNOWN_ANCESTRY_ROOTS = frozenset({
     BLOCK_ENTITY_CLASS,
 })
 KNOWN_ANCESTRY_PREFIXES = ("java.", "javax.", "jdk.", "sun.")
+_JDK_MODULE_CLASSES = None
+
+
+def _jdk_module_classes() -> frozenset[str]:
+    global _JDK_MODULE_CLASSES
+    if _JDK_MODULE_CLASSES is not None:
+        return _JDK_MODULE_CLASSES
+    javap = shutil.which("javap")
+    if javap is None:
+        raise RuntimeError(
+            "javap was not found; set JAVA_HOME to JDK 21 before scanning"
+        )
+    jmods = Path(javap).resolve().parent.parent / "jmods"
+    if not jmods.is_dir():
+        raise RuntimeError(
+            "JDK module metadata was not found; set JAVA_HOME to JDK 21 before scanning"
+        )
+    classes = set()
+    try:
+        for jmod in sorted(jmods.glob("*.jmod")):
+            with zipfile.ZipFile(jmod) as archive:
+                for entry_name in archive.namelist():
+                    if (
+                        entry_name.startswith("classes/")
+                        and entry_name.endswith(".class")
+                        and not entry_name.endswith("module-info.class")
+                    ):
+                        classes.add(
+                            _class_name(entry_name.removeprefix("classes/"))
+                        )
+    except (OSError, zipfile.BadZipFile) as error:
+        raise RuntimeError(
+            f"failed to read JDK module metadata: {error}"
+        ) from error
+    if not classes:
+        raise RuntimeError("JDK module metadata contains no classes")
+    _JDK_MODULE_CLASSES = frozenset(classes)
+    return _JDK_MODULE_CLASSES
 
 
 def _current_name_bucket(class_name: str) -> tuple[str, str] | None:
@@ -647,6 +785,9 @@ def _require_resolved_ancestry(
             return
         metadata = metadata_by_class.get(class_name)
         if metadata is None:
+            if class_name in _jdk_module_classes():
+                resolved.add(class_name)
+                return
             raise ValueError(
                 "unresolved ancestry; supply --classpath for "
                 f"{owner} -> {class_name}"
@@ -720,6 +861,10 @@ def _classify_candidate(
             return bucket, {"method": "name_term", "evidence": [term]}
         return None
 
+    name_classification = _current_name_bucket(class_name)
+    if name_classification is not None:
+        bucket, term = name_classification
+        return bucket, {"method": "name_term", "evidence": [term]}
     bucket = _candidate_bucket(class_name)
     if bucket is None:
         return None
@@ -1260,9 +1405,7 @@ def _validate_classification(class_name: str, bucket: str, value: dict, location
             raise ValueError(f"{location} name-term classification requires one term")
         expected = _current_name_bucket(class_name)
         expected_bucket = expected[0] if expected is not None else None
-        if bucket == "recipe_classes":
-            expected_bucket = _candidate_bucket(class_name)
-        elif expected_bucket is None:
+        if expected_bucket is None:
             expected_bucket = _candidate_bucket(class_name)
         if expected_bucket != bucket or evidence[0] not in class_name.lower():
             raise ValueError(
@@ -2150,6 +2293,7 @@ def _validate_station(value, location: str):
     variants = value["variants"]
     if not isinstance(variants, list) or not variants:
         raise ValueError(f"{location} station variants must be a non-empty list")
+    seen_items = set()
     for index, variant in enumerate(variants):
         variant_location = f"{location} station variant {index}"
         if not isinstance(variant, dict):
@@ -2160,6 +2304,11 @@ def _validate_station(value, location: str):
         _validate_nonempty_string(variant["item"], f"{variant_location} item")
         if not RESOURCE_LOCATION.fullmatch(variant["item"]):
             raise ValueError(f"{variant_location} item must be a resource location")
+        if variant["item"] in seen_items:
+            raise ValueError(
+                f"{location} has duplicate station variant item: {variant['item']}"
+            )
+        seen_items.add(variant["item"])
         rate = variant["rate"]
         if not isinstance(rate, dict):
             raise ValueError(f"{variant_location} rate must be an object")
@@ -4824,8 +4973,6 @@ def worker_package(
     }
     commands = """#!/bin/sh
 set -eu
-export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
-export PATH="$JAVA_HOME/bin:$PATH"
 tools/compat-kit/compat-kit propose {audit_argument} --output proposals.json
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_compat_kit
 {task_commands}
@@ -4909,7 +5056,9 @@ def _validate_direct_accessor(
     required = {
         "static_field_value_get": {"kind", "owner", "member", "value_type"},
         "static_method": {"kind", "owner", "member", "value_type"},
-        "registry_block_method": {"kind", "owner", "member", "value_type"},
+        "registry_block_method": {
+            "kind", "owner", "member", "value_type", "block_id",
+        },
         "enum_constant_numeric_field": {
             "kind", "owner", "constant", "member", "value_type",
         },
@@ -4931,6 +5080,10 @@ def _validate_direct_accessor(
         raise ValueError(f"{location} has invalid accessor member")
     if "constant" in accessor and not _is_java_member(accessor["constant"]):
         raise ValueError(f"{location} has invalid accessor constant")
+    if "block_id" in accessor and not RESOURCE_LOCATION.fullmatch(
+        accessor["block_id"]
+    ):
+        raise ValueError(f"{location} has invalid accessor block_id")
 
 
 def _validate_positive_long(value, location: str):
@@ -5006,7 +5159,8 @@ def _render_numeric_accessor(accessor: dict, item: str) -> str:
     if accessor["kind"] == "enum_constant_numeric_field":
         return f"{owner}.{accessor['constant']}.{member}"
     return (
-        f"(({owner}) requiredBlock({_java_resource_location(item)})).{member}()"
+        f"(({owner}) requiredBlock("
+        f"{_java_resource_location(accessor['block_id'])})).{member}()"
     )
 
 
@@ -5192,23 +5346,28 @@ def _validate_generation_plan(plan: dict, contract: dict):
                 )
                 free_cost = False
             if (
-                len(contract_family["inputs"]) != 1
-                or contract_family["inputs"][0]["role"] != "consume"
-                or contract_family["inputs"][0]["resource_kind"] != "item"
-                or len(contract_family["outputs"]) != 1
-                or contract_family["outputs"][0]["role"] != "primary"
-                or contract_family["outputs"][0]["resource_kind"] != "item"
+                contract_family["inputs"] != [{
+                    "role": "consume",
+                    "resource_kind": "item",
+                    "amount": 1,
+                    "selector": "recipe.input",
+                }]
+                or contract_family["outputs"] != [{
+                    "role": "primary",
+                    "resource_kind": "item",
+                    "amount": "recipe.output.count",
+                    "selector": "recipe.output",
+                }]
                 or (
                     free_cost
                     and contract_family["costs"]
                 )
                 or (
                     not free_cost
-                    and (
-                        len(contract_family["costs"]) != 1
-                        or contract_family["costs"][0]["resource_kind"]
-                        != "auto_storage:station_work"
-                    )
+                    and contract_family["costs"] != [{
+                        "resource_kind": "auto_storage:station_work",
+                        "amount": "recipe.processing_time",
+                    }]
                 )
             ):
                 raise ValueError(f"{location} contract shape is not supported")
@@ -6183,6 +6342,9 @@ def _resource_tests_java(plan: dict) -> str:
         scenario.reset();
         scenario.seed();
         var before = scenario.snapshot();
+        if (!Long.valueOf({sample_amount}L).equals(before.amounts().get({snapshot_key}))) {{
+            helper.fail("Seeded resource amount mismatch");
+        }}
         byte[] saved = Objects.requireNonNull(scenario.save(), "saved resource state");
         scenario.clear();
         if (before.equals(scenario.snapshot())) helper.fail("Resource clear did not change state");

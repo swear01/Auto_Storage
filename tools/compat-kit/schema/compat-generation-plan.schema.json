@@ -128,12 +128,13 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["kind", "owner", "member", "value_type"],
+          "required": ["kind", "owner", "member", "value_type", "block_id"],
           "properties": {
             "kind": { "const": "registry_block_method" },
             "owner": { "$ref": "#/$defs/java_type" },
             "member": { "$ref": "#/$defs/java_member" },
-            "value_type": { "const": "integral" }
+            "value_type": { "const": "integral" },
+            "block_id": { "$ref": "#/$defs/resource_location" }
           }
         },
         {

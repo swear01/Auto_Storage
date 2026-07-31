@@ -76,6 +76,9 @@ public final class GeneratedSteamResourceGameTests {
         scenario.reset();
         scenario.seed();
         var before = scenario.snapshot();
+        if (!Long.valueOf(1000L).equals(before.amounts().get("resource/compat_kit_fixture:steam"))) {
+            helper.fail("Seeded resource amount mismatch");
+        }
         byte[] saved = Objects.requireNonNull(scenario.save(), "saved resource state");
         scenario.clear();
         if (before.equals(scenario.snapshot())) helper.fail("Resource clear did not change state");

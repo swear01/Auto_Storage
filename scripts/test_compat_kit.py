@@ -1453,6 +1453,18 @@ class CompatKitAuditTests(unittest.TestCase):
             nested_jar,
             source=source,
             signature_reader=nested_signatures,
+            class_metadata_reader=lambda class_name: (
+                {
+                    "access_flags": 0,
+                    "super_class": "java.lang.Object",
+                    "interfaces": [
+                        "net.minecraft.world.item.crafting.Recipe"
+                    ],
+                }
+                if class_name
+                == "samplemod.recipe.CrusherRecipes$PolishingRecipe"
+                else None
+            ),
         )
 
         recipe_classes = [
@@ -1476,6 +1488,87 @@ class CompatKitAuditTests(unittest.TestCase):
             ["src/main/java/samplemod/recipe/CrusherRecipes.java"],
             audit["source"]["files"],
         )
+
+    def test_scan_keeps_real_named_nested_recipe_whose_identifier_contains_dollar(self):
+        source = self.root / "dollar-nested-source"
+        classes = self.root / "dollar-nested-classes"
+        sources = {
+            "net/minecraft/world/item/crafting/Recipe.java": (
+                "package net.minecraft.world.item.crafting; public interface Recipe {}\n"
+            ),
+            "samplemod/recipe/DollarRecipes.java": (
+                "package samplemod.recipe; "
+                "public final class DollarRecipes { "
+                "public static final class $Recipe implements "
+                "net.minecraft.world.item.crafting.Recipe {} "
+                "public static Object anonymous() { return new "
+                "net.minecraft.world.item.crafting.Recipe() {}; } "
+                "public static Class<?> local() { class LocalRecipe implements "
+                "net.minecraft.world.item.crafting.Recipe {} return LocalRecipe.class; } }\n"
+            ),
+        }
+        for relative, text in sources.items():
+            target = source / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text)
+        classes.mkdir()
+        subprocess.run(
+            [
+                "javac",
+                "-d",
+                str(classes),
+                *[str(source / relative) for relative in sorted(sources)],
+            ],
+            check=True,
+        )
+        nested_jar = self.root / "samplemod-dollar-nested.jar"
+        with zipfile.ZipFile(nested_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            for class_file in sorted(classes.rglob("*.class")):
+                archive.write(
+                    class_file,
+                    class_file.relative_to(classes).as_posix(),
+                )
+
+        audit = self.compat_kit.scan_jar(nested_jar)
+        recipes = {
+            candidate["class"]
+            for candidate in audit["candidates"]["recipe_classes"]
+        }
+        self.assertIn("samplemod.recipe.DollarRecipes$$Recipe", recipes)
+        self.assertFalse(any("$1" in class_name for class_name in recipes))
+
+    def test_scan_recognizes_jdk_module_ancestry_outside_java_prefixes(self):
+        source = self.root / "jdk-ancestry-source"
+        classes = self.root / "jdk-ancestry-classes"
+        handler = source / "samplemod/xml/XmlHandler.java"
+        handler.parent.mkdir(parents=True)
+        handler.write_text(
+            "package samplemod.xml; public final class XmlHandler extends "
+            "org.xml.sax.helpers.DefaultHandler {}\n"
+        )
+        classes.mkdir()
+        subprocess.run(["javac", "-d", str(classes), str(handler)], check=True)
+        target_jar = self.root / "samplemod-jdk-ancestry.jar"
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            archive.write(
+                classes / "samplemod/xml/XmlHandler.class",
+                "samplemod/xml/XmlHandler.class",
+            )
+
+        audit = self.compat_kit.scan_jar(target_jar)
+        self.assertEqual([], audit["candidates"]["recipe_classes"])
 
     def test_scan_ignores_multi_release_archive_paths_and_scans_root_class_once(self):
         multi_release_jar = self.root / "samplemod-multi-release.jar"
@@ -1607,6 +1700,23 @@ displayName="Sample Machines"
         audit = self.source_audit()
         candidate = audit["candidates"]["recipe_classes"].pop(0)
         audit["candidates"]["station_classes"].append(candidate)
+
+        with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
+            self.compat_kit._validate_audit(audit)
+
+    def test_audit_validation_recomputes_client_viewer_name_priority(self):
+        structural_jar = self.root / "samplemod-current-bucket.jar"
+        write_structural_fixture_jar(self.root, structural_jar)
+        audit = self.compat_kit.scan_jar(structural_jar)
+        candidate = audit["candidates"]["client_viewer_classes"].pop(0)
+        candidate["classification"] = {
+            "method": "name_term",
+            "evidence": ["recipe"],
+        }
+        audit["candidates"]["recipe_classes"].append(candidate)
+        audit["candidates"]["recipe_classes"].sort(
+            key=lambda entry: entry["class"]
+        )
 
         with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
             self.compat_kit._validate_audit(audit)
@@ -1775,6 +1885,25 @@ displayName="Sample Machines"
                         require_complete=True,
                         source_audit=audit,
                     )
+
+    def test_contract_rejects_duplicate_station_variant_items(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        family = next(
+            family
+            for family in contract["families"]
+            if family["status"] == "accepted"
+        )
+        duplicate = copy.deepcopy(family["station"]["variants"][0])
+        duplicate["rate"]["numerator"] = 2
+        family["station"]["variants"].append(duplicate)
+
+        with self.assertRaisesRegex(ValueError, "duplicate station variant item"):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=audit,
+            )
 
     def test_complete_contract_requires_resource_location_recipe_and_descriptor_ids(self):
         audit = self.source_audit()
@@ -2366,6 +2495,8 @@ displayName="Sample Machines"
             "./gradlew runSamplemodGameTestServer --console=plain --no-daemon",
             commands,
         )
+        self.assertNotIn("export JAVA_HOME=", commands)
+        self.assertNotIn('export PATH="$JAVA_HOME/bin:$PATH"', commands)
 
         args = self.compat_kit._build_parser().parse_args([
             "worker-package",
@@ -2652,6 +2783,47 @@ displayName="Sample Machines"
                 contract, audit, plan, self.root / "duplicate-rate-item"
             )
 
+        shape_mutations = (
+            ("input amount", lambda family: family["inputs"][0].__setitem__("amount", 2)),
+            (
+                "input selector",
+                lambda family: family["inputs"][0].__setitem__(
+                    "selector", "recipe.other"
+                ),
+            ),
+            ("output amount", lambda family: family["outputs"][0].__setitem__("amount", 1)),
+            (
+                "output selector",
+                lambda family: family["outputs"][0].__setitem__(
+                    "selector", "recipe.other"
+                ),
+            ),
+            ("cost amount", lambda family: family["costs"][0].__setitem__("amount", 1)),
+            (
+                "cost selector",
+                lambda family: family["costs"][0].__setitem__(
+                    "selector", "recipe.other"
+                ),
+            ),
+        )
+        for name, mutate in shape_mutations:
+            with self.subTest(name=name):
+                mutated_contract = self.accepted_contract()
+                family = next(
+                    family
+                    for family in mutated_contract["families"]
+                    if family["status"] == "accepted"
+                )
+                mutate(family)
+                mutated_plan = self.generation_plan(mutated_contract)
+                with self.assertRaisesRegex(ValueError, "contract shape is not supported"):
+                    self.compat_kit.generate_compatibility(
+                        mutated_contract,
+                        self.source_audit(),
+                        mutated_plan,
+                        self.root / ("unsupported-" + name.replace(" ", "-")),
+                    )
+
         plan = self.generation_plan(contract)
         plan["families"].append(copy.deepcopy(plan["families"][0]))
         with self.assertRaisesRegex(ValueError, "duplicate family"):
@@ -2739,13 +2911,14 @@ displayName="Sample Machines"
                 "accessor": accessor,
             },
             "public_numeric_getter": {
-                "item": "samplemod:crusher",
+                "item": "samplemod:crusher_item",
                 "template": "public_numeric_getter",
                 "accessor": {
                     "kind": "registry_block_method",
                     "owner": "samplemod.CrusherBlock",
                     "member": "getRate",
                     "value_type": "integral",
+                    "block_id": "samplemod:crusher",
                 },
             },
             "tier_multiplier": {
@@ -2793,6 +2966,11 @@ displayName="Sample Machines"
             rendered["config_tick_ratio"],
         )
         self.assertIn("samplemod.CrusherBlock", rendered["public_numeric_getter"])
+        self.assertIn('id("samplemod", "crusher")', rendered["public_numeric_getter"])
+        self.assertNotIn(
+            'requiredBlock(id("samplemod", "crusher_item"))',
+            rendered["public_numeric_getter"],
+        )
         self.assertIn("Math.multiplyExact", rendered["tier_multiplier"])
         self.assertIn(
             "mekanism.common.tier.FactoryTier.BASIC.processes",
@@ -2832,6 +3010,7 @@ displayName="Sample Machines"
                     "owner": "samplemod.CrusherBlock",
                     "member": "getRate",
                     "value_type": "integral",
+                    "block_id": "samplemod:crusher",
                 },
             },
             {
@@ -4254,6 +4433,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             variant["properties"]["value_type"] == {"const": "integral"}
             for variant in accessor_schema["oneOf"]
         ))
+        for variant in accessor_schema["oneOf"]:
+            kind = variant["properties"]["kind"]["const"]
+            self.assertEqual(set(variant["required"]), set(variant["properties"]))
+            self.assertEqual(kind == "registry_block_method", "block_id" in variant["required"])
         rate_schema = generation_schema["$defs"]["rate_binding"]
         self.assertNotIn("properties", rate_schema)
         rate_variants = {
@@ -4341,6 +4524,17 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             variant["properties"]["value_type"] == {"const": "boolean"}
             for variant in runtime_plan_schema["$defs"]["boolean_accessor"]["oneOf"]
         ))
+        for accessor_name in ("numeric_accessor", "boolean_accessor"):
+            for variant in runtime_plan_schema["$defs"][accessor_name]["oneOf"]:
+                kind = variant["properties"]["kind"]["const"]
+                self.assertEqual(
+                    set(variant["required"]),
+                    set(variant["properties"]),
+                )
+                self.assertEqual(
+                    kind == "registry_block_method",
+                    "block_id" in variant["required"],
+                )
         conformance_schema = json.loads(
             (schema_root / "compat-conformance-plan.schema.json").read_text()
         )
@@ -4648,6 +4842,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn("scenario.reset();", rollback)
         self.assertIn("scenario.seed();", rollback)
         self.assertLess(rollback.index("scenario.seed();"), rollback.index("scenario.snapshot();"))
+        self.assertIn(
+            'Long.valueOf(1000L).equals(before.amounts().get("resource/compat_kit_fixture:steam"))',
+            generated_resource_tests,
+        )
         build = (ROOT / "build.gradle").read_text()
         self.assertIn("compatKitGeneratedFixture", build)
         self.assertIn("compileCompatKitGeneratedFixtureJava", build)

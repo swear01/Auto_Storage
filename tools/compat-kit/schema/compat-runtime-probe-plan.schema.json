@@ -190,7 +190,8 @@
             "kind",
             "owner",
             "member",
-            "value_type"
+            "value_type",
+            "block_id"
           ],
           "properties": {
             "kind": {
@@ -204,6 +205,9 @@
             },
             "value_type": {
               "const": "number"
+            },
+            "block_id": {
+              "$ref": "#/$defs/resource_location"
             }
           }
         },
@@ -294,7 +298,8 @@
             "kind",
             "owner",
             "member",
-            "value_type"
+            "value_type",
+            "block_id"
           ],
           "properties": {
             "kind": {
@@ -308,6 +313,9 @@
             },
             "value_type": {
               "const": "boolean"
+            },
+            "block_id": {
+              "$ref": "#/$defs/resource_location"
             }
           }
         },

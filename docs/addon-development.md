@@ -69,11 +69,23 @@ recipe-class inventory and effective recipe-data/data-pack digest. Runtime
 probe JSON must pass `validate-probe` with the same audit and optional plan;
 schema validation alone does not prove those cross-file identities.
 
+The scanner reads the selected JDK 21 module inventory for platform ancestry
+and uses class-file `InnerClasses`/`EnclosingMethod` metadata for nested classes.
+Thus a named class whose identifier contains `$` remains auditable while local,
+anonymous, and synthetic classes stay excluded. Scan and audit validation use
+the same bucket priority, so moving a candidate record cannot bypass review.
+
 Complete contracts use lowercase resource locations for recipe types, station
 descriptor IDs, and station variant items. Generated rate bindings are
-one-to-one with those station items; duplicate item bindings are rejected.
-`worker-package` runs every Gradle task declared by the reviewed contract, so
-the target's authoritative GameTest remains part of a delegated worker gate.
+one-to-one with those station items; duplicate descriptor variants and duplicate
+rate bindings are rejected. `registry_block_method` bindings name their block ID
+separately from the representative station item. The generated
+`single_item_to_item` path accepts only the documented one-input/one-primary
+output selectors and exact amount expressions; all other shapes need a reviewed
+provider. Generated custom-resource tests verify that their sample key and
+amount were actually seeded before exercising persistence. `worker-package`
+runs every declared Gradle task without replacing the worker's JDK environment,
+so the target's authoritative GameTest remains part of a delegated worker gate.
 
 ## Add the SDK
 

@@ -96,7 +96,10 @@ non-JDK superclass and interface reachable from the target jar must resolve;
 an incomplete classpath fails instead of silently omitting a structurally
 hidden recipe family. This check runs before name-bucket classification, so a
 class named like a client viewer, builder, or datagen helper cannot bypass
-ancestry validation. At most 128 jars and 200,000 classes are read,
+ancestry validation. JDK ancestry is resolved from the selected JDK 21's
+`jmods` inventory, not from a package-prefix allowlist, so platform classes
+such as `org.xml.sax.*` are recognized without weakening external dependency
+checks. At most 128 jars and 200,000 classes are read,
 duplicate/conflicting classes fail, and the sorted artifact SHA/size set is
 persisted in the audit and cache identity. Every classpath jar is rehashed
 after inspection just like the target; replacing a dependency during a scan
@@ -137,8 +140,10 @@ the root binary name is scanned once.
 Chance, randomness, generic-ingredient, and capability-mutation detection read
 both source-like method signatures and the `methodName:(descriptor)` form
 emitted by `javap -c -p`.
-Named nested classes are audited and mapped back to their top-level Java source;
-anonymous/local `$<number>` classes and every class carrying the JVM
+Named nested classes are audited and mapped back to their top-level Java source,
+including legal Java identifiers that themselves contain `$`. The scanner uses
+`InnerClasses` and `EnclosingMethod` metadata rather than splitting the binary
+name on every `$`; anonymous/local classes and every class carrying the JVM
 `ACC_SYNTHETIC` access flag are excluded.
 
 Archive limits, the 1 MiB per-entry NeoForge metadata limit, the 16 MiB
@@ -151,9 +156,11 @@ or candidates. Every supplied ancestry jar has the same post-inspection
 size/SHA check. Current-format cache entries and committed audits are also fully
 validated down through target, artifact, source, candidate, and risk records;
 a matching cache path does not authorize malformed or partial evidence. Every
-candidate must remain in the bucket computed by the current scanner; moving a
-recipe candidate into a station or resource list cannot hide it from contract
-review. Every risk-evidence owner must also be one of the audited recipe
+candidate must remain in the bucket computed by the current scanner. Both scan
+and committed-audit validation apply the same current priority for client/viewer,
+builder, datagen, and structural/name classifications; moving a candidate into
+a lower-priority bucket cannot hide it from contract review. Every risk-evidence
+owner must also be one of the audited recipe
 candidates, so risk cannot be detached from the class under review.
 
 Legacy format-7 audits must be regenerated from the exact same reviewed
@@ -320,6 +327,8 @@ refers to a package-local `audit.json` that was not emitted. For a complete
 contract it runs every declared `verification.gradle_tasks` entry as its own
 Gradle invocation, followed by datagen and diff checks; the package cannot
 replace an authoritative target GameTest with only the compatibility matrix.
+The script preserves the worker's caller-provided JDK environment instead of
+hardcoding a macOS/Homebrew `JAVA_HOME`.
 
 ### 3a. Generate reviewed mechanical code
 
@@ -360,10 +369,21 @@ be guessed to be the runtime registry path. The registration namespace must
 match the reviewed station descriptor namespace. Commit plans and generated source, then keep a
 byte-for-byte regeneration test so drift is visible.
 
+The built-in `single_item_to_item` template accepts only its canonical contract
+shape: one consumed Item selected by `recipe.input` with amount `1`, one primary
+Item selected by `recipe.output` with amount `recipe.output.count`, and either
+no cost or the single `auto_storage:station_work` cost selected by
+`recipe.processing_time`. Any changed amount, selector, extra input/output, or
+different cost remains a handwritten/RED boundary rather than being silently
+compiled with different semantics.
+
 Contract recipe type IDs, station descriptor IDs, and station variant item IDs
-must use normal lowercase resource-location grammar. Generation plans must bind
-each station item exactly once; duplicate rate-item bindings fail before any
-Java is emitted instead of being collapsed by set comparison.
+must use normal lowercase resource-location grammar. A descriptor cannot list
+the same station variant item twice. Generation plans must bind each station
+item exactly once; duplicate rate-item bindings fail before any Java is emitted
+instead of being collapsed by set comparison. A `registry_block_method`
+accessor also declares its exact `block_id`; the station's representative item
+ID is not assumed to be the owning block registry ID.
 
 ### 3b. Generate conformance and resource scaffolds
 
@@ -399,7 +419,8 @@ which must reuse Auto Storage's built-in support. Generated common source may
 not import Core internals or client classes; the renderer bridge remains
 generic and client registration stays isolated. Each resource plan binds a
 sample amount and unique snapshot key. The generated tests own the before/after
-snapshot, delta, save/load round-trip, rollback, and physical-side assertions;
+snapshot, first assert that reset/seed produced that exact key and amount, then
+own the delta, save/load round-trip, rollback, and physical-side assertions;
 an addon provider exposes operations and bytes, not self-attested persistence
 or client-isolation booleans.
 
