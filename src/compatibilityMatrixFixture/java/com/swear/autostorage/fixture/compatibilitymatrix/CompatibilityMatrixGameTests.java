@@ -41,7 +41,8 @@ public final class CompatibilityMatrixGameTests {
                 "industrialforegoing",
                 "create",
                 "pneumaticcraft",
-                "extendedcrafting")) {
+                "extendedcrafting",
+                "theurgy")) {
             if (!ModList.get().isLoaded(modId)) {
                 helper.fail("Compatibility matrix did not load " + modId);
                 return;
@@ -58,7 +59,10 @@ public final class CompatibilityMatrixGameTests {
                 "powah_energizing",
                 "industrial_foregoing_dissolution_chamber",
                 "create_cutting",
-                "extended_crafting_table")) {
+                "extended_crafting_table",
+                "theurgy_calcination_oven",
+                "theurgy_distiller",
+                "theurgy_liquefaction_cauldron")) {
             ResourceLocation id = autoStorage(path);
             if (!AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.containsKey(id)
                     || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(id)) {
@@ -127,7 +131,9 @@ public final class CompatibilityMatrixGameTests {
                 ResourceLocation.fromNamespaceAndPath(
                         "industrialforegoing", "dissolution_chamber/pink_slime_ball"),
                 ResourceLocation.fromNamespaceAndPath(
-                        "create", "cutting/andesite_alloy"))) {
+                        "create", "cutting/andesite_alloy"),
+                ResourceLocation.fromNamespaceAndPath(
+                        "theurgy", "distillation/bread"))) {
             var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
             if (holder == null) {
                 helper.fail("Combined compatibility recipe is missing " + recipeId);

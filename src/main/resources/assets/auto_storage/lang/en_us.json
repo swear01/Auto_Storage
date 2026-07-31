@@ -159,5 +159,8 @@
   "gui.auto_storage.station.modern_industrialization_wiremill": "Wiremill",
   "gui.auto_storage.station.ae2_inscriber": "Inscriber",
   "gui.auto_storage.station.powah_energizing": "Energizing Rod",
-  "gui.auto_storage.station.powah_furnator": "Furnator"
+  "gui.auto_storage.station.powah_furnator": "Furnator",
+  "gui.auto_storage.station.theurgy_calcination": "Calcination",
+  "gui.auto_storage.station.theurgy_distillation": "Distillation",
+  "gui.auto_storage.station.theurgy_liquefaction": "Liquefaction"
 }
