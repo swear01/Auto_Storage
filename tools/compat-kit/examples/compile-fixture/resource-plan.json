@@ -1,0 +1,26 @@
+{
+  "class_name": "GeneratedSteamResource",
+  "kind": "auto_storage_compat_resource_plan",
+  "package": "com.swear.autostorage.compatkitfixture.generated",
+  "resources": [
+    {
+      "bridge_name": "GeneratedSteamBridge",
+      "id": "compat_kit_fixture:steam",
+      "representative_item": "minecraft:water_bucket",
+      "sample_amount": 1000,
+      "snapshot_key": "resource/compat_kit_fixture:steam",
+      "test_provider": {
+        "factory_member": "create",
+        "owner": "com.swear.autostorage.compatkitfixture.CompatKitResourceProvider"
+      },
+      "variant_aware": false
+    }
+  ],
+  "schema": 1,
+  "source_contract_digest": "e90c6022a56c50d065f25937e2bfc3e20fff8dc04bbdaf284cc6ae10674dac4f",
+  "target": {
+    "display_name": "Applied Energistics 2",
+    "mod_id": "ae2",
+    "version": "19.2.17"
+  }
+}

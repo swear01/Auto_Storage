@@ -26,20 +26,33 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-Scanner format v8 adds structural Recipe/RecipeSerializer classification and a
-bounded recipe-data inventory. The committed AE2 dogfood audit remains the
-explicitly supported v7 legacy format until it is regenerated from the same
-reviewed artifact/source evidence. Scanner format v7 audits named nested classes while excluding anonymous/local
-classes by name and JVM `ACC_SYNTHETIC` class files by access flag. It also
-recognizes the method-descriptor form that `javap` emits for chance,
-randomness, generic-ingredient, and capability-mutation calls. The reviewed
-contract explicitly rejects all 25 new nested recipe-name candidates as UI,
-datagen, codec, result, condition, or value helpers;
-`InscriberRecipe$Ingredients` remains owned by the accepted
-parent `InscriberRecipe` contract rather than becoming another family. The
-reviewed runtime list also carries GuideME through exact Modrinth artifact
-`rduAfwb7`; both bundled and generated-addon fixtures therefore reproduce AE2's
-required runtime instead of relying on a hand-edited descriptor.
+The committed audit uses Scanner format v8. Class-file hierarchy inspection finds
+exactly five concrete `Recipe` implementations:
+
+- `appeng.recipes.entropy.EntropyRecipe`;
+- `appeng.recipes.handlers.ChargerRecipe`;
+- `appeng.recipes.handlers.InscriberRecipe`;
+- `appeng.recipes.mattercannon.MatterCannonAmmo`;
+- `appeng.recipes.transform.TransformRecipe`.
+
+Builders, datagen classes, client/viewer wrappers, serializers, station
+candidates, block entities, and resource APIs remain separate evidence buckets;
+they no longer become recipe families merely because their names contain
+`Recipe`. The bounded data inventory records 556 declared/effective recipes in
+18 serializer groups. The migrated contract therefore contains five exact
+decisions rather than the old name-based candidate surface: Inscriber is
+accepted and the other four classes are rejected.
+
+The reviewed runtime list carries GuideME through exact Modrinth artifact
+`rduAfwb7`; bundled and generated-addon fixtures reproduce AE2's required
+runtime instead of relying on a hand-edited descriptor.
+
+`compat/generation/ae2.json` is bound to the canonical contract digest. It
+generates `Ae2GeneratedCompat.java`, which owns direct typed descriptor and
+recipe-family registration. `Ae2Compat` retains only the reviewed semantic
+providers for eligibility, typed transaction planning, and exact cost. A
+Python golden test regenerates the class byte-for-byte, and the isolated AE2
+source set compiles the committed result. Neither side uses reflection.
 
 ## Accepted family
 
@@ -76,8 +89,8 @@ range, or fractional. Auto Storage never rounds an AE cost.
   synthetic transaction cost.
 - Speed-card variants: not representable by an unconfigured Inscriber
   `ItemStack`.
-- Every other AE2 recipe candidate: rejected until it has its own complete
-  deterministic contract.
+- Entropy, Matter Cannon Ammo, and Transform: rejected until each has its own
+  complete deterministic contract.
 - AE2 networks, storage, spatial, world/entity, and live-machine operations:
   outside this recipe-family module.
 
@@ -87,7 +100,7 @@ range, or fractional. Auto Storage never rounds an AE cost.
 ./gradlew runAe2GameTestServer
 ```
 
-Eight real GameTests cover registration/Charger exclusion, retained INSCRIBE
+Eight real GameTests cover generated registration/Charger exclusion, retained INSCRIBE
 presses, consumed PRESS inputs, exact FE/work, missing middle ingredient,
 insufficient FE, insufficient work, destination overflow rollback, and runtime
 conversion representation. The missing-ingredient case keeps both remaining

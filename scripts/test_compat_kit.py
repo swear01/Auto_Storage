@@ -1344,7 +1344,6 @@ class CompatKitAuditTests(unittest.TestCase):
                 for candidate in audit["candidates"]["recipe_classes"]
             },
         )
-
     def test_scan_rejects_malformed_or_ambiguous_mod_metadata(self):
         malformed = self.root / "malformed.jar"
         with zipfile.ZipFile(malformed, "w") as archive:
@@ -1764,6 +1763,7 @@ displayName="Sample Machines"
             if class_name == "samplemod.machine.CrusherBlock":
                 return (
                     "public final class samplemod.machine.CrusherBlock { "
+                    "public final int processes; "
                     "public int getConfiguredTicks(); "
                     "public int getProcesses(); "
                     "public int getSlots(); }"
@@ -1791,6 +1791,7 @@ displayName="Sample Machines"
         }
         self.assertEqual("config_tick_ratio", bindings["getConfiguredTicks"])
         self.assertEqual("parallel_lanes", bindings["getProcesses"])
+        self.assertEqual("parallel_lanes", bindings["processes"])
         self.assertNotIn("getSlots", bindings)
 
         requirements = {
@@ -1887,6 +1888,7 @@ displayName="Sample Machines"
             "authority": "evidence_only",
             "target": audit["target"],
             "source_audit_digest": digest,
+            "source_probe_plan_digest": None,
             "loaded_recipe_count": 2,
             "recipes": [
                 {
@@ -1927,6 +1929,129 @@ displayName="Sample Machines"
         output["registries"]["blocks"] = ["othermod:crusher"]
         with self.assertRaisesRegex(ValueError, "target namespace"):
             self.compat_kit.validate_runtime_probe_output(output, audit)
+
+        output["registries"]["blocks"] = ["samplemod:crusher"]
+        output["config_values"] = [{
+            "id": "crusher_ticks",
+            "value": {"unexpected": True},
+            "source": "samplemod.Config#crusherTicks",
+        }]
+        with self.assertRaisesRegex(ValueError, "config_values entry 0"):
+            self.compat_kit.validate_runtime_probe_output(output, audit)
+
+        output["config_values"] = []
+        output["capability_surfaces"] = [{
+            "id": "samplemod:crusher",
+            "surface": "",
+            "source": "samplemod.CrusherBlockEntity",
+            "available": True,
+        }]
+        with self.assertRaisesRegex(ValueError, "capability_surfaces entry 0"):
+            self.compat_kit.validate_runtime_probe_output(output, audit)
+
+        output["config_values"] = [{
+            "id": "crusher_rate",
+            "value": 1.25,
+            "source": "samplemod.Config#crusherRate",
+        }]
+        output["capability_surfaces"] = []
+        self.compat_kit.validate_runtime_probe_output(output, audit)
+
+    def test_runtime_probe_plan_emits_direct_config_and_capability_calls(self):
+        audit = self.source_audit()
+        digest = hashlib.sha256(
+            self.compat_kit.canonical_json(audit).encode()
+        ).hexdigest()
+        plan = {
+            "schema": 1,
+            "kind": "auto_storage_runtime_probe_plan",
+            "source_audit_digest": digest,
+            "target": audit["target"],
+            "config_values": [{
+                "id": "crusher_ticks",
+                "source": "samplemod.Config#crusherTicks",
+                "item": "samplemod:crusher",
+                "accessor": {
+                    "kind": "static_field_value_get",
+                    "owner": "samplemod.Config",
+                    "member": "crusherTicks",
+                    "value_type": "number",
+                },
+            }],
+            "capability_surfaces": [{
+                "id": "samplemod:crusher",
+                "surface": "neoforge:item_handler",
+                "source": "samplemod.CompatProbe#hasItemHandler",
+                "item": "samplemod:crusher",
+                "accessor": {
+                    "kind": "static_method",
+                    "owner": "samplemod.CompatProbe",
+                    "member": "hasItemHandler",
+                    "value_type": "boolean",
+                },
+            }],
+        }
+        output = self.root / "runtime-probe-bound"
+
+        self.compat_kit.scaffold_runtime_probe(audit, output, plan=plan)
+
+        source = next((output / "src/main/java").rglob("*.java")).read_text()
+        plan_digest = hashlib.sha256(
+            self.compat_kit.canonical_json(plan).encode()
+        ).hexdigest()
+        self.assertEqual(
+            self.compat_kit.canonical_json(plan),
+            (output / "probe-plan.json").read_text(),
+        )
+        self.assertEqual(
+            plan_digest,
+            json.loads((output / "probe-spec.json").read_text())
+            ["source_probe_plan_digest"],
+        )
+        self.assertIn(
+            f'root.addProperty("source_probe_plan_digest", "{plan_digest}")',
+            source,
+        )
+        self.assertIn("samplemod.Config.crusherTicks.get()", source)
+        self.assertIn("samplemod.CompatProbe.hasItemHandler()", source)
+        self.assertIn('addConfig(configValues, "crusher_ticks"', source)
+        self.assertIn('capability.addProperty("available"', source)
+        self.assertIn("private static ResourceLocation id(", source)
+        self.assertNotIn("java.lang.reflect", source)
+
+        args = self.compat_kit._build_parser().parse_args([
+            "probe",
+            "audit.json",
+            "--plan",
+            "probe-plan.json",
+            "--output",
+            "probe-output",
+        ])
+        self.assertEqual("probe-plan.json", args.plan)
+
+        runtime_output = {
+            "schema": 1,
+            "kind": "auto_storage_runtime_probe",
+            "authority": "evidence_only",
+            "target": audit["target"],
+            "source_audit_digest": digest,
+            "source_probe_plan_digest": plan_digest,
+            "loaded_recipe_count": 0,
+            "recipes": [],
+            "registries": {
+                "blocks": [],
+                "items": [],
+                "block_entity_types": [],
+            },
+            "config_values": [],
+            "capability_surfaces": [],
+        }
+        with self.assertRaisesRegex(ValueError, "probe plan config_values"):
+            self.compat_kit.validate_runtime_probe_output(
+                runtime_output,
+                audit,
+                plan=plan,
+            )
 
     def test_worker_package_is_compact_byte_deterministic_and_source_free(self):
         audit = self.source_audit()
@@ -1990,6 +2115,897 @@ displayName="Sample Machines"
             self.compat_kit.worker_package(contract, audit, output)
 
         self.assertEqual([], list(outside.iterdir()))
+
+    def test_migrate_contract_preserves_exact_class_decisions_and_surfaces_new_classes(self):
+        old_audit = self.source_audit()
+        old_contract = self.accepted_contract()
+        migrated, actions = self.compat_kit.migrate_contract(
+            old_contract,
+            old_audit,
+            old_audit,
+        )
+
+        self.assertEqual(old_contract, migrated)
+        self.assertIn("No unresolved recipe families", actions)
+
+        new_audit = copy.deepcopy(old_audit)
+        prototype = copy.deepcopy(
+            new_audit["candidates"]["recipe_classes"][0]
+        )
+        prototype["class"] = "samplemod.recipe.NewDeterministicRecipe"
+        prototype["classification"] = {
+            "method": "name_term",
+            "evidence": ["recipe"],
+        }
+        new_audit["candidates"]["recipe_classes"].append(prototype)
+        new_audit["candidates"]["recipe_classes"].sort(
+            key=lambda entry: entry["class"]
+        )
+
+        migrated, actions = self.compat_kit.migrate_contract(
+            old_contract,
+            old_audit,
+            new_audit,
+        )
+
+        new_family = next(
+            family
+            for family in migrated["families"]
+            if family["class"] == "samplemod.recipe.NewDeterministicRecipe"
+        )
+        self.assertEqual("needs_decision", new_family["status"])
+        self.assertIn("NewDeterministicRecipe", actions)
+        self.compat_kit.validate_contract(
+            migrated,
+            require_complete=False,
+            source_audit=new_audit,
+        )
+
+        args = self.compat_kit._build_parser().parse_args([
+            "migrate-contract",
+            "legacy-contract.json",
+            "--old-audit",
+            "legacy-audit.json",
+            "--new-audit",
+            "current-audit.json",
+            "--output",
+            "current-contract.json",
+            "--next-actions",
+            "next-actions.md",
+        ])
+        self.assertEqual("migrate-contract", args.command)
+
+    def test_migrate_contract_reopens_changed_evidence_and_rejects_removed_acceptance(self):
+        old_audit = self.source_audit()
+        old_contract = self.accepted_contract()
+        accepted_class = next(
+            family["class"]
+            for family in old_contract["families"]
+            if family["status"] == "accepted"
+        )
+        changed_audit = copy.deepcopy(old_audit)
+        changed_candidate = next(
+            candidate
+            for candidate in changed_audit["candidates"]["recipe_classes"]
+            if candidate["class"] == accepted_class
+        )
+        changed_candidate["public_signature"] += " public long changedCost();"
+
+        migrated, actions = self.compat_kit.migrate_contract(
+            old_contract,
+            old_audit,
+            changed_audit,
+        )
+
+        changed_family = next(
+            family for family in migrated["families"]
+            if family["class"] == accepted_class
+        )
+        self.assertEqual("needs_decision", changed_family["status"])
+        self.assertIn("changed evidence", actions)
+
+        removed_audit = copy.deepcopy(old_audit)
+        removed_audit["candidates"]["recipe_classes"] = [
+            candidate
+            for candidate in removed_audit["candidates"]["recipe_classes"]
+            if candidate["class"] != accepted_class
+        ]
+        with self.assertRaisesRegex(ValueError, "removed accepted recipe family"):
+            self.compat_kit.migrate_contract(
+                old_contract,
+                old_audit,
+                removed_audit,
+            )
+
+    def generation_plan(self, contract: dict) -> dict:
+        return {
+            "schema": 1,
+            "kind": "auto_storage_compat_generation_plan",
+            "source_contract_digest": self.compat_kit._contract_sha256(contract),
+            "target": {
+                key: contract["target"][key]
+                for key in ("mod_id", "display_name", "version")
+            },
+            "package": "com.swear.autostorage.compat.samplemod",
+            "class_name": "SamplemodGeneratedCompat",
+            "families": [
+                {
+                    "id": "crushing_recipe",
+                    "status": "generate",
+                    "shape": "single_item_to_item",
+                    "registration_id": "auto_storage:samplemod_crusher",
+                    "station_label_key": "gui.auto_storage.station.samplemod_crusher",
+                    "bindings": {
+                        "input": {
+                            "kind": "ingredient_method",
+                            "member": "getInput",
+                            "arguments": "none",
+                        },
+                        "output": {
+                            "kind": "item_stack_method",
+                            "member": "getResultItem",
+                            "arguments": "registries",
+                        },
+                        "cost": {
+                            "kind": "numeric_method",
+                            "member": "getProcessingTime",
+                            "arguments": "none",
+                        },
+                    },
+                    "rate_bindings": [
+                        {
+                            "item": "samplemod:crusher",
+                            "template": "fixed",
+                            "numerator": 1,
+                            "denominator": 1,
+                        }
+                    ],
+                }
+            ],
+            "resource_kinds": [],
+        }
+
+    def test_generate_emits_direct_typed_family_and_fixed_machine_code(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.generation_plan(contract)
+        output = self.root / "generated-compat"
+
+        first = self.compat_kit.generate_compatibility(
+            contract,
+            audit,
+            plan,
+            output,
+        )
+        first_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in first
+        }
+        second = self.compat_kit.generate_compatibility(
+            contract,
+            audit,
+            plan,
+            output,
+        )
+        second_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in second
+        }
+
+        self.assertEqual(first_bytes, second_bytes)
+        sources = list((output / "src/main/java").rglob("*.java"))
+        self.assertEqual(1, len(sources))
+        source = sources[0].read_text()
+        self.assertIn("RecipeFamilyFactories.singleItemToItem", source)
+        self.assertIn('recipeFamilies.register("samplemod_crusher"', source)
+        self.assertNotIn('recipeFamilies.register("crushing_recipe"', source)
+        self.assertIn("samplemod.recipe.CrushingRecipe.class", source)
+        self.assertIn("recipe.getInput()", source)
+        self.assertIn("recipe.getResultItem(registries)", source)
+        self.assertIn("recipe.getProcessingTime()", source)
+        self.assertIn("MachineVariant.of", source)
+        self.assertIn("MachineWorkRate.of(1L, 1L)", source)
+        self.assertIn("MachineDescriptorApi.REGISTRY_KEY", source)
+        self.assertIn("RecipeFamilyApi.REGISTRY_KEY", source)
+        self.assertIn("new BigDecimal(value.toString()).longValueExact()", source)
+        self.assertNotIn("(long) (", source)
+        self.assertIn(
+            'machineDescriptors.getNamespace().equals("auto_storage")',
+            source,
+        )
+        self.assertNotIn("ChanceRecipe.class", source)
+        self.assertNotIn("java.lang.reflect", source)
+        self.assertNotIn("Class.forName", source)
+        self.assertNotIn("getDeclared", source)
+        self.assertFalse((output / "RED_BOUNDARIES.md").exists())
+
+        args = self.compat_kit._build_parser().parse_args([
+            "generate",
+            "contract.json",
+            "--audit",
+            "audit.json",
+            "--plan",
+            "generation-plan.json",
+            "--output",
+            "generated-output",
+        ])
+        self.assertEqual("generate", args.command)
+
+    def test_generation_plan_rejects_unreviewed_or_unsafe_bindings(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.generation_plan(contract)
+        plan["source_contract_digest"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "contract digest"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "wrong-digest"
+            )
+
+        plan = self.generation_plan(contract)
+        plan["families"][0]["bindings"]["input"]["member"] = (
+            "getInput); Runtime.getRuntime("
+        )
+        with self.assertRaisesRegex(ValueError, "invalid member"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "unsafe-member"
+            )
+
+        plan = self.generation_plan(contract)
+        plan["families"][0]["rate_bindings"][0]["template"] = "reflection"
+        with self.assertRaisesRegex(ValueError, "rate template"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "unsafe-template"
+            )
+
+        plan = self.generation_plan(contract)
+        plan["families"][0]["rate_bindings"][0]["numerator"] = 2
+        with self.assertRaisesRegex(ValueError, "fixed rate does not match contract"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "rate-drift"
+            )
+
+        plan = self.generation_plan(contract)
+        plan["families"].append(copy.deepcopy(plan["families"][0]))
+        with self.assertRaisesRegex(ValueError, "duplicate family"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "duplicate-family"
+            )
+
+        plan = self.generation_plan(contract)
+        plan["families"][0]["station_label_key"] = 'bad";System.exit(0)'
+        with self.assertRaisesRegex(ValueError, "station_label_key"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "unsafe-label"
+            )
+
+        plan = self.generation_plan(contract)
+        plan["families"][0]["registration_id"] = "othermod:samplemod_crusher"
+        with self.assertRaisesRegex(ValueError, "registration namespace"):
+            self.compat_kit.generate_compatibility(
+                contract, audit, plan, self.root / "unsafe-registration-namespace"
+            )
+
+    def test_generation_uses_reviewed_descriptor_namespace_and_rejects_shared_drift(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        accepted = next(
+            family for family in contract["families"]
+            if family["status"] == "accepted"
+        )
+        accepted["station"]["descriptor_id"] = "sampleaddon:samplemod_crusher"
+        plan = self.generation_plan(contract)
+        plan["families"][0]["registration_id"] = "sampleaddon:samplemod_crusher"
+        output = self.root / "descriptor-namespace"
+
+        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+
+        source = next((output / "src/main/java").rglob("*.java")).read_text()
+        self.assertIn('id("sampleaddon", "samplemod_crusher")', source)
+        self.assertIn(
+            'machineDescriptors.getNamespace().equals("sampleaddon")',
+            source,
+        )
+
+        contract = self.accepted_contract()
+        first = next(
+            family for family in contract["families"]
+            if family["status"] == "accepted"
+        )
+        second = next(
+            family for family in contract["families"]
+            if family["status"] == "rejected"
+        )
+        for field in ("recipe_type", "station", "inputs", "outputs", "costs"):
+            second[field] = copy.deepcopy(first[field])
+        second["status"] = "accepted"
+        second["decision"] = "Reviewed deterministic fixture for descriptor drift."
+        second["station"]["variants"][0]["rate"]["numerator"] = 2
+        plan = self.generation_plan(contract)
+        second_plan = copy.deepcopy(plan["families"][0])
+        second_plan["id"] = second["id"]
+        second_plan["registration_id"] = "auto_storage:samplemod_crusher_secondary"
+        second_plan["station_label_key"] = "gui.auto_storage.station.different"
+        second_plan["rate_bindings"][0]["numerator"] = 2
+        plan["families"].append(second_plan)
+
+        with self.assertRaisesRegex(ValueError, "shared descriptor"):
+            self.compat_kit.generate_compatibility(
+                contract,
+                audit,
+                plan,
+                self.root / "shared-descriptor-drift",
+            )
+
+    def test_generation_rate_templates_are_bounded_direct_calls(self):
+        accessor = {
+            "kind": "static_field_value_get",
+            "owner": "ironfurnaces.Config",
+            "member": "ironFurnaceSpeed",
+            "value_type": "integral",
+        }
+        cases = {
+            "config_tick_ratio": {
+                "item": "ironfurnaces:iron_furnace",
+                "template": "config_tick_ratio",
+                "numerator": 200,
+                "accessor": accessor,
+            },
+            "public_numeric_getter": {
+                "item": "samplemod:crusher",
+                "template": "public_numeric_getter",
+                "accessor": {
+                    "kind": "registry_block_method",
+                    "owner": "samplemod.CrusherBlock",
+                    "member": "getRate",
+                    "value_type": "integral",
+                },
+            },
+            "tier_multiplier": {
+                "item": "samplemod:crusher",
+                "template": "tier_multiplier",
+                "numerator": 1,
+                "denominator": 2,
+                "accessor": accessor,
+            },
+            "parallel_lanes": {
+                "item": "mekanism:basic_smelting_factory",
+                "template": "parallel_lanes",
+                "numerator": 1,
+                "denominator": 1,
+                "accessor": {
+                    "kind": "enum_constant_numeric_field",
+                    "owner": "mekanism.common.tier.FactoryTier",
+                    "constant": "BASIC",
+                    "member": "processes",
+                    "value_type": "integral",
+                },
+            },
+            "speed_times_parallel": {
+                "item": "samplemod:crusher",
+                "template": "speed_times_parallel",
+                "denominator": 1,
+                "speed_accessor": accessor,
+                "parallel_accessor": {
+                    "kind": "static_method",
+                    "owner": "samplemod.Config",
+                    "member": "parallelLanes",
+                    "value_type": "integral",
+                },
+            },
+        }
+
+        rendered = {
+            template: self.compat_kit._render_rate_binding(binding)
+            for template, binding in cases.items()
+        }
+
+        self.assertIn("MachineVariant.derived", rendered["config_tick_ratio"])
+        self.assertIn(
+            "ironfurnaces.Config.ironFurnaceSpeed.get()",
+            rendered["config_tick_ratio"],
+        )
+        self.assertIn("samplemod.CrusherBlock", rendered["public_numeric_getter"])
+        self.assertIn("Math.multiplyExact", rendered["tier_multiplier"])
+        self.assertIn(
+            "mekanism.common.tier.FactoryTier.BASIC.processes",
+            rendered["parallel_lanes"],
+        )
+        self.assertEqual(
+            2,
+            rendered["speed_times_parallel"].count("exactPositiveIntegral("),
+        )
+        self.assertTrue(all("reflect" not in value.lower() for value in rendered.values()))
+
+    def test_generated_rate_templates_compile_against_config_and_tier_shapes(self):
+        integral = {
+            "kind": "static_field_value_get",
+            "owner": "ironfurnaces.Config",
+            "member": "ironFurnaceSpeed",
+            "value_type": "integral",
+        }
+        bindings = [
+            {
+                "item": "samplemod:crusher",
+                "template": "fixed",
+                "numerator": 1,
+                "denominator": 1,
+            },
+            {
+                "item": "ironfurnaces:iron_furnace",
+                "template": "config_tick_ratio",
+                "numerator": 200,
+                "accessor": integral,
+            },
+            {
+                "item": "samplemod:crusher",
+                "template": "public_numeric_getter",
+                "accessor": {
+                    "kind": "registry_block_method",
+                    "owner": "samplemod.CrusherBlock",
+                    "member": "getRate",
+                    "value_type": "integral",
+                },
+            },
+            {
+                "item": "samplemod:crusher",
+                "template": "tier_multiplier",
+                "numerator": 2,
+                "denominator": 1,
+                "accessor": integral,
+            },
+            {
+                "item": "mekanism:basic_smelting_factory",
+                "template": "parallel_lanes",
+                "numerator": 1,
+                "denominator": 1,
+                "accessor": {
+                    "kind": "enum_constant_numeric_field",
+                    "owner": "mekanism.common.tier.FactoryTier",
+                    "constant": "BASIC",
+                    "member": "processes",
+                    "value_type": "integral",
+                },
+            },
+            {
+                "item": "samplemod:crusher",
+                "template": "speed_times_parallel",
+                "denominator": 1,
+                "speed_accessor": integral,
+                "parallel_accessor": {
+                    "kind": "static_method",
+                    "owner": "samplemod.Config",
+                    "member": "parallelLanes",
+                    "value_type": "integral",
+                },
+            },
+        ]
+        expressions = [
+            self.compat_kit._render_rate_binding(binding)
+            for binding in bindings
+        ]
+        source_root = self.root / "rate-compile"
+        fixtures = {
+            "fixture/RateCompile.java": """package fixture;
+import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.function.Supplier;
+public final class RateCompile {
+    static final class ItemStack { ItemStack(Object item) {} }
+    record MachineWorkRate(long numerator, long denominator) {
+        static MachineWorkRate of(long numerator, long denominator) {
+            return new MachineWorkRate(numerator, denominator);
+        }
+    }
+    static final class MachineVariant {
+        static Object of(ItemStack stack, MachineWorkRate rate) { return rate; }
+        static Object derived(ItemStack stack, Supplier<MachineWorkRate> rate) { return rate.get(); }
+    }
+    static Object requiredItem(Object id) { return id; }
+    static Object requiredBlock(Object id) { return new samplemod.CrusherBlock(); }
+    static Object id(String namespace, String path) { return namespace + ":" + path; }
+    static long exactPositiveIntegral(Number value, String name) {
+        Objects.requireNonNull(value, name);
+        try {
+            long exact = new BigDecimal(value.toString()).longValueExact();
+            if (exact <= 0) throw new ArithmeticException();
+            return exact;
+        } catch (NumberFormatException | ArithmeticException error) {
+            throw new IllegalStateException(name, error);
+        }
+    }
+%s
+}
+""" % "\n".join(
+                f"    static Object rate{index}() {{ return {expression}; }}"
+                for index, expression in enumerate(expressions)
+            ),
+            "ironfurnaces/Config.java": """package ironfurnaces;
+public final class Config {
+    public static final IntValue ironFurnaceSpeed = new IntValue();
+    public static final class IntValue { public Integer get() { return 100; } }
+}
+""",
+            "samplemod/Config.java": """package samplemod;
+public final class Config { public static int parallelLanes() { return 3; } }
+""",
+            "samplemod/CrusherBlock.java": """package samplemod;
+public final class CrusherBlock { public int getRate() { return 2; } }
+""",
+            "mekanism/common/tier/FactoryTier.java": """package mekanism.common.tier;
+public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int processes) { this.processes = processes; } }
+""",
+        }
+        sources = []
+        for relative, content in fixtures.items():
+            path = source_root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content)
+            sources.append(path)
+
+        completed = subprocess.run(
+            ["javac", "-proc:none", "-d", str(source_root / "classes"), *map(str, sources)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+
+    def test_generate_wires_reviewed_typed_plan_for_n_inputs_costs_and_remainders(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        family = next(
+            entry
+            for entry in contract["families"]
+            if entry["id"] == "crushing_recipe"
+        )
+        family["inputs"].append({
+            "role": "catalyst",
+            "resource_kind": "item",
+            "amount": 1,
+            "selector": "recipe.catalyst",
+        })
+        family["outputs"].append({
+            "role": "remainder",
+            "resource_kind": "item",
+            "amount": 1,
+            "selector": "recipe.remainder",
+        })
+        family["costs"].append({
+            "resource_kind": "auto_storage:neoforge_energy",
+            "amount": 40,
+        })
+        plan = self.generation_plan(contract)
+        generated = plan["families"][0]
+        generated["shape"] = "typed_resources"
+        generated["bindings"] = {
+            "eligibility": {
+                "kind": "static_recipe_predicate_method",
+                "owner": "samplemod.compat.CrusherPlans",
+                "member": "supports",
+            },
+            "plan": {
+                "kind": "static_typed_plan_method",
+                "owner": "samplemod.compat.CrusherPlans",
+                "member": "plan",
+            },
+            "cost": {
+                "kind": "static_recipe_family_cost_method",
+                "owner": "samplemod.compat.CrusherPlans",
+                "member": "cost",
+            },
+        }
+        output = self.root / "generated-typed-compat"
+
+        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+
+        source = next((output / "src/main/java").rglob("*.java")).read_text()
+        self.assertIn("RecipeFamilyFactories.deterministicResources", source)
+        self.assertIn(
+            "recipe -> samplemod.compat.CrusherPlans.supports(recipe)",
+            source,
+        )
+        self.assertIn(
+            "(recipe, registries) -> samplemod.compat.CrusherPlans.plan(recipe, registries)",
+            source,
+        )
+        self.assertIn(
+            "recipe -> samplemod.compat.CrusherPlans.cost(recipe)",
+            source,
+        )
+        self.assertNotIn("java.lang.reflect", source)
+
+    def test_generate_supports_reviewed_instant_family_with_zero_rate_and_free_cost(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        family = next(
+            entry
+            for entry in contract["families"]
+            if entry["id"] == "crushing_recipe"
+        )
+        family["station"]["category"] = "instant"
+        family["station"]["variants"][0]["rate"]["numerator"] = 0
+        family["costs"] = []
+        plan = self.generation_plan(contract)
+        generated = plan["families"][0]
+        generated["bindings"]["cost"] = {"kind": "free"}
+        generated["rate_bindings"][0]["numerator"] = 0
+        output = self.root / "generated-instant-compat"
+
+        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+
+        source = next((output / "src/main/java").rglob("*.java")).read_text()
+        self.assertIn("MachineWorkRate.of(0L, 1L)", source)
+        self.assertIn("recipe -> RecipeFamilyCost.free()", source)
+        self.assertIn("MachineCategory.INSTANT", source)
+
+    def conformance_plan(self, contract: dict) -> dict:
+        return {
+            "schema": 1,
+            "kind": "auto_storage_compat_conformance_plan",
+            "source_contract_digest": self.compat_kit._contract_sha256(contract),
+            "target": {
+                key: contract["target"][key]
+                for key in ("mod_id", "display_name", "version")
+            },
+            "package": "com.swear.autostorage.fixture.samplemod",
+            "class_name": "SamplemodGeneratedConformanceGameTests",
+            "families": [
+                {
+                    "id": "crushing_recipe",
+                    "sample_recipe_id": "samplemod:iron_dust",
+                    "provider": {
+                        "owner": "samplemod.fixture.CrusherConformanceProvider",
+                        "factory_member": "create",
+                    },
+                    "batch": 8,
+                    "expected_deltas": {
+                        "catalyst_tool_remainder": {
+                            "item/minecraft:bucket": 1,
+                            "item/minecraft:iron_ingot": -1,
+                            "item/samplemod:iron_dust": 2,
+                            "work/auto_storage:samplemod_crusher": -100,
+                        },
+                        "happy": {
+                            "item/minecraft:iron_ingot": -1,
+                            "item/samplemod:iron_dust": 2,
+                            "work/auto_storage:samplemod_crusher": -100,
+                        },
+                        "multi_output": {
+                            "item/minecraft:iron_ingot": -1,
+                            "item/samplemod:iron_dust": 2,
+                            "item/samplemod:slag": 1,
+                            "work/auto_storage:samplemod_crusher": -100,
+                        },
+                    },
+                }
+            ],
+        }
+
+    def test_conformance_scaffold_owns_real_snapshot_and_atomicity_assertions(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.conformance_plan(contract)
+        output = self.root / "conformance"
+
+        first = self.compat_kit.scaffold_conformance_tests(
+            contract, audit, plan, output
+        )
+        first_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in first
+        }
+        second = self.compat_kit.scaffold_conformance_tests(
+            contract, audit, plan, output
+        )
+        second_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in second
+        }
+
+        self.assertEqual(first_bytes, second_bytes)
+        sources = {
+            path.name: path.read_text()
+            for path in (output / "src/main/java").rglob("*.java")
+        }
+        self.assertEqual(2, len(sources))
+        combined = "\n".join(sources.values())
+        for behavior in (
+            "happy_path_and_batching",
+            "one_short_shortage_is_atomic",
+            "destination_capacity_is_atomic",
+            "checked_overflow_is_atomic",
+            "stale_holder_is_atomic",
+            "catalyst_tool_remainder_is_exact",
+            "multi_output_merge_is_exact",
+            "mixed_resource_rollback_is_atomic",
+            "dedicated_server_client_isolation",
+            "all_mod_coexistence",
+        ):
+            self.assertIn(behavior, combined)
+        self.assertIn("before = scenario.snapshot()", combined)
+        self.assertIn("assertDelta", combined)
+        self.assertIn("assertUnchanged", combined)
+        self.assertIn("expectedDelta0CatalystToolRemainder", combined)
+        self.assertIn("expectedDelta0MultiOutput", combined)
+        self.assertIn("expected.values().removeIf(value -> value == 0L)", combined)
+        self.assertIn("scenario.attempt", combined)
+        self.assertNotIn("self-attested", combined)
+        self.assertNotIn("java.lang.reflect", combined)
+        self.assertNotIn("clientClassesLoaded()", combined)
+        self.assertIn("FMLEnvironment.dist != Dist.DEDICATED_SERVER", combined)
+
+        args = self.compat_kit._build_parser().parse_args([
+            "conformance",
+            "contract.json",
+            "--audit",
+            "audit.json",
+            "--plan",
+            "conformance-plan.json",
+            "--output",
+            "conformance-output",
+        ])
+        self.assertEqual("conformance", args.command)
+
+    def test_conformance_scaffold_rejects_missing_family_and_unsafe_provider(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.conformance_plan(contract)
+        plan["families"] = []
+        with self.assertRaisesRegex(ValueError, "accepted contract families"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract, audit, plan, self.root / "missing-family"
+            )
+
+        plan = self.conformance_plan(contract)
+        plan["families"][0]["provider"]["owner"] = "bad.Owner;System.exit"
+        with self.assertRaisesRegex(ValueError, "provider owner"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract, audit, plan, self.root / "unsafe-provider"
+            )
+
+        plan = self.conformance_plan(contract)
+        plan["families"].append(copy.deepcopy(plan["families"][0]))
+        with self.assertRaisesRegex(ValueError, "duplicate family"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract, audit, plan, self.root / "duplicate-conformance"
+            )
+
+        plan = self.conformance_plan(contract)
+        plan["class_name"] = "CompatibilityConformanceHarness"
+        with self.assertRaisesRegex(ValueError, "reserved generated class"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract, audit, plan, self.root / "conformance-class-collision"
+            )
+
+    def resource_scaffold_plan(self, contract: dict) -> dict:
+        return {
+            "schema": 1,
+            "kind": "auto_storage_compat_resource_plan",
+            "source_contract_digest": self.compat_kit._contract_sha256(contract),
+            "target": {
+                key: contract["target"][key]
+                for key in ("mod_id", "display_name", "version")
+            },
+            "package": "com.swear.autostorage.compat.samplemod.resource",
+            "class_name": "SamplemodSteamResource",
+            "resources": [
+                {
+                    "id": "samplemod:steam",
+                    "representative_item": "samplemod:steam_bucket",
+                    "variant_aware": False,
+                    "bridge_name": "SamplemodSteamBridge",
+                    "snapshot_key": "resource/samplemod:steam",
+                    "sample_amount": 1000,
+                    "test_provider": {
+                        "owner": "samplemod.fixture.SteamResourceProvider",
+                        "factory_member": "create",
+                    },
+                }
+            ],
+        }
+
+    def test_resource_scaffold_is_api_only_and_covers_resource_boundaries(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.resource_scaffold_plan(contract)
+        output = self.root / "resource-scaffold"
+
+        first = self.compat_kit.scaffold_resource_integration(
+            contract, audit, plan, output
+        )
+        first_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in first
+        }
+        second = self.compat_kit.scaffold_resource_integration(
+            contract, audit, plan, output
+        )
+        second_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in second
+        }
+
+        self.assertEqual(first_bytes, second_bytes)
+        sources = {
+            path.name: path.read_text()
+            for path in (output / "src/main/java").rglob("*.java")
+        }
+        self.assertEqual(3, len(sources))
+        combined = "\n".join(sources.values())
+        for surface in (
+            "StorageResourceKind.variantless",
+            "StorageResourceContainerStrategy",
+            "StorageResourceBlockStrategy",
+            "StorageResourceHandler",
+            "TerminalResourceRendererApi.register",
+            "planDeposit",
+            "planWithdraw",
+            "persistence_round_trip",
+            "scenario.save()",
+            "scenario.load(saved)",
+            "assertDelta",
+            "mixed_resource_rollback_is_atomic",
+            "dedicated_server_client_isolation",
+        ):
+            self.assertIn(surface, combined)
+        self.assertNotIn("StorageCoreBlockEntity", combined)
+        self.assertNotIn("com.swear.autostorage.internal", combined)
+        self.assertNotIn("java.lang.reflect", combined)
+        self.assertNotIn("net.minecraft.client", combined)
+        self.assertNotIn("persistenceRoundTrip()", combined)
+        self.assertNotIn("containerDepositAndWithdraw()", combined)
+        self.assertNotIn("clientClassesLoaded()", combined)
+
+        args = self.compat_kit._build_parser().parse_args([
+            "resource-scaffold",
+            "contract.json",
+            "--audit",
+            "audit.json",
+            "--plan",
+            "resource-plan.json",
+            "--output",
+            "resource-output",
+        ])
+        self.assertEqual("resource-scaffold", args.command)
+
+    def test_resource_scaffold_reuses_standard_kinds_and_rejects_unsafe_bridge(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.resource_scaffold_plan(contract)
+        plan["resources"][0]["id"] = "auto_storage:fluid"
+        with self.assertRaisesRegex(ValueError, "reuse standard"):
+            self.compat_kit.scaffold_resource_integration(
+                contract, audit, plan, self.root / "standard-kind"
+            )
+
+        plan = self.resource_scaffold_plan(contract)
+        plan["resources"][0]["bridge_name"] = "Bridge;Runtime"
+        with self.assertRaisesRegex(ValueError, "bridge_name"):
+            self.compat_kit.scaffold_resource_integration(
+                contract, audit, plan, self.root / "unsafe-bridge"
+            )
+
+        plan = self.resource_scaffold_plan(contract)
+        plan["resources"].append(copy.deepcopy(plan["resources"][0]))
+        plan["resources"][1].update({
+            "id": "samplemod:steam-vapor",
+            "bridge_name": "SamplemodSteamVaporBridge",
+            "snapshot_key": "resource/samplemod:steam_vapor",
+        })
+        plan["resources"][0]["id"] = "samplemod:steam-vapor"
+        plan["resources"][0]["bridge_name"] = "SamplemodSteamBridge"
+        plan["resources"][1]["id"] = "samplemod:steam_vapor"
+        with self.assertRaisesRegex(ValueError, "generated name collision"):
+            self.compat_kit.scaffold_resource_integration(
+                contract, audit, plan, self.root / "resource-name-collision"
+            )
+
+        plan = self.resource_scaffold_plan(contract)
+        plan["resources"][0]["bridge_name"] = plan["class_name"]
+        with self.assertRaisesRegex(ValueError, "generated class collision"):
+            self.compat_kit.scaffold_resource_integration(
+                contract, audit, plan, self.root / "resource-class-collision"
+            )
 
     def source_audit(self) -> dict:
         return self.compat_kit.scan_jar(
@@ -2782,9 +3798,19 @@ displayName="Sample Machines"
         schema_root = ROOT / "tools/compat-kit/schema"
         expected = {
             "compat-audit.schema.json": "auto_storage_compat_audit",
+            "compat-conformance-plan.schema.json":
+                "auto_storage_compat_conformance_plan",
             "compat-contract.schema.json": "auto_storage_compat_contract",
             "compat-delta.schema.json": "auto_storage_compat_delta",
+            "compat-generation-plan.schema.json":
+                "auto_storage_compat_generation_plan",
+            "compat-proposals.schema.json": "auto_storage_compat_proposals",
             "compat-report.schema.json": "auto_storage_compat_report",
+            "compat-resource-plan.schema.json":
+                "auto_storage_compat_resource_plan",
+            "compat-runtime-probe-plan.schema.json":
+                "auto_storage_runtime_probe_plan",
+            "compat-runtime-probe.schema.json": "auto_storage_runtime_probe",
         }
         for name, kind in expected.items():
             with self.subTest(schema=name):
@@ -2903,6 +3929,135 @@ displayName="Sample Machines"
                 ]
                 for command in addon_commands["allOf"]
             ],
+        )
+
+        generation_schema = json.loads(
+            (schema_root / "compat-generation-plan.schema.json").read_text()
+        )
+        accessor_schema = generation_schema["$defs"]["accessor"]
+        self.assertEqual(
+            {
+                "static_field_value_get",
+                "static_method",
+                "registry_block_method",
+                "enum_constant_numeric_field",
+            },
+            {
+                variant["properties"]["kind"]["const"]
+                for variant in accessor_schema["oneOf"]
+            },
+        )
+        self.assertTrue(all(
+            variant["properties"]["value_type"] == {"const": "integral"}
+            for variant in accessor_schema["oneOf"]
+        ))
+        rate_schema = generation_schema["$defs"]["rate_binding"]
+        self.assertNotIn("properties", rate_schema)
+        rate_variants = {
+            variant["properties"]["template"]["const"]: variant
+            for variant in rate_schema["oneOf"]
+        }
+        self.assertEqual(
+            {
+                "fixed",
+                "config_tick_ratio",
+                "public_numeric_getter",
+                "tier_multiplier",
+                "parallel_lanes",
+                "speed_times_parallel",
+            },
+            set(rate_variants),
+        )
+        for variant in rate_variants.values():
+            self.assertFalse(variant["additionalProperties"])
+            self.assertEqual(set(variant["required"]), set(variant["properties"]))
+        self.assertEqual(
+            0,
+            rate_variants["fixed"]["properties"]["numerator"]["minimum"],
+        )
+        generated_family_schema = generation_schema["$defs"]["generated_family"]
+        generated_shapes = {
+            variant["properties"]["shape"]["const"]: variant
+            for variant in generated_family_schema["oneOf"]
+        }
+        self.assertEqual(
+            {"single_item_to_item", "typed_resources"},
+            set(generated_shapes),
+        )
+        self.assertTrue(all(
+            variant["type"] == "object"
+            for variant in generated_shapes.values()
+        ))
+        self.assertTrue(all(
+            "registration_id" in variant["required"]
+            for variant in generated_shapes.values()
+        ))
+        typed_bindings = generated_shapes["typed_resources"]["properties"][
+            "bindings"
+        ]
+        self.assertEqual(
+            {"eligibility", "plan", "cost"},
+            set(typed_bindings["required"]),
+        )
+        self.assertFalse(typed_bindings["additionalProperties"])
+        single_cost = generated_shapes["single_item_to_item"]["properties"][
+            "bindings"
+        ]["properties"]["cost"]
+        self.assertEqual(
+            {"numeric_method", "free"},
+            {
+                generation_schema["$defs"][
+                    variant["$ref"].rsplit("/", 1)[-1]
+                ]["properties"]["kind"]["const"]
+                for variant in single_cost["oneOf"]
+            },
+        )
+        runtime_schema = json.loads(
+            (schema_root / "compat-runtime-probe.schema.json").read_text()
+        )
+        self.assertIn(
+            "source_probe_plan_digest",
+            runtime_schema["required"],
+        )
+        self.assertEqual(
+            "number",
+            runtime_schema["$defs"]["config_value"]["properties"]["value"]["type"],
+        )
+        self.assertIn(
+            "available",
+            runtime_schema["$defs"]["capability_surface"]["required"],
+        )
+        runtime_plan_schema = json.loads(
+            (schema_root / "compat-runtime-probe-plan.schema.json").read_text()
+        )
+        self.assertTrue(all(
+            variant["properties"]["value_type"] == {"const": "number"}
+            for variant in runtime_plan_schema["$defs"]["numeric_accessor"]["oneOf"]
+        ))
+        self.assertTrue(all(
+            variant["properties"]["value_type"] == {"const": "boolean"}
+            for variant in runtime_plan_schema["$defs"]["boolean_accessor"]["oneOf"]
+        ))
+        conformance_schema = json.loads(
+            (schema_root / "compat-conformance-plan.schema.json").read_text()
+        )
+        self.assertEqual(
+            {
+                "happy",
+                "catalyst_tool_remainder",
+                "multi_output",
+            },
+            set(
+                conformance_schema["$defs"]["family"]["properties"]
+                ["expected_deltas"]["required"]
+            ),
+        )
+        resource_schema = json.loads(
+            (schema_root / "compat-resource-plan.schema.json").read_text()
+        )
+        self.assertTrue(
+            {"snapshot_key", "sample_amount"}
+            <= set(resource_schema["$defs"]["resource"]["required"])
         )
 
     def test_contract_schema_requires_scaffold_inputs_after_family_decisions(self):
@@ -3025,8 +4180,16 @@ displayName="Sample Machines"
             candidate["class"]
             for candidate in audit["candidates"]["recipe_classes"]
         }
-        self.assertIn(
-            "appeng.recipes.handlers.InscriberRecipe$Ingredients",
+        self.assertEqual(self.compat_kit.SCAN_CACHE_VERSION, audit["scanner_format"])
+        self.assertEqual(556, audit["recipe_data"]["effective_recipes"])
+        self.assertEqual(
+            {
+                "appeng.recipes.entropy.EntropyRecipe",
+                "appeng.recipes.handlers.ChargerRecipe",
+                "appeng.recipes.handlers.InscriberRecipe",
+                "appeng.recipes.mattercannon.MatterCannonAmmo",
+                "appeng.recipes.transform.TransformRecipe",
+            },
             audited_recipe_classes,
         )
         self.assertEqual(
@@ -3092,6 +4255,79 @@ displayName="Sample Machines"
             f"Scanner format v{self.compat_kit.SCAN_CACHE_VERSION}",
             guide,
         )
+
+    def test_ae2_codegen_dogfood_matches_committed_registration(self):
+        audit = json.loads(
+            (ROOT / "compat/audits/ae2/19.2.17.json").read_text()
+        )
+        contract = json.loads(
+            (ROOT / "compat/contracts/ae2.json").read_text()
+        )
+        plan = json.loads(
+            (ROOT / "compat/generation/ae2.json").read_text()
+        )
+        output = self.root / "ae2-generated"
+
+        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+
+        generated = next((output / "src/main/java").rglob("*.java"))
+        committed = (
+            ROOT
+            / "src/compat/ae2/java/com/swear/autostorage/compat/ae2/"
+            "Ae2GeneratedCompat.java"
+        )
+        self.assertEqual(committed.read_bytes(), generated.read_bytes())
+        owner = (
+            ROOT
+            / "src/compat/ae2/java/com/swear/autostorage/compat/ae2/"
+            "Ae2Compat.java"
+        ).read_text()
+        self.assertIn("Ae2GeneratedCompat.register(", owner)
+
+    def test_generated_conformance_and_resource_compile_fixture_has_no_drift(self):
+        audit = json.loads(
+            (ROOT / "compat/audits/ae2/19.2.17.json").read_text()
+        )
+        contract = json.loads(
+            (ROOT / "compat/contracts/ae2.json").read_text()
+        )
+        fixture_root = ROOT / "tools/compat-kit/examples/compile-fixture"
+        conformance_plan = json.loads(
+            (fixture_root / "conformance-plan.json").read_text()
+        )
+        resource_plan = json.loads(
+            (fixture_root / "resource-plan.json").read_text()
+        )
+        generated_root = self.root / "generated-compile-fixture"
+
+        conformance = self.compat_kit.scaffold_conformance_tests(
+            contract,
+            audit,
+            conformance_plan,
+            generated_root / "conformance",
+        )
+        resources = self.compat_kit.scaffold_resource_integration(
+            contract,
+            audit,
+            resource_plan,
+            generated_root / "resource",
+        )
+
+        committed_root = ROOT / "src/compatKitGeneratedFixture/java"
+        for output_name, paths in (
+            ("conformance", conformance),
+            ("resource", resources),
+        ):
+            source_root = generated_root / output_name / "src/main/java"
+            for path in paths:
+                if path.suffix != ".java":
+                    continue
+                committed = committed_root / path.relative_to(source_root)
+                self.assertTrue(committed.is_file(), committed)
+                self.assertEqual(committed.read_bytes(), path.read_bytes())
+        build = (ROOT / "build.gradle").read_text()
+        self.assertIn("compatKitGeneratedFixture", build)
+        self.assertIn("compileCompatKitGeneratedFixtureJava", build)
 
     def test_recipe_family_verification_commands_include_ae2_fixture(self):
         guide = (ROOT / "docs/recipe-family-api.md").read_text()
@@ -3988,9 +5224,13 @@ displayName="Sample Machines"
                 "auto-storage-compat-kit/LICENSE",
                 "auto-storage-compat-kit/schema/compat-audit.schema.json",
                 "auto-storage-compat-kit/schema/compat-contract.schema.json",
+                "auto-storage-compat-kit/schema/compat-conformance-plan.schema.json",
                 "auto-storage-compat-kit/schema/compat-delta.schema.json",
+                "auto-storage-compat-kit/schema/compat-generation-plan.schema.json",
                 "auto-storage-compat-kit/schema/compat-proposals.schema.json",
                 "auto-storage-compat-kit/schema/compat-report.schema.json",
+                "auto-storage-compat-kit/schema/compat-resource-plan.schema.json",
+                "auto-storage-compat-kit/schema/compat-runtime-probe-plan.schema.json",
                 "auto-storage-compat-kit/schema/compat-runtime-probe.schema.json",
                 "auto-storage-compat-kit/examples/github-actions/compat-kit.yml",
                 "auto-storage-compat-kit/examples/addon/src/main/java/example/autostorage/ExampleAddon.java",
@@ -4049,9 +5289,13 @@ displayName="Sample Machines"
         for name in (
             "compat-audit.schema.json",
             "compat-contract.schema.json",
+            "compat-conformance-plan.schema.json",
             "compat-delta.schema.json",
+            "compat-generation-plan.schema.json",
             "compat-proposals.schema.json",
             "compat-report.schema.json",
+            "compat-resource-plan.schema.json",
+            "compat-runtime-probe-plan.schema.json",
             "compat-runtime-probe.schema.json",
         ):
             (schema_root / name).write_text("{}")
@@ -4063,9 +5307,13 @@ displayName="Sample Machines"
             {
                 "schema/compat-audit.schema.json",
                 "schema/compat-contract.schema.json",
+                "schema/compat-conformance-plan.schema.json",
                 "schema/compat-delta.schema.json",
+                "schema/compat-generation-plan.schema.json",
                 "schema/compat-proposals.schema.json",
                 "schema/compat-report.schema.json",
+                "schema/compat-resource-plan.schema.json",
+                "schema/compat-runtime-probe-plan.schema.json",
                 "schema/compat-runtime-probe.schema.json",
             },
             set(files),

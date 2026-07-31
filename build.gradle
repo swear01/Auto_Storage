@@ -312,6 +312,14 @@ sourceSets.create('addonExample') {
 tasks.named(sourceSets.addonExample.compileJavaTaskName).configure {
     dependsOn apiJar
 }
+sourceSets.create('compatKitGeneratedFixture') {
+    java.srcDir('src/compatKitGeneratedFixture/java')
+    compileClasspath += files(apiJar) + configurations.compileClasspath
+    runtimeClasspath += output + compileClasspath
+}
+tasks.named(sourceSets.compatKitGeneratedFixture.compileJavaTaskName).configure {
+    dependsOn apiJar
+}
 
 base {
     archivesName = mod_id
@@ -327,6 +335,7 @@ neoForge {
     addModdingDependenciesTo sourceSets.pneumaticCraftFixture
     addModdingDependenciesTo sourceSets.compatibilityMatrixFixture
     addModdingDependenciesTo sourceSets.addonExample
+    addModdingDependenciesTo sourceSets.compatKitGeneratedFixture
     compatModules.each { spec ->
         addModdingDependenciesTo compatSourceSets[spec.id]
         addModdingDependenciesTo sourceSets[spec.fixture]
@@ -1017,6 +1026,7 @@ tasks.withType(JavaCompile).configureEach {
 tasks.named('check').configure {
     dependsOn tasks.named('compileApiTestJava')
     dependsOn tasks.named('compileAddonExampleJava')
+    dependsOn tasks.named('compileCompatKitGeneratedFixtureJava')
     dependsOn tasks.named('verifyApiSurface')
     dependsOn tasks.named('verifyCompatIsolation')
     dependsOn compatArtifactVerificationTasks

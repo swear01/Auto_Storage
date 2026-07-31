@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/swear01/Auto_Storage/tools/compat-kit/schema/compat-generation-plan.schema.json",
+  "title": "Auto Storage reviewed compatibility generation plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "kind",
+    "source_contract_digest",
+    "target",
+    "package",
+    "class_name",
+    "families",
+    "resource_kinds"
+  ],
+  "properties": {
+    "schema": { "const": 1 },
+    "kind": { "const": "auto_storage_compat_generation_plan" },
+    "source_contract_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target": { "$ref": "#/$defs/target" },
+    "package": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+    },
+    "class_name": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+    },
+    "families": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/generated_family" },
+          { "$ref": "#/$defs/red_boundary" }
+        ]
+      }
+    },
+    "resource_kinds": {
+      "type": "array",
+      "maxItems": 0
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mod_id", "display_name", "version"],
+      "properties": {
+        "mod_id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "java_type": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+    },
+    "java_member": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+    },
+    "recipe_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "member", "arguments"],
+      "properties": {
+        "kind": {
+          "enum": ["ingredient_method", "item_stack_method", "numeric_method"]
+        },
+        "member": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        },
+        "arguments": {
+          "enum": ["none", "registries"]
+        }
+      }
+    },
+    "numeric_recipe_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "member", "arguments"],
+      "properties": {
+        "kind": { "const": "numeric_method" },
+        "member": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        },
+        "arguments": { "const": "none" }
+      }
+    },
+    "free_recipe_cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "const": "free" }
+      }
+    },
+    "accessor": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "owner", "member", "value_type"],
+          "properties": {
+            "kind": { "const": "static_field_value_get" },
+            "owner": { "$ref": "#/$defs/java_type" },
+            "member": { "$ref": "#/$defs/java_member" },
+            "value_type": { "const": "integral" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "owner", "member", "value_type"],
+          "properties": {
+            "kind": { "const": "static_method" },
+            "owner": { "$ref": "#/$defs/java_type" },
+            "member": { "$ref": "#/$defs/java_member" },
+            "value_type": { "const": "integral" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "owner", "member", "value_type"],
+          "properties": {
+            "kind": { "const": "registry_block_method" },
+            "owner": { "$ref": "#/$defs/java_type" },
+            "member": { "$ref": "#/$defs/java_member" },
+            "value_type": { "const": "integral" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "owner", "constant", "member", "value_type"],
+          "properties": {
+            "kind": { "const": "enum_constant_numeric_field" },
+            "owner": { "$ref": "#/$defs/java_type" },
+            "constant": { "$ref": "#/$defs/java_member" },
+            "member": { "$ref": "#/$defs/java_member" },
+            "value_type": { "const": "integral" }
+          }
+        }
+      ]
+    },
+    "rate_binding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["item", "template", "numerator", "denominator"],
+          "properties": {
+            "item": { "$ref": "#/$defs/resource_location" },
+            "template": { "const": "fixed" },
+            "numerator": { "type": "integer", "minimum": 0 },
+            "denominator": { "$ref": "#/$defs/positive_integer" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["item", "template", "numerator", "accessor"],
+          "properties": {
+            "item": { "$ref": "#/$defs/resource_location" },
+            "template": { "const": "config_tick_ratio" },
+            "numerator": { "$ref": "#/$defs/positive_integer" },
+            "accessor": { "$ref": "#/$defs/accessor" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["item", "template", "accessor"],
+          "properties": {
+            "item": { "$ref": "#/$defs/resource_location" },
+            "template": { "const": "public_numeric_getter" },
+            "accessor": { "$ref": "#/$defs/accessor" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["item", "template", "numerator", "denominator", "accessor"],
+          "properties": {
+            "item": { "$ref": "#/$defs/resource_location" },
+            "template": { "const": "tier_multiplier" },
+            "numerator": { "$ref": "#/$defs/positive_integer" },
+            "denominator": { "$ref": "#/$defs/positive_integer" },
+            "accessor": { "$ref": "#/$defs/accessor" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["item", "template", "numerator", "denominator", "accessor"],
+          "properties": {
+            "item": { "$ref": "#/$defs/resource_location" },
+            "template": { "const": "parallel_lanes" },
+            "numerator": { "$ref": "#/$defs/positive_integer" },
+            "denominator": { "$ref": "#/$defs/positive_integer" },
+            "accessor": { "$ref": "#/$defs/accessor" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["item", "template", "denominator", "speed_accessor", "parallel_accessor"],
+          "properties": {
+            "item": { "$ref": "#/$defs/resource_location" },
+            "template": { "const": "speed_times_parallel" },
+            "denominator": { "$ref": "#/$defs/positive_integer" },
+            "speed_accessor": { "$ref": "#/$defs/accessor" },
+            "parallel_accessor": { "$ref": "#/$defs/accessor" }
+          }
+        }
+      ]
+    },
+    "resource_location": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+    },
+    "positive_integer": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "typed_plan_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "owner", "member"],
+      "properties": {
+        "kind": { "const": "static_typed_plan_method" },
+        "owner": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+        },
+        "member": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        }
+      }
+    },
+    "recipe_predicate_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "owner", "member"],
+      "properties": {
+        "kind": { "const": "static_recipe_predicate_method" },
+        "owner": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+        },
+        "member": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        }
+      }
+    },
+    "recipe_family_cost_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "owner", "member"],
+      "properties": {
+        "kind": { "const": "static_recipe_family_cost_method" },
+        "owner": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+        },
+        "member": {
+          "type": "string",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        }
+      }
+    },
+    "generated_family": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "status", "shape", "registration_id", "station_label_key", "bindings", "rate_bindings"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+            "status": { "const": "generate" },
+            "shape": { "const": "single_item_to_item" },
+            "registration_id": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9/._-]+$" },
+            "station_label_key": { "type": "string", "pattern": "^[a-z0-9_.-]+$" },
+            "bindings": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["input", "output", "cost"],
+              "properties": {
+                "input": { "$ref": "#/$defs/recipe_binding" },
+                "output": { "$ref": "#/$defs/recipe_binding" },
+                "cost": {
+                  "oneOf": [
+                    { "$ref": "#/$defs/numeric_recipe_binding" },
+                    { "$ref": "#/$defs/free_recipe_cost" }
+                  ]
+                }
+              }
+            },
+            "rate_bindings": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/rate_binding" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "status", "shape", "registration_id", "station_label_key", "bindings", "rate_bindings"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+            "status": { "const": "generate" },
+            "shape": { "const": "typed_resources" },
+            "registration_id": { "type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9/._-]+$" },
+            "station_label_key": { "type": "string", "pattern": "^[a-z0-9_.-]+$" },
+            "bindings": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["eligibility", "plan", "cost"],
+              "properties": {
+                "eligibility": { "$ref": "#/$defs/recipe_predicate_binding" },
+                "plan": { "$ref": "#/$defs/typed_plan_binding" },
+                "cost": { "$ref": "#/$defs/recipe_family_cost_binding" }
+              }
+            },
+            "rate_bindings": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/rate_binding" }
+            }
+          }
+        }
+      ]
+    },
+    "red_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "reason"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "status": { "const": "red_boundary" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -2,8 +2,11 @@
 
 import argparse
 import base64
+import copy
 import hashlib
+import itertools
 import json
+import math
 import os
 import re
 import shutil
@@ -40,9 +43,13 @@ PUBLISHED_ADDON_EXAMPLE_FILES = (
 PUBLISHED_SCHEMA_FILES = (
     "compat-audit.schema.json",
     "compat-contract.schema.json",
+    "compat-conformance-plan.schema.json",
     "compat-delta.schema.json",
+    "compat-generation-plan.schema.json",
     "compat-proposals.schema.json",
     "compat-report.schema.json",
+    "compat-resource-plan.schema.json",
+    "compat-runtime-probe-plan.schema.json",
     "compat-runtime-probe.schema.json",
 )
 REQUIRED_VERIFICATION_CHECKS = (
@@ -217,12 +224,21 @@ JAVA_RESERVED_IDENTIFIERS = frozenset(
     implements import instanceof int interface long native new package private
     protected public return short static strictfp super switch synchronized this
     throw throws transient try void volatile while true false null
+    _ exports module non-sealed open opens permits provides record requires
+    sealed to transitive uses var when with yield
     """.split()
 )
+TRANSLATION_KEY = re.compile(r"^[a-z0-9_.-]+$")
 
 
 def canonical_json(value) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _java_string(value: str) -> str:
+    if not isinstance(value, str):
+        raise ValueError("Java string value must be a string")
+    return json.dumps(value, ensure_ascii=True)
 
 
 def _recipe_inventory_sha256(class_names) -> str:
@@ -1708,6 +1724,122 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
     }
     validate_contract(contract, require_complete=False, source_audit=audit)
     return contract, "\n".join(action_lines).rstrip() + "\n"
+
+
+def migrate_contract(
+    old_contract: dict,
+    old_audit: dict,
+    new_audit: dict,
+) -> tuple[dict, str]:
+    validate_contract(
+        old_contract,
+        require_complete=False,
+        source_audit=old_audit,
+    )
+    _validate_audit(new_audit)
+    if new_audit["scanner_format"] != SCAN_CACHE_VERSION:
+        raise ValueError("contract migration requires a current new audit")
+    if old_audit["target"] != new_audit["target"]:
+        raise ValueError("contract migration audit target does not match")
+    if old_audit["artifact"]["sha256"] != new_audit["artifact"]["sha256"]:
+        raise ValueError("contract migration artifact SHA does not match")
+
+    migrated, _ = decide_audit(new_audit)
+    migrated["target"] = copy.deepcopy(old_contract["target"])
+    migrated["verification"] = copy.deepcopy(old_contract["verification"])
+    old_by_class = {
+        family["class"]: family
+        for family in old_contract["families"]
+    }
+    new_classes = {
+        family["class"] for family in migrated["families"]
+    }
+    removed = sorted(set(old_by_class) - new_classes)
+    removed_accepted = [
+        class_name
+        for class_name in removed
+        if old_by_class[class_name]["status"] == "accepted"
+    ]
+    if removed_accepted:
+        raise ValueError(
+            "contract migration removed accepted recipe family: "
+            + ", ".join(removed_accepted)
+        )
+
+    def evidence_by_class(audit: dict) -> dict[str, tuple]:
+        signatures = {
+            candidate["class"]: candidate["public_signature"]
+            for candidate in audit["candidates"]["recipe_classes"]
+        }
+        risks = {class_name: [] for class_name in signatures}
+        for risk in audit["risks"]:
+            for item in risk["evidence"]:
+                owner = item.split("#", 1)[0].split(":", 1)[0]
+                if owner in risks:
+                    risks[owner].append((risk["code"], item))
+        recipe_digest = audit.get("recipe_data", {}).get("digest")
+        return {
+            class_name: (
+                signature,
+                tuple(sorted(risks[class_name])),
+                recipe_digest,
+            )
+            for class_name, signature in signatures.items()
+        }
+
+    old_evidence = evidence_by_class(old_audit)
+    new_evidence = evidence_by_class(new_audit)
+    changed_evidence = []
+    decision_fields = (
+        "status",
+        "recipe_type",
+        "station",
+        "inputs",
+        "outputs",
+        "costs",
+        "decision",
+    )
+    for family in migrated["families"]:
+        previous = old_by_class.get(family["class"])
+        if previous is None:
+            continue
+        if old_evidence.get(family["class"]) != new_evidence.get(family["class"]):
+            changed_evidence.append(family["class"])
+            continue
+        for field in decision_fields:
+            family[field] = copy.deepcopy(previous[field])
+
+    validate_contract(
+        migrated,
+        require_complete=False,
+        source_audit=new_audit,
+    )
+    unresolved = [
+        family
+        for family in migrated["families"]
+        if family["status"] == "needs_decision"
+    ]
+    lines = [
+        f"# Contract migration for {new_audit['target']['display_name']}",
+        "",
+    ]
+    if unresolved:
+        lines.extend(["## Unresolved recipe families", ""])
+        lines.extend(
+            f"- `{family['class']}`" for family in unresolved
+        )
+    else:
+        lines.append("No unresolved recipe families.")
+    if removed:
+        lines.extend(["", "## Removed legacy non-recipe candidates", ""])
+        lines.extend(f"- `{class_name}`" for class_name in removed)
+    if changed_evidence:
+        lines.extend(["", "## Reopened changed evidence", ""])
+        lines.extend(
+            f"- `{class_name}` changed evidence"
+            for class_name in sorted(changed_evidence)
+        )
+    return migrated, "\n".join(lines).rstrip() + "\n"
 
 
 def _unknown_keys(value: dict, allowed: set[str], location: str):
@@ -3598,11 +3730,18 @@ NUMERIC_MEMBER = re.compile(
     r"\b(?:byte|short|int|long|float|double|java\.lang\.(?:Byte|Short|Integer|Long|Float|Double))\s+"
     r"(?P<member>[A-Za-z_$][A-Za-z0-9_$]*)\s*\([^;{}]*\)"
 )
+NUMERIC_FIELD = re.compile(
+    r"\b(?:byte|short|int|long|float|double|java\.lang\.(?:Byte|Short|Integer|Long|Float|Double))\s+"
+    r"(?P<member>[A-Za-z_$][A-Za-z0-9_$]*)\s*;"
+)
 
 
 def _rate_binding_candidates(candidate: dict) -> list[dict]:
     bindings = []
-    for match in NUMERIC_MEMBER.finditer(candidate["public_signature"]):
+    for match in itertools.chain(
+        NUMERIC_MEMBER.finditer(candidate["public_signature"]),
+        NUMERIC_FIELD.finditer(candidate["public_signature"]),
+    ):
         member = match.group("member")
         lowered = member.lower()
         if "slot" in lowered:
@@ -3766,7 +3905,7 @@ def propose_audit(audit: dict) -> dict:
     return proposals
 
 
-def _runtime_probe_spec(audit: dict) -> dict:
+def _runtime_probe_spec(audit: dict, plan: dict | None = None) -> dict:
     proposals = propose_audit(audit)
     unresolved = [
         {
@@ -3795,6 +3934,11 @@ def _runtime_probe_spec(audit: dict) -> dict:
         "source_audit_digest": hashlib.sha256(
             canonical_json(audit).encode("utf-8")
         ).hexdigest(),
+        "source_probe_plan_digest": (
+            hashlib.sha256(canonical_json(plan).encode("utf-8")).hexdigest()
+            if plan is not None
+            else None
+        ),
         "limits": {
             "loaded_recipes": MAX_RUNTIME_PROBE_RECIPES,
             "config_values": MAX_RUNTIME_PROBE_VALUES,
@@ -3807,10 +3951,97 @@ def _runtime_probe_spec(audit: dict) -> dict:
     }
 
 
-def _runtime_probe_java(audit: dict, spec: dict) -> tuple[str, str]:
+def _validate_runtime_probe_plan(plan: dict, audit: dict):
+    if not isinstance(plan, dict) or set(plan) != {
+        "schema",
+        "kind",
+        "source_audit_digest",
+        "target",
+        "config_values",
+        "capability_surfaces",
+    }:
+        raise ValueError("runtime probe plan has invalid fields")
+    if plan["schema"] != 1 or plan["kind"] != "auto_storage_runtime_probe_plan":
+        raise ValueError("runtime probe plan has invalid identity")
+    expected_digest = hashlib.sha256(
+        canonical_json(audit).encode("utf-8")
+    ).hexdigest()
+    if plan["source_audit_digest"] != expected_digest:
+        raise ValueError("runtime probe plan source audit does not match")
+    if plan["target"] != audit["target"]:
+        raise ValueError("runtime probe plan target does not match")
+    for name in ("config_values", "capability_surfaces"):
+        entries = plan[name]
+        if not isinstance(entries, list) or len(entries) > MAX_RUNTIME_PROBE_VALUES:
+            raise ValueError(f"runtime probe plan {name} is invalid")
+        keys = []
+        for index, entry in enumerate(entries):
+            required = {"id", "source", "item", "accessor"}
+            if name == "capability_surfaces":
+                required.add("surface")
+            if not isinstance(entry, dict) or set(entry) != required:
+                raise ValueError(f"runtime probe plan {name} entry {index} is invalid")
+            if any(
+                not isinstance(entry[field], str) or not entry[field]
+                for field in required - {"accessor"}
+            ):
+                raise ValueError(f"runtime probe plan {name} entry {index} is invalid")
+            if not RESOURCE_LOCATION.fullmatch(entry["item"]):
+                raise ValueError(f"runtime probe plan {name} entry {index} has invalid item")
+            if name == "capability_surfaces" and not RESOURCE_LOCATION.fullmatch(
+                entry["surface"]
+            ):
+                raise ValueError(
+                    f"runtime probe plan {name} entry {index} has invalid surface"
+                )
+            _validate_direct_accessor(
+                entry["accessor"],
+                f"runtime probe plan {name} entry {index}",
+                expected_value_type=(
+                    "boolean" if name == "capability_surfaces" else "number"
+                ),
+            )
+            keys.append((entry["id"], entry.get("surface", ""), entry["source"]))
+        if keys != sorted(set(keys)):
+            raise ValueError(f"runtime probe plan {name} must be sorted and unique")
+    return plan
+
+
+def _runtime_probe_java(
+    audit: dict,
+    spec: dict,
+    plan: dict | None = None,
+) -> tuple[str, str]:
     mod_id = audit["target"]["mod_id"]
     package_name = f"com.example.autostorageprobe.{_java_segment(mod_id)}"
     class_name = f"{_pascal(mod_id)}RuntimeProbeGameTests"
+    config_calls = []
+    capability_calls = []
+    plan_digest = None
+    if plan is not None:
+        plan_digest = hashlib.sha256(
+            canonical_json(plan).encode("utf-8")
+        ).hexdigest()
+        for entry in plan["config_values"]:
+            value = _render_numeric_accessor(entry["accessor"], entry["item"])
+            config_calls.append(
+                "        addConfig(configValues, "
+                f"{json.dumps(entry['id'])}, {value}, {json.dumps(entry['source'])});"
+            )
+        for entry in plan["capability_surfaces"]:
+            value = _render_numeric_accessor(entry["accessor"], entry["item"])
+            capability_calls.append(
+                "        addCapability(capabilitySurfaces, "
+                f"{json.dumps(entry['id'])}, {json.dumps(entry['surface'])}, "
+                f"{value}, {json.dumps(entry['source'])});"
+            )
+    plan_digest_statement = (
+        'root.add("source_probe_plan_digest", com.google.gson.JsonNull.INSTANCE);'
+        if plan_digest is None
+        else 'root.addProperty("source_probe_plan_digest", '
+        + json.dumps(plan_digest)
+        + ");"
+    )
     source = f'''package {package_name};
 
 import com.google.gson.Gson;
@@ -3824,6 +4055,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -3871,6 +4104,7 @@ public final class {class_name} {{
         target.addProperty("version", {json.dumps(audit['target']['version'])});
         root.add("target", target);
         root.addProperty("source_audit_digest", SOURCE_AUDIT_DIGEST);
+        {plan_digest_statement}
         root.addProperty("loaded_recipe_count", recipes.size());
 
         JsonArray recipeRecords = new JsonArray();
@@ -3898,8 +4132,12 @@ public final class {class_name} {{
         registries.add("block_entity_types", targetIds(
                 BuiltInRegistries.BLOCK_ENTITY_TYPE.keySet().stream()));
         root.add("registries", registries);
-        root.add("config_values", new JsonArray());
-        root.add("capability_surfaces", new JsonArray());
+        JsonArray configValues = new JsonArray();
+{chr(10).join(config_calls)}
+        root.add("config_values", configValues);
+        JsonArray capabilitySurfaces = new JsonArray();
+{chr(10).join(capability_calls)}
+        root.add("capability_surfaces", capabilitySurfaces);
 
         Path output = Path.of(outputProperty).toAbsolutePath().normalize();
         try {{
@@ -3923,23 +4161,70 @@ public final class {class_name} {{
                 .forEach(id -> result.add(id.toString()));
         return result;
     }}
+
+    private static void addConfig(
+            JsonArray values,
+            String id,
+            Number value,
+            String source
+    ) {{
+        JsonObject config = new JsonObject();
+        config.addProperty("id", id);
+        config.addProperty("value", value);
+        config.addProperty("source", source);
+        values.add(config);
+    }}
+
+    private static void addCapability(
+            JsonArray values,
+            String id,
+            String surface,
+            boolean available,
+            String source
+    ) {{
+        JsonObject capability = new JsonObject();
+        capability.addProperty("id", id);
+        capability.addProperty("surface", surface);
+        capability.addProperty("available", available);
+        capability.addProperty("source", source);
+        values.add(capability);
+    }}
+
+    private static Block requiredBlock(ResourceLocation id) {{
+        Block block = BuiltInRegistries.BLOCK.get(id);
+        if (block == Blocks.AIR) throw new IllegalStateException("Missing probe block " + id);
+        return block;
+    }}
+
+    private static ResourceLocation id(String namespace, String path) {{
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
+    }}
 }}
 '''
     return package_name, source
 
 
-def scaffold_runtime_probe(audit: dict, output) -> list[Path]:
+def scaffold_runtime_probe(
+    audit: dict,
+    output,
+    *,
+    plan: dict | None = None,
+) -> list[Path]:
     _validate_audit(audit)
     if audit["scanner_format"] != SCAN_CACHE_VERSION:
         raise ValueError("probe requires a current scanner-format audit")
-    spec = _runtime_probe_spec(audit)
-    package_name, source = _runtime_probe_java(audit, spec)
+    if plan is not None:
+        _validate_runtime_probe_plan(plan, audit)
+    spec = _runtime_probe_spec(audit, plan)
+    package_name, source = _runtime_probe_java(audit, spec, plan)
     package_path = package_name.replace(".", "/")
     class_name = f"{_pascal(audit['target']['mod_id'])}RuntimeProbeGameTests"
     files = {
         "probe-spec.json": canonical_json(spec).encode("utf-8"),
         f"src/main/java/{package_path}/{class_name}.java": source.encode("utf-8"),
     }
+    if plan is not None:
+        files["probe-plan.json"] = canonical_json(plan).encode("utf-8")
     return _materialize(
         Path(output),
         files,
@@ -3948,7 +4233,12 @@ def scaffold_runtime_probe(audit: dict, output) -> list[Path]:
     )
 
 
-def validate_runtime_probe_output(output: dict, audit: dict):
+def validate_runtime_probe_output(
+    output: dict,
+    audit: dict,
+    *,
+    plan: dict | None = None,
+):
     _validate_audit(audit)
     expected_keys = {
         "schema",
@@ -3956,6 +4246,7 @@ def validate_runtime_probe_output(output: dict, audit: dict):
         "authority",
         "target",
         "source_audit_digest",
+        "source_probe_plan_digest",
         "loaded_recipe_count",
         "recipes",
         "registries",
@@ -3977,6 +4268,15 @@ def validate_runtime_probe_output(output: dict, audit: dict):
     ).hexdigest()
     if output["source_audit_digest"] != expected_digest:
         raise ValueError("runtime probe source audit does not match")
+    if plan is not None:
+        _validate_runtime_probe_plan(plan, audit)
+        expected_plan_digest = hashlib.sha256(
+            canonical_json(plan).encode("utf-8")
+        ).hexdigest()
+    else:
+        expected_plan_digest = None
+    if output["source_probe_plan_digest"] != expected_plan_digest:
+        raise ValueError("runtime probe source probe plan does not match")
     recipes = output["recipes"]
     count = output["loaded_recipe_count"]
     if (
@@ -4043,6 +4343,63 @@ def validate_runtime_probe_output(output: dict, audit: dict):
         values = output[name]
         if not isinstance(values, list) or len(values) > MAX_RUNTIME_PROBE_VALUES:
             raise ValueError(f"runtime probe {name} is invalid")
+    config_keys = []
+    for index, entry in enumerate(output["config_values"]):
+        if not isinstance(entry, dict) or set(entry) != {"id", "value", "source"}:
+            raise ValueError(f"runtime probe config_values entry {index} is invalid")
+        if any(
+            not isinstance(entry[field], str) or not entry[field]
+            for field in ("id", "source")
+        ):
+            raise ValueError(f"runtime probe config_values entry {index} is invalid")
+        value = entry["value"]
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or (
+            isinstance(value, float) and not math.isfinite(value)
+        ):
+            raise ValueError(f"runtime probe config_values entry {index} is invalid")
+        config_keys.append((entry["id"], entry["source"]))
+    if config_keys != sorted(set(config_keys)):
+        raise ValueError("runtime probe config_values must be sorted and unique")
+    capability_keys = []
+    for index, entry in enumerate(output["capability_surfaces"]):
+        if not isinstance(entry, dict) or set(entry) != {
+            "id",
+            "surface",
+            "available",
+            "source",
+        }:
+            raise ValueError(
+                f"runtime probe capability_surfaces entry {index} is invalid"
+            )
+        if any(
+            not isinstance(entry[field], str) or not entry[field]
+            for field in ("id", "surface", "source")
+        ):
+            raise ValueError(
+                f"runtime probe capability_surfaces entry {index} is invalid"
+            )
+        if not isinstance(entry["available"], bool):
+            raise ValueError(
+                f"runtime probe capability_surfaces entry {index} is invalid"
+            )
+        capability_keys.append((entry["id"], entry["surface"], entry["source"]))
+    if capability_keys != sorted(set(capability_keys)):
+        raise ValueError("runtime probe capability_surfaces must be sorted and unique")
+    if plan is not None:
+        expected_config_keys = [
+            (entry["id"], entry["source"])
+            for entry in plan["config_values"]
+        ]
+        if config_keys != expected_config_keys:
+            raise ValueError("runtime probe plan config_values do not match output")
+        expected_capability_keys = [
+            (entry["id"], entry["surface"], entry["source"])
+            for entry in plan["capability_surfaces"]
+        ]
+        if capability_keys != expected_capability_keys:
+            raise ValueError(
+                "runtime probe plan capability_surfaces do not match output"
+            )
     return output
 
 
@@ -4244,6 +4601,1461 @@ git diff --check
     return _materialize_plain(Path(output), files)
 
 
+JAVA_TYPE = re.compile(
+    r"^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+)
+JAVA_MEMBER = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
+RATE_TEMPLATES = frozenset({
+    "fixed",
+    "config_tick_ratio",
+    "public_numeric_getter",
+    "tier_multiplier",
+    "parallel_lanes",
+    "speed_times_parallel",
+})
+
+
+def _is_java_type(value) -> bool:
+    return (
+        isinstance(value, str)
+        and JAVA_TYPE.fullmatch(value) is not None
+        and all(
+            segment not in JAVA_RESERVED_IDENTIFIERS
+            for segment in value.split(".")
+        )
+    )
+
+
+def _is_java_member(value) -> bool:
+    return (
+        isinstance(value, str)
+        and JAVA_MEMBER.fullmatch(value) is not None
+        and value not in JAVA_RESERVED_IDENTIFIERS
+    )
+
+
+def _validate_direct_accessor(
+    accessor: dict,
+    location: str,
+    *,
+    expected_value_type: str | None = None,
+):
+    if not isinstance(accessor, dict):
+        raise ValueError(f"{location} accessor must be an object")
+    kind = accessor.get("kind")
+    required = {
+        "static_field_value_get": {"kind", "owner", "member", "value_type"},
+        "static_method": {"kind", "owner", "member", "value_type"},
+        "registry_block_method": {"kind", "owner", "member", "value_type"},
+        "enum_constant_numeric_field": {
+            "kind", "owner", "constant", "member", "value_type",
+        },
+    }.get(kind)
+    if required is None:
+        raise ValueError(f"{location} has invalid accessor kind")
+    if set(accessor) != required:
+        raise ValueError(f"{location} has invalid fields for {kind}")
+    value_type = accessor["value_type"]
+    if value_type not in {"integral", "number", "boolean"}:
+        raise ValueError(f"{location} has invalid accessor value_type")
+    if expected_value_type is not None and value_type != expected_value_type:
+        raise ValueError(
+            f"{location} accessor value_type must be {expected_value_type}"
+        )
+    if not _is_java_type(accessor["owner"]):
+        raise ValueError(f"{location} has invalid accessor owner")
+    if not _is_java_member(accessor["member"]):
+        raise ValueError(f"{location} has invalid accessor member")
+    if "constant" in accessor and not _is_java_member(accessor["constant"]):
+        raise ValueError(f"{location} has invalid accessor constant")
+
+
+def _validate_positive_long(value, location: str):
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int)
+        or value <= 0
+        or value > 9_223_372_036_854_775_807
+    ):
+        raise ValueError(f"{location} must be a positive long")
+
+
+def _validate_rate_binding(binding: dict, location: str, *, allow_zero: bool = False):
+    if not isinstance(binding, dict):
+        raise ValueError(f"{location} must be an object")
+    template = binding.get("template")
+    if template not in RATE_TEMPLATES:
+        raise ValueError(f"{location} has invalid rate template")
+    item = binding.get("item")
+    if not isinstance(item, str) or not RESOURCE_LOCATION.fullmatch(item):
+        raise ValueError(f"{location} has invalid item")
+    required = {
+        "fixed": {"item", "template", "numerator", "denominator"},
+        "config_tick_ratio": {"item", "template", "numerator", "accessor"},
+        "public_numeric_getter": {"item", "template", "accessor"},
+        "tier_multiplier": {
+            "item", "template", "numerator", "denominator", "accessor",
+        },
+        "parallel_lanes": {
+            "item", "template", "numerator", "denominator", "accessor",
+        },
+        "speed_times_parallel": {
+            "item", "template", "denominator", "speed_accessor",
+            "parallel_accessor",
+        },
+    }[template]
+    if set(binding) != required:
+        raise ValueError(f"{location} has invalid fields for {template}")
+    if "numerator" in binding:
+        numerator = binding["numerator"]
+        if (
+            isinstance(numerator, bool)
+            or not isinstance(numerator, int)
+            or numerator < (0 if allow_zero and template == "fixed" else 1)
+            or numerator > 9_223_372_036_854_775_807
+        ):
+            qualifier = "non-negative" if allow_zero and template == "fixed" else "positive"
+            raise ValueError(f"{location} numerator must be {qualifier} long")
+    if "denominator" in binding:
+        _validate_positive_long(binding["denominator"], f"{location} denominator")
+    for name in ("accessor", "speed_accessor", "parallel_accessor"):
+        if name in binding:
+            _validate_direct_accessor(
+                binding[name],
+                f"{location} {name}",
+                expected_value_type="integral",
+            )
+
+
+def _java_resource_location(value: str) -> str:
+    namespace, path = value.split(":", 1)
+    return f'id("{namespace}", "{path}")'
+
+
+def _render_numeric_accessor(accessor: dict, item: str) -> str:
+    _validate_direct_accessor(accessor, "rate")
+    owner = accessor["owner"]
+    member = accessor["member"]
+    if accessor["kind"] == "static_field_value_get":
+        return f"{owner}.{member}.get()"
+    if accessor["kind"] == "static_method":
+        return f"{owner}.{member}()"
+    if accessor["kind"] == "enum_constant_numeric_field":
+        return f"{owner}.{accessor['constant']}.{member}"
+    return (
+        f"(({owner}) requiredBlock({_java_resource_location(item)})).{member}()"
+    )
+
+
+def _render_rate_binding(binding: dict, *, allow_zero: bool = False) -> str:
+    _validate_rate_binding(binding, "rate binding", allow_zero=allow_zero)
+    item = binding["item"]
+    stack = f"new ItemStack(requiredItem({_java_resource_location(item)}))"
+    template = binding["template"]
+    if template == "fixed":
+        return (
+            f"MachineVariant.of({stack}, MachineWorkRate.of("
+            f"{binding['numerator']}L, {binding['denominator']}L))"
+        )
+    if template == "config_tick_ratio":
+        value = _render_numeric_accessor(binding["accessor"], item)
+        rate = (
+            f"MachineWorkRate.of({binding['numerator']}L, "
+            f"exactPositiveIntegral({value}, \"{item} configured ticks\"))"
+        )
+    elif template == "public_numeric_getter":
+        value = _render_numeric_accessor(binding["accessor"], item)
+        rate = (
+            f"MachineWorkRate.of(exactPositiveIntegral({value}, "
+            f"\"{item} public rate\"), 1L)"
+        )
+    elif template in {"tier_multiplier", "parallel_lanes"}:
+        value = _render_numeric_accessor(binding["accessor"], item)
+        rate = (
+            "MachineWorkRate.of(Math.multiplyExact("
+            f"{binding['numerator']}L, exactPositiveIntegral({value}, "
+            f"\"{item} {template}\")), {binding['denominator']}L)"
+        )
+    else:
+        speed = _render_numeric_accessor(binding["speed_accessor"], item)
+        parallel = _render_numeric_accessor(binding["parallel_accessor"], item)
+        rate = (
+            "MachineWorkRate.of(Math.multiplyExact("
+            f"exactPositiveIntegral({speed}, \"{item} speed\"), "
+            f"exactPositiveIntegral({parallel}, \"{item} parallel\")), "
+            f"{binding['denominator']}L)"
+        )
+    return f"MachineVariant.derived({stack}, () -> {rate})"
+
+
+def _validate_recipe_binding(binding: dict, expected_kind: str, location: str):
+    if not isinstance(binding, dict) or set(binding) != {
+        "kind",
+        "member",
+        "arguments",
+    }:
+        raise ValueError(f"{location} requires kind, member, and arguments")
+    if binding["kind"] != expected_kind:
+        raise ValueError(f"{location} has invalid kind")
+    if not isinstance(binding["member"], str) or not JAVA_MEMBER.fullmatch(
+        binding["member"]
+    ):
+        raise ValueError(f"{location} has invalid member")
+    allowed_arguments = {
+        "ingredient_method": {"none"},
+        "item_stack_method": {"none", "registries"},
+        "numeric_method": {"none"},
+    }[expected_kind]
+    if binding["arguments"] not in allowed_arguments:
+        raise ValueError(f"{location} has invalid arguments")
+
+
+def _validate_direct_binding(binding: dict, expected_kind: str, location: str):
+    if not isinstance(binding, dict) or set(binding) != {"kind", "owner", "member"}:
+        raise ValueError(f"{location} requires kind, owner, and member")
+    if binding["kind"] != expected_kind:
+        raise ValueError(f"{location} has invalid kind")
+    if not _is_java_type(binding["owner"]):
+        raise ValueError(f"{location} has invalid owner")
+    if not _is_java_member(binding["member"]):
+        raise ValueError(f"{location} has invalid member")
+
+
+def _validate_generation_plan(plan: dict, contract: dict):
+    if not isinstance(plan, dict) or set(plan) != {
+        "schema",
+        "kind",
+        "source_contract_digest",
+        "target",
+        "package",
+        "class_name",
+        "families",
+        "resource_kinds",
+    }:
+        raise ValueError("generation plan has invalid fields")
+    if plan["schema"] != 1 or plan["kind"] != "auto_storage_compat_generation_plan":
+        raise ValueError("generation plan has invalid identity")
+    if plan["source_contract_digest"] != _contract_sha256(contract):
+        raise ValueError("generation plan contract digest does not match")
+    expected_target = {
+        key: contract["target"][key]
+        for key in ("mod_id", "display_name", "version")
+    }
+    if plan["target"] != expected_target:
+        raise ValueError("generation plan target does not match contract")
+    if not _is_java_type(plan["package"]):
+        raise ValueError("generation plan has invalid package")
+    if not _is_java_member(plan["class_name"]):
+        raise ValueError("generation plan has invalid class_name")
+    if not isinstance(plan["resource_kinds"], list):
+        raise ValueError("generation plan resource_kinds must be a list")
+    if plan["resource_kinds"]:
+        raise ValueError("generation plan resource kinds require resource-scaffold")
+    accepted = {
+        family["id"]: family
+        for family in contract["families"]
+        if family["status"] == "accepted"
+    }
+    families = plan["families"]
+    if not isinstance(families, list):
+        raise ValueError("generation plan families must be a list")
+    family_ids = [
+        entry.get("id") for entry in families if isinstance(entry, dict)
+    ]
+    if len(family_ids) != len(families) or len(family_ids) != len(set(family_ids)):
+        raise ValueError("generation plan has duplicate family IDs")
+    if set(family_ids) != set(accepted):
+        raise ValueError("generation plan families must match accepted contract families")
+    registration_ids = [
+        entry.get("registration_id")
+        for entry in families
+        if isinstance(entry, dict) and entry.get("status") == "generate"
+    ]
+    if len(registration_ids) != len(set(registration_ids)):
+        raise ValueError("generation plan has duplicate registration IDs")
+    descriptor_definitions = {}
+    for index, entry in enumerate(families):
+        location = f"generation family {index}"
+        if not isinstance(entry, dict):
+            raise ValueError(f"{location} must be an object")
+        status = entry.get("status")
+        if status == "red_boundary":
+            if set(entry) != {"id", "status", "reason"}:
+                raise ValueError(f"{location} RED boundary has invalid fields")
+            _validate_nonempty_string(entry["reason"], f"{location} reason")
+            continue
+        if status != "generate" or set(entry) != {
+            "id",
+            "status",
+            "shape",
+            "registration_id",
+            "station_label_key",
+            "bindings",
+            "rate_bindings",
+        }:
+            raise ValueError(f"{location} has invalid fields")
+        if entry["shape"] not in {"single_item_to_item", "typed_resources"}:
+            raise ValueError(f"{location} has unsupported generation shape")
+        if not isinstance(entry["registration_id"], str) or not RESOURCE_LOCATION.fullmatch(
+            entry["registration_id"]
+        ):
+            raise ValueError(f"{location} has invalid registration_id")
+        _validate_nonempty_string(
+            entry["station_label_key"], f"{location} station_label_key"
+        )
+        if not TRANSLATION_KEY.fullmatch(entry["station_label_key"]):
+            raise ValueError(f"{location} has invalid station_label_key")
+        bindings = entry["bindings"]
+        contract_family = accepted[entry["id"]]
+        if entry["shape"] == "single_item_to_item":
+            if not isinstance(bindings, dict) or set(bindings) != {
+                "input",
+                "output",
+                "cost",
+            }:
+                raise ValueError(f"{location} bindings are invalid")
+            _validate_recipe_binding(
+                bindings["input"], "ingredient_method", f"{location} input"
+            )
+            _validate_recipe_binding(
+                bindings["output"], "item_stack_method", f"{location} output"
+            )
+            cost_binding = bindings["cost"]
+            if cost_binding == {"kind": "free"}:
+                free_cost = True
+            else:
+                _validate_recipe_binding(
+                    cost_binding, "numeric_method", f"{location} cost"
+                )
+                free_cost = False
+            if (
+                len(contract_family["inputs"]) != 1
+                or contract_family["inputs"][0]["role"] != "consume"
+                or contract_family["inputs"][0]["resource_kind"] != "item"
+                or len(contract_family["outputs"]) != 1
+                or contract_family["outputs"][0]["role"] != "primary"
+                or contract_family["outputs"][0]["resource_kind"] != "item"
+                or (
+                    free_cost
+                    and contract_family["costs"]
+                )
+                or (
+                    not free_cost
+                    and (
+                        len(contract_family["costs"]) != 1
+                        or contract_family["costs"][0]["resource_kind"]
+                        != "auto_storage:station_work"
+                    )
+                )
+            ):
+                raise ValueError(f"{location} contract shape is not supported")
+        else:
+            if not isinstance(bindings, dict) or set(bindings) != {
+                "eligibility",
+                "plan",
+                "cost",
+            }:
+                raise ValueError(f"{location} bindings are invalid")
+            _validate_direct_binding(
+                bindings["eligibility"],
+                "static_recipe_predicate_method",
+                f"{location} eligibility",
+            )
+            _validate_direct_binding(
+                bindings["plan"], "static_typed_plan_method", f"{location} plan"
+            )
+            _validate_direct_binding(
+                bindings["cost"],
+                "static_recipe_family_cost_method",
+                f"{location} cost",
+            )
+        rates = entry["rate_bindings"]
+        if not isinstance(rates, list) or not rates:
+            raise ValueError(f"{location} requires rate bindings")
+        allow_zero = contract_family["station"]["category"] == "instant"
+        if contract_family["station"]["category"] == "transform":
+            raise ValueError(f"{location} transform stations are not generated")
+        for rate_index, rate in enumerate(rates):
+            _validate_rate_binding(
+                rate,
+                f"{location} rate {rate_index}",
+                allow_zero=allow_zero,
+            )
+            if allow_zero and (
+                rate["template"] != "fixed" or rate["numerator"] != 0
+            ):
+                raise ValueError(f"{location} instant station rate must be fixed zero")
+        contract_items = {
+            variant["item"]
+            for variant in contract_family["station"]["variants"]
+        }
+        if {rate["item"] for rate in rates} != contract_items:
+            raise ValueError(f"{location} rate items do not match contract station")
+        contract_rates = {
+            variant["item"]: variant["rate"]
+            for variant in contract_family["station"]["variants"]
+        }
+        for rate in rates:
+            if rate["template"] == "fixed" and (
+                rate["numerator"]
+                != contract_rates[rate["item"]]["numerator"]
+                or rate["denominator"]
+                != contract_rates[rate["item"]]["denominator"]
+            ):
+                raise ValueError(f"{location} fixed rate does not match contract")
+        descriptor_id = contract_family["station"]["descriptor_id"]
+        if entry["registration_id"].split(":", 1)[0] != descriptor_id.split(":", 1)[0]:
+            raise ValueError(f"{location} registration namespace does not match descriptor")
+        descriptor_definition = (
+            entry["station_label_key"],
+            canonical_json(contract_family["station"]),
+            canonical_json(rates),
+        )
+        previous_definition = descriptor_definitions.get(descriptor_id)
+        if (
+            previous_definition is not None
+            and previous_definition != descriptor_definition
+        ):
+            raise ValueError(
+                f"{location} shared descriptor {descriptor_id} has conflicting definitions"
+            )
+        descriptor_definitions[descriptor_id] = descriptor_definition
+    return plan
+
+
+def _recipe_call(binding: dict, variable: str) -> str:
+    arguments = "registries" if binding["arguments"] == "registries" else ""
+    return f"{variable}.{binding['member']}({arguments})"
+
+
+def _generated_compat_java(contract: dict, plan: dict) -> tuple[str, list[dict]]:
+    generated = [entry for entry in plan["families"] if entry["status"] == "generate"]
+    boundaries = [entry for entry in plan["families"] if entry["status"] == "red_boundary"]
+    contract_by_id = {family["id"]: family for family in contract["families"]}
+    descriptor_namespaces = {
+        contract_by_id[entry["id"]]["station"]["descriptor_id"].split(":", 1)[0]
+        for entry in generated
+    }
+    if len(descriptor_namespaces) > 1:
+        raise ValueError("generated families require one descriptor namespace")
+    descriptor_namespace = next(iter(descriptor_namespaces), "auto_storage")
+    body = []
+    registered_descriptors = set()
+    for entry in generated:
+        family = contract_by_id[entry["id"]]
+        descriptor_id = family["station"]["descriptor_id"]
+        descriptor_path = descriptor_id.split(":", 1)[1]
+        descriptor_variable = re.sub(r"[^A-Za-z0-9_]", "_", entry["id"]) + "Descriptor"
+        descriptor_item_namespace = descriptor_id.split(":", 1)[0]
+        body.append(
+            f"        ResourceLocation {descriptor_variable} = id(\"{descriptor_item_namespace}\", \"{descriptor_path}\");"
+        )
+        if descriptor_id not in registered_descriptors:
+            category = (
+                "MachineCategory.PROCESS"
+                if family["station"]["category"] == "process"
+                else "MachineCategory.INSTANT"
+            )
+            allow_zero = family["station"]["category"] == "instant"
+            variants = ",\n                        ".join(
+                _render_rate_binding(binding, allow_zero=allow_zero)
+                for binding in entry["rate_bindings"]
+            )
+            body.extend([
+                f"        machineDescriptors.register({descriptor_variable}.getPath(), () ->",
+                "                MachineDescriptor.installableVariants(",
+                f"                        {descriptor_variable},",
+                f"                        Component.translatable({_java_string(entry['station_label_key'])}),",
+                "                        () -> List.of(",
+                f"                        {variants}),",
+                f"                        {category},",
+                "                        MachineDescriptorApi.MAX_INSTALLED_COUNT,",
+                "                        null));",
+            ])
+            registered_descriptors.add(descriptor_id)
+        recipe_type = _java_resource_location(family["recipe_type"])
+        recipe_class = family["class"]
+        if entry["shape"] == "single_item_to_item":
+            input_call = _recipe_call(entry["bindings"]["input"], "recipe")
+            output_call = _recipe_call(entry["bindings"]["output"], "recipe")
+            cost_binding = entry["bindings"]["cost"]
+            cost_expression = (
+                "RecipeFamilyCost.free()"
+                if cost_binding["kind"] == "free"
+                else "RecipeFamilyCost.stationWork("
+                + _recipe_call(cost_binding, "recipe")
+                + ")"
+            )
+            body.extend([
+                "        recipeFamilies.register("
+                + _java_string(entry["registration_id"].split(":", 1)[1])
+                + ", () ->",
+                "                RecipeFamilyFactories.singleItemToItem(",
+                f"                        {recipe_class}.class,",
+                f"                        () -> BuiltInRegistries.RECIPE_TYPE.get({recipe_type}),",
+                f"                        {descriptor_variable},",
+                f"                        recipe -> {input_call},",
+                f"                        (recipe, registries) -> {output_call},",
+                f"                        recipe -> {cost_expression},",
+                "                        RecipePresentationKind.CRAFTING));",
+            ])
+        else:
+            eligibility_binding = entry["bindings"]["eligibility"]
+            plan_binding = entry["bindings"]["plan"]
+            cost_binding = entry["bindings"]["cost"]
+            body.extend([
+                "        recipeFamilies.register("
+                + _java_string(entry["registration_id"].split(":", 1)[1])
+                + ", () ->",
+                "                RecipeFamilyFactories.deterministicResources(",
+                f"                        {recipe_class}.class,",
+                f"                        () -> BuiltInRegistries.RECIPE_TYPE.get({recipe_type}),",
+                f"                        {descriptor_variable},",
+                "                        recipe -> "
+                f"{eligibility_binding['owner']}.{eligibility_binding['member']}(recipe),",
+                "                        (recipe, registries) -> "
+                f"{plan_binding['owner']}.{plan_binding['member']}(recipe, registries),",
+                "                        recipe -> "
+                f"{cost_binding['owner']}.{cost_binding['member']}(recipe),",
+                "                        RecipePresentationKind.CRAFTING));",
+            ])
+    if boundaries:
+        reasons = "; ".join(
+            f"{entry['id']}: {entry['reason']}" for entry in boundaries
+        )
+        body.append(
+            "        throw new IllegalStateException("
+            + _java_string("Compat generation RED boundary: " + reasons)
+            + ");"
+        )
+    source = f'''package {plan['package']};
+
+import com.swear.autostorage.MachineCategory;
+import com.swear.autostorage.MachineDescriptor;
+import com.swear.autostorage.MachineDescriptorApi;
+import com.swear.autostorage.MachineVariant;
+import com.swear.autostorage.MachineWorkRate;
+import com.swear.autostorage.RecipeFamily;
+import com.swear.autostorage.RecipeFamilyApi;
+import com.swear.autostorage.RecipeFamilyCost;
+import com.swear.autostorage.RecipeFamilyFactories;
+import com.swear.autostorage.RecipePresentationKind;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+
+public final class {plan['class_name']} {{
+    private {plan['class_name']}() {{
+    }}
+
+    public static void register(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {{
+        Objects.requireNonNull(machineDescriptors, "machineDescriptors");
+        Objects.requireNonNull(recipeFamilies, "recipeFamilies");
+        if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {{
+            throw new IllegalArgumentException("Generated descriptor register targets the wrong registry");
+        }}
+        if (!recipeFamilies.getRegistryKey().equals(RecipeFamilyApi.REGISTRY_KEY)) {{
+            throw new IllegalArgumentException("Generated family register targets the wrong registry");
+        }}
+        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())) {{
+            throw new IllegalArgumentException("Generated descriptors and families must share one namespace");
+        }}
+        if (!machineDescriptors.getNamespace().equals("{descriptor_namespace}")) {{
+            throw new IllegalArgumentException("Generated descriptor namespace must be {descriptor_namespace}");
+        }}
+{chr(10).join(body)}
+    }}
+
+    private static long exactPositiveIntegral(Number value, String name) {{
+        Objects.requireNonNull(value, name);
+        try {{
+            long exact = new BigDecimal(value.toString()).longValueExact();
+            if (exact <= 0) throw new ArithmeticException();
+            return exact;
+        }} catch (NumberFormatException | ArithmeticException error) {{
+            throw new IllegalStateException(name + " must be an exact positive integer: " + value, error);
+        }}
+    }}
+
+    private static Item requiredItem(ResourceLocation id) {{
+        Item item = BuiltInRegistries.ITEM.get(id);
+        if (item == Items.AIR) throw new IllegalStateException("Missing station item " + id);
+        return item;
+    }}
+
+    private static Block requiredBlock(ResourceLocation id) {{
+        Block block = BuiltInRegistries.BLOCK.get(id);
+        if (block == Blocks.AIR) throw new IllegalStateException("Missing station block " + id);
+        return block;
+    }}
+
+    private static ResourceLocation id(String namespace, String path) {{
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
+    }}
+}}
+'''
+    return source, boundaries
+
+
+def generate_compatibility(
+    contract: dict,
+    audit: dict,
+    plan: dict,
+    output,
+) -> list[Path]:
+    validate_contract(contract, require_complete=True, source_audit=audit)
+    _validate_generation_plan(plan, contract)
+    source, boundaries = _generated_compat_java(contract, plan)
+    package_path = plan["package"].replace(".", "/")
+    files = {}
+    if any(entry["status"] == "generate" for entry in plan["families"]):
+        files[
+            f"src/main/java/{package_path}/{plan['class_name']}.java"
+        ] = source.encode("utf-8")
+    if boundaries:
+        files["RED_BOUNDARIES.md"] = (
+            "# Unsupported compatibility boundaries\n\n"
+            + "\n".join(
+                f"- `{entry['id']}`: {entry['reason']}" for entry in boundaries
+            )
+            + "\n"
+        ).encode("utf-8")
+    files["generation-plan.json"] = canonical_json(plan).encode("utf-8")
+    return _materialize(
+        Path(output),
+        files,
+        ".compat-kit-generation-manifest.json",
+        contract,
+    )
+
+
+def _validate_conformance_plan(plan: dict, contract: dict):
+    if not isinstance(plan, dict) or set(plan) != {
+        "schema",
+        "kind",
+        "source_contract_digest",
+        "target",
+        "package",
+        "class_name",
+        "families",
+    }:
+        raise ValueError("conformance plan has invalid fields")
+    if plan["schema"] != 1 or plan["kind"] != "auto_storage_compat_conformance_plan":
+        raise ValueError("conformance plan has invalid identity")
+    if plan["source_contract_digest"] != _contract_sha256(contract):
+        raise ValueError("conformance plan contract digest does not match")
+    expected_target = {
+        key: contract["target"][key]
+        for key in ("mod_id", "display_name", "version")
+    }
+    if plan["target"] != expected_target:
+        raise ValueError("conformance plan target does not match contract")
+    if not _is_java_type(plan["package"]):
+        raise ValueError("conformance plan has invalid package")
+    if not _is_java_member(plan["class_name"]):
+        raise ValueError("conformance plan has invalid class_name")
+    if (
+        plan["class_name"] in JAVA_RESERVED_IDENTIFIERS
+        or plan["class_name"] == "CompatibilityConformanceHarness"
+    ):
+        raise ValueError("conformance plan uses a reserved generated class")
+    accepted_ids = {
+        family["id"]
+        for family in contract["families"]
+        if family["status"] == "accepted"
+    }
+    families = plan["families"]
+    if not isinstance(families, list):
+        raise ValueError(
+            "conformance plan families must match accepted contract families"
+        )
+    family_ids = [
+        family.get("id") for family in families if isinstance(family, dict)
+    ]
+    if len(family_ids) != len(families) or len(family_ids) != len(set(family_ids)):
+        raise ValueError("conformance plan has duplicate family IDs")
+    if set(family_ids) != accepted_ids:
+        raise ValueError(
+            "conformance plan families must match accepted contract families"
+        )
+    for index, family in enumerate(families):
+        location = f"conformance family {index}"
+        if not isinstance(family, dict) or set(family) != {
+            "id",
+            "sample_recipe_id",
+            "provider",
+            "batch",
+            "expected_deltas",
+        }:
+            raise ValueError(f"{location} has invalid fields")
+        if not isinstance(family["sample_recipe_id"], str) or not RESOURCE_LOCATION.fullmatch(
+            family["sample_recipe_id"]
+        ):
+            raise ValueError(f"{location} has invalid sample_recipe_id")
+        provider = family["provider"]
+        if not isinstance(provider, dict) or set(provider) != {
+            "owner",
+            "factory_member",
+        }:
+            raise ValueError(f"{location} provider is invalid")
+        if not _is_java_type(provider["owner"]):
+            raise ValueError(f"{location} has invalid provider owner")
+        if not _is_java_member(provider["factory_member"]):
+            raise ValueError(f"{location} has invalid provider factory_member")
+        _validate_positive_long(family["batch"], f"{location} batch")
+        deltas = family["expected_deltas"]
+        if not isinstance(deltas, dict) or set(deltas) != {
+            "happy",
+            "catalyst_tool_remainder",
+            "multi_output",
+        }:
+            raise ValueError(f"{location} expected_deltas are invalid")
+        for mode, delta in deltas.items():
+            if (
+                not isinstance(delta, dict)
+                or not delta
+                or list(delta) != sorted(delta)
+            ):
+                raise ValueError(
+                    f"{location} expected_deltas {mode} must be sorted and non-empty"
+                )
+            for key, value in delta.items():
+                if not isinstance(key, str) or not key:
+                    raise ValueError(
+                        f"{location} expected_deltas {mode} has invalid key"
+                    )
+                if (
+                    isinstance(value, bool)
+                    or not isinstance(value, int)
+                    or value == 0
+                    or abs(value) > 9_223_372_036_854_775_807
+                ):
+                    raise ValueError(
+                        f"{location} expected_deltas {mode} has invalid amount"
+                    )
+    return plan
+
+
+def _conformance_harness_java(package_name: str) -> str:
+    return f'''package {package_name};
+
+import net.minecraft.gametest.framework.GameTestHelper;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public final class CompatibilityConformanceHarness {{
+    public enum Mode {{
+        HAPPY,
+        ONE_SHORT,
+        DESTINATION_FULL,
+        CHECKED_OVERFLOW,
+        STALE_HOLDER,
+        CATALYST_TOOL_REMAINDER,
+        MULTI_OUTPUT,
+        MIXED_RESOURCE_ROLLBACK
+    }}
+
+    public record Snapshot(Map<String, Long> amounts) {{
+        public Snapshot {{
+            amounts = Map.copyOf(amounts);
+        }}
+    }}
+
+    public record Attempt(boolean success) {{
+    }}
+
+    public interface Scenario {{
+        void reset();
+
+        void configure(Mode mode);
+
+        Snapshot snapshot();
+
+        Attempt attempt(long crafts);
+
+        boolean coexistenceHealthy();
+    }}
+
+    private CompatibilityConformanceHarness() {{
+    }}
+
+    public static void assertDelta(
+            GameTestHelper helper,
+            Snapshot before,
+            Snapshot after,
+            Map<String, Long> perCraft,
+            long crafts
+    ) {{
+        Map<String, Long> expected = new LinkedHashMap<>(before.amounts());
+        for (Map.Entry<String, Long> entry : perCraft.entrySet()) {{
+            long delta = Math.multiplyExact(entry.getValue(), crafts);
+            expected.merge(entry.getKey(), delta, Math::addExact);
+        }}
+        expected.values().removeIf(value -> value == 0L);
+        Map<String, Long> actual = new LinkedHashMap<>(after.amounts());
+        actual.values().removeIf(value -> value == 0L);
+        if (!expected.equals(actual)) {{
+            helper.fail("Conformance delta mismatch: expected " + expected
+                    + " but was " + actual);
+        }}
+    }}
+
+    public static void assertUnchanged(
+            GameTestHelper helper,
+            Snapshot before,
+            Snapshot after
+    ) {{
+        if (!before.equals(after)) {{
+            helper.fail("Atomic rollback mismatch: before " + before
+                    + " after " + after);
+        }}
+    }}
+
+    public static void requireSuccess(GameTestHelper helper, Attempt attempt) {{
+        if (!attempt.success()) helper.fail("Expected conformance craft success");
+    }}
+
+    public static void requireFailure(GameTestHelper helper, Attempt attempt) {{
+        if (attempt.success()) helper.fail("Expected conformance craft rejection");
+    }}
+}}
+'''
+
+
+def _java_map_entries(delta: dict[str, int]) -> str:
+    entries = ",\n                    ".join(
+        f'Map.entry({_java_string(key)}, {value}L)'
+        for key, value in delta.items()
+    )
+    return f"Map.ofEntries(\n                    {entries})"
+
+
+def _conformance_tests_java(plan: dict) -> str:
+    cases = []
+    for index, family in enumerate(plan["families"]):
+        name = re.sub(r"[^a-z0-9_]", "_", family["id"].lower())
+        provider = family["provider"]
+        factory = (
+            f"{provider['owner']}.{provider['factory_member']}(helper, "
+            f"ResourceLocation.parse({_java_string(family['sample_recipe_id'])}))"
+        )
+        happy_delta = _java_map_entries(family["expected_deltas"]["happy"])
+        catalyst_delta = _java_map_entries(
+            family["expected_deltas"]["catalyst_tool_remainder"]
+        )
+        multi_output_delta = _java_map_entries(
+            family["expected_deltas"]["multi_output"]
+        )
+        batch = family["batch"]
+        cases.append(f'''
+    private static CompatibilityConformanceHarness.Scenario scenario{index}(
+            GameTestHelper helper
+    ) {{
+        return {factory};
+    }}
+
+    private static Map<String, Long> expectedDelta{index}Happy() {{
+        return {happy_delta};
+    }}
+
+    private static Map<String, Long> expectedDelta{index}CatalystToolRemainder() {{
+        return {catalyst_delta};
+    }}
+
+    private static Map<String, Long> expectedDelta{index}MultiOutput() {{
+        return {multi_output_delta};
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_happy_path_and_batching(GameTestHelper helper) {{
+        var scenario = scenario{index}(helper);
+        scenario.reset();
+        scenario.configure(CompatibilityConformanceHarness.Mode.HAPPY);
+        var before = scenario.snapshot();
+        CompatibilityConformanceHarness.requireSuccess(helper, scenario.attempt(1L));
+        CompatibilityConformanceHarness.assertDelta(
+                helper, before, scenario.snapshot(), expectedDelta{index}Happy(), 1L);
+        scenario.reset();
+        scenario.configure(CompatibilityConformanceHarness.Mode.HAPPY);
+        before = scenario.snapshot();
+        CompatibilityConformanceHarness.requireSuccess(helper, scenario.attempt({batch}L));
+        CompatibilityConformanceHarness.assertDelta(
+                helper, before, scenario.snapshot(), expectedDelta{index}Happy(), {batch}L);
+        helper.succeed();
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_one_short_shortage_is_atomic(GameTestHelper helper) {{
+        assertAtomic(helper, scenario{index}(helper),
+                CompatibilityConformanceHarness.Mode.ONE_SHORT);
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_destination_capacity_is_atomic(GameTestHelper helper) {{
+        assertAtomic(helper, scenario{index}(helper),
+                CompatibilityConformanceHarness.Mode.DESTINATION_FULL);
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_checked_overflow_is_atomic(GameTestHelper helper) {{
+        assertAtomic(helper, scenario{index}(helper),
+                CompatibilityConformanceHarness.Mode.CHECKED_OVERFLOW);
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_stale_holder_is_atomic(GameTestHelper helper) {{
+        assertAtomic(helper, scenario{index}(helper),
+                CompatibilityConformanceHarness.Mode.STALE_HOLDER);
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_catalyst_tool_remainder_is_exact(GameTestHelper helper) {{
+        assertExact(helper, scenario{index}(helper),
+                CompatibilityConformanceHarness.Mode.CATALYST_TOOL_REMAINDER,
+                expectedDelta{index}CatalystToolRemainder());
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_multi_output_merge_is_exact(GameTestHelper helper) {{
+        assertExact(helper, scenario{index}(helper),
+                CompatibilityConformanceHarness.Mode.MULTI_OUTPUT,
+                expectedDelta{index}MultiOutput());
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_mixed_resource_rollback_is_atomic(GameTestHelper helper) {{
+        assertAtomic(helper, scenario{index}(helper),
+                CompatibilityConformanceHarness.Mode.MIXED_RESOURCE_ROLLBACK);
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_dedicated_server_client_isolation(GameTestHelper helper) {{
+        if (FMLEnvironment.dist != Dist.DEDICATED_SERVER) helper.fail("Conformance requires a dedicated server");
+        helper.succeed();
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_all_mod_coexistence(GameTestHelper helper) {{
+        var scenario = scenario{index}(helper);
+        if (!scenario.coexistenceHealthy()) helper.fail("Compatibility coexistence failed");
+        helper.succeed();
+    }}
+''')
+    return f'''package {plan['package']};
+
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+
+import java.util.Map;
+
+public final class {plan['class_name']} {{
+    private {plan['class_name']}() {{
+    }}
+
+    private static void assertAtomic(
+            GameTestHelper helper,
+            CompatibilityConformanceHarness.Scenario scenario,
+            CompatibilityConformanceHarness.Mode mode
+    ) {{
+        scenario.reset();
+        scenario.configure(mode);
+        var before = scenario.snapshot();
+        CompatibilityConformanceHarness.requireFailure(helper, scenario.attempt(1L));
+        CompatibilityConformanceHarness.assertUnchanged(helper, before, scenario.snapshot());
+        helper.succeed();
+    }}
+
+    private static void assertExact(
+            GameTestHelper helper,
+            CompatibilityConformanceHarness.Scenario scenario,
+            CompatibilityConformanceHarness.Mode mode,
+            Map<String, Long> expectedDelta
+    ) {{
+        scenario.reset();
+        scenario.configure(mode);
+        var before = scenario.snapshot();
+        CompatibilityConformanceHarness.requireSuccess(helper, scenario.attempt(1L));
+        CompatibilityConformanceHarness.assertDelta(
+                helper, before, scenario.snapshot(), expectedDelta, 1L);
+        helper.succeed();
+    }}
+{''.join(cases)}
+}}
+'''
+
+
+def scaffold_conformance_tests(
+    contract: dict,
+    audit: dict,
+    plan: dict,
+    output,
+) -> list[Path]:
+    validate_contract(contract, require_complete=True, source_audit=audit)
+    _validate_conformance_plan(plan, contract)
+    package_path = plan["package"].replace(".", "/")
+    files = {
+        (
+            f"src/main/java/{package_path}/"
+            "CompatibilityConformanceHarness.java"
+        ): _conformance_harness_java(plan["package"]).encode("utf-8"),
+        (
+            f"src/main/java/{package_path}/{plan['class_name']}.java"
+        ): _conformance_tests_java(plan).encode("utf-8"),
+        "conformance-plan.json": canonical_json(plan).encode("utf-8"),
+    }
+    return _materialize(
+        Path(output),
+        files,
+        ".compat-kit-conformance-manifest.json",
+        contract,
+    )
+
+
+STANDARD_RESOURCE_KIND_IDS = frozenset({
+    "auto_storage:item",
+    "auto_storage:fluid",
+    "auto_storage:neoforge_energy",
+})
+
+
+def _validate_resource_plan(plan: dict, contract: dict):
+    if not isinstance(plan, dict) or set(plan) != {
+        "schema",
+        "kind",
+        "source_contract_digest",
+        "target",
+        "package",
+        "class_name",
+        "resources",
+    }:
+        raise ValueError("resource plan has invalid fields")
+    if plan["schema"] != 1 or plan["kind"] != "auto_storage_compat_resource_plan":
+        raise ValueError("resource plan has invalid identity")
+    if plan["source_contract_digest"] != _contract_sha256(contract):
+        raise ValueError("resource plan contract digest does not match")
+    expected_target = {
+        key: contract["target"][key]
+        for key in ("mod_id", "display_name", "version")
+    }
+    if plan["target"] != expected_target:
+        raise ValueError("resource plan target does not match contract")
+    if not _is_java_type(plan["package"]):
+        raise ValueError("resource plan has invalid package")
+    if not _is_java_member(plan["class_name"]):
+        raise ValueError("resource plan has invalid class_name")
+    resources = plan["resources"]
+    if not isinstance(resources, list) or not resources:
+        raise ValueError("resource plan requires resources")
+    seen_ids = set()
+    seen_bridges = set()
+    seen_snapshot_keys = set()
+    generated_types = {plan["class_name"], plan["class_name"] + "GameTests"}
+    generated_suffixes = set()
+    generated_constants = set()
+    for index, resource in enumerate(resources):
+        location = f"resource plan entry {index}"
+        if not isinstance(resource, dict) or set(resource) != {
+            "id",
+            "representative_item",
+            "variant_aware",
+            "bridge_name",
+            "snapshot_key",
+            "sample_amount",
+            "test_provider",
+        }:
+            raise ValueError(f"{location} has invalid fields")
+        resource_id = resource["id"]
+        if not isinstance(resource_id, str) or not RESOURCE_LOCATION.fullmatch(resource_id):
+            raise ValueError(f"{location} has invalid id")
+        if resource_id in STANDARD_RESOURCE_KIND_IDS:
+            raise ValueError(f"{location} must reuse standard resource kind {resource_id}")
+        if resource_id in seen_ids:
+            raise ValueError(f"{location} repeats id")
+        seen_ids.add(resource_id)
+        representative = resource["representative_item"]
+        if not isinstance(representative, str) or not RESOURCE_LOCATION.fullmatch(
+            representative
+        ):
+            raise ValueError(f"{location} has invalid representative_item")
+        if not isinstance(resource["variant_aware"], bool):
+            raise ValueError(f"{location} variant_aware must be boolean")
+        bridge_name = resource["bridge_name"]
+        if (
+            not _is_java_member(bridge_name)
+        ):
+            raise ValueError(f"{location} has invalid bridge_name")
+        if bridge_name in seen_bridges:
+            raise ValueError(f"{location} repeats bridge_name")
+        if bridge_name in generated_types:
+            raise ValueError(f"{location} has generated class collision")
+        seen_bridges.add(bridge_name)
+        generated_types.add(bridge_name)
+        snapshot_key = resource["snapshot_key"]
+        if not isinstance(snapshot_key, str) or not snapshot_key:
+            raise ValueError(f"{location} has invalid snapshot_key")
+        if snapshot_key in seen_snapshot_keys:
+            raise ValueError(f"{location} repeats snapshot_key")
+        seen_snapshot_keys.add(snapshot_key)
+        _validate_positive_long(resource["sample_amount"], f"{location} sample_amount")
+        suffix = _pascal(resource_id.split(":", 1)[1])
+        constant = re.sub(r"[^A-Za-z0-9_]", "_", resource_id).upper()
+        if (
+            not JAVA_MEMBER.fullmatch(suffix)
+            or suffix in JAVA_RESERVED_IDENTIFIERS
+            or suffix in generated_suffixes
+            or constant in generated_constants
+        ):
+            raise ValueError(f"{location} has generated name collision")
+        generated_suffixes.add(suffix)
+        generated_constants.add(constant)
+        provider = resource["test_provider"]
+        if not isinstance(provider, dict) or set(provider) != {
+            "owner",
+            "factory_member",
+        }:
+            raise ValueError(f"{location} test_provider is invalid")
+        if not _is_java_type(provider["owner"]):
+            raise ValueError(f"{location} has invalid test provider owner")
+        if not _is_java_member(provider["factory_member"]):
+            raise ValueError(f"{location} has invalid test provider factory_member")
+    return plan
+
+
+def _resource_bridge_java(package_name: str, bridge_name: str) -> str:
+    return f'''package {package_name};
+
+import com.swear.autostorage.StorageResourceContainerStrategy;
+import com.swear.autostorage.StorageResourceHandler;
+import com.swear.autostorage.StorageResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+
+import java.util.Optional;
+
+public interface {bridge_name}<C> {{
+    Optional<StorageResourceContainerStrategy.Transfer> planDeposit(
+            ItemStack singleContainer,
+            HolderLookup.Provider registries
+    );
+
+    Optional<StorageResourceContainerStrategy.Transfer> planWithdraw(
+            ItemStack singleContainer,
+            StorageResourceKey key,
+            long maxAmount,
+            HolderLookup.Provider registries
+    );
+
+    Optional<StorageResourceHandler> find(
+            Level level,
+            BlockPos pos,
+            Direction side
+    );
+
+    boolean render(
+            C context,
+            StorageResourceKey key,
+            long amount,
+            int x,
+            int y,
+            float partialTick
+    );
+}}
+'''
+
+
+def _resource_registration_java(plan: dict) -> str:
+    methods = []
+    for index, resource in enumerate(plan["resources"]):
+        suffix = _pascal(resource["id"].split(":", 1)[1])
+        kind_id = _java_resource_location(resource["id"])
+        representative_id = _java_resource_location(resource["representative_item"])
+        bridge = resource["bridge_name"]
+        factory = "variantAware" if resource["variant_aware"] else "variantless"
+        methods.append(f'''
+    public static final ResourceLocation {re.sub(r'[^A-Za-z0-9_]', '_', resource['id']).upper()} =
+            {kind_id};
+
+    public static StorageResourceKind {suffix}Kind() {{
+        return StorageResourceKind.{factory}(() ->
+                new ItemStack(requiredItem({representative_id})));
+    }}
+
+    public static <C> StorageResourceContainerStrategy {suffix}Containers(
+            {bridge}<C> bridge
+    ) {{
+        Objects.requireNonNull(bridge, "bridge");
+        return new StorageResourceContainerStrategy() {{
+            @Override
+            public ResourceLocation kindId() {{
+                return {kind_id};
+            }}
+
+            @Override
+            public Optional<Transfer> planDeposit(
+                    ItemStack singleContainer,
+                    HolderLookup.Provider registries
+            ) {{
+                return bridge.planDeposit(singleContainer, registries);
+            }}
+
+            @Override
+            public Optional<Transfer> planWithdraw(
+                    ItemStack singleContainer,
+                    StorageResourceKey key,
+                    long maxAmount,
+                    HolderLookup.Provider registries
+            ) {{
+                return bridge.planWithdraw(singleContainer, key, maxAmount, registries);
+            }}
+        }};
+    }}
+
+    public static <C> StorageResourceBlockStrategy {suffix}Blocks(
+            {bridge}<C> bridge
+    ) {{
+        Objects.requireNonNull(bridge, "bridge");
+        return new StorageResourceBlockStrategy() {{
+            @Override
+            public ResourceLocation kindId() {{
+                return {kind_id};
+            }}
+
+            @Override
+            public Optional<StorageResourceHandler> find(
+                    Level level,
+                    BlockPos pos,
+                    Direction side
+            ) {{
+                return bridge.find(level, pos, side);
+            }}
+        }};
+    }}
+
+    public static <C> void register{suffix}Renderer(
+            Class<C> contextType,
+            {bridge}<C> bridge
+    ) {{
+        Objects.requireNonNull(bridge, "bridge");
+        TerminalResourceRendererApi.register(
+                {kind_id}, contextType, bridge::render);
+    }}
+''')
+    return f'''package {plan['package']};
+
+import com.swear.autostorage.StorageResourceBlockStrategy;
+import com.swear.autostorage.StorageResourceContainerStrategy;
+import com.swear.autostorage.StorageResourceHandler;
+import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceKind;
+import com.swear.autostorage.TerminalResourceRendererApi;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+
+import java.util.Objects;
+import java.util.Optional;
+
+public final class {plan['class_name']} {{
+    private {plan['class_name']}() {{
+    }}
+{''.join(methods)}
+    private static Item requiredItem(ResourceLocation id) {{
+        Item item = BuiltInRegistries.ITEM.get(id);
+        if (item == Items.AIR) throw new IllegalStateException("Missing resource representative " + id);
+        return item;
+    }}
+
+    private static ResourceLocation id(String namespace, String path) {{
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
+    }}
+}}
+'''
+
+
+def _resource_tests_java(plan: dict) -> str:
+    tests = []
+    for index, resource in enumerate(plan["resources"]):
+        name = re.sub(r"[^a-z0-9_]", "_", resource["id"].lower())
+        provider = resource["test_provider"]
+        create = f"{provider['owner']}.{provider['factory_member']}(helper)"
+        snapshot_key = _java_string(resource["snapshot_key"])
+        sample_amount = resource["sample_amount"]
+        tests.append(f'''
+    private static ResourceScenario scenario{index}(GameTestHelper helper) {{
+        return {create};
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_persistence_round_trip(GameTestHelper helper) {{
+        var scenario = scenario{index}(helper);
+        scenario.reset();
+        scenario.seed();
+        var before = scenario.snapshot();
+        byte[] saved = Objects.requireNonNull(scenario.save(), "saved resource state");
+        scenario.clear();
+        if (before.equals(scenario.snapshot())) helper.fail("Resource clear did not change state");
+        scenario.load(saved);
+        assertUnchanged(helper, before, scenario.snapshot());
+        helper.succeed();
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_container_deposit_and_withdraw(GameTestHelper helper) {{
+        var scenario = scenario{index}(helper);
+        scenario.reset();
+        var before = scenario.snapshot();
+        if (!scenario.deposit()) helper.fail("Resource container deposit failed");
+        assertDelta(helper, before, scenario.snapshot(), {snapshot_key}, {sample_amount}L);
+        if (!scenario.withdraw()) helper.fail("Resource container withdrawal failed");
+        assertUnchanged(helper, before, scenario.snapshot());
+        helper.succeed();
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_mixed_resource_rollback_is_atomic(GameTestHelper helper) {{
+        var scenario = scenario{index}(helper);
+        var before = scenario.snapshot();
+        if (scenario.attemptMixedRollback()) helper.fail("Mixed resource rollback unexpectedly committed");
+        if (!before.equals(scenario.snapshot())) helper.fail("Mixed resource rollback mutated state");
+        helper.succeed();
+    }}
+
+    @GameTest(template = "empty")
+    public static void {name}_dedicated_server_client_isolation(GameTestHelper helper) {{
+        if (FMLEnvironment.dist != Dist.DEDICATED_SERVER) helper.fail("Resource conformance requires a dedicated server");
+        helper.succeed();
+    }}
+''')
+    return f'''package {plan['package']};
+
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+
+public final class {plan['class_name']}GameTests {{
+    public record Snapshot(Map<String, Long> amounts) {{
+        public Snapshot {{
+            amounts = Map.copyOf(amounts);
+        }}
+    }}
+
+    public interface ResourceScenario {{
+        void reset();
+
+        void seed();
+
+        Snapshot snapshot();
+
+        byte[] save();
+
+        void clear();
+
+        void load(byte[] saved);
+
+        boolean deposit();
+
+        boolean withdraw();
+
+        boolean attemptMixedRollback();
+    }}
+
+    private {plan['class_name']}GameTests() {{
+    }}
+
+    private static void assertDelta(
+            GameTestHelper helper,
+            Snapshot before,
+            Snapshot after,
+            String key,
+            long delta
+    ) {{
+        Map<String, Long> expected = new LinkedHashMap<>(before.amounts());
+        expected.merge(key, delta, Math::addExact);
+        expected.values().removeIf(value -> value == 0L);
+        Map<String, Long> actual = new LinkedHashMap<>(after.amounts());
+        actual.values().removeIf(value -> value == 0L);
+        if (!expected.equals(actual)) {{
+            helper.fail("Resource delta mismatch: expected " + expected + " but was " + actual);
+        }}
+    }}
+
+    private static void assertUnchanged(
+            GameTestHelper helper,
+            Snapshot before,
+            Snapshot after
+    ) {{
+        if (!before.equals(after)) {{
+            helper.fail("Resource atomicity mismatch: before " + before + " after " + after);
+        }}
+    }}
+{''.join(tests)}
+}}
+'''
+
+
+def scaffold_resource_integration(
+    contract: dict,
+    audit: dict,
+    plan: dict,
+    output,
+) -> list[Path]:
+    validate_contract(contract, require_complete=True, source_audit=audit)
+    _validate_resource_plan(plan, contract)
+    package_path = plan["package"].replace(".", "/")
+    files = {
+        (
+            f"src/main/java/{package_path}/{plan['class_name']}.java"
+        ): _resource_registration_java(plan).encode("utf-8"),
+        (
+            f"src/main/java/{package_path}/{plan['class_name']}GameTests.java"
+        ): _resource_tests_java(plan).encode("utf-8"),
+        "resource-plan.json": canonical_json(plan).encode("utf-8"),
+    }
+    for resource in plan["resources"]:
+        files[
+            f"src/main/java/{package_path}/{resource['bridge_name']}.java"
+        ] = _resource_bridge_java(
+            plan["package"], resource["bridge_name"]
+        ).encode("utf-8")
+    return _materialize(
+        Path(output),
+        files,
+        ".compat-kit-resource-manifest.json",
+        contract,
+    )
+
+
 def _read_json(path) -> dict:
     try:
         return json.loads(Path(path).read_text())
@@ -4285,14 +6097,40 @@ def _build_parser() -> argparse.ArgumentParser:
     migrate.add_argument("--output", required=True)
     migrate.add_argument("--cache", default="build/compat-kit/cache")
 
+    migrate_contract_parser = subparsers.add_parser("migrate-contract")
+    migrate_contract_parser.add_argument("contract")
+    migrate_contract_parser.add_argument("--old-audit", required=True)
+    migrate_contract_parser.add_argument("--new-audit", required=True)
+    migrate_contract_parser.add_argument("--output", required=True)
+    migrate_contract_parser.add_argument("--next-actions", required=True)
+
     probe = subparsers.add_parser("probe")
     probe.add_argument("audit")
+    probe.add_argument("--plan")
     probe.add_argument("--output", required=True)
 
     worker = subparsers.add_parser("worker-package")
     worker.add_argument("contract")
     worker.add_argument("--audit", required=True)
     worker.add_argument("--output", required=True)
+
+    generate = subparsers.add_parser("generate")
+    generate.add_argument("contract")
+    generate.add_argument("--audit", required=True)
+    generate.add_argument("--plan", required=True)
+    generate.add_argument("--output", required=True)
+
+    conformance = subparsers.add_parser("conformance")
+    conformance.add_argument("contract")
+    conformance.add_argument("--audit", required=True)
+    conformance.add_argument("--plan", required=True)
+    conformance.add_argument("--output", required=True)
+
+    resource = subparsers.add_parser("resource-scaffold")
+    resource.add_argument("contract")
+    resource.add_argument("--audit", required=True)
+    resource.add_argument("--plan", required=True)
+    resource.add_argument("--output", required=True)
 
     delta = subparsers.add_parser("diff")
     delta.add_argument("old_audit")
@@ -4354,12 +6192,47 @@ def main(argv=None) -> int:
                     data_roots=args.data_root,
                 ),
             )
+        elif args.command == "migrate-contract":
+            contract, actions = migrate_contract(
+                _read_json(args.contract),
+                _read_json(args.old_audit),
+                _read_json(args.new_audit),
+            )
+            _write_json(args.output, contract)
+            action_path = Path(args.next_actions)
+            action_path.parent.mkdir(parents=True, exist_ok=True)
+            action_path.write_text(actions)
         elif args.command == "probe":
-            scaffold_runtime_probe(_read_json(args.audit), args.output)
+            scaffold_runtime_probe(
+                _read_json(args.audit),
+                args.output,
+                plan=_read_json(args.plan) if args.plan else None,
+            )
         elif args.command == "worker-package":
             worker_package(
                 _read_json(args.contract),
                 _read_json(args.audit),
+                args.output,
+            )
+        elif args.command == "generate":
+            generate_compatibility(
+                _read_json(args.contract),
+                _read_json(args.audit),
+                _read_json(args.plan),
+                args.output,
+            )
+        elif args.command == "conformance":
+            scaffold_conformance_tests(
+                _read_json(args.contract),
+                _read_json(args.audit),
+                _read_json(args.plan),
+                args.output,
+            )
+        elif args.command == "resource-scaffold":
+            scaffold_resource_integration(
+                _read_json(args.contract),
+                _read_json(args.audit),
+                _read_json(args.plan),
                 args.output,
             )
         elif args.command == "diff":

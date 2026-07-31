@@ -3,8 +3,8 @@
 Compat Kit is the development-time workflow for adding deterministic cross-mod
 support without repeatedly rereading an upstream repository or weakening Auto
 Storage's transaction boundary. It collects facts, makes unresolved semantics
-explicit, generates RED scaffolds, and runs declared verification gates. It is
-never loaded by Minecraft.
+explicit, generates reviewed mechanical code or RED boundaries, and runs
+declared verification gates. It is never loaded by Minecraft.
 
 This file is authoritative. The GitHub Wiki `Compat Kit` page mirrors it, but
 the developer page is intentionally absent from the player-manual Home contents
@@ -26,7 +26,7 @@ Compat Kit automates evidence and boilerplate, not recipe semantics.
 - A human or reviewing agent explicitly decides consumed inputs,
   catalysts/tools, remainders, all outputs, typed units, station rates, costs,
   deterministic bounds, and rejections.
-- `needs_decision` blocks `scaffold` and `verify`.
+- `needs_decision` blocks `scaffold`, `generate`, `conformance`, and `verify`.
 - A loaded but incompatible integration fails explicitly. The tool never emits
   a compiling empty adapter or silently skips a required check.
 - A representative target version and SHA are reproducible audit evidence, not
@@ -51,6 +51,7 @@ tools/compat-kit/
   examples/github-actions/          reusable addon CI example
 compat/audits/<mod-id>/<version>.json
 compat/contracts/<mod-id>.json
+compat/generation/<mod-id>.json
 build/compat-kit/cache/<jar-sha>/v*/ ignored versioned scan cache
 build/compat-kit/report.json         ignored verification report
 ```
@@ -163,8 +164,11 @@ tools/compat-kit/compat-kit propose \
 ```
 
 `propose` converts only current-format audit evidence into a compact review
-surface. Public numeric members that mention time/rate/parallelism are offered
-as bounded rate-binding candidates; slot counts are deliberately ignored.
+surface. Public numeric methods and fields that mention time/rate/parallelism
+are offered as bounded rate-binding candidates; slot counts are deliberately
+ignored. This includes public tier fields such as Mekanism
+`FactoryTier.processes`, but choosing the corresponding tier/item mapping still
+requires review.
 Recipe-data fields are classified as transaction-representable,
 station-descriptor-representable, or unsupported live/world state. Every
 proposal and binding stays `needs_decision`; the output cannot authorize a
@@ -176,6 +180,7 @@ valid station.
 ```bash
 tools/compat-kit/compat-kit probe \
   compat/audits/target/1.2.3.json \
+  --plan compat/probes/target.json \
   --output build/compat-kit/target-probe
 ```
 
@@ -184,11 +189,19 @@ explicit `compatKitProbeOutput` system property, sorts and records every loaded
 `RecipeManager` recipe ID/type/serializer/concrete class plus common public
 ingredient/result values, and records target-namespace block, item, and block
 entity type identities. The probe fails above 50,000 loaded recipes instead of
-truncating silently. It contains no client imports or reflection. Target config
-and capability candidates remain listed as unresolved in `probe-spec.json`
-until reviewed direct-call bindings are supplied; empty arrays do not authorize
-those semantics. Validate collected JSON against both the committed audit and
-`compat-runtime-probe.schema.json` before using it as review evidence.
+truncating silently. It contains no client imports or reflection. `--plan` is
+optional, but when present it must match the exact current audit digest and may
+add reviewed direct calls for public config values or capability surfaces. The
+only accessor shapes are a value-wrapper static field, static method, registry
+block method, or enum-constant numeric field. Target config and capability
+candidates remain listed as unresolved in `probe-spec.json` until those
+bindings are supplied; empty arrays do not authorize those semantics. Validate
+collected JSON against both the committed audit, the exact canonical probe-plan
+digest recorded as `source_probe_plan_digest`, and
+`compat-runtime-probe.schema.json` before using it as review evidence. Config
+records accept only finite JSON numbers and capability records accept only
+booleans; validation also requires the output IDs, sources, and capability
+surfaces to match the reviewed plan exactly.
 
 ### 3. Decide
 
@@ -245,6 +258,25 @@ identifiers such as `class`, `true`, or `null` fail before files are written.
 
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
 
+When a current scan supersedes an older audit of the exact same target and jar,
+migrate decisions by exact recipe-class identity instead of manually copying
+the contract:
+
+```bash
+tools/compat-kit/compat-kit migrate-contract \
+  compat/contracts/target.json \
+  --old-audit compat/audits/target/1.2.3-old.json \
+  --new-audit compat/audits/target/1.2.3.json \
+  --output build/compat-kit/target-contract-migrated.json \
+  --next-actions build/compat-kit/target-contract-migration.md
+```
+
+The command preserves a decision only when the recipe class, its public
+signature, its class-owned risk evidence, and the recipe-data inventory digest
+are all unchanged. New or changed classes reopen as `needs_decision`. Removing
+an accepted family fails; removed rejected legacy false positives are reported.
+Target or artifact-SHA drift is rejected.
+
 For a one-issue/one-worktree worker, generate the compact handoff package:
 
 ```bash
@@ -258,6 +290,83 @@ The seven deterministic files contain hashes, compact class/recipe summaries,
 unresolved decisions, commands, issue/worker context, and a PR checklist. They
 never embed public-signature bodies or complete upstream source. Existing drift
 and symlinked output paths fail before any file is written.
+
+### 3a. Generate reviewed mechanical code
+
+After the contract is complete, write a separate generation plan bound to the
+exact canonical contract digest and run:
+
+```bash
+tools/compat-kit/compat-kit generate \
+  compat/contracts/target.json \
+  --audit compat/audits/target/1.2.3.json \
+  --plan compat/generation/target.json \
+  --output build/compat-kit/target-generated
+```
+
+The generator emits direct typed registry calls for reviewed safe shapes:
+single-item deterministic recipes or a reviewed provider returning an exact
+`TypedRecipePlan` and `RecipeFamilyCost`. It can mechanically emit fixed,
+config-tick-ratio, public numeric getter, tier multiplier, parallel-lane, and
+speed-times-parallel station variants. Config wrapper fields are read with
+`.get()`; enum tier fields are read directly, for example
+`FactoryTier.BASIC.processes`. Every dynamic value must be positive,
+multiplication is checked, and every reviewed dynamic accessor is declared
+`integral` and converted through `BigDecimal.longValueExact()` rather than a
+lossy cast. Process rates are positive and Instant rates are fixed zero.
+Generated code uses `MachineVariant.of`/`derived`, public Auto Storage APIs,
+and exact target types; it never uses reflection. Families sharing one station
+descriptor must provide byte-identical station and rate definitions, and the
+generated register validates the descriptor's reviewed namespace rather than
+assuming `auto_storage`.
+
+The plan is a reviewed binding, not another inference layer. Unsupported recipe
+shapes stay as explicit `red_boundary` entries. A typed provider remains the
+small handwritten semantic boundary for N-input/N-output selection,
+catalysts/tools/remainders, and mixed resource costs; code generation only owns
+registration boilerplate. Every generated family therefore declares an exact
+`registration_id`; the audit family ID identifies review evidence and must not
+be guessed to be the runtime registry path. The registration namespace must
+match the reviewed station descriptor namespace. Commit plans and generated source, then keep a
+byte-for-byte regeneration test so drift is visible.
+
+### 3b. Generate conformance and resource scaffolds
+
+```bash
+tools/compat-kit/compat-kit conformance \
+  compat/contracts/target.json \
+  --audit compat/audits/target/1.2.3.json \
+  --plan compat/conformance/target.json \
+  --output build/compat-kit/target-conformance
+
+tools/compat-kit/compat-kit resource-scaffold \
+  compat/contracts/target.json \
+  --audit compat/audits/target/1.2.3.json \
+  --plan compat/resources/target.json \
+  --output build/compat-kit/target-resource
+```
+
+`conformance` emits a reusable assertion harness plus target scenarios for
+success/batching, shortage, capacity, overflow, stale holders,
+catalyst/tool/remainder preservation, multi-output merging, mixed-resource
+rollback, dedicated-server isolation, and all-mod coexistence. The generated
+harness performs snapshot/delta/unchanged and success/failure assertions; the
+integration supplies only the reviewed scenario setup and operation. Happy,
+catalyst/tool/remainder, and multi-output paths carry separate expected deltas,
+and zero-valued resource keys are normalized before comparison. Dedicated-
+server isolation checks the physical NeoForge distribution instead of trusting
+an addon-supplied boolean.
+
+`resource-scaffold` emits API-only kind/container/block/renderer boundaries and
+real persistence, transfer, rollback, and dedicated-server test scenarios for
+an optional custom resource kind. It rejects Item, Fluid, and NeoForge Energy,
+which must reuse Auto Storage's built-in support. Generated common source may
+not import Core internals or client classes; the renderer bridge remains
+generic and client registration stays isolated. Each resource plan binds a
+sample amount and unique snapshot key. The generated tests own the before/after
+snapshot, delta, save/load round-trip, rollback, and physical-side assertions;
+an addon provider exposes operations and bytes, not self-attested persistence
+or client-isolation booleans.
 
 Repository declarations are build inputs, not discovery hints. A target
 published through Modrinth Maven, Curse Maven, or its own Maven must list the
@@ -333,7 +442,7 @@ backslashes, control characters, newlines, and multiline-literal delimiters
 cannot break generated metadata. DEL (`U+007F`) is escaped explicitly because
 TOML forbids it even though JSON serializers commonly leave it literal.
 
-The generated adapter and fixture are deliberately RED. Rerunning `scaffold`
+The `scaffold` adapter and fixture are deliberately RED. Rerunning `scaffold`
 is byte-deterministic and refuses to overwrite drift. The manifest binds the
 scaffold to the reviewed contract; implementation edits are expected after the
 initial RED generation. Verification regenerates the security-sensitive
@@ -456,8 +565,10 @@ schemas, Gradle wrapper, RED templates, complete public-SDK addon example, CI
 example, README, and license.
 Only the explicit repository-owned addon example template is packaged; local
 `build/` or untracked files under `examples/addon` are never traversed. The
-four published JSON schemas are also an explicit allowlist, not a directory
-glob. Gradle passes `mod_version` to `publish`, and publication fails unless it
+ten published JSON schemas are also an explicit allowlist, not a directory
+glob: audit, contract, conformance plan, delta, generation plan, proposals,
+report, resource plan, runtime-probe plan, and runtime-probe output. Gradle
+passes `mod_version` to `publish`, and publication fails unless it
 exactly matches the tool version embedded in generated projects.
 `assemble`/`build` includes the archive, CI uploads it, and tagged releases add
 it beside API, sources, and Javadocs artifacts.
@@ -469,12 +580,25 @@ Storage source checkout.
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_compat_kit
+./gradlew compileCompatKitGeneratedFixtureJava
 ```
+
+`src/compatKitGeneratedFixture/` is a committed compile-only contract for the
+generated conformance and custom-resource outputs. Python regenerates those
+sources byte-for-byte from the committed example plans, while Gradle compiles
+them against only the public API jar plus NeoForge/Minecraft. The providers
+deliberately throw if executed: runtime semantics are supplied and asserted by
+each real integration's GameTests, while this fixture permanently guards the
+generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 audit and contract prove this workflow against a real
-target. The accepted slice is only `InscriberRecipe`:
+The committed AE2 19.2.17 scanner-format-8 audit, migrated contract, generation
+plan, and generated registration prove this workflow against a real target.
+Structural classification reduces the prior name-based recipe surface to five
+actual `Recipe` implementations while inventorying 556 effective recipe JSONs
+across 18 serializer groups. The accepted slice remains only
+`InscriberRecipe`:
 
 - middle is consumed;
 - optional top/bottom are retained for `INSCRIBE` and consumed for `PRESS`;
@@ -483,7 +607,19 @@ target. The accepted slice is only `InscriberRecipe`:
   AE2's public `PowerUnit` API to a finite positive exact integer FE amount;
 - the plain Inscriber contributes 2 work per tick; speed-card state is not
   inferred from its item;
-- Charger and every unaudited AE2 family remain rejected.
+- Charger, Entropy, Matter Cannon Ammo, and Transform remain rejected.
+
+`Ae2GeneratedCompat.java` owns deterministic descriptor/family registration;
+the handwritten `Ae2Compat` methods own exact eligibility, typed transaction
+planning, and AE-to-FE cost semantics. A golden test regenerates the source and
+requires byte identity before the isolated AE2 source set is compiled.
+
+The bounded rate templates are additionally compiled against source-shaped
+fixtures for Iron Furnaces' public config wrapper
+`Config.ironFurnaceSpeed.get()` and Mekanism's public factory parallel field
+`FactoryTier.BASIC.processes`. Their real isolated GameTest modules remain the
+runtime evidence for configured speed and factory parallel throughput; these
+representative versions are CI fixtures, not player dependency pins.
 
 Its required-check evidence uses markers inside annotated method braces, not
 method names or declarations. The ingredient-shortage check omits the PRESS

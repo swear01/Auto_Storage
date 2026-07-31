@@ -13,9 +13,10 @@ not listed in the player-manual Home contents or sidebar.
 
 Use the [Auto Storage Compat Kit](compat-kit.md) before writing a bundled
 integration or independent addon. It scans one reproducible target jar/source
-revision, creates an explicit reviewed recipe contract, generates a deliberately
-RED SDK-only scaffold, and runs the contract's verification gates. It does not
-infer consumption, catalysts, outputs, units, station costs, or determinism.
+revision, creates an explicit reviewed recipe contract, generates either a
+deliberately RED SDK-only scaffold or reviewed mechanical registration, and
+runs the contract's verification gates. It does not infer consumption,
+catalysts, outputs, units, station costs, or determinism.
 Every scaffold/verify command also loads the committed source audit. The exact
 audited recipe-candidate set, target identity, artifact SHA, and inventory
 digest must match the contract, so recomputing a contract-only field cannot
@@ -32,9 +33,29 @@ atomically replaced jar cannot mix two artifacts in one audit.
 ```bash
 tools/compat-kit/compat-kit scan --help
 tools/compat-kit/compat-kit decide --help
+tools/compat-kit/compat-kit migrate-contract --help
+tools/compat-kit/compat-kit generate --help
+tools/compat-kit/compat-kit conformance --help
+tools/compat-kit/compat-kit resource-scaffold --help
 tools/compat-kit/compat-kit scaffold --help
 tools/compat-kit/compat-kit verify --help
 ```
+
+`generate` accepts only a completed contract plus a reviewed plan bound to its
+exact digest. It emits direct typed station/family registration for bounded
+safe shapes and rate bindings; a handwritten provider still owns exact typed
+selection, catalysts/tools/remainders, and costs. Unsupported semantics remain
+an explicit RED boundary. Dynamic rate accessors are reviewed as integral and
+converted exactly; families sharing a descriptor must share the same reviewed
+definition. Each generated family also declares its runtime `registration_id`;
+the audit family key is evidence identity and is not assumed to be a registry
+path. `conformance` generates repeated snapshot/delta/rollback assertions
+around addon-supplied operations rather than trusting booleans returned by the
+addon. `resource-scaffold` generates only public-API custom-resource boundaries,
+sample-keyed persistence/transfer assertions, and rejects built-in Item, Fluid,
+and NeoForge Energy support. None of these commands add runtime reflection or
+make the client authoritative. Repository tests regenerate and compile the
+committed generated-scaffold fixture against the public API jar.
 
 ## Add the SDK
 
@@ -344,7 +365,7 @@ The API artifact version equals the Auto Storage mod version.
 - Compat Kit therefore generates a current-minor dependency range; version
   0.3.0 produces `[0.3.0,0.4)`, not an open-ended pre-1.0 range.
 - Compat Kit publication receives the authoritative Gradle `mod_version` and
-  fails if it differs from the tool version. Its addon example and four
+  fails if it differs from the tool version. Its addon example and ten
   machine-readable schemas use explicit tracked allowlists, never recursive or
   globbed local-output scans.
 - Registry IDs and persisted resource/descriptor IDs are data contracts and

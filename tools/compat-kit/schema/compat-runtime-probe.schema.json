@@ -10,6 +10,7 @@
     "authority",
     "target",
     "source_audit_digest",
+    "source_probe_plan_digest",
     "loaded_recipe_count",
     "recipes",
     "registries",
@@ -23,6 +24,10 @@
     "target": { "$ref": "#/$defs/target" },
     "source_audit_digest": {
       "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_probe_plan_digest": {
+      "type": ["string", "null"],
       "pattern": "^[0-9a-f]{64}$"
     },
     "loaded_recipe_count": {
@@ -106,19 +111,18 @@
       "required": ["id", "value", "source"],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
-        "value": {
-          "type": ["boolean", "integer", "number", "string"]
-        },
+        "value": { "type": "number" },
         "source": { "type": "string", "minLength": 1 }
       }
     },
     "capability_surface": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "surface", "source"],
+      "required": ["id", "surface", "available", "source"],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "surface": { "type": "string", "minLength": 1 },
+        "available": { "type": "boolean" },
         "source": { "type": "string", "minLength": 1 }
       }
     }
