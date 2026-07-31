@@ -14,9 +14,13 @@ and sidebar.
 
 Compat Kit automates evidence and boilerplate, not recipe semantics.
 
-- No runtime jar scanning, reflection fallback, serializer-name inference,
-  machine-name inference, or EMI/JEI crafting logic.
-- `scan` publishes public surfaces and risk evidence only. It also inspects
+- No player-runtime jar scanning, reflection fallback, serializer-name
+  semantics, machine-name semantics, or EMI/JEI crafting logic.
+- `scan` structurally follows class-file inheritance for concrete `Recipe` and
+  `RecipeSerializer` implementations. Names are only candidate evidence for
+  resource and station surfaces; they never authorize behavior.
+- `scan` publishes public surfaces, bounded recipe-data structure, and risk
+  evidence only. It also inspects
   bounded private bytecode to detect hidden randomness or world/entity access,
   but never writes that private bytecode into the audit.
 - A human or reviewing agent explicitly decides consumed inputs,
@@ -80,12 +84,18 @@ as `notsamplemod/recipe/CrushingRecipe.java` cannot satisfy the candidate
 tools/compat-kit/compat-kit scan \
   --jar build/compat-kit/artifacts/target.jar \
   --source build/compat-kit/sources/target \
+  --data-root build/compat-kit/datapacks/target-override \
   --output compat/audits/target/1.2.3.json
 ```
 
-The deterministic audit contains NeoForge identity, artifact SHA/size, source
-revision and exact source paths, recipe-class/public-signature evidence,
-resource API candidates, station candidates, and explicit risk flags. Risk
+`--data-root` is repeatable and follows data-pack precedence: the target jar is
+the first layer and later supplied roots override earlier recipes by exact ID.
+Roots and recipe files must be real, non-symlink paths. The deterministic audit
+contains NeoForge identity, artifact SHA/size, source revision and exact source
+paths, structurally classified concrete recipe and serializer classes,
+resource/station candidates, per-serializer recipe counts, bounded sample IDs,
+top-level fields and array cardinalities, NeoForge condition types, override
+provenance, and explicit risk flags. Risk
 detection uses bounded `javap -c -p` output so non-public implementation risks
 are not missed; only compact flags for randomness/chance, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded
@@ -99,7 +109,10 @@ one process nor all classes can bypass the memory bound. `RandomSource`,
 cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
-The scanner format is also stored in every audit and required by its published
+Data-root scans bind the ordered layer digests into their cache identity. The
+current scanner format is `8`; format `7` remains readable only as explicit
+legacy evidence while committed contracts are migrated. The scanner format is
+also stored in every audit and required by its published
 schema, so an older structurally valid committed audit cannot authorize current
 contract review.
 Multi-release `META-INF/versions/` aliases are not treated as binary class names;
@@ -124,6 +137,23 @@ candidate must remain in the bucket computed by the current scanner; moving a
 recipe candidate into a station or resource list cannot hide it from contract
 review. Every risk-evidence owner must also be one of the audited recipe
 candidates, so risk cannot be detached from the class under review.
+
+### 2a. Generate unresolved machine and requirement proposals
+
+```bash
+tools/compat-kit/compat-kit propose \
+  compat/audits/target/1.2.3.json \
+  --output build/compat-kit/target-proposals.json
+```
+
+`propose` converts only current-format audit evidence into a compact review
+surface. Public numeric members that mention time/rate/parallelism are offered
+as bounded rate-binding candidates; slot counts are deliberately ignored.
+Recipe-data fields are classified as transaction-representable,
+station-descriptor-representable, or unsupported live/world state. Every
+proposal and binding stays `needs_decision`; the output cannot authorize a
+contract, generate runtime reflection, or assert that a candidate machine is a
+valid station.
 
 ### 3. Decide
 

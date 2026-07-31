@@ -17,7 +17,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 7
+SCAN_CACHE_VERSION = 8
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -27,6 +28,9 @@ MAX_CANDIDATE_CLASSES = 2_000
 MAX_SIGNATURE_BYTES = 256 * 1024
 MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
 MAX_SOURCE_FILES = 10_000
+MAX_RECIPE_FILES = 50_000
+MAX_RECIPE_JSON_BYTES = 1024 * 1024
+MAX_RECIPE_SAMPLES_PER_SERIALIZER = 16
 TOOL_VERSION = "0.3.0"
 PUBLISHED_ADDON_EXAMPLE_FILES = (
     "src/main/java/example/autostorage/ExampleAddon.java",
@@ -35,6 +39,7 @@ PUBLISHED_SCHEMA_FILES = (
     "compat-audit.schema.json",
     "compat-contract.schema.json",
     "compat-delta.schema.json",
+    "compat-proposals.schema.json",
     "compat-report.schema.json",
 )
 REQUIRED_VERIFICATION_CHECKS = (
@@ -133,6 +138,7 @@ AUDIT_TOP_KEYS = {
     "artifact",
     "source",
     "candidates",
+    "recipe_data",
     "risks",
 }
 CONTRACT_TOP_KEYS = {
@@ -278,12 +284,14 @@ def _class_name(entry_name: str) -> str:
     return entry_name[:-6].replace("/", ".")
 
 
-def _class_access_flags(payload: bytes, entry_name: str) -> int:
+def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
     if not payload.startswith(b"\xca\xfe\xba\xbe"):
-        return 0
+        return None
     if len(payload) < 10:
         raise ValueError(f"truncated class header: {entry_name}")
     constant_pool_count = int.from_bytes(payload[8:10], "big")
+    utf8_entries: dict[int, str] = {}
+    class_entries: dict[int, int] = {}
     offset = 10
     index = 1
     while index < constant_pool_count:
@@ -295,13 +303,24 @@ def _class_access_flags(payload: bytes, entry_name: str) -> int:
             if offset + 2 > len(payload):
                 raise ValueError(f"truncated class UTF-8 length: {entry_name}")
             length = int.from_bytes(payload[offset:offset + 2], "big")
-            offset += 2 + length
+            offset += 2
+            if offset + length > len(payload):
+                raise ValueError(f"truncated class UTF-8 value: {entry_name}")
+            try:
+                utf8_entries[index] = payload[offset:offset + length].decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise ValueError(f"invalid class UTF-8 value: {entry_name}") from error
+            offset += length
         elif tag in (3, 4, 9, 10, 11, 12, 17, 18):
             offset += 4
         elif tag in (5, 6):
             offset += 8
             index += 1
         elif tag in (7, 8, 16, 19, 20):
+            if offset + 2 > len(payload):
+                raise ValueError(f"truncated class constant pool: {entry_name}")
+            if tag == 7:
+                class_entries[index] = int.from_bytes(payload[offset:offset + 2], "big")
             offset += 2
         elif tag == 15:
             offset += 3
@@ -313,8 +332,55 @@ def _class_access_flags(payload: bytes, entry_name: str) -> int:
             raise ValueError(f"truncated class constant pool: {entry_name}")
         index += 1
     if offset + 2 > len(payload):
-        raise ValueError(f"truncated class access flags: {entry_name}")
-    return int.from_bytes(payload[offset:offset + 2], "big")
+        raise ValueError(f"truncated class declaration: {entry_name}")
+    access_flags = int.from_bytes(payload[offset:offset + 2], "big")
+    if offset + 8 > len(payload) and access_flags & 0x1000:
+        return {
+            "access_flags": access_flags,
+            "super_class": None,
+            "interfaces": [],
+        }
+    if offset + 8 > len(payload):
+        raise ValueError(f"truncated class declaration: {entry_name}")
+    this_class = int.from_bytes(payload[offset + 2:offset + 4], "big")
+    super_class = int.from_bytes(payload[offset + 4:offset + 6], "big")
+    interface_count = int.from_bytes(payload[offset + 6:offset + 8], "big")
+    offset += 8
+    if offset + interface_count * 2 > len(payload):
+        raise ValueError(f"truncated class interfaces: {entry_name}")
+
+    def resolve_class(class_index: int) -> str | None:
+        if class_index == 0:
+            return None
+        name_index = class_entries.get(class_index)
+        name = utf8_entries.get(name_index) if name_index is not None else None
+        if not name:
+            raise ValueError(f"invalid class name reference: {entry_name}")
+        return name.replace("/", ".")
+
+    interfaces = []
+    for interface_index in range(interface_count):
+        class_index = int.from_bytes(
+            payload[offset + interface_index * 2:offset + interface_index * 2 + 2],
+            "big",
+        )
+        interfaces.append(resolve_class(class_index))
+    declared_name = resolve_class(this_class)
+    expected_name = _class_name(entry_name)
+    if declared_name != expected_name:
+        raise ValueError(
+            f"class declaration name mismatch: {entry_name} declares {declared_name}"
+        )
+    return {
+        "access_flags": access_flags,
+        "super_class": resolve_class(super_class),
+        "interfaces": interfaces,
+    }
+
+
+def _class_access_flags(payload: bytes, entry_name: str) -> int:
+    metadata = _class_metadata(payload, entry_name)
+    return 0 if metadata is None else metadata["access_flags"]
 
 
 def _is_inspectable_class(
@@ -353,6 +419,89 @@ def _candidate_bucket(class_name: str) -> str | None:
     if any(term in lowered for term in STATION_TERMS):
         return "station_classes"
     return None
+
+
+RECIPE_INTERFACE = "net.minecraft.world.item.crafting.Recipe"
+RECIPE_SERIALIZER_INTERFACE = "net.minecraft.world.item.crafting.RecipeSerializer"
+
+
+def _inheritance_path(
+    class_name: str,
+    target: str,
+    metadata_by_class: dict[str, dict | None],
+) -> list[str] | None:
+    def visit(current: str, trail: tuple[str, ...]) -> list[str] | None:
+        if current == target:
+            return [*trail, current]
+        if current in trail:
+            return None
+        metadata = metadata_by_class.get(current)
+        if metadata is None:
+            return None
+        parents = [
+            *metadata["interfaces"],
+            *([metadata["super_class"]] if metadata["super_class"] else []),
+        ]
+        for parent in parents:
+            if parent == target:
+                return [*trail, current, parent]
+            result = visit(parent, (*trail, current))
+            if result is not None:
+                return result
+        return None
+
+    return visit(class_name, ())
+
+
+def _classify_candidate(
+    class_name: str,
+    metadata_by_class: dict[str, dict | None],
+) -> tuple[str, dict] | None:
+    metadata = metadata_by_class.get(class_name)
+    if metadata is not None:
+        concrete = metadata["access_flags"] & (0x0200 | 0x0400) == 0
+        if concrete:
+            recipe_path = _inheritance_path(
+                class_name,
+                RECIPE_INTERFACE,
+                metadata_by_class,
+            )
+            if recipe_path is not None:
+                return "recipe_classes", {
+                    "method": "class_hierarchy",
+                    "evidence": recipe_path,
+                }
+            serializer_path = _inheritance_path(
+                class_name,
+                RECIPE_SERIALIZER_INTERFACE,
+                metadata_by_class,
+            )
+            if serializer_path is not None:
+                return "recipe_serializers", {
+                    "method": "class_hierarchy",
+                    "evidence": serializer_path,
+                }
+        lowered = class_name.lower()
+        for bucket, terms in (
+            ("resource_apis", RESOURCE_TERMS),
+            ("station_classes", STATION_TERMS),
+        ):
+            term = next((term for term in terms if term in lowered), None)
+            if term is not None:
+                return bucket, {"method": "name_term", "evidence": [term]}
+        return None
+
+    bucket = _candidate_bucket(class_name)
+    if bucket is None:
+        return None
+    lowered = class_name.lower()
+    terms = {
+        "recipe_classes": RECIPE_TERMS,
+        "resource_apis": RESOURCE_TERMS,
+        "station_classes": STATION_TERMS,
+    }[bucket]
+    term = next(term for term in terms if term in lowered)
+    return bucket, {"method": "name_term", "evidence": [term]}
 
 
 def _run_javap(
@@ -608,6 +757,193 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
     return {"revision": revision, "files": files}
 
 
+RECIPE_PATH = re.compile(
+    r"^data/(?P<namespace>[a-z0-9_.-]+)/recipe/"
+    r"(?P<path>[a-z0-9_./-]+)\.json$"
+)
+RESOURCE_LOCATION = re.compile(r"^[a-z0-9_.-]+:[a-z0-9_./-]+$")
+
+
+def _recipe_record(source_id: str, relative_path: str, payload: bytes) -> dict:
+    match = RECIPE_PATH.fullmatch(relative_path)
+    if match is None:
+        raise ValueError(f"invalid recipe data path: {relative_path}")
+    if len(payload) > MAX_RECIPE_JSON_BYTES:
+        raise ValueError(
+            f"recipe JSON exceeds {MAX_RECIPE_JSON_BYTES} bytes: {relative_path}"
+        )
+    try:
+        value = json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"invalid recipe JSON {relative_path}: {error}") from error
+    if not isinstance(value, dict):
+        raise ValueError(f"recipe JSON must be an object: {relative_path}")
+    serializer_id = value.get("type")
+    if not isinstance(serializer_id, str) or not RESOURCE_LOCATION.fullmatch(
+        serializer_id
+    ):
+        raise ValueError(f"recipe JSON has invalid type: {relative_path}")
+    recipe_id = f"{match.group('namespace')}:{match.group('path')}"
+    conditions = value.get("neoforge:conditions", [])
+    if "neoforge:conditions" in value and not isinstance(conditions, list):
+        raise ValueError(f"recipe JSON conditions must be a list: {relative_path}")
+    condition_types = []
+    for index, condition in enumerate(conditions):
+        condition_type = condition.get("type") if isinstance(condition, dict) else None
+        if not isinstance(condition_type, str) or not RESOURCE_LOCATION.fullmatch(
+            condition_type
+        ):
+            raise ValueError(
+                f"recipe JSON condition {index} has invalid type: {relative_path}"
+            )
+        condition_types.append(condition_type)
+    return {
+        "recipe_id": recipe_id,
+        "source": source_id,
+        "serializer_id": serializer_id,
+        "payload_sha256": hashlib.sha256(payload).hexdigest(),
+        "fields": sorted(value),
+        "array_sizes": {
+            key: len(field_value)
+            for key, field_value in sorted(value.items())
+            if isinstance(field_value, list)
+        },
+        "condition_types": sorted(set(condition_types)),
+    }
+
+
+def _data_root_digest(root: Path, files: list[Path]) -> str:
+    digest = hashlib.sha256()
+    for path in files:
+        relative = path.relative_to(root).as_posix()
+        payload = path.read_bytes()
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(hashlib.sha256(payload).digest())
+    return digest.hexdigest()
+
+
+def _recipe_data_inventory(
+    archive: zipfile.ZipFile,
+    artifact_sha: str,
+    data_roots,
+) -> dict:
+    layers: list[tuple[str, str, list[tuple[str, bytes]]]] = []
+    jar_entries = []
+    for name in sorted(archive.namelist()):
+        if RECIPE_PATH.fullmatch(name) is None:
+            continue
+        entry = archive.getinfo(name)
+        if entry.file_size > MAX_RECIPE_JSON_BYTES:
+            raise ValueError(
+                f"recipe JSON exceeds {MAX_RECIPE_JSON_BYTES} bytes: {name}"
+            )
+        jar_entries.append((name, archive.read(name)))
+    layers.append(("target_jar", artifact_sha, jar_entries))
+
+    for index, raw_root in enumerate(data_roots or (), start=1):
+        root = Path(raw_root).resolve()
+        if not root.is_dir():
+            raise ValueError(f"recipe data root is not a directory: {raw_root}")
+        if Path(raw_root).is_symlink():
+            raise ValueError(f"recipe data root is a symlink: data_root_{index}")
+        files = []
+        for path in sorted(root.rglob("*.json")):
+            relative = path.relative_to(root)
+            if RECIPE_PATH.fullmatch(relative.as_posix()) is None:
+                continue
+            if path.is_symlink() or any(parent.is_symlink() for parent in path.parents if parent != root.parent):
+                raise ValueError(
+                    f"recipe data contains a symlink: data_root_{index}/{relative.as_posix()}"
+                )
+            if path.is_file():
+                files.append(path)
+        if len(files) > MAX_RECIPE_FILES:
+            raise ValueError(
+                f"recipe data root exceeds {MAX_RECIPE_FILES} files: data_root_{index}"
+            )
+        entries = []
+        for path in files:
+            if path.stat().st_size > MAX_RECIPE_JSON_BYTES:
+                raise ValueError(
+                    "recipe JSON exceeds "
+                    f"{MAX_RECIPE_JSON_BYTES} bytes: data_root_{index}/"
+                    f"{path.relative_to(root).as_posix()}"
+                )
+            entries.append((path.relative_to(root).as_posix(), path.read_bytes()))
+        layers.append(
+            (f"data_root_{index}", _data_root_digest(root, files), entries)
+        )
+
+    if sum(len(entries) for _, _, entries in layers) > MAX_RECIPE_FILES:
+        raise ValueError(f"recipe inventory exceeds {MAX_RECIPE_FILES} files")
+
+    selected: dict[str, dict] = {}
+    origins: dict[str, list[str]] = {}
+    for source_id, _, entries in layers:
+        for relative_path, payload in entries:
+            record = _recipe_record(source_id, relative_path, payload)
+            recipe_id = record["recipe_id"]
+            origins.setdefault(recipe_id, []).append(source_id)
+            selected[recipe_id] = record
+
+    grouped: dict[str, list[dict]] = {}
+    for record in selected.values():
+        grouped.setdefault(record["serializer_id"], []).append(record)
+    serializers = []
+    for serializer_id, records in sorted(grouped.items()):
+        ordered = sorted(records, key=lambda record: record["recipe_id"])
+        fields = sorted({field for record in ordered for field in record["fields"]})
+        max_array_sizes: dict[str, int] = {}
+        for record in ordered:
+            for field, size in record["array_sizes"].items():
+                max_array_sizes[field] = max(max_array_sizes.get(field, 0), size)
+        serializers.append({
+            "serializer_id": serializer_id,
+            "recipe_count": len(ordered),
+            "conditional_recipes": sum(bool(record["condition_types"]) for record in ordered),
+            "condition_types": sorted({
+                condition_type
+                for record in ordered
+                for condition_type in record["condition_types"]
+            }),
+            "sample_recipe_ids": [
+                record["recipe_id"]
+                for record in ordered[:MAX_RECIPE_SAMPLES_PER_SERIALIZER]
+            ],
+            "fields": fields,
+            "max_array_sizes": dict(sorted(max_array_sizes.items())),
+        })
+    sources = [
+        {"id": source_id, "sha256": digest, "declared_recipes": len(entries)}
+        for source_id, digest, entries in layers
+    ]
+    digest_payload = {
+        "sources": sources,
+        "effective": [
+            {
+                "recipe_id": recipe_id,
+                "source": record["source"],
+                "payload_sha256": record["payload_sha256"],
+            }
+            for recipe_id, record in sorted(selected.items())
+        ],
+    }
+    return {
+        "format": 1,
+        "digest": hashlib.sha256(canonical_json(digest_payload).encode("utf-8")).hexdigest(),
+        "sources": sources,
+        "declared_recipes": sum(len(entries) for _, _, entries in layers),
+        "effective_recipes": len(selected),
+        "serializers": serializers,
+        "overrides": [
+            {"recipe_id": recipe_id, "sources": sources}
+            for recipe_id, sources in sorted(origins.items())
+            if len(sources) > 1
+        ],
+    }
+
+
 def _collect_risk_evidence(
     collected: dict[str, set[str]],
     class_name: str,
@@ -667,6 +1003,187 @@ def _risk_evidence(candidates: list[dict]) -> list[dict]:
     return _finalize_risk_evidence(collected)
 
 
+def _validate_classification(class_name: str, bucket: str, value: dict, location: str):
+    if not isinstance(value, dict) or set(value) != {"method", "evidence"}:
+        raise ValueError(f"{location} classification requires method and evidence")
+    method = value["method"]
+    evidence = value["evidence"]
+    if (
+        not isinstance(evidence, list)
+        or not evidence
+        or any(not isinstance(item, str) or not item for item in evidence)
+    ):
+        raise ValueError(f"{location} classification evidence must be non-empty strings")
+    if method == "class_hierarchy":
+        targets = {
+            "recipe_classes": RECIPE_INTERFACE,
+            "recipe_serializers": RECIPE_SERIALIZER_INTERFACE,
+        }
+        if bucket not in targets or evidence[0] != class_name or evidence[-1] != targets[bucket]:
+            raise ValueError(f"{location} candidate bucket mismatch")
+        if len(evidence) != len(set(evidence)):
+            raise ValueError(f"{location} classification hierarchy contains a cycle")
+        return
+    if method == "name_term":
+        if len(evidence) != 1:
+            raise ValueError(f"{location} name-term classification requires one term")
+        expected = _candidate_bucket(class_name)
+        if expected != bucket or evidence[0] not in class_name.lower():
+            raise ValueError(f"{location} candidate bucket mismatch: expected {expected}")
+        return
+    raise ValueError(f"{location} has invalid classification method")
+
+
+def _validate_recipe_data(value: dict, artifact_sha: str):
+    if not isinstance(value, dict) or set(value) != {
+        "format",
+        "digest",
+        "sources",
+        "declared_recipes",
+        "effective_recipes",
+        "serializers",
+        "overrides",
+    }:
+        raise ValueError(
+            "audit recipe_data has invalid fields"
+        )
+    if value["format"] != 1:
+        raise ValueError("audit recipe_data has unsupported format")
+    if not isinstance(value["digest"], str) or not re.fullmatch(
+        r"[0-9a-f]{64}", value["digest"]
+    ):
+        raise ValueError("audit recipe_data has invalid digest")
+    sources = value["sources"]
+    if not isinstance(sources, list) or not sources:
+        raise ValueError("audit recipe_data sources must be a non-empty list")
+    source_ids = []
+    for index, source in enumerate(sources):
+        if not isinstance(source, dict) or set(source) != {
+            "id",
+            "sha256",
+            "declared_recipes",
+        }:
+            raise ValueError(f"audit recipe_data source {index} is invalid")
+        expected_id = "target_jar" if index == 0 else f"data_root_{index}"
+        if source["id"] != expected_id:
+            raise ValueError(f"audit recipe_data source {index} has invalid id")
+        if not isinstance(source["sha256"], str) or not re.fullmatch(
+            r"[0-9a-f]{64}", source["sha256"]
+        ):
+            raise ValueError(f"audit recipe_data source {index} has invalid SHA")
+        source_ids.append(source["id"])
+        declared = source["declared_recipes"]
+        if isinstance(declared, bool) or not isinstance(declared, int) or declared < 0:
+            raise ValueError(f"audit recipe_data source {index} has invalid count")
+    if sources[0]["sha256"] != artifact_sha:
+        raise ValueError("audit recipe_data target jar SHA does not match artifact")
+    declared_total = value["declared_recipes"]
+    effective_total = value["effective_recipes"]
+    if (
+        isinstance(declared_total, bool)
+        or not isinstance(declared_total, int)
+        or declared_total < 0
+        or declared_total > MAX_RECIPE_FILES
+        or isinstance(effective_total, bool)
+        or not isinstance(effective_total, int)
+        or effective_total < 0
+        or effective_total > declared_total
+        or declared_total != sum(source["declared_recipes"] for source in sources)
+    ):
+        raise ValueError("audit recipe_data recipe counts are invalid")
+    serializers = value["serializers"]
+    if not isinstance(serializers, list):
+        raise ValueError("audit recipe_data serializers must be a list")
+    serializer_ids = []
+    counted = 0
+    for index, serializer in enumerate(serializers):
+        location = f"audit recipe_data serializer {index}"
+        if not isinstance(serializer, dict) or set(serializer) != {
+            "serializer_id",
+            "recipe_count",
+            "conditional_recipes",
+            "condition_types",
+            "sample_recipe_ids",
+            "fields",
+            "max_array_sizes",
+        }:
+            raise ValueError(f"{location} is invalid")
+        serializer_id = serializer["serializer_id"]
+        if not isinstance(serializer_id, str) or not RESOURCE_LOCATION.fullmatch(serializer_id):
+            raise ValueError(f"{location} has invalid serializer_id")
+        serializer_ids.append(serializer_id)
+        recipe_count = serializer["recipe_count"]
+        conditioned = serializer["conditional_recipes"]
+        if (
+            isinstance(recipe_count, bool)
+            or not isinstance(recipe_count, int)
+            or recipe_count < 1
+            or isinstance(conditioned, bool)
+            or not isinstance(conditioned, int)
+            or conditioned < 0
+            or conditioned > recipe_count
+        ):
+            raise ValueError(f"{location} has invalid counts")
+        counted += recipe_count
+        condition_types = serializer["condition_types"]
+        if (
+            not isinstance(condition_types, list)
+            or condition_types != sorted(set(condition_types))
+            or any(
+                not isinstance(condition_type, str)
+                or not RESOURCE_LOCATION.fullmatch(condition_type)
+                for condition_type in condition_types
+            )
+        ):
+            raise ValueError(f"{location} has invalid condition_types")
+        samples = serializer["sample_recipe_ids"]
+        if (
+            not isinstance(samples, list)
+            or not samples
+            or len(samples) > MAX_RECIPE_SAMPLES_PER_SERIALIZER
+            or samples != sorted(set(samples))
+            or any(not isinstance(item, str) or not RESOURCE_LOCATION.fullmatch(item) for item in samples)
+        ):
+            raise ValueError(f"{location} has invalid sample_recipe_ids")
+        fields = serializer["fields"]
+        if not isinstance(fields, list) or fields != sorted(set(fields)) or any(
+            not isinstance(field, str) or not field for field in fields
+        ):
+            raise ValueError(f"{location} has invalid fields")
+        sizes = serializer["max_array_sizes"]
+        if not isinstance(sizes, dict) or any(
+            not isinstance(field, str)
+            or not field
+            or isinstance(size, bool)
+            or not isinstance(size, int)
+            or size < 0
+            for field, size in sizes.items()
+        ):
+            raise ValueError(f"{location} has invalid max_array_sizes")
+    if serializer_ids != sorted(set(serializer_ids)) or counted != effective_total:
+        raise ValueError("audit recipe_data serializer inventory mismatch")
+    overrides = value["overrides"]
+    if not isinstance(overrides, list):
+        raise ValueError("audit recipe_data overrides must be a list")
+    override_ids = []
+    for index, override in enumerate(overrides):
+        if not isinstance(override, dict) or set(override) != {"recipe_id", "sources"}:
+            raise ValueError(f"audit recipe_data override {index} is invalid")
+        recipe_id = override["recipe_id"]
+        override_sources = override["sources"]
+        if (
+            not isinstance(recipe_id, str)
+            or not RESOURCE_LOCATION.fullmatch(recipe_id)
+            or not isinstance(override_sources, list)
+            or len(override_sources) < 2
+            or any(source not in source_ids for source in override_sources)
+        ):
+            raise ValueError(f"audit recipe_data override {index} is invalid")
+        override_ids.append(recipe_id)
+    if override_ids != sorted(set(override_ids)):
+        raise ValueError("audit recipe_data overrides must be sorted and unique")
+
+
 def _validate_audit(audit: dict):
     if not isinstance(audit, dict):
         raise ValueError("audit must be a JSON object")
@@ -675,10 +1192,11 @@ def _validate_audit(audit: dict):
         raise ValueError("audit has unknown keys: " + ", ".join(unknown))
     if audit.get("schema") != SCHEMA_VERSION:
         raise ValueError(f"unsupported audit schema: {audit.get('schema')}")
-    if audit.get("scanner_format") != SCAN_CACHE_VERSION:
+    scanner_format = audit.get("scanner_format")
+    if scanner_format not in {*LEGACY_SCAN_CACHE_VERSIONS, SCAN_CACHE_VERSION}:
         raise ValueError(
             "unsupported audit scanner format: "
-            f"{audit.get('scanner_format')}"
+            f"{scanner_format}"
         )
     if audit.get("kind") != "auto_storage_compat_audit":
         raise ValueError(f"invalid audit kind: {audit.get('kind')}")
@@ -733,16 +1251,22 @@ def _validate_audit(audit: dict):
     if len(set(files)) != len(files):
         raise ValueError("audit source files must not contain duplicates")
 
+    if scanner_format == SCAN_CACHE_VERSION and "recipe_data" not in audit:
+        raise ValueError("audit is missing recipe_data")
+    if scanner_format in LEGACY_SCAN_CACHE_VERSIONS and "recipe_data" in audit:
+        raise ValueError("legacy audit must not contain recipe_data")
+
     candidates = audit["candidates"]
     candidate_buckets = {
         "recipe_classes",
         "resource_apis",
         "station_classes",
     }
+    if scanner_format == SCAN_CACHE_VERSION:
+        candidate_buckets.add("recipe_serializers")
     if not isinstance(candidates, dict) or set(candidates) != candidate_buckets:
         raise ValueError(
-            "audit candidates require recipe_classes, resource_apis, "
-            "and station_classes"
+            "audit candidates require " + ", ".join(sorted(candidate_buckets))
         )
     seen_classes = set()
     for bucket in sorted(candidate_buckets):
@@ -751,12 +1275,12 @@ def _validate_audit(audit: dict):
             raise ValueError(f"audit candidates {bucket} must be a list")
         for index, record in enumerate(records):
             location = f"audit candidates {bucket} {index}"
-            if not isinstance(record, dict) or set(record) != {
-                "class",
-                "public_signature",
-            }:
+            record_keys = {"class", "public_signature"}
+            if scanner_format == SCAN_CACHE_VERSION:
+                record_keys.add("classification")
+            if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
-                    f"{location} requires class and public_signature"
+                    f"{location} has invalid candidate fields"
                 )
             class_name = record["class"]
             if not isinstance(class_name, str) or not re.fullmatch(
@@ -764,12 +1288,20 @@ def _validate_audit(audit: dict):
                 class_name,
             ):
                 raise ValueError(f"{location} has invalid class")
-            expected_bucket = _candidate_bucket(class_name)
-            if expected_bucket != bucket:
-                raise ValueError(
-                    f"{location} candidate bucket mismatch: "
-                    f"expected {expected_bucket}"
+            if scanner_format == SCAN_CACHE_VERSION:
+                _validate_classification(
+                    class_name,
+                    bucket,
+                    record["classification"],
+                    location,
                 )
+            else:
+                expected_bucket = _candidate_bucket(class_name)
+                if expected_bucket != bucket:
+                    raise ValueError(
+                        f"{location} candidate bucket mismatch: "
+                        f"expected {expected_bucket}"
+                    )
             if class_name in seen_classes:
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
@@ -778,6 +1310,9 @@ def _validate_audit(audit: dict):
                 or not record["public_signature"].strip()
             ):
                 raise ValueError(f"{location} has empty public_signature")
+
+    if scanner_format == SCAN_CACHE_VERSION:
+        _validate_recipe_data(audit["recipe_data"], artifact["sha256"])
 
     recipe_classes = {
         record["class"] for record in candidates["recipe_classes"]
@@ -828,6 +1363,8 @@ def scan_jar(
     cache_dir=None,
     signature_reader=None,
     risk_reader=None,
+    class_metadata_reader=None,
+    data_roots=None,
 ) -> dict:
     jar = Path(jar).resolve()
     if not jar.is_file():
@@ -837,20 +1374,6 @@ def scan_jar(
         raise ValueError(f"target jar exceeds {MAX_JAR_BYTES} bytes: {jar}")
     artifact_sha = _sha256_file(jar)
     cache_path = None
-    if cache_dir is not None and source is None:
-        cache_path = (
-            Path(cache_dir)
-            / artifact_sha
-            / f"v{SCAN_CACHE_VERSION}"
-            / "audit.json"
-        )
-        if cache_path.is_file():
-            cached = json.loads(cache_path.read_text())
-            _validate_audit(cached)
-            if cached["artifact"]["sha256"] != artifact_sha:
-                raise ValueError(f"cached audit SHA mismatch: {cache_path}")
-            _require_unchanged_artifact(jar, artifact_sha, artifact_size)
-            return cached
 
     reader = signature_reader or (
         lambda class_name: _run_javap(jar, class_name, "-public")
@@ -870,27 +1393,75 @@ def scan_jar(
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
         target = _read_mod_metadata(archive)
+        recipe_data = _recipe_data_inventory(
+            archive,
+            artifact_sha,
+            data_roots,
+        )
+        if cache_dir is not None and source is None:
+            cache_identity = (
+                recipe_data["digest"] if data_roots else artifact_sha
+            )
+            cache_path = (
+                Path(cache_dir)
+                / cache_identity
+                / f"v{SCAN_CACHE_VERSION}"
+                / "audit.json"
+            )
+            if cache_path.is_file():
+                cached = json.loads(cache_path.read_text())
+                _validate_audit(cached)
+                if cached["artifact"]["sha256"] != artifact_sha:
+                    raise ValueError(f"cached audit SHA mismatch: {cache_path}")
+                if cached["recipe_data"]["digest"] != recipe_data["digest"]:
+                    raise ValueError(f"cached recipe-data digest mismatch: {cache_path}")
+                if data_roots and _recipe_data_inventory(
+                    archive,
+                    artifact_sha,
+                    data_roots,
+                ) != recipe_data:
+                    raise ValueError("recipe data roots changed during scan")
+                _require_unchanged_artifact(jar, artifact_sha, artifact_size)
+                return cached
         classified = {
             "recipe_classes": [],
+            "recipe_serializers": [],
             "resource_apis": [],
             "station_classes": [],
         }
-        class_names = sorted(
-            _class_name(name)
+        class_entries = {
+            _class_name(name): name
             for name in archive.namelist()
             if _is_inspectable_class(archive, name)
-        )
-        candidates = [
-            (class_name, bucket)
+        }
+        class_names = sorted(class_entries)
+        metadata_by_class = {
+            class_name: (
+                class_metadata_reader(class_name)
+                if class_metadata_reader is not None
+                else _class_metadata(
+                    archive.read(class_entries[class_name]),
+                    class_entries[class_name],
+                )
+            )
             for class_name in class_names
-            if (bucket := _candidate_bucket(class_name)) is not None
+        }
+        candidates = [
+            (class_name, classification[0], classification[1])
+            for class_name in class_names
+            if (
+                classification := _classify_candidate(
+                    class_name,
+                    metadata_by_class,
+                )
+            ) is not None
         ]
         if len(candidates) > MAX_CANDIDATE_CLASSES:
             raise ValueError(
                 f"target jar exceeds {MAX_CANDIDATE_CLASSES} candidate classes"
             )
         collected_risks: dict[str, set[str]] = {}
-        for class_name, bucket in candidates:
+        for class_name, bucket, classification in candidates:
             signature = reader(class_name)
             if not isinstance(signature, str) or not signature.strip():
                 raise ValueError(f"empty public signature for {class_name}")
@@ -902,6 +1473,7 @@ def scan_jar(
                 {
                     "class": class_name,
                     "public_signature": signature.strip(),
+                    "classification": classification,
                 }
             )
             if bucket == "recipe_classes":
@@ -922,6 +1494,12 @@ def scan_jar(
                     risk_signature,
                 )
                 del risk_signature
+        if data_roots and _recipe_data_inventory(
+            archive,
+            artifact_sha,
+            data_roots,
+        ) != recipe_data:
+            raise ValueError("recipe data roots changed during scan")
 
     all_candidates = [
         candidate
@@ -943,6 +1521,7 @@ def scan_jar(
             {candidate["class"] for candidate in all_candidates},
         ),
         "candidates": classified,
+        "recipe_data": recipe_data,
         "risks": _finalize_risk_evidence(collected_risks),
     }
     _require_unchanged_artifact(jar, artifact_sha, artifact_size)
@@ -2849,7 +3428,7 @@ def publish_archive(output, release_version):
 def _candidate_map(audit: dict, bucket: str) -> dict[str, str]:
     return {
         candidate["class"]: candidate["public_signature"]
-        for candidate in audit["candidates"][bucket]
+        for candidate in audit["candidates"].get(bucket, [])
     }
 
 
@@ -2865,7 +3444,12 @@ def diff_audits(old: dict, new: dict) -> dict:
     contract_affected = (
         old["artifact"]["sha256"] != new["artifact"]["sha256"]
     )
-    for bucket in ("recipe_classes", "resource_apis", "station_classes"):
+    for bucket in (
+        "recipe_classes",
+        "recipe_serializers",
+        "resource_apis",
+        "station_classes",
+    ):
         old_map = _candidate_map(old, bucket)
         new_map = _candidate_map(new, bucket)
         added = sorted(set(new_map) - set(old_map))
@@ -2896,6 +3480,19 @@ def diff_audits(old: dict, new: dict) -> dict:
     contract_affected = contract_affected or bool(
         risk_changes["added"] or risk_changes["removed"]
     )
+    old_recipe_data = old.get("recipe_data")
+    new_recipe_data = new.get("recipe_data")
+    old_digest = old_recipe_data.get("digest") if old_recipe_data else None
+    new_digest = new_recipe_data.get("digest") if new_recipe_data else None
+    old_sources = old_recipe_data.get("sources") if old_recipe_data else None
+    new_sources = new_recipe_data.get("sources") if new_recipe_data else None
+    recipe_data_changes = {
+        "from_digest": old_digest,
+        "to_digest": new_digest,
+        "sources_changed": old_sources != new_sources,
+        "changed": old_digest != new_digest,
+    }
+    contract_affected = contract_affected or recipe_data_changes["changed"]
     return {
         "schema": SCHEMA_VERSION,
         "kind": "auto_storage_compat_delta",
@@ -2903,9 +3500,179 @@ def diff_audits(old: dict, new: dict) -> dict:
         "from_version": old["target"]["version"],
         "to_version": new["target"]["version"],
         **bucket_changes,
+        "recipe_data": recipe_data_changes,
         "risks": risk_changes,
         "contract_affected": contract_affected,
     }
+
+
+NUMERIC_MEMBER = re.compile(
+    r"\b(?:byte|short|int|long|float|double|java\.lang\.(?:Byte|Short|Integer|Long|Float|Double))\s+"
+    r"(?P<member>[A-Za-z_$][A-Za-z0-9_$]*)\s*\([^;{}]*\)"
+)
+
+
+def _rate_binding_candidates(candidate: dict) -> list[dict]:
+    bindings = []
+    for match in NUMERIC_MEMBER.finditer(candidate["public_signature"]):
+        member = match.group("member")
+        lowered = member.lower()
+        if "slot" in lowered:
+            continue
+        if any(term in lowered for term in ("parallel", "processes", "lanes", "operations")):
+            template = "parallel_lanes"
+        elif any(term in lowered for term in ("tick", "time", "duration")):
+            template = "config_tick_ratio"
+        elif any(term in lowered for term in ("speed", "rate", "throughput")):
+            template = "public_numeric_getter"
+        else:
+            continue
+        bindings.append({
+            "member": member,
+            "template": template,
+            "status": "needs_decision",
+            "evidence": f"{candidate['class']}#{member}:{match.group(0)}",
+        })
+    return sorted(bindings, key=lambda binding: (binding["member"], binding["template"]))
+
+
+def _requirement_classification(field: str) -> str | None:
+    lowered = field.lower()
+    if any(term in lowered for term in (
+        "heat",
+        "pressure",
+        "rpm",
+        "multiblock",
+        "world",
+        "entity",
+        "chance",
+        "random",
+        "environment",
+        "biome",
+        "dimension",
+    )):
+        return "unsupported_live_state"
+    if any(term in lowered for term in (
+        "item",
+        "ingredient",
+        "fluid",
+        "chemical",
+        "gas",
+        "energy",
+        "mana",
+        "source",
+        "catalyst",
+        "tool",
+        "remainder",
+        "container",
+    )):
+        return "transaction_representable"
+    if any(term in lowered for term in (
+        "duration",
+        "processing_time",
+        "ticks",
+        "speed",
+        "rate",
+        "parallel",
+        "processes",
+        "lanes",
+    )):
+        return "station_descriptor_representable"
+    return None
+
+
+def _validate_proposals(proposals: dict):
+    if not isinstance(proposals, dict) or set(proposals) != {
+        "schema",
+        "kind",
+        "target",
+        "source_audit_digest",
+        "machine_candidates",
+        "requirement_candidates",
+    }:
+        raise ValueError("compatibility proposals have invalid fields")
+    if proposals["schema"] != 1 or proposals["kind"] != "auto_storage_compat_proposals":
+        raise ValueError("compatibility proposals have invalid identity")
+    if not re.fullmatch(r"[0-9a-f]{64}", proposals["source_audit_digest"]):
+        raise ValueError("compatibility proposals have invalid audit digest")
+    for index, candidate in enumerate(proposals["machine_candidates"]):
+        if not isinstance(candidate, dict) or set(candidate) != {
+            "class",
+            "status",
+            "evidence",
+            "rate_bindings",
+        }:
+            raise ValueError(f"machine proposal {index} is invalid")
+        if candidate["status"] != "needs_decision" or not candidate["evidence"]:
+            raise ValueError(f"machine proposal {index} must remain unresolved")
+        for binding in candidate["rate_bindings"]:
+            if binding.get("status") != "needs_decision" or binding.get("template") not in {
+                "config_tick_ratio",
+                "public_numeric_getter",
+                "parallel_lanes",
+            }:
+                raise ValueError(f"machine proposal {index} has invalid rate binding")
+    for index, candidate in enumerate(proposals["requirement_candidates"]):
+        if not isinstance(candidate, dict) or set(candidate) != {
+            "serializer_id",
+            "field",
+            "classification",
+            "status",
+            "evidence",
+        }:
+            raise ValueError(f"requirement proposal {index} is invalid")
+        if candidate["status"] != "needs_decision" or candidate["classification"] not in {
+            "transaction_representable",
+            "station_descriptor_representable",
+            "unsupported_live_state",
+        }:
+            raise ValueError(f"requirement proposal {index} must remain unresolved")
+
+
+def propose_audit(audit: dict) -> dict:
+    _validate_audit(audit)
+    if audit["scanner_format"] != SCAN_CACHE_VERSION:
+        raise ValueError("propose requires a current scanner-format audit")
+    machines = [
+        {
+            "class": candidate["class"],
+            "status": "needs_decision",
+            "evidence": [
+                f"{candidate['class']}#public_signature",
+                *candidate["classification"]["evidence"],
+            ],
+            "rate_bindings": _rate_binding_candidates(candidate),
+        }
+        for candidate in audit["candidates"]["station_classes"]
+    ]
+    requirements = []
+    for serializer in audit["recipe_data"]["serializers"]:
+        for field in serializer["fields"]:
+            classification = _requirement_classification(field)
+            if classification is None:
+                continue
+            requirements.append({
+                "serializer_id": serializer["serializer_id"],
+                "field": field,
+                "classification": classification,
+                "status": "needs_decision",
+                "evidence": f"recipe_data:{serializer['serializer_id']}#{field}",
+            })
+    proposals = {
+        "schema": 1,
+        "kind": "auto_storage_compat_proposals",
+        "target": dict(audit["target"]),
+        "source_audit_digest": hashlib.sha256(
+            canonical_json(audit).encode("utf-8")
+        ).hexdigest(),
+        "machine_candidates": sorted(machines, key=lambda candidate: candidate["class"]),
+        "requirement_candidates": sorted(
+            requirements,
+            key=lambda candidate: (candidate["serializer_id"], candidate["field"]),
+        ),
+    }
+    _validate_proposals(proposals)
+    return proposals
 
 
 def _read_json(path) -> dict:
@@ -2928,6 +3695,7 @@ def _build_parser() -> argparse.ArgumentParser:
     scan = subparsers.add_parser("scan")
     scan.add_argument("--jar", required=True)
     scan.add_argument("--source")
+    scan.add_argument("--data-root", action="append", default=[])
     scan.add_argument("--output", required=True)
     scan.add_argument("--cache", default="build/compat-kit/cache")
 
@@ -2936,10 +3704,15 @@ def _build_parser() -> argparse.ArgumentParser:
     decide.add_argument("--output", required=True)
     decide.add_argument("--next-actions", required=True)
 
+    propose = subparsers.add_parser("propose")
+    propose.add_argument("audit")
+    propose.add_argument("--output", required=True)
+
     delta = subparsers.add_parser("diff")
     delta.add_argument("old_audit")
     delta.add_argument("new_target")
     delta.add_argument("--source")
+    delta.add_argument("--data-root", action="append", default=[])
     delta.add_argument("--output", required=True)
     delta.add_argument("--cache", default="build/compat-kit/cache")
 
@@ -2973,6 +3746,7 @@ def main(argv=None) -> int:
                 args.jar,
                 source=args.source,
                 cache_dir=args.cache,
+                data_roots=args.data_root,
             )
             _write_json(args.output, audit)
         elif args.command == "decide":
@@ -2981,6 +3755,8 @@ def main(argv=None) -> int:
             action_path = Path(args.next_actions)
             action_path.parent.mkdir(parents=True, exist_ok=True)
             action_path.write_text(actions)
+        elif args.command == "propose":
+            _write_json(args.output, propose_audit(_read_json(args.audit)))
         elif args.command == "diff":
             old = _read_json(args.old_audit)
             new_path = Path(args.new_target)
@@ -2991,6 +3767,7 @@ def main(argv=None) -> int:
                     new_path,
                     source=args.source,
                     cache_dir=args.cache,
+                    data_roots=args.data_root,
                 )
             _write_json(args.output, diff_audits(old, new))
         elif args.command == "scaffold":

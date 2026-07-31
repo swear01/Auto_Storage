@@ -57,6 +57,65 @@ displayName="Sample Machines"
             archive.writestr(info, payload)
 
 
+def write_structural_fixture_jar(root: Path, path: Path):
+    source = root / "structural-source"
+    classes = root / "structural-classes"
+    sources = {
+        "net/minecraft/world/item/crafting/Recipe.java": (
+            "package net.minecraft.world.item.crafting; public interface Recipe {}\n"
+        ),
+        "net/minecraft/world/item/crafting/RecipeSerializer.java": (
+            "package net.minecraft.world.item.crafting; "
+            "public interface RecipeSerializer {}\n"
+        ),
+        "samplemod/process/BaseProcess.java": (
+            "package samplemod.process; "
+            "public abstract class BaseProcess implements "
+            "net.minecraft.world.item.crafting.Recipe {}\n"
+        ),
+        "samplemod/process/OreProcess.java": (
+            "package samplemod.process; "
+            "public final class OreProcess extends BaseProcess {}\n"
+        ),
+        "samplemod/client/RecipeWidget.java": (
+            "package samplemod.client; public final class RecipeWidget {}\n"
+        ),
+        "samplemod/serialization/CrusherCodec.java": (
+            "package samplemod.serialization; "
+            "public final class CrusherCodec implements "
+            "net.minecraft.world.item.crafting.RecipeSerializer {}\n"
+        ),
+    }
+    for relative, text in sources.items():
+        target = source / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
+    classes.mkdir()
+    subprocess.run(
+        [
+            "javac",
+            "-d",
+            str(classes),
+            *[str(source / relative) for relative in sorted(sources)],
+        ],
+        check=True,
+    )
+    mods_toml = """
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="samplemod"
+version="1.2.3"
+displayName="Sample Machines"
+""".strip()
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr("META-INF/neoforge.mods.toml", mods_toml)
+        for class_file in sorted(classes.rglob("*.class")):
+            archive.write(class_file, class_file.relative_to(classes).as_posix())
+
+
 class CompatKitAuditTests(unittest.TestCase):
     def setUp(self):
         self.compat_kit = load_compat_kit()
@@ -243,6 +302,35 @@ class CompatKitAuditTests(unittest.TestCase):
             serializer_classes,
         )
 
+    def test_scan_resolves_real_transitive_recipe_hierarchy_without_name_guessing(self):
+        structural_jar = self.root / "samplemod-real-structural.jar"
+        write_structural_fixture_jar(self.root, structural_jar)
+
+        audit = self.compat_kit.scan_jar(structural_jar)
+
+        recipes = {
+            candidate["class"]: candidate
+            for candidate in audit["candidates"]["recipe_classes"]
+        }
+        serializers = {
+            candidate["class"]
+            for candidate in audit["candidates"]["recipe_serializers"]
+        }
+        self.assertEqual({"samplemod.process.OreProcess"}, set(recipes))
+        self.assertEqual(
+            [
+                "samplemod.process.OreProcess",
+                "samplemod.process.BaseProcess",
+                "net.minecraft.world.item.crafting.Recipe",
+            ],
+            recipes["samplemod.process.OreProcess"]["classification"]["evidence"],
+        )
+        self.assertEqual(
+            {"samplemod.serialization.CrusherCodec"},
+            serializers,
+        )
+        self.assertNotIn("samplemod.client.RecipeWidget", json.dumps(audit))
+
     def test_scan_summarizes_recipe_json_and_explicit_data_root_overrides(self):
         self.assertIn(
             "data_roots",
@@ -291,7 +379,8 @@ class CompatKitAuditTests(unittest.TestCase):
             data_roots=[data_root],
         )
 
-        self.assertEqual(2, audit["recipe_data"]["total_recipes"])
+        self.assertEqual(3, audit["recipe_data"]["declared_recipes"])
+        self.assertEqual(2, audit["recipe_data"]["effective_recipes"])
         self.assertEqual(
             [{
                 "recipe_id": "samplemod:crushed_iron",
@@ -304,7 +393,7 @@ class CompatKitAuditTests(unittest.TestCase):
             for entry in audit["recipe_data"]["serializers"]
         }
         self.assertEqual(1, serializers["samplemod:alloying"]["recipe_count"])
-        self.assertEqual(1, serializers["samplemod:alloying"]["conditioned_recipes"])
+        self.assertEqual(1, serializers["samplemod:alloying"]["conditional_recipes"])
         self.assertEqual(2, serializers["samplemod:alloying"]["max_array_sizes"]["ingredients"])
         self.assertEqual(
             ["samplemod:alloy"],
@@ -321,6 +410,115 @@ class CompatKitAuditTests(unittest.TestCase):
             serializers["samplemod:crushing"]["fields"],
         )
         self.assertNotIn(str(self.root), json.dumps(audit))
+
+    def test_recipe_inventory_digest_covers_conditions_and_effective_payloads(self):
+        recipe_jar = self.root / "samplemod-inventory.jar"
+        write_fixture_jar(recipe_jar)
+        with zipfile.ZipFile(recipe_jar, "a") as archive:
+            archive.writestr(
+                "data/samplemod/recipe/conditional.json",
+                json.dumps({
+                    "type": "samplemod:crushing",
+                    "ingredient": {"item": "minecraft:iron_ingot"},
+                    "result": {"id": "samplemod:iron_dust"},
+                    "neoforge:conditions": [
+                        {"type": "neoforge:mod_loaded", "modid": "example"},
+                        {"type": "samplemod:enabled"},
+                    ],
+                }),
+            )
+
+        first = self.compat_kit.scan_jar(
+            recipe_jar,
+            signature_reader=self.signatures,
+        )
+        second = self.compat_kit.scan_jar(
+            recipe_jar,
+            signature_reader=self.signatures,
+        )
+
+        self.assertEqual(1, first["recipe_data"]["format"])
+        self.assertEqual(first["recipe_data"]["digest"], second["recipe_data"]["digest"])
+        serializer = first["recipe_data"]["serializers"][0]
+        self.assertEqual(
+            ["neoforge:mod_loaded", "samplemod:enabled"],
+            serializer["condition_types"],
+        )
+        self.assertNotIn("modid", json.dumps(first["recipe_data"]))
+
+    def test_scan_rejects_symlinked_or_malformed_datapack_recipe_evidence(self):
+        data_root = self.root / "unsafe-data"
+        recipe = data_root / "data/samplemod/recipe/unsafe.json"
+        recipe.parent.mkdir(parents=True)
+        outside = self.root / "outside.json"
+        outside.write_text(json.dumps({"type": "samplemod:crushing"}))
+        recipe.symlink_to(outside)
+
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                signature_reader=self.signatures,
+                data_roots=[data_root],
+            )
+
+        recipe.unlink()
+        recipe.write_text("not JSON")
+        with self.assertRaisesRegex(ValueError, "invalid recipe JSON"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                signature_reader=self.signatures,
+                data_roots=[data_root],
+            )
+
+    def test_scan_cache_is_keyed_by_ordered_data_root_content(self):
+        cache = self.root / "cache"
+        first_root = self.root / "first-data"
+        second_root = self.root / "second-data"
+        first_recipe = first_root / "data/samplemod/recipe/override.json"
+        second_recipe = second_root / "data/samplemod/recipe/override.json"
+        first_recipe.parent.mkdir(parents=True)
+        second_recipe.parent.mkdir(parents=True)
+        first_recipe.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "result": {"id": "samplemod:first"},
+        }))
+        second_recipe.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "result": {"id": "samplemod:second"},
+        }))
+        calls = []
+
+        def counted_reader(class_name: str):
+            calls.append(class_name)
+            return self.signatures(class_name)
+
+        first = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=counted_reader,
+            data_roots=[first_root, second_root],
+        )
+        first_calls = len(calls)
+        cached = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=counted_reader,
+            data_roots=[first_root, second_root],
+        )
+        self.assertEqual(first_calls, len(calls))
+        self.assertEqual(first, cached)
+
+        reversed_roots = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=counted_reader,
+            data_roots=[second_root, first_root],
+        )
+        self.assertNotEqual(
+            first["recipe_data"]["digest"],
+            reversed_roots["recipe_data"]["digest"],
+        )
+        self.assertGreater(len(calls), first_calls)
 
     def test_scan_records_risks_with_exact_evidence_but_does_not_decide_semantics(self):
         audit = self.compat_kit.scan_jar(
@@ -387,7 +585,10 @@ class CompatKitAuditTests(unittest.TestCase):
             if candidate["class"] == "samplemod.recipe.CrushingRecipe"
         )
         self.assertNotIn("RandomSource", crushing["public_signature"])
-        self.assertEqual({"class", "public_signature"}, set(crushing))
+        self.assertEqual(
+            {"class", "public_signature", "classification"},
+            set(crushing),
+        )
 
     def test_scan_releases_private_bytecode_before_reading_next_candidate(self):
         previous = None
@@ -858,6 +1059,9 @@ class CompatKitAuditTests(unittest.TestCase):
         legacy["scanner_format"] = 7
         legacy.pop("recipe_data")
         legacy["candidates"].pop("recipe_serializers")
+        for records in legacy["candidates"].values():
+            for record in records:
+                record.pop("classification")
         self.compat_kit._validate_audit(legacy)
 
         audit["scanner_format"] = 6
@@ -1386,6 +1590,126 @@ displayName="Sample Machines"
                 delta[bucket],
             )
         self.assertEqual({"added": [], "removed": []}, delta["risks"])
+
+    def test_diff_reports_recipe_serializer_and_datapack_inventory_changes(self):
+        old = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        data_root = self.root / "changed-data"
+        recipe = data_root / "data/samplemod/recipe/new_recipe.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "ingredient": {"item": "minecraft:copper_ingot"},
+            "result": {"id": "samplemod:copper_dust"},
+        }))
+        new = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            data_roots=[data_root],
+        )
+
+        delta = self.compat_kit.diff_audits(old, new)
+
+        self.assertIn("recipe_serializers", delta)
+        self.assertIn("recipe_data", delta)
+        self.assertEqual(
+            {"added": [], "removed": [], "changed": []},
+            delta["recipe_serializers"],
+        )
+        self.assertTrue(delta["recipe_data"]["changed"])
+        self.assertNotEqual(
+            delta["recipe_data"]["from_digest"],
+            delta["recipe_data"]["to_digest"],
+        )
+        self.assertTrue(delta["contract_affected"])
+
+    def test_proposals_surface_rate_parallel_and_requirement_evidence_without_deciding(self):
+        self.assertTrue(hasattr(self.compat_kit, "propose_audit"))
+        proposal_jar = self.root / "samplemod-proposals.jar"
+        write_fixture_jar(proposal_jar)
+        with zipfile.ZipFile(proposal_jar, "a") as archive:
+            archive.writestr(
+                "data/samplemod/recipe/pressurized.json",
+                json.dumps({
+                    "type": "samplemod:pressurized",
+                    "item_input": {"item": "minecraft:iron_ingot"},
+                    "fluid_input": {"fluid": "minecraft:water", "amount": 1000},
+                    "energy": 400,
+                    "duration": 80,
+                    "heat": 2,
+                    "result": {"id": "samplemod:plate"},
+                }),
+            )
+
+        def signatures(class_name: str) -> str:
+            if class_name == "samplemod.machine.CrusherBlock":
+                return (
+                    "public final class samplemod.machine.CrusherBlock { "
+                    "public int getConfiguredTicks(); "
+                    "public int getProcesses(); "
+                    "public int getSlots(); }"
+                )
+            return self.signatures(class_name)
+
+        audit = self.compat_kit.scan_jar(
+            proposal_jar,
+            signature_reader=signatures,
+            risk_reader=lambda class_name: (
+                signatures(class_name) + " private MultiblockController controller;"
+            ),
+        )
+        proposals = self.compat_kit.propose_audit(audit)
+
+        machine = next(
+            candidate
+            for candidate in proposals["machine_candidates"]
+            if candidate["class"] == "samplemod.machine.CrusherBlock"
+        )
+        self.assertEqual("needs_decision", machine["status"])
+        bindings = {
+            binding["member"]: binding["template"]
+            for binding in machine["rate_bindings"]
+        }
+        self.assertEqual("config_tick_ratio", bindings["getConfiguredTicks"])
+        self.assertEqual("parallel_lanes", bindings["getProcesses"])
+        self.assertNotIn("getSlots", bindings)
+
+        requirements = {
+            entry["field"]: entry["classification"]
+            for entry in proposals["requirement_candidates"]
+        }
+        self.assertEqual("transaction_representable", requirements["fluid_input"])
+        self.assertEqual("transaction_representable", requirements["energy"])
+        self.assertEqual("station_descriptor_representable", requirements["duration"])
+        self.assertEqual("unsupported_live_state", requirements["heat"])
+        self.assertTrue(all(
+            entry["status"] == "needs_decision"
+            for entry in proposals["requirement_candidates"]
+        ))
+
+    def test_propose_command_writes_schema_valid_deterministic_output(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        audit_path = self.root / "audit.json"
+        first = self.root / "proposals-first.json"
+        second = self.root / "proposals-second.json"
+        audit_path.write_text(self.compat_kit.canonical_json(audit))
+
+        self.assertEqual(0, self.compat_kit.main([
+            "propose", str(audit_path), "--output", str(first),
+        ]))
+        self.assertEqual(0, self.compat_kit.main([
+            "propose", str(audit_path), "--output", str(second),
+        ]))
+
+        self.assertEqual(first.read_bytes(), second.read_bytes())
+        proposals = json.loads(first.read_text())
+        self.compat_kit._validate_proposals(proposals)
+        self.assertEqual("auto_storage_compat_proposals", proposals["kind"])
 
     def source_audit(self) -> dict:
         return self.compat_kit.scan_jar(
@@ -3385,6 +3709,7 @@ displayName="Sample Machines"
                 "auto-storage-compat-kit/schema/compat-audit.schema.json",
                 "auto-storage-compat-kit/schema/compat-contract.schema.json",
                 "auto-storage-compat-kit/schema/compat-delta.schema.json",
+                "auto-storage-compat-kit/schema/compat-proposals.schema.json",
                 "auto-storage-compat-kit/schema/compat-report.schema.json",
                 "auto-storage-compat-kit/examples/github-actions/compat-kit.yml",
                 "auto-storage-compat-kit/examples/addon/src/main/java/example/autostorage/ExampleAddon.java",
@@ -3444,6 +3769,7 @@ displayName="Sample Machines"
             "compat-audit.schema.json",
             "compat-contract.schema.json",
             "compat-delta.schema.json",
+            "compat-proposals.schema.json",
             "compat-report.schema.json",
         ):
             (schema_root / name).write_text("{}")
@@ -3456,6 +3782,7 @@ displayName="Sample Machines"
                 "schema/compat-audit.schema.json",
                 "schema/compat-contract.schema.json",
                 "schema/compat-delta.schema.json",
+                "schema/compat-proposals.schema.json",
                 "schema/compat-report.schema.json",
             },
             set(files),

@@ -20,7 +20,9 @@ python3 --version
 ./compat-kit scan \
   --jar target.jar \
   --source target-source \
+  --data-root optional-datapack \
   --output audit.json
+./compat-kit propose audit.json --output proposals.json
 ./compat-kit decide audit.json \
   --output contract-draft.json \
   --next-actions next-actions.md
@@ -40,6 +42,13 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
+Scanner format 8 structurally classifies concrete `Recipe` and
+`RecipeSerializer` implementations. Repeatable `--data-root` inputs use normal
+data-pack precedence and add bounded recipe counts, sample IDs, fields,
+top-level array sizes, NeoForge conditions, and override provenance to the
+audit. Their ordered content digests participate in cache identity. Legacy
+format 7 remains readable for explicit migration, but current-only commands
+reject it.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
@@ -74,6 +83,11 @@ anonymous/local classes, class files carrying `ACC_SYNTHETIC`, and
 `META-INF/versions/` aliases are excluded; the root binary name is scanned once.
 Chance, randomness, generic-ingredient, and capability-mutation method calls
 accept the descriptor syntax emitted by `javap -c -p`.
+
+`propose` emits evidence-backed station/rate/parallel and recipe-requirement
+candidates. Slot count is never treated as throughput. All proposal records
+remain `needs_decision`; transaction, descriptor, and unsupported live/world
+classifications are a review aid, not accepted recipe semantics.
 
 ```bash
 ./compat-kit scaffold --addon contract.json --audit audit.json \
@@ -138,7 +152,7 @@ scaffold an addon without an Auto Storage checkout.
 Bundled scaffolding also compares derived module IDs, entrypoints, source sets,
 and fixtures with existing descriptors before writing. Publication requires
 `publish --version <mod_version>` to match the embedded tool version and
-includes only the explicit addon example and four schema allowlists; local
+includes only the explicit addon example and five schema allowlists; local
 outputs are excluded.
 
 ## Review an update
@@ -149,7 +163,7 @@ outputs are excluded.
   --output delta.json
 ```
 
-The audit, contract, delta, and report schemas are under `schema/`. Once all
+The audit, contract, delta, proposals, and report schemas are under `schema/`. Once all
 family decisions are complete, the contract schema requires dependency and
 repository inputs plus the non-null fixture, positive GameTest count,
 authoritative task, nonempty task list, all twelve exact checks, and every

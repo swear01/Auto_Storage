@@ -11,45 +11,130 @@
     "from_version",
     "to_version",
     "recipe_classes",
+    "recipe_serializers",
     "resource_apis",
     "station_classes",
+    "recipe_data",
     "risks",
     "contract_affected"
   ],
   "properties": {
-    "schema": {"const": 1},
-    "kind": {"const": "auto_storage_compat_delta"},
-    "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
-    "from_version": {"type": "string", "minLength": 1},
-    "to_version": {"type": "string", "minLength": 1},
-    "recipe_classes": {"$ref": "#/$defs/class_delta"},
-    "resource_apis": {"$ref": "#/$defs/class_delta"},
-    "station_classes": {"$ref": "#/$defs/class_delta"},
+    "schema": {
+      "const": 1
+    },
+    "kind": {
+      "const": "auto_storage_compat_delta"
+    },
+    "mod_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$"
+    },
+    "from_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "to_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recipe_classes": {
+      "$ref": "#/$defs/class_delta"
+    },
+    "resource_apis": {
+      "$ref": "#/$defs/class_delta"
+    },
+    "station_classes": {
+      "$ref": "#/$defs/class_delta"
+    },
     "risks": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["added", "removed"],
+      "required": [
+        "added",
+        "removed"
+      ],
       "properties": {
-        "added": {"$ref": "#/$defs/risks"},
-        "removed": {"$ref": "#/$defs/risks"}
+        "added": {
+          "$ref": "#/$defs/risks"
+        },
+        "removed": {
+          "$ref": "#/$defs/risks"
+        }
       }
     },
-    "contract_affected": {"type": "boolean"}
+    "contract_affected": {
+      "type": "boolean"
+    },
+    "recipe_serializers": {
+      "$ref": "#/$defs/class_delta"
+    },
+    "recipe_data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_digest",
+        "to_digest",
+        "sources_changed",
+        "changed"
+      ],
+      "properties": {
+        "from_digest": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          ]
+        },
+        "to_digest": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          ]
+        },
+        "sources_changed": {
+          "type": "boolean"
+        },
+        "changed": {
+          "type": "boolean"
+        }
+      }
+    }
   },
   "$defs": {
     "strings": {
       "type": "array",
-      "items": {"type": "string"},
+      "items": {
+        "type": "string"
+      },
       "uniqueItems": true
     },
     "class_delta": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["added", "removed", "changed"],
+      "required": [
+        "added",
+        "removed",
+        "changed"
+      ],
       "properties": {
-        "added": {"$ref": "#/$defs/strings"},
-        "removed": {"$ref": "#/$defs/strings"},
-        "changed": {"$ref": "#/$defs/strings"}
+        "added": {
+          "$ref": "#/$defs/strings"
+        },
+        "removed": {
+          "$ref": "#/$defs/strings"
+        },
+        "changed": {
+          "$ref": "#/$defs/strings"
+        }
       }
     },
     "risks": {
@@ -57,10 +142,18 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["code", "evidence"],
+        "required": [
+          "code",
+          "evidence"
+        ],
         "properties": {
-          "code": {"type": "string", "pattern": "^[a-z0-9_]+$"},
-          "evidence": {"$ref": "#/$defs/strings"}
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "evidence": {
+            "$ref": "#/$defs/strings"
+          }
         }
       }
     }

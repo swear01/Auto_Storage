@@ -4,35 +4,72 @@
   "title": "Auto Storage compatibility audit",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "scanner_format", "kind", "target", "artifact", "source", "candidates", "risks"],
+  "required": [
+    "schema",
+    "scanner_format",
+    "kind",
+    "target",
+    "artifact",
+    "source",
+    "candidates",
+    "recipe_data",
+    "risks"
+  ],
   "properties": {
-    "schema": {"const": 1},
-    "scanner_format": {"const": 7},
-    "kind": {"const": "auto_storage_compat_audit"},
-    "target": {"$ref": "#/$defs/target"},
+    "schema": {
+      "const": 1
+    },
+    "scanner_format": {
+      "const": 8
+    },
+    "kind": {
+      "const": "auto_storage_compat_audit"
+    },
+    "target": {
+      "$ref": "#/$defs/target"
+    },
     "artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sha256", "size"],
+      "required": [
+        "sha256",
+        "size"
+      ],
       "properties": {
-        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-        "size": {"type": "integer", "minimum": 1}
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["revision", "files"],
+      "required": [
+        "revision",
+        "files"
+      ],
       "properties": {
         "revision": {
           "oneOf": [
-            {"type": "null"},
-            {"type": "string", "pattern": "^[0-9a-f]{40,64}$"}
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40,64}$"
+            }
           ]
         },
         "files": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "uniqueItems": true
         }
       }
@@ -40,25 +77,53 @@
     "candidates": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["recipe_classes", "resource_apis", "station_classes"],
+      "required": [
+        "recipe_classes",
+        "recipe_serializers",
+        "resource_apis",
+        "station_classes"
+      ],
       "properties": {
-        "recipe_classes": {"$ref": "#/$defs/candidates"},
-        "resource_apis": {"$ref": "#/$defs/candidates"},
-        "station_classes": {"$ref": "#/$defs/candidates"}
+        "recipe_classes": {
+          "$ref": "#/$defs/candidates"
+        },
+        "recipe_serializers": {
+          "$ref": "#/$defs/candidates"
+        },
+        "resource_apis": {
+          "$ref": "#/$defs/candidates"
+        },
+        "station_classes": {
+          "$ref": "#/$defs/candidates"
+        }
       }
+    },
+    "recipe_data": {
+      "$ref": "#/$defs/recipe_data"
     },
     "risks": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["code", "disposition", "evidence"],
+        "required": [
+          "code",
+          "disposition",
+          "evidence"
+        ],
         "properties": {
-          "code": {"type": "string", "pattern": "^[a-z0-9_]+$"},
-          "disposition": {"const": "needs_decision"},
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "disposition": {
+            "const": "needs_decision"
+          },
           "evidence": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": {
+              "type": "string"
+            },
             "minItems": 1,
             "uniqueItems": true
           }
@@ -70,11 +135,48 @@
     "target": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mod_id", "display_name", "version"],
+      "required": [
+        "mod_id",
+        "display_name",
+        "version"
+      ],
       "properties": {
-        "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
-        "display_name": {"type": "string", "minLength": 1},
-        "version": {"type": "string", "minLength": 1}
+        "mod_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]+$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "evidence"
+      ],
+      "properties": {
+        "method": {
+          "enum": [
+            "class_hierarchy",
+            "name_term"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
       }
     },
     "candidates": {
@@ -82,10 +184,170 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["class", "public_signature"],
+        "required": [
+          "class",
+          "public_signature",
+          "classification"
+        ],
         "properties": {
-          "class": {"type": "string", "pattern": "^[A-Za-z_$][A-Za-z0-9_$.]*$"},
-          "public_signature": {"type": "string", "minLength": 1}
+          "class": {
+            "type": "string",
+            "pattern": "^[A-Za-z_$][A-Za-z0-9_$.]*$"
+          },
+          "public_signature": {
+            "type": "string",
+            "minLength": 1
+          },
+          "classification": {
+            "$ref": "#/$defs/classification"
+          }
+        }
+      }
+    },
+    "recipe_data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "digest",
+        "sources",
+        "declared_recipes",
+        "effective_recipes",
+        "serializers",
+        "overrides"
+      ],
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "sha256",
+              "declared_recipes"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^(target_jar|data_root_[1-9][0-9]*)$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "declared_recipes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 50000
+              }
+            }
+          }
+        },
+        "serializers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "serializer_id",
+              "recipe_count",
+              "conditional_recipes",
+              "condition_types",
+              "sample_recipe_ids",
+              "fields",
+              "max_array_sizes"
+            ],
+            "properties": {
+              "serializer_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+              },
+              "recipe_count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "sample_recipe_ids": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 16,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+                }
+              },
+              "fields": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "max_array_sizes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "conditional_recipes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "condition_types": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+                }
+              }
+            }
+          }
+        },
+        "overrides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "recipe_id",
+              "sources"
+            ],
+            "properties": {
+              "recipe_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+              },
+              "sources": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "format": {
+          "const": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "declared_recipes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50000
+        },
+        "effective_recipes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50000
         }
       }
     }
