@@ -79,21 +79,41 @@
       "additionalProperties": false,
       "required": [
         "recipe_classes",
+        "recipe_types",
         "recipe_serializers",
+        "recipe_builders",
+        "datagen_classes",
+        "client_viewer_classes",
         "resource_apis",
-        "station_classes"
+        "station_classes",
+        "block_entity_classes"
       ],
       "properties": {
         "recipe_classes": {
           "$ref": "#/$defs/candidates"
         },
+        "recipe_types": {
+          "$ref": "#/$defs/candidates"
+        },
         "recipe_serializers": {
+          "$ref": "#/$defs/candidates"
+        },
+        "recipe_builders": {
+          "$ref": "#/$defs/candidates"
+        },
+        "datagen_classes": {
+          "$ref": "#/$defs/candidates"
+        },
+        "client_viewer_classes": {
           "$ref": "#/$defs/candidates"
         },
         "resource_apis": {
           "$ref": "#/$defs/candidates"
         },
         "station_classes": {
+          "$ref": "#/$defs/candidates"
+        },
+        "block_entity_classes": {
           "$ref": "#/$defs/candidates"
         }
       }

@@ -23,6 +23,7 @@ python3 --version
   --data-root optional-datapack \
   --output audit.json
 ./compat-kit propose audit.json --output proposals.json
+./compat-kit probe audit.json --output runtime-probe
 ./compat-kit decide audit.json \
   --output contract-draft.json \
   --next-actions next-actions.md
@@ -49,6 +50,8 @@ top-level array sizes, NeoForge conditions, and override provenance to the
 audit. Their ordered content digests participate in cache identity. Legacy
 format 7 remains readable for explicit migration, but current-only commands
 reject it.
+Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
+explicitly rescan the exact format-7 artifact; identity or SHA drift fails.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
@@ -88,6 +91,13 @@ accept the descriptor syntax emitted by `javap -c -p`.
 candidates. Slot count is never treated as throughput. All proposal records
 remain `needs_decision`; transaction, descriptor, and unsupported live/world
 classifications are a review aid, not accepted recipe semantics.
+
+`probe` emits a deterministic, server-only GameTest plus `probe-spec.json`.
+The fixture records the bounded sorted loaded RecipeManager inventory and
+target registry identities under an explicit output system property. It has no
+client/reflection path and does not turn unresolved config/capability candidates
+into accepted evidence. `worker-package` emits seven compact deterministic
+issue/worktree/PR handoff files without upstream source or signature bodies.
 
 ```bash
 ./compat-kit scaffold --addon contract.json --audit audit.json \
@@ -152,7 +162,7 @@ scaffold an addon without an Auto Storage checkout.
 Bundled scaffolding also compares derived module IDs, entrypoints, source sets,
 and fixtures with existing descriptors before writing. Publication requires
 `publish --version <mod_version>` to match the embedded tool version and
-includes only the explicit addon example and five schema allowlists; local
+includes only the explicit addon example and six schema allowlists; local
 outputs are excluded.
 
 ## Review an update
@@ -163,7 +173,8 @@ outputs are excluded.
   --output delta.json
 ```
 
-The audit, contract, delta, proposals, and report schemas are under `schema/`. Once all
+The audit, contract, delta, proposals, report, and runtime-probe schemas are
+under `schema/`. Once all
 family decisions are complete, the contract schema requires dependency and
 repository inputs plus the non-null fixture, positive GameTest count,
 authoritative task, nonempty task list, all twelve exact checks, and every

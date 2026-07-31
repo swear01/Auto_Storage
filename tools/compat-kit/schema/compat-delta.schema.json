@@ -11,9 +11,14 @@
     "from_version",
     "to_version",
     "recipe_classes",
+    "recipe_types",
     "recipe_serializers",
+    "recipe_builders",
+    "datagen_classes",
+    "client_viewer_classes",
     "resource_apis",
     "station_classes",
+    "block_entity_classes",
     "recipe_data",
     "risks",
     "contract_affected"
@@ -40,10 +45,25 @@
     "recipe_classes": {
       "$ref": "#/$defs/class_delta"
     },
+    "recipe_types": {
+      "$ref": "#/$defs/class_delta"
+    },
+    "recipe_builders": {
+      "$ref": "#/$defs/class_delta"
+    },
+    "datagen_classes": {
+      "$ref": "#/$defs/class_delta"
+    },
+    "client_viewer_classes": {
+      "$ref": "#/$defs/class_delta"
+    },
     "resource_apis": {
       "$ref": "#/$defs/class_delta"
     },
     "station_classes": {
+      "$ref": "#/$defs/class_delta"
+    },
+    "block_entity_classes": {
       "$ref": "#/$defs/class_delta"
     },
     "risks": {

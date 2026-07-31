@@ -93,6 +93,7 @@ the first layer and later supplied roots override earlier recipes by exact ID.
 Roots and recipe files must be real, non-symlink paths. The deterministic audit
 contains NeoForge identity, artifact SHA/size, source revision and exact source
 paths, structurally classified concrete recipe and serializer classes,
+recipe types, builders, datagen classes, client/viewer wrappers, block entities,
 resource/station candidates, per-serializer recipe counts, bounded sample IDs,
 top-level fields and array cardinalities, NeoForge condition types, override
 provenance, and explicit risk flags. Risk
@@ -138,6 +139,21 @@ recipe candidate into a station or resource list cannot hide it from contract
 review. Every risk-evidence owner must also be one of the audited recipe
 candidates, so risk cannot be detached from the class under review.
 
+Legacy format-7 audits must be regenerated from the exact same reviewed
+artifact rather than edited in place:
+
+```bash
+tools/compat-kit/compat-kit migrate-audit \
+  compat/audits/target/1.2.3-v7.json \
+  --jar build/compat-kit/artifacts/target.jar \
+  --source build/compat-kit/sources/target \
+  --output compat/audits/target/1.2.3.json
+```
+
+Migration rejects a current audit, a different target identity, or different
+artifact bytes. It performs a full current scanner pass and therefore preserves
+no stale format-7 classification.
+
 ### 2a. Generate unresolved machine and requirement proposals
 
 ```bash
@@ -154,6 +170,25 @@ station-descriptor-representable, or unsupported live/world state. Every
 proposal and binding stays `needs_decision`; the output cannot authorize a
 contract, generate runtime reflection, or assert that a candidate machine is a
 valid station.
+
+### 2b. Generate a dedicated-server runtime probe
+
+```bash
+tools/compat-kit/compat-kit probe \
+  compat/audits/target/1.2.3.json \
+  --output build/compat-kit/target-probe
+```
+
+The generated GameTest is server-only and evidence-only. It requires an
+explicit `compatKitProbeOutput` system property, sorts and records every loaded
+`RecipeManager` recipe ID/type/serializer/concrete class plus common public
+ingredient/result values, and records target-namespace block, item, and block
+entity type identities. The probe fails above 50,000 loaded recipes instead of
+truncating silently. It contains no client imports or reflection. Target config
+and capability candidates remain listed as unresolved in `probe-spec.json`
+until reviewed direct-call bindings are supplied; empty arrays do not authorize
+those semantics. Validate collected JSON against both the committed audit and
+`compat-runtime-probe.schema.json` before using it as review evidence.
 
 ### 3. Decide
 
@@ -209,6 +244,20 @@ The target mod ID must produce a valid, non-reserved Java package segment;
 identifiers such as `class`, `true`, or `null` fail before files are written.
 
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
+
+For a one-issue/one-worktree worker, generate the compact handoff package:
+
+```bash
+tools/compat-kit/compat-kit worker-package \
+  compat/contracts/target.json \
+  --audit compat/audits/target/1.2.3.json \
+  --output build/compat-kit/target-worker
+```
+
+The seven deterministic files contain hashes, compact class/recipe summaries,
+unresolved decisions, commands, issue/worker context, and a PR checklist. They
+never embed public-signature bodies or complete upstream source. Existing drift
+and symlinked output paths fail before any file is written.
 
 Repository declarations are build inputs, not discovery hints. A target
 published through Modrinth Maven, Curse Maven, or its own Maven must list the

@@ -31,6 +31,8 @@ MAX_SOURCE_FILES = 10_000
 MAX_RECIPE_FILES = 50_000
 MAX_RECIPE_JSON_BYTES = 1024 * 1024
 MAX_RECIPE_SAMPLES_PER_SERIALIZER = 16
+MAX_RUNTIME_PROBE_RECIPES = 50_000
+MAX_RUNTIME_PROBE_VALUES = 4_096
 TOOL_VERSION = "0.3.0"
 PUBLISHED_ADDON_EXAMPLE_FILES = (
     "src/main/java/example/autostorage/ExampleAddon.java",
@@ -41,6 +43,7 @@ PUBLISHED_SCHEMA_FILES = (
     "compat-delta.schema.json",
     "compat-proposals.schema.json",
     "compat-report.schema.json",
+    "compat-runtime-probe.schema.json",
 )
 REQUIRED_VERIFICATION_CHECKS = (
     "absent_target_no_classload",
@@ -79,6 +82,28 @@ STATION_TERMS = (
     "mill",
     "processor",
     "station",
+)
+RECIPE_BUILDER_TERMS = ("recipebuilder", "recipe_builder")
+DATAGEN_TERMS = ("datagen", "datagenerator", ".data.", ".datagen.")
+CLIENT_VIEWER_TERMS = (
+    ".client.",
+    ".emi.",
+    ".jei.",
+    ".rei.",
+    "recipecategory",
+    "recipeviewer",
+    "recipewidget",
+)
+CURRENT_CANDIDATE_BUCKETS = (
+    "recipe_classes",
+    "recipe_types",
+    "recipe_serializers",
+    "recipe_builders",
+    "datagen_classes",
+    "client_viewer_classes",
+    "station_classes",
+    "block_entity_classes",
+    "resource_apis",
 )
 RISK_PATTERNS = (
     ("chance_output", re.compile(r"\bgetChance(?:\s*\(|:)"), "getChance"),
@@ -422,7 +447,25 @@ def _candidate_bucket(class_name: str) -> str | None:
 
 
 RECIPE_INTERFACE = "net.minecraft.world.item.crafting.Recipe"
+RECIPE_TYPE_INTERFACE = "net.minecraft.world.item.crafting.RecipeType"
 RECIPE_SERIALIZER_INTERFACE = "net.minecraft.world.item.crafting.RecipeSerializer"
+BLOCK_ENTITY_CLASS = "net.minecraft.world.level.block.entity.BlockEntity"
+
+
+def _current_name_bucket(class_name: str) -> tuple[str, str] | None:
+    lowered = class_name.lower()
+    groups = (
+        ("client_viewer_classes", CLIENT_VIEWER_TERMS),
+        ("recipe_builders", RECIPE_BUILDER_TERMS),
+        ("datagen_classes", DATAGEN_TERMS),
+        ("resource_apis", RESOURCE_TERMS),
+        ("station_classes", STATION_TERMS),
+    )
+    for bucket, terms in groups:
+        term = next((term for term in terms if term in lowered), None)
+        if term is not None:
+            return bucket, term
+    return None
 
 
 def _inheritance_path(
@@ -481,14 +524,30 @@ def _classify_candidate(
                     "method": "class_hierarchy",
                     "evidence": serializer_path,
                 }
-        lowered = class_name.lower()
-        for bucket, terms in (
-            ("resource_apis", RESOURCE_TERMS),
-            ("station_classes", STATION_TERMS),
-        ):
-            term = next((term for term in terms if term in lowered), None)
-            if term is not None:
-                return bucket, {"method": "name_term", "evidence": [term]}
+            recipe_type_path = _inheritance_path(
+                class_name,
+                RECIPE_TYPE_INTERFACE,
+                metadata_by_class,
+            )
+            if recipe_type_path is not None:
+                return "recipe_types", {
+                    "method": "class_hierarchy",
+                    "evidence": recipe_type_path,
+                }
+            block_entity_path = _inheritance_path(
+                class_name,
+                BLOCK_ENTITY_CLASS,
+                metadata_by_class,
+            )
+            if block_entity_path is not None:
+                return "block_entity_classes", {
+                    "method": "class_hierarchy",
+                    "evidence": block_entity_path,
+                }
+        name_classification = _current_name_bucket(class_name)
+        if name_classification is not None:
+            bucket, term = name_classification
+            return bucket, {"method": "name_term", "evidence": [term]}
         return None
 
     bucket = _candidate_bucket(class_name)
@@ -1017,7 +1076,9 @@ def _validate_classification(class_name: str, bucket: str, value: dict, location
     if method == "class_hierarchy":
         targets = {
             "recipe_classes": RECIPE_INTERFACE,
+            "recipe_types": RECIPE_TYPE_INTERFACE,
             "recipe_serializers": RECIPE_SERIALIZER_INTERFACE,
+            "block_entity_classes": BLOCK_ENTITY_CLASS,
         }
         if bucket not in targets or evidence[0] != class_name or evidence[-1] != targets[bucket]:
             raise ValueError(f"{location} candidate bucket mismatch")
@@ -1027,9 +1088,16 @@ def _validate_classification(class_name: str, bucket: str, value: dict, location
     if method == "name_term":
         if len(evidence) != 1:
             raise ValueError(f"{location} name-term classification requires one term")
-        expected = _candidate_bucket(class_name)
-        if expected != bucket or evidence[0] not in class_name.lower():
-            raise ValueError(f"{location} candidate bucket mismatch: expected {expected}")
+        expected = _current_name_bucket(class_name)
+        expected_bucket = expected[0] if expected is not None else None
+        if bucket == "recipe_classes":
+            expected_bucket = _candidate_bucket(class_name)
+        elif expected_bucket is None:
+            expected_bucket = _candidate_bucket(class_name)
+        if expected_bucket != bucket or evidence[0] not in class_name.lower():
+            raise ValueError(
+                f"{location} candidate bucket mismatch: expected {expected_bucket}"
+            )
         return
     raise ValueError(f"{location} has invalid classification method")
 
@@ -1263,7 +1331,7 @@ def _validate_audit(audit: dict):
         "station_classes",
     }
     if scanner_format == SCAN_CACHE_VERSION:
-        candidate_buckets.add("recipe_serializers")
+        candidate_buckets = set(CURRENT_CANDIDATE_BUCKETS)
     if not isinstance(candidates, dict) or set(candidates) != candidate_buckets:
         raise ValueError(
             "audit candidates require " + ", ".join(sorted(candidate_buckets))
@@ -1423,12 +1491,7 @@ def scan_jar(
                     raise ValueError("recipe data roots changed during scan")
                 _require_unchanged_artifact(jar, artifact_sha, artifact_size)
                 return cached
-        classified = {
-            "recipe_classes": [],
-            "recipe_serializers": [],
-            "resource_apis": [],
-            "station_classes": [],
-        }
+        classified = {bucket: [] for bucket in CURRENT_CANDIDATE_BUCKETS}
         class_entries = {
             _class_name(name): name
             for name in archive.namelist()
@@ -1530,6 +1593,36 @@ def scan_jar(
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_text(canonical_json(audit))
     return audit
+
+
+def migrate_audit(
+    legacy_audit: dict,
+    jar,
+    *,
+    source=None,
+    cache_dir=None,
+    signature_reader=None,
+    risk_reader=None,
+    class_metadata_reader=None,
+    data_roots=None,
+) -> dict:
+    _validate_audit(legacy_audit)
+    if legacy_audit["scanner_format"] not in LEGACY_SCAN_CACHE_VERSIONS:
+        raise ValueError("migrate-audit requires a legacy scanner-format audit")
+    migrated = scan_jar(
+        jar,
+        source=source,
+        cache_dir=cache_dir,
+        signature_reader=signature_reader,
+        risk_reader=risk_reader,
+        class_metadata_reader=class_metadata_reader,
+        data_roots=data_roots,
+    )
+    if migrated["target"] != legacy_audit["target"]:
+        raise ValueError("migration target identity does not match legacy audit")
+    if migrated["artifact"] != legacy_audit["artifact"]:
+        raise ValueError("migration artifact does not match legacy audit")
+    return migrated
 
 
 def _family_id(class_name: str) -> str:
@@ -3444,12 +3537,7 @@ def diff_audits(old: dict, new: dict) -> dict:
     contract_affected = (
         old["artifact"]["sha256"] != new["artifact"]["sha256"]
     )
-    for bucket in (
-        "recipe_classes",
-        "recipe_serializers",
-        "resource_apis",
-        "station_classes",
-    ):
+    for bucket in CURRENT_CANDIDATE_BUCKETS:
         old_map = _candidate_map(old, bucket)
         new_map = _candidate_map(new, bucket)
         added = sorted(set(new_map) - set(old_map))
@@ -3643,7 +3731,10 @@ def propose_audit(audit: dict) -> dict:
             ],
             "rate_bindings": _rate_binding_candidates(candidate),
         }
-        for candidate in audit["candidates"]["station_classes"]
+        for candidate in (
+            audit["candidates"]["station_classes"]
+            + audit["candidates"]["block_entity_classes"]
+        )
     ]
     requirements = []
     for serializer in audit["recipe_data"]["serializers"]:
@@ -3673,6 +3764,484 @@ def propose_audit(audit: dict) -> dict:
     }
     _validate_proposals(proposals)
     return proposals
+
+
+def _runtime_probe_spec(audit: dict) -> dict:
+    proposals = propose_audit(audit)
+    unresolved = [
+        {
+            "kind": "machine_candidate",
+            "id": candidate["class"],
+            "evidence": candidate["evidence"],
+        }
+        for candidate in proposals["machine_candidates"]
+    ]
+    unresolved.extend(
+        {
+            "kind": "resource_api",
+            "id": candidate["class"],
+            "evidence": [
+                f"{candidate['class']}#public_signature",
+                *candidate["classification"]["evidence"],
+            ],
+        }
+        for candidate in audit["candidates"]["resource_apis"]
+    )
+    return {
+        "schema": 1,
+        "kind": "auto_storage_runtime_probe_spec",
+        "authority": "evidence_only",
+        "target": dict(audit["target"]),
+        "source_audit_digest": hashlib.sha256(
+            canonical_json(audit).encode("utf-8")
+        ).hexdigest(),
+        "limits": {
+            "loaded_recipes": MAX_RUNTIME_PROBE_RECIPES,
+            "config_values": MAX_RUNTIME_PROBE_VALUES,
+            "capability_surfaces": MAX_RUNTIME_PROBE_VALUES,
+        },
+        "unresolved": sorted(
+            unresolved,
+            key=lambda entry: (entry["kind"], entry["id"]),
+        ),
+    }
+
+
+def _runtime_probe_java(audit: dict, spec: dict) -> tuple[str, str]:
+    mod_id = audit["target"]["mod_id"]
+    package_name = f"com.example.autostorageprobe.{_java_segment(mod_id)}"
+    class_name = f"{_pascal(mod_id)}RuntimeProbeGameTests"
+    source = f'''package {package_name};
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
+
+public final class {class_name} {{
+    private static final int MAX_LOADED_RECIPES = {MAX_RUNTIME_PROBE_RECIPES};
+    private static final String TARGET_MOD_ID = "{mod_id}";
+    private static final String SOURCE_AUDIT_DIGEST = "{spec['source_audit_digest']}";
+    private static final Gson GSON = new GsonBuilder()
+            .disableHtmlEscaping()
+            .setPrettyPrinting()
+            .create();
+
+    private {class_name}() {{
+    }}
+
+    @GameTest(template = "empty")
+    public static void collect_runtime_evidence(GameTestHelper helper) {{
+        String outputProperty = System.getProperty("compatKitProbeOutput");
+        if (outputProperty == null || outputProperty.isBlank()) {{
+            helper.fail("compatKitProbeOutput system property is required");
+            return;
+        }}
+        List<RecipeHolder<?>> recipes = helper.getLevel().getRecipeManager().getRecipes()
+                .stream()
+                .sorted(Comparator.comparing(holder -> holder.id().toString()))
+                .toList();
+        if (recipes.size() > MAX_LOADED_RECIPES) {{
+            helper.fail("runtime probe recipe inventory exceeds " + MAX_LOADED_RECIPES);
+            return;
+        }}
+
+        JsonObject root = new JsonObject();
+        root.addProperty("schema", 1);
+        root.addProperty("kind", "auto_storage_runtime_probe");
+        root.addProperty("authority", "evidence_only");
+        JsonObject target = new JsonObject();
+        target.addProperty("mod_id", "{mod_id}");
+        target.addProperty("display_name", {json.dumps(audit['target']['display_name'])});
+        target.addProperty("version", {json.dumps(audit['target']['version'])});
+        root.add("target", target);
+        root.addProperty("source_audit_digest", SOURCE_AUDIT_DIGEST);
+        root.addProperty("loaded_recipe_count", recipes.size());
+
+        JsonArray recipeRecords = new JsonArray();
+        for (RecipeHolder<?> holder : recipes) {{
+            Recipe<?> recipe = holder.value();
+            ItemStack result = recipe.getResultItem(helper.getLevel().registryAccess());
+            JsonObject record = new JsonObject();
+            record.addProperty("id", holder.id().toString());
+            record.addProperty("type", BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType()).toString());
+            record.addProperty("serializer", BuiltInRegistries.RECIPE_SERIALIZER.getKey(recipe.getSerializer()).toString());
+            record.addProperty("class", recipe.getClass().getName());
+            record.addProperty("ingredient_count", recipe.getIngredients().size());
+            record.addProperty("special", recipe.isSpecial());
+            record.addProperty("result_item", result.isEmpty()
+                    ? "minecraft:air"
+                    : BuiltInRegistries.ITEM.getKey(result.getItem()).toString());
+            record.addProperty("result_count", result.isEmpty() ? 0 : result.getCount());
+            recipeRecords.add(record);
+        }}
+        root.add("recipes", recipeRecords);
+
+        JsonObject registries = new JsonObject();
+        registries.add("blocks", targetIds(BuiltInRegistries.BLOCK.keySet().stream()));
+        registries.add("items", targetIds(BuiltInRegistries.ITEM.keySet().stream()));
+        registries.add("block_entity_types", targetIds(
+                BuiltInRegistries.BLOCK_ENTITY_TYPE.keySet().stream()));
+        root.add("registries", registries);
+        root.add("config_values", new JsonArray());
+        root.add("capability_surfaces", new JsonArray());
+
+        Path output = Path.of(outputProperty).toAbsolutePath().normalize();
+        try {{
+            Path parent = output.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            Files.writeString(
+                    output,
+                    GSON.toJson(root) + "\\n",
+                    StandardCharsets.UTF_8);
+        }} catch (IOException error) {{
+            helper.fail("runtime probe output failed: " + error.getMessage());
+            return;
+        }}
+        helper.succeed();
+    }}
+
+    private static JsonArray targetIds(Stream<ResourceLocation> ids) {{
+        JsonArray result = new JsonArray();
+        ids.filter(id -> id.getNamespace().equals(TARGET_MOD_ID))
+                .sorted(Comparator.comparing(ResourceLocation::toString))
+                .forEach(id -> result.add(id.toString()));
+        return result;
+    }}
+}}
+'''
+    return package_name, source
+
+
+def scaffold_runtime_probe(audit: dict, output) -> list[Path]:
+    _validate_audit(audit)
+    if audit["scanner_format"] != SCAN_CACHE_VERSION:
+        raise ValueError("probe requires a current scanner-format audit")
+    spec = _runtime_probe_spec(audit)
+    package_name, source = _runtime_probe_java(audit, spec)
+    package_path = package_name.replace(".", "/")
+    class_name = f"{_pascal(audit['target']['mod_id'])}RuntimeProbeGameTests"
+    files = {
+        "probe-spec.json": canonical_json(spec).encode("utf-8"),
+        f"src/main/java/{package_path}/{class_name}.java": source.encode("utf-8"),
+    }
+    return _materialize(
+        Path(output),
+        files,
+        ".compat-kit-probe-manifest.json",
+        audit,
+    )
+
+
+def validate_runtime_probe_output(output: dict, audit: dict):
+    _validate_audit(audit)
+    expected_keys = {
+        "schema",
+        "kind",
+        "authority",
+        "target",
+        "source_audit_digest",
+        "loaded_recipe_count",
+        "recipes",
+        "registries",
+        "config_values",
+        "capability_surfaces",
+    }
+    if not isinstance(output, dict) or set(output) != expected_keys:
+        raise ValueError("runtime probe output has invalid fields")
+    if (
+        output["schema"] != 1
+        or output["kind"] != "auto_storage_runtime_probe"
+        or output["authority"] != "evidence_only"
+    ):
+        raise ValueError("runtime probe output has invalid identity")
+    if output["target"] != audit["target"]:
+        raise ValueError("runtime probe target does not match audit")
+    expected_digest = hashlib.sha256(
+        canonical_json(audit).encode("utf-8")
+    ).hexdigest()
+    if output["source_audit_digest"] != expected_digest:
+        raise ValueError("runtime probe source audit does not match")
+    recipes = output["recipes"]
+    count = output["loaded_recipe_count"]
+    if (
+        isinstance(count, bool)
+        or not isinstance(count, int)
+        or count < 0
+        or count > MAX_RUNTIME_PROBE_RECIPES
+        or not isinstance(recipes, list)
+        or len(recipes) != count
+    ):
+        raise ValueError("runtime probe recipe count is invalid")
+    recipe_ids = []
+    for index, recipe in enumerate(recipes):
+        if not isinstance(recipe, dict) or set(recipe) != {
+            "id",
+            "type",
+            "serializer",
+            "class",
+            "ingredient_count",
+            "special",
+            "result_item",
+            "result_count",
+        }:
+            raise ValueError(f"runtime probe recipe {index} is invalid")
+        for field in ("id", "type", "serializer", "result_item"):
+            if not isinstance(recipe[field], str) or not RESOURCE_LOCATION.fullmatch(
+                recipe[field]
+            ):
+                raise ValueError(f"runtime probe recipe {index} has invalid {field}")
+        if not isinstance(recipe["class"], str) or not recipe["class"]:
+            raise ValueError(f"runtime probe recipe {index} has invalid class")
+        for field in ("ingredient_count", "result_count"):
+            value = recipe[field]
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"runtime probe recipe {index} has invalid {field}")
+        if not isinstance(recipe["special"], bool):
+            raise ValueError(f"runtime probe recipe {index} has invalid special")
+        recipe_ids.append(recipe["id"])
+    if recipe_ids != sorted(set(recipe_ids)):
+        raise ValueError("runtime probe recipes must be sorted and unique")
+
+    registries = output["registries"]
+    if not isinstance(registries, dict) or set(registries) != {
+        "blocks",
+        "items",
+        "block_entity_types",
+    }:
+        raise ValueError("runtime probe registries are invalid")
+    target_namespace = audit["target"]["mod_id"]
+    for name, values in registries.items():
+        if (
+            not isinstance(values, list)
+            or values != sorted(set(values))
+            or any(
+                not isinstance(value, str)
+                or not RESOURCE_LOCATION.fullmatch(value)
+                for value in values
+            )
+        ):
+            raise ValueError(f"runtime probe registry {name} is invalid")
+        if any(value.split(":", 1)[0] != target_namespace for value in values):
+            raise ValueError(f"runtime probe registry {name} must use target namespace")
+    for name in ("config_values", "capability_surfaces"):
+        values = output[name]
+        if not isinstance(values, list) or len(values) > MAX_RUNTIME_PROBE_VALUES:
+            raise ValueError(f"runtime probe {name} is invalid")
+    return output
+
+
+def _materialize_plain(root: Path, files: dict[str, bytes]) -> list[Path]:
+    root = _validate_materialization_root(root)
+    for relative, payload in sorted(files.items()):
+        path = Path(relative)
+        if path.is_absolute() or ".." in path.parts or not path.parts:
+            raise ValueError(f"generated path is unsafe: {relative}")
+        target = root / path
+        ancestor = root
+        for part in path.parts[:-1]:
+            ancestor /= part
+            if ancestor.is_symlink():
+                raise ValueError(
+                    "generated path parent is a symlink: "
+                    + ancestor.relative_to(root).as_posix()
+                )
+            if ancestor.exists() and not ancestor.is_dir():
+                raise ValueError(
+                    "generated path parent is not a directory: "
+                    + ancestor.relative_to(root).as_posix()
+                )
+        if target.is_symlink():
+            raise ValueError(f"generated path is a symlink: {relative}")
+        if target.exists() and (
+            not target.is_file() or target.read_bytes() != payload
+        ):
+            raise ValueError(f"generated file drift: {relative}")
+    generated = []
+    for relative, payload in sorted(files.items()):
+        target = root / relative
+        if not target.exists():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(payload)
+        if relative == "commands.sh":
+            target.chmod(0o755)
+        generated.append(target)
+    return generated
+
+
+def _worker_candidate_summary(contract: dict, audit: dict) -> dict:
+    proposals = propose_audit(audit)
+    machine_candidates = []
+    for candidate in proposals["machine_candidates"]:
+        compact = dict(candidate)
+        compact["evidence"] = [
+            evidence.replace("#public_signature", "#public-surface")
+            for evidence in candidate["evidence"]
+        ]
+        machine_candidates.append(compact)
+    return {
+        "schema": 1,
+        "kind": "auto_storage_compat_worker_summary",
+        "target": dict(audit["target"]),
+        "counts": {
+            bucket: len(audit["candidates"][bucket])
+            for bucket in CURRENT_CANDIDATE_BUCKETS
+        },
+        "candidates": {
+            bucket: [
+                {
+                    "class": candidate["class"],
+                    "classification": candidate["classification"],
+                }
+                for candidate in audit["candidates"][bucket]
+            ]
+            for bucket in CURRENT_CANDIDATE_BUCKETS
+        },
+        "recipe_data": {
+            "digest": audit["recipe_data"]["digest"],
+            "declared_recipes": audit["recipe_data"]["declared_recipes"],
+            "effective_recipes": audit["recipe_data"]["effective_recipes"],
+            "serializers": audit["recipe_data"]["serializers"],
+        },
+        "risks": audit["risks"],
+        "machine_candidates": machine_candidates,
+        "requirement_candidates": proposals["requirement_candidates"],
+        "unresolved_families": [
+            {
+                "id": family["id"],
+                "class": family["class"],
+                "risks": family["risks"],
+                "evidence": [
+                    evidence.replace("#public_signature", "#public-surface")
+                    for evidence in family["evidence"]
+                ],
+            }
+            for family in contract["families"]
+            if family["status"] == "needs_decision"
+        ],
+    }
+
+
+def worker_package(contract: dict, audit: dict, output) -> list[Path]:
+    validate_contract(contract, require_complete=False, source_audit=audit)
+    if audit["scanner_format"] != SCAN_CACHE_VERSION:
+        raise ValueError("worker-package requires a current scanner-format audit")
+    summary = _worker_candidate_summary(contract, audit)
+    target = audit["target"]
+    unresolved = summary["unresolved_families"]
+    decision_lines = [
+        f"- `{entry['id']}` — `{entry['class']}`"
+        for entry in unresolved
+    ] or ["- No unresolved recipe families."]
+    issue_body = "\n".join([
+        f"## {target['display_name']} compatibility worker",
+        "",
+        "Implement one evidence-reviewed Auto Storage integration from the attached Compat Kit package.",
+        "",
+        "### Evidence",
+        "",
+        f"- Target mod: `{target['mod_id']}` `{target['version']}`",
+        f"- Artifact SHA-256: `{audit['artifact']['sha256']}`",
+        f"- Scanner format: `{audit['scanner_format']}`",
+        f"- Effective recipes: `{audit['recipe_data']['effective_recipes']}`",
+        "",
+        "### Unresolved recipe families",
+        "",
+        *decision_lines,
+        "",
+        "### Acceptance",
+        "",
+        "- Review every unresolved semantic decision against public source/runtime evidence.",
+        "- Use direct typed Auto Storage SDK calls only; no reflection or viewer authority.",
+        "- Add failing tests before production code and keep all declared verification gates green.",
+        "",
+    ])
+    worker_prompt = "\n".join([
+        f"Integrate {target['display_name']} {target['version']} with Auto Storage.",
+        "",
+        "Read AGENTS.md, docs/compat-kit.md, artifact.json, candidate-summary.json, and next-actions.md first.",
+        "Use a dedicated issue branch/worktree and strict RED -> GREEN TDD.",
+        "Treat every proposal as needs_decision until public evidence resolves it.",
+        "Do not use runtime reflection, EMI/JEI semantics, slot-count throughput, silent fallback, or client authority.",
+        "Use the repository Compat Kit and public Auto Storage SDK for registration.",
+        "Run commands.sh gates, update active developer docs, and report exact evidence and remaining rejections.",
+        "",
+    ])
+    next_actions = "\n".join([
+        f"# Next actions for {target['display_name']}",
+        "",
+        *decision_lines,
+        "",
+        "Resolve machine variants, rates, parallelism, typed costs, catalysts, remainders, and unsupported live state from public evidence before code generation.",
+        "",
+    ])
+    artifact = {
+        "schema": 1,
+        "kind": "auto_storage_compat_worker_artifact",
+        "tool_version": TOOL_VERSION,
+        "scanner_format": audit["scanner_format"],
+        "target": dict(target),
+        "artifact": dict(audit["artifact"]),
+        "source": dict(audit["source"]),
+        "recipe_data_digest": audit["recipe_data"]["digest"],
+        "source_audit_digest": hashlib.sha256(
+            canonical_json(audit).encode("utf-8")
+        ).hexdigest(),
+        "contract_digest": _contract_sha256(contract),
+    }
+    commands = """#!/bin/sh
+set -eu
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+tools/compat-kit/compat-kit propose audit.json --output proposals.json
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest scripts.test_compat_kit
+./gradlew build --console=plain --no-daemon
+./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon
+./gradlew runData --console=plain --no-daemon
+git diff --check
+"""
+    pr_body = "\n".join([
+        f"## Summary",
+        "",
+        f"- integrate reviewed `{target['mod_id']}` compatibility evidence",
+        "- preserve direct typed transaction and dedicated-server boundaries",
+        "",
+        "## Verification",
+        "",
+        "- [ ] Compat Kit Python tests",
+        "- [ ] build",
+        "- [ ] target GameTests",
+        "- [ ] compatibility matrix",
+        "- [ ] runData drift check",
+        "",
+        "Closes the worker issue.",
+        "",
+    ])
+    files = {
+        "issue-body.md": issue_body.encode("utf-8"),
+        "worker-prompt.md": worker_prompt.encode("utf-8"),
+        "next-actions.md": next_actions.encode("utf-8"),
+        "artifact.json": canonical_json(artifact).encode("utf-8"),
+        "commands.sh": commands.encode("utf-8"),
+        "candidate-summary.json": canonical_json(summary).encode("utf-8"),
+        "pr-body.md": pr_body.encode("utf-8"),
+    }
+    return _materialize_plain(Path(output), files)
 
 
 def _read_json(path) -> dict:
@@ -3707,6 +4276,23 @@ def _build_parser() -> argparse.ArgumentParser:
     propose = subparsers.add_parser("propose")
     propose.add_argument("audit")
     propose.add_argument("--output", required=True)
+
+    migrate = subparsers.add_parser("migrate-audit")
+    migrate.add_argument("audit")
+    migrate.add_argument("--jar", required=True)
+    migrate.add_argument("--source")
+    migrate.add_argument("--data-root", action="append", default=[])
+    migrate.add_argument("--output", required=True)
+    migrate.add_argument("--cache", default="build/compat-kit/cache")
+
+    probe = subparsers.add_parser("probe")
+    probe.add_argument("audit")
+    probe.add_argument("--output", required=True)
+
+    worker = subparsers.add_parser("worker-package")
+    worker.add_argument("contract")
+    worker.add_argument("--audit", required=True)
+    worker.add_argument("--output", required=True)
 
     delta = subparsers.add_parser("diff")
     delta.add_argument("old_audit")
@@ -3757,6 +4343,25 @@ def main(argv=None) -> int:
             action_path.write_text(actions)
         elif args.command == "propose":
             _write_json(args.output, propose_audit(_read_json(args.audit)))
+        elif args.command == "migrate-audit":
+            _write_json(
+                args.output,
+                migrate_audit(
+                    _read_json(args.audit),
+                    args.jar,
+                    source=args.source,
+                    cache_dir=args.cache,
+                    data_roots=args.data_root,
+                ),
+            )
+        elif args.command == "probe":
+            scaffold_runtime_probe(_read_json(args.audit), args.output)
+        elif args.command == "worker-package":
+            worker_package(
+                _read_json(args.contract),
+                _read_json(args.audit),
+                args.output,
+            )
         elif args.command == "diff":
             old = _read_json(args.old_audit)
             new_path = Path(args.new_target)

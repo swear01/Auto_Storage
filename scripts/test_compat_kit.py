@@ -302,6 +302,58 @@ class CompatKitAuditTests(unittest.TestCase):
             serializer_classes,
         )
 
+    def test_scan_separates_recipe_types_builders_datagen_viewers_and_block_entities(self):
+        structural_jar = self.root / "samplemod-candidate-groups.jar"
+        write_fixture_jar(structural_jar)
+        extra_classes = (
+            "samplemod/process/CrusherRecipeType.class",
+            "samplemod/data/CrusherRecipeBuilder.class",
+            "samplemod/data/CrusherDataGen.class",
+            "samplemod/client/jei/CrusherRecipeCategory.class",
+            "samplemod/machine/CrusherBlockEntity.class",
+        )
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            for entry in extra_classes:
+                archive.writestr(entry, b"structural fixture")
+
+        metadata = {
+            "samplemod.process.CrusherRecipeType": {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": ["net.minecraft.world.item.crafting.RecipeType"],
+            },
+            "samplemod.machine.CrusherBlockEntity": {
+                "access_flags": 0,
+                "super_class": "net.minecraft.world.level.block.entity.BlockEntity",
+                "interfaces": [],
+            },
+        }
+
+        audit = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+            class_metadata_reader=lambda class_name: metadata.get(class_name, {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": [],
+            }),
+        )
+
+        expected = {
+            "recipe_types": "samplemod.process.CrusherRecipeType",
+            "recipe_builders": "samplemod.data.CrusherRecipeBuilder",
+            "datagen_classes": "samplemod.data.CrusherDataGen",
+            "client_viewer_classes": "samplemod.client.jei.CrusherRecipeCategory",
+            "block_entity_classes": "samplemod.machine.CrusherBlockEntity",
+        }
+        for bucket, class_name in expected.items():
+            with self.subTest(bucket=bucket):
+                self.assertEqual(
+                    [class_name],
+                    [entry["class"] for entry in audit["candidates"][bucket]],
+                )
+
     def test_scan_resolves_real_transitive_recipe_hierarchy_without_name_guessing(self):
         structural_jar = self.root / "samplemod-real-structural.jar"
         write_structural_fixture_jar(self.root, structural_jar)
@@ -329,7 +381,17 @@ class CompatKitAuditTests(unittest.TestCase):
             {"samplemod.serialization.CrusherCodec"},
             serializers,
         )
-        self.assertNotIn("samplemod.client.RecipeWidget", json.dumps(audit))
+        self.assertNotIn(
+            "samplemod.client.RecipeWidget",
+            {entry["class"] for entry in audit["candidates"]["recipe_classes"]},
+        )
+        self.assertEqual(
+            ["samplemod.client.RecipeWidget"],
+            [
+                entry["class"]
+                for entry in audit["candidates"]["client_viewer_classes"]
+            ],
+        )
 
     def test_scan_summarizes_recipe_json_and_explicit_data_root_overrides(self):
         self.assertIn(
@@ -1058,7 +1120,13 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertIn("recipe_serializers", legacy["candidates"])
         legacy["scanner_format"] = 7
         legacy.pop("recipe_data")
-        legacy["candidates"].pop("recipe_serializers")
+        for bucket in tuple(legacy["candidates"]):
+            if bucket not in {
+                "recipe_classes",
+                "resource_apis",
+                "station_classes",
+            }:
+                legacy["candidates"].pop(bucket)
         for records in legacy["candidates"].values():
             for record in records:
                 record.pop("classification")
@@ -1070,6 +1138,55 @@ class CompatKitAuditTests(unittest.TestCase):
             "unsupported audit scanner format",
         ):
             self.compat_kit._validate_audit(audit)
+
+    def test_migrate_audit_requires_legacy_evidence_and_rescans_exact_artifact(self):
+        current = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        legacy = copy.deepcopy(current)
+        legacy["scanner_format"] = 7
+        legacy.pop("recipe_data")
+        for bucket in tuple(legacy["candidates"]):
+            if bucket not in {
+                "recipe_classes",
+                "resource_apis",
+                "station_classes",
+            }:
+                legacy["candidates"].pop(bucket)
+        for records in legacy["candidates"].values():
+            for record in records:
+                record.pop("classification")
+
+        migrated = self.compat_kit.migrate_audit(
+            legacy,
+            self.jar,
+            signature_reader=self.signatures,
+        )
+
+        self.assertEqual(self.compat_kit.SCAN_CACHE_VERSION, migrated["scanner_format"])
+        self.assertEqual(current["artifact"], migrated["artifact"])
+        self.assertIn("recipe_data", migrated)
+        self.assertEqual(
+            set(self.compat_kit.CURRENT_CANDIDATE_BUCKETS),
+            set(migrated["candidates"]),
+        )
+        with self.assertRaisesRegex(ValueError, "legacy scanner-format audit"):
+            self.compat_kit.migrate_audit(
+                current,
+                self.jar,
+                signature_reader=self.signatures,
+            )
+
+        args = self.compat_kit._build_parser().parse_args([
+            "migrate-audit",
+            "legacy.json",
+            "--jar",
+            "target.jar",
+            "--output",
+            "current.json",
+        ])
+        self.assertEqual("migrate-audit", args.command)
 
     def test_scan_rejects_malformed_current_cache_structure(self):
         cache = self.root / "cache"
@@ -1710,6 +1827,169 @@ displayName="Sample Machines"
         proposals = json.loads(first.read_text())
         self.compat_kit._validate_proposals(proposals)
         self.assertEqual("auto_storage_compat_proposals", proposals["kind"])
+
+    def test_runtime_probe_scaffold_is_deterministic_bounded_and_server_only(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        output = self.root / "runtime-probe"
+
+        first = self.compat_kit.scaffold_runtime_probe(audit, output)
+        first_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in first
+        }
+        second = self.compat_kit.scaffold_runtime_probe(audit, output)
+        second_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in second
+        }
+
+        self.assertEqual(first_bytes, second_bytes)
+        probe_spec = json.loads((output / "probe-spec.json").read_text())
+        self.assertEqual("evidence_only", probe_spec["authority"])
+        self.assertEqual(50_000, probe_spec["limits"]["loaded_recipes"])
+        self.assertTrue(probe_spec["unresolved"])
+        sources = list((output / "src/main/java").rglob("*.java"))
+        self.assertEqual(1, len(sources))
+        source = sources[0].read_text()
+        self.assertIn("@GameTest", source)
+        self.assertIn("getRecipeManager().getRecipes()", source)
+        self.assertIn("BuiltInRegistries.RECIPE_TYPE", source)
+        self.assertIn("BuiltInRegistries.RECIPE_SERIALIZER", source)
+        self.assertIn("BuiltInRegistries.BLOCK_ENTITY_TYPE", source)
+        self.assertIn("getResultItem", source)
+        self.assertIn("compatKitProbeOutput", source)
+        self.assertNotIn("net.minecraft.client", source)
+        self.assertNotIn("java.lang.reflect", source)
+        self.assertNotIn("Class.forName", source)
+
+        args = self.compat_kit._build_parser().parse_args([
+            "probe",
+            "audit.json",
+            "--output",
+            "probe-output",
+        ])
+        self.assertEqual("probe", args.command)
+
+    def test_runtime_probe_output_validation_rejects_unordered_or_foreign_evidence(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        digest = hashlib.sha256(
+            self.compat_kit.canonical_json(audit).encode()
+        ).hexdigest()
+        output = {
+            "schema": 1,
+            "kind": "auto_storage_runtime_probe",
+            "authority": "evidence_only",
+            "target": audit["target"],
+            "source_audit_digest": digest,
+            "loaded_recipe_count": 2,
+            "recipes": [
+                {
+                    "id": "minecraft:a",
+                    "type": "minecraft:crafting",
+                    "serializer": "minecraft:crafting_shaped",
+                    "class": "sample.A",
+                    "ingredient_count": 1,
+                    "special": False,
+                    "result_item": "minecraft:stick",
+                    "result_count": 4,
+                },
+                {
+                    "id": "samplemod:b",
+                    "type": "samplemod:crusher",
+                    "serializer": "samplemod:crusher",
+                    "class": "sample.B",
+                    "ingredient_count": 1,
+                    "special": False,
+                    "result_item": "samplemod:dust",
+                    "result_count": 1,
+                },
+            ],
+            "registries": {
+                "blocks": ["samplemod:crusher"],
+                "items": ["samplemod:crusher"],
+                "block_entity_types": ["samplemod:crusher"],
+            },
+            "config_values": [],
+            "capability_surfaces": [],
+        }
+
+        self.compat_kit.validate_runtime_probe_output(output, audit)
+        output["recipes"].reverse()
+        with self.assertRaisesRegex(ValueError, "recipes must be sorted"):
+            self.compat_kit.validate_runtime_probe_output(output, audit)
+        output["recipes"].reverse()
+        output["registries"]["blocks"] = ["othermod:crusher"]
+        with self.assertRaisesRegex(ValueError, "target namespace"):
+            self.compat_kit.validate_runtime_probe_output(output, audit)
+
+    def test_worker_package_is_compact_byte_deterministic_and_source_free(self):
+        audit = self.source_audit()
+        contract, _ = self.compat_kit.decide_audit(audit)
+        output = self.root / "worker-package"
+
+        first = self.compat_kit.worker_package(contract, audit, output)
+        first_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in first
+        }
+        second = self.compat_kit.worker_package(contract, audit, output)
+        second_bytes = {
+            path.relative_to(output).as_posix(): path.read_bytes()
+            for path in second
+        }
+
+        expected = {
+            "issue-body.md",
+            "worker-prompt.md",
+            "next-actions.md",
+            "artifact.json",
+            "commands.sh",
+            "candidate-summary.json",
+            "pr-body.md",
+        }
+        self.assertEqual(expected, set(first_bytes))
+        self.assertEqual(first_bytes, second_bytes)
+        combined = b"\n".join(first_bytes.values()).decode()
+        self.assertNotIn(str(self.root), combined)
+        self.assertNotIn("public_signature", combined)
+        self.assertNotIn("Compiled from", combined)
+        summary = json.loads((output / "candidate-summary.json").read_text())
+        self.assertEqual("samplemod", summary["target"]["mod_id"])
+        self.assertEqual(2, summary["counts"]["recipe_classes"])
+        self.assertEqual(
+            2,
+            len(summary["unresolved_families"]),
+        )
+        self.assertTrue(os.access(output / "commands.sh", os.X_OK))
+
+        args = self.compat_kit._build_parser().parse_args([
+            "worker-package",
+            "contract.json",
+            "--audit",
+            "audit.json",
+            "--output",
+            "worker-output",
+        ])
+        self.assertEqual("worker-package", args.command)
+
+    def test_worker_package_rejects_symlinked_output_before_writing(self):
+        audit = self.source_audit()
+        contract, _ = self.compat_kit.decide_audit(audit)
+        outside = self.root / "outside"
+        outside.mkdir()
+        output = self.root / "worker-link"
+        output.symlink_to(outside, target_is_directory=True)
+
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            self.compat_kit.worker_package(contract, audit, output)
+
+        self.assertEqual([], list(outside.iterdir()))
 
     def source_audit(self) -> dict:
         return self.compat_kit.scan_jar(
@@ -3711,6 +3991,7 @@ displayName="Sample Machines"
                 "auto-storage-compat-kit/schema/compat-delta.schema.json",
                 "auto-storage-compat-kit/schema/compat-proposals.schema.json",
                 "auto-storage-compat-kit/schema/compat-report.schema.json",
+                "auto-storage-compat-kit/schema/compat-runtime-probe.schema.json",
                 "auto-storage-compat-kit/examples/github-actions/compat-kit.yml",
                 "auto-storage-compat-kit/examples/addon/src/main/java/example/autostorage/ExampleAddon.java",
                 "auto-storage-compat-kit/templates/craftingtests.platform.nbt",
@@ -3771,6 +4052,7 @@ displayName="Sample Machines"
             "compat-delta.schema.json",
             "compat-proposals.schema.json",
             "compat-report.schema.json",
+            "compat-runtime-probe.schema.json",
         ):
             (schema_root / name).write_text("{}")
         (schema_root / "review-sentinel.json").write_text("{}")
@@ -3784,6 +4066,7 @@ displayName="Sample Machines"
                 "schema/compat-delta.schema.json",
                 "schema/compat-proposals.schema.json",
                 "schema/compat-report.schema.json",
+                "schema/compat-runtime-probe.schema.json",
             },
             set(files),
         )
