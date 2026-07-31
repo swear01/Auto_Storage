@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatCreate",
   "fixture": "createFixture",
+  "expectedTests": 13,
   "dependencies": [
     "maven.modrinth:create:${create_ci_version}"
   ]

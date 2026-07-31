@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatArsNouveau",
   "fixture": "arsNouveauFixture",
+  "expectedTests": 11,
   "dependencies": [
     "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}",
     "maven.modrinth:geckolib:${geckolib_ci_version}",

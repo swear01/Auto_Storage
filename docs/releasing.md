@@ -70,8 +70,9 @@ requirement facts. EMI is client-required with the supported range
 as required. Optional compatibility fixtures are CI evidence, not player-facing
 exact dependency pins.
 
-The Wiki `Addon Development` page mirrors `docs/addon-development.md` for addon
-authors but is intentionally excluded from the player-manual Home contents and
+The Wiki `Addon Development` and `Compat Kit` pages mirror
+`docs/addon-development.md` and `docs/compat-kit.md` for developers. Both are
+intentionally excluded from the player-manual Home contents and
 sidebar.
 
 Do not feature an old development capture merely to clear a platform suggestion.
@@ -123,13 +124,14 @@ The matching `docs/release-notes/<mod_version>.md` file is mandatory; the
 workflow prepends it to generated commit history and fails before publishing if
 it is missing. Breaking and migration warnings belong in that versioned file so
 GitHub, Modrinth, and CurseForge receive the same player-facing notice.
-For an SDK release, clone `git@github.com:swear01/Auto_Storage.wiki.git`, copy
-the authoritative `docs/addon-development.md` content to
-`Addon-Development.md` (rewriting repository-relative links to canonical
-`swear01/Auto_Storage` links), and push that Wiki commit before creating the
-release tag. Do not add the developer page to the player-manual Home contents
-or sidebar. The Wiki page must not contain an older API surface than the tagged
-guide.
+For an SDK or Compat Kit release, clone
+`https://github.com/swear01/Auto_Storage.wiki.git`, copy the authoritative
+`docs/addon-development.md` and `docs/compat-kit.md` content to
+`Addon-Development.md` and `Compat-Kit.md` (rewriting repository-relative links
+to canonical `swear01/Auto_Storage` links), and push that Wiki commit before
+creating the release tag. Do not add either developer page to the player-manual
+Home contents or sidebar. The Wiki pages must not contain an older API or tool
+surface than the tagged guides.
 The workflow reruns build, minimum/latest EMI compilation, every isolated and
 combined GameTest gate, Python tests, and datagen drift before publishing.
 
@@ -148,10 +150,11 @@ gh run list --workflow Release --limit 1
 
 The workflow publishes the player alpha jar to GitHub, Modrinth, and
 CurseForge. After the three-platform upload succeeds, it attaches the
-compile-only API jar, API sources, and API Javadocs to the same GitHub Release.
-Those SDK assets are not sent to Modrinth or CurseForge as player files. A
-missing secret, missing variable, tag mismatch, test failure, or platform/API
-asset upload failure keeps the workflow red.
+compile-only API jar, API sources, API Javadocs, and reproducible
+`auto-storage-compat-kit-<version>.zip` to the same GitHub Release. Those
+developer assets are not sent to Modrinth or CurseForge as player files. A
+missing secret, missing variable, tag mismatch, test failure, or
+platform/developer-asset upload failure keeps the workflow red.
 
 ## Verify
 
@@ -170,8 +173,10 @@ rebuild; only the uploaded workflow artifact is release evidence. Also verify
 the GitHub Release contains the matching
 `auto_storage-<version>-api.jar`,
 `auto_storage-<version>-api-sources.jar`, and
-`auto_storage-<version>-api-javadoc.jar`, then run an addon compile through the
-public dependency in `docs/addon-development.md`. Finally verify alpha status,
+`auto_storage-<version>-api-javadoc.jar`, plus
+`auto-storage-compat-kit-<version>.zip`; run an addon compile through the public
+dependency in `docs/addon-development.md`, and run
+`compat-kit --help` from the extracted archive. Finally verify alpha status,
 Minecraft 1.21.1, NeoForge, Java 21, client/server environment, EMI/Patchouli
 dependencies, changelog, source/issues links, and the project icon.
 

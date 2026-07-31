@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatEvilCraft",
   "fixture": "evilCraftFixture",
+  "expectedTests": 10,
   "dependencies": [
     "maven.modrinth:evilcraft:${evilcraft_ci_version}",
     "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"

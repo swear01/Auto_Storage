@@ -1,0 +1,402 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/swear01/Auto_Storage/tools/compat-kit/schema/compat-contract.schema.json",
+  "title": "Auto Storage compatibility contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "target", "source_audit_sha256", "source_recipe_inventory_sha256", "families", "verification"],
+  "properties": {
+    "schema": {"const": 1},
+    "kind": {"const": "auto_storage_compat_contract"},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mod_id", "display_name", "version"],
+      "properties": {
+        "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+        "display_name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "dependency": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
+        },
+        "repositories": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^https://\\S+$"},
+          "uniqueItems": true
+        },
+        "runtime_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "source_audit_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_recipe_inventory_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "families": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "class",
+          "status",
+          "recipe_type",
+          "station",
+          "inputs",
+          "outputs",
+          "costs",
+          "risks",
+          "evidence",
+          "decision"
+        ],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "class": {"type": "string", "minLength": 1},
+          "status": {"enum": ["accepted", "rejected", "needs_decision"]},
+          "recipe_type": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]},
+          "station": {
+            "oneOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["descriptor_id", "category", "variants"],
+                "properties": {
+                  "descriptor_id": {"type": "string", "minLength": 1},
+                  "category": {"enum": ["instant", "process", "transform"]},
+                  "variants": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["item", "rate"],
+                      "properties": {
+                        "item": {"type": "string", "minLength": 1},
+                        "rate": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["numerator", "denominator"],
+                          "properties": {
+                            "numerator": {"type": "integer", "minimum": 0},
+                            "denominator": {"type": "integer", "minimum": 1}
+                          }
+                        },
+                        "bounds": {"type": "string", "minLength": 1}
+                      }
+                    }
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {"category": {"const": "process"}},
+                      "required": ["category"]
+                    },
+                    "then": {
+                      "properties": {
+                        "variants": {
+                          "items": {
+                            "properties": {
+                              "rate": {
+                                "properties": {
+                                  "numerator": {"minimum": 1}
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {"category": {"const": "instant"}},
+                      "required": ["category"]
+                    },
+                    "then": {
+                      "properties": {
+                        "variants": {
+                          "items": {
+                            "properties": {
+                              "rate": {
+                                "properties": {
+                                  "numerator": {"const": 0}
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "inputs": {"$ref": "#/$defs/terms"},
+          "outputs": {"$ref": "#/$defs/terms"},
+          "costs": {"$ref": "#/$defs/costs"},
+          "risks": {
+            "type": "array",
+            "items": {"type": "string"},
+            "uniqueItems": true
+          },
+          "evidence": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "decision": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]}
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"status": {"const": "accepted"}},
+              "required": ["status"]
+            },
+            "then": {
+              "properties": {
+                "recipe_type": {"type": "string", "minLength": 1},
+                "station": {"type": "object"},
+                "inputs": {"minItems": 1},
+                "outputs": {
+                  "minItems": 1,
+                  "contains": {
+                    "type": "object",
+                    "properties": {"role": {"const": "primary"}},
+                    "required": ["role"]
+                  }
+                },
+                "decision": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"status": {"const": "rejected"}},
+              "required": ["status"]
+            },
+            "then": {
+              "properties": {
+                "decision": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        ]
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixture",
+        "expected_game_tests",
+        "game_test_task",
+        "gradle_tasks",
+        "checks",
+        "evidence"
+      ],
+      "properties": {
+        "fixture": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]},
+        "expected_game_tests": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "integer", "minimum": 1}
+          ]
+        },
+        "game_test_task": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"}
+          ]
+        },
+        "gradle_tasks": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"},
+          "uniqueItems": true
+        },
+        "checks": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "uniqueItems": true
+        },
+        "evidence": {
+          "type": "object",
+          "propertyNames": {"pattern": "^[a-z0-9_]+$"},
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["task", "source", "marker"],
+              "properties": {
+                "task": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*$"},
+                "source": {"type": "string", "minLength": 1},
+                "marker": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["families"],
+        "properties": {
+          "families": {
+            "contains": {
+              "type": "object",
+              "required": ["status"],
+              "properties": {
+                "status": {"const": "needs_decision"}
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "target": {
+            "required": [
+              "mod_id",
+              "display_name",
+              "version",
+              "dependency",
+              "repositories",
+              "runtime_dependencies"
+            ]
+          },
+          "verification": {
+            "properties": {
+              "fixture": {"type": "string", "minLength": 1},
+              "expected_game_tests": {"type": "integer", "minimum": 1},
+              "game_test_task": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+              },
+              "gradle_tasks": {"minItems": 1},
+              "checks": {
+                "minItems": 12,
+                "maxItems": 12,
+                "items": {
+                  "enum": [
+                    "absent_target_no_classload",
+                    "present_target_load_once",
+                    "ingredient_shortage_atomic",
+                    "destination_capacity_atomic",
+                    "checked_overflow_atomic",
+                    "stale_recipe_holder_atomic",
+                    "catalyst_tool_remainder_exact",
+                    "multi_output_merge_exact",
+                    "mixed_resource_rollback_atomic",
+                    "dedicated_server_client_isolation",
+                    "api_only_compilation",
+                    "all_mod_coexistence"
+                  ]
+                },
+                "allOf": [
+                  {"contains": {"const": "absent_target_no_classload"}},
+                  {"contains": {"const": "present_target_load_once"}},
+                  {"contains": {"const": "ingredient_shortage_atomic"}},
+                  {"contains": {"const": "destination_capacity_atomic"}},
+                  {"contains": {"const": "checked_overflow_atomic"}},
+                  {"contains": {"const": "stale_recipe_holder_atomic"}},
+                  {"contains": {"const": "catalyst_tool_remainder_exact"}},
+                  {"contains": {"const": "multi_output_merge_exact"}},
+                  {"contains": {"const": "mixed_resource_rollback_atomic"}},
+                  {"contains": {"const": "dedicated_server_client_isolation"}},
+                  {"contains": {"const": "api_only_compilation"}},
+                  {"contains": {"const": "all_mod_coexistence"}}
+                ]
+              },
+              "evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "absent_target_no_classload",
+                  "present_target_load_once",
+                  "ingredient_shortage_atomic",
+                  "destination_capacity_atomic",
+                  "checked_overflow_atomic",
+                  "stale_recipe_holder_atomic",
+                  "catalyst_tool_remainder_exact",
+                  "multi_output_merge_exact",
+                  "mixed_resource_rollback_atomic",
+                  "dedicated_server_client_isolation",
+                  "api_only_compilation",
+                  "all_mod_coexistence"
+                ],
+                "properties": {
+                  "absent_target_no_classload": {},
+                  "present_target_load_once": {},
+                  "ingredient_shortage_atomic": {},
+                  "destination_capacity_atomic": {},
+                  "checked_overflow_atomic": {},
+                  "stale_recipe_holder_atomic": {},
+                  "catalyst_tool_remainder_exact": {},
+                  "multi_output_merge_exact": {},
+                  "mixed_resource_rollback_atomic": {},
+                  "dedicated_server_client_isolation": {},
+                  "api_only_compilation": {},
+                  "all_mod_coexistence": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "terms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "resource_kind", "amount"],
+        "properties": {
+          "role": {"type": "string", "minLength": 1},
+          "resource_kind": {"type": "string", "minLength": 1},
+          "amount": {
+            "oneOf": [
+              {"type": "integer", "minimum": 1},
+              {"type": "string", "minLength": 1}
+            ]
+          },
+          "selector": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "costs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resource_kind", "amount"],
+        "properties": {
+          "resource_kind": {"type": "string", "minLength": 1},
+          "amount": {
+            "oneOf": [
+              {"type": "integer", "minimum": 1},
+              {"type": "string", "minLength": 1}
+            ]
+          },
+          "selector": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

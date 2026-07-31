@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/swear01/Auto_Storage/tools/compat-kit/schema/compat-audit.schema.json",
+  "title": "Auto Storage compatibility audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scanner_format", "kind", "target", "artifact", "source", "candidates", "risks"],
+  "properties": {
+    "schema": {"const": 1},
+    "scanner_format": {"const": 7},
+    "kind": {"const": "auto_storage_compat_audit"},
+    "target": {"$ref": "#/$defs/target"},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "size"],
+      "properties": {
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "size": {"type": "integer", "minimum": 1}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "files"],
+      "properties": {
+        "revision": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^[0-9a-f]{40,64}$"}
+          ]
+        },
+        "files": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "candidates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipe_classes", "resource_apis", "station_classes"],
+      "properties": {
+        "recipe_classes": {"$ref": "#/$defs/candidates"},
+        "resource_apis": {"$ref": "#/$defs/candidates"},
+        "station_classes": {"$ref": "#/$defs/candidates"}
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "disposition", "evidence"],
+        "properties": {
+          "code": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "disposition": {"const": "needs_decision"},
+          "evidence": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mod_id", "display_name", "version"],
+      "properties": {
+        "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+        "display_name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["class", "public_signature"],
+        "properties": {
+          "class": {"type": "string", "pattern": "^[A-Za-z_$][A-Za-z0-9_$.]*$"},
+          "public_signature": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

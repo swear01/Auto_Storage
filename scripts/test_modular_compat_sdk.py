@@ -25,6 +25,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             self.assertEqual("both", module["side"])
             self.assertTrue(module["requires"])
             self.assertTrue(module["dependencies"])
+            self.assertGreater(module["expectedTests"], 0)
             class_path = Path(
                 "src/compat",
                 module["id"].split(":", 1)[1],
@@ -46,6 +47,77 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn("JsonSlurper", build)
         self.assertIn("generateCompatModuleIndex", build)
         self.assertNotIn("def compatModules = [", build)
+
+    def test_descriptor_build_wires_new_fixture_run_and_test_gate_without_central_switches(self):
+        build = (ROOT / "build.gradle").read_text()
+        self.assertIn("sourceSets.maybeCreate(spec.fixture)", build)
+        self.assertRegex(
+            build,
+            r"(?s)compatModules\.each \{ spec ->.*?"
+            r"addModdingDependenciesTo sourceSets\[spec\.fixture\]",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)compatModules\.each \{ spec ->.*?"
+            r"\"\$\{spec\.fixtureModId\}\".*?"
+            r"sourceSet\(sourceSets\[spec\.fixture\]\)",
+        )
+        self.assertIn('"${spec.runName}"', build)
+        self.assertIn("tasks.named(spec.runTask)", build)
+        self.assertIn("spec.expectedTests", build)
+        self.assertIn(
+            "descriptor.expectedTests instanceof Integer",
+            build,
+        )
+        self.assertNotIn(
+            "descriptor.expectedTests instanceof Number",
+            build,
+        )
+        self.assertIn("descriptor.auditArtifact", build)
+        self.assertIn(
+            "descriptor.dependencies[0] != auditArtifact.dependency",
+            build,
+        )
+        self.assertIn(
+            "!descriptor.runtimeDependencies.contains(auditArtifact.dependency)",
+            build,
+        )
+        self.assertIn("descriptor.repositories", build)
+        self.assertIn(
+            "descriptor.repositories == null ? [] : descriptor.repositories",
+            build,
+        )
+        self.assertIn("compatModules.collectMany { it.repositories }", build)
+        self.assertIn(
+            "compatModules.collectMany { it.repositories }.unique(false).each",
+            build,
+        )
+        self.assertNotRegex(
+            build,
+            r"(?s)repositories:\s*descriptorRepositories\.collect\s*\{.*?\}\.sort\(\)",
+        )
+        self.assertIn("url = uri(repository)", build)
+        self.assertIn("verifyCompatArtifact", build)
+        self.assertIn("MessageDigest.getInstance(\"SHA-256\")", build)
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\(spec\.runTask\).*?dependsOn verifyTask",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\('check'\).*?dependsOn compatArtifactVerificationTasks",
+        )
+        self.assertIn(
+            "def runName = descriptor.fixture.substring(",
+            build,
+        )
+        self.assertNotIn("def compatPascalName", build)
+        for fixture_id in (
+            "auto_storage_mekanism_fixture {",
+            "auto_storage_botania_fixture {",
+            "auto_storage_create_fixture {",
+        ):
+            self.assertNotIn(fixture_id, build)
 
     def test_registration_and_reload_lifecycle_are_fail_closed_and_ordered(self):
         addon = (
@@ -149,8 +221,8 @@ class ModularCompatSdkTests(unittest.TestCase):
     def test_bundled_modules_compile_against_the_api_artifact(self):
         build = (ROOT / "build.gradle").read_text()
         compat_source_sets = re.search(
-            r"def compatSourceSets = \[:\](?P<body>.*?)"
-            r"def apiClassNames =",
+            r"compatSourceSets\[spec\.id\] = "
+            r"sourceSets\.create\(spec\.sourceSet\) \{(?P<body>.*?)\n\s*\}",
             build,
             re.DOTALL,
         ).group("body")
@@ -232,6 +304,7 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertIn(":api", guide)
         self.assertIn("api-sources.jar", guide)
         self.assertIn("api-javadoc.jar", guide)
+        self.assertIn("Compat Kit", guide)
         readme = (ROOT / "README.md").read_text()
         self.assertIn("docs/addon-development.md", readme)
         release = (ROOT / ".github/workflows/release.yml").read_text()

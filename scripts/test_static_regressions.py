@@ -19,6 +19,30 @@ class StaticRegressionTests(unittest.TestCase):
     def read_compat_module(self, module_id: str) -> str:
         return self.read_required(f"src/compat/{module_id}/compat-module.json")
 
+    def assert_descriptor_driven_fixture(
+        self,
+        build: str,
+        module_id: str,
+        fixture: str,
+        expected_tests: int,
+    ):
+        descriptor = json.loads(self.read_compat_module(module_id))
+        self.assertEqual(fixture, descriptor["fixture"])
+        self.assertEqual(expected_tests, descriptor["expectedTests"])
+        self.assertIn("def fixture = sourceSets.maybeCreate(spec.fixture)", build)
+        self.assertIn(
+            "fixture.runtimeClasspath += fixture.output + "
+            "sourceSets.main.runtimeClasspath",
+            build,
+        )
+        self.assertIn("tasks.named(spec.runTask).configure", build)
+        self.assertIn(
+            'text.contains("All ${expectedTests} required tests passed")',
+            build,
+        )
+        self.assertIn("expectedSelfTestSummary", build)
+        self.assertIn("text.contains('TESTS FAILED!')", build)
+
     def png_dimensions(self, path: Path) -> tuple[int, int]:
         with path.open("rb") as texture_file:
             header = texture_file.read(24)
@@ -994,24 +1018,13 @@ class StaticRegressionTests(unittest.TestCase):
 
     def test_all_gametest_gates_reject_any_selftest_failure(self):
         build = self.read_required("build.gradle")
-        expected = {
+        explicit_expected = {
             "runGameTestServer": 405,
             "runRecipeAddonGameTestServer": 17,
-            "runMekanismGameTestServer": 47,
-            "runBotaniaGameTestServer": 14,
-            "runIronFurnacesGameTestServer": 3,
-            "runFarmersDelightGameTestServer": 7,
-            "runModernIndustrializationGameTestServer": 7,
-            "runArsNouveauGameTestServer": 11,
-            "runEvilCraftGameTestServer": 10,
-            "runPowahGameTestServer": 11,
-            "runIndustrialForegoingGameTestServer": 9,
-            "runCreateGameTestServer": 13,
             "runPneumaticCraftGameTestServer": 9,
-            "runExtendedCraftingGameTestServer": 4,
             "runCompatibilityMatrixGameTestServer": 3,
         }
-        for task, count in expected.items():
+        for task, count in explicit_expected.items():
             match = re.search(
                 rf"tasks\.named\('{task}'\)\.configure \{{(?P<body>.*?)\n\}}",
                 build,
@@ -1022,8 +1035,27 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertIn(f"All {count} required tests passed", body, task)
             self.assertIn("expectedSelfTestSummary", body, task)
             self.assertIn("TESTS FAILED!", body, task)
+        descriptors = sorted((ROOT / "src/compat").glob("*/compat-module.json"))
+        self.assertTrue(descriptors)
+        for descriptor_path in descriptors:
+            descriptor = json.loads(descriptor_path.read_text())
+            self.assert_descriptor_driven_fixture(
+                build,
+                descriptor_path.parent.name,
+                descriptor["fixture"],
+                descriptor["expectedTests"],
+            )
         self.assertIn("SelfTest: 204927 passed, 0 failed, 204927 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
+
+    def test_compatibility_matrix_locks_the_thirteen_mod_recipe_workload(self):
+        matrix = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CraftablePerformanceGameTests.java"
+        )
+        self.assertIn("EXPECTED_RECIPE_COUNT = 11_657", matrix)
+        self.assertIn("recipeCount != EXPECTED_RECIPE_COUNT", matrix)
+        self.assertIn("Compatibility recipe workload drifted", matrix)
 
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
         build = self.read_required("build.gradle")
@@ -1064,18 +1096,19 @@ class StaticRegressionTests(unittest.TestCase):
             compat,
             "a weak-key map still leaks when each strongly held handler references its Core key",
         )
-        self.assertIn("tasks.named('runMekanismGameTestServer').configure", build)
-        self.assertIn("All 47 required tests passed", build)
+        self.assert_descriptor_driven_fixture(
+            build, "mekanism", "mekanismFixture", 47
+        )
         self.assertIn('modId="mekanism"', fixture_metadata)
         self.assertIn('versionRange="[10.7,)"', fixture_metadata)
         self.assertNotRegex(fixture_metadata, r'versionRange="\[10\.7\.\d')
-        for source_set in ["recipeAddonFixture", "mekanismFixture"]:
-            self.assertRegex(
-                build,
-                rf"(?s){source_set}\s*\{{.*?runtimeClasspath\s*\+=\s*"
-                r"output\s*\+\s*sourceSets\.main\.runtimeClasspath.*?\}",
-                f"{source_set} runtime must not inherit main compileOnly mods",
-            )
+        self.assertRegex(
+            build,
+            r"(?s)recipeAddonFixture\s*\{.*?"
+            r"runtimeClasspath\s*\+=\s*output\s*\+\s*"
+            r"sourceSets\.main\.runtimeClasspath.*?\}",
+            "recipeAddonFixture runtime must not inherit main compileOnly mods",
+        )
 
     def test_botania_mana_and_recipe_compat_is_optional_and_isolated(self):
         build = self.read_required("build.gradle")
@@ -1144,12 +1177,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("resolvedConfiguration", verify)
         self.assertNotIn("project.", verify)
         self.assertIn('dependsOn tasks.named("verifyBotaniaFixtureArtifact")', build)
-        self.assertRegex(
-            build,
-            r"(?s)botaniaFixture\s*\{.*?runtimeClasspath\s*\+=\s*"
-            r"output\s*\+\s*sourceSets\.main\.runtimeClasspath.*?\}",
+        self.assert_descriptor_driven_fixture(
+            build, "botania", "botaniaFixture", 14
         )
-        self.assertIn("tasks.named('runBotaniaGameTestServer').configure", build)
         self.assertNotIn('modId="botania"', metadata)
         self.assertIn('"requires": ["botania"]', module_index)
         self.assertIn("implements AutoStorageCompatModule", module)
@@ -1205,15 +1235,11 @@ class StaticRegressionTests(unittest.TestCase):
             build,
             r'(?m)^\s*runtimeOnly\s+"[^"]*modern-industrialization',
         )
-        self.assertRegex(
+        self.assert_descriptor_driven_fixture(
             build,
-            r"(?s)modernIndustrializationFixture\s*\{.*?"
-            r"runtimeClasspath\s*\+=\s*output\s*\+\s*"
-            r"sourceSets\.main\.runtimeClasspath.*?\}",
-        )
-        self.assertIn(
-            "tasks.named('runModernIndustrializationGameTestServer').configure",
-            build,
+            "modern_industrialization",
+            "modernIndustrializationFixture",
+            7,
         )
         self.assertNotIn('modId="modern_industrialization"', metadata)
         self.assertIn(
@@ -1282,17 +1308,9 @@ class StaticRegressionTests(unittest.TestCase):
             build,
             r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:ars-nouveau:',
         )
-        self.assertRegex(
-            build,
-            r"(?s)arsNouveauFixture\s*\{.*?"
-            r"runtimeClasspath\s*\+=\s*output\s*\+\s*"
-            r"sourceSets\.main\.runtimeClasspath.*?\}",
+        self.assert_descriptor_driven_fixture(
+            build, "ars_nouveau", "arsNouveauFixture", 11
         )
-        self.assertIn(
-            "tasks.named('runArsNouveauGameTestServer').configure",
-            build,
-        )
-        self.assertIn("All 11 required tests passed", build)
         self.assertNotIn('modId="ars_nouveau"', metadata)
         self.assertIn('"requires": ["ars_nouveau"]', module_index)
         self.assertIn("implements AutoStorageCompatModule", module)
@@ -1351,14 +1369,9 @@ class StaticRegressionTests(unittest.TestCase):
             build,
             r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:(evilcraft|cyclops-core):',
         )
-        self.assertRegex(
-            build,
-            r"(?s)evilCraftFixture\s*\{.*?"
-            r"runtimeClasspath\s*\+=\s*output\s*\+\s*"
-            r"sourceSets\.main\.runtimeClasspath.*?\}",
+        self.assert_descriptor_driven_fixture(
+            build, "evilcraft", "evilCraftFixture", 10
         )
-        self.assertIn("tasks.named('runEvilCraftGameTestServer').configure", build)
-        self.assertIn("All 10 required tests passed", build)
         self.assertNotIn('modId="evilcraft"', metadata)
         self.assertIn('"requires": ["evilcraft"]', module_index)
         self.assertIn("implements AutoStorageCompatModule", module)
@@ -1420,14 +1433,9 @@ class StaticRegressionTests(unittest.TestCase):
             r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:'
             r'(powah|cloth-config|guideme):',
         )
-        self.assertRegex(
-            build,
-            r"(?s)powahFixture\s*\{.*?"
-            r"runtimeClasspath\s*\+=\s*output\s*\+\s*"
-            r"sourceSets\.main\.runtimeClasspath.*?\}",
+        self.assert_descriptor_driven_fixture(
+            build, "powah", "powahFixture", 11
         )
-        self.assertIn("tasks.named('runPowahGameTestServer').configure", build)
-        self.assertIn("All 11 required tests passed", build)
         self.assertNotIn('modId="powah"', metadata)
         self.assertIn('"requires": ["powah"]', module_index)
         self.assertIn("implements AutoStorageCompatModule", module)
@@ -1493,17 +1501,12 @@ class StaticRegressionTests(unittest.TestCase):
             r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:'
             r'(industrial-foregoing|titanium):',
         )
-        self.assertRegex(
+        self.assert_descriptor_driven_fixture(
             build,
-            r"(?s)industrialForegoingFixture\s*\{.*?"
-            r"runtimeClasspath\s*\+=\s*output\s*\+\s*"
-            r"sourceSets\.main\.runtimeClasspath.*?\}",
+            "industrial_foregoing",
+            "industrialForegoingFixture",
+            9,
         )
-        self.assertIn(
-            "tasks.named('runIndustrialForegoingGameTestServer').configure",
-            build,
-        )
-        self.assertIn("All 9 required tests passed", build)
         self.assertNotIn('modId="industrialforegoing"', metadata)
         self.assertIn('"requires": ["industrialforegoing"]', module_index)
         self.assertIn("implements AutoStorageCompatModule", module)
@@ -1557,14 +1560,9 @@ class StaticRegressionTests(unittest.TestCase):
             build,
             r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:create:',
         )
-        self.assertRegex(
-            build,
-            r"(?s)createFixture\s*\{.*?"
-            r"runtimeClasspath\s*\+=\s*output\s*\+\s*"
-            r"sourceSets\.main\.runtimeClasspath.*?\}",
+        self.assert_descriptor_driven_fixture(
+            build, "create", "createFixture", 13
         )
-        self.assertIn("tasks.named('runCreateGameTestServer').configure", build)
-        self.assertIn("All 13 required tests passed", build)
         self.assertNotIn('modId="create"', metadata)
         self.assertIn('"requires": ["create"]', module_index)
         self.assertIn("implements AutoStorageCompatModule", module)

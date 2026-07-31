@@ -59,6 +59,7 @@ public final class CraftablePerformanceGameTests {
     private static final int SAMPLE_COUNT = 20;
     private static final int RETAINED_MENU_COUNT = 16;
     private static final int SEED_BATCH_TYPES = 1_000;
+    private static final int EXPECTED_RECIPE_COUNT = 11_657;
     private static final int STORED_TYPE_COUNT = terminalScaleTypes();
     private static final List<String> STORED_ITEM_IDS = List.of(
             "minecraft:oak_log",
@@ -321,8 +322,15 @@ public final class CraftablePerformanceGameTests {
             long prefetchP95Nanos = percentile95(prefetchNanos);
             long switchP95Nanos = percentile95(switchNanos);
             long warmP95Nanos = percentile95(warmNanos);
+            int recipeCount =
+                    helper.getLevel().getRecipeManager().getRecipes().size();
+            if (recipeCount != EXPECTED_RECIPE_COUNT) {
+                throw new IllegalStateException(
+                        "Compatibility recipe workload drifted: expected "
+                                + EXPECTED_RECIPE_COUNT + ", got " + recipeCount);
+            }
             writeReport(
-                    helper.getLevel().getRecipeManager().getRecipes().size(),
+                    recipeCount,
                     core.getTypeCount(),
                     first.outputCount(),
                     first.prefetchNanos(),
@@ -342,7 +350,7 @@ public final class CraftablePerformanceGameTests {
                             + "firstPrefetchMs={} prefetchP95Ms={} "
                             + "firstSwitchMs={} switchP95Ms={} warmSwitchP95Ms={} "
                             + "indexRetainedBytes={} menusRetainedBytes={} perMenuBytes={}",
-                    helper.getLevel().getRecipeManager().getRecipes().size(),
+                    recipeCount,
                     core.getTypeCount(),
                     first.outputCount(),
                     millis(first.prefetchNanos()),

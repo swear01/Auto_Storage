@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/swear01/Auto_Storage/tools/compat-kit/schema/compat-report.schema.json",
+  "title": "Auto Storage compatibility verification report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "tool_version", "target", "mode", "manifest_sha256", "checks", "commands", "status"],
+  "properties": {
+    "schema": {"const": 1},
+    "kind": {"const": "auto_storage_compat_report"},
+    "tool_version": {"type": "string", "minLength": 1},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mod_id", "display_name", "version"],
+      "properties": {
+        "mod_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+        "display_name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "dependency": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
+        },
+        "repositories": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^https://\\S+$"},
+          "uniqueItems": true
+        },
+        "runtime_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "mode": {"enum": ["bundled", "addon"]},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "checks": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "allOf": [
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "absent_target_no_classload"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "present_target_load_once"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "ingredient_shortage_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "destination_capacity_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "checked_overflow_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "stale_recipe_holder_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "catalyst_tool_remainder_exact"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "multi_output_merge_exact"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "mixed_resource_rollback_atomic"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "dedicated_server_client_isolation"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "api_only_compilation"}}}},
+        {"contains": {"type": "object", "required": ["id"], "properties": {"id": {"const": "all_mod_coexistence"}}}}
+      ],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "evidence"],
+        "properties": {
+          "id": {
+            "enum": [
+              "absent_target_no_classload",
+              "present_target_load_once",
+              "ingredient_shortage_atomic",
+              "destination_capacity_atomic",
+              "checked_overflow_atomic",
+              "stale_recipe_holder_atomic",
+              "catalyst_tool_remainder_exact",
+              "multi_output_merge_exact",
+              "mixed_resource_rollback_atomic",
+              "dedicated_server_client_isolation",
+              "api_only_compilation",
+              "all_mod_coexistence"
+            ]
+          },
+          "status": {"const": "passed"},
+          "evidence": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "exit_code", "stdout_sha256", "stderr_sha256"],
+        "properties": {
+          "command": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 1
+          },
+          "exit_code": {"type": "integer", "const": 0},
+          "stdout_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "stderr_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "status": {"const": "passed"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["mode"],
+        "properties": {"mode": {"const": "addon"}}
+      },
+      "then": {
+        "properties": {
+          "commands": {
+            "minItems": 2,
+            "maxItems": 2,
+            "allOf": [
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["command"],
+                  "properties": {
+                    "command": {
+                      "type": "array",
+                      "minItems": 2,
+                      "prefixItems": [
+                        {"const": "./gradlew"},
+                        {"const": "build"}
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "contains": {
+                  "type": "object",
+                  "required": ["command"],
+                  "properties": {
+                    "command": {
+                      "type": "array",
+                      "minItems": 2,
+                      "prefixItems": [
+                        {"const": "./gradlew"},
+                        {"const": "runGameTestServer"}
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

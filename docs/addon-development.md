@@ -9,6 +9,33 @@ This document is the authoritative addon guide. The GitHub Wiki copy must match
 it at every SDK release; edit this file first. The Wiki page is intentionally
 not listed in the player-manual Home contents or sidebar.
 
+## Start with Compat Kit
+
+Use the [Auto Storage Compat Kit](compat-kit.md) before writing a bundled
+integration or independent addon. It scans one reproducible target jar/source
+revision, creates an explicit reviewed recipe contract, generates a deliberately
+RED SDK-only scaffold, and runs the contract's verification gates. It does not
+infer consumption, catalysts, outputs, units, station costs, or determinism.
+Every scaffold/verify command also loads the committed source audit. The exact
+audited recipe-candidate set, target identity, artifact SHA, and inventory
+digest must match the contract, so recomputing a contract-only field cannot
+hide an omitted candidate. Candidate records must also remain in the bucket
+computed by the current scanner; changing a recipe into a station/resource
+record is rejected. When source is supplied, at least one classified candidate
+must map to a tracked, non-ignored Java file in that Git module; ignored build
+output or an unrelated clean checkout cannot contribute its revision as target
+evidence. Candidate-source suffixes match only at path-segment boundaries, and
+risk evidence must remain owned by an audited recipe candidate. The scanner
+also rehashes the target after inspection, so an
+atomically replaced jar cannot mix two artifacts in one audit.
+
+```bash
+tools/compat-kit/compat-kit scan --help
+tools/compat-kit/compat-kit decide --help
+tools/compat-kit/compat-kit scaffold --help
+tools/compat-kit/compat-kit verify --help
+```
+
 ## Add the SDK
 
 Every GitHub release contains:
@@ -50,6 +77,66 @@ Use normal NeoForge dependency metadata to require Auto Storage. If the addon
 integrates another mod, declare that target dependency in the addon's own
 metadata as well. Do not pin player installations to Auto Storage's
 representative CI fixture versions.
+
+Compat Kit contracts list every target Maven repository as an explicit HTTPS
+URL. The generated addon copies those repositories into `build.gradle`; it
+does not infer Modrinth, Curse Maven, or an upstream repository from a
+dependency coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
+because it can change which repository serves a coordinate. Reviewed
+repositories are emitted before defaults and restricted to target/runtime
+groups. Explicit runtime groups cannot fall back to Maven Central even when
+the reviewed repository list is empty; the target can fall back only under its
+exact SHA check. Fixed repository filters reserve
+Patchouli and Auto Storage for BlameJared and the release Ivy repository. The generated
+build also copies every explicit `target.runtime_dependencies` entry, so
+required libraries such as GuideME do not depend on transitive metadata or an
+undocumented post-scaffold edit. Target and explicit runtime dependencies are
+non-transitive on both target compile and runtime classpaths, so every required
+companion must be listed. The generated build resolves the reviewed
+target dependency separately and checks its exact
+jar SHA against `source_audit_sha256` during both `build` and
+`runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
+Reviewed repository URLs, dependency coordinates, and group filters are
+serialized as literal Groovy strings rather than interpolated text. Maven
+coordinates must use exact `group:name:version` structure and cannot contain
+control characters.
+Because Auto Storage requires Patchouli on both sides, the generated
+GameTest runtime includes the matching Patchouli artifact and its repository.
+A different target artifact or source audit fails before compatibility
+evidence can pass. Verification regenerates the expected `build.gradle`,
+`settings.gradle`, `gradle.properties`, `gradlew`, `gradlew.bat`, and Gradle
+wrapper jar/properties from the reviewed contract and generator before
+comparing each with both the file and manifest. An addon therefore cannot
+replace the launcher or artifact gate and authorize that edit by updating its
+own manifest hash. Scaffold generation preflights all destinations and parent
+directories before its first write. Existing conflicting files, symlinked
+roots/ancestors/targets, or a file-valued `src` ancestor fail without leaving
+workflow, manifest, wrapper fragments, or writes outside the output root. This
+includes existing symlink ancestors above a not-yet-created output root, and
+lexical `..` segments are normalized before that preflight.
+Byte-identical reruns repair both generated launchers to mode `0755`.
+
+An independent-addon contract uses fixture `main`, declares exactly `build`
+and `runGameTestServer`, and maps every evidence record to one of those actual
+tasks. Published completed-contract schemas require that non-null fixture,
+positive GameTest count, authoritative task, nonempty task list, all twelve
+exact checks, and every evidence mapping; unresolved RED drafts may keep those
+fields empty. A `runGameTestServer` evidence marker must live inside the annotated
+GameTest method that executes the assertion; file-level constants, comments,
+and detached helpers are rejected. Comments inside the method do not count,
+while executable string arguments may carry assertion markers. Its fresh-world
+cleanup rejects symlinked parents and paths outside the addon root before
+deletion. Bundled task names are not translated or treated as equivalent.
+GameTest output must contain
+exactly one success summary with the reviewed count; conflicting summaries fail
+even when one count matches. A published passing report must carry the strict
+target identity, all twelve mandated check records, and exactly the addon
+`build` and `runGameTestServer` command records. Commented or string-literal
+`@GameTest` text is ignored by both source counting and method-body evidence
+extraction; intermediate annotation initializers are skipped until the real
+method body, escaped triple quotes stay inside Java text blocks, and every
+GameTest evidence file must belong to the fixture source set executed by its
+declared task.
 
 ## Register through one facade
 
@@ -204,6 +291,15 @@ infer recipes through reflection, generic `Recipe#getIngredients()`, EMI
 widgets, serializer names, or machine names. It does not send resources into an
 external machine and wait for world state.
 
+The reviewed contract must preserve every scanner risk attached to each recipe
+family. Process station variants use positive work rates; Instant variants use
+zero rates. Accepted families keep an explicit `costs` list, which may be empty
+only for a reviewed runtime family that is genuinely free. A bundled contract's
+GameTest task must be the task derived from its fixture name; another fixture
+with the same expected count cannot provide its runtime evidence. Compat Kit
+rejects drift before generating code that runtime descriptor validation would
+reject.
+
 Registration, linkage, or validation failures are startup errors. Auto Storage
 does not silently skip a loaded but incompatible integration. Runtime crafting
 uses current server recipe holders, checked long arithmetic, joint reservation,
@@ -217,12 +313,21 @@ isolated `src/compat/<mod-id>` source sets. Each module owns one
 `src/compat/<mod-id>/compat-module.json` descriptor containing its entrypoint,
 required mods, source-set/fixture names, and representative compile
 dependencies. Gradle validates every descriptor and deterministically generates
-the runtime `META-INF/auto_storage/compat-modules.json` index; there is no second
+the runtime index. Descriptor `expectedTests` is a positive JSON integer;
+fractional or wider numeric values fail instead of being truncated.
+The generated `META-INF/auto_storage/compat-modules.json` has no second
 hand-written central module list. The loader checks every required mod ID before
 resolving the module class. A present module uses
 `AutoStorageCompatModule` plus the same registration facade available to
 external addons. Every bundled entry must declare at least one required target
-mod; an empty requirement list is rejected before classloading.
+mod; an empty requirement list is rejected before classloading. Compat Kit
+descriptors also carry the reviewed target repositories and artifact SHA, so a
+non-central Maven target resolves through contract-owned configuration rather
+than a root-build guess. Compat Kit rejects target IDs that would become Java
+reserved package segments instead of emitting uncompilable source.
+Before scaffold writes, the generated module ID, entrypoint, source set, and
+fixture are compared with all existing descriptors so normalized Java/Gradle
+identifier collisions fail closed.
 
 External addons do not add entries to Auto Storage's bundled module index.
 They are ordinary NeoForge mods with their own entrypoint and dependency
@@ -236,6 +341,12 @@ The API artifact version equals the Auto Storage mod version.
   minor-version increase and release-note migration section.
 - Patch releases must remain source- and binary-compatible with the preceding
   release in the same minor line.
+- Compat Kit therefore generates a current-minor dependency range; version
+  0.3.0 produces `[0.3.0,0.4)`, not an open-ended pre-1.0 range.
+- Compat Kit publication receives the authoritative Gradle `mod_version` and
+  fails if it differs from the tool version. Its addon example and four
+  machine-readable schemas use explicit tracked allowlists, never recursive or
+  globbed local-output scans.
 - Registry IDs and persisted resource/descriptor IDs are data contracts and
   must not be reused for different semantics.
 - Optional target-mod versions in CI are representative evidence only. Addons

@@ -1,0 +1,26 @@
+{
+  "auditArtifact": {
+    "dependency": "org.appliedenergistics:appliedenergistics2:19.2.17",
+    "sha256": "460d779a0609b81409907d9956de8f6f70a1b0912257e3e5c3c7e75ac9630e95"
+  },
+  "dependencies": [
+    "org.appliedenergistics:appliedenergistics2:19.2.17"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.ae2.Ae2CompatModule",
+  "expectedTests": 8,
+  "fixture": "ae2Fixture",
+  "id": "auto_storage:ae2",
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "ae2"
+  ],
+  "runtimeDependencies": [
+    "org.appliedenergistics:appliedenergistics2:19.2.17",
+    "maven.modrinth:guideme:rduAfwb7"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatAe2"
+}

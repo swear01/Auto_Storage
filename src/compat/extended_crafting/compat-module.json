@@ -6,6 +6,7 @@
   "side": "both",
   "sourceSet": "compatExtendedCrafting",
   "fixture": "extendedCraftingFixture",
+  "expectedTests": 4,
   "dependencies": [
     "maven.modrinth:extended-crafting:${extended_crafting_ci_version}",
     "maven.modrinth:cucumber:${cucumber_ci_version}"
