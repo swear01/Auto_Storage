@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import inspect
+import copy
 import json
 import os
 import selectors
@@ -422,7 +423,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(7, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(8, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -851,7 +852,15 @@ class CompatKitAuditTests(unittest.TestCase):
             self.compat_kit.SCAN_CACHE_VERSION,
             audit["scanner_format"],
         )
-        audit["scanner_format"] -= 1
+        legacy = copy.deepcopy(audit)
+        self.assertIn("recipe_data", legacy)
+        self.assertIn("recipe_serializers", legacy["candidates"])
+        legacy["scanner_format"] = 7
+        legacy.pop("recipe_data")
+        legacy["candidates"].pop("recipe_serializers")
+        self.compat_kit._validate_audit(legacy)
+
+        audit["scanner_format"] = 6
         with self.assertRaisesRegex(
             ValueError,
             "unsupported audit scanner format",
