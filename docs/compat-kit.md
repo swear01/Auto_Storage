@@ -89,7 +89,10 @@ resource API candidates, station candidates, and explicit risk flags. Risk
 detection uses bounded `javap -c -p` output so non-public implementation risks
 are not missed; only compact flags for randomness/chance, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded
-outputs, and capability mutations requiring simulation are persisted. Without
+outputs, and capability mutations requiring simulation are persisted. Each
+private-bytecode result is reduced to compact flags before the next class is
+read; the scanner never retains all bounded outputs together. `RandomSource`,
+`ThreadLocalRandom`, and `RandomGenerator` are all randomness evidence. Without
 `--source`, scans are cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
@@ -191,8 +194,9 @@ depending on transitive metadata or hand edits. Target and explicit runtime
 dependencies are non-transitive; every required companion must therefore appear
 in the contract. Repository URLs, dependency coordinates, and derived group
 filters are serialized as escaped Groovy literals, so `$`, quotes, and
-backslashes cannot alter the reviewed build input; Maven coordinates containing
-control characters are rejected before scaffolding.
+backslashes cannot alter the reviewed build input. Target and runtime
+dependencies must use exact `group:name:version` Maven coordinates; malformed
+or control-character-bearing values are rejected before scaffolding.
 
 ### 4. Scaffold a RED integration
 
@@ -306,9 +310,11 @@ any non-zero command. Multiple success summaries are rejected even when one
 matches, because editable fixture output cannot outrank the framework result.
 A marker assigned to a `run*GameTestServer` task must occur inside an
 annotated `@GameTest` method body; a detached constant, helper, or comment does
-not prove that the behavior ran. A check is marked passed only when all of its
-declared source markers exist in the correct execution boundary and the
-associated Gradle task succeeds. The report records those
+not prove that the behavior ran. Comments inside a real GameTest are removed
+before matching evidence, while markers in executable string arguments remain
+valid. A check is marked passed only when all of its declared source markers
+exist in the correct execution boundary and the associated Gradle task
+succeeds. The report records those
 per-check evidence links, exact commands, exit codes, output hashes, tool
 version, target, and manifest hash. Bundled verification runs every declared
 Gradle task as a separate process and removes only `run/world` before each task

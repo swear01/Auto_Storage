@@ -19,7 +19,7 @@
         "dependency": {
           "type": "string",
           "minLength": 1,
-          "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+          "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
         },
         "repositories": {
           "type": "array",
@@ -31,7 +31,7 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "pattern": "^[^\\u0000-\\u001F\\u007F]+$"
+            "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
           },
           "uniqueItems": true
         }

@@ -98,7 +98,8 @@ jar SHA against `source_audit_sha256` during both `build` and
 `runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
 Reviewed repository URLs, dependency coordinates, and group filters are
 serialized as literal Groovy strings rather than interpolated text. Maven
-coordinates containing control characters are rejected before generation.
+coordinates must use exact `group:name:version` structure and cannot contain
+control characters.
 Because Auto Storage requires Patchouli on both sides, the generated
 GameTest runtime includes the matching Patchouli artifact and its repository.
 A different target artifact or source audit fails before compatibility
@@ -122,9 +123,11 @@ positive GameTest count, authoritative task, nonempty task list, all twelve
 exact checks, and every evidence mapping; unresolved RED drafts may keep those
 fields empty. A `runGameTestServer` evidence marker must live inside the annotated
 GameTest method that executes the assertion; file-level constants, comments,
-and detached helpers are rejected. Its fresh-world cleanup rejects symlinked
-parents and paths outside the addon root before deletion. Bundled task names
-are not translated or treated as equivalent. GameTest output must contain
+and detached helpers are rejected. Comments inside the method do not count,
+while executable string arguments may carry assertion markers. Its fresh-world
+cleanup rejects symlinked parents and paths outside the addon root before
+deletion. Bundled task names are not translated or treated as equivalent.
+GameTest output must contain
 exactly one success summary with the reviewed count; conflicting summaries fail
 even when one count matches. A published passing report must carry the strict
 target identity, all twelve mandated check records, and exactly the addon

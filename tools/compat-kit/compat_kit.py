@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 6
+SCAN_CACHE_VERSION = 7
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -77,6 +77,16 @@ RISK_PATTERNS = (
     ("chance_output", re.compile(r"\bgetChance(?:\s*\(|:)"), "getChance"),
     ("randomness", re.compile(r"\brandom(?:\s*\(|:)"), "random"),
     ("randomness", re.compile(r"\bRandom(?:Source)?\b"), "Random"),
+    (
+        "randomness",
+        re.compile(r"\bThreadLocalRandom\b"),
+        "ThreadLocalRandom",
+    ),
+    (
+        "randomness",
+        re.compile(r"\bRandomGenerator\b"),
+        "RandomGenerator",
+    ),
     (
         "multiblock",
         re.compile(r"\b(?:MultiBlock|Multiblock)[A-Za-z0-9_$]*\b"),
@@ -498,28 +508,33 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
     return {"revision": revision, "files": files}
 
 
-def _risk_evidence(candidates: list[dict]) -> list[dict]:
-    collected: dict[str, set[str]] = {}
-    for candidate in candidates:
-        class_name = candidate["class"]
-        signature = candidate["public_signature"]
-        for code, pattern, label in RISK_PATTERNS:
-            if pattern.search(signature):
-                if label in {
-                    "drain",
-                    "extractEnergy",
-                    "extractItem",
-                    "fill",
-                    "getChance",
-                    "getIngredients",
-                    "insertItem",
-                    "random",
-                    "receiveEnergy",
-                }:
-                    evidence = f"{class_name}#{label}"
-                else:
-                    evidence = f"{class_name}: {label}"
-                collected.setdefault(code, set()).add(evidence)
+def _collect_risk_evidence(
+    collected: dict[str, set[str]],
+    class_name: str,
+    signature: str,
+):
+    for code, pattern, label in RISK_PATTERNS:
+        if pattern.search(signature):
+            if label in {
+                "drain",
+                "extractEnergy",
+                "extractItem",
+                "fill",
+                "getChance",
+                "getIngredients",
+                "insertItem",
+                "random",
+                "receiveEnergy",
+            }:
+                evidence = f"{class_name}#{label}"
+            else:
+                evidence = f"{class_name}: {label}"
+            collected.setdefault(code, set()).add(evidence)
+
+
+def _finalize_risk_evidence(
+    collected: dict[str, set[str]],
+) -> list[dict]:
     for code, evidence in collected.items():
         exact_classes = {
             item.split("#", 1)[0]
@@ -539,6 +554,17 @@ def _risk_evidence(candidates: list[dict]) -> list[dict]:
         }
         for code, evidence in sorted(collected.items())
     ]
+
+
+def _risk_evidence(candidates: list[dict]) -> list[dict]:
+    collected: dict[str, set[str]] = {}
+    for candidate in candidates:
+        _collect_risk_evidence(
+            collected,
+            candidate["class"],
+            candidate["public_signature"],
+        )
+    return _finalize_risk_evidence(collected)
 
 
 def _validate_audit(audit: dict):
@@ -763,7 +789,7 @@ def scan_jar(
             raise ValueError(
                 f"target jar exceeds {MAX_CANDIDATE_CLASSES} candidate classes"
             )
-        risk_candidates = []
+        collected_risks: dict[str, set[str]] = {}
         for class_name, bucket in candidates:
             signature = reader(class_name)
             if not isinstance(signature, str) or not signature.strip():
@@ -790,12 +816,12 @@ def scan_jar(
                         "private bytecode exceeds "
                         f"{MAX_PRIVATE_BYTECODE_BYTES} bytes: {class_name}"
                     )
-                risk_candidates.append(
-                    {
-                        "class": class_name,
-                        "public_signature": risk_signature.strip(),
-                    }
+                _collect_risk_evidence(
+                    collected_risks,
+                    class_name,
+                    risk_signature,
                 )
+                del risk_signature
 
     all_candidates = [
         candidate
@@ -817,7 +843,7 @@ def scan_jar(
             {candidate["class"] for candidate in all_candidates},
         ),
         "candidates": classified,
-        "risks": _risk_evidence(risk_candidates),
+        "risks": _finalize_risk_evidence(collected_risks),
     }
     _require_unchanged_artifact(jar, artifact_sha, artifact_size)
     _validate_audit(audit)
@@ -927,6 +953,10 @@ def _validate_dependency_coordinate(value, location: str):
     _validate_nonempty_string(value, location)
     if re.search(r"[\x00-\x1f\x7f]", value):
         raise ValueError(f"{location} must not contain control characters")
+    if not re.fullmatch(r"[^:\s]+:[^:\s]+:[^:\s]+", value):
+        raise ValueError(
+            f"{location} must use group:name:version Maven coordinates"
+        )
 
 
 def _validate_amount(value, location: str):
@@ -2292,6 +2322,62 @@ def _java_code_mask(text: str) -> str:
     return "".join(masked)
 
 
+def _java_without_comments(text: str) -> str:
+    masked = list(text)
+    index = 0
+    state = "code"
+    while index < len(text):
+        if state == "code":
+            if text.startswith('"""', index):
+                state = "text"
+                index += 3
+                continue
+            if text.startswith("//", index):
+                masked[index:index + 2] = "  "
+                state = "line"
+                index += 2
+                continue
+            if text.startswith("/*", index):
+                masked[index:index + 2] = "  "
+                state = "block"
+                index += 2
+                continue
+            if text[index] == '"':
+                state = "string"
+            elif text[index] == "'":
+                state = "char"
+        elif state == "line":
+            if text[index] == "\n":
+                state = "code"
+            else:
+                masked[index] = " "
+        elif state == "block":
+            if text.startswith("*/", index):
+                masked[index:index + 2] = "  "
+                state = "code"
+                index += 2
+                continue
+            if text[index] != "\n":
+                masked[index] = " "
+        elif state == "text":
+            if text[index] == "\\":
+                index += 2
+                continue
+            if text.startswith('"""', index):
+                state = "code"
+                index += 3
+                continue
+        elif text[index] == "\\":
+            index += 2
+            continue
+        elif state == "string" and text[index] == '"':
+            state = "code"
+        elif state == "char" and text[index] == "'":
+            state = "code"
+        index += 1
+    return "".join(masked)
+
+
 def _game_test_method_opening(code: str, annotation_end: int) -> int:
     parentheses = 1
     for index in range(annotation_end, len(code)):
@@ -2400,7 +2486,7 @@ def _verification_evidence(
                     f"{record['marker']}"
                 )
             if re.fullmatch(r"run(?:[A-Za-z0-9]+)?GameTestServer", task) and not any(
-                record["marker"] in block
+                record["marker"] in _java_without_comments(block)
                 for text in matching_texts
                 for block in _game_test_blocks(text)
             ):

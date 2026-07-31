@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import tomllib
 import unittest
+import weakref
 import zipfile
 from pathlib import Path
 
@@ -233,6 +234,66 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertNotIn("RandomSource", crushing["public_signature"])
         self.assertEqual({"class", "public_signature"}, set(crushing))
+
+    def test_scan_releases_private_bytecode_before_reading_next_candidate(self):
+        previous = None
+
+        class PrivateBytecode(str):
+            __slots__ = ("__weakref__",)
+
+            def strip(self, chars=None):
+                return self
+
+        def bounded_reader(class_name: str):
+            nonlocal previous
+            if previous is not None:
+                self.assertIsNone(
+                    previous(),
+                    "previous private bytecode remained live",
+                )
+            value = PrivateBytecode(
+                f"private void inspect{class_name.rsplit('.', 1)[-1]}() {{}}"
+            )
+            previous = weakref.ref(value)
+            return value
+
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            risk_reader=bounded_reader,
+        )
+
+        self.assertEqual(
+            2,
+            len(audit["candidates"]["recipe_classes"]),
+        )
+
+    def test_risk_evidence_detects_modern_java_random_generators(self):
+        self.assertEqual(7, self.compat_kit.SCAN_CACHE_VERSION)
+        risks = self.compat_kit._risk_evidence(
+            [
+                {
+                    "class": "samplemod.recipe.ModernRandomRecipe",
+                    "public_signature": (
+                        "java/util/concurrent/ThreadLocalRandom.current:"
+                        "()Ljava/util/concurrent/ThreadLocalRandom;\n"
+                        "java/util/random/RandomGenerator.getDefault:"
+                        "()Ljava/util/random/RandomGenerator;"
+                    ),
+                }
+            ]
+        )
+
+        randomness = next(
+            risk for risk in risks if risk["code"] == "randomness"
+        )
+        self.assertEqual(
+            [
+                "samplemod.recipe.ModernRandomRecipe: RandomGenerator",
+                "samplemod.recipe.ModernRandomRecipe: ThreadLocalRandom",
+            ],
+            randomness["evidence"],
+        )
 
     def test_scan_detects_capability_mutation_in_real_javap_invocation_syntax(self):
         audit = self.compat_kit.scan_jar(
@@ -1620,6 +1681,28 @@ displayName="Sample Machines"
                         source_audit=self.source_audit(),
                     )
 
+    def test_contract_validation_rejects_malformed_dependency_coordinates(self):
+        cases = (
+            ("dependency", "not-a-coordinate"),
+            (
+                "runtime_dependencies",
+                ["org.example:missing-version"],
+            ),
+        )
+        for field, value in cases:
+            with self.subTest(field=field):
+                contract = self.addon_contract()
+                contract["target"][field] = value
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "group:name:version",
+                ):
+                    self.compat_kit.validate_contract(
+                        contract,
+                        require_complete=True,
+                        source_audit=self.source_audit(),
+                    )
+
     def test_external_scaffold_escapes_target_display_name_as_toml(self):
         contract = self.addon_contract()
         audit = self.source_audit()
@@ -2016,7 +2099,11 @@ displayName="Sample Machines"
         )
         target = schema["properties"]["target"]["properties"]
         self.assertEqual(
-            "^[^\\u0000-\\u001F\\u007F]+$",
+            (
+                "^[^:\\s\\u0000-\\u001F\\u007F]+:"
+                "[^:\\s\\u0000-\\u001F\\u007F]+:"
+                "[^:\\s\\u0000-\\u001F\\u007F]+$"
+            ),
             target["dependency"]["pattern"],
         )
         self.assertEqual(
@@ -2603,6 +2690,54 @@ displayName="Sample Machines"
         self.assertEqual(1, len(blocks))
         self.assertIn("helper.succeed();", blocks[0])
         self.assertNotIn("forged_marker();", blocks[0])
+
+    def test_verification_evidence_ignores_comments_but_keeps_string_markers(self):
+        contract = self.accepted_contract()
+        marker = "ingredient_shortage_atomic"
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["marker"] = marker
+        source = (
+            self.root
+            / "src/samplemodFixture/java/com/example/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        source.parent.mkdir(parents=True)
+        source.write_text(
+            "final class SamplemodIntegrationGameTests {\n"
+            '    @GameTest(template = "craftingtests.platform")\n'
+            "    static void evidence(GameTestHelper helper) {\n"
+            f"        // {marker}\n"
+            "        helper.succeed();\n"
+            "    }\n"
+            "}\n"
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "evidence marker is not inside an @GameTest method",
+        ):
+            self.compat_kit._verification_evidence(
+                contract,
+                self.root,
+                "bundled",
+            )
+
+        source.write_text(
+            source.read_text().replace(
+                f"// {marker}",
+                f'helper.assertTrue(true, "{marker}");',
+            )
+        )
+        resolved = self.compat_kit._verification_evidence(
+            contract,
+            self.root,
+            "bundled",
+        )
+        self.assertEqual(
+            set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            set(resolved),
+        )
 
     def test_verify_binds_gametest_evidence_source_to_declared_task(self):
         contract = self.accepted_contract()

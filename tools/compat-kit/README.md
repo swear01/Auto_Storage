@@ -64,10 +64,13 @@ reviewed runtime family is genuinely free.
 The scan publishes only public signatures and compact risk evidence. Bounded
 private bytecode is inspected for hidden randomness, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded output,
-and capability mutations requiring simulation, but is never stored in the
-audit. Named nested classes are included and mapped to their top-level source;
-anonymous/local classes, class files carrying `ACC_SYNTHETIC`, and
-`META-INF/versions/` aliases are excluded; the root binary name is scanned once.
+and capability mutations requiring simulation, but each class is reduced
+immediately and the bytecode is never stored in the audit or retained until the
+next class. `RandomSource`, `ThreadLocalRandom`, and `RandomGenerator` are
+recognized. Named nested classes are included and mapped to their top-level
+source; anonymous/local classes, class files carrying `ACC_SYNTHETIC`, and
+`META-INF/versions/` aliases are excluded; the root binary name is scanned
+once.
 Chance, randomness, generic-ingredient, and capability-mutation method calls
 accept the descriptor syntax emitted by `javap -c -p`.
 
@@ -96,8 +99,8 @@ Explicit runtime groups cannot fall back to Maven Central even with no reviewed
 repositories; target fallback is still protected by its exact SHA gate, and
 fixed repositories are filtered to their Auto Storage or Patchouli artifacts.
 Reviewed repository, dependency, and group values are emitted as escaped
-literal Groovy strings; dependency coordinates containing control characters
-are rejected.
+literal Groovy strings; dependency coordinates must use exact
+`group:name:version` structure and cannot contain control characters.
 Verification regenerates the expected bundled descriptor or external
 `build.gradle`, `settings.gradle`, `gradle.properties`, launchers, and wrapper
 artifacts from the reviewed contract and current generator, then checks every
@@ -117,8 +120,9 @@ evidence; addon reports require exactly `build` and `runGameTestServer`.
 Comment/string-aware annotation extraction ignores fake `@GameTest` text when
 counting tests and locating marker-bearing method bodies, skips brace-bearing
 intermediate annotations, keeps escaped triple quotes inside Java text blocks,
-and requires each GameTest evidence file to belong to the source set executed by
-its declared task.
+removes comments before marker matching while retaining executable strings, and
+requires each GameTest evidence file to belong to the source set executed by its
+declared task.
 Bundled descriptors preserve reviewed HTTPS repository order, and fixture names
 must be Java-safe identifiers ending in `Fixture`. Their authoritative GameTest
 task is derived from the same fixture name (`evilCraftFixture` becomes
