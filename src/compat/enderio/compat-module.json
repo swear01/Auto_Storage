@@ -1,0 +1,25 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:enderio:Tfs8aJPH",
+    "sha256": "e01af48907781f2d5ccdfa8d71975b611c33f295be11b7021cb91be06ce8070c"
+  },
+  "dependencies": [
+    "maven.modrinth:enderio:Tfs8aJPH"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.enderio.EnderioCompatModule",
+  "expectedTests": 6,
+  "fixture": "enderIoFixture",
+  "id": "auto_storage:enderio",
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "enderio"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:enderio:Tfs8aJPH"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatEnderio"
+}

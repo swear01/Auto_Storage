@@ -1,0 +1,1354 @@
+{
+  "schema": 1,
+  "kind": "auto_storage_compat_contract",
+  "target": {
+    "mod_id": "enderio",
+    "display_name": "Ender IO",
+    "version": "8.2.11-beta",
+    "dependency": "maven.modrinth:enderio:Tfs8aJPH",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": []
+  },
+  "source_audit_sha256": "e01af48907781f2d5ccdfa8d71975b611c33f295be11b7021cb91be06ce8070c",
+  "source_recipe_inventory_sha256": "c78ccd6cc7bd72929f01fbfd596d9caeb9eb1dc2495737b9dcc663cd52e2ccd4",
+  "families": [
+    {
+      "class": "com.enderio.enderio.api.travel.TravelTargetSerializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.api.travel.TravelTargetSerializer#public_signature"
+      ],
+      "id": "travel_target_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei.EnderIOJEIRecipes",
+      "costs": [],
+      "decision": "JEI/client recipe-viewer helper; not a server RecipeManager family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei.EnderIOJEIRecipes#public_signature"
+      ],
+      "id": "ender_i_o_j_e_i_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei.helper.FakeGrindingRecipe",
+      "costs": [],
+      "decision": "JEI-only fake grinding display recipe; not a server RecipeManager family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei.helper.FakeGrindingRecipe#public_signature"
+      ],
+      "id": "fake_grinding_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei_machines_to_merge.MachineJEIRecipes",
+      "costs": [],
+      "decision": "JEI/client recipe-viewer helper; not a server RecipeManager family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei_machines_to_merge.MachineJEIRecipes#public_signature"
+      ],
+      "id": "machine_j_e_i_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei_machines_to_merge.category.SlicingRecipeCategory",
+      "costs": [],
+      "decision": "JEI/client recipe-viewer helper; not a server RecipeManager family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei_machines_to_merge.category.SlicingRecipeCategory#public_signature"
+      ],
+      "id": "slicing_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei_machines_to_merge.transfer.CrafterRecipeTransferHandler",
+      "costs": [],
+      "decision": "JEI/client recipe-viewer helper; not a server RecipeManager family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei_machines_to_merge.transfer.CrafterRecipeTransferHandler#public_signature"
+      ],
+      "id": "crafter_recipe_transfer_handler",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "generic_ingredients"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei_machines_to_merge.util.MachineRecipeCategory",
+      "costs": [],
+      "decision": "JEI/client recipe-viewer helper; not a server RecipeManager family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei_machines_to_merge.util.MachineRecipeCategory#public_signature"
+      ],
+      "id": "machine_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei_machines_to_merge.util.RecipeUtil",
+      "costs": [],
+      "decision": "JEI/client recipe-viewer helper; not a server RecipeManager family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei_machines_to_merge.util.RecipeUtil#public_signature"
+      ],
+      "id": "recipe_util",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.compat.jei_machines_to_merge.util.WrappedEnchanterRecipe",
+      "costs": [],
+      "decision": "JEI wrapper around EnchanterRecipe; rejected with the enchanter family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei_machines_to_merge.util.WrappedEnchanterRecipe#public_signature"
+      ],
+      "id": "wrapped_enchanter_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.enchanter.EnchanterRecipe",
+      "costs": [],
+      "decision": "Special recipe with empty static result, player XP cost, and input-count-dependent enchantment level.",
+      "evidence": [
+        "com.enderio.enderio.content.enchanter.EnchanterRecipe#public_signature"
+      ],
+      "id": "enchanter_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.enchanter.EnchanterRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.enchanter.EnchanterRecipe$Input#public_signature"
+      ],
+      "id": "enchanter_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.enchanter.EnchanterRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.enchanter.EnchanterRecipe$Serializer#public_signature"
+      ],
+      "id": "enchanter_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.enderface.EnderfaceTravelTarget$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.enderface.EnderfaceTravelTarget$Serializer#public_signature"
+      ],
+      "id": "enderface_travel_target__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe",
+      "costs": [],
+      "decision": "World fire-crafting with chance/min-max counts, dimension filters, and block-after-burning world mutation.",
+      "evidence": [
+        "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe#public_signature"
+      ],
+      "id": "fire_crafting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe$Result",
+      "costs": [],
+      "decision": "Nested helper/value type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe$Result#public_signature"
+      ],
+      "id": "fire_crafting_recipe__result",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe$Serializer#public_signature"
+      ],
+      "id": "fire_crafting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.alloy.AlloySmeltingRecipe",
+      "costs": [
+        {
+          "amount": "recipe.energy",
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": "recipe.energy",
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept exact non-smelting AlloySmeltingRecipe holders when every SizedIngredient expands to nonempty simple item alternatives, energy is positive, and output is non-empty. Reject is_smelting vanilla-batch recipes. Consume each sized input, exact NeoForge Energy equal to recipe.energy, and matching station work. Station rate uses loaded Alloy Smelter base usage under Basic Capacitor level 1 (usage*1^2); higher capacitors, loot capacitors, machine mode, and unused experience are not inferred.",
+      "evidence": [
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#inputs",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#output",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#energy",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#isSmelting",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#craft",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmelterBlockEntity.java#TODO: Award XP",
+        "enderio/src/main/java/com/enderio/enderio/foundation/task/PoweredCraftingMachineTask.java#getProgressRequired",
+        "enderio/src/main/java/com/enderio/enderio/config/machines/common/EnergyConfig.java#ALLOY_SMELTER_USAGE",
+        "enderio/src/main/java/com/enderio/enderio/init/EIOItems.java#BASIC_CAPACITOR",
+        "enderio/src/main/java/com/enderio/enderio/api/capacitor/QuadraticScalable.java#scale",
+        "enderio/src/main/java/com/enderio/enderio/init/EIORecipes.java#ALLOY_SMELTING",
+        "enderio/src/datagen/java/com/enderio/enderio/datagen/client/EIOLanguageProvider.java#ALLOY_SMELTING_TITLE"
+      ],
+      "id": "alloy_smelting_recipe",
+      "inputs": [
+        {
+          "amount": "recipe.inputs[i].count",
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.inputs[i].ingredient alternatives"
+        },
+        {
+          "amount": "recipe.energy",
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.output.count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.output"
+        }
+      ],
+      "recipe_type": "enderio:alloy_smelting",
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:enderio_alloy_smelting",
+        "variants": [
+          {
+            "bounds": "plain alloy_smelter item; rate assumes required Basic Capacitor level 1 (config usage * 1^2); higher/loot capacitors and machine mode are not inferred",
+            "item": "enderio:alloy_smelter",
+            "rate": {
+              "numerator": 20,
+              "denominator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.alloy.AlloySmeltingRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; the accepted AlloySmeltingRecipe contract owns its exact semantics.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.alloy.AlloySmeltingRecipe$Input#public_signature"
+      ],
+      "id": "alloy_smelting_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.alloy.AlloySmeltingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer helper; the accepted AlloySmeltingRecipe contract owns recipe type and payload semantics.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.alloy.AlloySmeltingRecipe$Serializer#public_signature"
+      ],
+      "id": "alloy_smelting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe",
+      "costs": [],
+      "decision": "Produces no item/fluid output and mutates world weather state.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe#public_signature"
+      ],
+      "id": "weather_change_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe$Input#public_signature"
+      ],
+      "id": "weather_change_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe$Serializer#public_signature"
+      ],
+      "id": "weather_change_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe$WeatherMode",
+      "costs": [],
+      "decision": "Nested helper/value type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe$WeatherMode#public_signature"
+      ],
+      "id": "weather_change_recipe__weather_mode",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.painting.PaintingRecipe",
+      "costs": [],
+      "decision": "Output paint component depends on a live paint-block input and assemble returns null; not a fixed deterministic result.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.painting.PaintingRecipe#public_signature"
+      ],
+      "id": "painting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.painting.PaintingRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.painting.PaintingRecipe$Input#public_signature"
+      ],
+      "id": "painting_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.painting.PaintingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.painting.PaintingRecipe$Serializer#public_signature"
+      ],
+      "id": "painting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe",
+      "costs": [],
+      "decision": "Uses Random chance/bonus outputs and grinding-ball live multipliers; nondeterministic.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe#public_signature"
+      ],
+      "id": "sag_milling_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$BonusType",
+      "costs": [],
+      "decision": "Nested helper/value type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$BonusType#public_signature"
+      ],
+      "id": "sag_milling_recipe__bonus_type",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$Input#public_signature"
+      ],
+      "id": "sag_milling_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$OutputItem",
+      "costs": [],
+      "decision": "Nested helper/value type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$OutputItem#public_signature"
+      ],
+      "id": "sag_milling_recipe__output_item",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$OutputItem$SizedTagOutput",
+      "costs": [],
+      "decision": "Nested helper/value type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$OutputItem$SizedTagOutput#public_signature"
+      ],
+      "id": "sag_milling_recipe__output_item__sized_tag_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe$Serializer#public_signature"
+      ],
+      "id": "sag_milling_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.slicer.SlicerRecipeManager",
+      "costs": [],
+      "decision": "Recipe infrastructure/cache helper; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.slicer.SlicerRecipeManager#public_signature"
+      ],
+      "id": "slicer_recipe_manager",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.slicer.SlicingRecipe",
+      "costs": [],
+      "decision": "Slice and Splice damages axe/shears durability; tool durability mutation is outside the retained-tool contract.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.slicer.SlicingRecipe#public_signature"
+      ],
+      "id": "slicing_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.slicer.SlicingRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.slicer.SlicingRecipe$Input#public_signature"
+      ],
+      "id": "slicing_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.slicer.SlicingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.slicer.SlicingRecipe$Serializer#public_signature"
+      ],
+      "id": "slicing_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe",
+      "costs": [],
+      "decision": "Requires soul-bound vial capability, entity-type/soul-data matching, and experience-fluid level conversion.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe#public_signature"
+      ],
+      "id": "soul_binding_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe$Input#public_signature"
+      ],
+      "id": "soul_binding_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe$Serializer#public_signature"
+      ],
+      "id": "soul_binding_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.vat.FermentingRecipe",
+      "costs": [],
+      "decision": "Fluid output amount is scaled by live VatReagent item data-map modifiers.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.vat.FermentingRecipe#public_signature"
+      ],
+      "id": "fermenting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.vat.FermentingRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.vat.FermentingRecipe$Input#public_signature"
+      ],
+      "id": "fermenting_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.vat.FermentingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.vat.FermentingRecipe$Serializer#public_signature"
+      ],
+      "id": "fermenting_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.storage.fluid_tank.TankRecipe",
+      "costs": [],
+      "decision": "Mutates a live MachineFluidTank via fill/drain simulation against retained tank state.",
+      "evidence": [
+        "com.enderio.enderio.content.storage.fluid_tank.TankRecipe#public_signature"
+      ],
+      "id": "tank_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "live_machine_state",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.storage.fluid_tank.TankRecipe$Input",
+      "costs": [],
+      "decision": "Nested recipe-input value object; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.storage.fluid_tank.TankRecipe$Input#public_signature"
+      ],
+      "id": "tank_recipe__input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.storage.fluid_tank.TankRecipe$Mode",
+      "costs": [],
+      "decision": "Nested helper/value type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.storage.fluid_tank.TankRecipe$Mode#public_signature"
+      ],
+      "id": "tank_recipe__mode",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.storage.fluid_tank.TankRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.storage.fluid_tank.TankRecipe$Serializer#public_signature"
+      ],
+      "id": "tank_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.travel.travel_anchor.AnchorTravelTarget$Serializer",
+      "costs": [],
+      "decision": "Serializer/helper nested type; not an exact executable recipe family.",
+      "evidence": [
+        "com.enderio.enderio.content.travel.travel_anchor.AnchorTravelTarget$Serializer#public_signature"
+      ],
+      "id": "anchor_travel_target__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.AlloyRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.AlloyRecipeProvider#public_signature"
+      ],
+      "id": "alloy_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.ArmoryRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.ArmoryRecipeProvider#public_signature"
+      ],
+      "id": "armory_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.ConduitRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.ConduitRecipeProvider#public_signature"
+      ],
+      "id": "conduit_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.EnchanterRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.EnchanterRecipeProvider#public_signature"
+      ],
+      "id": "enchanter_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.EnderIORecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.EnderIORecipeProvider#public_signature"
+      ],
+      "id": "ender_i_o_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.FermentingRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.FermentingRecipeProvider#public_signature"
+      ],
+      "id": "fermenting_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.FilterRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.FilterRecipeProvider#public_signature"
+      ],
+      "id": "filter_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.FireCraftingRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.FireCraftingRecipeProvider#public_signature"
+      ],
+      "id": "fire_crafting_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.GlassRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.GlassRecipeProvider#public_signature"
+      ],
+      "id": "glass_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.ItemRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.ItemRecipeProvider#public_signature"
+      ],
+      "id": "item_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.MachineRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.MachineRecipeProvider#public_signature"
+      ],
+      "id": "machine_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.MaterialRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.MaterialRecipeProvider#public_signature"
+      ],
+      "id": "material_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.MiscBlockRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.MiscBlockRecipeProvider#public_signature"
+      ],
+      "id": "misc_block_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.PaintingRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.PaintingRecipeProvider#public_signature"
+      ],
+      "id": "painting_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.SagMillRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.SagMillRecipeProvider#public_signature"
+      ],
+      "id": "sag_mill_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.SlicingRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.SlicingRecipeProvider#public_signature"
+      ],
+      "id": "slicing_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.SoulBindingRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.SoulBindingRecipeProvider#public_signature"
+      ],
+      "id": "soul_binding_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.TankRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.TankRecipeProvider#public_signature"
+      ],
+      "id": "tank_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.datagen.common.recipes.WeatherChangeRecipeProvider",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.datagen.common.recipes.WeatherChangeRecipeProvider#public_signature"
+      ],
+      "id": "weather_change_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.MachineRecipe",
+      "costs": [],
+      "decision": "Shared MachineRecipe interface; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.foundation.MachineRecipe#public_signature"
+      ],
+      "id": "machine_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.recipe.FluidRecipeInput",
+      "costs": [],
+      "decision": "Recipe infrastructure/cache helper; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.foundation.recipe.FluidRecipeInput#public_signature"
+      ],
+      "id": "fluid_recipe_input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.recipe.MachineRecipeCaches",
+      "costs": [],
+      "decision": "Recipe infrastructure/cache helper; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.foundation.recipe.MachineRecipeCaches#public_signature"
+      ],
+      "id": "machine_recipe_caches",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.recipe.RecipeInputCache",
+      "costs": [],
+      "decision": "Recipe infrastructure/cache helper; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.foundation.recipe.RecipeInputCache#public_signature"
+      ],
+      "id": "recipe_input_cache",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.soul.ShapedEntityStorageRecipe",
+      "costs": [],
+      "decision": "Wrapped crafting recipe that copies live soul-bindable capability state into the result.",
+      "evidence": [
+        "com.enderio.enderio.foundation.soul.ShapedEntityStorageRecipe#public_signature"
+      ],
+      "id": "shaped_entity_storage_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.soul.ShapedEntityStorageRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen/builder helper; not a runtime recipe family.",
+      "evidence": [
+        "com.enderio.enderio.foundation.soul.ShapedEntityStorageRecipeBuilder#public_signature"
+      ],
+      "id": "shaped_entity_storage_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.init.EIORecipes",
+      "costs": [],
+      "decision": "Registration/mixin/accessor helper; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.init.EIORecipes#public_signature"
+      ],
+      "id": "e_i_o_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.mixin.AbstractCookingRecipeAccessor",
+      "costs": [],
+      "decision": "Registration/mixin/accessor helper; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.mixin.AbstractCookingRecipeAccessor#public_signature"
+      ],
+      "id": "abstract_cooking_recipe_accessor",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.mixin.RecipeManagerMixin",
+      "costs": [],
+      "decision": "Recipe infrastructure/cache helper; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.mixin.RecipeManagerMixin#public_signature"
+      ],
+      "id": "recipe_manager_mixin",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "verification": {
+    "fixture": "enderIoFixture",
+    "expected_game_tests": 6,
+    "game_test_task": "runEnderIoGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runEnderIoGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ],
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Combined compatibility registry is missing",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Ender IO Alloy Smelting catalyst/tool/remainder behavior was incorrect",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Long.MAX_VALUE",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Ender IO full destination transaction was not an atomic no-op",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Ender IO missing-ingredient transaction was not an atomic no-op",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Ender IO Alloy Smelting registration or rejection boundary was incorrect",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    }
+  }
+}
