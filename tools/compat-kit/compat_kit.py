@@ -28,6 +28,12 @@ TOOL_VERSION = "0.3.0"
 PUBLISHED_ADDON_EXAMPLE_FILES = (
     "src/main/java/example/autostorage/ExampleAddon.java",
 )
+PUBLISHED_SCHEMA_FILES = (
+    "compat-audit.schema.json",
+    "compat-contract.schema.json",
+    "compat-delta.schema.json",
+    "compat-report.schema.json",
+)
 REQUIRED_VERIFICATION_CHECKS = (
     "absent_target_no_classload",
     "present_target_load_once",
@@ -2565,6 +2571,16 @@ def _published_addon_example_files(root: Path) -> dict[str, bytes]:
     return files
 
 
+def _published_schema_files(root: Path) -> dict[str, bytes]:
+    files = {}
+    for name in PUBLISHED_SCHEMA_FILES:
+        source = root / name
+        if not source.is_file() or source.is_symlink():
+            raise ValueError(f"missing published schema file: {source}")
+        files[f"schema/{name}"] = source.read_bytes()
+    return files
+
+
 def _publish_files() -> dict[str, bytes]:
     tool_root = Path(__file__).resolve().parent
     repo_root = tool_root.parents[1]
@@ -2577,8 +2593,7 @@ def _publish_files() -> dict[str, bytes]:
             tool_root / "examples/github-actions/compat-kit.yml"
         ).read_bytes(),
     }
-    for schema in sorted((tool_root / "schema").glob("*.json")):
-        files[f"schema/{schema.name}"] = schema.read_bytes()
+    files.update(_published_schema_files(tool_root / "schema"))
     files.update(
         _published_addon_example_files(repo_root / "examples/addon")
     )

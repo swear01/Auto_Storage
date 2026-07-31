@@ -334,8 +334,9 @@ The API artifact version equals the Auto Storage mod version.
 - Compat Kit therefore generates a current-minor dependency range; version
   0.3.0 produces `[0.3.0,0.4)`, not an open-ended pre-1.0 range.
 - Compat Kit publication receives the authoritative Gradle `mod_version` and
-  fails if it differs from the tool version. Its addon example uses an explicit
-  tracked template list, never a recursive local-output scan.
+  fails if it differs from the tool version. Its addon example and four
+  machine-readable schemas use explicit tracked allowlists, never recursive or
+  globbed local-output scans.
 - Registry IDs and persisted resource/descriptor IDs are data contracts and
   must not be reused for different semantics.
 - Optional target-mod versions in CI are representative evidence only. Addons

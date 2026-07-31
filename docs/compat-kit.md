@@ -354,9 +354,10 @@ This produces
 schemas, Gradle wrapper, RED templates, complete public-SDK addon example, CI
 example, README, and license.
 Only the explicit repository-owned addon example template is packaged; local
-`build/` or untracked files under `examples/addon` are never traversed. Gradle
-passes `mod_version` to `publish`, and publication fails unless it exactly
-matches the tool version embedded in generated projects.
+`build/` or untracked files under `examples/addon` are never traversed. The
+four published JSON schemas are also an explicit allowlist, not a directory
+glob. Gradle passes `mod_version` to `publish`, and publication fails unless it
+exactly matches the tool version embedded in generated projects.
 `assemble`/`build` includes the archive, CI uploads it, and tagged releases add
 it beside API, sources, and Javadocs artifacts.
 

@@ -129,7 +129,8 @@ scaffold an addon without an Auto Storage checkout.
 Bundled scaffolding also compares derived module IDs, entrypoints, source sets,
 and fixtures with existing descriptors before writing. Publication requires
 `publish --version <mod_version>` to match the embedded tool version and
-includes only the explicit addon example template; local outputs are excluded.
+includes only the explicit addon example and four schema allowlists; local
+outputs are excluded.
 
 ## Review an update
 

@@ -2881,6 +2881,31 @@ displayName="Sample Machines"
         )
         self.assertNotIn("review-sentinel.txt", "\n".join(files))
 
+    def test_publish_excludes_local_schema_outputs(self):
+        schema_root = self.root / "schema"
+        schema_root.mkdir()
+        for name in (
+            "compat-audit.schema.json",
+            "compat-contract.schema.json",
+            "compat-delta.schema.json",
+            "compat-report.schema.json",
+        ):
+            (schema_root / name).write_text("{}")
+        (schema_root / "review-sentinel.json").write_text("{}")
+
+        files = self.compat_kit._published_schema_files(schema_root)
+
+        self.assertEqual(
+            {
+                "schema/compat-audit.schema.json",
+                "schema/compat-contract.schema.json",
+                "schema/compat-delta.schema.json",
+                "schema/compat-report.schema.json",
+            },
+            set(files),
+        )
+        self.assertNotIn("review-sentinel.json", "\n".join(files))
+
     def test_publish_rejects_release_version_drift(self):
         with self.assertRaisesRegex(
             ValueError,
