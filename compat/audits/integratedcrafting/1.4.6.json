@@ -1,0 +1,139 @@
+{
+  "artifact": {
+    "sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec",
+    "size": 377545
+  },
+  "candidates": {
+    "recipe_classes": [
+      {
+        "class": "org.cyclops.integratedcrafting.api.crafting.FailedCraftingRecipeException",
+        "public_signature": "Compiled from \"FailedCraftingRecipeException.java\"\npublic class org.cyclops.integratedcrafting.api.crafting.FailedCraftingRecipeException extends java.lang.Exception {\n  public org.cyclops.integratedcrafting.api.crafting.FailedCraftingRecipeException(org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition, long, java.util.List<org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException>, org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients, java.util.List<org.cyclops.integratedcrafting.api.crafting.CraftingJob>);\n  public org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition getRecipe();\n  public long getQuantityMissing();\n  public java.util.List<org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException> getMissingChildRecipes();\n  public org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients getIngredientsStorage();\n  public java.util.List<org.cyclops.integratedcrafting.api.crafting.CraftingJob> getPartialCraftingJobs();\n  public java.lang.String getMessage();\n  public boolean equals(java.lang.Object);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.api.crafting.RecursiveCraftingRecipeException",
+        "public_signature": "Compiled from \"RecursiveCraftingRecipeException.java\"\npublic class org.cyclops.integratedcrafting.api.crafting.RecursiveCraftingRecipeException extends java.lang.Exception {\n  public <T, M> org.cyclops.integratedcrafting.api.crafting.RecursiveCraftingRecipeException(org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient);\n  public org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient getPrototypedIngredient();\n  public java.util.List<org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition> getRecipeStack();\n  public java.lang.String getMessage();\n  public java.lang.String toString();\n  public void addRecipe(org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition);\n  public boolean equals(java.lang.Object);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException",
+        "public_signature": "Compiled from \"UnknownCraftingRecipeException.java\"\npublic class org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException extends java.lang.Exception {\n  public org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException(org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient<?, ?>, long, java.util.List<org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException>, org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients, java.util.List<org.cyclops.integratedcrafting.api.crafting.CraftingJob>);\n  public org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient<?, ?> getIngredient();\n  public long getQuantityMissing();\n  public java.util.List<org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException> getMissingChildRecipes();\n  public org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients getIngredientsStorage();\n  public java.util.List<org.cyclops.integratedcrafting.api.crafting.CraftingJob> getPartialCraftingJobs();\n  public java.lang.String getMessage();\n  public boolean equals(java.lang.Object);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex",
+        "public_signature": "Compiled from \"ICraftingJobIndex.java\"\npublic interface org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex {\n  public abstract java.util.Collection<org.cyclops.integratedcrafting.api.crafting.CraftingJob> getCraftingJobs();\n  public abstract <T, M> java.util.Iterator<org.cyclops.integratedcrafting.api.crafting.CraftingJob> getCraftingJobs(org.cyclops.commoncapabilities.api.ingredient.IngredientComponent<T, M>, T, M);\n  public abstract org.cyclops.integratedcrafting.api.crafting.CraftingJob getCraftingJob(int);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndexModifiable",
+        "public_signature": "Compiled from \"ICraftingJobIndexModifiable.java\"\npublic interface org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndexModifiable extends org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex {\n  public abstract void addCraftingJob(org.cyclops.integratedcrafting.api.crafting.CraftingJob);\n  public abstract void removeCraftingJob(org.cyclops.integratedcrafting.api.crafting.CraftingJob);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.api.recipe.IRecipeIndex",
+        "public_signature": "Compiled from \"IRecipeIndex.java\"\npublic interface org.cyclops.integratedcrafting.api.recipe.IRecipeIndex {\n  public abstract java.util.Set<org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition> getRecipes();\n  public abstract <T, M> java.util.Iterator<org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition> getRecipes(org.cyclops.commoncapabilities.api.ingredient.IngredientComponent<T, M>, T, M);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.api.recipe.IRecipeIndexModifiable",
+        "public_signature": "Compiled from \"IRecipeIndexModifiable.java\"\npublic interface org.cyclops.integratedcrafting.api.recipe.IRecipeIndexModifiable extends org.cyclops.integratedcrafting.api.recipe.IRecipeIndex {\n  public abstract void addRecipe(org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition);\n  public abstract void removeRecipe(org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.core.RecipeIndexDefault",
+        "public_signature": "Compiled from \"RecipeIndexDefault.java\"\npublic class org.cyclops.integratedcrafting.core.RecipeIndexDefault implements org.cyclops.integratedcrafting.api.recipe.IRecipeIndexModifiable {\n  public org.cyclops.integratedcrafting.core.RecipeIndexDefault();\n  public java.util.Set<org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition> getRecipes();\n  public <T, M> java.util.Iterator<org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition> getRecipes(org.cyclops.commoncapabilities.api.ingredient.IngredientComponent<T, M>, T, M);\n  public void addRecipe(org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition);\n  public void removeRecipe(org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+        "public_signature": "Compiled from \"RecipeDeadBush.java\"\npublic class org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush extends net.minecraft.world.item.crafting.CustomRecipe {\n  public org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush(net.minecraft.world.item.crafting.CraftingBookCategory);\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.core.NonNullList getRemainingItems(net.minecraft.world.item.crafting.RecipeInput);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.recipe.type.RecipeSerializerDeadBushConfig",
+        "public_signature": "Compiled from \"RecipeSerializerDeadBushConfig.java\"\npublic class org.cyclops.integratedcrafting.recipe.type.RecipeSerializerDeadBushConfig extends org.cyclops.cyclopscore.config.extendedconfig.RecipeConfig<org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush> {\n  public org.cyclops.integratedcrafting.recipe.type.RecipeSerializerDeadBushConfig();\n}"
+      }
+    ],
+    "resource_apis": [
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders",
+        "public_signature": "Compiled from \"CraftingAspectReadBuilders.java\"\npublic class org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders {\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders();\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders$CraftingNetwork",
+        "public_signature": "Compiled from \"CraftingAspectReadBuilders.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders$CraftingNetwork {\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Pair<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties>, org.apache.commons.lang3.tuple.Pair<org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.util.Optional<org.cyclops.integratedcrafting.api.network.ICraftingNetwork>>> PROP_GET_CRAFTING_NETWORK;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList, org.apache.commons.lang3.tuple.Pair<org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.util.Optional<org.cyclops.integratedcrafting.api.network.ICraftingNetwork>>> BUILDER_LIST;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders$CraftingNetwork();\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders",
+        "public_signature": "Compiled from \"CraftingAspectWriteBuilders.java\"\npublic class org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders {\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger> PROP_CHANNEL;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean$ValueBoolean> PROP_IGNORE_STORAGE;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean$ValueBoolean> PROP_IGNORE_CRAFTING;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean$ValueBoolean> PROP_CRAFT_MISSING;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger> PROP_CRAFT_AMOUNT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger> PROP_CRAFT_DELAY;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties PROPERTIES_CRAFTING_RECIPE;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties PROPERTIES_CRAFTING;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe$ValueRecipe, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition>> BUILDER_RECIPE;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack$ValueItemStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.minecraft.world.item.ItemStack>> BUILDER_ITEMSTACK;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack$ValueFluidStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.neoforged.neoforge.fluids.FluidStack>> BUILDER_FLUIDSTACK;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.lang.Integer>> BUILDER_INTEGER;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.minecraft.world.item.ItemStack>, org.cyclops.integratedcrafting.part.aspect.CraftingJobData<net.minecraft.world.item.ItemStack, java.lang.Integer>> PROP_ITEMSTACK_CRAFTINGDATA;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.neoforged.neoforge.fluids.FluidStack>, org.cyclops.integratedcrafting.part.aspect.CraftingJobData<net.neoforged.neoforge.fluids.FluidStack, java.lang.Integer>> PROP_FLUIDSTACK_CRAFTINGDATA;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.lang.Integer>, org.cyclops.integratedcrafting.part.aspect.CraftingJobData<java.lang.Long, java.lang.Boolean>> PROP_ENERGY_CRAFTINGDATA;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition>, java.lang.Void> PROP_CRAFT_RECIPE;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders();\n  public static <T, M> org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.cyclops.integratedcrafting.part.aspect.CraftingJobData<T, M>, java.lang.Void> PROP_CRAFT();\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects",
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic class org.cyclops.integratedcrafting.part.aspect.CraftingAspects {\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects();\n  public static void load();\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read",
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read {\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read();\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read$Network",
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read$Network {\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectRead<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList> CRAFTING_JOBS;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectRead<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList> CRAFTING_INGREDIENTS;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectRead<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList> RECIPES;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read$Network();\n}"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Write",
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Write {\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe$ValueRecipe, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe> RECIPE_CRAFT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack$ValueItemStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack> ITEMSTACK_CRAFT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack$ValueFluidStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack> FLUIDSTACK_CRAFT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger> ENERGY_CRAFT;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Write();\n}"
+      }
+    ],
+    "station_classes": []
+  },
+  "kind": "auto_storage_compat_audit",
+  "risks": [
+    {
+      "code": "entity_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush: entity API"
+      ]
+    },
+    {
+      "code": "generic_ingredients",
+      "disposition": "needs_decision",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush#getIngredients"
+      ]
+    },
+    {
+      "code": "unbounded_output",
+      "disposition": "needs_decision",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex: streaming output",
+        "org.cyclops.integratedcrafting.api.recipe.IRecipeIndex: streaming output",
+        "org.cyclops.integratedcrafting.core.RecipeIndexDefault: streaming output"
+      ]
+    },
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush: world API"
+      ]
+    }
+  ],
+  "scanner_format": 7,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/org/cyclops/integratedcrafting/api/crafting/FailedCraftingRecipeException.java",
+      "src/main/java/org/cyclops/integratedcrafting/api/crafting/RecursiveCraftingRecipeException.java",
+      "src/main/java/org/cyclops/integratedcrafting/api/crafting/UnknownCraftingRecipeException.java",
+      "src/main/java/org/cyclops/integratedcrafting/api/recipe/ICraftingJobIndex.java",
+      "src/main/java/org/cyclops/integratedcrafting/api/recipe/ICraftingJobIndexModifiable.java",
+      "src/main/java/org/cyclops/integratedcrafting/api/recipe/IRecipeIndex.java",
+      "src/main/java/org/cyclops/integratedcrafting/api/recipe/IRecipeIndexModifiable.java",
+      "src/main/java/org/cyclops/integratedcrafting/core/RecipeIndexDefault.java",
+      "src/main/java/org/cyclops/integratedcrafting/part/aspect/CraftingAspectReadBuilders.java",
+      "src/main/java/org/cyclops/integratedcrafting/part/aspect/CraftingAspectWriteBuilders.java",
+      "src/main/java/org/cyclops/integratedcrafting/part/aspect/CraftingAspects.java",
+      "src/main/java/org/cyclops/integratedcrafting/recipe/type/RecipeDeadBush.java",
+      "src/main/java/org/cyclops/integratedcrafting/recipe/type/RecipeSerializerDeadBushConfig.java"
+    ],
+    "revision": "352bce1cfd1d57aef79aeb17b38895aaac0cac39"
+  },
+  "target": {
+    "display_name": "IntegratedCrafting",
+    "mod_id": "integratedcrafting",
+    "version": "1.4.6"
+  }
+}

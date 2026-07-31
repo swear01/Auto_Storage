@@ -1,0 +1,294 @@
+{
+  "families": [
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.FailedCraftingRecipeException",
+      "costs": [],
+      "decision": "Network crafting exception type, not a recipe family.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.crafting.FailedCraftingRecipeException#public_signature"
+      ],
+      "id": "failed_crafting_recipe_exception",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.RecursiveCraftingRecipeException",
+      "costs": [],
+      "decision": "Network crafting exception type, not a recipe family.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.crafting.RecursiveCraftingRecipeException#public_signature"
+      ],
+      "id": "recursive_crafting_recipe_exception",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException",
+      "costs": [],
+      "decision": "Network crafting exception type, not a recipe family.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException#public_signature"
+      ],
+      "id": "unknown_crafting_recipe_exception",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex",
+      "costs": [],
+      "decision": "Integrated Crafting network job index API; automation against live crafting interfaces is outside Auto Storage installed-station scope.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex#public_signature"
+      ],
+      "id": "i_crafting_job_index",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "unbounded_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndexModifiable",
+      "costs": [],
+      "decision": "Integrated Crafting network job index API; automation against live crafting interfaces is outside Auto Storage installed-station scope.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndexModifiable#public_signature"
+      ],
+      "id": "i_crafting_job_index_modifiable",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.IRecipeIndex",
+      "costs": [],
+      "decision": "Integrated Crafting network recipe index API with streaming outputs; not a bounded deterministic recipe family.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.recipe.IRecipeIndex#public_signature"
+      ],
+      "id": "i_recipe_index",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "unbounded_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.IRecipeIndexModifiable",
+      "costs": [],
+      "decision": "Integrated Crafting network recipe index API; not a bounded deterministic recipe family.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.api.recipe.IRecipeIndexModifiable#public_signature"
+      ],
+      "id": "i_recipe_index_modifiable",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.RecipeIndexDefault",
+      "costs": [],
+      "decision": "Default network recipe index implementation with streaming outputs; not a bounded deterministic recipe family.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.core.RecipeIndexDefault#public_signature"
+      ],
+      "id": "recipe_index_default",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "unbounded_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+      "costs": [],
+      "decision": "Special crafting recipe used for game tests; shears durability uses player/entity mutation and CommonHooks remainders, so it has no complete Auto Storage transaction contract.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush#public_signature"
+      ],
+      "id": "recipe_dead_bush",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.recipe.type.RecipeSerializerDeadBushConfig",
+      "costs": [],
+      "decision": "Serializer/config helper for the rejected DeadBush special recipe.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeSerializerDeadBushConfig#public_signature"
+      ],
+      "id": "recipe_serializer_dead_bush_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec",
+  "source_recipe_inventory_sha256": "59739de1259eacbb1070607d86dae2c9d8f666c33ff725781ac422eafa8a4a64",
+  "target": {
+    "dependency": "maven.modrinth:integrated-crafting:se5g7ewq",
+    "display_name": "IntegratedCrafting",
+    "mod_id": "integratedcrafting",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:integrated-dynamics:tG3ZKTep",
+      "maven.modrinth:cyclops-core:vEjxRv40",
+      "maven.modrinth:common-capabilities:c50bCinZ"
+    ],
+    "version": "1.4.6"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Combined compatibility registry is missing",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Integrated Crafting DeadBush special recipe must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Integrated Crafting recipes must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Integrated Crafting recipes must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Integrated Crafting recipes must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Integrated Crafting unsafe recipe contract was registered",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 4,
+    "fixture": "integratedCraftingFixture",
+    "game_test_task": "runIntegratedCraftingGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runIntegratedCraftingGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

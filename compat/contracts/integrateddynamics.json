@@ -1,0 +1,1861 @@
+{
+  "families": [
+    {
+      "class": "org.cyclops.integrateddynamics.api.evaluate.operator.IOperatorSerializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.api.evaluate.operator.IOperatorSerializer#public_signature"
+      ],
+      "id": "i_operator_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.client.render.valuetype.RecipeValueTypeWorldRenderer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.client.render.valuetype.RecipeValueTypeWorldRenderer#public_signature"
+      ],
+      "id": "recipe_value_type_world_renderer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "unbounded_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Conjunction$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Conjunction$Serializer#public_signature"
+      ],
+      "id": "combined_operator__conjunction__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Disjunction$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Disjunction$Serializer#public_signature"
+      ],
+      "id": "combined_operator__disjunction__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Flip$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Flip$Serializer#public_signature"
+      ],
+      "id": "combined_operator__flip__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$ListOperatorSerializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$ListOperatorSerializer#public_signature"
+      ],
+      "id": "combined_operator__list_operator_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Negation$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Negation$Serializer#public_signature"
+      ],
+      "id": "combined_operator__negation__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Pipe$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Pipe$Serializer#public_signature"
+      ],
+      "id": "combined_operator__pipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Pipe2$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CombinedOperator$Pipe2$Serializer#public_signature"
+      ],
+      "id": "combined_operator__pipe2__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.CurriedOperator$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.CurriedOperator$Serializer#public_signature"
+      ],
+      "id": "curried_operator__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.OperatorSerializerDefault",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.OperatorSerializerDefault#public_signature"
+      ],
+      "id": "operator_serializer_default",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperator$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperator$Serializer#public_signature"
+      ],
+      "id": "positioned_operator__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandler",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandler#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandler$Function",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandler$Function#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler__function",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerInputs",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerInputs#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_inputs",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerInputs$Function",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerInputs$Function#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_inputs__function",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerOutput",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerOutput#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerOutput$Function",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerOutput$Function#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_output__function",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByInput",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByInput#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipe_by_input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByInput$Function",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByInput$Function#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipe_by_input__function",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByOutput",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByOutput#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipe_by_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByOutput$Function",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipeByOutput$Function#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipe_by_output__function",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByInput",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByInput#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipes_by_input",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByInput$Function",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByInput$Function#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipes_by_input__function",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByOutput",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByOutput#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipes_by_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByOutput$Function",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PositionedOperatorRecipeHandlerRecipesByOutput$Function#public_signature"
+      ],
+      "id": "positioned_operator_recipe_handler_recipes_by_output__function",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.operator.PredicateOperator$Serializer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.operator.PredicateOperator$Serializer#public_signature"
+      ],
+      "id": "predicate_operator__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe#public_signature"
+      ],
+      "id": "value_object_type_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe$ValueRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe$ValueRecipe#public_signature"
+      ],
+      "id": "value_object_type_recipe__value_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeListProxyPositionedRecipes",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeListProxyPositionedRecipes#public_signature"
+      ],
+      "id": "value_type_list_proxy_positioned_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeAdapterLPElementPropertiesSubGui",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeAdapterLPElementPropertiesSubGui#public_signature"
+      ],
+      "id": "value_type_recipe_adapter_l_p_element_properties_sub_gui",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeAdapterLPElementPropertiesSubGui$DropdownEntry",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeAdapterLPElementPropertiesSubGui$DropdownEntry#public_signature"
+      ],
+      "id": "value_type_recipe_adapter_l_p_element_properties_sub_gui__dropdown_entry",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElement",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElement#public_signature"
+      ],
+      "id": "value_type_recipe_l_p_element",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "live_machine_state",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElementMasterSubGui",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElementMasterSubGui#public_signature"
+      ],
+      "id": "value_type_recipe_l_p_element_master_sub_gui",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElementPropertiesSubGui",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElementPropertiesSubGui#public_signature"
+      ],
+      "id": "value_type_recipe_l_p_element_properties_sub_gui",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElementRecipeSubGui",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.logicprogrammer.ValueTypeRecipeLPElementRecipeSubGui#public_signature"
+      ],
+      "id": "value_type_recipe_l_p_element_recipe_sub_gui",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.handler.RecipeHandlerDryingBasin",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.handler.RecipeHandlerDryingBasin#public_signature"
+      ],
+      "id": "recipe_handler_drying_basin",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "live_machine_state",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.handler.RecipeHandlerSqueezer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.handler.RecipeHandlerSqueezer#public_signature"
+      ],
+      "id": "recipe_handler_squeezer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeDryingBasin",
+      "costs": [
+        {
+          "amount": "recipe.duration",
+          "resource_kind": "auto_storage:station_work"
+        }
+      ],
+      "decision": "Accept exact Drying Basin recipes with optional exact item and/or sized fluid inputs, exact item and/or sized fluid outputs, and positive recipe duration as station work. When an item output exists it is the primary; otherwise the fluid output is primary. Reject non-simple ingredients, tag-derived ItemStackFromIngredient outputs, empty plans, and non-positive duration.",
+      "evidence": [
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeDryingBasin.java#getDuration",
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeDryingBasin.java#getInputIngredient",
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeDryingBasin.java#getInputFluid",
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeDryingBasin.java#getOutputItem",
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeDryingBasin.java#getOutputFluid",
+        "src/main/java/org/cyclops/integrateddynamics/blockentity/BlockEntityDryingBasin.java#TickerServer",
+        "RegistryEntries.RECIPETYPE_DRYING_BASIN"
+      ],
+      "id": "recipe_drying_basin",
+      "inputs": [
+        {
+          "amount": "optional recipe.inputIngredient count 1",
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.inputIngredient"
+        },
+        {
+          "amount": "optional recipe.inputFluid.amount",
+          "resource_kind": "fluid",
+          "role": "consume",
+          "selector": "recipe.inputFluid"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "optional recipe.outputItem count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.outputItem"
+        },
+        {
+          "amount": "optional recipe.outputFluid.amount",
+          "resource_kind": "fluid",
+          "role": "remainder",
+          "selector": "recipe.outputFluid"
+        }
+      ],
+      "recipe_type": "integrateddynamics:drying_basin",
+      "risks": [
+        "live_machine_state",
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:integrateddynamics_drying_basin",
+        "variants": [
+          {
+            "item": "integrateddynamics:drying_basin",
+            "rate": {
+              "denominator": 1,
+              "numerator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeEnergyContainerCombination",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeEnergyContainerCombination#public_signature"
+      ],
+      "id": "recipe_energy_container_combination",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeEnergyContainerCombinationConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeEnergyContainerCombinationConfig#public_signature"
+      ],
+      "id": "recipe_energy_container_combination_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeMechanicalDryingBasin",
+      "costs": [
+        {
+          "amount": "recipe.duration",
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": "BlockMechanicalDryingBasinConfig.consumptionRate * recipe.duration",
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept exact Mechanical Drying Basin recipes under the same item/fluid determinism rules as Drying Basin, with recipe duration as station work and loaded BlockMechanicalDryingBasinConfig.consumptionRate * duration NeoForge Energy. When an item output exists it is the primary; otherwise the fluid output is primary.",
+      "evidence": [
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeMechanicalDryingBasin.java",
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeDryingBasin.java#getDuration",
+        "src/main/java/org/cyclops/integrateddynamics/block/BlockMechanicalDryingBasinConfig.java#consumptionRate",
+        "src/main/java/org/cyclops/integrateddynamics/core/blockentity/BlockEntityMechanicalMachine.java#getEnergyConsumptionRate",
+        "RegistryEntries.RECIPETYPE_MECHANICAL_DRYING_BASIN"
+      ],
+      "id": "recipe_mechanical_drying_basin",
+      "inputs": [
+        {
+          "amount": "optional recipe.inputIngredient count 1",
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.inputIngredient"
+        },
+        {
+          "amount": "optional recipe.inputFluid.amount",
+          "resource_kind": "fluid",
+          "role": "consume",
+          "selector": "recipe.inputFluid"
+        },
+        {
+          "amount": "BlockMechanicalDryingBasinConfig.consumptionRate * recipe.duration",
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "optional recipe.outputItem count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.outputItem"
+        },
+        {
+          "amount": "optional recipe.outputFluid.amount",
+          "resource_kind": "fluid",
+          "role": "remainder",
+          "selector": "recipe.outputFluid"
+        }
+      ],
+      "recipe_type": "integrateddynamics:mechanical_drying_basin",
+      "risks": [],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:integrateddynamics_mechanical_drying_basin",
+        "variants": [
+          {
+            "item": "integrateddynamics:mechanical_drying_basin",
+            "rate": {
+              "denominator": 1,
+              "numerator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeMechanicalSqueezer",
+      "costs": [
+        {
+          "amount": "recipe.duration",
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": "BlockMechanicalSqueezerConfig.consumptionRate * recipe.duration",
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept Mechanical Squeezer recipes only when the input ingredient is simple/exact, every item output chance is exactly 1.0F, optional fluid output is exact, duration is positive, and loaded BlockMechanicalSqueezerConfig.consumptionRate * duration is a finite positive FE total. The first guaranteed item is primary; additional guaranteed items and fluid are remainders. Chance outputs below 1.0 fail closed. Manual Squeezer remains rejected.",
+      "evidence": [
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeMechanicalSqueezer.java#getDuration",
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeSqueezer.java#getOutputItems",
+        "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeSqueezer.IngredientChance#getChance",
+        "src/main/java/org/cyclops/integrateddynamics/blockentity/BlockEntityMechanicalSqueezer.java#finalizeRecipe",
+        "src/main/java/org/cyclops/integrateddynamics/block/BlockMechanicalSqueezerConfig.java#consumptionRate",
+        "RegistryEntries.RECIPETYPE_MECHANICAL_SQUEEZER"
+      ],
+      "id": "recipe_mechanical_squeezer",
+      "inputs": [
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.inputIngredient"
+        },
+        {
+          "amount": "BlockMechanicalSqueezerConfig.consumptionRate * recipe.duration",
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "first chance==1.0F output item count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.outputItems[0]"
+        },
+        {
+          "amount": "additional chance==1.0F output item counts",
+          "resource_kind": "item",
+          "role": "remainder",
+          "selector": "recipe.outputItems[1..]"
+        },
+        {
+          "amount": "optional recipe.outputFluid.amount",
+          "resource_kind": "fluid",
+          "role": "remainder",
+          "selector": "recipe.outputFluid"
+        }
+      ],
+      "recipe_type": "integrateddynamics:mechanical_squeezer",
+      "risks": [],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:integrateddynamics_mechanical_squeezer",
+        "variants": [
+          {
+            "item": "integrateddynamics:mechanical_squeezer",
+            "rate": {
+              "denominator": 1,
+              "numerator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeMechanicalSqueezerFacade",
+      "costs": [],
+      "decision": "Facade/datagen wrapper, not a runtime recipe family.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeMechanicalSqueezerFacade#public_signature"
+      ],
+      "id": "recipe_mechanical_squeezer_facade",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeNbtClear",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeNbtClear#public_signature"
+      ],
+      "id": "recipe_nbt_clear",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerDryingBasin",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerDryingBasin#public_signature"
+      ],
+      "id": "recipe_serializer_drying_basin",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerDryingBasinConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerDryingBasinConfig#public_signature"
+      ],
+      "id": "recipe_serializer_drying_basin_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerEnergyContainerCombination",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerEnergyContainerCombination#public_signature"
+      ],
+      "id": "recipe_serializer_energy_container_combination",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalDryingBasin",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalDryingBasin#public_signature"
+      ],
+      "id": "recipe_serializer_mechanical_drying_basin",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalDryingBasinConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalDryingBasinConfig#public_signature"
+      ],
+      "id": "recipe_serializer_mechanical_drying_basin_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezer#public_signature"
+      ],
+      "id": "recipe_serializer_mechanical_squeezer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezerConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezerConfig#public_signature"
+      ],
+      "id": "recipe_serializer_mechanical_squeezer_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezerFacade",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezerFacade#public_signature"
+      ],
+      "id": "recipe_serializer_mechanical_squeezer_facade",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezerFacadeConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerMechanicalSqueezerFacadeConfig#public_signature"
+      ],
+      "id": "recipe_serializer_mechanical_squeezer_facade_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerNbtClear",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerNbtClear#public_signature"
+      ],
+      "id": "recipe_serializer_nbt_clear",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerNbtClearConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerNbtClearConfig#public_signature"
+      ],
+      "id": "recipe_serializer_nbt_clear_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezer",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezer#public_signature"
+      ],
+      "id": "recipe_serializer_squeezer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezerConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezerConfig#public_signature"
+      ],
+      "id": "recipe_serializer_squeezer_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezerFacade",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezerFacade#public_signature"
+      ],
+      "id": "recipe_serializer_squeezer_facade",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezerFacadeConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSerializerSqueezerFacadeConfig#public_signature"
+      ],
+      "id": "recipe_serializer_squeezer_facade_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSqueezer",
+      "costs": [],
+      "decision": "Manual Squeezer completion depends on player-driven block height compression and chance outputs; not representable as an installed-station work transaction.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSqueezer#public_signature"
+      ],
+      "id": "recipe_squeezer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSqueezer$IngredientChance",
+      "costs": [],
+      "decision": "Nested chance value object; owned by accepted Mechanical Squeezer / rejected manual Squeezer contracts rather than a standalone family.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSqueezer$IngredientChance#public_signature"
+      ],
+      "id": "recipe_squeezer__ingredient_chance",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeSqueezerFacade",
+      "costs": [],
+      "decision": "Facade/datagen wrapper, not a runtime recipe family.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeSqueezerFacade#public_signature"
+      ],
+      "id": "recipe_squeezer_facade",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeDryingBasinConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeDryingBasinConfig#public_signature"
+      ],
+      "id": "recipe_type_drying_basin_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeMechanicalDryingBasinConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeMechanicalDryingBasinConfig#public_signature"
+      ],
+      "id": "recipe_type_mechanical_drying_basin_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeMechanicalSqueezerConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeMechanicalSqueezerConfig#public_signature"
+      ],
+      "id": "recipe_type_mechanical_squeezer_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeSqueezerConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.core.recipe.type.RecipeTypeSqueezerConfig#public_signature"
+      ],
+      "id": "recipe_type_squeezer_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.infobook.pageelement.DryingBasinRecipeAppendix",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.infobook.pageelement.DryingBasinRecipeAppendix#public_signature"
+      ],
+      "id": "drying_basin_recipe_appendix",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.infobook.pageelement.MechanicalDryingBasinRecipeAppendix",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.infobook.pageelement.MechanicalDryingBasinRecipeAppendix#public_signature"
+      ],
+      "id": "mechanical_drying_basin_recipe_appendix",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.infobook.pageelement.MechanicalSqueezerRecipeAppendix",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.infobook.pageelement.MechanicalSqueezerRecipeAppendix#public_signature"
+      ],
+      "id": "mechanical_squeezer_recipe_appendix",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.infobook.pageelement.SqueezerRecipeAppendix",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.infobook.pageelement.SqueezerRecipeAppendix#public_signature"
+      ],
+      "id": "squeezer_recipe_appendix",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.metadata.RegistryExportableDryingBasinRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.metadata.RegistryExportableDryingBasinRecipe#public_signature"
+      ],
+      "id": "registry_exportable_drying_basin_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.metadata.RegistryExportableMechanicalDryingBasinRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.metadata.RegistryExportableMechanicalDryingBasinRecipe#public_signature"
+      ],
+      "id": "registry_exportable_mechanical_drying_basin_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.metadata.RegistryExportableMechanicalSqueezerRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.metadata.RegistryExportableMechanicalSqueezerRecipe#public_signature"
+      ],
+      "id": "registry_exportable_mechanical_squeezer_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.metadata.RegistryExportableSqueezerRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.metadata.RegistryExportableSqueezerRecipe#public_signature"
+      ],
+      "id": "registry_exportable_squeezer_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.network.packet.LogicProgrammerValueTypeRecipeSlotPropertiesChangedPacket",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.network.packet.LogicProgrammerValueTypeRecipeSlotPropertiesChangedPacket#public_signature"
+      ],
+      "id": "logic_programmer_value_type_recipe_slot_properties_changed_packet",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.network.packet.LogicProgrammerValueTypeRecipeValueChangedPacket",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.network.packet.LogicProgrammerValueTypeRecipeValueChangedPacket#public_signature"
+      ],
+      "id": "logic_programmer_value_type_recipe_value_changed_packet",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.network.packet.LogicProgrammerValueTypeRecipeValueChangedPacket$Type",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.network.packet.LogicProgrammerValueTypeRecipeValueChangedPacket$Type#public_signature"
+      ],
+      "id": "logic_programmer_value_type_recipe_value_changed_packet__type",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.recipe.ItemFacadeRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.recipe.ItemFacadeRecipe#public_signature"
+      ],
+      "id": "item_facade_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.recipe.ItemFacadeRecipeConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.recipe.ItemFacadeRecipeConfig#public_signature"
+      ],
+      "id": "item_facade_recipe_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.recipe.ItemVariableCopyRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.recipe.ItemVariableCopyRecipe#public_signature"
+      ],
+      "id": "item_variable_copy_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.recipe.ItemVariableCopyRecipeConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.recipe.ItemVariableCopyRecipeConfig#public_signature"
+      ],
+      "id": "item_variable_copy_recipe_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.recipe.RecipeSerializerCraftingSpecialShapedOmniDirectional3Config",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.recipe.RecipeSerializerCraftingSpecialShapedOmniDirectional3Config#public_signature"
+      ],
+      "id": "recipe_serializer_crafting_special_shaped_omni_directional3_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.recipe.RecipeSerializerCraftingSpecialShapedOmniDirectionalConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.recipe.RecipeSerializerCraftingSpecialShapedOmniDirectionalConfig#public_signature"
+      ],
+      "id": "recipe_serializer_crafting_special_shaped_omni_directional_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.recipe.RecipeSerializerCraftingSpecialShapelessOmniDirectionalConfig",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamics.recipe.RecipeSerializerCraftingSpecialShapelessOmniDirectionalConfig#public_signature"
+      ],
+      "id": "recipe_serializer_crafting_special_shapeless_omni_directional_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.almostunified.DryingBasinRecipeUnifier",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.almostunified.DryingBasinRecipeUnifier#public_signature"
+      ],
+      "id": "drying_basin_recipe_unifier",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.almostunified.SqueezerRecipeUnifier",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.almostunified.SqueezerRecipeUnifier#public_signature"
+      ],
+      "id": "squeezer_recipe_unifier",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.dryingbasin.DryingBasinRecipeCategory",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.dryingbasin.DryingBasinRecipeCategory#public_signature"
+      ],
+      "id": "drying_basin_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.dryingbasin.DryingBasinRecipeJEI",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.dryingbasin.DryingBasinRecipeJEI#public_signature"
+      ],
+      "id": "drying_basin_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicaldryingbasin.MechanicalDryingBasinRecipeCategory",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicaldryingbasin.MechanicalDryingBasinRecipeCategory#public_signature"
+      ],
+      "id": "mechanical_drying_basin_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicaldryingbasin.MechanicalDryingBasinRecipeJEI",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicaldryingbasin.MechanicalDryingBasinRecipeJEI#public_signature"
+      ],
+      "id": "mechanical_drying_basin_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicalsqueezer.MechanicalSqueezerRecipeCategory",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicalsqueezer.MechanicalSqueezerRecipeCategory#public_signature"
+      ],
+      "id": "mechanical_squeezer_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicalsqueezer.MechanicalSqueezerRecipeJEI",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.mechanicalsqueezer.MechanicalSqueezerRecipeJEI#public_signature"
+      ],
+      "id": "mechanical_squeezer_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.squeezer.SqueezerRecipeCategory",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.squeezer.SqueezerRecipeCategory#public_signature"
+      ],
+      "id": "squeezer_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.jei.squeezer.SqueezerRecipeJEI",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.jei.squeezer.SqueezerRecipeJEI#public_signature"
+      ],
+      "id": "squeezer_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.rei.dryingbasin.ReiDryingBasinRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.rei.dryingbasin.ReiDryingBasinRecipe#public_signature"
+      ],
+      "id": "rei_drying_basin_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.rei.mechanicaldryingbasin.ReiMechanicalDryingBasinRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.rei.mechanicaldryingbasin.ReiMechanicalDryingBasinRecipe#public_signature"
+      ],
+      "id": "rei_mechanical_drying_basin_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.rei.mechanicalsqueezer.ReiMechanicalSqueezerRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.rei.mechanicalsqueezer.ReiMechanicalSqueezerRecipe#public_signature"
+      ],
+      "id": "rei_mechanical_squeezer_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.modcompat.rei.squeezer.ReiSqueezerRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.modcompat.rei.squeezer.ReiSqueezerRecipe#public_signature"
+      ],
+      "id": "rei_squeezer_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "chance_output"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "org.cyclops.integrateddynamicscompat.network.packet.CPacketValueTypeRecipeLPElementSetRecipe",
+      "costs": [],
+      "decision": "Not a complete deterministic Auto Storage recipe-family contract for this issue; logic-programmer/operator/JEI/REI/serializer/config/UI/network helper or special crafting shape remains fail closed.",
+      "evidence": [
+        "org.cyclops.integrateddynamicscompat.network.packet.CPacketValueTypeRecipeLPElementSetRecipe#public_signature"
+      ],
+      "id": "c_packet_value_type_recipe_l_p_element_set_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2",
+  "source_recipe_inventory_sha256": "4f1c89e1e3ba20cc8b25c3042a33aef3c486fb281f39cc1f2903795a6fd360af",
+  "target": {
+    "dependency": "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "display_name": "IntegratedDynamics",
+    "mod_id": "integrateddynamics",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:cyclops-core:vEjxRv40",
+      "maven.modrinth:common-capabilities:c50bCinZ"
+    ],
+    "version": "1.33.3"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Combined compatibility registry is missing",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Integrated Dynamics chance-output recipes must remain fail closed",
+          "source": "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java",
+          "task": "runIntegratedDynamicsGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Long.MAX_VALUE",
+          "source": "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java",
+          "task": "runIntegratedDynamicsGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Integrated Dynamics full destination transaction was not an atomic no-op",
+          "source": "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java",
+          "task": "runIntegratedDynamicsGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Integrated Dynamics missing-ingredient transaction was not an atomic no-op",
+          "source": "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java",
+          "task": "runIntegratedDynamicsGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Integrated Dynamics registration was incorrect",
+          "source": "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java",
+          "task": "runIntegratedDynamicsGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 8,
+    "fixture": "integratedDynamicsFixture",
+    "game_test_task": "runIntegratedDynamicsGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runIntegratedDynamicsGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}
