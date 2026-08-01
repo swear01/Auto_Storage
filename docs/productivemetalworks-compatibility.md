@@ -77,4 +77,4 @@ stations/families, representative melting/alloying/casting recipes stay
 unsupported, entity melting stays absent, and every loaded recipe in each
 audited custom recipe type remains fail closed. The descriptor-owned
 compatibility matrix also loads the representative artifact and locks the same
-zero-family boundary plus the per-namespace recipe inventory digest.
+zero-family boundary plus the per-namespace recipe inventory digest. Loading the present-mod jar still contributes Foundry/casting datapack recipes to `RecipeManager`; those IDs are locked by the descriptor-owned digest rather than a single global recipe count.
