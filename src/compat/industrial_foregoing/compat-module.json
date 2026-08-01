@@ -1,14 +1,36 @@
 {
-  "schema": 1,
-  "id": "auto_storage:industrial_foregoing",
-  "entrypoint": "com.swear.autostorage.compat.industrialforegoing.IndustrialForegoingCompatModule",
-  "requires": ["industrialforegoing"],
-  "side": "both",
-  "sourceSet": "compatIndustrialForegoing",
-  "fixture": "industrialForegoingFixture",
-  "expectedTests": 9,
   "dependencies": [
     "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}",
     "maven.modrinth:titanium:${titanium_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.industrialforegoing.IndustrialForegoingCompatModule",
+  "expectedTests": 9,
+  "fixture": "industrialForegoingFixture",
+  "id": "auto_storage:industrial_foregoing",
+  "matrix": {
+    "acceptedRecipes": [
+      "industrialforegoing:dissolution_chamber/pink_slime_ball"
+    ],
+    "descriptors": [
+      "auto_storage:industrial_foregoing_dissolution_chamber"
+    ],
+    "mods": [
+      "industrialforegoing"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "industrialforegoing"
+      ],
+      "sha256": "df28ecda544f1e96a6510a6a53f643d3c12bf896d6a9ab0395401bff9353ef71"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "requires": [
+    "industrialforegoing"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatIndustrialForegoing"
 }

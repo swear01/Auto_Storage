@@ -610,7 +610,10 @@ the source set, reviewed HTTPS repositories, target dependencies, fixture mod,
 run task, expected test gate, and audited target artifact from that descriptor;
 `expectedTests` must be a positive JSON integer representable by Gradle's
 `Integer` parser; fractions and wider overflow values are rejected rather than
-truncated.
+truncated. Scaffolded descriptors also include the required `matrix` assertion
+block (mods, accepted/rejected evidence, and a pending recipe-inventory digest),
+so a complete module joins CI and the generated compatibility-matrix manifest
+without editing shared workflow or matrix Java sources.
 Before writing a bundled module, Compat Kit compares its derived module ID and
 entrypoint with every existing descriptor. The generated compatibility source
 set and fixture share Gradle's source-set namespace, so both are compared with

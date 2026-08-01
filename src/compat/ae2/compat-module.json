@@ -10,6 +10,26 @@
   "expectedTests": 8,
   "fixture": "ae2Fixture",
   "id": "auto_storage:ae2",
+  "matrix": {
+    "acceptedRecipes": [
+      "ae2:inscriber/logic_processor"
+    ],
+    "descriptors": [
+      "auto_storage:ae2_inscriber"
+    ],
+    "mods": [
+      "ae2"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "ae2"
+      ],
+      "sha256": "160a63ae8c4a1fb1d9324888985841d3f32a1e8abdb9caeae9c36ff3b5524363"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
     "https://api.modrinth.com/maven",
     "https://maven.shedaniel.me/",

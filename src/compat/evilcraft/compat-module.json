@@ -1,14 +1,36 @@
 {
-  "schema": 1,
-  "id": "auto_storage:evilcraft",
-  "entrypoint": "com.swear.autostorage.compat.evilcraft.EvilCraftCompatModule",
-  "requires": ["evilcraft"],
-  "side": "both",
-  "sourceSet": "compatEvilCraft",
-  "fixture": "evilCraftFixture",
-  "expectedTests": 10,
   "dependencies": [
     "maven.modrinth:evilcraft:${evilcraft_ci_version}",
     "maven.modrinth:cyclops-core:${cyclops_core_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.evilcraft.EvilCraftCompatModule",
+  "expectedTests": 10,
+  "fixture": "evilCraftFixture",
+  "id": "auto_storage:evilcraft",
+  "matrix": {
+    "acceptedRecipes": [
+      "evilcraft:blood_infuser/base/bloody_cobblestone"
+    ],
+    "descriptors": [
+      "auto_storage:evilcraft_blood_infuser"
+    ],
+    "mods": [
+      "evilcraft"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "evilcraft"
+      ],
+      "sha256": "2be2449c84c6cd203630f25fdfab1b0beb6cc800d67213da11c3bc8162162934"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "requires": [
+    "evilcraft"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatEvilCraft"
 }

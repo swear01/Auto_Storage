@@ -1,13 +1,35 @@
 {
-  "schema": 1,
-  "id": "auto_storage:create",
-  "entrypoint": "com.swear.autostorage.compat.create.CreateCompatModule",
-  "requires": ["create"],
-  "side": "both",
-  "sourceSet": "compatCreate",
-  "fixture": "createFixture",
-  "expectedTests": 13,
   "dependencies": [
     "maven.modrinth:create:${create_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.create.CreateCompatModule",
+  "expectedTests": 13,
+  "fixture": "createFixture",
+  "id": "auto_storage:create",
+  "matrix": {
+    "acceptedRecipes": [
+      "create:cutting/andesite_alloy"
+    ],
+    "descriptors": [
+      "auto_storage:create_cutting"
+    ],
+    "mods": [
+      "create"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "create"
+      ],
+      "sha256": "265efd10f95adc2633ced4eea476852f84431d58bb1ea63306bef544ca8cf7d8"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "requires": [
+    "create"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatCreate"
 }

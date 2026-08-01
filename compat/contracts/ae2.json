@@ -317,7 +317,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Combined compatibility registry is missing",
+          "marker": "Iron Furnaces variant did not coexist with the shared Furnace descriptor",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }

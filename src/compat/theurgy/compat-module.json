@@ -10,6 +10,28 @@
   "expectedTests": 9,
   "fixture": "theurgyFixture",
   "id": "auto_storage:theurgy",
+  "matrix": {
+    "acceptedRecipes": [
+      "theurgy:distillation/bread"
+    ],
+    "descriptors": [
+      "auto_storage:theurgy_calcination_oven",
+      "auto_storage:theurgy_distiller",
+      "auto_storage:theurgy_liquefaction_cauldron"
+    ],
+    "mods": [
+      "theurgy"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "theurgy"
+      ],
+      "sha256": "9a91bd4dd49a7a25a9cb7aed9d97b70f8403f61b2e9bad833898c600f996cd31"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
     "https://api.modrinth.com/maven",
     "https://dl.cloudsmith.io/public/klikli-dev/mods/maven/",

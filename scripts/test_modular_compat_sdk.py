@@ -26,6 +26,10 @@ class ModularCompatSdkTests(unittest.TestCase):
             self.assertTrue(module["requires"])
             self.assertTrue(module["dependencies"])
             self.assertGreater(module["expectedTests"], 0)
+            self.assertIn("matrix", module)
+            self.assertTrue(module["matrix"]["mods"])
+            self.assertIn("recipeInventory", module["matrix"])
+            self.assertRegex(module["matrix"]["recipeInventory"]["sha256"], r"^[0-9a-f]{64}$")
             class_path = Path(
                 "src/compat",
                 module["id"].split(":", 1)[1],

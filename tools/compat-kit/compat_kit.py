@@ -4561,6 +4561,20 @@ def _bundled_files(contract: dict) -> dict[str, bytes]:
             "dependency": target["dependency"],
             "sha256": contract["source_audit_sha256"],
         },
+        "matrix": {
+            "mods": [mod_id],
+            "descriptors": [],
+            "resourceKinds": [],
+            "acceptedRecipes": [],
+            "rejectedDescriptors": [],
+            "rejectedResourceKinds": [],
+            "recipeInventory": {
+                "namespaces": [mod_id],
+                "sha256": hashlib.sha256(
+                    f"pending-recipe-inventory:{mod_id}".encode()
+                ).hexdigest(),
+            },
+        },
     }
     module = f"""package {module_package};
 

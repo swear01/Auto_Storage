@@ -450,12 +450,16 @@ presentation/input surfaces only.
 The player still installs one Auto Storage jar. Bundled integrations live in
 isolated `src/compat/<mod-id>` source sets. Each module owns one
 `src/compat/<mod-id>/compat-module.json` descriptor containing its entrypoint,
-required mods, source-set/fixture names, and representative compile
-dependencies. Gradle validates every descriptor and deterministically generates
-the runtime index. Descriptor `expectedTests` is a positive JSON integer;
+required mods, source-set/fixture names, representative compile dependencies,
+and matrix assertion metadata (required mods, accepted/rejected evidence, and
+per-module recipe-inventory digest). Gradle validates every descriptor and
+deterministically generates the runtime index plus the compatibility-matrix
+assertion manifest. Descriptor `expectedTests` is a positive JSON integer;
 fractional or wider numeric values fail instead of being truncated.
 The generated `META-INF/auto_storage/compat-modules.json` has no second
-hand-written central module list. The loader checks every required mod ID before
+hand-written central module list, and CI consumes descriptor-derived
+`runCompatFixtureGameTestServers` rather than a hand-maintained per-module
+workflow list. The loader checks every required mod ID before
 resolving the module class. A present module uses
 `AutoStorageCompatModule` plus the same registration facade available to
 external addons. Every bundled entry must declare at least one required target

@@ -65,7 +65,18 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || !(auditArtifact.sha256 ==~ /[0-9a-f]{64}/)
             || descriptor.dependencies[0] != auditArtifact.dependency
             || !(descriptor.runtimeDependencies instanceof List)
-            || !descriptor.runtimeDependencies.contains(auditArtifact.dependency)))) {
+            || !descriptor.runtimeDependencies.contains(auditArtifact.dependency)))
+            || !(descriptor.matrix instanceof Map)
+            || descriptor.matrix.mods == null
+            || descriptor.matrix.descriptors == null
+            || descriptor.matrix.resourceKinds == null
+            || descriptor.matrix.acceptedRecipes == null
+            || descriptor.matrix.rejectedDescriptors == null
+            || descriptor.matrix.rejectedResourceKinds == null
+            || !(descriptor.matrix.recipeInventory instanceof Map)
+            || !(descriptor.matrix.recipeInventory.namespaces instanceof List)
+            || !(descriptor.matrix.recipeInventory.sha256 instanceof String)
+            || !(descriptor.matrix.recipeInventory.sha256 ==~ /[0-9a-f]{64}/)) {
         throw new GradleException(
                 "Invalid compatibility module descriptor: ${descriptorFile}")
     }
@@ -135,6 +146,28 @@ def generateCompatModuleIndex = tasks.register('generateCompatModuleIndex') {
     }
 }
 
+def compatibilityMatrixCompanionsFile = layout.projectDirectory.file(
+        'src/compatibilityMatrixFixture/resources/META-INF/auto_storage/compatibility-matrix-companions.json')
+def generatedCompatibilityMatrixManifestDir =
+        layout.buildDirectory.dir('generated/resources/compatibilityMatrix')
+def generateCompatibilityMatrixManifest = tasks.register(
+        'generateCompatibilityMatrixManifest', Exec) {
+    inputs.files(compatModuleFiles)
+    inputs.file(compatibilityMatrixCompanionsFile)
+    inputs.file('scripts/compatibility_matrix_manifest.py')
+    def manifestFile = generatedCompatibilityMatrixManifestDir.map {
+        it.file('META-INF/auto_storage/compatibility-matrix-manifest.json')
+    }
+    outputs.file(manifestFile)
+    workingDir = layout.projectDirectory.asFile
+    doFirst {
+        manifestFile.get().asFile.parentFile.mkdirs()
+    }
+    commandLine 'python3', 'scripts/compatibility_matrix_manifest.py',
+            '--root', layout.projectDirectory.asFile.absolutePath,
+            '--output', manifestFile.get().asFile.absolutePath
+}
+
 sourceSets.main.resources {
     srcDir('src/generated/resources')
     srcDir(generatedCompatModuleIndexDir)
@@ -160,7 +193,11 @@ sourceSets {
     compatibilityMatrixFixture {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
+        resources.srcDir(generatedCompatibilityMatrixManifestDir)
     }
+}
+tasks.named('processCompatibilityMatrixFixtureResources').configure {
+    dependsOn generateCompatibilityMatrixManifest
 }
 def apiSourceSet = sourceSets.create('api') {
     java.setSrcDirs(['src/api/java'])
@@ -1279,6 +1316,7 @@ def compatibilityMatrixLatestLog =
 tasks.named('runCompatibilityMatrixGameTestServer').configure {
     dependsOn compatArtifactVerificationTasks
     dependsOn tasks.named('verifyBotaniaFixtureArtifact')
+    dependsOn generateCompatibilityMatrixManifest
     doLast {
         if (!compatibilityMatrixLatestLog.exists()) {
             throw new GradleException(
@@ -1299,6 +1337,31 @@ tasks.named('runCompatibilityMatrixGameTestServer').configure {
                     'Compatibility matrix GameTest or SelfTest did not pass; inspect run/logs/latest.log')
         }
     }
+}
+
+def compatFixtureRunTasks = []
+def compatGameTestWorldDir = layout.projectDirectory.dir('run/world').asFile
+compatModules.each { spec ->
+    def fixtureTask = tasks.named(spec.runTask)
+    def previousCompatFixture = compatFixtureRunTasks.isEmpty()
+            ? null
+            : compatFixtureRunTasks.last()
+    fixtureTask.configure {
+        doFirst {
+            if (compatGameTestWorldDir.exists()) {
+                compatGameTestWorldDir.deleteDir()
+            }
+        }
+        if (previousCompatFixture != null) {
+            mustRunAfter previousCompatFixture
+        }
+    }
+    compatFixtureRunTasks << fixtureTask
+}
+tasks.register('runCompatFixtureGameTestServers') {
+    group = 'verification'
+    description = 'Run every descriptor-owned compatibility fixture GameTest server'
+    dependsOn compatFixtureRunTasks
 }
 
 idea {
