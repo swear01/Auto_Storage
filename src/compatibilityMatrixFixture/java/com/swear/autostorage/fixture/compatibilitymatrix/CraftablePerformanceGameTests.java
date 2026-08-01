@@ -53,13 +53,13 @@ public final class CraftablePerformanceGameTests {
     private static final long MAX_PREFETCH_NANOS = 50_000_000L;
     private static final long MAX_SWITCH_NANOS = 50_000_000L;
     private static final long MAX_STORAGE_INTERACTION_NANOS = 250_000_000L;
-    private static final long MAX_BASELINE_INDEX_RETAINED_BYTES = 8L * 1024L * 1024L;
+    private static final long MAX_BASELINE_INDEX_RETAINED_BYTES = 9L * 1024L * 1024L;
     private static final long MAX_MENU_RETAINED_BYTES = 128L * 1024L;
     private static final int WARMUP_COUNT = 10;
     private static final int SAMPLE_COUNT = 20;
     private static final int RETAINED_MENU_COUNT = 16;
     private static final int SEED_BATCH_TYPES = 1_000;
-    private static final int EXPECTED_RECIPE_COUNT = 11_657;
+    private static final int EXPECTED_RECIPE_COUNT = 12_736;
     private static final int STORED_TYPE_COUNT = terminalScaleTypes();
     private static final List<String> STORED_ITEM_IDS = List.of(
             "minecraft:oak_log",

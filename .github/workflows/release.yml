@@ -160,6 +160,12 @@ jobs:
           python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log
 
+      - name: Run Theurgy GameTest server
+        run: |
+          set -o pipefail
+          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
+          ./gradlew runTheurgyGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/theurgy-gametest.log
+
       - name: Run optional compatibility matrix GameTest server
         run: |
           set -o pipefail

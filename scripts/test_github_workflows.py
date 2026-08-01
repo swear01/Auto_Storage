@@ -68,6 +68,10 @@ class GitHubWorkflowTests(unittest.TestCase):
             "./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log",
         ),
         (
+            "Run Theurgy GameTest server",
+            "./gradlew runTheurgyGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/theurgy-gametest.log",
+        ),
+        (
             "Run optional compatibility matrix GameTest server",
             "./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/compatibility-matrix-gametest.log",
         ),
@@ -129,6 +133,7 @@ class GitHubWorkflowTests(unittest.TestCase):
         self.assertIn("./gradlew runPowahGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/powah-gametest.log", text)
         self.assertIn("./gradlew runIndustrialForegoingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/industrial-foregoing-gametest.log", text)
         self.assertIn("./gradlew runExtendedCraftingGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/extended-crafting-gametest.log", text)
+        self.assertIn("./gradlew runTheurgyGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/theurgy-gametest.log", text)
         self.assertIn("./gradlew runCreateGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/create-gametest.log", text)
         self.assertIn("./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log", text)
         self.assertIn("PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts 2>&1 | tee build/ci-logs/python-unittest.log", text)
