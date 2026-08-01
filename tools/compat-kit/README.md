@@ -70,7 +70,12 @@ audit. Their ordered content digests include every bounded tag JSON and bounded
 `pack.mcmeta` bytes; recipe counts remain recipe-only and the evidence-file
 bound applies globally across ordered roots. Roots declaring top-level
 data-pack `filter` or `overlays` metadata are rejected because the scanner does
-not model filter removal or overlay-directory activation semantics. Legacy
+not model filter removal or overlay-directory activation semantics. Each
+recipe, tag, and metadata file is bounded-read once per inventory pass, and
+the same bytes are used for validation, parsing, and hashing. Ordered roots
+are inventoried again after source evidence is built and immediately before a
+scan can cache or return, so a persistent in-flight change fails instead of
+producing mixed evidence. Legacy
 formats 7, 8, 9, 10, and 11 remain readable for explicit
 migration, but current-only commands reject them. Format 12 stores each
 candidate's structural classification and a separate sorted top-level
@@ -93,6 +98,12 @@ ancestry artifact SHA/size inventory, and recipe-data inventory are unchanged
 after that rescan. New or changed
 classes remain unresolved; removing an accepted family fails, while removed
 rejected false positives are reported.
+Format-7 contracts predate recipe-data evidence. Only `migrate-contract`, when
+paired with an actual format-7 old audit, accepts that legacy contract's absent
+`source_recipe_data_sha256`; every common family reopens because the missing
+recipe-data and ancestry evidence cannot preserve a decision. The normal
+contract validator remains strict, later audit formats cannot omit the field,
+and a format-7 contract claiming an unverifiable recipe-data digest is rejected.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven

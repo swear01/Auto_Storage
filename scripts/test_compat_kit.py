@@ -811,6 +811,155 @@ class CompatKitAuditTests(unittest.TestCase):
             second["recipe_data"]["digest"],
         )
 
+    def test_recipe_data_inventory_hashes_the_same_bytes_it_parses(self):
+        data_root = self.root / "snapshot-data"
+        recipe = data_root / "data/samplemod/recipe/snapshot.json"
+        recipe.parent.mkdir(parents=True)
+        original_payload = json.dumps({
+            "type": "samplemod:crushing",
+            "result": {"id": "samplemod:before"},
+        }).encode()
+        replacement_payload = json.dumps({
+            "type": "samplemod:crushing",
+            "result": {"id": "samplemod:after"},
+        }).encode()
+        recipe.write_bytes(original_payload)
+        original_payload_reader = self.compat_kit._bounded_data_root_payload
+        mutated = False
+        reads = []
+
+        def mutating_payload_reader(path, maximum_bytes, location):
+            nonlocal mutated
+            payload = original_payload_reader(path, maximum_bytes, location)
+            reads.append(Path(path))
+            if Path(path) == recipe and not mutated:
+                recipe.write_bytes(replacement_payload)
+                mutated = True
+            return payload
+
+        with zipfile.ZipFile(self.jar) as archive, mock.patch.object(
+            self.compat_kit,
+            "_bounded_data_root_payload",
+            mutating_payload_reader,
+        ):
+            inventory = self.compat_kit._recipe_data_inventory(
+                archive,
+                self.compat_kit._sha256_file(self.jar),
+                [data_root],
+            )
+
+        expected_digest = hashlib.sha256()
+        expected_digest.update(b"data/samplemod/recipe/snapshot.json\0")
+        expected_digest.update(hashlib.sha256(original_payload).digest())
+        self.assertEqual(
+            expected_digest.hexdigest(),
+            inventory["sources"][1]["sha256"],
+        )
+        self.assertEqual([recipe], reads)
+
+    def test_recipe_data_inventory_hashes_the_pack_metadata_it_validates(self):
+        data_root = self.root / "metadata-snapshot-data"
+        recipe = data_root / "data/samplemod/recipe/metadata.json"
+        recipe.parent.mkdir(parents=True)
+        recipe_payload = json.dumps({
+            "type": "samplemod:crushing",
+        }).encode()
+        recipe.write_bytes(recipe_payload)
+        metadata = data_root / "pack.mcmeta"
+        original_metadata = json.dumps({
+            "pack": {"pack_format": 48, "description": "before"},
+        }).encode()
+        metadata.write_bytes(original_metadata)
+        replacement_metadata = json.dumps({
+            "pack": {"pack_format": 48, "description": "after"},
+        }).encode()
+        original_payload_reader = self.compat_kit._bounded_data_root_payload
+
+        def mutating_payload_reader(path, maximum_bytes, location):
+            payload = original_payload_reader(path, maximum_bytes, location)
+            if Path(path) == metadata:
+                metadata.write_bytes(replacement_metadata)
+            return payload
+
+        with zipfile.ZipFile(self.jar) as archive, mock.patch.object(
+            self.compat_kit,
+            "_bounded_data_root_payload",
+            mutating_payload_reader,
+        ):
+            inventory = self.compat_kit._recipe_data_inventory(
+                archive,
+                self.compat_kit._sha256_file(self.jar),
+                [data_root],
+            )
+
+        expected_digest = hashlib.sha256()
+        for relative_path, payload in (
+            ("data/samplemod/recipe/metadata.json", recipe_payload),
+            ("pack.mcmeta", original_metadata),
+        ):
+            expected_digest.update(relative_path.encode())
+            expected_digest.update(b"\0")
+            expected_digest.update(hashlib.sha256(payload).digest())
+        self.assertEqual(
+            expected_digest.hexdigest(),
+            inventory["sources"][1]["sha256"],
+        )
+
+    def test_scan_rechecks_recipe_data_after_building_the_audit(self):
+        data_root = self.root / "late-change-data"
+        recipe = data_root / "data/samplemod/recipe/late.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "result": {"id": "samplemod:before"},
+        }))
+        original_source_evidence = self.compat_kit._source_evidence
+
+        def mutating_source_evidence(*args, **kwargs):
+            recipe.write_text(json.dumps({
+                "type": "samplemod:crushing",
+                "result": {"id": "samplemod:after"},
+            }))
+            return original_source_evidence(*args, **kwargs)
+
+        with mock.patch.object(
+            self.compat_kit,
+            "_source_evidence",
+            mutating_source_evidence,
+        ), self.assertRaisesRegex(ValueError, "recipe data roots changed during scan"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                signature_reader=self.signatures,
+                data_roots=[data_root],
+            )
+
+    def test_scan_preserves_recipe_data_recheck_after_signature_inspection(self):
+        data_root = self.root / "signature-change-data"
+        recipe = data_root / "data/samplemod/recipe/signature.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "result": {"id": "samplemod:before"},
+        }))
+        mutated = False
+
+        def mutating_signature_reader(class_name):
+            nonlocal mutated
+            if not mutated:
+                recipe.write_text(json.dumps({
+                    "type": "samplemod:crushing",
+                    "result": {"id": "samplemod:after"},
+                }))
+                mutated = True
+            return self.signatures(class_name)
+
+        with self.assertRaisesRegex(ValueError, "recipe data roots changed during scan"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                signature_reader=mutating_signature_reader,
+                data_roots=(root for root in [data_root]),
+            )
+
     def test_recipe_data_tag_bound_is_global_across_roots(self):
         roots = []
         for index in range(2):
@@ -880,6 +1029,46 @@ class CompatKitAuditTests(unittest.TestCase):
             reversed_roots["recipe_data"]["digest"],
         )
         self.assertGreater(len(calls), first_calls)
+
+    def test_scan_cache_rechecks_recipe_data_after_artifact_validation(self):
+        cache = self.root / "late-cache"
+        data_root = self.root / "late-cache-data"
+        recipe = data_root / "data/samplemod/recipe/cached.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "result": {"id": "samplemod:before"},
+        }))
+        self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=self.signatures,
+            data_roots=[data_root],
+        )
+        original_check = self.compat_kit._require_unchanged_artifact
+        mutated = False
+
+        def mutating_artifact_check(path, expected_sha256, expected_size, label="target jar"):
+            nonlocal mutated
+            original_check(path, expected_sha256, expected_size, label)
+            if Path(path) == self.jar and not mutated:
+                recipe.write_text(json.dumps({
+                    "type": "samplemod:crushing",
+                    "result": {"id": "samplemod:after"},
+                }))
+                mutated = True
+
+        with mock.patch.object(
+            self.compat_kit,
+            "_require_unchanged_artifact",
+            mutating_artifact_check,
+        ), self.assertRaisesRegex(ValueError, "recipe data roots changed during scan"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                cache_dir=cache,
+                signature_reader=self.signatures,
+                data_roots=[data_root],
+            )
 
     def test_scan_records_risks_with_exact_evidence_but_does_not_decide_semantics(self):
         audit = self.compat_kit.scan_jar(
@@ -3377,6 +3566,69 @@ displayName="Sample Machines"
             "next-actions.md",
         ])
         self.assertEqual("migrate-contract", args.command)
+
+    def test_migrate_contract_accepts_format_7_contract_and_reopens_missing_evidence(self):
+        current_audit = self.source_audit()
+        legacy_audit = copy.deepcopy(current_audit)
+        legacy_audit["scanner_format"] = 7
+        legacy_audit.pop("ancestry_classpath")
+        legacy_audit.pop("recipe_data")
+        legacy_audit.pop("structural_hierarchy")
+        legacy_audit["candidates"] = {
+            bucket: [
+                {
+                    "class": candidate["class"],
+                    "public_signature": candidate["public_signature"],
+                }
+                for candidate in legacy_audit["candidates"][bucket]
+            ]
+            for bucket in (
+                "recipe_classes",
+                "resource_apis",
+                "station_classes",
+            )
+        }
+        legacy_contract = self.accepted_contract()
+        legacy_contract.pop("source_recipe_data_sha256")
+
+        with self.assertRaisesRegex(ValueError, "source_recipe_data_sha256"):
+            self.compat_kit.validate_contract(
+                legacy_contract,
+                require_complete=False,
+            )
+
+        migrated, actions = self.compat_kit.migrate_contract(
+            legacy_contract,
+            legacy_audit,
+            current_audit,
+        )
+
+        self.assertTrue(all(
+            family["status"] == "needs_decision"
+            for family in migrated["families"]
+        ))
+        self.assertIn("changed evidence", actions)
+        self.compat_kit.validate_contract(
+            migrated,
+            require_complete=False,
+            source_audit=current_audit,
+        )
+
+        unverifiable_contract = copy.deepcopy(legacy_contract)
+        unverifiable_contract["source_recipe_data_sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "format 7.*recipe data"):
+            self.compat_kit.migrate_contract(
+                unverifiable_contract,
+                legacy_audit,
+                current_audit,
+            )
+
+        with self.assertRaisesRegex(ValueError, "source_recipe_data_sha256"):
+            self.compat_kit.migrate_contract(
+                legacy_contract,
+                current_audit,
+                current_audit,
+            )
 
     def test_migrate_contract_reopens_changed_evidence_and_rejects_removed_acceptance(self):
         old_audit = self.source_audit()

@@ -1336,18 +1336,32 @@ def _recipe_record(source_id: str, relative_path: str, payload: bytes) -> dict:
     }
 
 
-def _data_root_digest(root: Path, files: list[Path]) -> str:
-    digest = hashlib.sha256()
-    for path in files:
-        relative = path.relative_to(root).as_posix()
-        payload = path.read_bytes()
-        digest.update(relative.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(hashlib.sha256(payload).digest())
-    return digest.hexdigest()
+def _update_data_root_digest(
+    digest,
+    relative_path: str,
+    payload: bytes,
+):
+    digest.update(relative_path.encode("utf-8"))
+    digest.update(b"\0")
+    digest.update(hashlib.sha256(payload).digest())
 
 
-def _validated_pack_metadata(root: Path, source_id: str) -> Path | None:
+def _bounded_data_root_payload(
+    path: Path,
+    maximum_bytes: int,
+    location: str,
+) -> bytes:
+    with path.open("rb") as stream:
+        payload = stream.read(maximum_bytes + 1)
+    if len(payload) > maximum_bytes:
+        raise ValueError(f"{location} exceeds {maximum_bytes} bytes")
+    return payload
+
+
+def _validated_pack_metadata(
+    root: Path,
+    source_id: str,
+) -> tuple[str, bytes] | None:
     path = root / "pack.mcmeta"
     if path.is_symlink():
         raise ValueError(f"recipe data {source_id} pack metadata is a symlink")
@@ -1356,12 +1370,12 @@ def _validated_pack_metadata(root: Path, source_id: str) -> Path | None:
     if not path.is_file():
         raise ValueError(f"recipe data {source_id} pack metadata is not a file")
     try:
-        if path.stat().st_size > MAX_PACK_METADATA_BYTES:
-            raise ValueError(
-                "recipe data pack metadata exceeds "
-                f"{MAX_PACK_METADATA_BYTES} bytes: {source_id}/pack.mcmeta"
-            )
-        metadata = json.loads(path.read_text())
+        payload = _bounded_data_root_payload(
+            path,
+            MAX_PACK_METADATA_BYTES,
+            f"recipe data pack metadata: {source_id}/pack.mcmeta",
+        )
+        metadata = json.loads(payload)
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise ValueError(
             f"invalid recipe data pack metadata: {source_id}/pack.mcmeta"
@@ -1378,7 +1392,7 @@ def _validated_pack_metadata(root: Path, source_id: str) -> Path | None:
         raise ValueError(
             f"recipe data pack overlays are unsupported: {source_id}/pack.mcmeta"
         )
-    return path
+    return "pack.mcmeta", payload
 
 
 def _recipe_data_inventory(
@@ -1433,27 +1447,35 @@ def _recipe_data_inventory(
                 f"recipe data inventory exceeds {MAX_RECIPE_FILES} files"
             )
         entries = []
-        for path in files:
-            if path.stat().st_size > MAX_RECIPE_JSON_BYTES:
-                raise ValueError(
-                    "recipe JSON exceeds "
-                    f"{MAX_RECIPE_JSON_BYTES} bytes: data_root_{index}/"
-                    f"{path.relative_to(root).as_posix()}"
+        root_digest = hashlib.sha256()
+        recipe_files = set(files)
+        for path in sorted(
+            [*files, *tag_files],
+            key=lambda candidate: candidate.relative_to(root).as_posix(),
+        ):
+            relative_path = path.relative_to(root).as_posix()
+            payload = _bounded_data_root_payload(
+                path,
+                MAX_RECIPE_JSON_BYTES,
+                (
+                    "recipe JSON"
+                    if path in recipe_files
+                    else "recipe tag JSON"
                 )
-            entries.append((path.relative_to(root).as_posix(), path.read_bytes()))
-        for path in tag_files:
-            if path.stat().st_size > MAX_RECIPE_JSON_BYTES:
-                raise ValueError(
-                    "recipe tag JSON exceeds "
-                    f"{MAX_RECIPE_JSON_BYTES} bytes: data_root_{index}/"
-                    f"{path.relative_to(root).as_posix()}"
-                )
-        digest_files = [*files, *tag_files]
+                + f": data_root_{index}/{relative_path}",
+            )
+            _update_data_root_digest(
+                root_digest,
+                relative_path,
+                payload,
+            )
+            if path in recipe_files:
+                entries.append((relative_path, payload))
         pack_metadata = _validated_pack_metadata(root, source_id)
         if pack_metadata is not None:
-            digest_files.append(pack_metadata)
-        digest_files.sort(key=lambda path: path.relative_to(root).as_posix())
-        layers.append((source_id, _data_root_digest(root, digest_files), entries))
+            relative_path, payload = pack_metadata
+            _update_data_root_digest(root_digest, relative_path, payload)
+        layers.append((source_id, root_digest.hexdigest(), entries))
 
     if sum(len(entries) for _, _, entries in layers) > MAX_RECIPE_FILES:
         raise ValueError(f"recipe inventory exceeds {MAX_RECIPE_FILES} files")
@@ -2216,6 +2238,7 @@ def scan_jar(
     class_metadata_reader=None,
     data_roots=None,
 ) -> dict:
+    data_roots = tuple(data_roots or ())
     jar = Path(jar).resolve()
     if not jar.is_file():
         raise ValueError(f"target jar does not exist: {jar}")
@@ -2288,12 +2311,6 @@ def scan_jar(
                     raise ValueError(f"cached recipe-data digest mismatch: {cache_path}")
                 if cached["ancestry_classpath"] != ancestry_classpath:
                     raise ValueError(f"cached ancestry classpath mismatch: {cache_path}")
-                if data_roots and _recipe_data_inventory(
-                    archive,
-                    artifact_sha,
-                    data_roots,
-                ) != recipe_data:
-                    raise ValueError("recipe data roots changed during scan")
                 for path, digest, size in classpath_artifact_checks:
                     _require_unchanged_artifact(
                         path,
@@ -2302,6 +2319,12 @@ def scan_jar(
                         "classpath jar",
                     )
                 _require_unchanged_artifact(jar, artifact_sha, artifact_size)
+                if data_roots and _recipe_data_inventory(
+                    archive,
+                    artifact_sha,
+                    data_roots,
+                ) != recipe_data:
+                    raise ValueError("recipe data roots changed during scan")
                 return cached
         classified = {bucket: [] for bucket in CURRENT_CANDIDATE_BUCKETS}
         structural_hierarchy = []
@@ -2439,13 +2462,6 @@ def scan_jar(
                         matches,
                         implementation_class,
                     )
-        if data_roots and _recipe_data_inventory(
-            archive,
-            artifact_sha,
-            data_roots,
-        ) != recipe_data:
-            raise ValueError("recipe data roots changed during scan")
-
     all_candidates = [
         candidate
         for bucket in classified.values()
@@ -2481,6 +2497,16 @@ def scan_jar(
         _require_unchanged_artifact(path, digest, size, "classpath jar")
     _require_unchanged_artifact(jar, artifact_sha, artifact_size)
     _validate_audit(audit)
+    if data_roots:
+        with zipfile.ZipFile(jar) as verification_archive:
+            _validate_archive(jar, verification_archive)
+            if _recipe_data_inventory(
+                verification_archive,
+                artifact_sha,
+                data_roots,
+            ) != recipe_data:
+                raise ValueError("recipe data roots changed during scan")
+        _require_unchanged_artifact(jar, artifact_sha, artifact_size)
     if cache_path is not None:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_text(canonical_json(audit))
@@ -2609,15 +2635,72 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
     return contract, "\n".join(action_lines).rstrip() + "\n"
 
 
+def _validate_migration_source_contract(
+    contract: dict,
+    source_audit: dict,
+):
+    _validate_audit(source_audit)
+    if not isinstance(contract, dict):
+        raise ValueError("contract must be a JSON object")
+    if source_audit["scanner_format"] != 7:
+        validate_contract(
+            contract,
+            require_complete=False,
+            source_audit=source_audit,
+        )
+        return
+    if "source_recipe_data_sha256" in contract:
+        raise ValueError(
+            "format 7 contract must not bind unverifiable recipe data"
+        )
+    expected_keys = CONTRACT_TOP_KEYS - {"source_recipe_data_sha256"}
+    _unknown_keys(contract, expected_keys, "format 7 contract")
+    missing = sorted(expected_keys - set(contract))
+    if missing:
+        raise ValueError(
+            "format 7 contract is missing keys: " + ", ".join(missing)
+        )
+    normalized = copy.deepcopy(contract)
+    normalized["source_recipe_data_sha256"] = "0" * 64
+    validate_contract(normalized, require_complete=False)
+
+    target = contract["target"]
+    audit_target = source_audit["target"]
+    for key in ("mod_id", "display_name", "version"):
+        if target[key] != audit_target[key]:
+            raise ValueError(
+                f"contract target {key} does not match source audit"
+            )
+    if source_audit["artifact"]["sha256"] != contract["source_audit_sha256"]:
+        raise ValueError("contract target artifact does not match source audit")
+    audited_recipe_classes = {
+        candidate["class"]
+        for candidate in source_audit["candidates"]["recipe_classes"]
+    }
+    contract_recipe_classes = {
+        family["class"] for family in contract["families"]
+    }
+    if contract_recipe_classes != audited_recipe_classes:
+        raise ValueError(
+            "contract families do not match audited recipe candidates"
+        )
+    audited_risks = _audited_risks_by_class(source_audit)
+    if any(
+        set(family["risks"])
+        != set(audited_risks.get(family["class"], []))
+        for family in contract["families"]
+    ):
+        raise ValueError("contract family risks do not match source audit")
+
+
 def migrate_contract(
     old_contract: dict,
     old_audit: dict,
     new_audit: dict,
 ) -> tuple[dict, str]:
-    validate_contract(
+    _validate_migration_source_contract(
         old_contract,
-        require_complete=False,
-        source_audit=old_audit,
+        old_audit,
     )
     _validate_audit(new_audit)
     if new_audit["scanner_format"] != SCAN_CACHE_VERSION:

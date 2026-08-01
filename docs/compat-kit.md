@@ -115,7 +115,15 @@ Roots and recipe/tag files must be real, non-symlink paths. Every bounded
 digest without being counted as recipes; the file bound applies globally
 across ordered roots. Roots declaring top-level data-pack `filter` or
 `overlays` metadata fail because removal and overlay-directory activation are
-not modeled. The deterministic audit
+not modeled. Each recipe, tag, and `pack.mcmeta` payload is read once with a
+bounded `limit + 1` read per inventory pass. Validation, recipe summaries,
+payload hashes, and the ordered root digest all use that same byte snapshot;
+tag payloads are hashed incrementally rather than retained. Compat Kit freezes
+the ordered root arguments and performs a second complete inventory after
+source evidence construction, immediately before caching or returning. A
+persistent addition, removal, replacement, or metadata change during the scan
+therefore fails explicitly instead of mixing parsed bytes with a later digest.
+The deterministic audit
 contains NeoForge identity, artifact SHA/size, source revision and exact source
 paths, structurally classified concrete recipe and serializer classes,
 recipe types, builders, datagen classes, client/viewer wrappers, block entities,
@@ -339,6 +347,13 @@ and the recipe-data inventory digest are all unchanged. New or changed classes
 reopen as `needs_decision`. Removing
 an accepted family fails; removed rejected legacy false positives are reported.
 Target or artifact-SHA drift is rejected.
+Format-7 contracts do not contain `source_recipe_data_sha256`, because their
+audits predate recipe-data evidence. This omission is accepted only by
+`migrate-contract` when `--old-audit` is actually format 7. All common families
+then reopen as `needs_decision` because neither recipe-data nor ancestry
+evidence can be proven unchanged. Public/current contract validation remains
+strict, formats 8 and later may not omit the digest, and a format-7 contract
+that supplies an unverifiable digest is rejected rather than trusted.
 
 For a one-issue/one-worktree worker, generate the compact handoff package:
 
