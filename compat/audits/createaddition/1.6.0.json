@@ -1,0 +1,438 @@
+{
+  "artifact": {
+    "sha256": "41876c3780b70365a1848994d146a73423cc19fbe86485885795d9e7d855e7e9",
+    "size": 1661802
+  },
+  "candidates": {
+    "recipe_classes": [
+      {
+        "class": "com.mrh0.createaddition.compat.jei.CARecipeCategory",
+        "public_signature": "Compiled from \"CARecipeCategory.java\"\npublic abstract class com.mrh0.createaddition.compat.jei.CARecipeCategory<T extends net.minecraft.world.item.crafting.Recipe<?>> extends com.simibubi.create.compat.jei.category.CreateRecipeCategory<T> {\n  public com.mrh0.createaddition.compat.jei.CARecipeCategory(com.simibubi.create.compat.jei.category.CreateRecipeCategory$Info<T>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder",
+        "public_signature": "Compiled from \"CALiquidBurningRecipeBuilder.java\"\npublic class com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder extends com.mrh0.createaddition.datagen.RecipeBuilders.CARecipeBuilder {\n  public com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder(int);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder liquidBurning(int);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder require(net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder require(net.minecraft.world.level.material.Fluid);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder require(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder superheated();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n  public void save(net.minecraft.data.recipes.RecipeOutput, java.lang.String);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeBuilders.CARecipeBuilder",
+        "public_signature": "Compiled from \"CARecipeBuilder.java\"\npublic abstract class com.mrh0.createaddition.datagen.RecipeBuilders.CARecipeBuilder implements net.minecraft.data.recipes.RecipeBuilder {\n  public com.mrh0.createaddition.datagen.RecipeBuilders.CARecipeBuilder(net.minecraft.world.item.ItemStack);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder",
+        "public_signature": "Compiled from \"ChargingRecipeBuilder.java\"\npublic class com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder extends com.mrh0.createaddition.datagen.RecipeBuilders.CARecipeBuilder {\n  public com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder(net.minecraft.world.item.ItemStack);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder charging(net.minecraft.world.item.ItemStack);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder charging(net.minecraft.world.level.ItemLike, int);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder charging(net.minecraft.world.level.ItemLike);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder charging(net.minecraft.world.item.Item, int);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder charging(net.minecraft.world.item.Item);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder charging(net.minecraft.world.item.ItemStack, net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, net.minecraft.core.HolderLookup$Provider);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder deoxidize(net.minecraft.world.level.block.Block);\n  public static com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder deoxidize(net.minecraft.world.level.block.Block, net.minecraft.world.level.block.Block);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder require(net.minecraft.world.item.crafting.Ingredient);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder require(net.minecraft.world.level.ItemLike);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder require(net.minecraft.world.item.ItemStack);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder require(net.minecraft.world.level.ItemLike, int);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder energy(int);\n  public com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder maxChargeRate(int);\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n  public void save(net.minecraft.data.recipes.RecipeOutput);\n  public void save(net.minecraft.data.recipes.RecipeOutput, java.lang.String);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeGen.ChargingRecipeGen",
+        "public_signature": "Compiled from \"ChargingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeGen.ChargingRecipeGen extends com.simibubi.create.api.data.recipe.ProcessingRecipeGen<com.mrh0.createaddition.recipe.charging.ChargingRecipeParams, com.mrh0.createaddition.recipe.charging.ChargingRecipe, com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder<com.mrh0.createaddition.recipe.charging.ChargingRecipe>> {\n  public com.mrh0.createaddition.datagen.RecipeGen.ChargingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe deoxidize(net.minecraft.world.level.block.Block, net.minecraft.world.level.block.Block);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe deoxidize(net.minecraft.world.level.block.Block);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeGen.LiquidBurningRecipeGen",
+        "public_signature": "Compiled from \"LiquidBurningRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeGen.LiquidBurningRecipeGen extends com.simibubi.create.api.data.recipe.ProcessingRecipeGen<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams, com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe, com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe>> {\n  public com.mrh0.createaddition.datagen.RecipeGen.LiquidBurningRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeGen.RollingRecipeGen",
+        "public_signature": "Compiled from \"RollingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeGen.RollingRecipeGen extends com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen<com.mrh0.createaddition.recipe.rolling.RollingRecipe> {\n  public com.mrh0.createaddition.datagen.RecipeGen.RollingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAChargingRecipeProvider",
+        "public_signature": "Compiled from \"CAChargingRecipeProvider.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CAChargingRecipeProvider extends com.mrh0.createaddition.datagen.RecipeGen.ChargingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CAChargingRecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe buildCreateDeoxidizeVariants(com.simibubi.create.foundation.block.CopperBlockSet$Variant<?>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACompactingRecipeGen",
+        "public_signature": "Compiled from \"CACompactingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CACompactingRecipeGen extends com.simibubi.create.api.data.recipe.CompactingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CACompactingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider",
+        "public_signature": "Compiled from \"CACraftingRecipeProvider.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider extends net.minecraft.data.recipes.RecipeProvider {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider$SaveUtility",
+        "public_signature": "Compiled from \"CACraftingRecipeProvider.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider$SaveUtility {\n  public net.minecraft.data.recipes.RecipeOutput output;\n  public com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider$SaveUtility(com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider, net.minecraft.data.recipes.RecipeOutput);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACrushingRecipeGen",
+        "public_signature": "Compiled from \"CACrushingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CACrushingRecipeGen extends com.simibubi.create.api.data.recipe.CrushingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CACrushingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAFillingRecipeGen",
+        "public_signature": "Compiled from \"CAFillingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CAFillingRecipeGen extends com.simibubi.create.api.data.recipe.FillingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CAFillingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CALiquidBurningRecipeProvider",
+        "public_signature": "Compiled from \"CALiquidBurningRecipeProvider.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CALiquidBurningRecipeProvider extends com.mrh0.createaddition.datagen.RecipeGen.LiquidBurningRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CALiquidBurningRecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAMechanicalCrafterRecipeGen",
+        "public_signature": "Compiled from \"CAMechanicalCrafterRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CAMechanicalCrafterRecipeGen extends com.simibubi.create.api.data.recipe.MechanicalCraftingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CAMechanicalCrafterRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAMixingRecipeGen",
+        "public_signature": "Compiled from \"CAMixingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CAMixingRecipeGen extends com.simibubi.create.api.data.recipe.MixingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CAMixingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAPressingRecipeGen",
+        "public_signature": "Compiled from \"CAPressingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CAPressingRecipeGen extends com.simibubi.create.api.data.recipe.PressingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CAPressingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.RecipeProvider.CARollingRecipeGen",
+        "public_signature": "Compiled from \"CARollingRecipeGen.java\"\npublic class com.mrh0.createaddition.datagen.RecipeProvider.CARollingRecipeGen extends com.mrh0.createaddition.datagen.RecipeGen.RollingRecipeGen {\n  public com.mrh0.createaddition.datagen.RecipeProvider.CARollingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.index.CARecipes",
+        "public_signature": "Compiled from \"CARecipes.java\"\npublic class com.mrh0.createaddition.index.CARecipes {\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> SERIALIZERS;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.world.item.crafting.RecipeType<?>> RECIPE_TYPES;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<com.mojang.serialization.MapCodec<? extends net.neoforged.neoforge.common.conditions.ICondition>> CONDITION_CODECS;\n  public static final java.util.function.Supplier<net.minecraft.world.item.crafting.RecipeType<com.mrh0.createaddition.recipe.rolling.RollingRecipe>> ROLLING_TYPE;\n  public static net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<com.mrh0.createaddition.recipe.rolling.RollingRecipe>> ROLLING;\n  public static final java.util.function.Supplier<net.minecraft.world.item.crafting.RecipeType<com.mrh0.createaddition.recipe.charging.ChargingRecipe>> CHARGING_TYPE;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<com.mrh0.createaddition.recipe.charging.ChargingRecipe>> CHARGING;\n  public static final java.util.function.Supplier<net.minecraft.world.item.crafting.RecipeType<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe>> LIQUID_BURNING_TYPE;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe>> LIQUID_BURNING;\n  public static final java.util.function.Supplier<com.mojang.serialization.MapCodec<com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition>> HAS_FLUID_TAG_CONDITION;\n  public com.mrh0.createaddition.index.CARecipes();\n  public static void register(net.neoforged.bus.api.IEventBus);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.FluidRecipeWrapper",
+        "public_signature": "Compiled from \"FluidRecipeWrapper.java\"\npublic class com.mrh0.createaddition.recipe.FluidRecipeWrapper implements net.minecraft.world.Container,net.minecraft.world.item.crafting.RecipeInput {\n  public net.neoforged.neoforge.fluids.FluidStack fluid;\n  public com.mrh0.createaddition.recipe.FluidRecipeWrapper(net.neoforged.neoforge.fluids.FluidStack);\n  public void clearContent();\n  public int getContainerSize();\n  public boolean isEmpty();\n  public net.minecraft.world.item.ItemStack getItem(int);\n  public int size();\n  public net.minecraft.world.item.ItemStack removeItem(int, int);\n  public net.minecraft.world.item.ItemStack removeItemNoUpdate(int);\n  public void setItem(int, net.minecraft.world.item.ItemStack);\n  public void setChanged();\n  public boolean stillValid(net.minecraft.world.entity.player.Player);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe",
+        "public_signature": "Compiled from \"ChargingRecipe.java\"\npublic class com.mrh0.createaddition.recipe.charging.ChargingRecipe extends com.simibubi.create.content.processing.recipe.ProcessingRecipe<net.neoforged.neoforge.items.wrapper.RecipeWrapper, com.mrh0.createaddition.recipe.charging.ChargingRecipeParams> {\n  public static final com.simibubi.create.foundation.recipe.IRecipeTypeInfo TYPE_INFO;\n  public int energy;\n  public int maxChargeRate;\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipe(com.mrh0.createaddition.recipe.charging.ChargingRecipeParams);\n  public boolean matches(net.neoforged.neoforge.items.wrapper.RecipeWrapper, net.minecraft.world.level.Level);\n  public int getEnergy();\n  public int getMaxChargeRate();\n  public net.minecraft.world.item.ItemStack getResultStack();\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder",
+        "public_signature": "Compiled from \"ChargingRecipe.java\"\npublic class com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder<R extends com.mrh0.createaddition.recipe.charging.ChargingRecipe> extends com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder<com.mrh0.createaddition.recipe.charging.ChargingRecipeParams, R, com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder<R>> {\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder(com.mrh0.createaddition.recipe.charging.ChargingRecipe$Factory<R>, net.minecraft.resources.ResourceLocation);\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder<R> self();\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder<R> enchantedOutput(net.minecraft.world.item.ItemStack, net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, net.minecraft.core.HolderLookup$Provider);\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder<R> energy(int);\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder<R> maxChargeRate(int);\n  public com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder self();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Factory",
+        "public_signature": "Compiled from \"ChargingRecipe.java\"\npublic interface com.mrh0.createaddition.recipe.charging.ChargingRecipe$Factory<R extends com.mrh0.createaddition.recipe.charging.ChargingRecipe> extends com.simibubi.create.content.processing.recipe.ProcessingRecipe$Factory<com.mrh0.createaddition.recipe.charging.ChargingRecipeParams, R> {\n  public abstract R create(com.mrh0.createaddition.recipe.charging.ChargingRecipeParams);\n  public default com.simibubi.create.content.processing.recipe.ProcessingRecipe create(com.simibubi.create.content.processing.recipe.ProcessingRecipeParams);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Serializer",
+        "public_signature": "Compiled from \"ChargingRecipe.java\"\npublic class com.mrh0.createaddition.recipe.charging.ChargingRecipe$Serializer<R extends com.mrh0.createaddition.recipe.charging.ChargingRecipe> implements net.minecraft.world.item.crafting.RecipeSerializer<R> {\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipe$Serializer(com.simibubi.create.content.processing.recipe.ProcessingRecipe$Factory<com.mrh0.createaddition.recipe.charging.ChargingRecipeParams, R>);\n  public com.mojang.serialization.MapCodec<R> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, R> streamCodec();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipeParams",
+        "public_signature": "Compiled from \"ChargingRecipeParams.java\"\npublic class com.mrh0.createaddition.recipe.charging.ChargingRecipeParams extends com.simibubi.create.content.processing.recipe.ProcessingRecipeParams {\n  public static com.mojang.serialization.MapCodec<com.mrh0.createaddition.recipe.charging.ChargingRecipeParams> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, com.mrh0.createaddition.recipe.charging.ChargingRecipeParams> STREAM_CODEC;\n  public com.mrh0.createaddition.recipe.charging.ChargingRecipeParams();\n  public int getEnergy();\n  public int getMaxChargeRate();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition",
+        "public_signature": "Compiled from \"HasFluidTagCondition.java\"\npublic final class com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition extends java.lang.Record implements net.neoforged.neoforge.common.conditions.ICondition {\n  public static final com.mojang.serialization.MapCodec<com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition> CODEC;\n  public com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition(java.lang.String);\n  public com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition(java.lang.String, java.lang.String);\n  public com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition(net.minecraft.resources.ResourceLocation);\n  public com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);\n  public boolean test(net.neoforged.neoforge.common.conditions.ICondition$IContext);\n  public com.mojang.serialization.MapCodec<? extends net.neoforged.neoforge.common.conditions.ICondition> codec();\n  public java.lang.String toString();\n  public net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> tag();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe",
+        "public_signature": "Compiled from \"LiquidBurningRecipe.java\"\npublic class com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe extends com.simibubi.create.content.processing.recipe.ProcessingRecipe<com.mrh0.createaddition.recipe.FluidRecipeWrapper, com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams> {\n  public static final com.simibubi.create.foundation.recipe.IRecipeTypeInfo TYPE_INFO;\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe(com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams);\n  public int getBurnTime();\n  public boolean isSuperheated();\n  public boolean matches(com.mrh0.createaddition.recipe.FluidRecipeWrapper, net.minecraft.world.level.Level);\n  public net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient getFluidInput();\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder",
+        "public_signature": "Compiled from \"LiquidBurningRecipe.java\"\npublic class com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder<R extends com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe> extends com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams, R, com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder<R>> {\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder(com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Factory<R>, net.minecraft.resources.ResourceLocation);\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder<R> self();\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder<R> fluid(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>);\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder<R> burnTime(int);\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder<R> superheated();\n  public com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder self();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Factory",
+        "public_signature": "Compiled from \"LiquidBurningRecipe.java\"\npublic interface com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Factory<R extends com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe> extends com.simibubi.create.content.processing.recipe.ProcessingRecipe$Factory<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams, R> {\n  public abstract R create(com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams);\n  public default com.simibubi.create.content.processing.recipe.ProcessingRecipe create(com.simibubi.create.content.processing.recipe.ProcessingRecipeParams);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Serializer",
+        "public_signature": "Compiled from \"LiquidBurningRecipe.java\"\npublic class com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Serializer<R extends com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe> implements net.minecraft.world.item.crafting.RecipeSerializer<R> {\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Serializer(com.simibubi.create.content.processing.recipe.ProcessingRecipe$Factory<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams, R>);\n  public com.mojang.serialization.MapCodec<R> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, R> streamCodec();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams",
+        "public_signature": "Compiled from \"LiquidBurningRecipeParams.java\"\npublic class com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams extends com.simibubi.create.content.processing.recipe.ProcessingRecipeParams {\n  public static com.mojang.serialization.MapCodec<com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams> CODEC;\n  public static net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams> STREAM_CODEC;\n  public com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams();\n  public int getBurnTime();\n  public boolean isSuperheated();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.recipe.rolling.RollingRecipe",
+        "public_signature": "Compiled from \"RollingRecipe.java\"\npublic class com.mrh0.createaddition.recipe.rolling.RollingRecipe extends com.simibubi.create.content.processing.recipe.StandardProcessingRecipe<net.neoforged.neoforge.items.wrapper.RecipeWrapper> {\n  public static final com.simibubi.create.foundation.recipe.IRecipeTypeInfo TYPE_INFO;\n  public com.mrh0.createaddition.recipe.rolling.RollingRecipe(com.simibubi.create.content.processing.recipe.ProcessingRecipeParams);\n  public net.minecraft.world.item.crafting.Ingredient getIngredient();\n  public boolean matches(net.neoforged.neoforge.items.wrapper.RecipeWrapper, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack getResultStack();\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      }
+    ],
+    "resource_apis": [
+      {
+        "class": "com.mrh0.createaddition.blocks.connector.base.AbstractConnectorBlockEntity$InterfaceEnergyHandler",
+        "public_signature": "Compiled from \"AbstractConnectorBlockEntity.java\"\nclass com.mrh0.createaddition.blocks.connector.base.AbstractConnectorBlockEntity$InterfaceEnergyHandler implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public com.mrh0.createaddition.blocks.connector.base.AbstractConnectorBlockEntity$InterfaceEnergyHandler(com.mrh0.createaddition.blocks.connector.base.AbstractConnectorBlockEntity);\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlock",
+        "public_signature": "Compiled from \"CreativeEnergyBlock.java\"\npublic class com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlock extends com.simibubi.create.content.logistics.crate.CrateBlock implements com.simibubi.create.foundation.block.IBE<com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlockEntity> {\n  public static final net.minecraft.world.phys.shapes.VoxelShape CREATIVE_ENERGY_SHAPE;\n  public com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties);\n  public net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.world.phys.shapes.CollisionContext);\n  public java.lang.Class<com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlockEntity> getBlockEntityClass();\n  public net.minecraft.world.level.block.entity.BlockEntityType<? extends com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlockEntity> getBlockEntityType();\n  public void neighborChanged(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.Block, net.minecraft.core.BlockPos, boolean);\n  public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlockEntity",
+        "public_signature": "Compiled from \"CreativeEnergyBlockEntity.java\"\npublic class com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlockEntity extends com.simibubi.create.content.logistics.crate.CrateBlockEntity {\n  public com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent);\n  public void tick();\n  public void firstTick();\n  public void updateCache();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterDisplaySource",
+        "public_signature": "Compiled from \"DigitalAdapterDisplaySource.java\"\npublic class com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterDisplaySource extends com.simibubi.create.api.behaviour.display.DisplaySource {\n  public com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterDisplaySource();\n  public java.util.List<net.minecraft.network.chat.MutableComponent> provideText(com.simibubi.create.content.redstone.displayLink.DisplayLinkContext, com.simibubi.create.content.redstone.displayLink.target.DisplayTargetStats);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.modular_accumulator.ModularAccumulatorDisplaySource",
+        "public_signature": "Compiled from \"ModularAccumulatorDisplaySource.java\"\npublic class com.mrh0.createaddition.blocks.modular_accumulator.ModularAccumulatorDisplaySource extends com.simibubi.create.content.redstone.displayLink.source.PercentOrProgressBarDisplaySource {\n  public com.mrh0.createaddition.blocks.modular_accumulator.ModularAccumulatorDisplaySource();\n  public void initConfigurationWidgets(com.simibubi.create.content.redstone.displayLink.DisplayLinkContext, com.simibubi.create.foundation.gui.ModularGuiLineBuilder, boolean);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PEIActorVisual",
+        "public_signature": "Compiled from \"PEIActorVisual.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PEIActorVisual extends com.simibubi.create.content.contraptions.render.ActorVisual {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PEIActorVisual(dev.engine_room.flywheel.api.visualization.VisualizationContext, com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld, com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public void beginFrame();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PEIInstance",
+        "public_signature": "Compiled from \"PEIInstance.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PEIInstance {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PEIInstance(dev.engine_room.flywheel.api.instance.InstancerProvider, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos, boolean);\n  public void beginFrame(float);\n  public void tick(boolean);\n  public void remove();\n  public void collectCrumblingInstances(java.util.function.Consumer<dev.engine_room.flywheel.api.instance.Instance>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PEIVisual",
+        "public_signature": "Compiled from \"PEIVisual.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PEIVisual extends dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual<com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity> implements dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual, dev.engine_room.flywheel.lib.visual.SimpleTickableVisual {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PEIVisual(dev.engine_room.flywheel.api.visualization.VisualizationContext, com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity, float);\n  public void tick(dev.engine_room.flywheel.api.visual.TickableVisual$Context);\n  public void beginFrame(dev.engine_room.flywheel.api.visual.DynamicVisual$Context);\n  public void updateLight(float);\n  public void collectCrumblingInstances(java.util.function.Consumer<dev.engine_room.flywheel.api.instance.Instance>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlock",
+        "public_signature": "Compiled from \"PortableEnergyInterfaceBlock.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlock extends com.simibubi.create.foundation.block.WrenchableDirectionalBlock implements com.simibubi.create.foundation.block.IBE<com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity> {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties);\n  public void neighborChanged(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.Block, net.minecraft.core.BlockPos, boolean);\n  public net.minecraft.world.level.block.state.BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext);\n  public net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.world.phys.shapes.CollisionContext);\n  public boolean hasAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState);\n  public int getAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos);\n  public java.lang.Class<com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity> getBlockEntityClass();\n  public net.minecraft.world.level.block.entity.BlockEntityType<? extends com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity> getBlockEntityType();\n  public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity",
+        "public_signature": "Compiled from \"PortableEnergyInterfaceBlockEntity.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity extends com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent);\n  public void startTransferringTo(com.simibubi.create.content.contraptions.Contraption, float);\n  public boolean isConnected();\n  public int getEnergy();\n  public int getCapacity();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity$InterfaceEnergyHandler",
+        "public_signature": "Compiled from \"PortableEnergyInterfaceBlockEntity.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity$InterfaceEnergyHandler implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity$InterfaceEnergyHandler(com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity, net.neoforged.neoforge.energy.IEnergyStorage);\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n  public void keepAlive();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceMovement",
+        "public_signature": "Compiled from \"PortableEnergyInterfaceMovement.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceMovement implements com.simibubi.create.api.behaviour.movement.MovementBehaviour {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceMovement();\n  public net.minecraft.world.phys.Vec3 getActiveAreaOffset(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public void renderInContraption(com.simibubi.create.content.contraptions.behaviour.MovementContext, com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld, com.simibubi.create.content.contraptions.render.ContraptionMatrices, net.minecraft.client.renderer.MultiBufferSource);\n  public com.simibubi.create.content.contraptions.render.ActorVisual createVisual(dev.engine_room.flywheel.api.visualization.VisualizationContext, com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld, com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public void visitNewPosition(com.simibubi.create.content.contraptions.behaviour.MovementContext, net.minecraft.core.BlockPos);\n  public void tick(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public void cancelStall(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public void reset(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public static net.createmod.catnip.animation.LerpedFloat getAnimation(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceRenderer",
+        "public_signature": "Compiled from \"PortableEnergyInterfaceRenderer.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceRenderer extends com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer<com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity> {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public static void renderInContraption(com.simibubi.create.content.contraptions.behaviour.MovementContext, com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld, com.simibubi.create.content.contraptions.render.ContraptionMatrices, net.minecraft.client.renderer.MultiBufferSource);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager",
+        "public_signature": "Compiled from \"PortableEnergyManager.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager();\n  public static void tick();\n  public static void track(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public static void untrack(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n  public static net.neoforged.neoforge.energy.IEnergyStorage get(com.simibubi.create.content.contraptions.Contraption);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager$EnergyData",
+        "public_signature": "Compiled from \"PortableEnergyManager.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager$EnergyData {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager$EnergyData(net.minecraft.nbt.CompoundTag);\n  public int receiveEnergy(int);\n  public int extractEnergy(int);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager$EnergyStorageHolder",
+        "public_signature": "Compiled from \"PortableEnergyManager.java\"\npublic class com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager$EnergyStorageHolder implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyManager$EnergyStorageHolder();\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.compat.computercraft.PortableEnergyInterfacePeripheral",
+        "public_signature": "Compiled from \"PortableEnergyInterfacePeripheral.java\"\npublic class com.mrh0.createaddition.compat.computercraft.PortableEnergyInterfacePeripheral implements dan200.computercraft.api.peripheral.IPeripheral {\n  public com.mrh0.createaddition.compat.computercraft.PortableEnergyInterfacePeripheral(java.lang.String, com.mrh0.createaddition.blocks.portable_energy_interface.PortableEnergyInterfaceBlockEntity);\n  public java.lang.String getType();\n  public boolean equals(dan200.computercraft.api.peripheral.IPeripheral);\n  public java.lang.Object getTarget();\n  public final int getEnergy();\n  public final int getCapacity();\n  public final boolean isConnected();\n  public final int getMaxInsert();\n  public final int getMaxExtract();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.compat.simulated.DockEnergyStorage",
+        "public_signature": "Compiled from \"DockEnergyStorage.java\"\npublic class com.mrh0.createaddition.compat.simulated.DockEnergyStorage implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public com.mrh0.createaddition.compat.simulated.DockEnergyStorage(net.minecraft.world.level.block.entity.BlockEntity, int);\n  public void connect(net.minecraft.core.BlockPos, com.mrh0.createaddition.compat.simulated.DockEnergyStorage);\n  public void disconnect();\n  public boolean isConnected();\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n  public com.mrh0.createaddition.compat.simulated.DockEnergyStorage getConnectedStorage();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.TagProvider.CAFluidTagProvider",
+        "public_signature": "Compiled from \"CAFluidTagProvider.java\"\npublic class com.mrh0.createaddition.datagen.TagProvider.CAFluidTagProvider extends net.minecraft.data.tags.FluidTagsProvider {\n  public com.mrh0.createaddition.datagen.TagProvider.CAFluidTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.datagen.TagProvider.CATagRegister$Fluids",
+        "public_signature": "Compiled from \"CATagRegister.java\"\npublic class com.mrh0.createaddition.datagen.TagProvider.CATagRegister$Fluids {\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> BIOFUEL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> CREOSOTE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> CRUDE_OIL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> PLANTOIL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> ETHANOL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> GASOLINE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> DIESEL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> BIODIESEL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> IGNITES;\n  public com.mrh0.createaddition.datagen.TagProvider.CATagRegister$Fluids();\n  public static net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> commonTags(java.lang.String, java.lang.String);\n  public static net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> commonTags(java.lang.String);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.AbstractElectricBlockEntity",
+        "public_signature": "Compiled from \"AbstractElectricBlockEntity.java\"\npublic abstract class com.mrh0.createaddition.energy.AbstractElectricBlockEntity extends com.simibubi.create.foundation.blockEntity.SmartBlockEntity {\n  public com.mrh0.createaddition.energy.AbstractElectricBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public abstract int getCapacity();\n  public abstract int getMaxIn();\n  public abstract int getMaxOut();\n  public void addBehaviours(java.util.List<com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour>);\n  public abstract boolean isEnergyInput(net.minecraft.core.Direction);\n  public abstract boolean isEnergyOutput(net.minecraft.core.Direction);\n  public void writeSafe(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void outputTick(int);\n  public void tick();\n  public void updateCache(net.minecraft.core.Direction);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.CreativeEnergyStorage",
+        "public_signature": "Compiled from \"CreativeEnergyStorage.java\"\npublic class com.mrh0.createaddition.energy.CreativeEnergyStorage implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public com.mrh0.createaddition.energy.CreativeEnergyStorage();\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.IEnergyProvider",
+        "public_signature": "Compiled from \"IEnergyProvider.java\"\npublic interface com.mrh0.createaddition.energy.IEnergyProvider {\n  public abstract net.neoforged.neoforge.energy.IEnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.IMultiTileEnergyContainer",
+        "public_signature": "Compiled from \"IMultiTileEnergyContainer.java\"\npublic interface com.mrh0.createaddition.energy.IMultiTileEnergyContainer extends com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer {\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.IWireNode",
+        "public_signature": "Compiled from \"IWireNode.java\"\npublic interface com.mrh0.createaddition.energy.IWireNode {\n  public abstract com.mrh0.createaddition.energy.IWireNode getWireNode(int);\n  public static com.mrh0.createaddition.energy.IWireNode getWireNodeFrom(int, com.mrh0.createaddition.energy.IWireNode, com.mrh0.createaddition.energy.LocalNode[], com.mrh0.createaddition.energy.IWireNode[], net.minecraft.world.level.Level);\n  public abstract com.mrh0.createaddition.energy.LocalNode getLocalNode(int);\n  public abstract void setNode(int, int, net.minecraft.core.BlockPos, com.mrh0.createaddition.energy.WireType);\n  public abstract void removeNode(int, boolean);\n  public default void removeNode(int);\n  public default void removeNode(com.mrh0.createaddition.energy.LocalNode, boolean);\n  public default void removeNode(com.mrh0.createaddition.energy.LocalNode);\n  public default int getNodeCount();\n  public default int getAvailableNode(net.minecraft.world.phys.Vec3);\n  public default int getAvailableNode();\n  public default net.minecraft.core.BlockPos getNodePos(int);\n  public default com.mrh0.createaddition.energy.WireType getNodeType(int);\n  public default int getOtherNodeIndex(int);\n  public default boolean hasConnection(int);\n  public default boolean hasAnyConnection();\n  public default boolean hasConnectionTo(net.minecraft.core.BlockPos);\n  public default com.mrh0.createaddition.energy.LocalNode getConnectionTo(net.minecraft.core.BlockPos);\n  public default boolean isNodeInput(int);\n  public default boolean isNodeOutput(int);\n  public abstract net.minecraft.world.phys.Vec3 getNodeOffset(int);\n  public abstract net.minecraft.core.BlockPos getPos();\n  public abstract void invalidateNodeCache();\n  public abstract void setNetwork(int, com.mrh0.createaddition.energy.network.EnergyNetwork);\n  public abstract com.mrh0.createaddition.energy.network.EnergyNetwork getNetwork(int);\n  public default boolean awakeNetwork(net.minecraft.world.level.Level);\n  public default boolean isNetworkValid(int);\n  public default boolean isNodeIndeciesConnected(int, int);\n  public default boolean validateLocalNodes(com.mrh0.createaddition.energy.LocalNode[]);\n  public default void convertOldNbt(net.minecraft.nbt.CompoundTag);\n  public default void handleWireCache(net.minecraft.world.level.Level, java.util.Set<com.mrh0.createaddition.energy.LocalNode>);\n  public default void disconnectWires();\n  public default void dropWire(net.minecraft.world.level.Level, com.mrh0.createaddition.energy.LocalNode);\n  public default void dropWires(net.minecraft.world.level.Level, boolean);\n  public default void dropWires(net.minecraft.world.level.Level, net.minecraft.world.entity.player.Player, boolean);\n  public abstract com.mrh0.createaddition.blocks.connector.ConnectorType getConnectorType();\n  public static net.minecraft.core.BlockPos readNodeBlockPos(net.minecraft.nbt.CompoundTag, int, net.minecraft.core.BlockPos);\n  public static com.mrh0.createaddition.energy.WireType readNodeWireType(net.minecraft.nbt.CompoundTag, int);\n  public static int readNodeOtherIndex(net.minecraft.nbt.CompoundTag, int);\n  public static net.minecraft.nbt.CompoundTag getNbtNode(net.minecraft.nbt.CompoundTag, int);\n  public abstract int getMaxWireLength();\n  public static com.mrh0.createaddition.energy.WireConnectResult connect(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, int, net.minecraft.core.BlockPos, int, com.mrh0.createaddition.energy.WireType);\n  public static com.mrh0.createaddition.energy.WireConnectResult disconnect(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);\n  public static com.mrh0.createaddition.energy.WireType getTypeOfConnection(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);\n  public static com.mrh0.createaddition.energy.IWireNode getWireNode(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);\n  public static void dropWire(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.item.ItemStack);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.InternalEnergyStorage",
+        "public_signature": "Compiled from \"InternalEnergyStorage.java\"\npublic class com.mrh0.createaddition.energy.InternalEnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {\n  public com.mrh0.createaddition.energy.InternalEnergyStorage(int);\n  public com.mrh0.createaddition.energy.InternalEnergyStorage(int, int);\n  public com.mrh0.createaddition.energy.InternalEnergyStorage(int, int, int);\n  public com.mrh0.createaddition.energy.InternalEnergyStorage(int, int, int, int);\n  public net.minecraft.nbt.CompoundTag write(net.minecraft.nbt.CompoundTag);\n  public void read(net.minecraft.nbt.CompoundTag);\n  public net.minecraft.nbt.CompoundTag write(net.minecraft.nbt.CompoundTag, java.lang.String);\n  public void read(net.minecraft.nbt.CompoundTag, java.lang.String);\n  public int getSpace();\n  public boolean canExtract();\n  public boolean canReceive();\n  public int internalConsumeEnergy(int);\n  public int internalProduceEnergy(int);\n  public void setEnergy(int);\n  public void setCapacity(int);\n  public void outputToSide(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);\n  public java.lang.String toString();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.LocalNode",
+        "public_signature": "Compiled from \"LocalNode.java\"\npublic class com.mrh0.createaddition.energy.LocalNode {\n  public static final java.lang.String NODES;\n  public static final java.lang.String ID;\n  public static final java.lang.String OTHER;\n  public static final java.lang.String TYPE;\n  public static final java.lang.String X;\n  public static final java.lang.String Y;\n  public static final java.lang.String Z;\n  public com.mrh0.createaddition.energy.LocalNode(net.minecraft.world.level.block.entity.BlockEntity, int, int, com.mrh0.createaddition.energy.WireType, net.minecraft.core.BlockPos);\n  public com.mrh0.createaddition.energy.LocalNode(net.minecraft.world.level.block.entity.BlockEntity, net.minecraft.nbt.CompoundTag);\n  public void write(net.minecraft.nbt.CompoundTag);\n  public void updateRelative(com.mrh0.createaddition.energy.NodeRotation);\n  public int getIndex();\n  public int getOtherIndex();\n  public com.mrh0.createaddition.energy.WireType getType();\n  public net.minecraft.core.Vec3i getRelativePos();\n  public net.minecraft.core.BlockPos getPos();\n  public boolean isInvalid();\n  public void invalid();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.NodeMovementBehaviour",
+        "public_signature": "Compiled from \"NodeMovementBehaviour.java\"\npublic class com.mrh0.createaddition.energy.NodeMovementBehaviour implements com.simibubi.create.api.behaviour.movement.MovementBehaviour {\n  public com.mrh0.createaddition.energy.NodeMovementBehaviour();\n  public void startMoving(com.simibubi.create.content.contraptions.behaviour.MovementContext);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.NodeRotation",
+        "public_signature": "Compiled from \"NodeRotation.java\"\npublic final class com.mrh0.createaddition.energy.NodeRotation extends java.lang.Enum<com.mrh0.createaddition.energy.NodeRotation> implements net.minecraft.util.StringRepresentable {\n  public static final com.mrh0.createaddition.energy.NodeRotation NONE;\n  public static final com.mrh0.createaddition.energy.NodeRotation Y_CLOCKWISE_90;\n  public static final com.mrh0.createaddition.energy.NodeRotation Y_CLOCKWISE_180;\n  public static final com.mrh0.createaddition.energy.NodeRotation Y_COUNTERCLOCKWISE_90;\n  public static final com.mrh0.createaddition.energy.NodeRotation X_CLOCKWISE_90;\n  public static final com.mrh0.createaddition.energy.NodeRotation X_CLOCKWISE_180;\n  public static final com.mrh0.createaddition.energy.NodeRotation X_COUNTERCLOCKWISE_90;\n  public static final com.mrh0.createaddition.energy.NodeRotation Z_CLOCKWISE_90;\n  public static final com.mrh0.createaddition.energy.NodeRotation Z_CLOCKWISE_180;\n  public static final com.mrh0.createaddition.energy.NodeRotation Z_COUNTERCLOCKWISE_90;\n  public static final net.minecraft.world.level.block.state.properties.EnumProperty<com.mrh0.createaddition.energy.NodeRotation> ROTATION;\n  public static final com.mrh0.createaddition.energy.NodeRotation[] VALUES;\n  public static com.mrh0.createaddition.energy.NodeRotation[] values();\n  public static com.mrh0.createaddition.energy.NodeRotation valueOf(java.lang.String);\n  public net.minecraft.core.Direction rotate(net.minecraft.core.Direction, boolean);\n  public net.minecraft.core.Vec3i updateRelative(net.minecraft.core.Vec3i);\n  public net.minecraft.core.Direction$Axis getAxis();\n  public net.minecraft.world.level.block.Rotation getRotation();\n  public java.lang.String getSerializedName();\n  public static com.mrh0.createaddition.energy.NodeRotation get(net.minecraft.core.Direction$Axis, net.minecraft.world.level.block.Rotation);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.WireConnectResult",
+        "public_signature": "Compiled from \"WireConnectResult.java\"\npublic final class com.mrh0.createaddition.energy.WireConnectResult extends java.lang.Enum<com.mrh0.createaddition.energy.WireConnectResult> {\n  public static final com.mrh0.createaddition.energy.WireConnectResult LINKED;\n  public static final com.mrh0.createaddition.energy.WireConnectResult LINKED_IN;\n  public static final com.mrh0.createaddition.energy.WireConnectResult LINKED_OUT;\n  public static final com.mrh0.createaddition.energy.WireConnectResult CONNECT;\n  public static final com.mrh0.createaddition.energy.WireConnectResult CONNECT_IN;\n  public static final com.mrh0.createaddition.energy.WireConnectResult CONNECT_OUT;\n  public static final com.mrh0.createaddition.energy.WireConnectResult LONG;\n  public static final com.mrh0.createaddition.energy.WireConnectResult OBSTRUCTED;\n  public static final com.mrh0.createaddition.energy.WireConnectResult COUNT;\n  public static final com.mrh0.createaddition.energy.WireConnectResult REMOVED;\n  public static final com.mrh0.createaddition.energy.WireConnectResult EXISTS;\n  public static final com.mrh0.createaddition.energy.WireConnectResult NO_CONNECTION;\n  public static final com.mrh0.createaddition.energy.WireConnectResult INVALID;\n  public static final com.mrh0.createaddition.energy.WireConnectResult REQUIRES_HIGH_CURRENT;\n  public static com.mrh0.createaddition.energy.WireConnectResult[] values();\n  public static com.mrh0.createaddition.energy.WireConnectResult valueOf(java.lang.String);\n  public net.minecraft.network.chat.Component getMessage();\n  public boolean isLinked();\n  public boolean isConnect();\n  public static com.mrh0.createaddition.energy.WireConnectResult getLink(boolean, boolean);\n  public static com.mrh0.createaddition.energy.WireConnectResult getConnect(boolean, boolean);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.WireType",
+        "public_signature": "Compiled from \"WireType.java\"\npublic final class com.mrh0.createaddition.energy.WireType extends java.lang.Enum<com.mrh0.createaddition.energy.WireType> {\n  public static final com.mrh0.createaddition.energy.WireType COPPER;\n  public static final com.mrh0.createaddition.energy.WireType GOLD;\n  public static final com.mrh0.createaddition.energy.WireType ELECTRUM;\n  public static final com.mrh0.createaddition.energy.WireType FESTIVE;\n  public static com.mrh0.createaddition.energy.WireType[] values();\n  public static com.mrh0.createaddition.energy.WireType valueOf(java.lang.String);\n  public static com.mrh0.createaddition.energy.WireType fromIndex(int);\n  public int getIndex();\n  public net.minecraft.world.item.ItemStack getDrop();\n  public net.minecraft.world.item.ItemStack getSourceDrop();\n  public int transfer();\n  public int getRed();\n  public int getGreen();\n  public int getBlue();\n  public boolean isFestive();\n  public static com.mrh0.createaddition.energy.WireType of(net.minecraft.world.item.Item);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.network.EnergyNetwork",
+        "public_signature": "Compiled from \"EnergyNetwork.java\"\npublic class com.mrh0.createaddition.energy.network.EnergyNetwork {\n  public com.mrh0.createaddition.energy.network.EnergyNetwork(net.minecraft.world.level.Level);\n  public int getMaxBuff();\n  public void tick(int);\n  public int getBuff();\n  public int push(int, boolean);\n  public int push(int);\n  public int demand(int);\n  public int getDemand();\n  public int getPulled();\n  public int getPushed();\n  public int pull(int, boolean);\n  public int pull(int);\n  public static com.mrh0.createaddition.energy.network.EnergyNetwork nextNode(net.minecraft.world.level.Level, com.mrh0.createaddition.energy.network.EnergyNetwork, java.util.Map<java.lang.String, com.mrh0.createaddition.energy.IWireNode>, com.mrh0.createaddition.energy.IWireNode, int);\n  public void invalidate();\n  public boolean isValid();\n  public void removed();\n  public int getId();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.energy.network.EnergyNetworkManager",
+        "public_signature": "Compiled from \"EnergyNetworkManager.java\"\npublic class com.mrh0.createaddition.energy.network.EnergyNetworkManager {\n  public static java.util.Map<net.minecraft.world.level.LevelAccessor, com.mrh0.createaddition.energy.network.EnergyNetworkManager> instances;\n  public com.mrh0.createaddition.energy.network.EnergyNetworkManager(net.minecraft.world.level.LevelAccessor);\n  public void add(com.mrh0.createaddition.energy.network.EnergyNetwork);\n  public void tick();\n  public static void tickWorld(net.minecraft.world.level.LevelAccessor);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.event.ResourceReloadListener",
+        "public_signature": "Compiled from \"ResourceReloadListener.java\"\npublic class com.mrh0.createaddition.event.ResourceReloadListener implements net.minecraft.server.packs.resources.ResourceManagerReloadListener {\n  public com.mrh0.createaddition.event.ResourceReloadListener();\n  public void onResourceManagerReload(net.minecraft.server.packs.resources.ResourceManager);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.index.CADisplaySources",
+        "public_signature": "Compiled from \"CADisplaySources.java\"\npublic class com.mrh0.createaddition.index.CADisplaySources {\n  public static final com.tterrag.registrate.util.entry.RegistryEntry<com.simibubi.create.api.behaviour.display.DisplaySource, com.mrh0.createaddition.blocks.modular_accumulator.ModularAccumulatorDisplaySource> MODULAR_ACCUMULATOR;\n  public static final com.tterrag.registrate.util.entry.RegistryEntry<com.simibubi.create.api.behaviour.display.DisplaySource, com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterDisplaySource> DIGITAL_ADAPTER;\n  public com.mrh0.createaddition.index.CADisplaySources();\n  public static void register();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.index.CAFluids",
+        "public_signature": "Compiled from \"CAFluids.java\"\npublic class com.mrh0.createaddition.index.CAFluids {\n  public static com.tterrag.registrate.util.entry.FluidEntry<net.neoforged.neoforge.fluids.BaseFlowingFluid$Flowing> SEED_OIL;\n  public static com.tterrag.registrate.util.entry.FluidEntry<net.neoforged.neoforge.fluids.BaseFlowingFluid$Flowing> BIOETHANOL;\n  public com.mrh0.createaddition.index.CAFluids();\n  public static void register();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.index.CAFluids$NoColorFluidAttributes",
+        "public_signature": "Compiled from \"CAFluids.java\"\nclass com.mrh0.createaddition.index.CAFluids$NoColorFluidAttributes extends com.simibubi.create.AllFluids$TintedFluidType {\n  public com.mrh0.createaddition.index.CAFluids$NoColorFluidAttributes(net.neoforged.neoforge.fluids.FluidType$Properties, net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation);\n  public int getTintColor(net.minecraft.world.level.material.FluidState, net.minecraft.world.level.BlockAndTintGetter, net.minecraft.core.BlockPos);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.item.CapacitorItem$CapacitorEnergyStorage",
+        "public_signature": "Compiled from \"CapacitorItem.java\"\npublic class com.mrh0.createaddition.item.CapacitorItem$CapacitorEnergyStorage implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public com.mrh0.createaddition.item.CapacitorItem$CapacitorEnergyStorage(net.minecraft.world.item.ItemStack);\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.mixin.FlowingFluidMixin",
+        "public_signature": "Compiled from \"FlowingFluidMixin.java\"\npublic class com.mrh0.createaddition.mixin.FlowingFluidMixin {\n  public com.mrh0.createaddition.mixin.FlowingFluidMixin();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.network.EnergyNetworkPacketPayload",
+        "public_signature": "Compiled from \"EnergyNetworkPacketPayload.java\"\npublic final class com.mrh0.createaddition.network.EnergyNetworkPacketPayload extends java.lang.Record implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {\n  public static double clientSaturation;\n  public static int clientDemand;\n  public static int clientBuff;\n  public static final net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<com.mrh0.createaddition.network.EnergyNetworkPacketPayload> TYPE;\n  public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, com.mrh0.createaddition.network.EnergyNetworkPacketPayload> STREAM_CODEC;\n  public com.mrh0.createaddition.network.EnergyNetworkPacketPayload(net.minecraft.core.BlockPos, int, int);\n  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<? extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> type();\n  public static void updateClientCache(net.minecraft.core.BlockPos, int, int);\n  public static boolean send(net.minecraft.core.BlockPos, int, int, net.minecraft.server.level.ServerPlayer);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.core.BlockPos pos();\n  public int demand();\n  public int buff();\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.trains.schedule.condition.EnergyThresholdCondition",
+        "public_signature": "Compiled from \"EnergyThresholdCondition.java\"\npublic class com.mrh0.createaddition.trains.schedule.condition.EnergyThresholdCondition extends com.simibubi.create.content.trains.schedule.condition.CargoThresholdCondition {\n  public com.mrh0.createaddition.trains.schedule.condition.EnergyThresholdCondition();\n  public net.minecraft.world.item.ItemStack getSecondLineIcon();\n  public int slotsTargeted();\n  public boolean lazyTickCompletion(net.minecraft.world.level.Level, com.simibubi.create.content.trains.entity.Train, net.minecraft.nbt.CompoundTag);\n  public java.util.List<net.minecraft.network.chat.Component> getTitleAs(java.lang.String);\n  public net.minecraft.resources.ResourceLocation getId();\n  public void initConfigurationWidgets(com.simibubi.create.foundation.gui.ModularGuiLineBuilder);\n  public net.minecraft.network.chat.MutableComponent getWaitingStatus(net.minecraft.world.level.Level, com.simibubi.create.content.trains.entity.Train, net.minecraft.nbt.CompoundTag);\n}"
+      }
+    ],
+    "station_classes": [
+      {
+        "class": "com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlock",
+        "public_signature": "Compiled from \"RollingMillBlock.java\"\npublic class com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlock extends com.simibubi.create.content.kinetics.base.HorizontalKineticBlock implements com.simibubi.create.foundation.block.IBE<com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity> {\n  public static final net.minecraft.world.phys.shapes.VoxelShape ROLLING_MILL_SHAPE;\n  public com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties);\n  public net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.world.phys.shapes.CollisionContext);\n  public void updateEntityAfterFallOn(net.minecraft.world.level.BlockGetter, net.minecraft.world.entity.Entity);\n  public void onRemove(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean);\n  public net.minecraft.world.level.block.state.BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext);\n  public net.minecraft.core.Direction$Axis getRotationAxis(net.minecraft.world.level.block.state.BlockState);\n  public boolean hasShaftTowards(net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.Direction);\n  public net.minecraft.world.level.block.entity.BlockEntityType<? extends com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity> getBlockEntityType();\n  public java.lang.Class<com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity> getBlockEntityClass();\n  public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity",
+        "public_signature": "Compiled from \"RollingMillBlockEntity.java\"\npublic class com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity extends com.simibubi.create.content.kinetics.base.KineticBlockEntity {\n  public net.neoforged.neoforge.items.ItemStackHandler inputInv;\n  public net.neoforged.neoforge.items.ItemStackHandler outputInv;\n  public net.neoforged.neoforge.items.IItemHandler capability;\n  public int timer;\n  public com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent);\n  public void addBehaviours(java.util.List<com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour>);\n  public void tickAudio();\n  public void tick();\n  public void invalidate();\n  public void destroy();\n  public void spawnParticles();\n  public void write(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, boolean);\n  public int getProcessingSpeed();\n  public java.util.Optional<net.minecraft.world.item.crafting.RecipeHolder<com.mrh0.createaddition.recipe.rolling.RollingRecipe>> find(net.neoforged.neoforge.items.wrapper.RecipeWrapper, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity$MillstoneInventoryHandler",
+        "public_signature": "Compiled from \"RollingMillBlockEntity.java\"\nclass com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity$MillstoneInventoryHandler extends net.neoforged.neoforge.items.wrapper.CombinedInvWrapper {\n  public com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity$MillstoneInventoryHandler(com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity);\n  public boolean isItemValid(int, net.minecraft.world.item.ItemStack);\n  public net.minecraft.world.item.ItemStack insertItem(int, net.minecraft.world.item.ItemStack, boolean);\n  public net.minecraft.world.item.ItemStack extractItem(int, int, boolean);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.rolling_mill.RollingMillRenderer",
+        "public_signature": "Compiled from \"RollingMillRenderer.java\"\npublic class com.mrh0.createaddition.blocks.rolling_mill.RollingMillRenderer extends com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer {\n  public com.mrh0.createaddition.blocks.rolling_mill.RollingMillRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.blocks.rolling_mill.RollingMillVisual",
+        "public_signature": "Compiled from \"RollingMillVisual.java\"\npublic class com.mrh0.createaddition.blocks.rolling_mill.RollingMillVisual extends com.simibubi.create.content.kinetics.base.KineticBlockEntityVisual<com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity> {\n  public com.mrh0.createaddition.blocks.rolling_mill.RollingMillVisual(dev.engine_room.flywheel.api.visualization.VisualizationContext, com.mrh0.createaddition.blocks.rolling_mill.RollingMillBlockEntity, float);\n  public void update(float);\n  public void updateLight(float);\n  public void collectCrumblingInstances(java.util.function.Consumer<dev.engine_room.flywheel.api.instance.Instance>);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.compat.jei.AnimatedRollingMill",
+        "public_signature": "Compiled from \"AnimatedRollingMill.java\"\npublic class com.mrh0.createaddition.compat.jei.AnimatedRollingMill extends com.simibubi.create.compat.jei.category.animations.AnimatedKinetics {\n  public com.mrh0.createaddition.compat.jei.AnimatedRollingMill(boolean);\n  public com.mrh0.createaddition.compat.jei.AnimatedRollingMill();\n  public void draw(net.minecraft.client.gui.GuiGraphics, int, int);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.compat.jei.RollingMillAssemblySubCategory",
+        "public_signature": "Compiled from \"RollingMillAssemblySubCategory.java\"\npublic class com.mrh0.createaddition.compat.jei.RollingMillAssemblySubCategory extends com.simibubi.create.compat.jei.category.sequencedAssembly.SequencedAssemblySubCategory {\n  public com.mrh0.createaddition.compat.jei.RollingMillAssemblySubCategory();\n  public void draw(com.simibubi.create.content.processing.sequenced.SequencedRecipe<?>, net.minecraft.client.gui.GuiGraphics, double, double, int);\n}"
+      },
+      {
+        "class": "com.mrh0.createaddition.compat.jei.RollingMillCategory",
+        "public_signature": "Compiled from \"RollingMillCategory.java\"\npublic class com.mrh0.createaddition.compat.jei.RollingMillCategory extends com.mrh0.createaddition.compat.jei.CARecipeCategory<com.mrh0.createaddition.recipe.rolling.RollingRecipe> {\n  public com.mrh0.createaddition.compat.jei.RollingMillCategory(com.simibubi.create.compat.jei.category.CreateRecipeCategory$Info<com.mrh0.createaddition.recipe.rolling.RollingRecipe>);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, com.mrh0.createaddition.recipe.rolling.RollingRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(com.mrh0.createaddition.recipe.rolling.RollingRecipe, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void draw(net.minecraft.world.item.crafting.Recipe, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, net.minecraft.world.item.crafting.Recipe, mezz.jei.api.recipe.IFocusGroup);\n}"
+      }
+    ]
+  },
+  "kind": "auto_storage_compat_audit",
+  "risks": [
+    {
+      "code": "entity_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "com.mrh0.createaddition.recipe.FluidRecipeWrapper: entity API"
+      ]
+    },
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "com.mrh0.createaddition.recipe.charging.ChargingRecipe: world API",
+        "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe: world API",
+        "com.mrh0.createaddition.recipe.rolling.RollingRecipe: world API"
+      ]
+    }
+  ],
+  "scanner_format": 7,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/com/mrh0/createaddition/blocks/connector/base/AbstractConnectorBlockEntity.java",
+      "src/main/java/com/mrh0/createaddition/blocks/creative_energy/CreativeEnergyBlock.java",
+      "src/main/java/com/mrh0/createaddition/blocks/creative_energy/CreativeEnergyBlockEntity.java",
+      "src/main/java/com/mrh0/createaddition/blocks/digital_adapter/DigitalAdapterDisplaySource.java",
+      "src/main/java/com/mrh0/createaddition/blocks/modular_accumulator/ModularAccumulatorDisplaySource.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PEIActorVisual.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PEIInstance.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PEIVisual.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PortableEnergyInterfaceBlock.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PortableEnergyInterfaceBlockEntity.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PortableEnergyInterfaceMovement.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PortableEnergyInterfaceRenderer.java",
+      "src/main/java/com/mrh0/createaddition/blocks/portable_energy_interface/PortableEnergyManager.java",
+      "src/main/java/com/mrh0/createaddition/blocks/rolling_mill/RollingMillBlock.java",
+      "src/main/java/com/mrh0/createaddition/blocks/rolling_mill/RollingMillBlockEntity.java",
+      "src/main/java/com/mrh0/createaddition/blocks/rolling_mill/RollingMillRenderer.java",
+      "src/main/java/com/mrh0/createaddition/blocks/rolling_mill/RollingMillVisual.java",
+      "src/main/java/com/mrh0/createaddition/compat/computercraft/PortableEnergyInterfacePeripheral.java",
+      "src/main/java/com/mrh0/createaddition/compat/jei/AnimatedRollingMill.java",
+      "src/main/java/com/mrh0/createaddition/compat/jei/CARecipeCategory.java",
+      "src/main/java/com/mrh0/createaddition/compat/jei/RollingMillAssemblySubCategory.java",
+      "src/main/java/com/mrh0/createaddition/compat/jei/RollingMillCategory.java",
+      "src/main/java/com/mrh0/createaddition/compat/simulated/DockEnergyStorage.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeBuilders/CALiquidBurningRecipeBuilder.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeBuilders/CARecipeBuilder.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeBuilders/ChargingRecipeBuilder.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeGen/ChargingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeGen/LiquidBurningRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeGen/RollingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CAChargingRecipeProvider.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CACompactingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CACraftingRecipeProvider.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CACrushingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CAFillingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CALiquidBurningRecipeProvider.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CAMechanicalCrafterRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CAMixingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CAPressingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/RecipeProvider/CARollingRecipeGen.java",
+      "src/main/java/com/mrh0/createaddition/datagen/TagProvider/CAFluidTagProvider.java",
+      "src/main/java/com/mrh0/createaddition/datagen/TagProvider/CATagRegister.java",
+      "src/main/java/com/mrh0/createaddition/energy/AbstractElectricBlockEntity.java",
+      "src/main/java/com/mrh0/createaddition/energy/CreativeEnergyStorage.java",
+      "src/main/java/com/mrh0/createaddition/energy/IEnergyProvider.java",
+      "src/main/java/com/mrh0/createaddition/energy/IMultiTileEnergyContainer.java",
+      "src/main/java/com/mrh0/createaddition/energy/IWireNode.java",
+      "src/main/java/com/mrh0/createaddition/energy/InternalEnergyStorage.java",
+      "src/main/java/com/mrh0/createaddition/energy/LocalNode.java",
+      "src/main/java/com/mrh0/createaddition/energy/NodeMovementBehaviour.java",
+      "src/main/java/com/mrh0/createaddition/energy/NodeRotation.java",
+      "src/main/java/com/mrh0/createaddition/energy/WireConnectResult.java",
+      "src/main/java/com/mrh0/createaddition/energy/WireType.java",
+      "src/main/java/com/mrh0/createaddition/energy/network/EnergyNetwork.java",
+      "src/main/java/com/mrh0/createaddition/energy/network/EnergyNetworkManager.java",
+      "src/main/java/com/mrh0/createaddition/event/ResourceReloadListener.java",
+      "src/main/java/com/mrh0/createaddition/index/CADisplaySources.java",
+      "src/main/java/com/mrh0/createaddition/index/CAFluids.java",
+      "src/main/java/com/mrh0/createaddition/index/CARecipes.java",
+      "src/main/java/com/mrh0/createaddition/item/CapacitorItem.java",
+      "src/main/java/com/mrh0/createaddition/mixin/FlowingFluidMixin.java",
+      "src/main/java/com/mrh0/createaddition/network/EnergyNetworkPacketPayload.java",
+      "src/main/java/com/mrh0/createaddition/recipe/FluidRecipeWrapper.java",
+      "src/main/java/com/mrh0/createaddition/recipe/charging/ChargingRecipe.java",
+      "src/main/java/com/mrh0/createaddition/recipe/charging/ChargingRecipeParams.java",
+      "src/main/java/com/mrh0/createaddition/recipe/conditions/HasFluidTagCondition.java",
+      "src/main/java/com/mrh0/createaddition/recipe/liquid_burning/LiquidBurningRecipe.java",
+      "src/main/java/com/mrh0/createaddition/recipe/liquid_burning/LiquidBurningRecipeParams.java",
+      "src/main/java/com/mrh0/createaddition/recipe/rolling/RollingRecipe.java",
+      "src/main/java/com/mrh0/createaddition/trains/schedule/condition/EnergyThresholdCondition.java"
+    ],
+    "revision": "84c7b2ceafc0b382da4606ac0770085e63104c3a"
+  },
+  "target": {
+    "display_name": "Create Crafts & Additions",
+    "mod_id": "createaddition",
+    "version": "1.6.0"
+  }
+}

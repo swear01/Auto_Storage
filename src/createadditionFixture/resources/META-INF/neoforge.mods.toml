@@ -1,0 +1,37 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="auto_storage_createaddition_fixture"
+version="1.0.0"
+displayName="Auto Storage Createaddition Fixture"
+description="Compat Kit generated RED fixture for Create Crafts & Additions."
+
+[[dependencies.auto_storage_createaddition_fixture]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.auto_storage_createaddition_fixture]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.auto_storage_createaddition_fixture]]
+modId="auto_storage"
+type="required"
+versionRange="[0.3,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.auto_storage_createaddition_fixture]]
+modId="createaddition"
+type="required"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"

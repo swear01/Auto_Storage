@@ -1,0 +1,27 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:createaddition:qPr8V4G2",
+    "sha256": "41876c3780b70365a1848994d146a73423cc19fbe86485885795d9e7d855e7e9"
+  },
+  "dependencies": [
+    "maven.modrinth:createaddition:qPr8V4G2",
+    "maven.modrinth:create:UjX6dr61"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.createaddition.CreateadditionCompatModule",
+  "expectedTests": 8,
+  "fixture": "createadditionFixture",
+  "id": "auto_storage:createaddition",
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "createaddition"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:createaddition:qPr8V4G2",
+    "maven.modrinth:create:UjX6dr61"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatCreateaddition"
+}

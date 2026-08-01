@@ -8056,6 +8056,13 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 "com.example:samplemod:1.2.3",
                 "org.example:samplemod-runtime:4.5.6",
             ],
+            descriptor["dependencies"],
+        )
+        self.assertEqual(
+            [
+                "com.example:samplemod:1.2.3",
+                "org.example:samplemod-runtime:4.5.6",
+            ],
             descriptor["runtimeDependencies"],
         )
 
