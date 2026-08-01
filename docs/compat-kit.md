@@ -130,8 +130,12 @@ repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
 Data-root scans bind the ordered layer digests into their cache identity;
 ancestry classpaths bind their exact artifact set. The
-current scanner format is `8`; format `7` remains readable only as explicit
-legacy evidence while committed contracts are migrated. The scanner format is
+current scanner format is `9`; formats `7` and `8` remain readable only as
+explicit legacy evidence while committed contracts are migrated. Format 9
+persists the structural hierarchy separately from the final classification and
+requires hierarchy to win before every name-term bucket. Validation also
+cross-checks direct `extends`/`implements` parents in the public declaration;
+generic type bounds are not treated as direct ancestry. The scanner format is
 also stored in every audit and required by its published
 schema, so an older structurally valid committed audit cannot authorize current
 contract review.
@@ -142,8 +146,10 @@ both source-like method signatures and the `methodName:(descriptor)` form
 emitted by `javap -c -p`.
 Named nested classes are audited and mapped back to their top-level Java source,
 including legal Java identifiers that themselves contain `$`. The scanner uses
-`InnerClasses` and `EnclosingMethod` metadata rather than splitting the binary
-name on every `$`; anonymous/local classes and every class carrying the JVM
+`SourceFile`, `InnerClasses`, and `EnclosingMethod` metadata rather than
+splitting the binary name on every `$`; a legal top-level `Recipe$1Variant`
+therefore maps to `Recipe$1Variant.java`, while anonymous/local classes and
+every class carrying the JVM
 `ACC_SYNTHETIC` access flag are excluded.
 
 Archive limits, the 1 MiB per-entry NeoForge metadata limit, the 16 MiB
@@ -163,20 +169,18 @@ a lower-priority bucket cannot hide it from contract review. Every risk-evidence
 owner must also be one of the audited recipe
 candidates, so risk cannot be detached from the class under review.
 
-Legacy format-7 audits must be regenerated from the exact same reviewed
-artifact rather than edited in place:
+Legacy format-7 and format-8 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
 
 ```bash
 tools/compat-kit/compat-kit migrate-audit \
-  compat/audits/target/1.2.3-v7.json \
+  compat/audits/target/1.2.3-legacy.json \
   --jar build/compat-kit/artifacts/target.jar \
   --source build/compat-kit/sources/target \
   --output compat/audits/target/1.2.3.json
 ```
 
 Migration rejects a current audit, a different target identity, or different
-artifact bytes. It performs a full current scanner pass and therefore preserves
-no stale format-7 classification.
+artifact bytes. It performs a full current scanner pass and therefore preserves no stale legacy classification.
 
 ### 2a. Generate unresolved machine and requirement proposals
 
@@ -409,8 +413,7 @@ harness performs snapshot/delta/unchanged and success/failure assertions; the
 integration supplies only the reviewed scenario setup and operation. Happy,
 catalyst/tool/remainder, and multi-output paths carry separate expected deltas,
 and zero-valued resource keys are normalized before comparison. Dedicated-
-server isolation checks the physical NeoForge distribution instead of trusting
-an addon-supplied boolean.
+server isolation checks the physical NeoForge distribution instead of trusting an addon-supplied boolean. Every family batch must be at least 2, so `happy_path_and_batching` always proves a repeated operation rather than duplicating a single-craft assertion.
 
 `resource-scaffold` emits API-only kind/container/block/renderer boundaries and
 real persistence, transfer, rollback, and dedicated-server test scenarios for
@@ -649,7 +652,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-8 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-9 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
 finds twelve

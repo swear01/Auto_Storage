@@ -78,7 +78,7 @@
           "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
         },
         "provider": { "$ref": "#/$defs/provider" },
-        "batch": { "type": "integer", "minimum": 1 },
+        "batch": { "type": "integer", "minimum": 2 },
         "expected_deltas": {
           "type": "object",
           "additionalProperties": false,

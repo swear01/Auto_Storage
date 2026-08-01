@@ -21,7 +21,7 @@
       "const": 1
     },
     "scanner_format": {
-      "const": 8
+      "const": 9
     },
     "kind": {
       "const": "auto_storage_compat_audit"
@@ -214,6 +214,28 @@
         }
       }
     },
+    "hierarchy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "evidence"
+      ],
+      "properties": {
+        "method": {
+          "const": "class_hierarchy"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        }
+      }
+    },
     "candidates": {
       "type": "array",
       "items": {
@@ -222,7 +244,8 @@
         "required": [
           "class",
           "public_signature",
-          "classification"
+          "classification",
+          "hierarchy"
         ],
         "properties": {
           "class": {
@@ -235,6 +258,12 @@
           },
           "classification": {
             "$ref": "#/$defs/classification"
+          },
+          "hierarchy": {
+            "oneOf": [
+              { "$ref": "#/$defs/hierarchy" },
+              { "type": "null" }
+            ]
           }
         }
       }

@@ -821,7 +821,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertNotIn("RandomSource", crushing["public_signature"])
         self.assertEqual(
-            {"class", "public_signature", "classification"},
+            {"class", "public_signature", "classification", "hierarchy"},
             set(crushing),
         )
 
@@ -859,7 +859,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(8, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(9, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -1304,6 +1304,7 @@ class CompatKitAuditTests(unittest.TestCase):
         for records in legacy["candidates"].values():
             for record in records:
                 record.pop("classification")
+                record.pop("hierarchy")
         self.compat_kit._validate_audit(legacy)
 
         audit["scanner_format"] = 6
@@ -1332,6 +1333,7 @@ class CompatKitAuditTests(unittest.TestCase):
         for records in legacy["candidates"].values():
             for record in records:
                 record.pop("classification")
+                record.pop("hierarchy")
 
         migrated = self.compat_kit.migrate_audit(
             legacy,
@@ -1345,6 +1347,28 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             set(self.compat_kit.CURRENT_CANDIDATE_BUCKETS),
             set(migrated["candidates"]),
+        )
+
+        legacy_structural = copy.deepcopy(current)
+        legacy_structural["scanner_format"] = 8
+        for records in legacy_structural["candidates"].values():
+            for record in records:
+                record.pop("hierarchy")
+        migrated_structural = self.compat_kit.migrate_audit(
+            legacy_structural,
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        self.assertEqual(
+            self.compat_kit.SCAN_CACHE_VERSION,
+            migrated_structural["scanner_format"],
+        )
+        self.assertTrue(
+            all(
+                "hierarchy" in record
+                for records in migrated_structural["candidates"].values()
+                for record in records
+            )
         )
         with self.assertRaisesRegex(ValueError, "legacy scanner-format audit"):
             self.compat_kit.migrate_audit(
@@ -1570,6 +1594,115 @@ class CompatKitAuditTests(unittest.TestCase):
         audit = self.compat_kit.scan_jar(target_jar)
         self.assertEqual([], audit["candidates"]["recipe_classes"])
 
+    def test_scan_rejects_unresolved_class_that_only_uses_a_platform_prefix(self):
+        support_source = self.root / "fake-platform-support-source"
+        support_classes = self.root / "fake-platform-support-classes"
+        base = support_source / "javax/sample/BaseMachine.java"
+        base.parent.mkdir(parents=True)
+        base.write_text(
+            "package javax.sample; public abstract class BaseMachine {}\n"
+        )
+        support_classes.mkdir()
+        subprocess.run(
+            ["javac", "-d", str(support_classes), str(base)],
+            check=True,
+        )
+
+        target_source = self.root / "fake-platform-target-source"
+        target_classes = self.root / "fake-platform-target-classes"
+        machine = target_source / "samplemod/machine/CrusherMachine.java"
+        machine.parent.mkdir(parents=True)
+        machine.write_text(
+            "package samplemod.machine; public final class CrusherMachine "
+            "extends javax.sample.BaseMachine {}\n"
+        )
+        target_classes.mkdir()
+        subprocess.run(
+            [
+                "javac",
+                "-cp",
+                str(support_classes),
+                "-d",
+                str(target_classes),
+                str(machine),
+            ],
+            check=True,
+        )
+        target_jar = self.root / "samplemod-fake-platform-prefix.jar"
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            archive.write(
+                target_classes / "samplemod/machine/CrusherMachine.class",
+                "samplemod/machine/CrusherMachine.class",
+            )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "unresolved ancestry.*javax.sample.BaseMachine",
+        ):
+            self.compat_kit.scan_jar(target_jar)
+
+    def test_scan_preserves_dollar_in_top_level_source_file_name(self):
+        source = self.root / "dollar-top-level-source"
+        classes = self.root / "dollar-top-level-classes"
+        recipe_api = source / "net/minecraft/world/item/crafting/Recipe.java"
+        recipe_api.parent.mkdir(parents=True)
+        recipe_api.write_text(
+            "package net.minecraft.world.item.crafting; public interface Recipe {}\n"
+        )
+        recipe = source / "samplemod/recipe/Recipe$1Variant.java"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(
+            "package samplemod.recipe; public final class Recipe$1Variant "
+            "implements net.minecraft.world.item.crafting.Recipe {}\n"
+        )
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
+        classes.mkdir()
+        subprocess.run(
+            ["javac", "-d", str(classes), str(recipe_api), str(recipe)],
+            check=True,
+        )
+        target_jar = self.root / "samplemod-dollar-top-level.jar"
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            archive.write(
+                classes / "samplemod/recipe/Recipe$1Variant.class",
+                "samplemod/recipe/Recipe$1Variant.class",
+            )
+
+        audit = self.compat_kit.scan_jar(target_jar, source=source)
+
+        self.assertEqual(
+            ["samplemod/recipe/Recipe$1Variant.java"],
+            audit["source"]["files"],
+        )
+
     def test_scan_ignores_multi_release_archive_paths_and_scans_root_class_once(self):
         multi_release_jar = self.root / "samplemod-multi-release.jar"
         write_fixture_jar(multi_release_jar)
@@ -1704,6 +1837,13 @@ displayName="Sample Machines"
         with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
             self.compat_kit._validate_audit(audit)
 
+    def test_audit_validation_rejects_non_string_public_signature(self):
+        audit = self.source_audit()
+        audit["candidates"]["recipe_classes"][0]["public_signature"] = None
+
+        with self.assertRaisesRegex(ValueError, "empty public_signature"):
+            self.compat_kit._validate_audit(audit)
+
     def test_audit_validation_recomputes_client_viewer_name_priority(self):
         structural_jar = self.root / "samplemod-current-bucket.jar"
         write_structural_fixture_jar(self.root, structural_jar)
@@ -1718,6 +1858,59 @@ displayName="Sample Machines"
             key=lambda entry: entry["class"]
         )
 
+        with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
+            self.compat_kit._validate_audit(audit)
+
+    def test_audit_validation_preserves_hierarchy_priority_over_name_terms(self):
+        structural_jar = self.root / "samplemod-hierarchy-priority.jar"
+        write_fixture_jar(structural_jar)
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                "samplemod/process/CrusherRecipe.class",
+                b"structural recipe with station name",
+            )
+
+        audit = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=lambda class_name: (
+                "public class samplemod.process.CrusherRecipe implements "
+                "net.minecraft.world.item.crafting.Recipe { }"
+                if class_name == "samplemod.process.CrusherRecipe"
+                else f"public class {class_name} {{ }}"
+            ),
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+            class_metadata_reader=lambda class_name: (
+                {
+                    "access_flags": 0,
+                    "super_class": "java.lang.Object",
+                    "interfaces": [
+                        "net.minecraft.world.item.crafting.Recipe"
+                    ],
+                }
+                if class_name == "samplemod.process.CrusherRecipe"
+                else None
+            ),
+        )
+        candidate = next(
+            entry
+            for entry in audit["candidates"]["recipe_classes"]
+            if entry["class"] == "samplemod.process.CrusherRecipe"
+        )
+        self.assertIsNot(candidate["classification"], candidate["hierarchy"])
+        audit["candidates"]["recipe_classes"].remove(candidate)
+        candidate["classification"] = {
+            "method": "name_term",
+            "evidence": ["crusher"],
+        }
+        audit["candidates"]["station_classes"].append(candidate)
+        audit["candidates"]["station_classes"].sort(
+            key=lambda entry: entry["class"]
+        )
+
+        with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
+            self.compat_kit._validate_audit(audit)
+
+        candidate["hierarchy"] = None
         with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
             self.compat_kit._validate_audit(audit)
 
@@ -3344,6 +3537,24 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract, audit, plan, self.root / "conformance-class-collision"
             )
 
+        plan = self.conformance_plan(contract)
+        plan["families"][0]["batch"] = 1
+        with self.assertRaisesRegex(ValueError, "batch must be at least 2"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract, audit, plan, self.root / "single-conformance"
+            )
+
+        schema = json.loads(
+            (
+                ROOT
+                / "tools/compat-kit/schema/compat-conformance-plan.schema.json"
+            ).read_text()
+        )
+        self.assertEqual(
+            2,
+            schema["$defs"]["family"]["properties"]["batch"]["minimum"],
+        )
+
     def resource_scaffold_plan(self, contract: dict) -> dict:
         return {
             "schema": 1,
@@ -4375,6 +4586,11 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         self.assertFalse(
             audit_schema["properties"]["candidates"]["additionalProperties"]
+        )
+        hierarchy = audit_schema["$defs"]["hierarchy"]
+        self.assertEqual(
+            "class_hierarchy",
+            hierarchy["properties"]["method"]["const"],
         )
         report_schema = json.loads(
             (schema_root / "compat-report.schema.json").read_text()

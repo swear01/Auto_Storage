@@ -46,23 +46,28 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 8 structurally classifies concrete `Recipe` and
+Scanner format 9 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
 letting a structurally hidden recipe disappear. Exact classpath artifact
 identities enter the audit/cache, and every ancestry jar is rehashed after
-inspection to reject in-flight replacement. Platform ancestry comes from the
-selected JDK 21 `jmods` inventory rather than package-prefix guesses.
+inspection to reject in-flight replacement. Platform ancestry requires exact
+membership in the selected JDK 21 `jmods` inventory; a `java.*` or `javax.*`
+prefix alone never authorizes an unresolved class.
 JVM modified UTF-8 class constants are handled correctly. Repeatable
 `--data-root` inputs use normal
 data-pack precedence and add bounded recipe counts, sample IDs, fields,
 top-level array sizes, NeoForge conditions, and override provenance to the
 audit. Their ordered content digests participate in cache identity. Legacy
-format 7 remains readable for explicit migration, but current-only commands
-reject it.
+formats 7 and 8 remain readable for explicit migration, but current-only
+commands reject them. Format 9 stores independent hierarchy evidence so audit
+validation cannot demote a structurally classified recipe to a lower-priority
+name bucket. Direct `extends`/`implements` parents in the public declaration are
+also cross-checked without treating generic type bounds as direct ancestry.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
-explicitly rescan the exact format-7 artifact; identity or SHA drift fails.
+explicitly rescan the exact format-7 or format-8 artifact; identity or SHA drift
+fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
 decisions only when class identity, public signature, class-owned risk evidence,
@@ -153,8 +158,7 @@ family declares a reviewed runtime `registration_id` distinct from its audit
 family key. The `single_item_to_item` template requires the canonical
 `recipe.input`/`recipe.output` selectors and exact amount expressions;
 `registry_block_method` requires an explicit block ID separate from its station
-item. `conformance`
-emits the shared real transaction assertion harness with separate happy,
+item. `conformance` requires every family batch to be at least 2 and emits the shared real transaction assertion harness with separate happy,
 catalyst/tool/remainder, and multi-output deltas while the integration supplies
 scenarios. `resource-scaffold` emits API-only
 custom-kind/container/block/renderer and operation-based snapshot tests and

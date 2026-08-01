@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 8
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7})
+SCAN_CACHE_VERSION = 9
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -439,6 +439,7 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
             "inner_class_entry": False,
             "inner_name": None,
             "enclosing_method": False,
+            "source_file": None,
         }
     if offset + 8 > len(payload):
         raise ValueError(f"truncated class declaration: {entry_name}")
@@ -518,6 +519,7 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
     inner_class_entry = False
     inner_name = None
     enclosing_method = False
+    source_file = None
     for _ in range(attribute_count):
         if offset + 6 > len(payload):
             raise ValueError(f"truncated class attribute: {entry_name}")
@@ -535,6 +537,16 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
                     f"invalid EnclosingMethod attribute: {entry_name}"
                 )
             enclosing_method = True
+        elif attribute_name == "SourceFile":
+            if length != 2:
+                raise ValueError(f"invalid SourceFile attribute: {entry_name}")
+            source_file = resolve_utf8(int.from_bytes(attribute, "big"))
+            if (
+                not source_file.endswith(".java")
+                or "/" in source_file
+                or "\\" in source_file
+            ):
+                raise ValueError(f"invalid SourceFile attribute: {entry_name}")
         elif attribute_name == "InnerClasses":
             if length < 2:
                 raise ValueError(f"invalid InnerClasses attribute: {entry_name}")
@@ -568,6 +580,7 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
         "inner_class_entry": inner_class_entry,
         "inner_name": inner_name,
         "enclosing_method": enclosing_method,
+        "source_file": source_file,
     }
 
 
@@ -682,7 +695,6 @@ KNOWN_ANCESTRY_ROOTS = frozenset({
     RECIPE_SERIALIZER_INTERFACE,
     BLOCK_ENTITY_CLASS,
 })
-KNOWN_ANCESTRY_PREFIXES = ("java.", "javax.", "jdk.", "sun.")
 _JDK_MODULE_CLASSES = None
 
 
@@ -778,7 +790,6 @@ def _require_resolved_ancestry(
         if (
             class_name in resolved
             or class_name in KNOWN_ANCESTRY_ROOTS
-            or class_name.startswith(KNOWN_ANCESTRY_PREFIXES)
         ):
             return
         if class_name in visiting:
@@ -1009,7 +1020,25 @@ def _run_javap(
     return stdout.strip()
 
 
-def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
+def _candidate_source_suffix(
+    class_name: str,
+    metadata: dict | None,
+) -> str:
+    if metadata is not None and "source_file" in metadata:
+        source_file = metadata["source_file"]
+        if source_file is not None:
+            package, _, _ = class_name.rpartition(".")
+            return (
+                f"{package.replace('.', '/')}/{source_file}"
+                if package
+                else source_file
+            )
+        if not metadata.get("inner_class_entry"):
+            return class_name.replace(".", "/") + ".java"
+    return class_name.split("$", 1)[0].replace(".", "/") + ".java"
+
+
+def _source_evidence(source: Path | None, candidate_suffixes: set[str]) -> dict:
     if source is None:
         return {"revision": None, "files": []}
     source = source.resolve()
@@ -1097,10 +1126,6 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
         raise ValueError(
             f"source checkout exceeds {MAX_SOURCE_FILES} Java files: {source}"
         )
-    source_suffixes = {
-        name.split("$", 1)[0].replace(".", "/") + ".java"
-        for name in candidate_names
-    }
     files = []
     for path in java_files:
         relative = path.relative_to(source).as_posix()
@@ -1109,7 +1134,7 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
             and not path.is_symlink()
             and any(
                 relative == suffix or relative.endswith("/" + suffix)
-                for suffix in source_suffixes
+                for suffix in candidate_suffixes
             )
         ):
             files.append(relative)
@@ -1126,7 +1151,7 @@ def _source_evidence(source: Path | None, candidate_names: set[str]) -> dict:
             + (result.stderr.strip() or result.stdout.strip())
         )
     revision = result.stdout.strip()
-    if candidate_names and not files:
+    if candidate_suffixes and not files:
         raise ValueError("source checkout has no candidate matches")
     return {"revision": revision, "files": files}
 
@@ -1415,6 +1440,94 @@ def _validate_classification(class_name: str, bucket: str, value: dict, location
     raise ValueError(f"{location} has invalid classification method")
 
 
+def _direct_hierarchy_bucket(
+    class_name: str,
+    public_signature: str,
+) -> str | None:
+    declaration = public_signature.split("{", 1)[0]
+    class_match = re.search(
+        rf"\b(?:class|interface|enum|record)\s+{re.escape(class_name)}"
+        r"(?=[\s<({]|$)",
+        declaration,
+    )
+    if class_match is None:
+        return None
+    suffix = declaration[class_match.end():]
+    flattened = []
+    generic_depth = 0
+    for character in suffix:
+        if character == "<":
+            generic_depth += 1
+        elif character == ">" and generic_depth:
+            generic_depth -= 1
+        elif generic_depth == 0:
+            flattened.append(character)
+    parent_types = {
+        match.group(1)
+        for match in re.finditer(
+            r"(?:\bextends\b|\bimplements\b|,)\s*"
+            r"([A-Za-z_$][A-Za-z0-9_$.]*)",
+            "".join(flattened),
+        )
+    }
+    return next(
+        (
+            target_bucket
+            for target, target_bucket in (
+                (RECIPE_INTERFACE, "recipe_classes"),
+                (RECIPE_SERIALIZER_INTERFACE, "recipe_serializers"),
+                (RECIPE_TYPE_INTERFACE, "recipe_types"),
+                (BLOCK_ENTITY_CLASS, "block_entity_classes"),
+            )
+            if target in parent_types
+        ),
+        None,
+    )
+
+
+def _validate_hierarchy_priority(
+    class_name: str,
+    bucket: str,
+    classification: dict,
+    hierarchy: dict | None,
+    public_signature: str,
+    location: str,
+):
+    direct_bucket = _direct_hierarchy_bucket(class_name, public_signature)
+    if hierarchy is None:
+        if classification["method"] == "class_hierarchy":
+            raise ValueError(f"{location} candidate bucket mismatch")
+        if direct_bucket is not None and direct_bucket != bucket:
+            raise ValueError(f"{location} candidate bucket mismatch")
+        return
+    if not isinstance(hierarchy, dict):
+        raise ValueError(f"{location} hierarchy must be null or a classification")
+    evidence = hierarchy.get("evidence")
+    target_buckets = {
+        RECIPE_INTERFACE: "recipe_classes",
+        RECIPE_TYPE_INTERFACE: "recipe_types",
+        RECIPE_SERIALIZER_INTERFACE: "recipe_serializers",
+        BLOCK_ENTITY_CLASS: "block_entity_classes",
+    }
+    hierarchy_bucket = (
+        target_buckets.get(evidence[-1])
+        if isinstance(evidence, list) and evidence
+        else None
+    )
+    if hierarchy_bucket is None:
+        raise ValueError(f"{location} candidate bucket mismatch")
+    if direct_bucket is not None and direct_bucket != hierarchy_bucket:
+        raise ValueError(f"{location} candidate bucket mismatch")
+    _validate_classification(
+        class_name,
+        hierarchy_bucket,
+        hierarchy,
+        location,
+    )
+    if bucket != hierarchy_bucket or classification != hierarchy:
+        raise ValueError(f"{location} candidate bucket mismatch")
+
+
 def _validate_recipe_data(value: dict, artifact_sha: str):
     if not isinstance(value, dict) or set(value) != {
         "format",
@@ -1615,7 +1728,7 @@ def _validate_audit(audit: dict):
     ):
         raise ValueError("audit artifact size must be a positive integer")
 
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format != 7:
         classpath = audit.get("ancestry_classpath")
         if not isinstance(classpath, list):
             raise ValueError("audit is missing ancestry_classpath")
@@ -1669,9 +1782,9 @@ def _validate_audit(audit: dict):
     if len(set(files)) != len(files):
         raise ValueError("audit source files must not contain duplicates")
 
-    if scanner_format == SCAN_CACHE_VERSION and "recipe_data" not in audit:
+    if scanner_format != 7 and "recipe_data" not in audit:
         raise ValueError("audit is missing recipe_data")
-    if scanner_format in LEGACY_SCAN_CACHE_VERSIONS and "recipe_data" in audit:
+    if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
     candidates = audit["candidates"]
@@ -1680,7 +1793,7 @@ def _validate_audit(audit: dict):
         "resource_apis",
         "station_classes",
     }
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format != 7:
         candidate_buckets = set(CURRENT_CANDIDATE_BUCKETS)
     if not isinstance(candidates, dict) or set(candidates) != candidate_buckets:
         raise ValueError(
@@ -1694,8 +1807,10 @@ def _validate_audit(audit: dict):
         for index, record in enumerate(records):
             location = f"audit candidates {bucket} {index}"
             record_keys = {"class", "public_signature"}
-            if scanner_format == SCAN_CACHE_VERSION:
+            if scanner_format != 7:
                 record_keys.add("classification")
+            if scanner_format == SCAN_CACHE_VERSION:
+                record_keys.add("hierarchy")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
                     f"{location} has invalid candidate fields"
@@ -1706,13 +1821,27 @@ def _validate_audit(audit: dict):
                 class_name,
             ):
                 raise ValueError(f"{location} has invalid class")
-            if scanner_format == SCAN_CACHE_VERSION:
+            if (
+                not isinstance(record["public_signature"], str)
+                or not record["public_signature"].strip()
+            ):
+                raise ValueError(f"{location} has empty public_signature")
+            if scanner_format != 7:
                 _validate_classification(
                     class_name,
                     bucket,
                     record["classification"],
                     location,
                 )
+                if scanner_format == SCAN_CACHE_VERSION:
+                    _validate_hierarchy_priority(
+                        class_name,
+                        bucket,
+                        record["classification"],
+                        record["hierarchy"],
+                        record["public_signature"],
+                        location,
+                    )
             else:
                 expected_bucket = _candidate_bucket(class_name)
                 if expected_bucket != bucket:
@@ -1723,13 +1852,8 @@ def _validate_audit(audit: dict):
             if class_name in seen_classes:
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
-            if (
-                not isinstance(record["public_signature"], str)
-                or not record["public_signature"].strip()
-            ):
-                raise ValueError(f"{location} has empty public_signature")
 
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format != 7:
         _validate_recipe_data(audit["recipe_data"], artifact["sha256"])
 
     recipe_classes = {
@@ -1904,6 +2028,11 @@ def scan_jar(
                     "class": class_name,
                     "public_signature": signature.strip(),
                     "classification": classification,
+                    "hierarchy": (
+                        copy.deepcopy(classification)
+                        if classification["method"] == "class_hierarchy"
+                        else None
+                    ),
                 }
             )
             if bucket == "recipe_classes":
@@ -1949,7 +2078,13 @@ def scan_jar(
         "ancestry_classpath": ancestry_classpath,
         "source": _source_evidence(
             source_path,
-            {candidate["class"] for candidate in all_candidates},
+            {
+                _candidate_source_suffix(
+                    candidate["class"],
+                    target_metadata.get(candidate["class"]),
+                )
+                for candidate in all_candidates
+            },
         ),
         "candidates": classified,
         "recipe_data": recipe_data,
@@ -5741,6 +5876,8 @@ def _validate_conformance_plan(plan: dict, contract: dict):
         if not _is_java_member(provider["factory_member"]):
             raise ValueError(f"{location} has invalid provider factory_member")
         _validate_positive_long(family["batch"], f"{location} batch")
+        if family["batch"] < 2:
+            raise ValueError(f"{location} batch must be at least 2")
         deltas = family["expected_deltas"]
         if not isinstance(deltas, dict) or set(deltas) != {
             "happy",

@@ -50,7 +50,7 @@ an explicit RED boundary. Dynamic rate accessors are reviewed as integral and
 converted exactly; families sharing a descriptor must share the same reviewed
 definition. Each generated family also declares its runtime `registration_id`;
 the audit family key is evidence identity and is not assumed to be a registry
-path. `conformance` generates repeated snapshot/delta/rollback assertions
+path. `conformance` requires a batch of at least 2 and generates repeated snapshot/delta/rollback assertions
 around addon-supplied operations rather than trusting booleans returned by the
 addon. `resource-scaffold` generates only public-API custom-resource boundaries,
 sample-keyed persistence/transfer assertions, and rejects built-in Item, Fluid,
@@ -69,11 +69,17 @@ recipe-class inventory and effective recipe-data/data-pack digest. Runtime
 probe JSON must pass `validate-probe` with the same audit and optional plan;
 schema validation alone does not prove those cross-file identities.
 
-The scanner reads the selected JDK 21 module inventory for platform ancestry
-and uses class-file `InnerClasses`/`EnclosingMethod` metadata for nested classes.
-Thus a named class whose identifier contains `$` remains auditable while local,
-anonymous, and synthetic classes stay excluded. Scan and audit validation use
-the same bucket priority, so moving a candidate record cannot bypass review.
+The scanner accepts platform ancestry only when the class is present in the
+selected JDK 21 module inventory; package prefixes such as `javax.*` do not
+bypass missing classpath evidence. It uses class-file `SourceFile`,
+`InnerClasses`, and `EnclosingMethod` metadata for source ownership and nested
+classes. Thus a top-level or named class whose identifier contains `$` remains
+auditable while local, anonymous, and synthetic classes stay excluded. Format 9
+stores hierarchy evidence independently, and scan/audit validation requires it
+to outrank name buckets, so moving a structural recipe into a station record
+cannot bypass review. Direct public `extends`/`implements` declarations provide
+a second bucket cross-check; generic type bounds do not count as direct
+ancestry. Legacy formats 7 and 8 must be rescanned with `migrate-audit`.
 
 Complete contracts use lowercase resource locations for recipe types, station
 descriptor IDs, and station variant items. Generated rate bindings are
