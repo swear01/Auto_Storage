@@ -61,7 +61,7 @@ displayName="Sample Machines"
             archive.writestr(info, payload)
 
 
-def write_structural_fixture_jar(root: Path, path: Path):
+def write_structural_fixture_jar(root: Path, path: Path, *, risky: bool = False):
     source = root / "structural-source"
     classes = root / "structural-classes"
     sources = {
@@ -79,7 +79,13 @@ def write_structural_fixture_jar(root: Path, path: Path):
         ),
         "samplemod/process/OreProcess.java": (
             "package samplemod.process; "
-            "public final class OreProcess extends BaseProcess {}\n"
+            "public final class OreProcess extends BaseProcess { "
+            + (
+                "private int roll() { return new java.util.Random().nextInt(); } "
+                if risky
+                else ""
+            )
+            + "}\n"
         ),
         "samplemod/client/RecipeWidget.java": (
             "package samplemod.client; public final class RecipeWidget {}\n"
@@ -566,6 +572,47 @@ class CompatKitAuditTests(unittest.TestCase):
                 "net.minecraft.world.item.crafting.Recipe",
             ],
             audit["candidates"]["recipe_classes"][1]["classification"]["evidence"],
+        )
+
+    def test_scan_records_only_reachable_ancestry_artifacts(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        unrelated_jar = self.root / "unrelated.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+        with zipfile.ZipFile(unrelated_jar, "w") as archive:
+            archive.writestr("unrelated.txt", "not a class")
+        classpath_digest = hashlib.sha256(classpath_jar.read_bytes()).hexdigest()
+        unrelated_digest = hashlib.sha256(unrelated_jar.read_bytes()).hexdigest()
+
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[classpath_jar, unrelated_jar],
+            classpath_dependencies=[
+                f"{classpath_digest}=com.example:external-support:1.0.0",
+                f"{unrelated_digest}=com.example:unrelated:1.0.0",
+            ],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+        )
+
+        self.assertEqual(
+            [{
+                "sha256": hashlib.sha256(classpath_jar.read_bytes()).hexdigest(),
+                "size": classpath_jar.stat().st_size,
+            }],
+            audit["ancestry_classpath"],
+        )
+        self.assertEqual(
+            [{
+                "dependency": "com.example:external-support:1.0.0",
+                "sha256": classpath_digest,
+                "size": classpath_jar.stat().st_size,
+            }],
+            audit["ancestry_dependencies"],
         )
 
     def test_scan_does_not_skip_unresolved_client_viewer_ancestry(self):
@@ -1404,7 +1451,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(15, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(16, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -3108,6 +3155,73 @@ displayName="Sample Machines"
                 source_artifact=self.jar,
             )
 
+    def test_exact_artifact_recomputes_private_bytecode_risks(self):
+        risky_jar = self.root / "samplemod-risky.jar"
+        write_structural_fixture_jar(self.root, risky_jar, risky=True)
+        audit = self.compat_kit.scan_jar(risky_jar)
+        self.assertTrue(audit["risks"])
+        forged = copy.deepcopy(audit)
+        forged["risks"] = []
+        self.compat_kit._validate_audit(forged)
+
+        with self.assertRaisesRegex(ValueError, "artifact risk evidence"):
+            self.compat_kit._validate_audit_target_artifact(forged, risky_jar)
+
+    def test_exact_artifact_derives_nested_source_class(self):
+        nested_jar = self.root / "samplemod-nested-exact.jar"
+        write_nested_recipe_fixture_jar(self.root, nested_jar)
+        audit = self.compat_kit.scan_jar(nested_jar)
+        candidate = audit["candidates"]["recipe_classes"][0]
+        self.assertEqual(
+            "samplemod.recipe.Container.PolishingRecipe",
+            candidate["source_class"],
+        )
+        candidate["source_class"] = candidate["class"]
+        self.compat_kit._validate_audit(audit)
+
+        with self.assertRaisesRegex(ValueError, "artifact source_class"):
+            self.compat_kit._validate_audit_target_artifact(audit, nested_jar)
+
+    def test_scan_persists_resolvable_ancestry_dependencies_for_generation(self):
+        target_jar = self.root / "external-target-dependency.jar"
+        classpath_jar = self.root / "external-support-dependency.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+        digest = hashlib.sha256(classpath_jar.read_bytes()).hexdigest()
+        dependency = "com.example:external-support:1.0.0"
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[classpath_jar],
+            classpath_dependencies=[f"{digest}={dependency}"],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+        )
+
+        self.assertEqual(
+            [{
+                "dependency": dependency,
+                "sha256": digest,
+                "size": classpath_jar.stat().st_size,
+            }],
+            audit["ancestry_dependencies"],
+        )
+        build = self.compat_kit._addon_files(
+            self.addon_contract(),
+            audit,
+        )["build.gradle"].decode()
+        self.assertIn(
+            f'compatKitAncestryArtifacts("{dependency}") '
+            "{ transitive = false }",
+            build,
+        )
+        self.assertIn(
+            f'compileOnly("{dependency}") {{ transitive = false }}',
+            build,
+        )
+
     def test_complete_validation_requires_exact_ancestry_artifacts(self):
         target_jar = self.root / "external-target.jar"
         classpath_jar = self.root / "external-support.jar"
@@ -3518,6 +3632,28 @@ displayName="Sample Machines"
                 family["station"]["category"] = category
                 family["station"]["variants"][0]["rate"]["numerator"] = numerator
                 with self.assertRaisesRegex(ValueError, expected):
+                    self.compat_kit.validate_contract(
+                        contract,
+                        require_complete=True,
+                        source_audit=audit,
+                        source_artifact=self.jar,
+                    )
+
+    def test_contract_station_rates_fit_signed_long(self):
+        audit = self.source_audit()
+        for field in ("numerator", "denominator"):
+            with self.subTest(field=field):
+                contract = self.accepted_contract()
+                family = next(
+                    family
+                    for family in contract["families"]
+                    if family["status"] == "accepted"
+                )
+                family["station"]["variants"][0]["rate"][field] = 2**63
+                with self.assertRaisesRegex(
+                    ValueError,
+                    f"rate {field} must not exceed 9223372036854775807",
+                ):
                     self.compat_kit.validate_contract(
                         contract,
                         require_complete=True,
@@ -5698,6 +5834,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     @staticmethod
     def downgrade_audit_artifact(audit: dict):
+        audit.pop("ancestry_dependencies", None)
         audit["artifact"] = {
             "sha256": audit["artifact"]["sha256"],
             "size": audit["artifact"]["size"],
@@ -6008,7 +6145,18 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn('layout.buildDirectory.file("compat-kit/target.jar")', build)
         self.assertIn('layout.buildDirectory.dir("compat-kit/ancestry")', build)
         self.assertIn("configurations.additionalRuntimeClasspath", build)
+        self.assertIn('tasks.named("createMinecraftArtifacts")', build)
         self.assertNotIn("sourceSets.main.compileClasspath", build)
+        properties = (output / "gradle.properties").read_text()
+        self.assertIn("parchment_minecraft_version=1.21.1", properties)
+        self.assertIn("parchment_mappings_version=2024.11.17", properties)
+        self.assertIn(
+            "parchment {\n"
+            "        mappingsVersion = parchment_mappings_version\n"
+            "        minecraftVersion = parchment_minecraft_version\n"
+            "    }",
+            build,
+        )
         self.assertIn(contract["source_audit_sha256"], build)
         self.assertIn(
             'url = uri("https://repo.example.com/releases")',
@@ -6050,9 +6198,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             audit,
         )["build.gradle"].decode()
         expected_digest = hashlib.sha256(
-            self.compat_kit.canonical_json(
-                audit["ancestry_classpath"]
-            ).encode()
+            self.compat_kit.canonical_json({
+                "artifacts": audit["ancestry_classpath"],
+                "dependencies": audit["ancestry_dependencies"],
+            }).encode()
         ).hexdigest()
 
         self.assertIn(
@@ -6688,6 +6837,11 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         }
         self.assertEqual({"minimum": 1}, station_rate_rules["process"])
         self.assertEqual({"const": 0}, station_rate_rules["instant"])
+        rate_properties = station_schema["properties"]["variants"]["items"][
+            "properties"
+        ]["rate"]["properties"]
+        self.assertEqual(9223372036854775807, rate_properties["numerator"]["maximum"])
+        self.assertEqual(9223372036854775807, rate_properties["denominator"]["maximum"])
         family_status_rules = {
             rule["if"]["properties"]["status"]["const"]: rule["then"][
                 "properties"
@@ -6741,6 +6895,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             audit_schema["properties"]["candidates"]["additionalProperties"]
         )
         self.assertIn("structural_class_graph", audit_schema["required"])
+        self.assertIn("ancestry_dependencies", audit_schema["required"])
         self.assertEqual(
             {
                 "class_count",
@@ -7134,7 +7289,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             },
             audited_recipe_classes,
         )
-        self.assertEqual(92, len(audit["ancestry_classpath"]))
+        self.assertEqual(13, len(audit["ancestry_classpath"]))
+        self.assertEqual(6, len(audit["ancestry_dependencies"]))
         self.assertEqual(
             audited_recipe_classes,
             {family["class"] for family in contract["families"]},

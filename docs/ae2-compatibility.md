@@ -26,26 +26,31 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-The committed audit uses Scanner format v15 and binds all 92 unique jars needed
-to resolve AE2's complete non-JDK compile ancestry, including its optional
-viewer APIs. Every candidate retains its binary identity, source-level Java
-type, and structural classification independently from the matching top-level
-hierarchy inventory. The audit additionally preserves a compact direct
-class-file graph for all 1,689 target classes and their reachable ancestry; the
-artifact binds the exact target-class count and graph digest, and validation
-reconstructs the twelve candidate classifications from that complete graph
-rather than trusting the candidate list or two derived hierarchy copies. An artifact/classpath-bound
+The committed audit uses Scanner format v16. A complete 92-jar compile
+classpath is supplied to scanning, but the audit retains only the 13 artifacts
+actually reachable from AE2's structural class graph. Six non-transitive compile
+APIs also carry exact resolvable coordinates: WTHIT API, The One Probe, GuideME,
+REI, EMI API, and Jade. Generated addons emit those coordinates automatically
+instead of requiring an unverifiable Gradle edit. Every candidate retains its
+binary identity, source-level Java type, and structural classification
+independently from the matching top-level hierarchy inventory. The audit
+preserves a compact direct class-file graph for all 1,689 target classes plus
+reachable ancestry (1,890 records total); the artifact binds the exact
+target-class count and graph digest, and validation reconstructs the twelve
+candidate classifications from that complete graph rather than trusting the
+candidate list or two derived hierarchy copies. An artifact/classpath-bound
 structural-candidate digest still binds the structural class inventory. Scanner
-v15's executable JDK-21 verification and inherited
-implementation-risk pass produce byte-identical evidence for this exact
-artifact/classpath set. Class-file hierarchy inspection finds exactly twelve concrete
-`Recipe` implementations:
+v16's executable JDK-21 verification and inherited implementation-risk pass
+produce deterministic evidence for this exact artifact/classpath set.
+Class-file hierarchy inspection finds exactly twelve concrete `Recipe`
+implementations:
 
 Complete generation and verification also reopen the exact AE2 19.2.17 jar,
-check its committed SHA/size, and rebuild all 1,689 sorted target class metadata
-records plus the complete 556-recipe target-jar inventory. The JSON
-count/digest alone cannot authorize a reduced graph or rewritten recipe
-evidence.
+check its committed SHA/size, rebuild all 1,689 sorted target class metadata
+records plus the complete 556-recipe target-jar inventory, derive nested source
+names from exact `InnerClasses` metadata, and recompute private-bytecode risk
+evidence from the exact target/ancestry jars. The JSON count/digest alone cannot
+authorize a reduced graph, rewritten source type, or deleted risk.
 
 - `appeng.recipes.entropy.EntropyRecipe`;
 - `appeng.recipes.game.AddItemUpgradeRecipe`;
@@ -70,7 +75,7 @@ accepted and the other eleven classes are rejected.
 
 The reviewed runtime list carries GuideME through exact Modrinth artifact
 `rduAfwb7`; bundled and generated-addon fixtures reproduce AE2's required
-runtime instead of relying on a hand-edited descriptor.
+runtime instead of relying on a hand-edited descriptor. The reviewed repository list also contains the exact upstream Maven endpoints needed to resolve the six persisted compile-only coordinates.
 
 `compat/generation/ae2.json` is bound to the canonical contract digest. It
 generates `Ae2GeneratedCompat.java`, which owns direct typed descriptor and

@@ -991,8 +991,8 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("emi_version_range=[1.1.24,2)", properties)
         self.assertNotRegex(
             build,
-            r'dev\.emi:emi-neoforge|maven\.terraformersmc\.com',
-            "all EMI compile and runtime artifacts must come from Modrinth",
+            r'(?m)^\s*(?:compileOnly|runtimeOnly|fusionRuntimeRuntimeOnly|emiRuntime)\s+"dev\.emi:emi-neoforge:',
+            "all Auto Storage EMI compile and runtime artifacts must come from Modrinth",
         )
         self.assertIn("clientSmokePatchouli", build)
         self.assertIn("clientSmokeFusion", build)
@@ -1010,6 +1010,33 @@ class StaticRegressionTests(unittest.TestCase):
 \s*side="CLIENT"''',
         )
         self.assertNotIn('versionRange="[1.1.24]"', metadata)
+
+    def test_ci_stages_exact_ae2_optional_ancestry_before_script_tests(self):
+        build = self.read_required("build.gradle")
+        workflow = self.read_required(".github/workflows/ci.yml")
+
+        self.assertIn("ae2CompatAuditAncestry", build)
+        for dependency in (
+            "mcp.mobius.waila:wthit-api:neo-12.1.2",
+            "mcjty.theoneprobe:theoneprobe:1.20.4_neo-11.0.1-2",
+            "org.appliedenergistics:guideme:21.1.1",
+            "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.729",
+            "dev.emi:emi-neoforge:1.1.22+1.21.1:api",
+            "curse.maven:jade-324717:5427817",
+        ):
+            self.assertIn(dependency, build)
+        for unreachable_dependency in (
+            "me.shedaniel.cloth:cloth-config-neoforge:15.0.127",
+            "dev.architectury:architectury-neoforge:13.0.1",
+            "org.jetbrains:annotations:24.1.0",
+        ):
+            self.assertNotIn(unreachable_dependency, build)
+        self.assertIn('tasks.register("stageAe2CompatAuditAncestry")', build)
+        self.assertIn("audit.ancestry_dependencies.collectEntries", build)
+        stage = "./gradlew stageAe2CompatAuditAncestry"
+        tests = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts"
+        self.assertIn(stage, workflow)
+        self.assertLess(workflow.index(stage), workflow.index(tests))
 
     def test_build_script_uses_gradle_10_safe_repository_url_assignment(self):
         build = self.read_required("build.gradle")

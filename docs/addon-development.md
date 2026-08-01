@@ -67,9 +67,11 @@ Supply the target's complete non-JDK compile ancestry through repeatable
 `--classpath` for `scan` and every complete consumer; every unresolved external superclass or interface fails
 instead of silently hiding a structural recipe family, including classes whose
 names look like client viewers, builders, or datagen helpers. The audit records
-only exact classpath artifact SHA/size evidence, and each ancestry jar is
-rehashed after all inherited-bytecode inspection so an in-flight replacement
-fails. A structurally discovered recipe inspects implementation classes along
+only structurally reachable classpath artifact SHA/size evidence. For each
+reachable compile API that is not transitively available from the target, pass
+`--classpath-dependency <sha256>=group:name:version[:classifier]`; the audit
+persists that exact coordinate and each ancestry jar is rehashed after all
+inherited-bytecode inspection so an in-flight replacement fails. A structurally discovered recipe inspects implementation classes along
 its target/classpath hierarchy and attributes compact inherited risks to the
 concrete recipe. Completed
 contracts separately bind the
@@ -85,13 +87,20 @@ entire recorded recipe inventory to match those jar bytes. Generated addon CI
 uses `stageCompatKitTargetArtifact` plus `stageCompatKitAncestryArtifacts`, then
 passes `build/compat-kit/target.jar` to `verify --jar` and every staged ancestry
 jar through repeatable `--classpath`.
-The generated ancestry task searches the target's transitive dependency graph
-and NeoForge's additional runtime classpath, then stages only SHA/size matches
-from the audit. If the target publishes optional compile APIs non-transitively,
-the task fails with their missing SHA values; add those reviewed coordinates to
-`compatKitAncestryArtifacts` rather than weakening or removing the exact gate.
-Complete consumers reopen every supplied ancestry jar and reconstruct the
-reachable external metadata graph, so editing classpath-owned graph records
+The generated ancestry task searches the target's transitive dependency graph,
+NeoForge's additional runtime classpath, and the ModDev
+`createMinecraftArtifacts` outputs, then stages only SHA/size matches from the
+audit. The scaffold uses the same pinned Parchment mapping baseline as Auto
+Storage so the generated NeoForge/Minecraft development artifact is
+byte-identical to the one inspected by the scanner. Scanner-format-16
+`ancestry_dependencies` are emitted
+automatically as non-transitive `compileOnly` and
+`compatKitAncestryArtifacts` declarations; hand-editing generated Gradle is not
+a supported workaround, and an unresolved hash remains a hard failure.
+Complete consumers reopen every supplied ancestry jar, reconstruct the
+reachable external metadata graph, derive named nested source types from exact
+`InnerClasses` metadata, and recompute bounded private-bytecode risk evidence,
+so editing classpath-owned graph records
 cannot remove structural recipe candidates while preserving a self-consistent
 JSON audit. If any reconstructed parent is neither present in those exact jars
 nor a selected JDK 21 class or known root, validation fails for missing
@@ -117,7 +126,7 @@ bypass review. Generated Java uses
 the source-level name for nested classes and preserves legal top-level `$`
 identifiers. Direct public
 `extends`/`implements` declarations provide a second bucket cross-check;
-generic type bounds do not count as direct ancestry. Legacy formats 7 through 14
+generic type bounds do not count as direct ancestry. Legacy formats 7 through 15
 must be rescanned with `migrate-audit`. A class name that normalizes to no
 alphanumeric family ID uses deterministic `class_<binary-name-hex>` evidence.
 Explicit `--data-root` evidence binds all bounded tag JSON and bounded
@@ -193,7 +202,8 @@ representative CI fixture versions.
 Compat Kit contracts list every target Maven repository as an explicit HTTPS
 URL. The generated addon copies those repositories into `build.gradle`; it
 does not infer Modrinth, Curse Maven, or an upstream repository from a
-dependency coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
+dependency coordinate. The same reviewed list must resolve any persisted
+`ancestry_dependencies` coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
 because it can change which repository serves a coordinate. Reviewed
 repositories are emitted before defaults and restricted to target/runtime
 groups. Explicit runtime groups cannot fall back to Maven Central even when
@@ -414,7 +424,7 @@ external machine and wait for world state.
 
 The reviewed contract must preserve every scanner risk attached to each recipe
 family. Process station variants use positive work rates; Instant variants use
-zero rates. Accepted families keep an explicit `costs` list, which may be empty
+zero rates. Every rational numerator and denominator must fit signed Java `long`. Accepted families keep an explicit `costs` list, which may be empty
 only for a reviewed runtime family that is genuinely free. A bundled contract's
 GameTest task must be the task derived from its fixture name; another fixture
 with the same expected count cannot provide its runtime evidence. Compat Kit

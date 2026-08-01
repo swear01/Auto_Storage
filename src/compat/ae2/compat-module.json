@@ -11,7 +11,12 @@
   "fixture": "ae2Fixture",
   "id": "auto_storage:ae2",
   "repositories": [
-    "https://api.modrinth.com/maven"
+    "https://api.modrinth.com/maven",
+    "https://maven.shedaniel.me/",
+    "https://maven2.bai.lol",
+    "https://maven.terraformersmc.com/",
+    "https://www.cursemaven.com",
+    "https://maven.k-4u.nl/"
   ],
   "requires": [
     "ae2"

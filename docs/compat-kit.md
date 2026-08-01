@@ -92,6 +92,7 @@ tools/compat-kit/compat-kit scan \
   --jar build/compat-kit/artifacts/target.jar \
   --source build/compat-kit/sources/target \
   --classpath build/compat-kit/classpath/dependency.jar \
+  --classpath-dependency <dependency-jar-sha256>=group:name:version[:classifier] \
   --data-root build/compat-kit/datapacks/target-override \
   --output compat/audits/target/1.2.3.json
 ```
@@ -109,8 +110,13 @@ ancestry is then resolved from that JDK's `jmods` inventory, not from a
 package-prefix allowlist, so platform classes
 such as `org.xml.sax.*` are recognized without weakening external dependency
 checks. At most 128 jars and 200,000 classes are read,
-duplicate/conflicting classes fail, and the sorted artifact SHA/size set is
-persisted in the audit and cache identity. Every classpath jar is rehashed
+duplicate/conflicting classes fail, and only artifacts reachable from the exact
+structural graph remain in the sorted audit SHA/size set. Repeatable
+`--classpath-dependency <sha256>=group:name:version[:classifier]` binds a
+supplied jar to the exact Gradle coordinate needed when the target does not
+transitively publish that compile API; mappings for unreachable jars are
+dropped with those jars. Artifact and coordinate sets both enter the audit and
+cache identity. Every classpath jar is rehashed
 after inspection just like the target; replacing a dependency during a scan
 fails instead of mixing two artifacts in one audit. Class-name constants are
 decoded as JVM modified UTF-8, so
@@ -162,18 +168,20 @@ the selected JDK 21 installation, release version, module-file identity, and
 the resolved `javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `15`; formats `7` through `14` remain readable
+current scanner format is `16`; formats `7` through `15` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit plus the exact target jar; only explicit migration paths
 may consume legacy audit formats. Each complete consumer rehashes that jar and
-independently rebuilds its complete sorted class/metadata inventory. A
-self-consistent edited audit count or digest cannot replace those artifact
-bytes. The target jar's recipe source count is independently rebuilt on every
+independently rebuilds its complete sorted class/metadata inventory, derives
+named nested `source_class` values from exact `InnerClasses` metadata, and
+recomputes bounded private-bytecode risk evidence from the target/ancestry
+jars. A self-consistent edited audit count, source name, risk list, or digest
+cannot replace those artifact bytes. The target jar's recipe source count is independently rebuilt on every
 complete use; when `target_jar` is the audit's only recipe-data source, the
 entire effective recipe inventory, serializer summary, overrides, and digest
 must match the reopened jar exactly.
-Format 15 retains each candidate's structural classification and source-level
+Format 16 retains each candidate's structural classification and source-level
 Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
 artifact/classpath-bound `structural_candidate_inventory_sha256`. Its
 `structural_class_graph` starts from every target class and includes reachable
@@ -225,7 +233,7 @@ a lower-priority bucket cannot hide it from contract review. Every risk-evidence
 owner must also be one of the audited recipe
 candidates, so risk cannot be detached from the class under review.
 
-Legacy format-7 and format-8 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
+Legacy format-7 through format-15 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
 
 ```bash
 tools/compat-kit/compat-kit migrate-audit \
@@ -343,7 +351,8 @@ An accepted family records:
    and every required check mapped to `{task, source, marker}` evidence.
 
 Process station variants require a positive rational rate. Instant station
-variants require a zero numerator. These rules match runtime
+variants require a zero numerator. Every numerator and denominator must fit a
+signed Java `long`. These rules match runtime
 `MachineDescriptor` validation and fail before scaffolding.
 
 For a bundled module, `verification.game_test_task` is not arbitrary evidence:
@@ -670,11 +679,16 @@ Generated addon builds expose `stageCompatKitTargetArtifact` and
 audited ancestry jar. Generated and published example workflows pass the target
 through `verify --jar` and every staged ancestry jar through repeatable
 `--classpath`; copying only `compat/audit.json` is never sufficient.
-The generated staging task searches the target's transitive dependencies and
-NeoForge additional runtime classpath and copies only exact SHA/size matches.
-Optional compile APIs that the target does not publish transitively must be
-added as reviewed `compatKitAncestryArtifacts` dependencies; unresolved hashes
-remain a hard failure. Complete consumers independently rebuild the reachable
+The generated staging task searches the target's transitive dependencies,
+NeoForge additional runtime classpath, and ModDev
+`createMinecraftArtifacts` outputs and copies only exact SHA/size matches. The
+scaffold pins Auto Storage's Parchment baseline so the generated
+NeoForge/Minecraft development artifact has the same bytes as the scanner's
+artifact.
+Scanner-format-16 audits persist exact coordinates for reachable compile APIs
+under `ancestry_dependencies`; generated addons emit each as non-transitive
+`compileOnly` and `compatKitAncestryArtifacts` dependencies. No post-scaffold
+edit is needed or allowed, and unresolved hashes remain a hard failure. Complete consumers independently rebuild the reachable
 external class graph from the supplied jars, so classpath-owned metadata cannot
 be edited out of an otherwise self-consistent audit. Every unmatched parent
 must resolve to the selected JDK 21 modules or a known root; otherwise complete
@@ -787,10 +801,10 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-15 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-16 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
-Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
-finds twelve
+Structural classification retains 13 reachable ancestry jars and six exact
+non-transitive compile coordinates, then finds twelve
 actual `Recipe` implementations while inventorying 556 effective recipe JSONs
 across 18 serializer groups. The accepted slice remains only
 `InscriberRecipe`:

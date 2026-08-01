@@ -155,6 +155,7 @@ jobs:
       - name: Run script tests
         run: |
           set -o pipefail
+          ./gradlew stageAe2CompatAuditAncestry --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-audit-ancestry.log
           PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts 2>&1 | tee build/ci-logs/python-unittest.log
 
       - name: Check datagen drift

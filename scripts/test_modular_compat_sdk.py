@@ -92,9 +92,11 @@ class ModularCompatSdkTests(unittest.TestCase):
             "compatModules.collectMany { it.repositories }.unique(false).each",
             build,
         )
-        self.assertNotRegex(
+        self.assertNotIn(
+            "repositories: descriptorRepositories.collect {\n"
+            "                it.toString()\n"
+            "            }.sort()",
             build,
-            r"(?s)repositories:\s*descriptorRepositories\.collect\s*\{.*?\}\.sort\(\)",
         )
         self.assertIn("url = uri(repository)", build)
         self.assertIn("verifyCompatArtifact", build)

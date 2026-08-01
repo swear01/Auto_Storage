@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 15
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13, 14})
+SCAN_CACHE_VERSION = 16
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13, 14, 15})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -41,6 +41,7 @@ MAX_RECIPE_SAMPLES_PER_SERIALIZER = 16
 MAX_RUNTIME_PROBE_RECIPES = 50_000
 MAX_RUNTIME_PROBE_VALUES = 4_096
 GRADLE_INTEGER_MAX = 2_147_483_647
+JAVA_LONG_MAX = 9_223_372_036_854_775_807
 TOOL_VERSION = "0.3.0"
 SOURCE_EVIDENCE_PATH_PATTERN = (
     r"^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\.\.?(?:/|$))(?!.*//)(?!.*\\)"
@@ -188,6 +189,7 @@ AUDIT_TOP_KEYS = {
     "target",
     "artifact",
     "ancestry_classpath",
+    "ancestry_dependencies",
     "source",
     "structural_class_graph",
     "structural_hierarchy",
@@ -2040,6 +2042,86 @@ def _build_structural_class_graph(
     return graph
 
 
+def _reachable_ancestry_classpath(
+    ancestry_classpath: list[dict],
+    structural_class_graph: list[dict],
+    target_artifact_sha256: str,
+) -> list[dict]:
+    reachable_sha256 = {
+        record["owner_sha256"]
+        for record in structural_class_graph
+        if record["owner_sha256"] != target_artifact_sha256
+    }
+    return [
+        record
+        for record in ancestry_classpath
+        if record["sha256"] in reachable_sha256
+    ]
+
+
+def _normalize_ancestry_dependencies(
+    values,
+    ancestry_classpath: list[dict],
+) -> list[dict]:
+    identities_by_sha256 = {
+        record["sha256"]: record for record in ancestry_classpath
+    }
+    normalized = []
+    seen_sha256 = set()
+    seen_dependencies = set()
+    for index, value in enumerate(values or ()):
+        if not isinstance(value, str) or "=" not in value:
+            raise ValueError(
+                f"classpath dependency {index} must use sha256=group:name:version[:classifier]"
+            )
+        sha256, dependency = value.split("=", 1)
+        if not re.fullmatch(r"[0-9a-f]{64}", sha256):
+            raise ValueError(f"classpath dependency {index} has invalid SHA")
+        _validate_resolvable_dependency_coordinate(
+            dependency,
+            f"classpath dependency {index}",
+        )
+        identity = identities_by_sha256.get(sha256)
+        if identity is None:
+            raise ValueError(
+                f"classpath dependency {index} does not match a supplied classpath artifact"
+            )
+        if sha256 in seen_sha256:
+            raise ValueError("classpath dependencies repeat an artifact")
+        if dependency in seen_dependencies:
+            raise ValueError("classpath dependencies repeat a coordinate")
+        seen_sha256.add(sha256)
+        seen_dependencies.add(dependency)
+        normalized.append({
+            "dependency": dependency,
+            "sha256": sha256,
+            "size": identity["size"],
+        })
+    return sorted(
+        normalized,
+        key=lambda record: (
+            record["dependency"],
+            record["sha256"],
+            record["size"],
+        ),
+    )
+
+
+def _reachable_ancestry_dependencies(
+    ancestry_dependencies: list[dict],
+    ancestry_classpath: list[dict],
+) -> list[dict]:
+    reachable = {
+        (record["sha256"], record["size"])
+        for record in ancestry_classpath
+    }
+    return [
+        record
+        for record in ancestry_dependencies
+        if (record["sha256"], record["size"]) in reachable
+    ]
+
+
 def _validate_structural_class_graph(
     value: object,
     artifact_sha256: str,
@@ -2287,7 +2369,7 @@ def _validate_audit(audit: dict):
     structural_inventory_sha256 = audit.get(
         "structural_candidate_inventory_sha256"
     )
-    if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
+    if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
         if not isinstance(structural_inventory_sha256, str) or not re.fullmatch(
             r"[0-9a-f]{64}",
             structural_inventory_sha256,
@@ -2322,7 +2404,7 @@ def _validate_audit(audit: dict):
 
     artifact = audit["artifact"]
     artifact_keys = {"sha256", "size"}
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {15, SCAN_CACHE_VERSION}:
         artifact_keys.update({"class_count", "class_inventory_sha256"})
     if not isinstance(artifact, dict) or set(artifact) != artifact_keys:
         raise ValueError(
@@ -2339,7 +2421,7 @@ def _validate_audit(audit: dict):
         or artifact["size"] <= 0
     ):
         raise ValueError("audit artifact size must be a positive integer")
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {15, SCAN_CACHE_VERSION}:
         if (
             isinstance(artifact["class_count"], bool)
             or not isinstance(artifact["class_count"], int)
@@ -2394,7 +2476,74 @@ def _validate_audit(audit: dict):
     elif "ancestry_classpath" in audit:
         raise ValueError("legacy audit must not contain ancestry_classpath")
 
-    if scanner_format in {14, SCAN_CACHE_VERSION}:
+    if scanner_format == SCAN_CACHE_VERSION:
+        ancestry_dependencies = audit.get("ancestry_dependencies")
+        if not isinstance(ancestry_dependencies, list):
+            raise ValueError("audit is missing ancestry_dependencies")
+        if len(ancestry_dependencies) > MAX_CLASSPATH_JARS:
+            raise ValueError("audit ancestry_dependencies has too many artifacts")
+        classpath_identities = {
+            (record["sha256"], record["size"])
+            for record in audit["ancestry_classpath"]
+        }
+        normalized_dependencies = []
+        for index, record in enumerate(ancestry_dependencies):
+            location = f"audit ancestry_dependencies {index}"
+            if not isinstance(record, dict) or set(record) != {
+                "dependency",
+                "sha256",
+                "size",
+            }:
+                raise ValueError(
+                    f"{location} requires dependency, sha256, and size"
+                )
+            _validate_resolvable_dependency_coordinate(
+                record["dependency"],
+                f"{location} dependency",
+            )
+            if not isinstance(record["sha256"], str) or not re.fullmatch(
+                r"[0-9a-f]{64}", record["sha256"]
+            ):
+                raise ValueError(f"{location} has invalid SHA")
+            if (
+                isinstance(record["size"], bool)
+                or not isinstance(record["size"], int)
+                or record["size"] <= 0
+            ):
+                raise ValueError(f"{location} has invalid size")
+            if (record["sha256"], record["size"]) not in classpath_identities:
+                raise ValueError(
+                    f"{location} does not match ancestry_classpath"
+                )
+            normalized_dependencies.append(record)
+        if ancestry_dependencies != sorted(
+            normalized_dependencies,
+            key=lambda record: (
+                record["dependency"],
+                record["sha256"],
+                record["size"],
+            ),
+        ):
+            raise ValueError(
+                "audit ancestry_dependencies must be sorted"
+            )
+        if len({
+            (record["dependency"], record["sha256"], record["size"])
+            for record in ancestry_dependencies
+        }) != len(ancestry_dependencies) or len({
+            record["dependency"] for record in ancestry_dependencies
+        }) != len(ancestry_dependencies) or len({
+            record["sha256"] for record in ancestry_dependencies
+        }) != len(ancestry_dependencies):
+            raise ValueError(
+                "audit ancestry_dependencies must be unique"
+            )
+    elif "ancestry_dependencies" in audit:
+        raise ValueError(
+            "legacy audit must not contain ancestry_dependencies"
+        )
+
+    if scanner_format in {14, 15, SCAN_CACHE_VERSION}:
         if "structural_class_graph" not in audit:
             raise ValueError("audit is missing structural_class_graph")
         structural_class_graph = audit["structural_class_graph"]
@@ -2436,7 +2585,7 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
-    if scanner_format in {10, 11, 12, 13, 14, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
         if "structural_hierarchy" not in audit:
             raise ValueError("audit is missing structural_hierarchy")
         structural_hierarchy = _validate_structural_hierarchy(
@@ -2472,9 +2621,9 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format in {9, 11, 12, 13, 14, SCAN_CACHE_VERSION}:
+            if scanner_format in {9, 11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
                 record_keys.add("hierarchy")
-            if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
+            if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
                 record_keys.add("source_class")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
@@ -2491,7 +2640,7 @@ def _validate_audit(audit: dict):
                 or not record["public_signature"].strip()
             ):
                 raise ValueError(f"{location} has empty public_signature")
-            if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
+            if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
                 _validate_candidate_source_class(
                     class_name,
                     record["source_class"],
@@ -2522,7 +2671,7 @@ def _validate_audit(audit: dict):
                         record["public_signature"],
                         location,
                     )
-                elif scanner_format in {11, 12, 13, 14, SCAN_CACHE_VERSION}:
+                elif scanner_format in {11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
                     candidate_hierarchy = record["hierarchy"]
                     persisted_hierarchy = structural_hierarchy.get(class_name)
                     if candidate_hierarchy != persisted_hierarchy:
@@ -2556,7 +2705,7 @@ def _validate_audit(audit: dict):
             "audit with classified candidates requires at least one source file"
         )
 
-    if scanner_format in {10, 11, 12, 13, 14, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
             set(structural_hierarchy) - seen_classes
         )
@@ -2565,7 +2714,7 @@ def _validate_audit(audit: dict):
                 "audit structural_hierarchy owner is not an audited candidate: "
                 + ", ".join(unknown_structural_classes)
             )
-    if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
+    if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
         expected_structural_inventory_sha256 = (
             _structural_candidate_inventory_sha256(
                 artifact,
@@ -2581,7 +2730,7 @@ def _validate_audit(audit: dict):
                 "audit structural candidate inventory does not match "
                 "structural hierarchy"
             )
-    if scanner_format in {14, SCAN_CACHE_VERSION}:
+    if scanner_format in {14, 15, SCAN_CACHE_VERSION}:
         structural_graph_metadata, structural_graph_target_classes = (
             _validate_structural_class_graph(
                 structural_class_graph,
@@ -2589,7 +2738,7 @@ def _validate_audit(audit: dict):
                 audit["ancestry_classpath"],
             )
         )
-        if scanner_format == SCAN_CACHE_VERSION:
+        if scanner_format in {15, SCAN_CACHE_VERSION}:
             target_records = [
                 {
                     "class": class_name,
@@ -2676,7 +2825,11 @@ def _validate_audit_ancestry_graph(
     audit: dict,
     source_classpath,
     target_metadata_by_class: dict[str, dict | None],
-) -> None:
+) -> tuple[
+    dict[str, dict | None],
+    dict[str, Path],
+    list[tuple[Path, str, int]],
+]:
     expected_artifacts = audit["ancestry_classpath"]
     raw_paths = list(source_classpath or ())
     if expected_artifacts and not raw_paths:
@@ -2788,6 +2941,7 @@ def _validate_audit_ancestry_graph(
             size,
             "ancestry artifact",
         )
+    return metadata_by_class, class_locations, artifact_checks
 
 
 def _validate_audit_target_artifact(
@@ -2856,11 +3010,99 @@ def _validate_audit_target_artifact(
         raise ValueError(
             "target artifact class inventory does not match source audit"
         )
-    _validate_audit_ancestry_graph(
-        audit,
-        source_classpath,
-        target_metadata_by_class,
+    metadata_by_class, class_locations, ancestry_artifact_checks = (
+        _validate_audit_ancestry_graph(
+            audit,
+            source_classpath,
+            target_metadata_by_class,
+        )
     )
+    for records in audit["candidates"].values():
+        for candidate in records:
+            expected_source_class = _candidate_source_class(
+                candidate["class"],
+                target_metadata_by_class,
+            )
+            if candidate["source_class"] != expected_source_class:
+                raise ValueError(
+                    "target artifact source_class does not match source audit: "
+                    + candidate["class"]
+                )
+
+    inspectable_recipe_classes = {
+        candidate["class"]
+        for candidate in audit["candidates"]["recipe_classes"]
+        if target_metadata_by_class.get(candidate["class"]) is not None
+    }
+    if inspectable_recipe_classes:
+        javap, _, _, _, jdk_identity = _jdk_21_toolchain()
+        collected_risks: dict[str, set[str]] = {}
+        risk_matches_by_class: dict[str, tuple[tuple[str, str], ...]] = {}
+        for candidate in audit["candidates"]["recipe_classes"]:
+            class_name = candidate["class"]
+            if class_name not in inspectable_recipe_classes:
+                continue
+            for implementation_class in _implementation_ancestry(
+                class_name,
+                metadata_by_class,
+            ):
+                owner = (
+                    jar
+                    if implementation_class in target_metadata_by_class
+                    else class_locations.get(implementation_class)
+                )
+                if owner is None:
+                    raise ValueError(
+                        "target artifact risk owner is unresolved: "
+                        + implementation_class
+                    )
+                matches = risk_matches_by_class.get(implementation_class)
+                if matches is None:
+                    private_bytecode = _run_javap(
+                        owner,
+                        implementation_class,
+                        "-c",
+                        "-p",
+                        output_limit=MAX_PRIVATE_BYTECODE_BYTES,
+                        output_label="private bytecode",
+                        javap=javap,
+                    )
+                    matches = _risk_matches(private_bytecode)
+                    risk_matches_by_class[implementation_class] = matches
+                _record_risk_evidence(
+                    collected_risks,
+                    class_name,
+                    matches,
+                    implementation_class,
+                )
+        actual_risks = _finalize_risk_evidence(collected_risks)
+        expected_risks = []
+        for risk in audit["risks"]:
+            evidence = [
+                item
+                for item in risk["evidence"]
+                if item.split("#", 1)[0].split(":", 1)[0]
+                in inspectable_recipe_classes
+            ]
+            if evidence:
+                expected_risks.append({**risk, "evidence": evidence})
+        if actual_risks != expected_risks:
+            raise ValueError(
+                "target artifact risk evidence does not match source audit"
+            )
+        _require_unchanged_artifact(
+            javap,
+            jdk_identity["javap"]["sha256"],
+            jdk_identity["javap"]["size"],
+            "javap executable",
+        )
+    for path, digest, size in ancestry_artifact_checks:
+        _require_unchanged_artifact(
+            path,
+            digest,
+            size,
+            "ancestry artifact",
+        )
     recipe_data = audit["recipe_data"]
     if (
         recipe_data["sources"][0] != target_recipe_data["sources"][0]
@@ -2885,6 +3127,7 @@ def scan_jar(
     *,
     source=None,
     classpath=None,
+    classpath_dependencies=None,
     cache_dir=None,
     signature_reader=None,
     risk_reader=None,
@@ -2901,12 +3144,19 @@ def scan_jar(
     artifact_sha = _sha256_file(jar)
     (
         external_metadata,
-        ancestry_classpath,
+        supplied_ancestry_classpath,
         classpath_class_locations,
         classpath_artifact_checks,
     ) = _classpath_metadata(classpath)
+    supplied_ancestry_dependencies = _normalize_ancestry_dependencies(
+        classpath_dependencies,
+        supplied_ancestry_classpath,
+    )
     classpath_digest = hashlib.sha256(
-        canonical_json(ancestry_classpath).encode("utf-8")
+        canonical_json({
+            "artifacts": supplied_ancestry_classpath,
+            "dependencies": supplied_ancestry_dependencies,
+        }).encode("utf-8")
     ).hexdigest()
     javap, _, _, _, jdk_identity = _jdk_21_toolchain()
     cache_path = None
@@ -2936,7 +3186,7 @@ def scan_jar(
                 hashlib.sha256(
                     (base_cache_identity + ":" + classpath_digest).encode("utf-8")
                 ).hexdigest()
-                if ancestry_classpath
+                if supplied_ancestry_classpath
                 else base_cache_identity
             )
             cache_path = (
@@ -2967,8 +3217,21 @@ def scan_jar(
                     raise ValueError(f"cached audit SHA mismatch: {cache_path}")
                 if cached["recipe_data"]["digest"] != recipe_data["digest"]:
                     raise ValueError(f"cached recipe-data digest mismatch: {cache_path}")
-                if cached["ancestry_classpath"] != ancestry_classpath:
+                if cached["ancestry_classpath"] != _reachable_ancestry_classpath(
+                    supplied_ancestry_classpath,
+                    cached["structural_class_graph"],
+                    artifact_sha,
+                ):
                     raise ValueError(f"cached ancestry classpath mismatch: {cache_path}")
+                if cached["ancestry_dependencies"] != (
+                    _reachable_ancestry_dependencies(
+                        supplied_ancestry_dependencies,
+                        cached["ancestry_classpath"],
+                    )
+                ):
+                    raise ValueError(
+                        f"cached ancestry dependencies mismatch: {cache_path}"
+                    )
                 for path, digest, size in classpath_artifact_checks:
                     _require_unchanged_artifact(
                         path,
@@ -3063,6 +3326,15 @@ def scan_jar(
             artifact_sha,
             classpath_class_locations,
             classpath_artifact_checks,
+        )
+        ancestry_classpath = _reachable_ancestry_classpath(
+            supplied_ancestry_classpath,
+            structural_class_graph,
+            artifact_sha,
+        )
+        ancestry_dependencies = _reachable_ancestry_dependencies(
+            supplied_ancestry_dependencies,
+            ancestry_classpath,
         )
         collected_risks: dict[str, set[str]] = {}
         risk_matches_by_class: dict[str, tuple[tuple[str, str], ...]] = {}
@@ -3182,6 +3454,7 @@ def scan_jar(
         "target": target,
         "artifact": artifact,
         "ancestry_classpath": ancestry_classpath,
+        "ancestry_dependencies": ancestry_dependencies,
         "source": _source_evidence(
             source_path,
             {
@@ -3236,6 +3509,7 @@ def migrate_audit(
     *,
     source=None,
     classpath=None,
+    classpath_dependencies=None,
     cache_dir=None,
     signature_reader=None,
     risk_reader=None,
@@ -3249,6 +3523,7 @@ def migrate_audit(
         jar,
         source=source,
         classpath=classpath,
+        classpath_dependencies=classpath_dependencies,
         cache_dir=cache_dir,
         signature_reader=signature_reader,
         risk_reader=risk_reader,
@@ -3556,6 +3831,16 @@ def _validate_dependency_coordinate(value, location: str):
         )
 
 
+def _validate_resolvable_dependency_coordinate(value, location: str):
+    _validate_nonempty_string(value, location)
+    if re.search(r"[\x00-\x1f\x7f]", value):
+        raise ValueError(f"{location} must not contain control characters")
+    if not re.fullmatch(r"[^:\s]+:[^:\s]+:[^:\s]+(?::[^:\s]+)?", value):
+        raise ValueError(
+            f"{location} must use group:name:version[:classifier] Maven coordinates"
+        )
+
+
 def _validate_amount(value, location: str):
     if isinstance(value, bool) or not isinstance(value, (int, str)):
         raise ValueError(f"{location} amount must be a positive integer or expression")
@@ -3663,12 +3948,20 @@ def _validate_station(value, location: str):
             or numerator < 0
         ):
             raise ValueError(f"{variant_location} rate numerator must be non-negative")
+        if numerator > JAVA_LONG_MAX:
+            raise ValueError(
+                f"{variant_location} rate numerator must not exceed {JAVA_LONG_MAX}"
+            )
         if (
             isinstance(denominator, bool)
             or not isinstance(denominator, int)
             or denominator <= 0
         ):
             raise ValueError(f"{variant_location} rate denominator must be positive")
+        if denominator > JAVA_LONG_MAX:
+            raise ValueError(
+                f"{variant_location} rate denominator must not exceed {JAVA_LONG_MAX}"
+            )
         if value["category"] == "process" and numerator == 0:
             raise ValueError(
                 f"{location} process station variants require positive rates"
@@ -4266,6 +4559,8 @@ org.gradle.caching=true
 
 minecraft_version=1.21.1
 neo_version=21.1.229
+parchment_minecraft_version=1.21.1
+parchment_mappings_version=2024.11.17
 auto_storage_version={TOOL_VERSION}
 patchouli_version=1.21.1-93-NEOFORGE
 mod_id={addon_id}
@@ -4277,6 +4572,10 @@ mod_group_id={package}
         for dependency in [
             target["dependency"],
             *target["runtime_dependencies"],
+            *(
+                record["dependency"]
+                for record in source_audit["ancestry_dependencies"]
+            ),
         ]
     })
     reviewed_group_includes = "".join(
@@ -4316,6 +4615,13 @@ mod_group_id={package}
         "{ transitive = false }\n"
         for dependency in target["runtime_dependencies"]
     )
+    ancestry_dependency_lines = "".join(
+        f"    compileOnly({_groovy_string(record['dependency'])}) "
+        "{ transitive = false }\n"
+        f"    compatKitAncestryArtifacts({_groovy_string(record['dependency'])}) "
+        "{ transitive = false }\n"
+        for record in source_audit["ancestry_dependencies"]
+    )
     target_dependency = _groovy_string(target["dependency"])
     ancestry_records = "\n".join(
         "    [sha256: "
@@ -4324,7 +4630,10 @@ mod_group_id={package}
         for record in source_audit["ancestry_classpath"]
     )
     ancestry_identity = hashlib.sha256(
-        canonical_json(source_audit["ancestry_classpath"]).encode()
+        canonical_json({
+            "artifacts": source_audit["ancestry_classpath"],
+            "dependencies": source_audit["ancestry_dependencies"],
+        }).encode()
     ).hexdigest()
     build = f"""plugins {{
     id 'java-library'
@@ -4374,6 +4683,11 @@ repositories {{
 neoForge {{
     version = neo_version
 
+    parchment {{
+        mappingsVersion = parchment_mappings_version
+        minecraftVersion = parchment_minecraft_version
+    }}
+
     mods {{
         {addon_id} {{
             sourceSet sourceSets.main
@@ -4395,6 +4709,7 @@ dependencies {{
     compileOnly({target_dependency}) {{ transitive = false }}
     runtimeOnly({target_dependency}) {{ transitive = false }}
 {runtime_dependency_lines}
+{ancestry_dependency_lines}
     compatKitTargetArtifact({target_dependency})
     compatKitAncestryArtifacts({target_dependency})
 }}
@@ -4463,7 +4778,8 @@ def stageCompatKitTargetArtifact = tasks.register("stageCompatKitTargetArtifact"
 def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArtifacts") {{
     inputs.files(
             configurations.compatKitAncestryArtifacts,
-            configurations.additionalRuntimeClasspath)
+            configurations.additionalRuntimeClasspath,
+            tasks.named("createMinecraftArtifacts"))
     inputs.property(
             "expectedArtifacts",
             {_groovy_string(ancestry_identity)})
@@ -8617,6 +8933,7 @@ def _build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--jar", required=True)
     scan.add_argument("--source")
     scan.add_argument("--classpath", action="append", default=[])
+    scan.add_argument("--classpath-dependency", action="append", default=[])
     scan.add_argument("--data-root", action="append", default=[])
     scan.add_argument("--output", required=True)
     scan.add_argument("--cache", default="build/compat-kit/cache")
@@ -8635,6 +8952,7 @@ def _build_parser() -> argparse.ArgumentParser:
     migrate.add_argument("--jar", required=True)
     migrate.add_argument("--source")
     migrate.add_argument("--classpath", action="append", default=[])
+    migrate.add_argument("--classpath-dependency", action="append", default=[])
     migrate.add_argument("--data-root", action="append", default=[])
     migrate.add_argument("--output", required=True)
     migrate.add_argument("--cache", default="build/compat-kit/cache")
@@ -8691,6 +9009,7 @@ def _build_parser() -> argparse.ArgumentParser:
     delta.add_argument("new_target")
     delta.add_argument("--source")
     delta.add_argument("--classpath", action="append", default=[])
+    delta.add_argument("--classpath-dependency", action="append", default=[])
     delta.add_argument("--data-root", action="append", default=[])
     delta.add_argument("--output", required=True)
     delta.add_argument("--cache", default="build/compat-kit/cache")
@@ -8729,6 +9048,7 @@ def main(argv=None) -> int:
                 args.jar,
                 source=args.source,
                 classpath=args.classpath,
+                classpath_dependencies=args.classpath_dependency,
                 cache_dir=args.cache,
                 data_roots=args.data_root,
             )
@@ -8749,6 +9069,7 @@ def main(argv=None) -> int:
                     args.jar,
                     source=args.source,
                     classpath=args.classpath,
+                    classpath_dependencies=args.classpath_dependency,
                     cache_dir=args.cache,
                     data_roots=args.data_root,
                 ),
@@ -8820,6 +9141,7 @@ def main(argv=None) -> int:
                     new_path,
                     source=args.source,
                     classpath=args.classpath,
+                    classpath_dependencies=args.classpath_dependency,
                     cache_dir=args.cache,
                     data_roots=args.data_root,
                 )

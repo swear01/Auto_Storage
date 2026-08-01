@@ -11,6 +11,7 @@
     "target",
     "artifact",
     "ancestry_classpath",
+    "ancestry_dependencies",
     "source",
     "structural_class_graph",
     "structural_hierarchy",
@@ -151,7 +152,7 @@
       "const": 1
     },
     "scanner_format": {
-      "const": 15
+      "const": 16
     },
     "kind": {
       "const": "auto_storage_compat_audit"
@@ -197,6 +198,24 @@
         "additionalProperties": false,
         "required": ["sha256", "size"],
         "properties": {
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "size": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "ancestry_dependencies": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["dependency", "sha256", "size"],
+        "properties": {
+          "dependency": {
+            "type": "string",
+            "pattern": "^[^:\\s]+:[^:\\s]+:[^:\\s]+(?::[^:\\s]+)?$"
+          },
           "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "size": {"type": "integer", "minimum": 1}
         }

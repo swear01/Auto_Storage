@@ -21,6 +21,7 @@ python3 --version
   --jar target.jar \
   --source target-source \
   --classpath compile-dependency.jar \
+  --classpath-dependency <dependency-jar-sha256>=group:name:version[:classifier] \
   --data-root optional-datapack \
   --output audit.json
 ./compat-kit propose audit.json --output proposals.json
@@ -40,9 +41,10 @@ relative to the supplied module. Supplying a non-Git source directory fails;
 omit `--source` when no versioned source is available. Current-format cache
 entries and committed audits carry the scanner format and are fully
 schema-validated before reuse. Complete consumers reject legacy scanner
-formats and require the exact target jar so they can rehash it and rebuild the
-complete sorted class/metadata inventory; only explicit migration commands may
-read formats 7 through 14. Complete consumers also rebuild the target jar's
+formats and require the exact target jar so they can rehash it, rebuild the
+complete sorted class/metadata inventory, derive nested source names from exact
+class metadata, and recompute private-bytecode risk evidence; only explicit migration commands may
+read formats 7 through 15. Complete consumers also rebuild the target jar's
 recipe source count; when it is the only recipe-data source, the complete
 effective inventory, serializer summary, overrides, and digest must match the
 reopened jar.
@@ -61,12 +63,16 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 15 structurally classifies concrete `Recipe` and
+Scanner format 16 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
-letting a structurally hidden recipe disappear. Exact classpath artifact
-identities enter the audit/cache, and every ancestry jar is rehashed after
+letting a structurally hidden recipe disappear. Only structurally reachable
+classpath artifacts remain in the audit. Repeatable
+`--classpath-dependency <sha256>=group:name:version[:classifier]` records exact
+coordinates for reachable compile APIs that the target does not publish
+transitively; artifact and coordinate identities enter the audit/cache. Every
+ancestry jar is rehashed after
 inspection to reject in-flight replacement. A binary class may be owned by
 only one ancestry jar; duplicate definitions fail even when their hierarchy
 metadata matches. Platform ancestry requires exact
@@ -91,8 +97,8 @@ the same bytes are used for validation, parsing, and hashing. Ordered roots
 are inventoried again after source evidence is built and immediately before a
 scan can cache or return, so a persistent in-flight change fails instead of
 producing mixed evidence. Legacy
-formats 7 through 14 remain readable for explicit migration, but current-only
-commands reject them. Format 15 stores each candidate's binary and source-level
+formats 7 through 15 remain readable for explicit migration, but current-only
+commands reject them. Format 16 stores each candidate's binary and source-level
 Java names, structural classification, a separate sorted top-level
 `structural_hierarchy` inventory, and an artifact/classpath-bound structural
 candidate digest. Its `structural_class_graph` starts from every target class
@@ -109,7 +115,7 @@ interface implementation, rather than only the first path from a concrete
 recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
-explicitly rescan an exact format-7 through format-14 artifact;
+explicitly rescan an exact format-7 through format-15 artifact;
 identity or SHA drift fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
@@ -148,7 +154,7 @@ changed override invalidates a previously complete contract even when the
 target jar and recipe classes are unchanged.
 Each candidate must remain in the bucket computed by the scanner; moving a
 recipe record into a station/resource list is rejected.
-Process station rates must be positive and Instant station rates must be zero.
+Process station rates must be positive and Instant station rates must be zero; every numerator and denominator must fit signed Java `long`.
 Accepted families keep the `costs` field, but may use an empty list when the
 reviewed runtime family is genuinely free.
 
@@ -276,9 +282,14 @@ dependencies are non-transitive, and evidence task names are never remapped.
 every audited ancestry jar. Generated and example GitHub Actions workflows pass
 both the target to `verify --jar` and every staged ancestry jar through
 repeatable `--classpath` rather than trusting only the committed audit.
-The ancestry task searches the target's transitive dependencies and NeoForge
-additional runtime classpath, stages only exact SHA/size matches, and reports
-missing hashes. Add non-transitively published optional compile APIs as reviewed
+Scanner-format-16 `ancestry_dependencies` make the generated build emit exact
+non-transitive `compileOnly` and `compatKitAncestryArtifacts` coordinates. The
+ancestry task searches the target's transitive dependencies, NeoForge
+additional runtime classpath, and ModDev `createMinecraftArtifacts` outputs,
+stages only exact SHA/size matches, and reports missing hashes. The generated
+project pins the same Parchment baseline as Auto Storage so its transformed
+NeoForge/Minecraft development artifact reproduces the scanner input exactly.
+Add non-transitively published optional compile APIs as reviewed
 `compatKitAncestryArtifacts` dependencies; never remove the exact gate. Complete
 consumers reopen those jars and independently rebuild the reachable external
 class graph before accepting the audit. A parent missing from those exact jars
