@@ -41,9 +41,11 @@ public final class CompatibilityMatrixGameTests {
             return;
         }
         if (AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getPath().startsWith("productivemetalworks_"))
+                        .anyMatch(id -> id.getNamespace().equals("productivemetalworks")
+                                || id.getPath().startsWith("productivemetalworks_"))
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getPath().startsWith("productivemetalworks_"))) {
+                        .anyMatch(id -> id.getNamespace().equals("productivemetalworks")
+                                || id.getPath().startsWith("productivemetalworks_"))) {
             helper.fail("Productive Metalworks fail-closed boundary changed");
             return;
         }

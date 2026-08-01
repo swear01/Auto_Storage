@@ -20,11 +20,16 @@ public final class ProductivemetalworksIntegrationGameTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void unsafe_foundry_contracts_are_not_registered(GameTestHelper helper) {
-        if (!ModList.get().isLoaded("productivemetalworks")
-                || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getPath().startsWith("productivemetalworks_"))
+        if (!ModList.get().isLoaded("productivemetalworks")) {
+            helper.fail("Productive Metalworks mod is not loaded");
+            return;
+        }
+        if (AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
+                        .anyMatch(id -> id.getNamespace().equals("productivemetalworks")
+                                || id.getPath().startsWith("productivemetalworks_"))
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getPath().startsWith("productivemetalworks_"))) {
+                        .anyMatch(id -> id.getNamespace().equals("productivemetalworks")
+                                || id.getPath().startsWith("productivemetalworks_"))) {
             helper.fail("Productive Metalworks unsafe foundry contract was registered");
             return;
         }
@@ -134,7 +139,7 @@ public final class ProductivemetalworksIntegrationGameTests {
             types.add(holder.value().getType());
         }
         if (types.size() != 4) {
-            helper.fail("Audited Productive Metalworks recipe type is empty");
+            helper.fail("Expected 4 unique audited Productive Metalworks recipe types, but found " + types.size());
             return;
         }
         for (var type : types) {

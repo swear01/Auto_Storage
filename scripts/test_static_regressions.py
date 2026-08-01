@@ -1731,6 +1731,44 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("Calcination", compatibility_doc)
         self.assertIn("Distillation", compatibility_doc)
         self.assertIn("Liquefaction", compatibility_doc)
+    def test_productivemetalworks_registry_checks_cover_namespace_and_path(self):
+        fixture = self.read_required(
+            "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/"
+            "productivemetalworks/ProductivemetalworksIntegrationGameTests.java"
+        )
+        matrix = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CompatibilityMatrixGameTests.java"
+        )
+
+        self.assertIn(
+            'helper.fail("Productive Metalworks mod is not loaded")',
+            fixture,
+        )
+        self.assertRegex(
+            fixture,
+            r'if \(types\.size\(\) != 4\) \{\s*'
+            r'helper\.fail\("Expected 4 unique audited Productive Metalworks '
+            r'recipe types, but found " \+ types\.size\(\)\);',
+        )
+        for source_name, source in (
+            ("fixture", fixture),
+            ("matrix", matrix),
+        ):
+            with self.subTest(source=source_name):
+                self.assertIn(
+                    'id.getNamespace().equals("productivemetalworks")',
+                    source,
+                )
+                self.assertIn(
+                    'id.getPath().startsWith("productivemetalworks_")',
+                    source,
+                )
+                self.assertRegex(
+                    source,
+                    r"id\.getNamespace\(\)\.equals\(\"productivemetalworks\"\)\s*"
+                    r"\|\|\s*id\.getPath\(\)\.startsWith\(\"productivemetalworks_\"\)",
+                )
 
     def test_pneumaticcraft_fixture_locks_unsafe_contracts_out(self):
         build = self.read_required("build.gradle")
