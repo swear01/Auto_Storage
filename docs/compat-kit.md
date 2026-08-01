@@ -113,8 +113,9 @@ the first layer and later supplied roots override earlier recipes by exact ID.
 Roots and recipe/tag files must be real, non-symlink paths. Every bounded
 `data/*/tags/**/*.json` resource and bounded `pack.mcmeta` enter each root
 digest without being counted as recipes; the file bound applies globally
-across ordered roots. Roots declaring a top-level data-pack `filter` fail
-because filter removal semantics are not modeled. The deterministic audit
+across ordered roots. Roots declaring top-level data-pack `filter` or
+`overlays` metadata fail because removal and overlay-directory activation are
+not modeled. The deterministic audit
 contains NeoForge identity, artifact SHA/size, source revision and exact source
 paths, structurally classified concrete recipe and serializer classes,
 recipe types, builders, datagen classes, client/viewer wrappers, block entities,
@@ -135,8 +136,8 @@ flags before the next class is
 read; platform-neutral concurrent pipe readers retain at most the configured
 limit plus one byte and terminate `javap` immediately on overflow, so neither
 one process nor all classes can bypass the memory bound. `RandomSource`,
-`ThreadLocalRandom`, and
-`RandomGenerator` are all randomness evidence. Without `--source`, scans are
+`ThreadLocalRandom`, `SplittableRandom`, `SecureRandom`, and `RandomGenerator`
+are all randomness evidence. Without `--source`, scans are
 cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
@@ -145,9 +146,9 @@ ancestry classpaths bind their exact artifact set. Cache metadata also records
 the selected JDK 21 installation, release version, and module-file identity.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `11`; formats `7`, `8`, `9`, and `10` remain readable
+current scanner format is `12`; formats `7`, `8`, `9`, `10`, and `11` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
-Format 11 retains each candidate's structural classification and a separate
+Format 12 retains each candidate's structural classification and a separate
 sorted top-level `structural_hierarchy` inventory, requires both copies to
 agree, and requires hierarchy to win before every name-term bucket. Removing
 only one indirect path therefore cannot demote that class without conflicting
@@ -695,7 +696,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-11 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-12 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
 finds twelve

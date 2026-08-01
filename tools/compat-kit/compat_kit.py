@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 11
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10})
+SCAN_CACHE_VERSION = 12
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -125,6 +125,16 @@ RISK_PATTERNS = (
         "randomness",
         re.compile(r"\bThreadLocalRandom\b"),
         "ThreadLocalRandom",
+    ),
+    (
+        "randomness",
+        re.compile(r"\bSplittableRandom\b"),
+        "SplittableRandom",
+    ),
+    (
+        "randomness",
+        re.compile(r"\bSecureRandom\b"),
+        "SecureRandom",
     ),
     (
         "randomness",
@@ -1364,6 +1374,10 @@ def _validated_pack_metadata(root: Path, source_id: str) -> Path | None:
         raise ValueError(
             f"recipe data pack filter is unsupported: {source_id}/pack.mcmeta"
         )
+    if "overlays" in metadata:
+        raise ValueError(
+            f"recipe data pack overlays are unsupported: {source_id}/pack.mcmeta"
+        )
     return path
 
 
@@ -2035,7 +2049,7 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
-    if scanner_format in {10, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, SCAN_CACHE_VERSION}:
         if "structural_hierarchy" not in audit:
             raise ValueError("audit is missing structural_hierarchy")
         structural_hierarchy = _validate_structural_hierarchy(
@@ -2070,7 +2084,7 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format in {9, SCAN_CACHE_VERSION}:
+            if scanner_format in {9, 11, SCAN_CACHE_VERSION}:
                 record_keys.add("hierarchy")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
@@ -2112,7 +2126,7 @@ def _validate_audit(audit: dict):
                         record["public_signature"],
                         location,
                     )
-                elif scanner_format == SCAN_CACHE_VERSION:
+                elif scanner_format in {11, SCAN_CACHE_VERSION}:
                     candidate_hierarchy = record["hierarchy"]
                     persisted_hierarchy = structural_hierarchy.get(class_name)
                     if candidate_hierarchy != persisted_hierarchy:
@@ -2136,7 +2150,7 @@ def _validate_audit(audit: dict):
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
 
-    if scanner_format in {10, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
             set(structural_hierarchy) - seen_classes
         )

@@ -47,7 +47,7 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 11 structurally classifies concrete `Recipe` and
+Scanner format 12 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
@@ -68,10 +68,11 @@ data-pack precedence and add bounded recipe counts, sample IDs, fields,
 top-level array sizes, NeoForge conditions, and override provenance to the
 audit. Their ordered content digests include every bounded tag JSON and bounded
 `pack.mcmeta` bytes; recipe counts remain recipe-only and the evidence-file
-bound applies globally across ordered roots. Roots declaring a top-level
-data-pack `filter` are rejected because the scanner does not model filter
-removal semantics. Legacy formats 7, 8, 9, and 10 remain readable for explicit
-migration, but current-only commands reject them. Format 11 stores each
+bound applies globally across ordered roots. Roots declaring top-level
+data-pack `filter` or `overlays` metadata are rejected because the scanner does
+not model filter removal or overlay-directory activation semantics. Legacy
+formats 7, 8, 9, 10, and 11 remain readable for explicit
+migration, but current-only commands reject them. Format 12 stores each
 candidate's structural classification and a separate sorted top-level
 `structural_hierarchy` inventory. Validation requires both records to agree,
 so removing only one indirect hierarchy path cannot demote a structurally
@@ -83,7 +84,7 @@ interface implementation, rather than only the first path from a concrete
 recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
-explicitly rescan the exact format-7, format-8, format-9, or format-10 artifact;
+explicitly rescan the exact format-7, format-8, format-9, format-10, or format-11 artifact;
 identity or SHA drift fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
@@ -127,7 +128,8 @@ attribute inherited findings to the concrete audited recipe. Each class is reduc
 immediately and the bytecode is never stored in the audit or retained until the
 next class. Platform-neutral concurrent pipe readers retain at most the
 configured limit plus one byte and terminate `javap` on overflow.
-`RandomSource`, `ThreadLocalRandom`, and `RandomGenerator` are recognized.
+`RandomSource`, `ThreadLocalRandom`, `SplittableRandom`, `SecureRandom`, and
+`RandomGenerator` are recognized.
 Named nested classes are included and mapped to their top-level source even
 when the Java identifier contains `$`; `InnerClasses`/`EnclosingMethod`
 metadata excludes anonymous/local classes. Class files carrying

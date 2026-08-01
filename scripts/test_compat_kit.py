@@ -724,6 +724,30 @@ class CompatKitAuditTests(unittest.TestCase):
                 data_roots=[data_root],
             )
 
+    def test_scan_rejects_unmodeled_datapack_overlays(self):
+        data_root = self.root / "overlay-data"
+        recipe = data_root / "data/samplemod/recipe/base.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({"type": "samplemod:crushing"}))
+        (data_root / "pack.mcmeta").write_text(json.dumps({
+            "pack": {"pack_format": 48, "description": "overlay"},
+            "overlays": {
+                "entries": [
+                    {
+                        "formats": 48,
+                        "directory": "overlay_48",
+                    }
+                ],
+            },
+        }))
+
+        with self.assertRaisesRegex(ValueError, "pack overlays"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                signature_reader=self.signatures,
+                data_roots=[data_root],
+            )
+
     def test_recipe_data_digest_binds_unfiltered_pack_metadata(self):
         data_root = self.root / "metadata-data"
         recipe = data_root / "data/samplemod/recipe/metadata.json"
@@ -1107,7 +1131,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(11, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(12, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -1116,7 +1140,9 @@ class CompatKitAuditTests(unittest.TestCase):
                         "java/util/concurrent/ThreadLocalRandom.current:"
                         "()Ljava/util/concurrent/ThreadLocalRandom;\n"
                         "java/util/random/RandomGenerator.getDefault:"
-                        "()Ljava/util/random/RandomGenerator;"
+                        "()Ljava/util/random/RandomGenerator;\n"
+                        "java/util/SplittableRandom.nextInt:(I)I\n"
+                        "java/security/SecureRandom.nextLong:()J"
                     ),
                 }
             ]
@@ -1128,6 +1154,8 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             [
                 "samplemod.recipe.ModernRandomRecipe: RandomGenerator",
+                "samplemod.recipe.ModernRandomRecipe: SecureRandom",
+                "samplemod.recipe.ModernRandomRecipe: SplittableRandom",
                 "samplemod.recipe.ModernRandomRecipe: ThreadLocalRandom",
             ],
             randomness["evidence"],
@@ -1723,6 +1751,17 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             self.compat_kit.SCAN_CACHE_VERSION,
             migrated_top_level["scanner_format"],
+        )
+        legacy_dual_hierarchy = copy.deepcopy(current)
+        legacy_dual_hierarchy["scanner_format"] = 11
+        migrated_dual_hierarchy = self.compat_kit.migrate_audit(
+            legacy_dual_hierarchy,
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        self.assertEqual(
+            self.compat_kit.SCAN_CACHE_VERSION,
+            migrated_dual_hierarchy["scanner_format"],
         )
         with self.assertRaisesRegex(ValueError, "legacy scanner-format audit"):
             self.compat_kit.migrate_audit(

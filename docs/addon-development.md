@@ -81,19 +81,20 @@ bypass missing classpath evidence. It uses class-file `SourceFile`,
 `InnerClasses`, and `EnclosingMethod` metadata for source ownership and nested
 classes. Thus a top-level or named class whose identifier contains `$` remains
 auditable while local, anonymous, and synthetic classes stay excluded. Format
-11 stores each candidate's structural classification and a separate sorted
+12 stores each candidate's structural classification and a separate sorted
 top-level `structural_hierarchy` inventory. Validation requires both records to
 agree and hierarchy to outrank name buckets, so removing only one indirect path
 and moving a structural recipe into a station record cannot bypass review. Direct public
 `extends`/`implements` declarations provide a second bucket cross-check;
-generic type bounds do not count as direct ancestry. Legacy formats 7, 8, 9,
-and 10
+generic type bounds do not count as direct ancestry. Legacy formats 7, 8, 9, 10,
+and 11
 must be rescanned with `migrate-audit`. A class name that normalizes to no
 alphanumeric family ID uses deterministic `class_<binary-name-hex>` evidence.
 Explicit `--data-root` evidence binds all bounded tag JSON and bounded
 `pack.mcmeta` bytes while keeping recipe counts recipe-only; a root with a
-top-level data-pack `filter` is rejected rather than misreporting filtered
-recipes as effective. Any ancestry artifact SHA/size change affects `diff` and
+top-level data-pack `filter` or `overlays` field is rejected rather than
+misreporting filtered or overlay recipes as effective. Any ancestry artifact
+SHA/size change affects `diff` and
 reopens migrated family decisions even when target public signatures are stable.
 Each ancestry class must have exactly one jar owner. The scanner rejects
 duplicate definitions even when their hierarchy declarations match, validates

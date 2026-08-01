@@ -26,7 +26,7 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-The committed audit uses Scanner format v11 and binds all 92 unique jars needed
+The committed audit uses Scanner format v12 and binds all 92 unique jars needed
 to resolve AE2's complete non-JDK compile ancestry, including its optional
 viewer APIs. Every candidate retains its structural classification independently
 from the matching top-level hierarchy inventory, and validation requires both
