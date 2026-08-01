@@ -173,11 +173,15 @@ only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit plus the exact target jar; only explicit migration paths
 may consume legacy audit formats. Each complete consumer rehashes that jar and
-independently rebuilds its complete sorted class/metadata inventory, derives
-named nested `source_class` values from exact `InnerClasses` metadata, and
-recomputes bounded private-bytecode risk evidence from the target/ancestry
-jars. A self-consistent edited audit count, source name, risk list, or digest
-cannot replace those artifact bytes. The target jar's recipe source count is independently rebuilt on every
+independently rebuilds its NeoForge target metadata, complete sorted
+class/metadata inventory, and every real candidate's public signature with the
+pinned JDK 21 `javap`. It derives named nested `source_class` values from exact
+`InnerClasses` metadata and recomputes bounded private-bytecode risk evidence
+from the target/ancestry jars. Every supplied ancestry jar is enumerated before
+graph traversal, so a second inspectable class owner fails even when that class
+is not reachable from a target parent. A self-consistent edited audit target,
+signature, count, source name, risk list, or digest cannot replace those
+artifact bytes. The target jar's recipe source count is independently rebuilt on every
 complete use; when `target_jar` is the audit's only recipe-data source, the
 entire effective recipe inventory, serializer summary, overrides, and digest
 must match the reopened jar exactly.
@@ -352,7 +356,8 @@ An accepted family records:
 
 Process station variants require a positive rational rate. Instant station
 variants require a zero numerator. Every numerator and denominator must fit a
-signed Java `long`. These rules match runtime
+signed Java `long`; the published generation-plan schema enforces the same
+maximum. These rules match runtime
 `MachineDescriptor` validation and fail before scaffolding.
 
 For a bundled module, `verification.game_test_task` is not arbitrary evidence:
@@ -379,7 +384,8 @@ tools/compat-kit/compat-kit migrate-contract \
 
 The command preserves a decision only when the recipe class, its public
 signature, its class-owned risk evidence, ancestry artifact SHA/size inventory,
-and the recipe-data inventory digest are all unchanged. New or changed classes
+exact ancestry dependency-coordinate mapping, and the recipe-data inventory
+digest are all unchanged. New or changed classes
 reopen as `needs_decision`. Removing
 an accepted family fails; removed rejected legacy false positives are reported.
 Target or artifact-SHA drift is rejected.
@@ -681,10 +687,10 @@ through `verify --jar` and every staged ancestry jar through repeatable
 `--classpath`; copying only `compat/audit.json` is never sufficient.
 The generated staging task searches the target's transitive dependencies,
 NeoForge additional runtime classpath, and ModDev
-`createMinecraftArtifacts` outputs and copies only exact SHA/size matches. The
-scaffold pins Auto Storage's Parchment baseline so the generated
-NeoForge/Minecraft development artifact has the same bytes as the scanner's
-artifact.
+`createMinecraftArtifacts` outputs, normalizes their archive layout, and copies
+only exact SHA/size matches. The scaffold pins Auto Storage's Parchment baseline
+so the generated NeoForge/Minecraft development artifact reproduces the
+scanner's canonical archive.
 Scanner-format-16 audits persist exact coordinates for reachable compile APIs
 under `ancestry_dependencies`; generated addons emit each as non-transitive
 `compileOnly` and `compatKitAncestryArtifacts` dependencies. No post-scaffold

@@ -395,6 +395,83 @@ def _validate_archive(path: Path, archive: zipfile.ZipFile):
         )
 
 
+def normalize_jar(source, output) -> Path:
+    unresolved_source = Path(source)
+    if unresolved_source.is_symlink():
+        raise ValueError(f"source jar is a symlink: {source}")
+    source_path = unresolved_source.resolve()
+    if not source_path.is_file():
+        raise ValueError(f"source jar does not exist: {source}")
+    source_size = source_path.stat().st_size
+    source_sha256 = _sha256_file(source_path)
+    output_path = Path(output).absolute()
+    if output_path.is_symlink():
+        raise ValueError(f"normalized jar output is a symlink: {output}")
+    if output_path.resolve() == source_path:
+        raise ValueError("normalized jar output must differ from source")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_name(
+        f".{output_path.name}.tmp-{os.getpid()}"
+    )
+    temporary.unlink(missing_ok=True)
+    try:
+        with zipfile.ZipFile(source_path) as source_archive:
+            _validate_archive(source_path, source_archive)
+            entries = source_archive.infolist()
+            names = [entry.filename for entry in entries]
+            if len(set(names)) != len(names):
+                raise ValueError("source jar repeats an archive entry")
+            if any(
+                not name
+                or name.startswith("/")
+                or "\\" in name
+                or any(part in ("", ".", "..") for part in name.split("/"))
+                for name in names
+                if not name.endswith("/")
+            ):
+                raise ValueError("source jar has a non-canonical entry path")
+            with zipfile.ZipFile(
+                temporary,
+                "w",
+                compression=zipfile.ZIP_STORED,
+                allowZip64=True,
+            ) as normalized_archive:
+                for entry in sorted(entries, key=lambda item: item.filename):
+                    info = zipfile.ZipInfo(
+                        entry.filename,
+                        (1980, 1, 1, 0, 0, 0),
+                    )
+                    info.compress_type = zipfile.ZIP_STORED
+                    info.create_system = 3
+                    info.external_attr = (
+                        (0o40755 if entry.is_dir() else 0o100644) << 16
+                    )
+                    if entry.is_dir():
+                        normalized_archive.writestr(info, b"")
+                        continue
+                    with source_archive.open(entry) as input_stream:
+                        with normalized_archive.open(
+                            info,
+                            "w",
+                            force_zip64=True,
+                        ) as output_stream:
+                            shutil.copyfileobj(
+                                input_stream,
+                                output_stream,
+                                length=64 * 1024,
+                            )
+        _require_unchanged_artifact(
+            source_path,
+            source_sha256,
+            source_size,
+            "source jar",
+        )
+        os.replace(temporary, output_path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return output_path
+
+
 def _read_mod_metadata(archive: zipfile.ZipFile) -> dict:
     metadata_path = next(
         (candidate for candidate in MOD_METADATA_PATHS if candidate in archive.namelist()),
@@ -1141,7 +1218,7 @@ def _classify_candidate(
 
 def _run_javap(
     jar: Path,
-    class_name: str,
+    class_name: str | tuple[str, ...],
     *options: str,
     output_limit: int = MAX_SIGNATURE_BYTES,
     output_label: str = "public signature",
@@ -1149,7 +1226,13 @@ def _run_javap(
 ) -> str:
     if javap is None:
         javap, _, _, _, _ = _jdk_21_toolchain()
-    command = [str(javap), *options, "-classpath", str(jar), class_name]
+    class_names = (
+        (class_name,)
+        if isinstance(class_name, str)
+        else tuple(class_name)
+    )
+    class_label = ", ".join(class_names)
+    command = [str(javap), *options, "-classpath", str(jar), *class_names]
     try:
         process = subprocess.Popen(
             command,
@@ -1232,29 +1315,29 @@ def _run_javap(
         for reader in readers:
             reader.join(timeout=1)
         if timed_out:
-            raise RuntimeError(f"javap timed out for {class_name}")
+            raise RuntimeError(f"javap timed out for {class_label}")
         for name, state in streams.items():
             if state["error"] is not None:
                 raise RuntimeError(
-                    f"failed to read javap {name} for {class_name}"
+                    f"failed to read javap {name} for {class_label}"
                 ) from state["error"]
             if not state["overflow"]:
                 continue
             if name == "stdout":
                 raise ValueError(
                     f"{output_label} exceeds {output_limit} bytes: "
-                    f"{class_name}"
+                    f"{class_label}"
                 )
             raise RuntimeError(
                 f"javap error output exceeds {MAX_SIGNATURE_BYTES} "
-                f"bytes: {class_name}"
+                f"bytes: {class_label}"
             )
         remaining = deadline - time.monotonic()
         try:
             return_code = process.wait(timeout=max(remaining, 0.001))
         except subprocess.TimeoutExpired as error:
             terminate()
-            raise RuntimeError(f"javap timed out for {class_name}") from error
+            raise RuntimeError(f"javap timed out for {class_label}") from error
     finally:
         for state in streams.values():
             state["file"].close()
@@ -1269,8 +1352,44 @@ def _run_javap(
     )
     if return_code != 0:
         detail = stderr.strip() or stdout.strip()
-        raise RuntimeError(f"javap failed for {class_name}: {detail}")
+        raise RuntimeError(f"javap failed for {class_label}: {detail}")
     return stdout.strip()
+
+
+def _public_signatures(
+    jar: Path,
+    class_names: list[str],
+    javap: Path,
+) -> dict[str, str]:
+    signatures = {}
+    for offset in range(0, len(class_names), 32):
+        batch = class_names[offset:offset + 32]
+        output = _run_javap(
+            jar,
+            tuple(batch),
+            "-public",
+            output_limit=MAX_SIGNATURE_BYTES * len(batch),
+            javap=javap,
+        )
+        sections = []
+        current = []
+        for line in output.splitlines():
+            current.append(line)
+            if line.strip() == "}":
+                sections.append("\n".join(current).strip())
+                current = []
+        if current or len(sections) != len(batch):
+            raise RuntimeError(
+                "javap returned an unexpected public-signature batch"
+            )
+        for class_name, signature in zip(batch, sections, strict=True):
+            if len(signature.encode("utf-8")) > MAX_SIGNATURE_BYTES:
+                raise ValueError(
+                    f"public signature exceeds {MAX_SIGNATURE_BYTES} bytes: "
+                    + class_name
+                )
+            signatures[class_name] = signature
+    return signatures
 
 
 def _candidate_source_suffix(
@@ -2864,16 +2983,14 @@ def _validate_audit_ancestry_graph(
         with zipfile.ZipFile(path) as archive:
             _validate_archive(path, archive)
             for entry_name in archive.namelist():
-                if (
-                    entry_name.startswith("META-INF/versions/")
-                    or not entry_name.endswith(".class")
-                    or entry_name.endswith("module-info.class")
-                ):
+                if not _is_inspectable_class(archive, entry_name):
                     continue
-                class_entries.setdefault(
-                    _class_name(entry_name),
-                    [],
-                ).append((path, entry_name))
+                class_name = _class_name(entry_name)
+                if class_name in class_entries:
+                    raise ValueError(
+                        "exact ancestry artifacts repeat class " + class_name
+                    )
+                class_entries[class_name] = [(path, entry_name)]
         actual_artifacts.append({"sha256": digest, "size": size})
         artifact_checks.append((path, digest, size))
     actual_artifacts.sort(
@@ -2902,8 +3019,6 @@ def _validate_audit_ancestry_graph(
             matches = []
             for path, entry_name in class_entries.get(parent, []):
                 with zipfile.ZipFile(path) as archive:
-                    if not _is_inspectable_class(archive, entry_name):
-                        continue
                     matches.append((
                         path,
                         _class_metadata(archive.read(entry_name), entry_name),
@@ -2967,8 +3082,10 @@ def _validate_audit_target_artifact(
     target_metadata_by_class = {}
     seen_classes = set()
     target_recipe_data = None
+    target = None
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
+        target = _read_mod_metadata(archive)
         for entry_name in sorted(archive.namelist()):
             if not _is_inspectable_class(archive, entry_name):
                 continue
@@ -2991,6 +3108,10 @@ def _validate_audit_target_artifact(
             archive,
             artifact["sha256"],
             (),
+        )
+    if target != audit["target"]:
+        raise ValueError(
+            "target metadata does not match exact artifact"
         )
     records.sort(key=lambda record: record["class"])
     expected_records = [
@@ -3029,13 +3150,35 @@ def _validate_audit_target_artifact(
                     + candidate["class"]
                 )
 
+    inspectable_candidates = [
+        candidate
+        for records in audit["candidates"].values()
+        for candidate in records
+        if target_metadata_by_class.get(candidate["class"]) is not None
+    ]
+    javap = None
+    jdk_identity = None
+    if inspectable_candidates:
+        javap, _, _, _, jdk_identity = _jdk_21_toolchain()
+        actual_signatures = _public_signatures(
+            jar,
+            [candidate["class"] for candidate in inspectable_candidates],
+            javap,
+        )
+        for candidate in inspectable_candidates:
+            actual_signature = actual_signatures[candidate["class"]]
+            if actual_signature != candidate["public_signature"]:
+                raise ValueError(
+                    "target artifact public signature does not match "
+                    "source audit: " + candidate["class"]
+                )
+
     inspectable_recipe_classes = {
         candidate["class"]
         for candidate in audit["candidates"]["recipe_classes"]
         if target_metadata_by_class.get(candidate["class"]) is not None
     }
     if inspectable_recipe_classes:
-        javap, _, _, _, jdk_identity = _jdk_21_toolchain()
         collected_risks: dict[str, set[str]] = {}
         risk_matches_by_class: dict[str, tuple[tuple[str, str], ...]] = {}
         for candidate in audit["candidates"]["recipe_classes"]:
@@ -3090,6 +3233,7 @@ def _validate_audit_target_artifact(
             raise ValueError(
                 "target artifact risk evidence does not match source audit"
             )
+    if javap is not None and jdk_identity is not None:
         _require_unchanged_artifact(
             javap,
             jdk_identity["javap"]["sha256"],
@@ -3745,12 +3889,17 @@ def migrate_contract(
             (record["sha256"], record["size"])
             for record in audit.get("ancestry_classpath", [])
         )
+        ancestry_dependencies = tuple(
+            (record["dependency"], record["sha256"], record["size"])
+            for record in audit.get("ancestry_dependencies", [])
+        )
         return {
             class_name: (
                 signature,
                 tuple(sorted(risks[class_name])),
                 recipe_digest,
                 ancestry,
+                ancestry_dependencies,
             )
             for class_name, signature in signatures.items()
         }
@@ -4722,6 +4871,9 @@ def expectedCompatKitAncestryArtifacts = [
 ]
 def stagedCompatKitTargetArtifact = layout.buildDirectory.file("compat-kit/target.jar")
 def stagedCompatKitAncestryArtifacts = layout.buildDirectory.dir("compat-kit/ancestry")
+def compatKitProjectDir = layout.projectDirectory.asFile
+def compatKitMinecraftArtifacts =
+        tasks.named("createMinecraftArtifacts").get().outputs.files
 def compatKitSha256 = {{ File artifact ->
     def digest = java.security.MessageDigest.getInstance("SHA-256")
     artifact.withInputStream {{ input ->
@@ -4731,6 +4883,26 @@ def compatKitSha256 = {{ File artifact ->
         }}
     }}
     digest.digest().encodeHex().toString()
+}}
+def compatKitNormalizeJar = {{ File artifact, File output ->
+    output.parentFile.mkdirs()
+    def command = [
+        "python3",
+        "tools/compat-kit/compat-kit",
+        "normalize-jar",
+        artifact.absolutePath,
+        output.absolutePath,
+    ]
+    def process = new ProcessBuilder(command)
+            .directory(compatKitProjectDir)
+            .inheritIO()
+            .start()
+    def exitCode = process.waitFor()
+    if (exitCode != 0) {{
+        throw new GradleException(
+                "Compat Kit jar normalization failed for " + artifact)
+    }}
+    output
 }}
 def stageCompatKitTargetArtifact = tasks.register("stageCompatKitTargetArtifact") {{
     inputs.files(configurations.compatKitTargetArtifact)
@@ -4779,7 +4951,7 @@ def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArti
     inputs.files(
             configurations.compatKitAncestryArtifacts,
             configurations.additionalRuntimeClasspath,
-            tasks.named("createMinecraftArtifacts"))
+            compatKitMinecraftArtifacts)
     inputs.property(
             "expectedArtifacts",
             {_groovy_string(ancestry_identity)})
@@ -4801,6 +4973,26 @@ def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArti
                 }}
             }}
         }}
+        def canonicalRoot = new File(
+                temporaryDir,
+                "compat-kit-canonical-platform")
+        canonicalRoot.deleteDir()
+        compatKitMinecraftArtifacts.files
+                .findAll {{ it.isFile() && it.name.endsWith(".jar") }}
+                .sort {{ left, right ->
+                    left.absolutePath <=> right.absolutePath
+                }}
+                .eachWithIndex {{ artifact, index ->
+                    def canonical = compatKitNormalizeJar(
+                            artifact,
+                            new File(canonicalRoot, index + ".jar"))
+                    def size = canonical.length()
+                    def sha256 = compatKitSha256(canonical)
+                    def expected = expectedBySha256[sha256]
+                    if (expected != null && expected.size == size) {{
+                        matches[sha256] = canonical
+                    }}
+                }}
         def missing = expectedBySha256.keySet() - matches.keySet()
         if (!missing.isEmpty()) {{
             throw new GradleException(
@@ -6365,6 +6557,8 @@ def diff_audits(old: dict, new: dict) -> dict:
     ancestry_changed = (
         old.get("ancestry_classpath", [])
         != new.get("ancestry_classpath", [])
+        or old.get("ancestry_dependencies", [])
+        != new.get("ancestry_dependencies", [])
     )
     contract_affected = (
         old["artifact"]["sha256"] != new["artifact"]["sha256"]
@@ -9036,6 +9230,10 @@ def _build_parser() -> argparse.ArgumentParser:
     publish = subparsers.add_parser("publish")
     publish.add_argument("--output", required=True)
     publish.add_argument("--version", required=True)
+
+    normalize = subparsers.add_parser("normalize-jar")
+    normalize.add_argument("source")
+    normalize.add_argument("output")
     return parser
 
 
@@ -9182,6 +9380,8 @@ def main(argv=None) -> int:
             _write_json(args.output, report)
         elif args.command == "publish":
             publish_archive(args.output, args.version)
+        elif args.command == "normalize-jar":
+            normalize_jar(args.source, args.output)
         else:
             parser.error(f"unsupported command: {args.command}")
     except (OSError, RuntimeError, ValueError, zipfile.BadZipFile) as error:

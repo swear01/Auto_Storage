@@ -120,8 +120,8 @@ identity or SHA drift fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
 decisions only when class identity, public signature, class-owned risk evidence,
-ancestry artifact SHA/size inventory, and recipe-data inventory are unchanged
-after that rescan. New or changed
+ancestry artifact SHA/size inventory, exact ancestry dependency coordinates,
+and recipe-data inventory are unchanged after that rescan. New or changed
 classes remain unresolved; removing an accepted family fails, while removed
 rejected false positives are reported.
 Format-7 contracts predate recipe-data evidence. Only `migrate-contract`, when
@@ -154,7 +154,9 @@ changed override invalidates a previously complete contract even when the
 target jar and recipe classes are unchanged.
 Each candidate must remain in the bucket computed by the scanner; moving a
 recipe record into a station/resource list is rejected.
-Process station rates must be positive and Instant station rates must be zero; every numerator and denominator must fit signed Java `long`.
+Process station rates must be positive and Instant station rates must be zero;
+every numerator and denominator must fit signed Java `long` in both runtime
+validation and the published generation-plan schema.
 Accepted families keep the `costs` field, but may use an empty list when the
 reviewed runtime family is genuinely free.
 
@@ -286,13 +288,16 @@ Scanner-format-16 `ancestry_dependencies` make the generated build emit exact
 non-transitive `compileOnly` and `compatKitAncestryArtifacts` coordinates. The
 ancestry task searches the target's transitive dependencies, NeoForge
 additional runtime classpath, and ModDev `createMinecraftArtifacts` outputs,
-stages only exact SHA/size matches, and reports missing hashes. The generated
-project pins the same Parchment baseline as Auto Storage so its transformed
-NeoForge/Minecraft development artifact reproduces the scanner input exactly.
+normalizes their archive layout, stages only exact SHA/size matches, and reports
+missing hashes. The generated project pins the same Parchment baseline as Auto
+Storage so its transformed NeoForge/Minecraft development artifact reproduces
+the scanner's canonical input.
 Add non-transitively published optional compile APIs as reviewed
 `compatKitAncestryArtifacts` dependencies; never remove the exact gate. Complete
-consumers reopen those jars and independently rebuild the reachable external
-class graph before accepting the audit. A parent missing from those exact jars
+consumers reopen the target and ancestry jars, rebuild NeoForge target metadata,
+every real candidate public signature, and the reachable external class graph,
+and reject a duplicate inspectable class anywhere in the supplied ancestry set
+before accepting the audit. A parent missing from those exact jars
 must be a selected JDK 21 class or known root; all other unresolved ancestry is
 rejected.
 Reviewed repositories are emitted first and own target/runtime groups.

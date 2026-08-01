@@ -32,16 +32,23 @@ def read_gradle_classpath_entries(path: Path) -> tuple[Path, ...]:
     return tuple(Path(line) for line in path.read_text().splitlines() if line)
 
 
-def write_fixture_jar(path: Path, version: str = "1.2.3", extra_class: str | None = None):
+def write_fixture_jar(
+    path: Path,
+    version: str = "1.2.3",
+    extra_class: str | None = None,
+    *,
+    mod_id: str = "samplemod",
+    display_name: str = "Sample Machines",
+):
     mods_toml = f"""
 modLoader="javafml"
 loaderVersion="[4,)"
 license="MIT"
 
 [[mods]]
-modId="samplemod"
-version="{version}"
-displayName="Sample Machines"
+modId={json.dumps(mod_id)}
+version={json.dumps(version)}
+displayName={json.dumps(display_name)}
 """.strip()
     entries = {
         "META-INF/neoforge.mods.toml": mods_toml.encode(),
@@ -1592,6 +1599,90 @@ class CompatKitAuditTests(unittest.TestCase):
                 )
 
         self.assertEqual("portable output", output)
+
+    def test_public_signature_revalidation_batches_javap_processes(self):
+        output = (
+            'Compiled from "First.java"\n'
+            "public class samplemod.First {\n}\n"
+            'Compiled from "Second.java"\n'
+            "public class samplemod.Second {\n}\n"
+        )
+        with mock.patch.object(
+            self.compat_kit,
+            "_run_javap",
+            return_value=output.strip(),
+        ) as run_javap:
+            signatures = self.compat_kit._public_signatures(
+                self.jar,
+                ["samplemod.First", "samplemod.Second"],
+                self.root / "javap",
+            )
+
+        self.assertEqual(
+            {
+                "samplemod.First": (
+                    'Compiled from "First.java"\n'
+                    "public class samplemod.First {\n}"
+                ),
+                "samplemod.Second": (
+                    'Compiled from "Second.java"\n'
+                    "public class samplemod.Second {\n}"
+                ),
+            },
+            signatures,
+        )
+        run_javap.assert_called_once()
+
+    def test_normalize_jar_removes_order_timestamp_and_compression_drift(self):
+        sources = []
+        entries = {
+            "samplemod/A.class": b"class-a",
+            "samplemod/data/value.txt": b"value",
+        }
+        for index, names in enumerate(
+            (tuple(entries), tuple(reversed(entries)))
+        ):
+            source = self.root / f"source-{index}.jar"
+            with zipfile.ZipFile(
+                source,
+                "w",
+                compression=(
+                    zipfile.ZIP_DEFLATED
+                    if index == 0
+                    else zipfile.ZIP_STORED
+                ),
+            ) as archive:
+                for name in names:
+                    info = zipfile.ZipInfo(
+                        name,
+                        (2020 + index, 1 + index, 2, 3, 4, 6),
+                    )
+                    info.compress_type = (
+                        zipfile.ZIP_DEFLATED
+                        if index == 0
+                        else zipfile.ZIP_STORED
+                    )
+                    archive.writestr(info, entries[name])
+            sources.append(source)
+
+        outputs = [self.root / "normalized-0.jar", self.root / "normalized-1.jar"]
+        for source, output in zip(sources, outputs, strict=True):
+            self.compat_kit.normalize_jar(source, output)
+
+        self.assertEqual(outputs[0].read_bytes(), outputs[1].read_bytes())
+        with zipfile.ZipFile(outputs[0]) as archive:
+            self.assertEqual(sorted(entries), archive.namelist())
+            self.assertTrue(all(
+                info.date_time == (1980, 1, 1, 0, 0, 0)
+                and info.compress_type == zipfile.ZIP_STORED
+                for info in archive.infolist()
+            ))
+        args = self.compat_kit._build_parser().parse_args([
+            "normalize-jar",
+            str(sources[0]),
+            str(outputs[0]),
+        ])
+        self.assertEqual("normalize-jar", args.command)
 
     def test_scan_allows_bounded_large_private_bytecode(self):
         large_private_bytecode = (
@@ -3155,6 +3246,87 @@ displayName="Sample Machines"
                 source_artifact=self.jar,
             )
 
+    def test_exact_artifact_rejects_duplicate_unused_ancestry_class(self):
+        target_jar = self.root / "duplicate-ancestry-target.jar"
+        write_structural_fixture_jar(self.root, target_jar)
+        audit = self.compat_kit.scan_jar(target_jar)
+        with zipfile.ZipFile(target_jar) as archive:
+            duplicate_class = archive.read(
+                "samplemod/client/RecipeWidget.class"
+            )
+        ancestry_jars = []
+        for name in ("first", "second"):
+            ancestry_jar = self.root / f"duplicate-ancestry-{name}.jar"
+            with zipfile.ZipFile(ancestry_jar, "w") as archive:
+                archive.writestr(
+                    "samplemod/client/RecipeWidget.class",
+                    duplicate_class,
+                )
+                archive.writestr(f"META-INF/{name}.txt", name)
+            ancestry_jars.append(ancestry_jar)
+        audit["ancestry_classpath"] = sorted(
+            [
+                {
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                    "size": path.stat().st_size,
+                }
+                for path in ancestry_jars
+            ],
+            key=lambda record: (record["sha256"], record["size"]),
+        )
+        audit["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                audit["artifact"],
+                audit["ancestry_classpath"],
+                [
+                    entry["class"]
+                    for entry in audit["structural_hierarchy"]
+                ],
+            )
+        )
+        self.compat_kit._validate_audit(audit)
+
+        with self.assertRaisesRegex(ValueError, "repeat class"):
+            self.compat_kit._validate_audit_target_artifact(
+                audit,
+                target_jar,
+                source_classpath=ancestry_jars,
+            )
+
+    def test_exact_artifact_rebuilds_target_metadata(self):
+        target_jar = self.root / "target-metadata.jar"
+        write_structural_fixture_jar(self.root, target_jar)
+        source_audit = self.compat_kit.scan_jar(target_jar)
+
+        for field, forged_value in (
+            ("mod_id", "forgedmod"),
+            ("display_name", "Forged Machines"),
+            ("version", "9.9.9"),
+        ):
+            with self.subTest(field=field):
+                audit = copy.deepcopy(source_audit)
+                audit["target"][field] = forged_value
+                self.compat_kit._validate_audit(audit)
+                with self.assertRaisesRegex(ValueError, "target metadata"):
+                    self.compat_kit._validate_audit_target_artifact(
+                        audit,
+                        target_jar,
+                    )
+
+    def test_exact_artifact_rebuilds_candidate_public_signatures(self):
+        target_jar = self.root / "candidate-signature.jar"
+        write_structural_fixture_jar(self.root, target_jar)
+        audit = self.compat_kit.scan_jar(target_jar)
+        candidate = audit["candidates"]["recipe_classes"][0]
+        candidate["public_signature"] += "\npublic int forgedSignature();"
+        self.compat_kit._validate_audit(audit)
+
+        with self.assertRaisesRegex(ValueError, "public signature"):
+            self.compat_kit._validate_audit_target_artifact(
+                audit,
+                target_jar,
+            )
+
     def test_exact_artifact_recomputes_private_bytecode_risks(self):
         risky_jar = self.root / "samplemod-risky.jar"
         write_structural_fixture_jar(self.root, risky_jar, risky=True)
@@ -3894,6 +4066,45 @@ displayName="Sample Machines"
             old_contract,
             old_audit,
             changed_audit,
+        )
+        self.assertTrue(all(
+            family["status"] == "needs_decision"
+            for family in migrated["families"]
+        ))
+        self.assertIn("changed evidence", actions)
+
+    def test_ancestry_dependency_changes_affect_diff(self):
+        old_audit = self.source_audit()
+        old_contract = self.accepted_contract()
+        ancestry = {"sha256": "f" * 64, "size": 1}
+        old_audit["ancestry_classpath"] = [ancestry]
+        old_audit["ancestry_dependencies"] = [{
+            "dependency": "com.example:ancestry:1.0.0",
+            **ancestry,
+        }]
+        old_audit["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                old_audit["artifact"],
+                old_audit["ancestry_classpath"],
+                [
+                    entry["class"]
+                    for entry in old_audit["structural_hierarchy"]
+                ],
+            )
+        )
+        new_audit = copy.deepcopy(old_audit)
+        new_audit["ancestry_dependencies"][0]["dependency"] = (
+            "com.example:ancestry:2.0.0"
+        )
+
+        delta = self.compat_kit.diff_audits(old_audit, new_audit)
+
+        self.assertTrue(delta["ancestry_changed"])
+        self.assertTrue(delta["contract_affected"])
+        migrated, actions = self.compat_kit.migrate_contract(
+            old_contract,
+            old_audit,
+            new_audit,
         )
         self.assertTrue(all(
             family["status"] == "needs_decision"
@@ -5736,6 +5947,11 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             signature_reader=self.signatures,
         )
 
+    @staticmethod
+    def rebind_contract_source(contract: dict, audit: dict):
+        contract["source_audit_sha256"] = audit["artifact"]["sha256"]
+        contract["source_recipe_data_sha256"] = audit["recipe_data"]["digest"]
+
     def committed_ae2_jar(self) -> Path:
         audit = json.loads(
             (ROOT / "compat/audits/ae2/19.2.17.json").read_text()
@@ -6146,6 +6362,12 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn('layout.buildDirectory.dir("compat-kit/ancestry")', build)
         self.assertIn("configurations.additionalRuntimeClasspath", build)
         self.assertIn('tasks.named("createMinecraftArtifacts")', build)
+        self.assertIn("compatKitNormalizeJar", build)
+        self.assertIn('"normalize-jar"', build)
+        self.assertIn(
+            'tasks.named("createMinecraftArtifacts").get().outputs.files',
+            build,
+        )
         self.assertNotIn("sourceSets.main.compileClasspath", build)
         properties = (output / "gradle.properties").read_text()
         self.assertIn("parchment_minecraft_version=1.21.1", properties)
@@ -6524,17 +6746,22 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_external_scaffold_escapes_target_display_name_as_toml(self):
         contract = self.addon_contract()
-        audit = self.source_audit()
         display_name = 'Sample "Quoted" \\\\ Machines\nSecond Line'
+        target_jar = self.root / "quoted-target.jar"
+        write_fixture_jar(target_jar, display_name=display_name)
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            signature_reader=self.signatures,
+        )
         contract["target"]["display_name"] = display_name
-        audit["target"]["display_name"] = display_name
+        self.rebind_contract_source(contract, audit)
         output = self.root / "quoted-addon"
 
         self.compat_kit.scaffold_addon(
             contract,
             output,
             source_audit=audit,
-            source_artifact=self.jar,
+            source_artifact=target_jar,
         )
 
         metadata = tomllib.loads(
@@ -6547,17 +6774,22 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_external_scaffold_escapes_del_as_toml(self):
         contract = self.addon_contract()
-        audit = self.source_audit()
         display_name = "Sample\u007fMachines"
+        target_jar = self.root / "del-target.jar"
+        write_fixture_jar(target_jar, display_name=display_name)
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            signature_reader=self.signatures,
+        )
         contract["target"]["display_name"] = display_name
-        audit["target"]["display_name"] = display_name
+        self.rebind_contract_source(contract, audit)
         output = self.root / "del-addon"
 
         self.compat_kit.scaffold_addon(
             contract,
             output,
             source_audit=audit,
-            source_artifact=self.jar,
+            source_artifact=target_jar,
         )
 
         metadata_path = output / "src/main/resources/META-INF/neoforge.mods.toml"
@@ -6591,17 +6823,22 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_bundled_scaffold_escapes_target_description_as_toml(self):
         contract = self.accepted_contract()
-        audit = self.source_audit()
         display_name = "Sample ''' Machines\\Control\nSecond Line"
+        target_jar = self.root / "description-target.jar"
+        write_fixture_jar(target_jar, display_name=display_name)
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            signature_reader=self.signatures,
+        )
         contract["target"]["display_name"] = display_name
-        audit["target"]["display_name"] = display_name
+        self.rebind_contract_source(contract, audit)
         output = self.root / "quoted-bundled"
 
         self.compat_kit.scaffold_bundled(
             contract,
             output,
             source_audit=audit,
-            source_artifact=self.jar,
+            source_artifact=target_jar,
         )
 
         metadata = tomllib.loads(
@@ -6669,9 +6906,14 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_bundled_scaffold_rejects_normalized_identifier_collision(self):
         contract = self.accepted_contract()
-        audit = self.source_audit()
+        target_jar = self.root / "foo-bar-target.jar"
+        write_fixture_jar(target_jar, mod_id="foo__bar")
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            signature_reader=self.signatures,
+        )
         contract["target"]["mod_id"] = "foo__bar"
-        audit["target"]["mod_id"] = "foo__bar"
+        self.rebind_contract_source(contract, audit)
         output = self.root / "bundled"
         existing = output / "src/compat/foo_bar/compat-module.json"
         existing.parent.mkdir(parents=True)
@@ -6708,7 +6950,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=audit,
-                source_artifact=self.jar,
+                source_artifact=target_jar,
             )
 
         self.assertFalse((output / "src/compat/foo__bar").exists())
@@ -6741,16 +6983,21 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_bundled_scaffold_rejects_java_keyword_package_segment(self):
         contract = self.accepted_contract()
-        audit = self.source_audit()
+        target_jar = self.root / "keyword-target.jar"
+        write_fixture_jar(target_jar, mod_id="class")
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            signature_reader=self.signatures,
+        )
         contract["target"]["mod_id"] = "class"
-        audit["target"]["mod_id"] = "class"
+        self.rebind_contract_source(contract, audit)
 
         with self.assertRaisesRegex(ValueError, "invalid Java package segment"):
             self.compat_kit.scaffold_bundled(
                 contract,
                 self.root / "bundled",
                 source_audit=audit,
-                source_artifact=self.jar,
+                source_artifact=target_jar,
             )
 
     def test_scaffold_rejects_unresolved_or_semantically_incomplete_contracts(self):
@@ -7028,6 +7275,14 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             0,
             rate_variants["fixed"]["properties"]["numerator"]["minimum"],
         )
+        self.assertEqual(
+            self.compat_kit.JAVA_LONG_MAX,
+            generation_schema["$defs"]["positive_integer"]["maximum"],
+        )
+        self.assertEqual(
+            self.compat_kit.JAVA_LONG_MAX,
+            rate_variants["fixed"]["properties"]["numerator"]["maximum"],
+        )
         generated_family_schema = generation_schema["$defs"]["generated_family"]
         generated_shapes = {
             variant["properties"]["shape"]["const"]: variant
@@ -7290,7 +7545,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             audited_recipe_classes,
         )
         self.assertEqual(13, len(audit["ancestry_classpath"]))
-        self.assertEqual(6, len(audit["ancestry_dependencies"]))
+        self.assertEqual(7, len(audit["ancestry_dependencies"]))
         self.assertEqual(
             audited_recipe_classes,
             {family["class"] for family in contract["families"]},

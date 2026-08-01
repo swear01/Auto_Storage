@@ -736,13 +736,16 @@ def ae2CompatAuditAncestryDir =
         layout.buildDirectory.dir("compat-kit/ae2-audit-optional-ancestry")
 def ae2CompatAuditAncestryManifest =
         layout.buildDirectory.file("compat-kit/ae2-audit-optional-ancestry.txt")
+def compatKitProjectDir = layout.projectDirectory.asFile
+def compatKitMinecraftArtifacts =
+        tasks.named("createMinecraftArtifacts").get().outputs.files
 tasks.register("stageAe2CompatAuditAncestry") {
     group = "verification"
     description = "Stages every exact ancestry jar used by the committed AE2 audit."
     inputs.files(
             configurations.ae2CompatAuditAncestry,
             configurations.additionalRuntimeClasspath,
-            tasks.named("createMinecraftArtifacts"))
+            compatKitMinecraftArtifacts)
     inputs.file("compat/audits/ae2/19.2.17.json")
     outputs.dir(ae2CompatAuditAncestryDir)
     outputs.file(ae2CompatAuditAncestryManifest)
@@ -776,6 +779,44 @@ tasks.register("stageAe2CompatAuditAncestry") {
                 matches[identity] = artifact
             }
         }
+        def canonicalRoot = new File(
+                temporaryDir,
+                "ae2-audit-canonical")
+        canonicalRoot.deleteDir()
+        canonicalRoot.mkdirs()
+        compatKitMinecraftArtifacts.files
+                .findAll { it.isFile() && it.name.endsWith(".jar") }
+                .sort { left, right ->
+                    left.absolutePath <=> right.absolutePath
+                }
+                .eachWithIndex { artifact, index ->
+                    def canonical = new File(canonicalRoot, "${index}.jar")
+                    def process = new ProcessBuilder(
+                            "python3",
+                            "tools/compat-kit/compat-kit",
+                            "normalize-jar",
+                            artifact.absolutePath,
+                            canonical.absolutePath)
+                            .directory(compatKitProjectDir)
+                            .inheritIO()
+                            .start()
+                    if (process.waitFor() != 0) {
+                        throw new GradleException(
+                                "AE2 audit ancestry normalization failed: "
+                                        + artifact)
+                    }
+                    def digest = java.security.MessageDigest.getInstance("SHA-256")
+                    canonical.withInputStream { input ->
+                        byte[] buffer = new byte[8192]
+                        for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {
+                            digest.update(buffer, 0, read)
+                        }
+                    }
+                    def identity = "${digest.digest().encodeHex().toString()}:${canonical.length()}"
+                    if (expected.containsKey(identity)) {
+                        matches[identity] = canonical
+                    }
+                }
         def missing = expected.keySet() - matches.keySet()
         if (!missing.isEmpty()) {
             throw new GradleException(

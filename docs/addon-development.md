@@ -89,18 +89,20 @@ passes `build/compat-kit/target.jar` to `verify --jar` and every staged ancestry
 jar through repeatable `--classpath`.
 The generated ancestry task searches the target's transitive dependency graph,
 NeoForge's additional runtime classpath, and the ModDev
-`createMinecraftArtifacts` outputs, then stages only SHA/size matches from the
-audit. The scaffold uses the same pinned Parchment mapping baseline as Auto
-Storage so the generated NeoForge/Minecraft development artifact is
-byte-identical to the one inspected by the scanner. Scanner-format-16
+`createMinecraftArtifacts` outputs, normalizes their archive layout, then
+stages only SHA/size matches from the audit. The scaffold uses the same pinned
+Parchment mapping baseline as Auto Storage so the generated NeoForge/Minecraft
+development artifact reproduces the scanner's canonical archive. Scanner-format-16
 `ancestry_dependencies` are emitted
 automatically as non-transitive `compileOnly` and
 `compatKitAncestryArtifacts` declarations; hand-editing generated Gradle is not
 a supported workaround, and an unresolved hash remains a hard failure.
-Complete consumers reopen every supplied ancestry jar, reconstruct the
-reachable external metadata graph, derive named nested source types from exact
-`InnerClasses` metadata, and recompute bounded private-bytecode risk evidence,
-so editing classpath-owned graph records
+Complete consumers reopen the target and every supplied ancestry jar,
+reconstruct the reachable external metadata graph, reject duplicate
+inspectable classes across the complete supplied set, rebuild exact NeoForge
+target metadata and candidate public signatures, derive named nested source
+types from exact `InnerClasses` metadata, and recompute bounded
+private-bytecode risk evidence, so editing target/classpath-owned records
 cannot remove structural recipe candidates while preserving a self-consistent
 JSON audit. If any reconstructed parent is neither present in those exact jars
 nor a selected JDK 21 class or known root, validation fails for missing
@@ -133,7 +135,7 @@ Explicit `--data-root` evidence binds all bounded tag JSON and bounded
 `pack.mcmeta` bytes while keeping recipe counts recipe-only; a root with a
 top-level data-pack `filter` or `overlays` field is rejected rather than
 misreporting filtered or overlay recipes as effective. Any ancestry artifact
-SHA/size change affects `diff` and
+SHA/size or `ancestry_dependencies` coordinate change affects `diff` and
 reopens migrated family decisions even when target public signatures are stable.
 Each ancestry class must have exactly one jar owner. The scanner rejects
 duplicate definitions even when their hierarchy declarations match, validates
@@ -424,7 +426,9 @@ external machine and wait for world state.
 
 The reviewed contract must preserve every scanner risk attached to each recipe
 family. Process station variants use positive work rates; Instant variants use
-zero rates. Every rational numerator and denominator must fit signed Java `long`. Accepted families keep an explicit `costs` list, which may be empty
+zero rates. Every rational numerator and denominator must fit signed Java
+`long`, including documents checked only through the published generation-plan
+schema. Accepted families keep an explicit `costs` list, which may be empty
 only for a reviewed runtime family that is genuinely free. A bundled contract's
 GameTest task must be the task derived from its fixture name; another fixture
 with the same expected count cannot provide its runtime evidence. Compat Kit
