@@ -43,7 +43,9 @@ artifact/classpath set. Class-file hierarchy inspection finds exactly twelve con
 
 Complete generation and verification also reopen the exact AE2 19.2.17 jar,
 check its committed SHA/size, and rebuild all 1,689 sorted target class metadata
-records. The JSON count/digest alone cannot authorize a reduced graph.
+records plus the complete 556-recipe target-jar inventory. The JSON
+count/digest alone cannot authorize a reduced graph or rewritten recipe
+evidence.
 
 - `appeng.recipes.entropy.EntropyRecipe`;
 - `appeng.recipes.game.AddItemUpgradeRecipe`;

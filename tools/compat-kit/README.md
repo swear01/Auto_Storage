@@ -42,7 +42,10 @@ entries and committed audits carry the scanner format and are fully
 schema-validated before reuse. Complete consumers reject legacy scanner
 formats and require the exact target jar so they can rehash it and rebuild the
 complete sorted class/metadata inventory; only explicit migration commands may
-read formats 7 through 14.
+read formats 7 through 14. Complete consumers also rebuild the target jar's
+recipe source count; when it is the only recipe-data source, the complete
+effective inventory, serializer summary, overrides, and digest must match the
+reopened jar.
 Committed source files must be sorted, unique, canonical POSIX
 repository-relative `.java` paths. A null revision requires no files, while a
 recorded revision with classified candidates requires at least one file. The
@@ -197,7 +200,10 @@ emits seven compact deterministic
 issue/worktree/PR handoff files without upstream source or signature bodies;
 its gate script points at the exact repository-relative audit path and runs
 every Gradle task declared by a complete reviewed contract without hardcoding a
-platform-specific JDK path.
+platform-specific JDK path. Worker directives identify the target only by its
+validated mod ID. Free-form display name/version metadata is emitted only as
+escaped, explicitly untrusted JSON evidence, never interpolated into agent
+instructions.
 
 For a complete reviewed contract:
 
@@ -220,6 +226,8 @@ family key. Family-derived Java variables and conformance methods use a
 collision-free `family$` prefix for digit-leading or reserved IDs plus the shared
 identifier validator. The `single_item_to_item` template requires the canonical
 `recipe.input`/`recipe.output` selectors and exact amount expressions;
+its input/output/cost method members use the same Java-keyword-aware validator
+as direct bindings, so names such as `class` cannot produce uncompilable Java;
 `registry_block_method` requires an explicit block ID separate from its station
 item. Generated registration, conformance, resource, and bridge class names
 must not shadow the simple names imported by their renderer. `conformance`
@@ -263,6 +271,10 @@ Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
 reviewed target jar SHA; target compile/runtime and explicit runtime
 dependencies are non-transitive, and evidence task names are never remapped.
+`stageCompatKitTargetArtifact` copies the one SHA-verified resolved jar to
+`build/compat-kit/target.jar`; generated and example GitHub Actions workflows
+pass that exact staged file to `verify --jar` rather than trusting only the
+committed audit.
 Reviewed repositories are emitted first and own target/runtime groups.
 Explicit runtime groups cannot fall back to Maven Central even with no reviewed
 repositories; target fallback is still protected by its exact SHA gate, and

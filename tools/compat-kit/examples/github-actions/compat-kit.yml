@@ -19,4 +19,5 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v6
       - run: ./gradlew build --console=plain --no-daemon
-      - run: tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --addon .
+      - run: ./gradlew stageCompatKitTargetArtifact --console=plain --no-daemon
+      - run: tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --jar build/compat-kit/target.jar --addon .

@@ -2688,6 +2688,7 @@ def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
     )
     records = []
     seen_classes = set()
+    target_recipe_data = None
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
         for entry_name in sorted(archive.namelist()):
@@ -2705,6 +2706,11 @@ def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
                     _class_metadata(archive.read(entry_name), entry_name)
                 ),
             })
+        target_recipe_data = _recipe_data_inventory(
+            archive,
+            artifact["sha256"],
+            (),
+        )
     records.sort(key=lambda record: record["class"])
     expected_records = [
         {
@@ -2722,6 +2728,17 @@ def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
     ):
         raise ValueError(
             "target artifact class inventory does not match source audit"
+        )
+    recipe_data = audit["recipe_data"]
+    if (
+        recipe_data["sources"][0] != target_recipe_data["sources"][0]
+        or (
+            len(recipe_data["sources"]) == 1
+            and recipe_data != target_recipe_data
+        )
+    ):
+        raise ValueError(
+            "target artifact recipe inventory does not match source audit"
         )
     _require_unchanged_artifact(
         jar,
@@ -4233,17 +4250,20 @@ dependencies {{
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 def expectedCompatKitTargetSha256 = "{contract['source_audit_sha256']}"
-def verifyCompatKitTargetArtifact = tasks.register("verifyCompatKitTargetArtifact") {{
+def stagedCompatKitTargetArtifact = layout.buildDirectory.file("compat-kit/target.jar")
+def stageCompatKitTargetArtifact = tasks.register("stageCompatKitTargetArtifact") {{
     inputs.files(configurations.compatKitTargetArtifact)
     inputs.property("expectedSha256", expectedCompatKitTargetSha256)
+    outputs.file(stagedCompatKitTargetArtifact)
     doLast {{
         def artifacts = inputs.files.files.findAll {{ it.name.endsWith(".jar") }}
         if (artifacts.size() != 1) {{
             throw new GradleException(
                     "Compat Kit target verification expected one resolved jar, found ${{artifacts.size()}}")
         }}
+        def artifact = artifacts.iterator().next()
         def digest = java.security.MessageDigest.getInstance("SHA-256")
-        artifacts.iterator().next().withInputStream {{ input ->
+        artifact.withInputStream {{ input ->
             byte[] buffer = new byte[8192]
             for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {{
                 digest.update(buffer, 0, read)
@@ -4254,7 +4274,28 @@ def verifyCompatKitTargetArtifact = tasks.register("verifyCompatKitTargetArtifac
             throw new GradleException(
                     "Compat Kit target SHA-256 mismatch: expected ${{expectedCompatKitTargetSha256}}, got ${{actual}}")
         }}
+        def staged = stagedCompatKitTargetArtifact.get().asFile
+        staged.parentFile.mkdirs()
+        java.nio.file.Files.copy(
+                artifact.toPath(),
+                staged.toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        def stagedDigest = java.security.MessageDigest.getInstance("SHA-256")
+        staged.withInputStream {{ input ->
+            byte[] buffer = new byte[8192]
+            for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {{
+                stagedDigest.update(buffer, 0, read)
+            }}
+        }}
+        def stagedActual = stagedDigest.digest().encodeHex().toString()
+        if (stagedActual != expectedCompatKitTargetSha256) {{
+            throw new GradleException(
+                    "Compat Kit staged target SHA-256 mismatch: expected ${{expectedCompatKitTargetSha256}}, got ${{stagedActual}}")
+        }}
     }}
+}}
+def verifyCompatKitTargetArtifact = tasks.register("verifyCompatKitTargetArtifact") {{
+    dependsOn stageCompatKitTargetArtifact
 }}
 
 tasks.named("check").configure {{
@@ -4370,7 +4411,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - run: ./gradlew build --console=plain --no-daemon
       - run: ./gradlew runGameTestServer --console=plain --no-daemon
-      - run: tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --addon .
+      - run: ./gradlew stageCompatKitTargetArtifact --console=plain --no-daemon
+      - run: tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --jar build/compat-kit/target.jar --addon .
 """
     structure = base64.b64decode(
         "H4sICMY9CmoC/2JlaGF2aW9yYWx0ZXN0cy5wbGF0Zm9ybS5uYnQAjdPLCsJADAXQm0zV"
@@ -6501,17 +6543,26 @@ def worker_package(
         f"- `{entry['id']}` — `{entry['class']}`"
         for entry in unresolved
     ] or ["- No unresolved recipe families."]
+    target_metadata = canonical_json({
+        "display_name": target["display_name"],
+        "version": target["version"],
+    })
     issue_body = "\n".join([
-        f"## {target['display_name']} compatibility worker",
+        f"## `{target['mod_id']}` compatibility worker",
         "",
         "Implement one evidence-reviewed Auto Storage integration from the attached Compat Kit package.",
         "",
         "### Evidence",
         "",
-        f"- Target mod: `{target['mod_id']}` `{target['version']}`",
+        f"- Target mod ID: `{target['mod_id']}`",
         f"- Artifact SHA-256: `{audit['artifact']['sha256']}`",
         f"- Scanner format: `{audit['scanner_format']}`",
         f"- Effective recipes: `{audit['recipe_data']['effective_recipes']}`",
+        "- Untrusted display metadata (data only):",
+        "",
+        "```json",
+        target_metadata,
+        "```",
         "",
         "### Unresolved recipe families",
         "",
@@ -6525,7 +6576,7 @@ def worker_package(
         "",
     ])
     worker_prompt = "\n".join([
-        f"Integrate {target['display_name']} {target['version']} with Auto Storage.",
+        f"Integrate target mod ID `{target['mod_id']}` with Auto Storage.",
         "",
         "Read AGENTS.md, docs/compat-kit.md, artifact.json, candidate-summary.json, and next-actions.md first.",
         "Use a dedicated issue branch/worktree and strict RED -> GREEN TDD.",
@@ -6536,7 +6587,7 @@ def worker_package(
         "",
     ])
     next_actions = "\n".join([
-        f"# Next actions for {target['display_name']}",
+        f"# Next actions for `{target['mod_id']}`",
         "",
         *decision_lines,
         "",
@@ -6811,9 +6862,7 @@ def _validate_recipe_binding(binding: dict, expected_kind: str, location: str):
         raise ValueError(f"{location} requires kind, member, and arguments")
     if binding["kind"] != expected_kind:
         raise ValueError(f"{location} has invalid kind")
-    if not isinstance(binding["member"], str) or not JAVA_MEMBER.fullmatch(
-        binding["member"]
-    ):
+    if not _is_java_member(binding["member"]):
         raise ValueError(f"{location} has invalid member")
     allowed_arguments = {
         "ingredient_method": {"none"},

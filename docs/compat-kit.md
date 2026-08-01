@@ -169,7 +169,10 @@ current-format audit plus the exact target jar; only explicit migration paths
 may consume legacy audit formats. Each complete consumer rehashes that jar and
 independently rebuilds its complete sorted class/metadata inventory. A
 self-consistent edited audit count or digest cannot replace those artifact
-bytes.
+bytes. The target jar's recipe source count is independently rebuilt on every
+complete use; when `target_jar` is the audit's only recipe-data source, the
+entire effective recipe inventory, serializer summary, overrides, and digest
+must match the reopened jar exactly.
 Format 15 retains each candidate's structural classification and source-level
 Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
 artifact/classpath-bound `structural_candidate_inventory_sha256`. Its
@@ -321,8 +324,9 @@ data-pack override digest. Every complete `generate`/`conformance`/
 `resource-scaffold`/`scaffold`/`verify` invocation must also load the committed
 source audit and exact target jar. Validation compares the contract's exact family-class set,
 per-family scanner risk set, target identity, artifact SHA, and inventory digest
-with that separate audit, then reconstructs the jar's class inventory; deleting
-a family, graph record, or risk and recomputing JSON fields still fails.
+with that separate audit, then reconstructs the jar's class and applicable
+recipe inventory; deleting a family, graph record, recipe record, or risk and
+recomputing JSON fields still fails.
 
 An accepted family records:
 
@@ -396,6 +400,9 @@ refers to a package-local `audit.json` that was not emitted. For a complete
 contract it runs every declared `verification.gradle_tasks` entry as its own
 Gradle invocation, followed by datagen and diff checks; the package cannot
 replace an authoritative target GameTest with only the compatibility matrix.
+Directive text uses only the validated target mod ID. Free-form target display
+name/version values are retained as escaped JSON explicitly labelled untrusted
+data, so target metadata cannot inject worker instructions.
 The script preserves the worker's caller-provided JDK environment instead of
 hardcoding a macOS/Homebrew `JAVA_HOME`.
 
@@ -449,7 +456,9 @@ The built-in `single_item_to_item` template accepts only its canonical contract
 shape: one consumed Item selected by `recipe.input` with amount `1`, one primary
 Item selected by `recipe.output` with amount `recipe.output.count`, and either
 no cost or the single `auto_storage:station_work` cost selected by
-`recipe.processing_time`. Any changed amount, selector, extra input/output, or
+`recipe.processing_time`. Input/output/cost method members use the shared
+Java-keyword-aware validator, so a member such as `class` fails before source
+generation. Any changed amount, selector, extra input/output, or
 different cost remains a handwritten/RED boundary rather than being silently
 compiled with different semantics.
 
@@ -650,6 +659,10 @@ any non-zero command. Multiple success summaries are rejected even when one
 matches, because editable fixture output cannot outrank the framework result.
 `expected_game_tests` is restricted to `1..2147483647`, matching the positive
 JSON `Integer` required by the generated Gradle descriptor.
+Generated addon builds expose `stageCompatKitTargetArtifact`, which verifies
+the resolved target SHA and writes `build/compat-kit/target.jar`. The generated
+and published example workflows run that task and pass the staged path through
+`verify --jar`; copying only `compat/audit.json` is never sufficient.
 A marker assigned to a `run*GameTestServer` task must occur inside an
 annotated `@GameTest` method body; a detached constant, helper, or comment does
 not prove that the behavior ran. Comments inside a real GameTest are removed

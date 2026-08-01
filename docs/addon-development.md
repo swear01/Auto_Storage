@@ -79,7 +79,11 @@ schema validation alone does not prove those cross-file identities.
 Every complete generation, conformance, resource, scaffold, and verification
 command also receives the exact target jar. Compat Kit rehashes it and rebuilds
 the complete sorted class/metadata inventory instead of trusting an edited
-audit's self-consistent count or digest.
+audit's self-consistent count or digest. It also rebuilds the target jar recipe
+source count and, when no external data root contributed recipes, requires the
+entire recorded recipe inventory to match those jar bytes. Generated addon CI
+uses `stageCompatKitTargetArtifact` and passes
+`build/compat-kit/target.jar` to `verify --jar`.
 
 The scanner first verifies that resolved `javap` belongs to a JDK whose
 `release` metadata and actual `javap -version` both report major version 21,
@@ -123,12 +127,14 @@ one-to-one with those station items; duplicate descriptor variants and duplicate
 rate bindings are rejected. `registry_block_method` bindings name their block ID
 separately from the representative station item. The generated
 `single_item_to_item` path accepts only the documented one-input/one-primary
-output selectors and exact amount expressions; all other shapes need a reviewed
-provider. Generated custom-resource tests verify that their sample key and
+output selectors and exact amount expressions, and method bindings reject Java
+keywords; all other shapes need a reviewed provider. Generated custom-resource tests verify that their sample key and
 amount were seeded, that `clear()` removes that key, and that `load()` restores
 the exact snapshot before exercising the remaining persistence boundaries. `worker-package`
 runs every declared Gradle task without replacing the worker's JDK environment,
 so the target's authoritative GameTest remains part of a delegated worker gate.
+Worker instructions identify targets only by validated mod ID; free-form display
+metadata is retained as escaped, explicitly untrusted JSON evidence.
 
 ## Add the SDK
 
