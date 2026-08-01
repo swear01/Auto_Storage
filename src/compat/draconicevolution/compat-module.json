@@ -1,0 +1,43 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:draconic-evolution:lBMsiWyw",
+    "sha256": "623d7d58e58428a206015b56bf67387c79ff6d97f7221cff23b1dad0bed9544e"
+  },
+  "dependencies": [
+    "maven.modrinth:draconic-evolution:lBMsiWyw"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.draconicevolution.DraconicevolutionCompatModule",
+  "expectedTests": 6,
+  "fixture": "draconicevolutionFixture",
+  "id": "auto_storage:draconicevolution",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "draconicevolution"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "draconicevolution"
+      ],
+      "sha256": "3044e680f5bb1cc4ad408af81aa53d54ba3e2a82dc656ec4da67a57dca58f5c6"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "draconicevolution"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:draconic-evolution:lBMsiWyw",
+    "maven.modrinth:brandons-core:56nwe5IX",
+    "maven.modrinth:codechicken-lib:gQ1srSKh"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatDraconicevolution"
+}
