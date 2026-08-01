@@ -1,0 +1,26 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:mystical-agriculture:izIaJr8V",
+    "sha256": "d67bb701fbe4ade2efeb0aafd477f569b5e6a5a7c8ac696a8a1f658f8477eb99"
+  },
+  "dependencies": [
+    "maven.modrinth:mystical-agriculture:izIaJr8V"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.mysticalagriculture.MysticalagricultureCompatModule",
+  "expectedTests": 8,
+  "fixture": "mysticalagricultureFixture",
+  "id": "auto_storage:mysticalagriculture",
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "mysticalagriculture"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:mystical-agriculture:izIaJr8V",
+    "maven.modrinth:cucumber:8421rqFF"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatMysticalagriculture"
+}
