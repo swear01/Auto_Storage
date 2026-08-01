@@ -160,17 +160,19 @@ ancestry classpaths bind their exact artifact set. Cache metadata also records
 the selected JDK 21 installation, release version, and module-file identity.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `13`; formats `7` through `12` remain readable
+current scanner format is `14`; formats `7` through `13` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit; only explicit migration paths may consume legacy audit
 formats.
-Format 13 retains each candidate's structural classification and source-level
+Format 14 retains each candidate's structural classification and source-level
 Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
 artifact/classpath-bound `structural_candidate_inventory_sha256`. Validation
-requires both hierarchy copies and the independent structural candidate
-inventory to agree before every name-term bucket, so deleting both hierarchy
-copies cannot silently demote an indirect candidate. Generated Java uses
+also reconstructs every candidate classification from
+`structural_class_graph`, a compact direct class-file metadata graph covering
+candidates and their reachable target/classpath ancestry. Both derived
+hierarchy copies and the independent graph must agree, so deleting or rewriting
+the hierarchy records cannot silently demote an indirect candidate. Generated Java uses
 `source_class`: named nested binary `Outer$Inner` becomes source
 `Outer.Inner`, while a legal top-level `$` remains unchanged. Validation also
 cross-checks direct `extends`/`implements` parents in the public declaration;
@@ -416,6 +418,9 @@ and exact target types; it never uses reflection. Families sharing one station
 descriptor must provide byte-identical station and rate definitions, and the
 generated register validates the descriptor's reviewed namespace rather than
 assuming `auto_storage`.
+Plan class and bridge names may not shadow any simple type imported by their
+specific renderer; invalid plans fail before materialization instead of
+emitting uncompilable Java.
 
 The plan is a reviewed binding, not another inference layer. Unsupported recipe
 shapes stay as explicit `red_boundary` entries. A typed provider remains the
@@ -493,6 +498,8 @@ an addon provider exposes operations and bytes, not self-attested persistence
 or client-isolation booleans. Resource IDs may begin with digits; every
 constant, registration method, and generated GameTest identifier is derived by
 one collision-checked Java-identifier normalizer that prefixes `_` when needed.
+Registration, conformance, test, and bridge class names are also checked against
+their renderer-specific imported type names before any file is written.
 
 Repository declarations are build inputs, not discovery hints. A target
 published through Modrinth Maven, Curse Maven, or its own Maven must list the
@@ -633,10 +640,12 @@ not prove that the behavior ran. Comments inside a real GameTest are removed
 before matching evidence, while markers in executable string arguments remain
 valid. Eligible Java Unicode escapes are rejected in evidence sources before
 raw marker matching because Java translates them before comment/token parsing;
-escaped literal `\\u` text remains allowed. The declaring source's
-`@GameTestHolder` must resolve to the exact
-namespace enabled by that Gradle run; evidence in a different namespace cannot
-borrow another test's successful task result. Literal holders and bounded
+escaped literal `\\u` text remains allowed. The marker method's own enclosing
+class must declare an `@GameTestHolder` that resolves to the exact namespace
+enabled by that Gradle run; a decoy holder on another class in the same source
+cannot authorize it. Simple and fully qualified `@GameTest` and
+`@GameTestHolder` annotations are parsed consistently for evidence and exact
+test counts. Literal holders and bounded
 `static final String` references are accepted, while missing, unresolved,
 ambiguous, or mismatched holders fail closed. A check is marked passed only
 when all of its declared source markers

@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 13
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12})
+SCAN_CACHE_VERSION = 14
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -189,6 +189,7 @@ AUDIT_TOP_KEYS = {
     "artifact",
     "ancestry_classpath",
     "source",
+    "structural_class_graph",
     "structural_hierarchy",
     "structural_candidate_inventory_sha256",
     "candidates",
@@ -251,6 +252,60 @@ JAVA_RESERVED_IDENTIFIERS = frozenset(
     sealed to transitive uses var when with yield
     """.split()
 )
+GENERATION_RENDERER_TYPES = frozenset({
+    "BigDecimal",
+    "Block",
+    "Blocks",
+    "BuiltInRegistries",
+    "Component",
+    "DeferredRegister",
+    "Item",
+    "ItemStack",
+    "Items",
+    "List",
+    "MachineCategory",
+    "MachineDescriptor",
+    "MachineDescriptorApi",
+    "MachineVariant",
+    "MachineWorkRate",
+    "Objects",
+    "RecipeFamily",
+    "RecipeFamilyApi",
+    "RecipeFamilyCost",
+    "RecipeFamilyFactories",
+    "RecipePresentationKind",
+    "ResourceLocation",
+})
+CONFORMANCE_RENDERER_TYPES = frozenset({
+    "CompatibilityConformanceHarness",
+    "Dist",
+    "FMLEnvironment",
+    "GameTest",
+    "GameTestHelper",
+    "GameTestHolder",
+    "Map",
+    "ResourceLocation",
+})
+RESOURCE_RENDERER_TYPES = frozenset({
+    "BlockPos",
+    "BuiltInRegistries",
+    "Direction",
+    "HolderLookup",
+    "Item",
+    "ItemStack",
+    "Items",
+    "Level",
+    "Objects",
+    "Optional",
+    "ResourceLocation",
+    "StorageResourceBlockStrategy",
+    "StorageResourceContainerStrategy",
+    "StorageResourceHandler",
+    "StorageResourceKey",
+    "StorageResourceKind",
+    "TerminalResourceRendererApi",
+})
+RESOURCE_BRIDGE_RENDERER_TYPES = RESOURCE_RENDERER_TYPES
 TRANSLATION_KEY = re.compile(r"^[a-z0-9_.-]+$")
 
 
@@ -1880,6 +1935,143 @@ def _validate_structural_hierarchy(value: object) -> dict[str, dict]:
     return by_class
 
 
+def _structural_metadata(metadata: dict | None) -> dict | None:
+    if metadata is None:
+        return None
+    return {
+        "access_flags": metadata["access_flags"],
+        "super_class": metadata["super_class"],
+        "interfaces": list(metadata["interfaces"]),
+    }
+
+
+def _build_structural_class_graph(
+    candidate_classes: list[str],
+    target_artifact_classes: list[str],
+    metadata_by_class: dict[str, dict | None],
+    target_artifact_sha256: str,
+    classpath_class_locations: dict[str, Path],
+    classpath_artifact_checks: list[tuple[Path, str, int]],
+) -> list[dict]:
+    classpath_sha256_by_path = {
+        path: digest for path, digest, _ in classpath_artifact_checks
+    }
+    included = set(candidate_classes)
+    pending = list(candidate_classes)
+    while pending:
+        class_name = pending.pop()
+        metadata = metadata_by_class.get(class_name)
+        if metadata is None:
+            continue
+        parents = [
+            *metadata["interfaces"],
+            *([metadata["super_class"]] if metadata["super_class"] else []),
+        ]
+        for parent in parents:
+            if parent in metadata_by_class and parent not in included:
+                included.add(parent)
+                pending.append(parent)
+
+    graph = []
+    target_class_set = set(target_artifact_classes)
+    for class_name in sorted(included):
+        if class_name in target_class_set:
+            owner_sha256 = target_artifact_sha256
+        else:
+            owner_path = classpath_class_locations.get(class_name)
+            owner_sha256 = classpath_sha256_by_path.get(owner_path)
+            if owner_sha256 is None:
+                raise ValueError(
+                    "structural ancestry owner is unresolved: " + class_name
+                )
+        graph.append({
+            "class": class_name,
+            "owner_sha256": owner_sha256,
+            "metadata": _structural_metadata(metadata_by_class.get(class_name)),
+        })
+    return graph
+
+
+def _validate_structural_class_graph(
+    value: object,
+    artifact_sha256: str,
+    ancestry_classpath: list[dict],
+) -> tuple[dict[str, dict | None], list[str]]:
+    if not isinstance(value, list):
+        raise ValueError("audit structural_class_graph must be a list")
+    if len(value) > MAX_ARCHIVE_ENTRIES + MAX_CLASSPATH_CLASSES:
+        raise ValueError("audit structural_class_graph has too many classes")
+    allowed_owners = {
+        artifact_sha256,
+        *(record["sha256"] for record in ancestry_classpath),
+    }
+    metadata_by_class = {}
+    target_classes = []
+    for index, record in enumerate(value):
+        location = f"audit structural_class_graph {index}"
+        if not isinstance(record, dict) or set(record) != {
+            "class",
+            "owner_sha256",
+            "metadata",
+        }:
+            raise ValueError(
+                f"{location} requires class, owner_sha256, and metadata"
+            )
+        class_name = record["class"]
+        if not isinstance(class_name, str) or not JAVA_TYPE.fullmatch(class_name):
+            raise ValueError(f"{location} has invalid class")
+        if class_name in metadata_by_class:
+            raise ValueError(
+                f"audit structural_class_graph repeats class {class_name}"
+            )
+        owner_sha256 = record["owner_sha256"]
+        if (
+            not isinstance(owner_sha256, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", owner_sha256)
+            or owner_sha256 not in allowed_owners
+        ):
+            raise ValueError(f"{location} has unknown owner_sha256")
+        metadata = record["metadata"]
+        if metadata is not None:
+            if not isinstance(metadata, dict) or set(metadata) != {
+                "access_flags",
+                "super_class",
+                "interfaces",
+            }:
+                raise ValueError(f"{location} has invalid metadata")
+            access_flags = metadata["access_flags"]
+            if isinstance(access_flags, bool) or not isinstance(access_flags, int):
+                raise ValueError(f"{location} has invalid access_flags")
+            super_class = metadata["super_class"]
+            if super_class is not None and (
+                not isinstance(super_class, str)
+                or not JAVA_TYPE.fullmatch(super_class)
+            ):
+                raise ValueError(f"{location} has invalid super_class")
+            interfaces = metadata["interfaces"]
+            if (
+                not isinstance(interfaces, list)
+                or any(
+                    not isinstance(interface, str)
+                    or not JAVA_TYPE.fullmatch(interface)
+                    for interface in interfaces
+                )
+                or len(interfaces) != len(set(interfaces))
+            ):
+                raise ValueError(f"{location} has invalid interfaces")
+            metadata = {
+                "access_flags": access_flags,
+                "super_class": super_class,
+                "interfaces": interfaces,
+            }
+        metadata_by_class[class_name] = metadata
+        if owner_sha256 == artifact_sha256:
+            target_classes.append(class_name)
+    if list(metadata_by_class) != sorted(metadata_by_class):
+        raise ValueError("audit structural_class_graph must be sorted by class")
+    return metadata_by_class, target_classes
+
+
 def _validate_recipe_data(value: dict, artifact_sha: str):
     if not isinstance(value, dict) or set(value) != {
         "format",
@@ -2047,7 +2239,7 @@ def _validate_audit(audit: dict):
     structural_inventory_sha256 = audit.get(
         "structural_candidate_inventory_sha256"
     )
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {13, SCAN_CACHE_VERSION}:
         if not isinstance(structural_inventory_sha256, str) or not re.fullmatch(
             r"[0-9a-f]{64}",
             structural_inventory_sha256,
@@ -2132,6 +2324,17 @@ def _validate_audit(audit: dict):
     elif "ancestry_classpath" in audit:
         raise ValueError("legacy audit must not contain ancestry_classpath")
 
+    if scanner_format == SCAN_CACHE_VERSION:
+        if "structural_class_graph" not in audit:
+            raise ValueError("audit is missing structural_class_graph")
+        structural_class_graph = audit["structural_class_graph"]
+    else:
+        if "structural_class_graph" in audit:
+            raise ValueError(
+                "legacy audit must not contain structural_class_graph"
+            )
+        structural_class_graph = None
+
     source = audit["source"]
     if not isinstance(source, dict) or set(source) != {"revision", "files"}:
         raise ValueError("audit source requires revision and files")
@@ -2163,7 +2366,7 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
-    if scanner_format in {10, 11, 12, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, SCAN_CACHE_VERSION}:
         if "structural_hierarchy" not in audit:
             raise ValueError("audit is missing structural_hierarchy")
         structural_hierarchy = _validate_structural_hierarchy(
@@ -2189,6 +2392,7 @@ def _validate_audit(audit: dict):
             "audit candidates require " + ", ".join(sorted(candidate_buckets))
         )
     seen_classes = set()
+    candidates_by_class = {}
     for bucket in sorted(candidate_buckets):
         records = candidates[bucket]
         if not isinstance(records, list):
@@ -2198,9 +2402,9 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format in {9, 11, 12, SCAN_CACHE_VERSION}:
+            if scanner_format in {9, 11, 12, 13, SCAN_CACHE_VERSION}:
                 record_keys.add("hierarchy")
-            if scanner_format == SCAN_CACHE_VERSION:
+            if scanner_format in {13, SCAN_CACHE_VERSION}:
                 record_keys.add("source_class")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
@@ -2217,7 +2421,7 @@ def _validate_audit(audit: dict):
                 or not record["public_signature"].strip()
             ):
                 raise ValueError(f"{location} has empty public_signature")
-            if scanner_format == SCAN_CACHE_VERSION:
+            if scanner_format in {13, SCAN_CACHE_VERSION}:
                 _validate_candidate_source_class(
                     class_name,
                     record["source_class"],
@@ -2248,7 +2452,7 @@ def _validate_audit(audit: dict):
                         record["public_signature"],
                         location,
                     )
-                elif scanner_format in {11, 12, SCAN_CACHE_VERSION}:
+                elif scanner_format in {11, 12, 13, SCAN_CACHE_VERSION}:
                     candidate_hierarchy = record["hierarchy"]
                     persisted_hierarchy = structural_hierarchy.get(class_name)
                     if candidate_hierarchy != persisted_hierarchy:
@@ -2271,13 +2475,18 @@ def _validate_audit(audit: dict):
             if class_name in seen_classes:
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
+            if scanner_format != 7:
+                candidates_by_class[class_name] = (
+                    bucket,
+                    record["classification"],
+                )
 
     if revision is not None and seen_classes and not files:
         raise ValueError(
             "audit with classified candidates requires at least one source file"
         )
 
-    if scanner_format in {10, 11, 12, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
             set(structural_hierarchy) - seen_classes
         )
@@ -2286,7 +2495,7 @@ def _validate_audit(audit: dict):
                 "audit structural_hierarchy owner is not an audited candidate: "
                 + ", ".join(unknown_structural_classes)
             )
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {13, SCAN_CACHE_VERSION}:
         expected_structural_inventory_sha256 = (
             _structural_candidate_inventory_sha256(
                 artifact,
@@ -2301,6 +2510,35 @@ def _validate_audit(audit: dict):
             raise ValueError(
                 "audit structural candidate inventory does not match "
                 "structural hierarchy"
+            )
+    if scanner_format == SCAN_CACHE_VERSION:
+        structural_graph_metadata, structural_graph_target_classes = (
+            _validate_structural_class_graph(
+                structural_class_graph,
+                artifact["sha256"],
+                audit["ancestry_classpath"],
+            )
+        )
+        independently_classified = {}
+        independently_structural = {}
+        for class_name in structural_graph_target_classes:
+            classification = _classify_candidate(
+                class_name,
+                structural_graph_metadata,
+            )
+            if classification is None:
+                continue
+            independently_classified[class_name] = classification
+            if classification[1]["method"] == "class_hierarchy":
+                independently_structural[class_name] = classification[1]
+        if candidates_by_class != independently_classified:
+            raise ValueError(
+                "audit candidates do not match independent structural evidence"
+            )
+        if structural_hierarchy != independently_structural:
+            raise ValueError(
+                "audit structural hierarchy does not match independent "
+                "structural evidence"
             )
 
     if scanner_format != 7:
@@ -2449,11 +2687,16 @@ def scan_jar(
                 return cached
         classified = {bucket: [] for bucket in CURRENT_CANDIDATE_BUCKETS}
         structural_hierarchy = []
-        class_entries = {
-            _class_name(name): name
-            for name in archive.namelist()
-            if _is_inspectable_class(archive, name)
-        }
+        class_entries = {}
+        for name in archive.namelist():
+            if not _is_inspectable_class(archive, name):
+                continue
+            class_name = _class_name(name)
+            if class_name in class_entries:
+                raise ValueError(
+                    "target jar repeats normalized class " + class_name
+                )
+            class_entries[class_name] = name
         class_names = sorted(class_entries)
         target_metadata = {
             class_name: (
@@ -2514,6 +2757,14 @@ def scan_jar(
             raise ValueError(
                 f"target jar exceeds {MAX_CANDIDATE_CLASSES} candidate classes"
             )
+        structural_class_graph = _build_structural_class_graph(
+            [class_name for class_name, _, _ in candidates],
+            class_names,
+            metadata_by_class,
+            artifact_sha,
+            classpath_class_locations,
+            classpath_artifact_checks,
+        )
         collected_risks: dict[str, set[str]] = {}
         risk_matches_by_class: dict[str, tuple[tuple[str, str], ...]] = {}
         for class_name, bucket, classification in candidates:
@@ -2613,6 +2864,7 @@ def scan_jar(
                 for candidate in all_candidates
             },
         ),
+        "structural_class_graph": structural_class_graph,
         "structural_hierarchy": structural_hierarchy,
         "structural_candidate_inventory_sha256": (
             _structural_candidate_inventory_sha256(
@@ -4491,14 +4743,24 @@ def _game_test_method_opening(code: str, annotation_end: int) -> int:
     raise ValueError("@GameTest annotation has no method body")
 
 
-def _game_test_blocks(text: str) -> list[str]:
+def _game_test_methods(text: str) -> list[dict]:
     code = _java_code_mask(text)
-    blocks = []
-    for annotation in re.finditer(r"@GameTest\s*\(", code):
+    methods = []
+    for annotation in re.finditer(
+        r"@(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*GameTest\s*\(",
+        code,
+    ):
         opening = _game_test_method_opening(code, annotation.end())
         closing = _java_block_end(text, opening)
-        blocks.append(text[opening + 1:closing])
-    return blocks
+        methods.append({
+            "annotation_start": annotation.start(),
+            "body": text[opening + 1:closing],
+        })
+    return methods
+
+
+def _game_test_blocks(text: str) -> list[str]:
+    return [method["body"] for method in _game_test_methods(text)]
 
 
 def _bundled_game_test_namespace(root: Path, fixture: str) -> str:
@@ -4627,14 +4889,17 @@ def _resolve_java_string_constant(
     return value
 
 
-def _game_test_holder_namespaces(
+def _game_test_holder_annotations(
     text: str,
     constant_expressions: dict[tuple[str, str], str],
-) -> list[str]:
+) -> list[dict]:
     code = _java_code_mask(text)
     uncommented = _java_without_comments(text)
-    namespaces = []
-    for annotation in re.finditer(r"@GameTestHolder\s*\(", code):
+    annotations = []
+    for annotation in re.finditer(
+        r"@(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*GameTestHolder\s*\(",
+        code,
+    ):
         opening = code.find("(", annotation.start())
         depth = 1
         closing = None
@@ -4651,27 +4916,70 @@ def _game_test_holder_namespaces(
         expression = uncommented[opening + 1:closing].strip()
         if re.fullmatch(r'"(?:\\.|[^"\\])*"', expression):
             try:
-                namespaces.append(json.loads(expression))
+                namespace = json.loads(expression)
             except json.JSONDecodeError as error:
                 raise ValueError(
                     "invalid GameTest holder namespace string"
                 ) from error
-            continue
-        constant = re.fullmatch(
-            r"(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*"
-            r"([A-Za-z_$][A-Za-z0-9_$]*)\."
-            r"([A-Za-z_$][A-Za-z0-9_$]*)",
-            expression,
-        )
-        if constant is None:
-            raise ValueError(
-                f"unresolved GameTest holder namespace: {expression}"
+        else:
+            constant = re.fullmatch(
+                r"(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*"
+                r"([A-Za-z_$][A-Za-z0-9_$]*)\."
+                r"([A-Za-z_$][A-Za-z0-9_$]*)",
+                expression,
             )
-        key = (constant.group(1), constant.group(2))
-        namespaces.append(
-            _resolve_java_string_constant(key, constant_expressions)
+            if constant is None:
+                raise ValueError(
+                    f"unresolved GameTest holder namespace: {expression}"
+                )
+            key = (constant.group(1), constant.group(2))
+            namespace = _resolve_java_string_constant(
+                key,
+                constant_expressions,
+            )
+        annotations.append({
+            "start": annotation.start(),
+            "end": closing + 1,
+            "namespace": namespace,
+        })
+    return annotations
+
+
+def _game_test_holder_namespaces(
+    text: str,
+    constant_expressions: dict[tuple[str, str], str],
+) -> list[str]:
+    return [
+        annotation["namespace"]
+        for annotation in _game_test_holder_annotations(
+            text,
+            constant_expressions,
         )
-    return namespaces
+    ]
+
+
+def _java_class_spans(text: str) -> list[dict]:
+    code = _java_code_mask(text)
+    spans = []
+    for declaration in re.finditer(
+        r"\b(?:class|interface|enum|record)\s+"
+        r"[A-Za-z_$][A-Za-z0-9_$]*\b[^{};]*\{",
+        code,
+    ):
+        opening = code.rfind("{", declaration.start(), declaration.end())
+        closing = _java_block_end(text, opening)
+        declaration_boundary = max(
+            code.rfind(";", 0, declaration.start()),
+            code.rfind("{", 0, declaration.start()),
+            code.rfind("}", 0, declaration.start()),
+        ) + 1
+        spans.append({
+            "declaration_start": declaration.start(),
+            "declaration_boundary": declaration_boundary,
+            "opening": opening,
+            "closing": closing,
+        })
+    return spans
 
 
 def _validate_game_test_holder_namespace(
@@ -4679,16 +4987,37 @@ def _validate_game_test_holder_namespace(
     text: str,
     expected_namespace: str,
     constant_expressions: dict[tuple[str, str], str],
+    methods: list[dict] | None = None,
 ):
-    namespaces = _game_test_holder_namespaces(text, constant_expressions)
-    if not namespaces or any(
-        namespace != expected_namespace for namespace in namespaces
-    ):
-        found = ", ".join(namespaces) if namespaces else "none"
-        raise ValueError(
-            "GameTest holder namespace does not match declared task: "
-            f"{path} expected {expected_namespace}, found {found}"
+    methods = _game_test_methods(text) if methods is None else methods
+    holders = _game_test_holder_annotations(text, constant_expressions)
+    class_spans = _java_class_spans(text)
+    for method in methods:
+        owners = [
+            span
+            for span in class_spans
+            if span["opening"] < method["annotation_start"] < span["closing"]
+        ]
+        owner = (
+            min(owners, key=lambda span: span["closing"] - span["opening"])
+            if owners
+            else None
         )
+        namespaces = [] if owner is None else [
+            holder["namespace"]
+            for holder in holders
+            if (
+                owner["declaration_boundary"]
+                <= holder["start"]
+                < owner["declaration_start"]
+            )
+        ]
+        if len(namespaces) != 1 or namespaces[0] != expected_namespace:
+            found = ", ".join(namespaces) if namespaces else "none"
+            raise ValueError(
+                "GameTest holder namespace does not match declared task: "
+                f"{path} expected {expected_namespace}, found {found}"
+            )
 
 
 def _verification_evidence(
@@ -4761,14 +5090,16 @@ def _verification_evidence(
                     f"{record['marker']}"
                 )
             if task_context is not None:
-                marker_sources = [
-                    (path, text)
-                    for path, text in zip(matches, matching_texts)
-                    if any(
-                        record["marker"] in _java_without_comments(block)
-                        for block in _game_test_blocks(text)
-                    )
-                ]
+                marker_sources = []
+                for path, text in zip(matches, matching_texts):
+                    marker_methods = [
+                        method
+                        for method in _game_test_methods(text)
+                        if record["marker"]
+                        in _java_without_comments(method["body"])
+                    ]
+                    if marker_methods:
+                        marker_sources.append((path, text, marker_methods))
                 if not marker_sources:
                     raise ValueError(
                         "evidence marker is not inside an @GameTest method for "
@@ -4790,12 +5121,13 @@ def _verification_evidence(
                 java_constant_expressions = (
                     java_constant_expressions_by_roots[constant_root_key]
                 )
-                for path, text in marker_sources:
+                for path, text, marker_methods in marker_sources:
                     _validate_game_test_holder_namespace(
                         path,
                         text,
                         expected_namespace,
                         java_constant_expressions,
+                        marker_methods,
                     )
             resolved_records.append(
                 f"{task}:{record['source']}#{record['marker']}"
@@ -6092,6 +6424,17 @@ def _is_java_member(value) -> bool:
     )
 
 
+def _validate_generated_class_name(
+    value: object,
+    reserved_types: frozenset[str],
+    location: str,
+):
+    if not _is_java_member(value):
+        raise ValueError(f"{location} has invalid class_name")
+    if value in reserved_types:
+        raise ValueError(f"{location} uses a reserved generated class")
+
+
 def _validate_direct_accessor(
     accessor: dict,
     location: str,
@@ -6310,8 +6653,11 @@ def _validate_generation_plan(plan: dict, contract: dict):
         raise ValueError("generation plan target does not match contract")
     if not _is_java_type(plan["package"]):
         raise ValueError("generation plan has invalid package")
-    if not _is_java_member(plan["class_name"]):
-        raise ValueError("generation plan has invalid class_name")
+    _validate_generated_class_name(
+        plan["class_name"],
+        GENERATION_RENDERER_TYPES,
+        "generation plan",
+    )
     if not isinstance(plan["resource_kinds"], list):
         raise ValueError("generation plan resource_kinds must be a list")
     if plan["resource_kinds"]:
@@ -6747,18 +7093,16 @@ def _validate_conformance_plan(plan: dict, contract: dict):
         raise ValueError("conformance plan target does not match contract")
     if not _is_java_type(plan["package"]):
         raise ValueError("conformance plan has invalid package")
-    if not _is_java_member(plan["class_name"]):
-        raise ValueError("conformance plan has invalid class_name")
+    _validate_generated_class_name(
+        plan["class_name"],
+        CONFORMANCE_RENDERER_TYPES,
+        "conformance plan",
+    )
     if (
         not isinstance(plan["game_test_namespace"], str)
         or not GAME_TEST_NAMESPACE.fullmatch(plan["game_test_namespace"])
     ):
         raise ValueError("conformance plan has invalid game_test_namespace")
-    if (
-        plan["class_name"] in JAVA_RESERVED_IDENTIFIERS
-        or plan["class_name"] == "CompatibilityConformanceHarness"
-    ):
-        raise ValueError("conformance plan uses a reserved generated class")
     accepted_ids = {
         family["id"]
         for family in contract["families"]
@@ -7159,8 +7503,11 @@ def _validate_resource_plan(plan: dict, contract: dict):
         raise ValueError("resource plan target does not match contract")
     if not _is_java_type(plan["package"]):
         raise ValueError("resource plan has invalid package")
-    if not _is_java_member(plan["class_name"]):
-        raise ValueError("resource plan has invalid class_name")
+    _validate_generated_class_name(
+        plan["class_name"],
+        RESOURCE_RENDERER_TYPES,
+        "resource plan",
+    )
     if (
         not isinstance(plan["game_test_namespace"], str)
         or not GAME_TEST_NAMESPACE.fullmatch(plan["game_test_namespace"])
@@ -7203,10 +7550,10 @@ def _validate_resource_plan(plan: dict, contract: dict):
         if not isinstance(resource["variant_aware"], bool):
             raise ValueError(f"{location} variant_aware must be boolean")
         bridge_name = resource["bridge_name"]
-        if (
-            not _is_java_member(bridge_name)
-        ):
+        if not _is_java_member(bridge_name):
             raise ValueError(f"{location} has invalid bridge_name")
+        if bridge_name in RESOURCE_BRIDGE_RENDERER_TYPES:
+            raise ValueError(f"{location} uses a reserved generated class")
         if bridge_name in seen_bridges:
             raise ValueError(f"{location} repeats bridge_name")
         if bridge_name in generated_types:

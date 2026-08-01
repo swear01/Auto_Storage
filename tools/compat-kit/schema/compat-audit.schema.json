@@ -12,6 +12,7 @@
     "artifact",
     "ancestry_classpath",
     "source",
+    "structural_class_graph",
     "structural_hierarchy",
     "structural_candidate_inventory_sha256",
     "candidates",
@@ -150,7 +151,7 @@
       "const": 1
     },
     "scanner_format": {
-      "const": 13
+      "const": 14
     },
     "kind": {
       "const": "auto_storage_compat_audit"
@@ -256,6 +257,39 @@
           },
           "classification": {
             "$ref": "#/$defs/hierarchy"
+          }
+        }
+      }
+    },
+    "structural_class_graph": {
+      "type": "array",
+      "maxItems": 300000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "class",
+          "owner_sha256",
+          "metadata"
+        ],
+        "properties": {
+          "class": {
+            "type": "string",
+            "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+          },
+          "owner_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "metadata": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/structural_metadata"
+              }
+            ]
           }
         }
       }
@@ -386,6 +420,39 @@
             "minLength": 1
           },
           "minItems": 1
+        }
+      }
+    },
+    "structural_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "access_flags",
+        "super_class",
+        "interfaces"
+      ],
+      "properties": {
+        "access_flags": {
+          "type": "integer"
+        },
+        "super_class": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+            }
+          ]
+        },
+        "interfaces": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+          }
         }
       }
     },

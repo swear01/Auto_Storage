@@ -26,9 +26,16 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-The committed audit uses Scanner format v13 and binds all 92 unique jars needed
+The committed audit uses Scanner format v14 and binds all 92 unique jars needed
 to resolve AE2's complete non-JDK compile ancestry, including its optional
-viewer APIs. Every candidate retains its binary identity, source-level Java type, and structural classification independently from the matching top-level hierarchy inventory. An artifact/classpath-bound structural-candidate digest prevents both hierarchy copies from disappearing together, and validation requires all records to agree. Scanner v12's JDK-21 verification and inherited
+viewer APIs. Every candidate retains its binary identity, source-level Java
+type, and structural classification independently from the matching top-level
+hierarchy inventory. The audit additionally preserves a compact direct
+class-file graph for all candidates and their reachable ancestry; validation
+reconstructs the twelve candidate classifications from that graph rather than
+trusting the two derived hierarchy copies. An artifact/classpath-bound
+structural-candidate digest still binds the structural class inventory. Scanner
+v12's JDK-21 verification and inherited
 implementation-risk pass produce byte-identical evidence for this exact
 artifact/classpath set. Class-file hierarchy inspection finds exactly twelve concrete
 `Recipe` implementations:

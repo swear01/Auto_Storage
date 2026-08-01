@@ -84,15 +84,16 @@ bypass missing classpath evidence. It uses class-file `SourceFile`,
 `InnerClasses`, and `EnclosingMethod` metadata for source ownership and nested
 classes. Thus a top-level or named class whose identifier contains `$` remains
 auditable while local, anonymous, and synthetic classes stay excluded. Format
-13 stores binary and source-level Java names, each candidate's structural
+14 stores binary and source-level Java names, each candidate's structural
 classification, a separate sorted top-level `structural_hierarchy` inventory,
-and an artifact/classpath-bound structural candidate digest. Validation
-requires all structural records to agree and hierarchy to outrank name buckets,
-so removing both indirect-path copies cannot bypass review. Generated Java uses
+an artifact/classpath-bound structural candidate digest, and direct metadata for
+candidates plus reachable ancestry. Validation independently reconstructs each
+candidate from that graph, so removing both derived indirect-path copies cannot
+bypass review. Generated Java uses
 the source-level name for nested classes and preserves legal top-level `$`
 identifiers. Direct public
 `extends`/`implements` declarations provide a second bucket cross-check;
-generic type bounds do not count as direct ancestry. Legacy formats 7 through 12
+generic type bounds do not count as direct ancestry. Legacy formats 7 through 13
 must be rescanned with `migrate-audit`. A class name that normalizes to no
 alphanumeric family ID uses deterministic `class_<binary-name-hex>` evidence.
 Explicit `--data-root` evidence binds all bounded tag JSON and bounded
