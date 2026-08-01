@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 14
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13})
+SCAN_CACHE_VERSION = 15
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13, 14})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -336,6 +336,18 @@ def _structural_candidate_inventory_sha256(
             "ancestry_classpath": ancestry_classpath,
             "classes": sorted(class_names),
         }).encode()
+    ).hexdigest()
+
+
+def _target_class_inventory_sha256(records: list[dict]) -> str:
+    return hashlib.sha256(
+        canonical_json([
+            {
+                "class": record["class"],
+                "metadata": record["metadata"],
+            }
+            for record in records
+        ]).encode()
     ).hexdigest()
 
 
@@ -1946,7 +1958,6 @@ def _structural_metadata(metadata: dict | None) -> dict | None:
 
 
 def _build_structural_class_graph(
-    candidate_classes: list[str],
     target_artifact_classes: list[str],
     metadata_by_class: dict[str, dict | None],
     target_artifact_sha256: str,
@@ -1956,8 +1967,8 @@ def _build_structural_class_graph(
     classpath_sha256_by_path = {
         path: digest for path, digest, _ in classpath_artifact_checks
     }
-    included = set(candidate_classes)
-    pending = list(candidate_classes)
+    included = set(target_artifact_classes)
+    pending = list(target_artifact_classes)
     while pending:
         class_name = pending.pop()
         metadata = metadata_by_class.get(class_name)
@@ -2239,7 +2250,7 @@ def _validate_audit(audit: dict):
     structural_inventory_sha256 = audit.get(
         "structural_candidate_inventory_sha256"
     )
-    if scanner_format in {13, SCAN_CACHE_VERSION}:
+    if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
         if not isinstance(structural_inventory_sha256, str) or not re.fullmatch(
             r"[0-9a-f]{64}",
             structural_inventory_sha256,
@@ -2273,8 +2284,13 @@ def _validate_audit(audit: dict):
             raise ValueError(f"audit target {key} must be a non-empty string")
 
     artifact = audit["artifact"]
-    if not isinstance(artifact, dict) or set(artifact) != {"sha256", "size"}:
-        raise ValueError("audit artifact requires sha256 and size")
+    artifact_keys = {"sha256", "size"}
+    if scanner_format == SCAN_CACHE_VERSION:
+        artifact_keys.update({"class_count", "class_inventory_sha256"})
+    if not isinstance(artifact, dict) or set(artifact) != artifact_keys:
+        raise ValueError(
+            "audit artifact requires " + ", ".join(sorted(artifact_keys))
+        )
     if not isinstance(artifact["sha256"], str) or not re.fullmatch(
         r"[0-9a-f]{64}",
         artifact["sha256"],
@@ -2286,6 +2302,23 @@ def _validate_audit(audit: dict):
         or artifact["size"] <= 0
     ):
         raise ValueError("audit artifact size must be a positive integer")
+    if scanner_format == SCAN_CACHE_VERSION:
+        if (
+            isinstance(artifact["class_count"], bool)
+            or not isinstance(artifact["class_count"], int)
+            or not 0 <= artifact["class_count"] <= MAX_ARCHIVE_ENTRIES
+        ):
+            raise ValueError("audit artifact class_count is invalid")
+        if (
+            not isinstance(artifact["class_inventory_sha256"], str)
+            or not re.fullmatch(
+                r"[0-9a-f]{64}",
+                artifact["class_inventory_sha256"],
+            )
+        ):
+            raise ValueError(
+                "audit artifact class_inventory_sha256 is invalid"
+            )
 
     if scanner_format != 7:
         classpath = audit.get("ancestry_classpath")
@@ -2324,7 +2357,7 @@ def _validate_audit(audit: dict):
     elif "ancestry_classpath" in audit:
         raise ValueError("legacy audit must not contain ancestry_classpath")
 
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {14, SCAN_CACHE_VERSION}:
         if "structural_class_graph" not in audit:
             raise ValueError("audit is missing structural_class_graph")
         structural_class_graph = audit["structural_class_graph"]
@@ -2366,7 +2399,7 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
-    if scanner_format in {10, 11, 12, 13, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, 14, SCAN_CACHE_VERSION}:
         if "structural_hierarchy" not in audit:
             raise ValueError("audit is missing structural_hierarchy")
         structural_hierarchy = _validate_structural_hierarchy(
@@ -2402,9 +2435,9 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format in {9, 11, 12, 13, SCAN_CACHE_VERSION}:
+            if scanner_format in {9, 11, 12, 13, 14, SCAN_CACHE_VERSION}:
                 record_keys.add("hierarchy")
-            if scanner_format in {13, SCAN_CACHE_VERSION}:
+            if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
                 record_keys.add("source_class")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
@@ -2421,7 +2454,7 @@ def _validate_audit(audit: dict):
                 or not record["public_signature"].strip()
             ):
                 raise ValueError(f"{location} has empty public_signature")
-            if scanner_format in {13, SCAN_CACHE_VERSION}:
+            if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
                 _validate_candidate_source_class(
                     class_name,
                     record["source_class"],
@@ -2452,7 +2485,7 @@ def _validate_audit(audit: dict):
                         record["public_signature"],
                         location,
                     )
-                elif scanner_format in {11, 12, 13, SCAN_CACHE_VERSION}:
+                elif scanner_format in {11, 12, 13, 14, SCAN_CACHE_VERSION}:
                     candidate_hierarchy = record["hierarchy"]
                     persisted_hierarchy = structural_hierarchy.get(class_name)
                     if candidate_hierarchy != persisted_hierarchy:
@@ -2486,7 +2519,7 @@ def _validate_audit(audit: dict):
             "audit with classified candidates requires at least one source file"
         )
 
-    if scanner_format in {10, 11, 12, 13, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, 14, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
             set(structural_hierarchy) - seen_classes
         )
@@ -2495,7 +2528,7 @@ def _validate_audit(audit: dict):
                 "audit structural_hierarchy owner is not an audited candidate: "
                 + ", ".join(unknown_structural_classes)
             )
-    if scanner_format in {13, SCAN_CACHE_VERSION}:
+    if scanner_format in {13, 14, SCAN_CACHE_VERSION}:
         expected_structural_inventory_sha256 = (
             _structural_candidate_inventory_sha256(
                 artifact,
@@ -2511,7 +2544,7 @@ def _validate_audit(audit: dict):
                 "audit structural candidate inventory does not match "
                 "structural hierarchy"
             )
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {14, SCAN_CACHE_VERSION}:
         structural_graph_metadata, structural_graph_target_classes = (
             _validate_structural_class_graph(
                 structural_class_graph,
@@ -2519,6 +2552,22 @@ def _validate_audit(audit: dict):
                 audit["ancestry_classpath"],
             )
         )
+        if scanner_format == SCAN_CACHE_VERSION:
+            target_records = [
+                {
+                    "class": class_name,
+                    "metadata": structural_graph_metadata[class_name],
+                }
+                for class_name in structural_graph_target_classes
+            ]
+            if (
+                len(target_records) != artifact["class_count"]
+                or _target_class_inventory_sha256(target_records)
+                != artifact["class_inventory_sha256"]
+            ):
+                raise ValueError(
+                    "audit structural graph does not match target class inventory"
+                )
         independently_classified = {}
         independently_structural = {}
         for class_name in structural_graph_target_classes:
@@ -2758,7 +2807,6 @@ def scan_jar(
                 f"target jar exceeds {MAX_CANDIDATE_CLASSES} candidate classes"
             )
         structural_class_graph = _build_structural_class_graph(
-            [class_name for class_name, _, _ in candidates],
             class_names,
             metadata_by_class,
             artifact_sha,
@@ -2843,16 +2891,29 @@ def scan_jar(
         for bucket in classified.values()
         for candidate in bucket
     ]
+    target_class_records = [
+        {
+            "class": record["class"],
+            "metadata": record["metadata"],
+        }
+        for record in structural_class_graph
+        if record["owner_sha256"] == artifact_sha
+    ]
+    artifact = {
+        "sha256": artifact_sha,
+        "size": artifact_size,
+        "class_count": len(target_class_records),
+        "class_inventory_sha256": _target_class_inventory_sha256(
+            target_class_records
+        ),
+    }
     source_path = Path(source) if source is not None else None
     audit = {
         "schema": SCHEMA_VERSION,
         "scanner_format": SCAN_CACHE_VERSION,
         "kind": "auto_storage_compat_audit",
         "target": target,
-        "artifact": {
-            "sha256": artifact_sha,
-            "size": artifact_size,
-        },
+        "artifact": artifact,
         "ancestry_classpath": ancestry_classpath,
         "source": _source_evidence(
             source_path,
@@ -2868,10 +2929,7 @@ def scan_jar(
         "structural_hierarchy": structural_hierarchy,
         "structural_candidate_inventory_sha256": (
             _structural_candidate_inventory_sha256(
-                {
-                    "sha256": artifact_sha,
-                    "size": artifact_size,
-                },
+                artifact,
                 ancestry_classpath,
                 [record["class"] for record in structural_hierarchy],
             )
@@ -2928,7 +2986,10 @@ def migrate_audit(
     )
     if migrated["target"] != legacy_audit["target"]:
         raise ValueError("migration target identity does not match legacy audit")
-    if migrated["artifact"] != legacy_audit["artifact"]:
+    if any(
+        migrated["artifact"][key] != legacy_audit["artifact"][key]
+        for key in ("sha256", "size")
+    ):
         raise ValueError("migration artifact does not match legacy audit")
     return migrated
 

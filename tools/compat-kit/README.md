@@ -40,7 +40,7 @@ relative to the supplied module. Supplying a non-Git source directory fails;
 omit `--source` when no versioned source is available. Current-format cache
 entries and committed audits carry the scanner format and are fully
 schema-validated before reuse. Complete consumers reject legacy scanner
-formats; only explicit migration commands may read formats 7 through 13.
+formats; only explicit migration commands may read formats 7 through 14.
 Committed source files must be sorted, unique, canonical POSIX
 repository-relative `.java` paths. A null revision requires no files, while a
 recorded revision with classified candidates requires at least one file. The
@@ -54,7 +54,7 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 14 structurally classifies concrete `Recipe` and
+Scanner format 15 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
@@ -83,13 +83,14 @@ the same bytes are used for validation, parsing, and hashing. Ordered roots
 are inventoried again after source evidence is built and immediately before a
 scan can cache or return, so a persistent in-flight change fails instead of
 producing mixed evidence. Legacy
-formats 7 through 13 remain readable for explicit migration, but current-only
-commands reject them. Format 14 stores each candidate's binary and source-level
+formats 7 through 14 remain readable for explicit migration, but current-only
+commands reject them. Format 15 stores each candidate's binary and source-level
 Java names, structural classification, a separate sorted top-level
 `structural_hierarchy` inventory, and an artifact/classpath-bound structural
-candidate digest. It also stores direct class-file metadata for candidates and
-their reachable ancestry in `structural_class_graph`; validation independently
-reconstructs every candidate bucket from that graph. Removing or rewriting both
+candidate digest. Its `structural_class_graph` starts from every target class
+and includes reachable ancestry; the artifact binds the exact target-class count
+and graph digest. Validation independently reconstructs every candidate bucket
+from that complete graph. Removing or rewriting both
 derived hierarchy copies therefore cannot demote an indirect candidate. Generated
 Java uses the source-level name for named nested classes without rewriting legal
 top-level `$` identifiers. Direct `extends`/`implements` parents
@@ -100,7 +101,7 @@ interface implementation, rather than only the first path from a concrete
 recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
-explicitly rescan an exact format-7 through format-13 artifact;
+explicitly rescan an exact format-7 through format-14 artifact;
 identity or SHA drift fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed

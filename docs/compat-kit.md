@@ -160,17 +160,18 @@ ancestry classpaths bind their exact artifact set. Cache metadata also records
 the selected JDK 21 installation, release version, and module-file identity.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `14`; formats `7` through `13` remain readable
+current scanner format is `15`; formats `7` through `14` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit; only explicit migration paths may consume legacy audit
 formats.
-Format 14 retains each candidate's structural classification and source-level
+Format 15 retains each candidate's structural classification and source-level
 Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
-artifact/classpath-bound `structural_candidate_inventory_sha256`. Validation
-also reconstructs every candidate classification from
-`structural_class_graph`, a compact direct class-file metadata graph covering
-candidates and their reachable target/classpath ancestry. Both derived
+artifact/classpath-bound `structural_candidate_inventory_sha256`. Its
+`structural_class_graph` starts from every target class and includes reachable
+target/classpath ancestry; the artifact binds that complete target-class count
+and graph digest. Validation reconstructs every candidate classification from
+this complete graph. Both derived
 hierarchy copies and the independent graph must agree, so deleting or rewriting
 the hierarchy records cannot silently demote an indirect candidate. Generated Java uses
 `source_class`: named nested binary `Outer$Inner` becomes source
@@ -739,7 +740,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-13 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-15 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
 finds twelve
