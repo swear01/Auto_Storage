@@ -1,5 +1,7 @@
 # Notes
 
+2026-08-01 Theurgy `BuiltInRegistries.ITEM.get` null-safety review：NeoForge 21.1.229 / Minecraft 1.21.1 的 `BuiltInRegistries.ITEM` 是 `DefaultedRegistry<Item>`；`DefaultedRegistry.get(ResourceLocation)` 標成 `@Nonnull`，`DefaultedMappedRegistry` 對 missing key 回傳 default `minecraft:air`，不會回傳 `null`。因此 `TheurgyCompat.requiredItem` 既有的 `item == Items.AIR` → `IllegalStateException` 已是正確 fail-closed；對 `ITEM.get(...)` 再加 `item == null` 是 dead check，不能當成 actionable NPE fix。Missing station item 的有意義邊界仍是 AIR/default key，不是 null。
+
 2026-08-01 Theurgy Compat Kit gotcha：Modrinth `KvM1ocNj` jar SHA-256 `6cbe0abe5fa53ba3d9308c7fe2b9a8f2df4d568f69fdb99a2fe6c6d1e59fdbc5` 與 klikli-dev Cloudsmith同版本座標位元組不同；CI/contract必須釘Modrinth代表artifact。Heat/brazier不進transaction，只抽象成已安裝Calcination/Distillation/Liquefaction Processing station work；Accumulation/Catalysation/Digestion/Fermentation/Incubation/Reformation與Mercury Flux明確reject。十四mod matrix recipe lock為12,736；加入Theurgy後shared Craftable index觀測 8,699,712 bytes（約8.30 MiB），因此matrix retained-index hard gate由8 MiB上修到9 MiB並寫入AGENTS/README/structure。
 
 

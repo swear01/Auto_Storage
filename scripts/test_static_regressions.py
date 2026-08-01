@@ -1623,6 +1623,12 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("IncubationRecipe.class", compat)
         self.assertNotIn("ReformationRecipe.class", compat)
         self.assertNotIn("AccumulationRecipe.class", compat)
+        self.assertRegex(
+            compat,
+            r"Item item = BuiltInRegistries\.ITEM\.get\(itemId\);\s*"
+            r"if \(item == Items\.AIR\) \{\s*"
+            r"throw new IllegalStateException\(\"Missing Theurgy station item \" \+ itemId\);",
+        )
         self.assertIn('modId="theurgy"', fixture_metadata)
         self.assertIn('versionRange="[1.73,)"', fixture_metadata)
         self.assertNotIn("1.73.1", fixture_metadata)
