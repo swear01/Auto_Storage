@@ -3104,6 +3104,57 @@ displayName="Sample Machines"
                 source_artifact=self.jar,
             )
 
+    def test_complete_validation_requires_exact_ancestry_artifacts(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[classpath_jar],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+        )
+
+        with self.assertRaisesRegex(ValueError, "exact ancestry artifacts"):
+            self.compat_kit._validate_audit_target_artifact(
+                audit,
+                target_jar,
+            )
+
+    def test_exact_ancestry_rejects_forged_external_graph(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[classpath_jar],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+        )
+        forged = copy.deepcopy(audit)
+        external = next(
+            record
+            for record in forged["structural_class_graph"]
+            if record["class"] == "fixture.base.BaseTransformer"
+        )
+        external["metadata"]["access_flags"] ^= 0x0010
+        self.compat_kit._validate_audit(forged)
+
+        with self.assertRaisesRegex(ValueError, "ancestry graph"):
+            self.compat_kit._validate_audit_target_artifact(
+                forged,
+                target_jar,
+                source_classpath=[classpath_jar],
+            )
+
     def test_complete_contract_requires_exact_source_artifact(self):
         with self.assertRaisesRegex(
             ValueError,
@@ -3114,6 +3165,57 @@ displayName="Sample Machines"
                 require_complete=True,
                 source_audit=self.source_audit(),
             )
+
+    def test_complete_consumers_accept_exact_source_classpath(self):
+        consumers = (
+            self.compat_kit.validate_contract,
+            self.compat_kit.generate_compatibility,
+            self.compat_kit.scaffold_conformance_tests,
+            self.compat_kit.scaffold_resource_integration,
+            self.compat_kit.scaffold_bundled,
+            self.compat_kit.scaffold_addon,
+            self.compat_kit.verify_contract,
+        )
+        for consumer in consumers:
+            with self.subTest(consumer=consumer.__name__):
+                self.assertIn(
+                    "source_classpath",
+                    inspect.signature(consumer).parameters,
+                )
+
+        parser = self.compat_kit._build_parser()
+        command_lines = (
+            [
+                "generate", "contract.json", "--audit", "audit.json",
+                "--jar", "target.jar", "--classpath", "one.jar",
+                "--classpath", "two.jar", "--plan", "plan.json",
+                "--output", "generated",
+            ],
+            [
+                "conformance", "contract.json", "--audit", "audit.json",
+                "--jar", "target.jar", "--classpath", "one.jar",
+                "--plan", "plan.json", "--output", "generated",
+            ],
+            [
+                "resource-scaffold", "contract.json", "--audit", "audit.json",
+                "--jar", "target.jar", "--classpath", "one.jar",
+                "--plan", "plan.json", "--output", "generated",
+            ],
+            [
+                "scaffold", "--addon", "contract.json", "--audit", "audit.json",
+                "--jar", "target.jar", "--classpath", "one.jar",
+                "--output", "generated",
+            ],
+            [
+                "verify", "contract.json", "--audit", "audit.json",
+                "--jar", "target.jar", "--classpath", "one.jar",
+                "--addon", "generated",
+            ],
+        )
+        for command_line in command_lines:
+            with self.subTest(command=command_line[0]):
+                args = parser.parse_args(command_line)
+                self.assertTrue(args.classpath)
 
     def test_audit_validation_binds_risk_evidence_to_recipe_candidates(self):
         audit = self.source_audit()
@@ -5453,6 +5555,76 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "missing exact AE2 19.2.17 artifact; resolve the Gradle fixture first"
         )
 
+    def committed_ae2_classpath(self) -> tuple[Path, ...]:
+        cached = getattr(self, "_committed_ae2_classpath", None)
+        if cached is not None:
+            return cached
+        audit = json.loads(
+            (ROOT / "compat/audits/ae2/19.2.17.json").read_text()
+        )
+        expected = {
+            (record["sha256"], record["size"])
+            for record in audit["ancestry_classpath"]
+        }
+        candidates = set()
+        manifest = ROOT / "build/compat-kit/ae2-classpath-exact-92.txt"
+        if manifest.is_file():
+            candidates.update(
+                Path(line)
+                for line in manifest.read_text().splitlines()
+                if line
+            )
+        for classpath_file in (ROOT / "build/moddev").glob("*Classpath.txt"):
+            candidates.update(
+                Path(value)
+                for value in classpath_file.read_text().split(os.pathsep)
+                if value
+            )
+        search_roots = (
+            ROOT / "build",
+            Path.home() / ".gradle/caches/modules-2/files-2.1",
+        )
+        expected_sizes = {size for _, size in expected}
+        found = {}
+        inspected = set()
+
+        def inspect_candidate(path: Path):
+            if path in inspected or not path.is_file():
+                return
+            inspected.add(path)
+            try:
+                size = path.stat().st_size
+            except OSError:
+                return
+            if size not in expected_sizes:
+                return
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            identity = (digest, size)
+            if identity in expected:
+                found[identity] = path.resolve()
+
+        for candidate in candidates:
+            inspect_candidate(candidate)
+        if len(found) != len(expected):
+            for search_root in search_roots:
+                if not search_root.is_dir():
+                    continue
+                for candidate in search_root.rglob("*.jar"):
+                    inspect_candidate(candidate)
+                if len(found) == len(expected):
+                    break
+        missing = expected - set(found)
+        if missing:
+            self.fail(
+                "missing exact AE2 ancestry artifacts; resolve the Gradle "
+                f"fixture first ({len(missing)} missing)"
+            )
+        self._committed_ae2_classpath = tuple(
+            found[(record["sha256"], record["size"])]
+            for record in audit["ancestry_classpath"]
+        )
+        return self._committed_ae2_classpath
+
     @staticmethod
     def downgrade_audit_artifact(audit: dict):
         audit["artifact"] = {
@@ -5758,9 +5930,12 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             build,
         )
         self.assertIn("compatKitTargetArtifact", build)
+        self.assertIn("compatKitAncestryArtifacts", build)
         self.assertIn("verifyCompatKitTargetArtifact", build)
         self.assertIn("stageCompatKitTargetArtifact", build)
+        self.assertIn("stageCompatKitAncestryArtifacts", build)
         self.assertIn('layout.buildDirectory.file("compat-kit/target.jar")', build)
+        self.assertIn('layout.buildDirectory.dir("compat-kit/ancestry")', build)
         self.assertIn(contract["source_audit_sha256"], build)
         self.assertIn(
             'url = uri("https://repo.example.com/releases")',
@@ -5782,14 +5957,37 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn("./gradlew build", workflow)
         self.assertIn("./gradlew runGameTestServer", workflow)
         self.assertIn("./gradlew stageCompatKitTargetArtifact", workflow)
+        self.assertIn("./gradlew stageCompatKitAncestryArtifacts", workflow)
         self.assertIn(
             "compat-kit verify compat/contract.json "
             "--audit compat/audit.json --jar build/compat-kit/target.jar "
-            "--addon .",
+            '"${classpath_args[@]}" --addon .',
             workflow,
         )
         self.assertTrue((output / "compat/audit.json").is_file())
         self.assertNotIn("implementation project", build)
+
+    def test_external_ancestry_staging_uses_single_line_input_identity(self):
+        audit = self.source_audit()
+        audit["ancestry_classpath"] = [
+            {"sha256": "a" * 64, "size": 123}
+        ]
+        build = self.compat_kit._addon_files(
+            self.addon_contract(),
+            audit,
+        )["build.gradle"].decode()
+        expected_digest = hashlib.sha256(
+            self.compat_kit.canonical_json(
+                audit["ancestry_classpath"]
+            ).encode()
+        ).hexdigest()
+
+        self.assertIn(
+            'inputs.property(\n'
+            '            "expectedArtifacts",\n'
+            f'            "{expected_digest}")',
+            build,
+        )
 
     def test_worker_package_keeps_untrusted_target_metadata_out_of_instructions(self):
         audit = self.source_audit()
@@ -6922,6 +7120,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             require_complete=True,
             source_audit=audit,
             source_artifact=self.committed_ae2_jar(),
+            source_classpath=self.committed_ae2_classpath(),
         )
         self.assertEqual(
             set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
@@ -6951,6 +7150,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             plan,
             output,
             source_artifact=self.committed_ae2_jar(),
+            source_classpath=self.committed_ae2_classpath(),
         )
 
         generated = next((output / "src/main/java").rglob("*.java"))
@@ -6989,6 +7189,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             conformance_plan,
             generated_root / "conformance",
             source_artifact=self.committed_ae2_jar(),
+            source_classpath=self.committed_ae2_classpath(),
         )
         resources = self.compat_kit.scaffold_resource_integration(
             contract,
@@ -6996,6 +7197,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             resource_plan,
             generated_root / "resource",
             source_artifact=self.committed_ae2_jar(),
+            source_classpath=self.committed_ae2_classpath(),
         )
 
         committed_root = ROOT / "src/compatKitGeneratedFixture/java"
@@ -7269,6 +7471,57 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "owner_namespace",
             expressions,
         )
+
+    def test_gametest_holder_constants_use_qualified_declaring_classes(self):
+        source_root = self.root / "qualified-holder-constants"
+        sources = {
+            "a/FixtureIds.java": (
+                "package a; public final class FixtureIds { "
+                'public static final String MOD_ID = "namespace_a"; }\n'
+            ),
+            "a/Tests.java": (
+                "package a; "
+                "@net.neoforged.neoforge.gametest.GameTestHolder(FixtureIds.MOD_ID) "
+                "final class Tests { "
+                "@net.minecraft.gametest.framework.GameTest("
+                'template = "craftingtests.platform") static void check() {} }\n'
+            ),
+            "b/FixtureIds.java": (
+                "package b; public final class FixtureIds { "
+                'public static final String MOD_ID = "namespace_b"; }\n'
+            ),
+            "b/Tests.java": (
+                "package b; "
+                "@net.neoforged.neoforge.gametest.GameTestHolder(FixtureIds.MOD_ID) "
+                "final class Tests { "
+                "@net.minecraft.gametest.framework.GameTest("
+                'template = "craftingtests.platform") static void check() {} }\n'
+            ),
+        }
+        for relative, text in sources.items():
+            path = source_root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text)
+
+        expressions = self.compat_kit._java_string_constant_expressions(
+            (source_root,)
+        )
+        self.assertEqual(
+            '"namespace_a"',
+            expressions[("a.FixtureIds", "MOD_ID")],
+        )
+        self.assertEqual(
+            '"namespace_b"',
+            expressions[("b.FixtureIds", "MOD_ID")],
+        )
+        for package, namespace in (("a", "namespace_a"), ("b", "namespace_b")):
+            source = source_root / package / "Tests.java"
+            self.compat_kit._validate_game_test_holder_namespace(
+                source,
+                source.read_text(),
+                namespace,
+                expressions,
+            )
 
     def test_verification_evidence_binds_marker_to_owning_gametest_holder(self):
         contract = self.accepted_contract()
@@ -8236,7 +8489,11 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 example_workflow,
             )
             self.assertIn(
-                "--jar build/compat-kit/target.jar --addon .",
+                "./gradlew stageCompatKitAncestryArtifacts",
+                example_workflow,
+            )
+            self.assertIn(
+                '--jar build/compat-kit/target.jar "${classpath_args[@]}" --addon .',
                 example_workflow,
             )
             archive.extractall(self.root / "extracted")

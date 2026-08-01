@@ -416,6 +416,7 @@ tools/compat-kit/compat-kit generate \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
   --jar build/compat-kit/artifacts/target.jar \
+  --classpath build/compat-kit/classpath/dependency.jar \
   --plan compat/generation/target.json \
   --output build/compat-kit/target-generated
 ```
@@ -477,6 +478,7 @@ tools/compat-kit/compat-kit conformance \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
   --jar build/compat-kit/artifacts/target.jar \
+  --classpath build/compat-kit/classpath/dependency.jar \
   --plan compat/conformance/target.json \
   --output build/compat-kit/target-conformance
 
@@ -484,6 +486,7 @@ tools/compat-kit/compat-kit resource-scaffold \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
   --jar build/compat-kit/artifacts/target.jar \
+  --classpath build/compat-kit/classpath/dependency.jar \
   --plan compat/resources/target.json \
   --output build/compat-kit/target-resource
 ```
@@ -552,7 +555,8 @@ Bundled module:
 tools/compat-kit/compat-kit scaffold \
   --bundled compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
-  --jar build/compat-kit/artifacts/target.jar
+  --jar build/compat-kit/artifacts/target.jar \
+  --classpath build/compat-kit/classpath/dependency.jar
 ```
 
 Independent addon:
@@ -562,6 +566,7 @@ tools/compat-kit/compat-kit scaffold \
   --addon compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
   --jar build/compat-kit/artifacts/target.jar \
+  --classpath build/compat-kit/classpath/dependency.jar \
   --output ../target-auto-storage
 ```
 
@@ -641,6 +646,7 @@ tools/compat-kit/compat-kit verify \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
   --jar build/compat-kit/artifacts/target.jar \
+  --classpath build/compat-kit/classpath/dependency.jar \
   --bundled . \
   --output build/compat-kit/target-report.json
 ```
@@ -659,10 +665,11 @@ any non-zero command. Multiple success summaries are rejected even when one
 matches, because editable fixture output cannot outrank the framework result.
 `expected_game_tests` is restricted to `1..2147483647`, matching the positive
 JSON `Integer` required by the generated Gradle descriptor.
-Generated addon builds expose `stageCompatKitTargetArtifact`, which verifies
-the resolved target SHA and writes `build/compat-kit/target.jar`. The generated
-and published example workflows run that task and pass the staged path through
-`verify --jar`; copying only `compat/audit.json` is never sufficient.
+Generated addon builds expose `stageCompatKitTargetArtifact` and
+`stageCompatKitAncestryArtifacts`, which stage the exact target and every
+audited ancestry jar. Generated and published example workflows pass the target
+through `verify --jar` and every staged ancestry jar through repeatable
+`--classpath`; copying only `compat/audit.json` is never sufficient.
 A marker assigned to a `run*GameTestServer` task must occur inside an
 annotated `@GameTest` method body; a detached constant, helper, or comment does
 not prove that the behavior ran. Comments inside a real GameTest are removed

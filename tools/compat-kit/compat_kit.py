@@ -2672,7 +2672,126 @@ def _validate_audit(audit: dict):
                 )
 
 
-def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
+def _validate_audit_ancestry_graph(
+    audit: dict,
+    source_classpath,
+    target_metadata_by_class: dict[str, dict | None],
+) -> None:
+    expected_artifacts = audit["ancestry_classpath"]
+    raw_paths = list(source_classpath or ())
+    if expected_artifacts and not raw_paths:
+        raise ValueError(
+            "complete validation requires exact ancestry artifacts"
+        )
+    if len(raw_paths) > MAX_CLASSPATH_JARS:
+        raise ValueError(
+            f"exact ancestry artifacts exceed {MAX_CLASSPATH_JARS} jars"
+        )
+    class_entries: dict[str, list[tuple[Path, str]]] = {}
+    artifact_checks = []
+    actual_artifacts = []
+    seen_artifacts = set()
+    for raw_path in raw_paths:
+        unresolved = Path(raw_path)
+        if unresolved.is_symlink():
+            raise ValueError(
+                f"exact ancestry artifact is a symlink: {raw_path}"
+            )
+        path = unresolved.resolve()
+        if not path.is_file():
+            raise ValueError(
+                f"exact ancestry artifact does not exist: {raw_path}"
+            )
+        size = path.stat().st_size
+        digest = _sha256_file(path)
+        identity = (digest, size)
+        if identity in seen_artifacts:
+            raise ValueError("exact ancestry artifacts repeat an artifact")
+        seen_artifacts.add(identity)
+        with zipfile.ZipFile(path) as archive:
+            _validate_archive(path, archive)
+            for entry_name in archive.namelist():
+                if (
+                    entry_name.startswith("META-INF/versions/")
+                    or not entry_name.endswith(".class")
+                    or entry_name.endswith("module-info.class")
+                ):
+                    continue
+                class_entries.setdefault(
+                    _class_name(entry_name),
+                    [],
+                ).append((path, entry_name))
+        actual_artifacts.append({"sha256": digest, "size": size})
+        artifact_checks.append((path, digest, size))
+    actual_artifacts.sort(
+        key=lambda record: (record["sha256"], record["size"])
+    )
+    if actual_artifacts != expected_artifacts:
+        raise ValueError(
+            "exact ancestry artifacts do not match source audit"
+        )
+
+    metadata_by_class = dict(target_metadata_by_class)
+    class_locations = {}
+    pending = list(target_metadata_by_class)
+    while pending:
+        class_name = pending.pop()
+        metadata = metadata_by_class.get(class_name)
+        if metadata is None:
+            continue
+        parents = [
+            *metadata["interfaces"],
+            *([metadata["super_class"]] if metadata["super_class"] else []),
+        ]
+        for parent in parents:
+            if parent in metadata_by_class:
+                continue
+            matches = []
+            for path, entry_name in class_entries.get(parent, []):
+                with zipfile.ZipFile(path) as archive:
+                    if not _is_inspectable_class(archive, entry_name):
+                        continue
+                    matches.append((
+                        path,
+                        _class_metadata(archive.read(entry_name), entry_name),
+                    ))
+            if len(matches) > 1:
+                raise ValueError(
+                    "exact ancestry artifacts repeat class " + parent
+                )
+            if not matches:
+                continue
+            owner_path, parent_metadata = matches[0]
+            metadata_by_class[parent] = parent_metadata
+            class_locations[parent] = owner_path
+            pending.append(parent)
+
+    actual_graph = _build_structural_class_graph(
+        sorted(target_metadata_by_class),
+        metadata_by_class,
+        audit["artifact"]["sha256"],
+        class_locations,
+        artifact_checks,
+    )
+    if actual_graph != audit["structural_class_graph"]:
+        raise ValueError(
+            "exact ancestry graph does not match source audit"
+        )
+    for path, digest, size in artifact_checks:
+        _require_unchanged_artifact(
+            path,
+            digest,
+            size,
+            "ancestry artifact",
+        )
+
+
+def _validate_audit_target_artifact(
+    audit: dict,
+    source_artifact,
+    *,
+    source_classpath=(),
+) -> None:
     _validate_audit(audit)
     if audit["scanner_format"] != SCAN_CACHE_VERSION:
         raise ValueError(
@@ -2687,6 +2806,7 @@ def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
         "target artifact",
     )
     records = []
+    target_metadata_by_class = {}
     seen_classes = set()
     target_recipe_data = None
     with zipfile.ZipFile(jar) as archive:
@@ -2700,11 +2820,14 @@ def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
                     "target artifact repeats normalized class " + class_name
                 )
             seen_classes.add(class_name)
+            metadata = _class_metadata(
+                archive.read(entry_name),
+                entry_name,
+            )
+            target_metadata_by_class[class_name] = metadata
             records.append({
                 "class": class_name,
-                "metadata": _structural_metadata(
-                    _class_metadata(archive.read(entry_name), entry_name)
-                ),
+                "metadata": _structural_metadata(metadata),
             })
         target_recipe_data = _recipe_data_inventory(
             archive,
@@ -2729,6 +2852,11 @@ def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
         raise ValueError(
             "target artifact class inventory does not match source audit"
         )
+    _validate_audit_ancestry_graph(
+        audit,
+        source_classpath,
+        target_metadata_by_class,
+    )
     recipe_data = audit["recipe_data"]
     if (
         recipe_data["sources"][0] != target_recipe_data["sources"][0]
@@ -3585,6 +3713,7 @@ def validate_contract(
     require_complete: bool,
     source_audit: dict | None = None,
     source_artifact=None,
+    source_classpath=(),
 ):
     if not isinstance(contract, dict):
         raise ValueError("contract must be a JSON object")
@@ -3825,7 +3954,11 @@ def validate_contract(
             raise ValueError("complete contract requires its source audit")
         if source_artifact is None:
             raise ValueError("complete contract requires exact source artifact")
-        _validate_audit_target_artifact(source_audit, source_artifact)
+        _validate_audit_target_artifact(
+            source_audit,
+            source_artifact,
+            source_classpath=source_classpath,
+        )
     else:
         verification = contract.get("verification")
         if not isinstance(verification, dict) or set(verification) != VERIFICATION_KEYS:
@@ -4180,6 +4313,15 @@ mod_group_id={package}
         for dependency in target["runtime_dependencies"]
     )
     target_dependency = _groovy_string(target["dependency"])
+    ancestry_records = "\n".join(
+        "    [sha256: "
+        + _groovy_string(record["sha256"])
+        + f", size: {record['size']}L],"
+        for record in source_audit["ancestry_classpath"]
+    )
+    ancestry_identity = hashlib.sha256(
+        canonical_json(source_audit["ancestry_classpath"]).encode()
+    ).hexdigest()
     build = f"""plugins {{
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.141'
@@ -4193,6 +4335,11 @@ configurations {{
         canBeConsumed = false
         canBeResolved = true
         transitive = false
+    }}
+    compatKitAncestryArtifacts {{
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = true
     }}
 }}
 
@@ -4245,12 +4392,27 @@ dependencies {{
     runtimeOnly({target_dependency}) {{ transitive = false }}
 {runtime_dependency_lines}
     compatKitTargetArtifact({target_dependency})
+    compatKitAncestryArtifacts({target_dependency})
 }}
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 def expectedCompatKitTargetSha256 = "{contract['source_audit_sha256']}"
+def expectedCompatKitAncestryArtifacts = [
+{ancestry_records}
+]
 def stagedCompatKitTargetArtifact = layout.buildDirectory.file("compat-kit/target.jar")
+def stagedCompatKitAncestryArtifacts = layout.buildDirectory.dir("compat-kit/ancestry")
+def compatKitSha256 = {{ File artifact ->
+    def digest = java.security.MessageDigest.getInstance("SHA-256")
+    artifact.withInputStream {{ input ->
+        byte[] buffer = new byte[8192]
+        for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {{
+            digest.update(buffer, 0, read)
+        }}
+    }}
+    digest.digest().encodeHex().toString()
+}}
 def stageCompatKitTargetArtifact = tasks.register("stageCompatKitTargetArtifact") {{
     inputs.files(configurations.compatKitTargetArtifact)
     inputs.property("expectedSha256", expectedCompatKitTargetSha256)
@@ -4294,8 +4456,62 @@ def stageCompatKitTargetArtifact = tasks.register("stageCompatKitTargetArtifact"
         }}
     }}
 }}
+def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArtifacts") {{
+    inputs.files(
+            configurations.compatKitAncestryArtifacts,
+            sourceSets.main.compileClasspath,
+            sourceSets.main.runtimeClasspath)
+    inputs.property(
+            "expectedArtifacts",
+            {_groovy_string(ancestry_identity)})
+    outputs.dir(stagedCompatKitAncestryArtifacts)
+    doLast {{
+        def expectedBySha256 = expectedCompatKitAncestryArtifacts.collectEntries {{
+            [(it.sha256): it]
+        }}
+        def matches = [:]
+        inputs.files.files.findAll {{
+            it.isFile() && it.name.endsWith(".jar")
+        }}.each {{ artifact ->
+            def size = artifact.length()
+            if (expectedCompatKitAncestryArtifacts.any {{ it.size == size }}) {{
+                def sha256 = compatKitSha256(artifact)
+                def expected = expectedBySha256[sha256]
+                if (expected != null && expected.size == size) {{
+                    matches[sha256] = artifact
+                }}
+            }}
+        }}
+        def missing = expectedBySha256.keySet() - matches.keySet()
+        if (!missing.isEmpty()) {{
+            throw new GradleException(
+                    "Compat Kit exact ancestry artifacts are unresolved: "
+                    + missing.toList().sort().join(", "))
+        }}
+        def stagedRoot = stagedCompatKitAncestryArtifacts.get().asFile
+        project.delete(stagedRoot)
+        stagedRoot.mkdirs()
+        expectedCompatKitAncestryArtifacts.each {{ expected ->
+            def source = matches[expected.sha256]
+            def staged = new File(stagedRoot, expected.sha256 + ".jar")
+            java.nio.file.Files.copy(
+                    source.toPath(),
+                    staged.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            if (
+                staged.length() != expected.size
+                || compatKitSha256(staged) != expected.sha256
+            ) {{
+                throw new GradleException(
+                        "Compat Kit staged ancestry artifact changed: "
+                        + expected.sha256)
+            }}
+        }}
+    }}
+}}
 def verifyCompatKitTargetArtifact = tasks.register("verifyCompatKitTargetArtifact") {{
     dependsOn stageCompatKitTargetArtifact
+    dependsOn stageCompatKitAncestryArtifacts
 }}
 
 tasks.named("check").configure {{
@@ -4412,7 +4628,14 @@ jobs:
       - run: ./gradlew build --console=plain --no-daemon
       - run: ./gradlew runGameTestServer --console=plain --no-daemon
       - run: ./gradlew stageCompatKitTargetArtifact --console=plain --no-daemon
-      - run: tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --jar build/compat-kit/target.jar --addon .
+      - run: ./gradlew stageCompatKitAncestryArtifacts --console=plain --no-daemon
+      - shell: bash
+        run: |
+          classpath_args=()
+          while IFS= read -r artifact; do
+            classpath_args+=(--classpath "$artifact")
+          done < <(find build/compat-kit/ancestry -type f -name '*.jar' -print | sort)
+          tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --jar build/compat-kit/target.jar "${classpath_args[@]}" --addon .
 """
     structure = base64.b64decode(
         "H4sICMY9CmoC/2JlaGF2aW9yYWx0ZXN0cy5wbGF0Zm9ybS5uYnQAjdPLCsJADAXQm0zV"
@@ -4587,12 +4810,14 @@ def scaffold_bundled(
     *,
     source_audit: dict,
     source_artifact,
+    source_classpath=(),
 ) -> list[Path]:
     validate_contract(
         contract,
         require_complete=True,
         source_audit=source_audit,
         source_artifact=source_artifact,
+        source_classpath=source_classpath,
     )
     _validate_bundled_verification(contract)
     mod_id = contract["target"]["mod_id"]
@@ -4647,12 +4872,14 @@ def scaffold_addon(
     *,
     source_audit: dict,
     source_artifact,
+    source_classpath=(),
 ) -> list[Path]:
     validate_contract(
         contract,
         require_complete=True,
         source_audit=source_audit,
         source_artifact=source_artifact,
+        source_classpath=source_classpath,
     )
     _validate_addon_verification(contract)
     return _materialize(
@@ -5066,10 +5293,11 @@ def _java_string_constant_expressions(
     })
     if len(sources) > MAX_SOURCE_FILES:
         raise ValueError(f"verification root exceeds {MAX_SOURCE_FILES} Java files")
-    expressions = {}
+    expressions = _JavaStringConstantExpressions()
     for path in sources:
         text = _java_without_comments(path.read_text())
         class_spans = _java_class_spans(text)
+        context = _java_compilation_context(text)
         for match in re.finditer(
             r"\b(?:public\s+|protected\s+|private\s+)?"
             r"(?:static\s+final|final\s+static)\s+String\s+"
@@ -5090,47 +5318,123 @@ def _java_string_constant_expressions(
                 owners,
                 key=lambda span: span["closing"] - span["opening"],
             )
-            key = (owner["name"], match.group(1))
+            key = (owner["qualified_name"], match.group(1))
             expression = match.group(2)
             previous = expressions.get(key)
             if previous is not None and previous != expression:
                 raise ValueError(
                     "ambiguous Java string constant for GameTest holder namespace: "
-                    f"{owner['name']}.{match.group(1)}"
+                    f"{owner['qualified_name']}.{match.group(1)}"
                 )
             expressions[key] = expression
+            expressions.contexts[key] = context
 
     return expressions
+
+
+class _JavaStringConstantExpressions(dict):
+    def __init__(self):
+        super().__init__()
+        self.contexts = {}
+
+
+def _java_compilation_context(text: str) -> tuple[str, dict[str, str]]:
+    code = _java_code_mask(text)
+    package_match = re.search(
+        r"\bpackage\s+([A-Za-z_$][A-Za-z0-9_$]*"
+        r"(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*)\s*;",
+        code,
+    )
+    package_name = package_match.group(1) if package_match else ""
+    imports = {}
+    for match in re.finditer(
+        r"\bimport\s+(?!static\b)"
+        r"([A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)+)\s*;",
+        code,
+    ):
+        qualified_name = match.group(1)
+        simple_name = qualified_name.rsplit(".", 1)[1]
+        previous = imports.get(simple_name)
+        if previous is not None and previous != qualified_name:
+            raise ValueError(
+                "ambiguous Java import for GameTest holder namespace: "
+                + simple_name
+            )
+        imports[simple_name] = qualified_name
+    return package_name, imports
+
+
+def _qualified_java_constant_key(
+    key: tuple[str, str],
+    expressions: dict[tuple[str, str], str],
+    context: tuple[str, dict[str, str]],
+) -> tuple[str, str]:
+    owner, member = key
+    package_name, imports = context
+    owner_parts = owner.split(".")
+    candidates = [owner]
+    imported = imports.get(owner_parts[0])
+    if imported is not None:
+        candidates.append(".".join([imported, *owner_parts[1:]]))
+    if package_name:
+        candidates.append(f"{package_name}.{owner}")
+    matches = []
+    for candidate in candidates:
+        candidate_key = (candidate, member)
+        if candidate_key in expressions and candidate_key not in matches:
+            matches.append(candidate_key)
+    if not matches:
+        suffix = "." + owner
+        matches = [
+            candidate
+            for candidate in expressions
+            if candidate[1] == member
+            and (
+                candidate[0] == owner
+                or candidate[0].endswith(suffix)
+            )
+        ]
+    if len(matches) != 1:
+        label = "ambiguous" if matches else "unresolved"
+        raise ValueError(
+            f"{label} Java string constant for GameTest holder namespace: "
+            f"{owner}.{member}"
+        )
+    return matches[0]
 
 
 def _resolve_java_string_constant(
     key: tuple[str, str],
     expressions: dict[tuple[str, str], str],
+    context: tuple[str, dict[str, str]] | None = None,
     resolving: set[tuple[str, str]] | None = None,
 ) -> str:
     resolving = set() if resolving is None else resolving
-    if key in resolving or key not in expressions:
+    context = ("", {}) if context is None else context
+    qualified_key = _qualified_java_constant_key(key, expressions, context)
+    if qualified_key in resolving:
         raise ValueError(
             "unresolved Java string constant for GameTest holder namespace: "
-            f"{key[0]}.{key[1]}"
+            f"{qualified_key[0]}.{qualified_key[1]}"
         )
-    expression = expressions[key]
+    expression = expressions[qualified_key]
     if expression.startswith('"'):
         try:
             return json.loads(expression)
         except json.JSONDecodeError as error:
             raise ValueError(
                 "invalid Java string constant for GameTest holder namespace: "
-                f"{key[0]}.{key[1]}"
+                f"{qualified_key[0]}.{qualified_key[1]}"
             ) from error
-    parts = expression.split(".")
-    resolving.add(key)
+    owner, member = expression.rsplit(".", 1)
+    resolving.add(qualified_key)
     value = _resolve_java_string_constant(
-        (parts[-2], parts[-1]),
+        (owner, member),
         expressions,
+        getattr(expressions, "contexts", {}).get(qualified_key, ("", {})),
         resolving,
     )
-    resolving.remove(key)
+    resolving.remove(qualified_key)
     return value
 
 
@@ -5140,6 +5444,7 @@ def _game_test_holder_annotations(
 ) -> list[dict]:
     code = _java_code_mask(text)
     uncommented = _java_without_comments(text)
+    context = _java_compilation_context(text)
     annotations = []
     for annotation in re.finditer(
         r"@(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*GameTestHolder\s*\(",
@@ -5168,8 +5473,8 @@ def _game_test_holder_annotations(
                 ) from error
         else:
             constant = re.fullmatch(
-                r"(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*"
-                r"([A-Za-z_$][A-Za-z0-9_$]*)\."
+                r"((?:[A-Za-z_$][A-Za-z0-9_$]*\.)*"
+                r"[A-Za-z_$][A-Za-z0-9_$]*)\."
                 r"([A-Za-z_$][A-Za-z0-9_$]*)",
                 expression,
             )
@@ -5177,10 +5482,10 @@ def _game_test_holder_annotations(
                 raise ValueError(
                     f"unresolved GameTest holder namespace: {expression}"
                 )
-            key = (constant.group(1), constant.group(2))
             namespace = _resolve_java_string_constant(
-                key,
+                (constant.group(1), constant.group(2)),
                 constant_expressions,
+                context,
             )
         annotations.append({
             "start": annotation.start(),
@@ -5225,6 +5530,32 @@ def _java_class_spans(text: str) -> list[dict]:
             "opening": opening,
             "closing": closing,
         })
+    package_name, _ = _java_compilation_context(text)
+    for span in sorted(spans, key=lambda value: value["opening"]):
+        parents = [
+            candidate
+            for candidate in spans
+            if (
+                candidate["opening"] < span["opening"]
+                and span["closing"] < candidate["closing"]
+            )
+        ]
+        parent = (
+            min(
+                parents,
+                key=lambda value: value["closing"] - value["opening"],
+            )
+            if parents
+            else None
+        )
+        if parent is not None:
+            span["qualified_name"] = (
+                f"{parent['qualified_name']}.{span['name']}"
+            )
+        elif package_name:
+            span["qualified_name"] = f"{package_name}.{span['name']}"
+        else:
+            span["qualified_name"] = span["name"]
     return spans
 
 
@@ -5394,6 +5725,7 @@ def verify_contract(
     *,
     source_audit: dict,
     source_artifact,
+    source_classpath=(),
     bundled_root=None,
     addon_root=None,
     command_runner=None,
@@ -5403,6 +5735,7 @@ def verify_contract(
         require_complete=True,
         source_audit=source_audit,
         source_artifact=source_artifact,
+        source_classpath=source_classpath,
     )
     if (bundled_root is None) == (addon_root is None):
         raise ValueError("verify requires exactly one of bundled_root or addon_root")
@@ -7299,12 +7632,14 @@ def generate_compatibility(
     output,
     *,
     source_artifact,
+    source_classpath=(),
 ) -> list[Path]:
     validate_contract(
         contract,
         require_complete=True,
         source_audit=audit,
         source_artifact=source_artifact,
+        source_classpath=source_classpath,
     )
     _validate_generation_plan(plan, contract)
     source, boundaries = _generated_compat_java(contract, audit, plan)
@@ -7714,12 +8049,14 @@ def scaffold_conformance_tests(
     output,
     *,
     source_artifact,
+    source_classpath=(),
 ) -> list[Path]:
     validate_contract(
         contract,
         require_complete=True,
         source_audit=audit,
         source_artifact=source_artifact,
+        source_classpath=source_classpath,
     )
     _validate_conformance_plan(plan, contract)
     package_path = plan["package"].replace(".", "/")
@@ -8160,12 +8497,14 @@ def scaffold_resource_integration(
     output,
     *,
     source_artifact,
+    source_classpath=(),
 ) -> list[Path]:
     validate_contract(
         contract,
         require_complete=True,
         source_audit=audit,
         source_artifact=source_artifact,
+        source_classpath=source_classpath,
     )
     _validate_resource_plan(plan, contract)
     package_path = plan["package"].replace(".", "/")
@@ -8262,6 +8601,7 @@ def _build_parser() -> argparse.ArgumentParser:
     generate.add_argument("contract")
     generate.add_argument("--audit", required=True)
     generate.add_argument("--jar", required=True)
+    generate.add_argument("--classpath", action="append", default=[])
     generate.add_argument("--plan", required=True)
     generate.add_argument("--output", required=True)
 
@@ -8269,6 +8609,7 @@ def _build_parser() -> argparse.ArgumentParser:
     conformance.add_argument("contract")
     conformance.add_argument("--audit", required=True)
     conformance.add_argument("--jar", required=True)
+    conformance.add_argument("--classpath", action="append", default=[])
     conformance.add_argument("--plan", required=True)
     conformance.add_argument("--output", required=True)
 
@@ -8276,6 +8617,7 @@ def _build_parser() -> argparse.ArgumentParser:
     resource.add_argument("contract")
     resource.add_argument("--audit", required=True)
     resource.add_argument("--jar", required=True)
+    resource.add_argument("--classpath", action="append", default=[])
     resource.add_argument("--plan", required=True)
     resource.add_argument("--output", required=True)
 
@@ -8295,11 +8637,13 @@ def _build_parser() -> argparse.ArgumentParser:
     scaffold.add_argument("--output")
     scaffold.add_argument("--audit", required=True)
     scaffold.add_argument("--jar", required=True)
+    scaffold.add_argument("--classpath", action="append", default=[])
 
     verify = subparsers.add_parser("verify")
     verify.add_argument("contract")
     verify.add_argument("--audit", required=True)
     verify.add_argument("--jar", required=True)
+    verify.add_argument("--classpath", action="append", default=[])
     verify_target = verify.add_mutually_exclusive_group(required=True)
     verify_target.add_argument("--bundled", nargs="?", const=".")
     verify_target.add_argument("--addon")
@@ -8381,6 +8725,7 @@ def main(argv=None) -> int:
                 _read_json(args.plan),
                 args.output,
                 source_artifact=args.jar,
+                source_classpath=args.classpath,
             )
         elif args.command == "conformance":
             scaffold_conformance_tests(
@@ -8389,6 +8734,7 @@ def main(argv=None) -> int:
                 _read_json(args.plan),
                 args.output,
                 source_artifact=args.jar,
+                source_classpath=args.classpath,
             )
         elif args.command == "resource-scaffold":
             scaffold_resource_integration(
@@ -8397,6 +8743,7 @@ def main(argv=None) -> int:
                 _read_json(args.plan),
                 args.output,
                 source_artifact=args.jar,
+                source_classpath=args.classpath,
             )
         elif args.command == "diff":
             old = _read_json(args.old_audit)
@@ -8423,6 +8770,7 @@ def main(argv=None) -> int:
                     root,
                     source_audit=source_audit,
                     source_artifact=args.jar,
+                    source_classpath=args.classpath,
                 )
             else:
                 if not args.output:
@@ -8432,6 +8780,7 @@ def main(argv=None) -> int:
                     args.output,
                     source_audit=source_audit,
                     source_artifact=args.jar,
+                    source_classpath=args.classpath,
                 )
         elif args.command == "verify":
             contract = _read_json(args.contract)
@@ -8439,6 +8788,7 @@ def main(argv=None) -> int:
                 contract,
                 source_audit=_read_json(args.audit),
                 source_artifact=args.jar,
+                source_classpath=args.classpath,
                 bundled_root=args.bundled,
                 addon_root=args.addon,
             )

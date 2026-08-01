@@ -208,11 +208,11 @@ instructions.
 For a complete reviewed contract:
 
 ```bash
-./compat-kit generate contract.json --audit audit.json --jar target.jar \
+./compat-kit generate contract.json --audit audit.json --jar target.jar --classpath ancestry.jar \
   --plan generation-plan.json --output generated
-./compat-kit conformance contract.json --audit audit.json --jar target.jar \
+./compat-kit conformance contract.json --audit audit.json --jar target.jar --classpath ancestry.jar \
   --plan conformance-plan.json --output conformance
-./compat-kit resource-scaffold contract.json --audit audit.json --jar target.jar \
+./compat-kit resource-scaffold contract.json --audit audit.json --jar target.jar --classpath ancestry.jar \
   --plan resource-plan.json --output resource
 ```
 
@@ -251,9 +251,9 @@ lowercase resource locations; duplicate descriptor variant items and duplicate
 generation-plan rate bindings are rejected.
 
 ```bash
-./compat-kit scaffold --addon contract.json --audit audit.json --jar target.jar \
+./compat-kit scaffold --addon contract.json --audit audit.json --jar target.jar --classpath ancestry.jar \
   --output target-auto-storage
-./compat-kit verify contract.json --audit audit.json --jar target.jar \
+./compat-kit verify contract.json --audit audit.json --jar target.jar --classpath ancestry.jar \
   --addon target-auto-storage \
   --output report.json
 ```
@@ -271,10 +271,11 @@ Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
 reviewed target jar SHA; target compile/runtime and explicit runtime
 dependencies are non-transitive, and evidence task names are never remapped.
-`stageCompatKitTargetArtifact` copies the one SHA-verified resolved jar to
-`build/compat-kit/target.jar`; generated and example GitHub Actions workflows
-pass that exact staged file to `verify --jar` rather than trusting only the
-committed audit.
+`stageCompatKitTargetArtifact` copies the SHA-verified target jar to
+`build/compat-kit/target.jar`, while `stageCompatKitAncestryArtifacts` stages
+every audited ancestry jar. Generated and example GitHub Actions workflows pass
+both the target to `verify --jar` and every staged ancestry jar through
+repeatable `--classpath` rather than trusting only the committed audit.
 Reviewed repositories are emitted first and own target/runtime groups.
 Explicit runtime groups cannot fall back to Maven Central even with no reviewed
 repositories; target fallback is still protected by its exact SHA gate, and
@@ -288,8 +289,8 @@ artifacts from the reviewed contract and current generator, then checks every
 byte and manifest entry. Replacing the launcher or SHA gate and self-attesting
 a new manifest hash is therefore explicit drift rather than a pass.
 
-Use `scaffold --bundled contract.json --audit audit.json --jar target.jar` and
-`verify contract.json --audit audit.json --jar target.jar --bundled <repo>` inside the Auto
+Use `scaffold --bundled contract.json --audit audit.json --jar target.jar --classpath ancestry.jar` and
+`verify contract.json --audit audit.json --jar target.jar --classpath ancestry.jar --bundled <repo>` inside the Auto
 Storage repository. Bundled verification runs each declared Gradle task
 separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing

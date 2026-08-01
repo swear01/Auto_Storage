@@ -64,7 +64,7 @@ make the client authoritative. Repository tests regenerate and compile the
 committed generated-scaffold fixture against the public API jar.
 
 Supply the target's complete non-JDK compile ancestry through repeatable
-`scan --classpath`; every unresolved external superclass or interface fails
+`--classpath` for `scan` and every complete consumer; every unresolved external superclass or interface fails
 instead of silently hiding a structural recipe family, including classes whose
 names look like client viewers, builders, or datagen helpers. The audit records
 only exact classpath artifact SHA/size evidence, and each ancestry jar is
@@ -82,8 +82,9 @@ the complete sorted class/metadata inventory instead of trusting an edited
 audit's self-consistent count or digest. It also rebuilds the target jar recipe
 source count and, when no external data root contributed recipes, requires the
 entire recorded recipe inventory to match those jar bytes. Generated addon CI
-uses `stageCompatKitTargetArtifact` and passes
-`build/compat-kit/target.jar` to `verify --jar`.
+uses `stageCompatKitTargetArtifact` plus `stageCompatKitAncestryArtifacts`, then
+passes `build/compat-kit/target.jar` to `verify --jar` and every staged ancestry
+jar through repeatable `--classpath`.
 
 The scanner first verifies that resolved `javap` belongs to a JDK whose
 `release` metadata and actual `javap -version` both report major version 21,
