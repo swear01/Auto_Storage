@@ -276,6 +276,14 @@ dependencies are non-transitive, and evidence task names are never remapped.
 every audited ancestry jar. Generated and example GitHub Actions workflows pass
 both the target to `verify --jar` and every staged ancestry jar through
 repeatable `--classpath` rather than trusting only the committed audit.
+The ancestry task searches the target's transitive dependencies and NeoForge
+additional runtime classpath, stages only exact SHA/size matches, and reports
+missing hashes. Add non-transitively published optional compile APIs as reviewed
+`compatKitAncestryArtifacts` dependencies; never remove the exact gate. Complete
+consumers reopen those jars and independently rebuild the reachable external
+class graph before accepting the audit. A parent missing from those exact jars
+must be a selected JDK 21 class or known root; all other unresolved ancestry is
+rejected.
 Reviewed repositories are emitted first and own target/runtime groups.
 Explicit runtime groups cannot fall back to Maven Central even with no reviewed
 repositories; target fallback is still protected by its exact SHA gate, and
@@ -309,7 +317,8 @@ declared task and its holder namespace to match that task's
 `neoforge.enabledGameTestNamespaces` value. Literal namespaces and bounded
 `static final String` references are resolved; missing, ambiguous, or mismatched
 holders fail closed, and constant ownership comes from the declaring class
-rather than the file stem. Eligible Java Unicode escapes are rejected before marker
+rather than the file stem. Nested references resolve through the annotation's
+lexical enclosing-class scope before package/global fallback. Eligible Java Unicode escapes are rejected before marker
 matching so pre-lexical escapes cannot manufacture comments, annotations, or
 method boundaries.
 Bundled descriptors preserve reviewed HTTPS repository order, and fixture names

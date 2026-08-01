@@ -2766,6 +2766,10 @@ def _validate_audit_ancestry_graph(
             class_locations[parent] = owner_path
             pending.append(parent)
 
+    _require_resolved_ancestry(
+        sorted(target_metadata_by_class),
+        metadata_by_class,
+    )
     actual_graph = _build_structural_class_graph(
         sorted(target_metadata_by_class),
         metadata_by_class,
@@ -4459,8 +4463,7 @@ def stageCompatKitTargetArtifact = tasks.register("stageCompatKitTargetArtifact"
 def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArtifacts") {{
     inputs.files(
             configurations.compatKitAncestryArtifacts,
-            sourceSets.main.compileClasspath,
-            sourceSets.main.runtimeClasspath)
+            configurations.additionalRuntimeClasspath)
     inputs.property(
             "expectedArtifacts",
             {_groovy_string(ancestry_identity)})
@@ -5327,7 +5330,10 @@ def _java_string_constant_expressions(
                     f"{owner['qualified_name']}.{match.group(1)}"
                 )
             expressions[key] = expression
-            expressions.contexts[key] = context
+            expressions.contexts[key] = (
+                context,
+                owner["qualified_name"],
+            )
 
     return expressions
 
@@ -5368,32 +5374,44 @@ def _qualified_java_constant_key(
     key: tuple[str, str],
     expressions: dict[tuple[str, str], str],
     context: tuple[str, dict[str, str]],
+    lexical_owner: str | None = None,
 ) -> tuple[str, str]:
     owner, member = key
     package_name, imports = context
     owner_parts = owner.split(".")
-    candidates = [owner]
+    candidates = []
+
+    def add(candidate: str) -> None:
+        if candidate not in candidates:
+            candidates.append(candidate)
+
+    if "." in owner:
+        add(owner)
+    scope = lexical_owner
+    while scope is not None and scope != package_name:
+        add(f"{scope}.{owner}")
+        scope = scope.rsplit(".", 1)[0] if "." in scope else None
     imported = imports.get(owner_parts[0])
     if imported is not None:
-        candidates.append(".".join([imported, *owner_parts[1:]]))
+        add(".".join([imported, *owner_parts[1:]]))
     if package_name:
-        candidates.append(f"{package_name}.{owner}")
-    matches = []
+        add(f"{package_name}.{owner}")
+    else:
+        add(owner)
     for candidate in candidates:
         candidate_key = (candidate, member)
-        if candidate_key in expressions and candidate_key not in matches:
-            matches.append(candidate_key)
-    if not matches:
-        suffix = "." + owner
-        matches = [
-            candidate
-            for candidate in expressions
-            if candidate[1] == member
-            and (
-                candidate[0] == owner
-                or candidate[0].endswith(suffix)
-            )
-        ]
+        if candidate_key in expressions:
+            return candidate_key
+    suffix = "." + owner
+    matches = [
+        candidate
+        for candidate in expressions
+        if candidate[1] == member
+        and (
+            candidate[0] == owner
+            or candidate[0].endswith(suffix)
+        )
+    ]
     if len(matches) != 1:
         label = "ambiguous" if matches else "unresolved"
         raise ValueError(
@@ -5408,10 +5426,16 @@ def _resolve_java_string_constant(
     expressions: dict[tuple[str, str], str],
     context: tuple[str, dict[str, str]] | None = None,
     resolving: set[tuple[str, str]] | None = None,
+    lexical_owner: str | None = None,
 ) -> str:
     resolving = set() if resolving is None else resolving
     context = ("", {}) if context is None else context
-    qualified_key = _qualified_java_constant_key(key, expressions, context)
+    qualified_key = _qualified_java_constant_key(
+        key,
+        expressions,
+        context,
+        lexical_owner,
+    )
     if qualified_key in resolving:
         raise ValueError(
             "unresolved Java string constant for GameTest holder namespace: "
@@ -5428,11 +5452,17 @@ def _resolve_java_string_constant(
             ) from error
     owner, member = expression.rsplit(".", 1)
     resolving.add(qualified_key)
+    nested_context, nested_lexical_owner = getattr(
+        expressions,
+        "contexts",
+        {},
+    ).get(qualified_key, (("", {}), None))
     value = _resolve_java_string_constant(
         (owner, member),
         expressions,
-        getattr(expressions, "contexts", {}).get(qualified_key, ("", {})),
-        resolving,
+        nested_context,
+        resolving=resolving,
+        lexical_owner=nested_lexical_owner,
     )
     resolving.remove(qualified_key)
     return value
@@ -5445,6 +5475,7 @@ def _game_test_holder_annotations(
     code = _java_code_mask(text)
     uncommented = _java_without_comments(text)
     context = _java_compilation_context(text)
+    class_spans = _java_class_spans(text)
     annotations = []
     for annotation in re.finditer(
         r"@(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*GameTestHolder\s*\(",
@@ -5482,10 +5513,44 @@ def _game_test_holder_annotations(
                 raise ValueError(
                     f"unresolved GameTest holder namespace: {expression}"
                 )
+            annotated_classes = [
+                span
+                for span in class_spans
+                if (
+                    span["declaration_boundary"]
+                    <= annotation.start()
+                    < span["declaration_start"]
+                )
+            ]
+            annotated_class = (
+                min(
+                    annotated_classes,
+                    key=lambda span: span["declaration_start"] - annotation.start(),
+                )
+                if annotated_classes
+                else None
+            )
+            enclosing_classes = [] if annotated_class is None else [
+                span
+                for span in class_spans
+                if (
+                    span["opening"] < annotated_class["opening"]
+                    and annotated_class["closing"] < span["closing"]
+                )
+            ]
+            lexical_owner = (
+                min(
+                    enclosing_classes,
+                    key=lambda span: span["closing"] - span["opening"],
+                )["qualified_name"]
+                if enclosing_classes
+                else None
+            )
             namespace = _resolve_java_string_constant(
                 (constant.group(1), constant.group(2)),
                 constant_expressions,
                 context,
+                lexical_owner=lexical_owner,
             )
         annotations.append({
             "start": annotation.start(),

@@ -85,6 +85,17 @@ entire recorded recipe inventory to match those jar bytes. Generated addon CI
 uses `stageCompatKitTargetArtifact` plus `stageCompatKitAncestryArtifacts`, then
 passes `build/compat-kit/target.jar` to `verify --jar` and every staged ancestry
 jar through repeatable `--classpath`.
+The generated ancestry task searches the target's transitive dependency graph
+and NeoForge's additional runtime classpath, then stages only SHA/size matches
+from the audit. If the target publishes optional compile APIs non-transitively,
+the task fails with their missing SHA values; add those reviewed coordinates to
+`compatKitAncestryArtifacts` rather than weakening or removing the exact gate.
+Complete consumers reopen every supplied ancestry jar and reconstruct the
+reachable external metadata graph, so editing classpath-owned graph records
+cannot remove structural recipe candidates while preserving a self-consistent
+JSON audit. If any reconstructed parent is neither present in those exact jars
+nor a selected JDK 21 class or known root, validation fails for missing
+ancestry instead of accepting a truncated graph.
 
 The scanner first verifies that resolved `javap` belongs to a JDK whose
 `release` metadata and actual `javap -version` both report major version 21,

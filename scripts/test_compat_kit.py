@@ -28,6 +28,10 @@ def load_compat_kit():
     return module
 
 
+def read_gradle_classpath_entries(path: Path) -> tuple[Path, ...]:
+    return tuple(Path(line) for line in path.read_text().splitlines() if line)
+
+
 def write_fixture_jar(path: Path, version: str = "1.2.3", extra_class: str | None = None):
     mods_toml = f"""
 modLoader="javafml"
@@ -3155,6 +3159,68 @@ displayName="Sample Machines"
                 source_classpath=[classpath_jar],
             )
 
+    def test_exact_ancestry_rejects_removed_unresolved_parent_artifact(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[classpath_jar],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+        )
+        forged = copy.deepcopy(audit)
+        target_sha = forged["artifact"]["sha256"]
+        forged["ancestry_classpath"] = []
+        forged["structural_class_graph"] = [
+            record
+            for record in forged["structural_class_graph"]
+            if record["owner_sha256"] == target_sha
+        ]
+        metadata_by_class = {
+            record["class"]: record["metadata"]
+            for record in forged["structural_class_graph"]
+        }
+        original_candidates = {
+            record["class"]: record
+            for records in forged["candidates"].values()
+            for record in records
+        }
+        forged["candidates"] = {
+            bucket: [] for bucket in self.compat_kit.CURRENT_CANDIDATE_BUCKETS
+        }
+        forged["structural_hierarchy"] = []
+        for class_name in sorted(metadata_by_class):
+            classification = self.compat_kit._classify_candidate(
+                class_name,
+                metadata_by_class,
+            )
+            if classification is None:
+                continue
+            bucket, evidence = classification
+            record = copy.deepcopy(original_candidates[class_name])
+            record["classification"] = evidence
+            record["hierarchy"] = None
+            forged["candidates"][bucket].append(record)
+        forged["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                forged["artifact"],
+                forged["ancestry_classpath"],
+                [],
+            )
+        )
+        self.compat_kit._validate_audit(forged)
+
+        with self.assertRaisesRegex(ValueError, "unresolved ancestry"):
+            self.compat_kit._validate_audit_target_artifact(
+                forged,
+                target_jar,
+            )
+
     def test_complete_contract_requires_exact_source_artifact(self):
         with self.assertRaisesRegex(
             ValueError,
@@ -5555,6 +5621,15 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "missing exact AE2 19.2.17 artifact; resolve the Gradle fixture first"
         )
 
+    def test_gradle_classpath_manifest_is_read_per_line(self):
+        manifest = self.root / "gradle-classpath.txt"
+        manifest.write_text("/tmp/first.jar\r\n\n/tmp/second.jar\n")
+
+        self.assertEqual(
+            (Path("/tmp/first.jar"), Path("/tmp/second.jar")),
+            read_gradle_classpath_entries(manifest),
+        )
+
     def committed_ae2_classpath(self) -> tuple[Path, ...]:
         cached = getattr(self, "_committed_ae2_classpath", None)
         if cached is not None:
@@ -5575,11 +5650,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 if line
             )
         for classpath_file in (ROOT / "build/moddev").glob("*Classpath.txt"):
-            candidates.update(
-                Path(value)
-                for value in classpath_file.read_text().split(os.pathsep)
-                if value
-            )
+            candidates.update(read_gradle_classpath_entries(classpath_file))
         search_roots = (
             ROOT / "build",
             Path.home() / ".gradle/caches/modules-2/files-2.1",
@@ -5936,6 +6007,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn("stageCompatKitAncestryArtifacts", build)
         self.assertIn('layout.buildDirectory.file("compat-kit/target.jar")', build)
         self.assertIn('layout.buildDirectory.dir("compat-kit/ancestry")', build)
+        self.assertIn("configurations.additionalRuntimeClasspath", build)
+        self.assertNotIn("sourceSets.main.compileClasspath", build)
         self.assertIn(contract["source_audit_sha256"], build)
         self.assertIn(
             'url = uri("https://repo.example.com/releases")',
@@ -7516,6 +7589,34 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         for package, namespace in (("a", "namespace_a"), ("b", "namespace_b")):
             source = source_root / package / "Tests.java"
+            self.compat_kit._validate_game_test_holder_namespace(
+                source,
+                source.read_text(),
+                namespace,
+                expressions,
+            )
+
+    def test_gametest_holder_constants_resolve_in_lexical_owner_scope(self):
+        source_root = self.root / "lexical-holder-constants"
+        for owner, namespace in (("OuterA", "namespace_a"), ("OuterB", "namespace_b")):
+            source = source_root / f"{owner}.java"
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.write_text(
+                "package nested; "
+                f"final class {owner} {{ "
+                "static final class Ids { "
+                f'static final String MOD_ID = "{namespace}"; }} '
+                "@net.neoforged.neoforge.gametest.GameTestHolder(Ids.MOD_ID) "
+                "static final class Tests { "
+                "@net.minecraft.gametest.framework.GameTest("
+                'template = "craftingtests.platform") static void check() {} } }\n'
+            )
+
+        expressions = self.compat_kit._java_string_constant_expressions(
+            (source_root,)
+        )
+        for owner, namespace in (("OuterA", "namespace_a"), ("OuterB", "namespace_b")):
+            source = source_root / f"{owner}.java"
             self.compat_kit._validate_game_test_holder_namespace(
                 source,
                 source.read_text(),

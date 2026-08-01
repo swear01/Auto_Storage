@@ -670,6 +670,15 @@ Generated addon builds expose `stageCompatKitTargetArtifact` and
 audited ancestry jar. Generated and published example workflows pass the target
 through `verify --jar` and every staged ancestry jar through repeatable
 `--classpath`; copying only `compat/audit.json` is never sufficient.
+The generated staging task searches the target's transitive dependencies and
+NeoForge additional runtime classpath and copies only exact SHA/size matches.
+Optional compile APIs that the target does not publish transitively must be
+added as reviewed `compatKitAncestryArtifacts` dependencies; unresolved hashes
+remain a hard failure. Complete consumers independently rebuild the reachable
+external class graph from the supplied jars, so classpath-owned metadata cannot
+be edited out of an otherwise self-consistent audit. Every unmatched parent
+must resolve to the selected JDK 21 modules or a known root; otherwise complete
+validation rejects the missing `--classpath` evidence.
 A marker assigned to a `run*GameTestServer` task must occur inside an
 annotated `@GameTest` method body; a detached constant, helper, or comment does
 not prove that the behavior ran. Comments inside a real GameTest are removed
@@ -684,7 +693,9 @@ cannot authorize it. Simple and fully qualified `@GameTest` and
 test counts. Literal holders and bounded
 `static final String` references are accepted, while missing, unresolved,
 ambiguous, or mismatched holders fail closed. Constants are keyed by their
-actual innermost declaring class, never the source file stem. A check is marked passed only
+actual innermost declaring class and resolved through the annotation's lexical
+enclosing-class scope before package/global fallback, never the source file
+stem. A check is marked passed only
 when all of its declared source markers
 exist in the correct execution boundary and the associated Gradle task
 succeeds. The report records those
