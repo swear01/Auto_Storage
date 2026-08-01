@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 12
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11})
+SCAN_CACHE_VERSION = 13
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -190,6 +190,7 @@ AUDIT_TOP_KEYS = {
     "ancestry_classpath",
     "source",
     "structural_hierarchy",
+    "structural_candidate_inventory_sha256",
     "candidates",
     "recipe_data",
     "risks",
@@ -266,6 +267,20 @@ def _java_string(value: str) -> str:
 def _recipe_inventory_sha256(class_names) -> str:
     return hashlib.sha256(
         canonical_json(sorted(class_names)).encode()
+    ).hexdigest()
+
+
+def _structural_candidate_inventory_sha256(
+    artifact: dict,
+    ancestry_classpath: list[dict],
+    class_names,
+) -> str:
+    return hashlib.sha256(
+        canonical_json({
+            "artifact": artifact,
+            "ancestry_classpath": ancestry_classpath,
+            "classes": sorted(class_names),
+        }).encode()
     ).hexdigest()
 
 
@@ -535,6 +550,7 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
     offset += 2
     inner_class_entry = False
     inner_name = None
+    outer_class = None
     enclosing_method = False
     source_file = None
     for _ in range(attribute_count):
@@ -579,6 +595,10 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
                 if inner_class_index != this_class:
                     continue
                 inner_class_entry = True
+                outer_class = resolve_class(int.from_bytes(
+                    attribute[entry_offset + 2:entry_offset + 4],
+                    "big",
+                ))
                 inner_name_index = int.from_bytes(
                     attribute[entry_offset + 4:entry_offset + 6],
                     "big",
@@ -596,6 +616,7 @@ def _class_metadata(payload: bytes, entry_name: str) -> dict | None:
         "interfaces": interfaces,
         "inner_class_entry": inner_class_entry,
         "inner_name": inner_name,
+        "outer_class": outer_class,
         "enclosing_method": enclosing_method,
         "source_file": source_file,
     }
@@ -1161,6 +1182,49 @@ def _candidate_source_suffix(
         if not metadata.get("inner_class_entry"):
             return class_name.replace(".", "/") + ".java"
     return class_name.split("$", 1)[0].replace(".", "/") + ".java"
+
+
+def _candidate_source_class(
+    class_name: str,
+    metadata_by_class: dict[str, dict | None],
+    ancestry: tuple[str, ...] = (),
+) -> str:
+    if class_name in ancestry:
+        raise ValueError("nested class ownership contains a cycle: " + class_name)
+    metadata = metadata_by_class.get(class_name)
+    if metadata is None or not metadata.get("inner_class_entry"):
+        return class_name
+    inner_name = metadata.get("inner_name")
+    outer_class = metadata.get("outer_class")
+    if not inner_name or not outer_class:
+        raise ValueError("named nested class has unresolved owner: " + class_name)
+    if outer_class not in metadata_by_class:
+        raise ValueError("named nested class owner is unresolved: " + class_name)
+    return (
+        _candidate_source_class(
+            outer_class,
+            metadata_by_class,
+            ancestry + (class_name,),
+        )
+        + "."
+        + inner_name
+    )
+
+
+def _validate_candidate_source_class(
+    class_name: str,
+    source_class: object,
+    location: str,
+):
+    if not _is_java_type(source_class):
+        raise ValueError(f"{location} has invalid source_class")
+    package, separator, binary_simple_name = class_name.rpartition(".")
+    expected_prefix = package + "." if separator else ""
+    if not source_class.startswith(expected_prefix):
+        raise ValueError(f"{location} source_class does not match class")
+    source_simple_name = source_class[len(expected_prefix):]
+    if source_simple_name.replace(".", "$") != binary_simple_name:
+        raise ValueError(f"{location} source_class does not match class")
 
 
 def _source_evidence(source: Path | None, candidate_suffixes: set[str]) -> dict:
@@ -1980,6 +2044,21 @@ def _validate_audit(audit: dict):
             "unsupported audit scanner format: "
             f"{scanner_format}"
         )
+    structural_inventory_sha256 = audit.get(
+        "structural_candidate_inventory_sha256"
+    )
+    if scanner_format == SCAN_CACHE_VERSION:
+        if not isinstance(structural_inventory_sha256, str) or not re.fullmatch(
+            r"[0-9a-f]{64}",
+            structural_inventory_sha256,
+        ):
+            raise ValueError(
+                "audit structural candidate inventory must be a SHA-256 digest"
+            )
+    elif "structural_candidate_inventory_sha256" in audit:
+        raise ValueError(
+            "legacy audit must not contain structural candidate inventory"
+        )
     if audit.get("kind") != "auto_storage_compat_audit":
         raise ValueError(f"invalid audit kind: {audit.get('kind')}")
     for key in ("target", "artifact", "source", "candidates", "risks"):
@@ -2084,7 +2163,7 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
-    if scanner_format in {10, 11, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, SCAN_CACHE_VERSION}:
         if "structural_hierarchy" not in audit:
             raise ValueError("audit is missing structural_hierarchy")
         structural_hierarchy = _validate_structural_hierarchy(
@@ -2119,8 +2198,10 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format in {9, 11, SCAN_CACHE_VERSION}:
+            if scanner_format in {9, 11, 12, SCAN_CACHE_VERSION}:
                 record_keys.add("hierarchy")
+            if scanner_format == SCAN_CACHE_VERSION:
+                record_keys.add("source_class")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
                     f"{location} has invalid candidate fields"
@@ -2136,6 +2217,12 @@ def _validate_audit(audit: dict):
                 or not record["public_signature"].strip()
             ):
                 raise ValueError(f"{location} has empty public_signature")
+            if scanner_format == SCAN_CACHE_VERSION:
+                _validate_candidate_source_class(
+                    class_name,
+                    record["source_class"],
+                    location,
+                )
             if scanner_format != 7:
                 _validate_classification(
                     class_name,
@@ -2161,7 +2248,7 @@ def _validate_audit(audit: dict):
                         record["public_signature"],
                         location,
                     )
-                elif scanner_format in {11, SCAN_CACHE_VERSION}:
+                elif scanner_format in {11, 12, SCAN_CACHE_VERSION}:
                     candidate_hierarchy = record["hierarchy"]
                     persisted_hierarchy = structural_hierarchy.get(class_name)
                     if candidate_hierarchy != persisted_hierarchy:
@@ -2190,7 +2277,7 @@ def _validate_audit(audit: dict):
             "audit with classified candidates requires at least one source file"
         )
 
-    if scanner_format in {10, 11, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
             set(structural_hierarchy) - seen_classes
         )
@@ -2198,6 +2285,22 @@ def _validate_audit(audit: dict):
             raise ValueError(
                 "audit structural_hierarchy owner is not an audited candidate: "
                 + ", ".join(unknown_structural_classes)
+            )
+    if scanner_format == SCAN_CACHE_VERSION:
+        expected_structural_inventory_sha256 = (
+            _structural_candidate_inventory_sha256(
+                artifact,
+                audit["ancestry_classpath"],
+                structural_hierarchy,
+            )
+        )
+        if (
+            structural_inventory_sha256
+            != expected_structural_inventory_sha256
+        ):
+            raise ValueError(
+                "audit structural candidate inventory does not match "
+                "structural hierarchy"
             )
 
     if scanner_format != 7:
@@ -2424,6 +2527,10 @@ def scan_jar(
             classified[bucket].append(
                 {
                     "class": class_name,
+                    "source_class": _candidate_source_class(
+                        class_name,
+                        target_metadata,
+                    ),
                     "public_signature": signature.strip(),
                     "classification": classification,
                     "hierarchy": (
@@ -2507,6 +2614,16 @@ def scan_jar(
             },
         ),
         "structural_hierarchy": structural_hierarchy,
+        "structural_candidate_inventory_sha256": (
+            _structural_candidate_inventory_sha256(
+                {
+                    "sha256": artifact_sha,
+                    "size": artifact_size,
+                },
+                ancestry_classpath,
+                [record["class"] for record in structural_hierarchy],
+            )
+        ),
         "candidates": classified,
         "recipe_data": recipe_data,
         "risks": _finalize_risk_evidence(collected_risks),
@@ -2752,7 +2869,10 @@ def migrate_contract(
 
     def evidence_by_class(audit: dict) -> dict[str, tuple]:
         signatures = {
-            candidate["class"]: candidate["public_signature"]
+            candidate["class"]: (
+                candidate["public_signature"],
+                candidate.get("source_class", candidate["class"]),
+            )
             for candidate in audit["candidates"]["recipe_classes"]
         }
         risks = {class_name: [] for class_name in signatures}
@@ -4929,9 +5049,12 @@ def publish_archive(output, release_version):
     return output
 
 
-def _candidate_map(audit: dict, bucket: str) -> dict[str, str]:
+def _candidate_map(audit: dict, bucket: str) -> dict[str, tuple[str, str]]:
     return {
-        candidate["class"]: candidate["public_signature"]
+        candidate["class"]: (
+            candidate["public_signature"],
+            candidate.get("source_class", candidate["class"]),
+        )
         for candidate in audit["candidates"].get(bucket, [])
     }
 
@@ -6378,10 +6501,18 @@ def _recipe_call(binding: dict, variable: str) -> str:
     return f"{variable}.{binding['member']}({arguments})"
 
 
-def _generated_compat_java(contract: dict, plan: dict) -> tuple[str, list[dict]]:
+def _generated_compat_java(
+    contract: dict,
+    audit: dict,
+    plan: dict,
+) -> tuple[str, list[dict]]:
     generated = [entry for entry in plan["families"] if entry["status"] == "generate"]
     boundaries = [entry for entry in plan["families"] if entry["status"] == "red_boundary"]
     contract_by_id = {family["id"]: family for family in contract["families"]}
+    source_class_by_binary = {
+        candidate["class"]: candidate["source_class"]
+        for candidate in audit["candidates"]["recipe_classes"]
+    }
     descriptor_namespaces = {
         contract_by_id[entry["id"]]["station"]["descriptor_id"].split(":", 1)[0]
         for entry in generated
@@ -6424,7 +6555,7 @@ def _generated_compat_java(contract: dict, plan: dict) -> tuple[str, list[dict]]
             ])
             registered_descriptors.add(descriptor_id)
         recipe_type = _java_resource_location(family["recipe_type"])
-        recipe_class = family["class"]
+        recipe_class = source_class_by_binary[family["class"]]
         if entry["shape"] == "single_item_to_item":
             input_call = _recipe_call(entry["bindings"]["input"], "recipe")
             output_call = _recipe_call(entry["bindings"]["output"], "recipe")
@@ -6568,7 +6699,7 @@ def generate_compatibility(
 ) -> list[Path]:
     validate_contract(contract, require_complete=True, source_audit=audit)
     _validate_generation_plan(plan, contract)
-    source, boundaries = _generated_compat_java(contract, plan)
+    source, boundaries = _generated_compat_java(contract, audit, plan)
     package_path = plan["package"].replace(".", "/")
     files = {}
     if any(entry["status"] == "generate" for entry in plan["families"]):

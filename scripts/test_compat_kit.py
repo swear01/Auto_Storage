@@ -194,6 +194,47 @@ displayName="Sample Machines"
             archive.write(class_file, class_file.relative_to(target_classes).as_posix())
 
 
+def write_nested_recipe_fixture_jar(root: Path, path: Path):
+    source = root / "nested-generation-source"
+    classes = root / "nested-generation-classes"
+    sources = {
+        "net/minecraft/world/item/crafting/Recipe.java": (
+            "package net.minecraft.world.item.crafting; public interface Recipe {}\n"
+        ),
+        "samplemod/recipe/Container.java": (
+            "package samplemod.recipe; public final class Container { "
+            "public static final class PolishingRecipe implements "
+            "net.minecraft.world.item.crafting.Recipe {} }\n"
+        ),
+    }
+    for relative, text in sources.items():
+        target = source / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
+    classes.mkdir()
+    subprocess.run(
+        [
+            "javac",
+            "-d",
+            str(classes),
+            *[str(source / relative) for relative in sorted(sources)],
+        ],
+        check=True,
+    )
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr(
+            "META-INF/neoforge.mods.toml",
+            'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+            '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+            'displayName="Sample Machines"\n',
+        )
+        for class_file in sorted((classes / "samplemod").rglob("*.class")):
+            archive.write(
+                class_file,
+                class_file.relative_to(classes).as_posix(),
+            )
+
+
 class CompatKitAuditTests(unittest.TestCase):
     def setUp(self):
         self.compat_kit = load_compat_kit()
@@ -1136,7 +1177,13 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertNotIn("RandomSource", crushing["public_signature"])
         self.assertEqual(
-            {"class", "public_signature", "classification", "hierarchy"},
+            {
+                "class",
+                "source_class",
+                "public_signature",
+                "classification",
+                "hierarchy",
+            },
             set(crushing),
         )
 
@@ -1320,7 +1367,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(12, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(13, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -1840,6 +1887,7 @@ class CompatKitAuditTests(unittest.TestCase):
         legacy.pop("recipe_data")
         legacy.pop("ancestry_classpath")
         legacy.pop("structural_hierarchy")
+        legacy.pop("structural_candidate_inventory_sha256")
         for bucket in tuple(legacy["candidates"]):
             if bucket not in {
                 "recipe_classes",
@@ -1851,6 +1899,7 @@ class CompatKitAuditTests(unittest.TestCase):
             for record in records:
                 record.pop("classification")
                 record.pop("hierarchy")
+                record.pop("source_class")
         self.compat_kit._validate_audit(legacy)
 
         audit["scanner_format"] = 6
@@ -1864,7 +1913,11 @@ class CompatKitAuditTests(unittest.TestCase):
         current_audit = self.source_audit()
         contract = self.accepted_contract()
         legacy_audit = copy.deepcopy(current_audit)
-        legacy_audit["scanner_format"] = 11
+        legacy_audit["scanner_format"] = 12
+        legacy_audit.pop("structural_candidate_inventory_sha256")
+        for records in legacy_audit["candidates"].values():
+            for record in records:
+                record.pop("source_class")
 
         self.compat_kit.validate_contract(
             contract,
@@ -1877,6 +1930,45 @@ class CompatKitAuditTests(unittest.TestCase):
                 require_complete=True,
                 source_audit=legacy_audit,
             )
+
+    def test_audit_binds_structural_inventory_and_source_class_shape(self):
+        audit = self.source_audit()
+        expected_inventory = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                audit["artifact"],
+                audit["ancestry_classpath"],
+                [
+                    record["class"]
+                    for record in audit["structural_hierarchy"]
+                ],
+            )
+        )
+        self.assertEqual(
+            expected_inventory,
+            audit["structural_candidate_inventory_sha256"],
+        )
+
+        missing = copy.deepcopy(audit)
+        missing.pop("structural_candidate_inventory_sha256")
+        with self.assertRaisesRegex(ValueError, "structural candidate inventory"):
+            self.compat_kit._validate_audit(missing)
+
+        malformed = copy.deepcopy(audit)
+        malformed["structural_candidate_inventory_sha256"] = "not-a-digest"
+        with self.assertRaisesRegex(ValueError, "structural candidate inventory"):
+            self.compat_kit._validate_audit(malformed)
+
+        artifact_drift = copy.deepcopy(audit)
+        artifact_drift["artifact"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "structural candidate inventory"):
+            self.compat_kit._validate_audit(artifact_drift)
+
+        source_drift = copy.deepcopy(audit)
+        source_drift["candidates"]["recipe_classes"][0]["source_class"] = (
+            "samplemod.recipe.Unrelated"
+        )
+        with self.assertRaisesRegex(ValueError, "source_class does not match class"):
+            self.compat_kit._validate_audit(source_drift)
 
     def test_audit_validation_requires_canonical_source_evidence(self):
         audit = self.source_audit()
@@ -1954,6 +2046,7 @@ class CompatKitAuditTests(unittest.TestCase):
         legacy.pop("recipe_data")
         legacy.pop("ancestry_classpath")
         legacy.pop("structural_hierarchy")
+        legacy.pop("structural_candidate_inventory_sha256")
         for bucket in tuple(legacy["candidates"]):
             if bucket not in {
                 "recipe_classes",
@@ -1965,6 +2058,7 @@ class CompatKitAuditTests(unittest.TestCase):
             for record in records:
                 record.pop("classification")
                 record.pop("hierarchy")
+                record.pop("source_class")
 
         migrated = self.compat_kit.migrate_audit(
             legacy,
@@ -1982,12 +2076,14 @@ class CompatKitAuditTests(unittest.TestCase):
 
         legacy_structural = copy.deepcopy(current)
         legacy_structural["scanner_format"] = 9
+        legacy_structural.pop("structural_candidate_inventory_sha256")
         hierarchy_by_class = {
             record["class"]: record["classification"]
             for record in legacy_structural.pop("structural_hierarchy")
         }
         for records in legacy_structural["candidates"].values():
             for record in records:
+                record.pop("source_class")
                 record["hierarchy"] = copy.deepcopy(
                     hierarchy_by_class.get(record["class"])
                 )
@@ -2013,8 +2109,10 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         legacy_top_level = copy.deepcopy(current)
         legacy_top_level["scanner_format"] = 10
+        legacy_top_level.pop("structural_candidate_inventory_sha256")
         for records in legacy_top_level["candidates"].values():
             for record in records:
+                record.pop("source_class")
                 record.pop("hierarchy")
         migrated_top_level = self.compat_kit.migrate_audit(
             legacy_top_level,
@@ -2027,6 +2125,10 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         legacy_dual_hierarchy = copy.deepcopy(current)
         legacy_dual_hierarchy["scanner_format"] = 11
+        legacy_dual_hierarchy.pop("structural_candidate_inventory_sha256")
+        for records in legacy_dual_hierarchy["candidates"].values():
+            for record in records:
+                record.pop("source_class")
         migrated_dual_hierarchy = self.compat_kit.migrate_audit(
             legacy_dual_hierarchy,
             self.jar,
@@ -2035,6 +2137,28 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             self.compat_kit.SCAN_CACHE_VERSION,
             migrated_dual_hierarchy["scanner_format"],
+        )
+        legacy_source_names = copy.deepcopy(current)
+        legacy_source_names["scanner_format"] = 12
+        legacy_source_names.pop("structural_candidate_inventory_sha256")
+        for records in legacy_source_names["candidates"].values():
+            for record in records:
+                record.pop("source_class")
+        migrated_source_names = self.compat_kit.migrate_audit(
+            legacy_source_names,
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        self.assertEqual(
+            self.compat_kit.SCAN_CACHE_VERSION,
+            migrated_source_names["scanner_format"],
+        )
+        self.assertTrue(
+            all(
+                "source_class" in record
+                for records in migrated_source_names["candidates"].values()
+                for record in records
+            )
         )
         with self.assertRaisesRegex(ValueError, "legacy scanner-format audit"):
             self.compat_kit.migrate_audit(
@@ -2073,6 +2197,13 @@ class CompatKitAuditTests(unittest.TestCase):
             "candidates": {},
             "risks": [],
         }
+        malformed["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                malformed["artifact"],
+                [],
+                [],
+            )
+        )
         cached.write_text(json.dumps(malformed))
 
         with self.assertRaisesRegex(ValueError, "audit target"):
@@ -2227,10 +2358,14 @@ class CompatKitAuditTests(unittest.TestCase):
 
         audit = self.compat_kit.scan_jar(nested_jar)
         recipes = {
-            candidate["class"]
+            candidate["class"]: candidate["source_class"]
             for candidate in audit["candidates"]["recipe_classes"]
         }
         self.assertIn("samplemod.recipe.DollarRecipes$$Recipe", recipes)
+        self.assertEqual(
+            "samplemod.recipe.DollarRecipes.$Recipe",
+            recipes["samplemod.recipe.DollarRecipes$$Recipe"],
+        )
         self.assertFalse(any("$1" in class_name for class_name in recipes))
 
     def test_scan_recognizes_jdk_module_ancestry_outside_java_prefixes(self):
@@ -2397,6 +2532,15 @@ class CompatKitAuditTests(unittest.TestCase):
         self.assertEqual(
             ["samplemod/recipe/Recipe$1Variant.java"],
             audit["source"]["files"],
+        )
+        recipe_candidate = next(
+            candidate
+            for candidate in audit["candidates"]["recipe_classes"]
+            if candidate["class"] == "samplemod.recipe.Recipe$1Variant"
+        )
+        self.assertEqual(
+            "samplemod.recipe.Recipe$1Variant",
+            recipe_candidate["source_class"],
         )
 
     def test_scan_ignores_multi_release_archive_paths_and_scans_root_class_once(self):
@@ -2673,6 +2817,7 @@ displayName="Sample Machines"
             "method": "name_term",
             "evidence": ["assembler"],
         }
+        candidate["hierarchy"] = None
         audit["candidates"]["station_classes"].append(candidate)
         audit["candidates"]["station_classes"].sort(
             key=lambda entry: entry["class"]
@@ -2683,7 +2828,10 @@ displayName="Sample Machines"
             if entry["class"] != candidate["class"]
         ]
 
-        with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
+        with self.assertRaisesRegex(
+            ValueError,
+            "structural candidate inventory",
+        ):
             self.compat_kit._validate_audit(audit)
 
     def test_audit_validation_binds_risk_evidence_to_recipe_candidates(self):
@@ -2734,6 +2882,7 @@ displayName="Sample Machines"
         for class_name in ("samplemod.a_b.Recipe", "samplemod.a.b.Recipe"):
             duplicate = dict(prototype)
             duplicate["class"] = class_name
+            duplicate["source_class"] = class_name
             audit["candidates"]["recipe_classes"].append(duplicate)
 
         contract, _ = self.compat_kit.decide_audit(audit)
@@ -2760,6 +2909,7 @@ displayName="Sample Machines"
             if entry["class"] == "samplemod.recipe.CrushingRecipe"
         )
         candidate["class"] = "samplemod.$"
+        candidate["source_class"] = "samplemod.$"
         candidate["public_signature"] = (
             "public class samplemod.$ implements "
             "net.minecraft.world.item.crafting.Recipe { }"
@@ -2781,6 +2931,16 @@ displayName="Sample Machines"
         )
         audit["structural_hierarchy"].sort(
             key=lambda entry: entry["class"]
+        )
+        audit["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                audit["artifact"],
+                audit["ancestry_classpath"],
+                [
+                    entry["class"]
+                    for entry in audit["structural_hierarchy"]
+                ],
+            )
         )
         audit["candidates"]["recipe_classes"].sort(
             key=lambda entry: entry["class"]
@@ -3107,6 +3267,16 @@ displayName="Sample Machines"
             "sha256": "f" * 64,
             "size": 1,
         }]
+        changed_audit["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                changed_audit["artifact"],
+                changed_audit["ancestry_classpath"],
+                [
+                    entry["class"]
+                    for entry in changed_audit["structural_hierarchy"]
+                ],
+            )
+        )
 
         delta = self.compat_kit.diff_audits(old_audit, changed_audit)
         self.assertTrue(delta["ancestry_changed"])
@@ -3609,6 +3779,9 @@ displayName="Sample Machines"
             new_audit["candidates"]["recipe_classes"][0]
         )
         prototype["class"] = "samplemod.recipe.NewDeterministicRecipe"
+        prototype["source_class"] = (
+            "samplemod.recipe.NewDeterministicRecipe"
+        )
         prototype["classification"] = {
             "method": "name_term",
             "evidence": ["recipe"],
@@ -3658,6 +3831,7 @@ displayName="Sample Machines"
         legacy_audit.pop("ancestry_classpath")
         legacy_audit.pop("recipe_data")
         legacy_audit.pop("structural_hierarchy")
+        legacy_audit.pop("structural_candidate_inventory_sha256")
         legacy_audit["candidates"] = {
             bucket: [
                 {
@@ -3869,6 +4043,100 @@ displayName="Sample Machines"
             "generated-output",
         ])
         self.assertEqual("generate", args.command)
+
+    def test_generation_renders_nested_recipe_source_name_for_both_shapes(self):
+        nested_jar = self.root / "samplemod-nested-generation.jar"
+        write_nested_recipe_fixture_jar(self.root, nested_jar)
+        audit = self.compat_kit.scan_jar(nested_jar)
+        contract, _ = self.compat_kit.decide_audit(audit)
+        family = next(
+            family
+            for family in contract["families"]
+            if family["class"]
+            == "samplemod.recipe.Container$PolishingRecipe"
+        )
+        template_contract = self.accepted_contract()
+        template_family = next(
+            template_family
+            for template_family in template_contract["families"]
+            if template_family["status"] == "accepted"
+        )
+        for field in (
+            "status",
+            "recipe_type",
+            "station",
+            "inputs",
+            "outputs",
+            "costs",
+            "decision",
+        ):
+            family[field] = copy.deepcopy(template_family[field])
+        contract["target"]["dependency"] = "com.example:samplemod:1.2.3"
+        contract["target"]["repositories"] = [
+            "https://repo.example.com/releases"
+        ]
+        contract["target"]["runtime_dependencies"] = []
+        contract["verification"] = copy.deepcopy(
+            template_contract["verification"]
+        )
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=True,
+            source_audit=audit,
+        )
+
+        single_plan = self.generation_plan(contract)
+        single_plan["families"][0]["id"] = family["id"]
+        single_output = self.root / "nested-single-generation"
+        self.compat_kit.generate_compatibility(
+            contract,
+            audit,
+            single_plan,
+            single_output,
+        )
+        single_source = next(
+            (single_output / "src/main/java").rglob("*.java")
+        ).read_text()
+
+        typed_plan = copy.deepcopy(single_plan)
+        typed_plan["families"][0]["shape"] = "typed_resources"
+        typed_plan["families"][0]["bindings"] = {
+            "eligibility": {
+                "kind": "static_recipe_predicate_method",
+                "owner": "samplemod.Compat",
+                "member": "eligible",
+            },
+            "plan": {
+                "kind": "static_typed_plan_method",
+                "owner": "samplemod.Compat",
+                "member": "plan",
+            },
+            "cost": {
+                "kind": "static_recipe_family_cost_method",
+                "owner": "samplemod.Compat",
+                "member": "cost",
+            },
+        }
+        typed_output = self.root / "nested-typed-generation"
+        self.compat_kit.generate_compatibility(
+            contract,
+            audit,
+            typed_plan,
+            typed_output,
+        )
+        typed_source = next(
+            (typed_output / "src/main/java").rglob("*.java")
+        ).read_text()
+
+        for source in (single_source, typed_source):
+            self.assertIn(
+                "samplemod.recipe.Container.PolishingRecipe.class",
+                source,
+            )
+            self.assertNotIn(
+                "samplemod.recipe.Container$PolishingRecipe.class",
+                source,
+            )
 
     def test_generation_and_conformance_prefix_family_java_identifiers(self):
         audit = self.source_audit()
@@ -5640,6 +5908,14 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         self.assertIn("structural_hierarchy", audit_schema["required"])
         self.assertIn(
+            "structural_candidate_inventory_sha256",
+            audit_schema["required"],
+        )
+        self.assertIn(
+            "source_class",
+            audit_schema["$defs"]["candidates"]["items"]["required"],
+        )
+        self.assertIn(
             "hierarchy",
             audit_schema["$defs"]["candidates"]["items"]["required"],
         )
@@ -6135,6 +6411,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
 
         committed_root = ROOT / "src/compatKitGeneratedFixture/java"
+        generated_relatives = set()
         for output_name, paths in (
             ("conformance", conformance),
             ("resource", resources),
@@ -6143,9 +6420,26 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             for path in paths:
                 if path.suffix != ".java":
                     continue
-                committed = committed_root / path.relative_to(source_root)
+                relative = path.relative_to(source_root)
+                generated_relatives.add(relative)
+                committed = committed_root / relative
                 self.assertTrue(committed.is_file(), committed)
                 self.assertEqual(committed.read_bytes(), path.read_bytes())
+        provider_relatives = {
+            Path("com/swear/autostorage/compatkitfixture/")
+            / "CompatKitConformanceProvider.java",
+            Path("com/swear/autostorage/compatkitfixture/")
+            / "CompatKitResourceProvider.java",
+        }
+        committed_relatives = {
+            path.relative_to(committed_root)
+            for path in committed_root.rglob("*.java")
+        }
+        self.assertTrue(provider_relatives <= committed_relatives)
+        self.assertEqual(
+            generated_relatives,
+            committed_relatives - provider_relatives,
+        )
         generated_resource_tests = (
             generated_root
             / "resource/src/main/java/com/swear/autostorage/compatkitfixture/generated/"

@@ -40,7 +40,7 @@ relative to the supplied module. Supplying a non-Git source directory fails;
 omit `--source` when no versioned source is available. Current-format cache
 entries and committed audits carry the scanner format and are fully
 schema-validated before reuse. Complete consumers reject legacy scanner
-formats; only explicit migration commands may read formats 7 through 11.
+formats; only explicit migration commands may read formats 7 through 12.
 Committed source files must be sorted, unique, canonical POSIX
 repository-relative `.java` paths. A null revision requires no files, while a
 recorded revision with classified candidates requires at least one file. The
@@ -54,7 +54,7 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 12 structurally classifies concrete `Recipe` and
+Scanner format 13 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
@@ -83,12 +83,14 @@ the same bytes are used for validation, parsing, and hashing. Ordered roots
 are inventoried again after source evidence is built and immediately before a
 scan can cache or return, so a persistent in-flight change fails instead of
 producing mixed evidence. Legacy
-formats 7, 8, 9, 10, and 11 remain readable for explicit
-migration, but current-only commands reject them. Format 12 stores each
-candidate's structural classification and a separate sorted top-level
-`structural_hierarchy` inventory. Validation requires both records to agree,
-so removing only one indirect hierarchy path cannot demote a structurally
-classified recipe to a lower-priority name bucket. Direct `extends`/`implements` parents
+formats 7 through 12 remain readable for explicit migration, but current-only
+commands reject them. Format 13 stores each candidate's binary and source-level
+Java names, structural classification, a separate sorted top-level
+`structural_hierarchy` inventory, and an artifact/classpath-bound structural
+candidate digest. Validation requires all structural records to agree, so
+removing both hierarchy copies cannot demote an indirect candidate. Generated
+Java uses the source-level name for named nested classes without rewriting legal
+top-level `$` identifiers. Direct `extends`/`implements` parents
 in the public declaration are also cross-checked without treating generic type
 bounds as direct ancestry.
 Risk scanning separately traverses every reachable non-JDK superclass and
@@ -96,7 +98,7 @@ interface implementation, rather than only the first path from a concrete
 recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
-explicitly rescan the exact format-7, format-8, format-9, format-10, or format-11 artifact;
+explicitly rescan an exact format-7 through format-12 artifact;
 identity or SHA drift fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed

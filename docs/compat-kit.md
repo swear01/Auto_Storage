@@ -160,16 +160,19 @@ ancestry classpaths bind their exact artifact set. Cache metadata also records
 the selected JDK 21 installation, release version, and module-file identity.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `12`; formats `7`, `8`, `9`, `10`, and `11` remain readable
+current scanner format is `13`; formats `7` through `12` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit; only explicit migration paths may consume legacy audit
 formats.
-Format 12 retains each candidate's structural classification and a separate
-sorted top-level `structural_hierarchy` inventory, requires both copies to
-agree, and requires hierarchy to win before every name-term bucket. Removing
-only one indirect path therefore cannot demote that class without conflicting
-with the other independently persisted record. Validation also
+Format 13 retains each candidate's structural classification and source-level
+Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
+artifact/classpath-bound `structural_candidate_inventory_sha256`. Validation
+requires both hierarchy copies and the independent structural candidate
+inventory to agree before every name-term bucket, so deleting both hierarchy
+copies cannot silently demote an indirect candidate. Generated Java uses
+`source_class`: named nested binary `Outer$Inner` becomes source
+`Outer.Inner`, while a legal top-level `$` remains unchanged. Validation also
 cross-checks direct `extends`/`implements` parents in the public declaration;
 generic type bounds are not treated as direct ancestry. The scanner format is
 also stored in every audit and required by its published
@@ -304,7 +307,7 @@ every check.
 `source_recipe_inventory_sha256` binds the sorted recipe-class inventory;
 `source_recipe_data_sha256` separately binds the effective recipe-data and
 data-pack override digest. Every
-every complete `scaffold`/`verify` invocation must also load the committed
+complete `scaffold`/`verify` invocation must also load the committed
 source audit. Validation compares the contract's exact family-class set,
 per-family scanner risk set, target identity, artifact SHA, and inventory digest
 with that separate audit; deleting a family or risk and recomputing a contract
@@ -727,7 +730,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-12 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-13 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
 finds twelve

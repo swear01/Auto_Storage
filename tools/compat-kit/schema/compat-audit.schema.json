@@ -13,6 +13,7 @@
     "ancestry_classpath",
     "source",
     "structural_hierarchy",
+    "structural_candidate_inventory_sha256",
     "candidates",
     "recipe_data",
     "risks"
@@ -149,7 +150,7 @@
       "const": 1
     },
     "scanner_format": {
-      "const": 12
+      "const": 13
     },
     "kind": {
       "const": "auto_storage_compat_audit"
@@ -258,6 +259,10 @@
           }
         }
       }
+    },
+    "structural_candidate_inventory_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
     },
     "candidates": {
       "type": "object",
@@ -413,6 +418,7 @@
         "additionalProperties": false,
         "required": [
           "class",
+          "source_class",
           "public_signature",
           "classification",
           "hierarchy"
@@ -421,6 +427,10 @@
           "class": {
             "type": "string",
             "pattern": "^[A-Za-z_$][A-Za-z0-9_$.]*$"
+          },
+          "source_class": {
+            "type": "string",
+            "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
           },
           "public_signature": {
             "type": "string",
