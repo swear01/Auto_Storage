@@ -19,6 +19,7 @@
     "resource_apis",
     "station_classes",
     "block_entity_classes",
+    "ancestry_changed",
     "recipe_data",
     "risks",
     "contract_affected"
@@ -83,6 +84,9 @@
       }
     },
     "contract_affected": {
+      "type": "boolean"
+    },
+    "ancestry_changed": {
       "type": "boolean"
     },
     "recipe_serializers": {

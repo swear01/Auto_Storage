@@ -11,6 +11,7 @@
     "target",
     "package",
     "class_name",
+    "game_test_namespace",
     "resources"
   ],
   "properties": {
@@ -28,6 +29,10 @@
     "class_name": {
       "type": "string",
       "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+    },
+    "game_test_namespace": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+$"
     },
     "resources": {
       "type": "array",

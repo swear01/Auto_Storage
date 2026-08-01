@@ -63,23 +63,40 @@ Supply the target's complete non-JDK compile ancestry through repeatable
 instead of silently hiding a structural recipe family, including classes whose
 names look like client viewers, builders, or datagen helpers. The audit records
 only exact classpath artifact SHA/size evidence, and each ancestry jar is
-rehashed after inspection so an in-flight replacement fails. Completed
+rehashed after all inherited-bytecode inspection so an in-flight replacement
+fails. A structurally discovered recipe inspects implementation classes along
+its target/classpath hierarchy and attributes compact inherited risks to the
+concrete recipe. Completed
 contracts separately bind the
 recipe-class inventory and effective recipe-data/data-pack digest. Runtime
 probe JSON must pass `validate-probe` with the same audit and optional plan;
 schema validation alone does not prove those cross-file identities.
 
-The scanner accepts platform ancestry only when the class is present in the
-selected JDK 21 module inventory; package prefixes such as `javax.*` do not
+The scanner first verifies that resolved `javap` belongs to a JDK whose
+`release` metadata reports major version 21, then accepts platform ancestry only
+when the class is present in that JDK's module inventory. Package prefixes such as `javax.*` do not
 bypass missing classpath evidence. It uses class-file `SourceFile`,
 `InnerClasses`, and `EnclosingMethod` metadata for source ownership and nested
 classes. Thus a top-level or named class whose identifier contains `$` remains
-auditable while local, anonymous, and synthetic classes stay excluded. Format 9
-stores hierarchy evidence independently, and scan/audit validation requires it
-to outrank name buckets, so moving a structural recipe into a station record
-cannot bypass review. Direct public `extends`/`implements` declarations provide
-a second bucket cross-check; generic type bounds do not count as direct
-ancestry. Legacy formats 7 and 8 must be rescanned with `migrate-audit`.
+auditable while local, anonymous, and synthetic classes stay excluded. Format
+10 stores a sorted top-level `structural_hierarchy` inventory independently
+from candidate classifications, and scan/audit validation requires it to
+outrank name buckets, so deleting an indirect path and moving a structural
+recipe into a station record cannot bypass review. Direct public
+`extends`/`implements` declarations provide a second bucket cross-check;
+generic type bounds do not count as direct ancestry. Legacy formats 7, 8, and 9
+must be rescanned with `migrate-audit`. A class name that normalizes to no
+alphanumeric family ID uses deterministic `class_<binary-name-hex>` evidence.
+Explicit `--data-root` evidence binds bounded `pack.mcmeta` bytes; a root with a
+top-level data-pack `filter` is rejected rather than misreporting filtered
+recipes as effective. Any ancestry artifact SHA/size change affects `diff` and
+reopens migrated family decisions even when target public signatures are stable.
+Each ancestry class must have exactly one jar owner. The scanner rejects
+duplicate definitions even when their hierarchy declarations match, validates
+JDK 21 before a cache hit, and invalidates the cache when the selected JDK module
+identity changes. Recipe risks traverse the complete non-JDK superclass and
+interface graph, not only the hierarchy path that established `Recipe`
+classification.
 
 Complete contracts use lowercase resource locations for recipe types, station
 descriptor IDs, and station variant items. Generated rate bindings are
@@ -180,7 +197,10 @@ GameTest count in `1..2147483647`, authoritative task, nonempty task list, all t
 exact checks, and every evidence mapping; unresolved RED drafts may keep those
 fields empty. A `runGameTestServer` evidence marker must live inside the annotated
 GameTest method that executes the assertion; file-level constants, comments,
-and detached helpers are rejected. Its `@GameTestHolder` must resolve to the
+and detached helpers are rejected. Runtime probes require an explicit
+`--game-test-namespace`; conformance and resource plans require the same exact
+`game_test_namespace`, and every generated class emits it in
+`@GameTestHolder`. An addon's holder must resolve to the
 addon's enabled `<target_mod_id>_auto_storage` namespace; a test compiled in
 another namespace is not evidence. Comments inside the method do not count,
 while executable string arguments may carry assertion markers. Its fresh-world

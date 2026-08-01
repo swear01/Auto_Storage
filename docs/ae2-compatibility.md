@@ -26,9 +26,12 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-The committed audit uses Scanner format v9 and binds all 92 unique jars needed
+The committed audit uses Scanner format v10 and binds all 92 unique jars needed
 to resolve AE2's complete non-JDK compile ancestry, including its optional
-viewer APIs. Class-file hierarchy inspection finds exactly twelve concrete
+viewer APIs. Its top-level structural hierarchy inventory is independent from
+candidate classifications. Scanner v10's JDK-21 verification and inherited
+implementation-risk pass produce byte-identical evidence for this exact
+artifact/classpath set. Class-file hierarchy inspection finds exactly twelve concrete
 `Recipe` implementations:
 
 - `appeng.recipes.entropy.EntropyRecipe`;

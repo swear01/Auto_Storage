@@ -24,7 +24,8 @@ python3 --version
   --data-root optional-datapack \
   --output audit.json
 ./compat-kit propose audit.json --output proposals.json
-./compat-kit probe audit.json --plan probe-plan.json --output runtime-probe
+./compat-kit probe audit.json --plan probe-plan.json \
+  --game-test-namespace target_auto_storage --output runtime-probe
 ./compat-kit validate-probe runtime-probe.json --audit audit.json \
   --plan probe-plan.json
 ./compat-kit decide audit.json \
@@ -46,32 +47,47 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 9 structurally classifies concrete `Recipe` and
+Scanner format 10 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
 letting a structurally hidden recipe disappear. Exact classpath artifact
 identities enter the audit/cache, and every ancestry jar is rehashed after
-inspection to reject in-flight replacement. Platform ancestry requires exact
-membership in the selected JDK 21 `jmods` inventory; a `java.*` or `javax.*`
-prefix alone never authorizes an unresolved class.
+inspection to reject in-flight replacement. A binary class may be owned by
+only one ancestry jar; duplicate definitions fail even when their hierarchy
+metadata matches. Platform ancestry requires exact
+membership in the selected JDK 21 `jmods` inventory. The resolved `javap`
+toolchain's `release` metadata must report major version 21 before that
+inventory is read or a cached audit is returned. Cache metadata binds the
+selected JDK installation, version, and module-file identity; a changed JDK 21
+inventory forces a fresh scan. A `java.*` or `javax.*` prefix alone never
+authorizes an unresolved class.
 JVM modified UTF-8 class constants are handled correctly. Repeatable
 `--data-root` inputs use normal
 data-pack precedence and add bounded recipe counts, sample IDs, fields,
 top-level array sizes, NeoForge conditions, and override provenance to the
-audit. Their ordered content digests participate in cache identity. Legacy
-formats 7 and 8 remain readable for explicit migration, but current-only
-commands reject them. Format 9 stores independent hierarchy evidence so audit
-validation cannot demote a structurally classified recipe to a lower-priority
-name bucket. Direct `extends`/`implements` parents in the public declaration are
-also cross-checked without treating generic type bounds as direct ancestry.
+audit. Their ordered content digests include bounded `pack.mcmeta` bytes and
+participate in cache identity. Roots declaring a top-level data-pack `filter`
+are rejected because the scanner does not model filter removal semantics. Legacy
+formats 7, 8, and 9 remain readable for explicit migration, but current-only
+commands reject them. Format 10 stores a sorted top-level
+`structural_hierarchy` inventory independently from candidate classifications,
+so deleting an indirect hierarchy path cannot demote a structurally classified
+recipe to a lower-priority name bucket. Direct `extends`/`implements` parents
+in the public declaration are also cross-checked without treating generic type
+bounds as direct ancestry.
+Risk scanning separately traverses every reachable non-JDK superclass and
+interface implementation, rather than only the first path from a concrete
+recipe to `Recipe`, so side-superclass and default-interface behavior remains
+review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
 explicitly rescan the exact format-7 or format-8 artifact; identity or SHA drift
 fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
 decisions only when class identity, public signature, class-owned risk evidence,
-and recipe-data inventory are unchanged after that rescan. New or changed
+ancestry artifact SHA/size inventory, and recipe-data inventory are unchanged
+after that rescan. New or changed
 classes remain unresolved; removing an accepted family fails, while removed
 rejected false positives are reported.
 
@@ -103,7 +119,9 @@ reviewed runtime family is genuinely free.
 The scan publishes only public signatures and compact risk evidence. Bounded
 private bytecode is inspected for hidden randomness, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded output,
-and capability mutations requiring simulation, but each class is reduced
+and capability mutations requiring simulation. Structural recipes also inspect
+target/classpath implementation classes along their inheritance path and
+attribute inherited findings to the concrete audited recipe. Each class is reduced
 immediately and the bytecode is never stored in the audit or retained until the
 next class. Platform-neutral concurrent pipe readers retain at most the
 configured limit plus one byte and terminate `javap` on overflow.
@@ -114,6 +132,10 @@ metadata excludes anonymous/local classes. Class files carrying
 `ACC_SYNTHETIC` and `META-INF/versions/` aliases are also excluded; the root
 binary name is scanned once. Scan and audit validation apply the same current
 name-bucket priority.
+Family IDs normally use the normalized simple class name. If a legal identifier
+contains no alphanumeric characters after normalization, the fallback is
+`class_<binary-name-hex>`; normalized collisions also retain a deterministic
+binary-name encoding.
 Chance, randomness, generic-ingredient, and capability-mutation method calls
 accept the descriptor syntax emitted by `javap -c -p`.
 
@@ -124,6 +146,9 @@ descriptor, and unsupported live/world classifications are a review aid, not
 accepted recipe semantics.
 
 `probe` emits a deterministic, server-only GameTest plus `probe-spec.json`.
+`--game-test-namespace` is mandatory and is written to both the spec and the
+generated class's `@GameTestHolder`; it must exactly match the namespace enabled
+by the Gradle run that executes the probe.
 The fixture records the bounded sorted loaded RecipeManager inventory and
 target registry identities under an explicit output system property. An
 optional exact-audit-digest plan adds reviewed direct config/capability calls;
@@ -164,8 +189,10 @@ item. `conformance` requires every family batch to be at least 2 and emits the s
 catalyst/tool/remainder, and multi-output deltas while the integration supplies
 scenarios. `resource-scaffold` emits API-only
 custom-kind/container/block/renderer and operation-based snapshot tests and
-rejects the built-in Item, Fluid, and NeoForge Energy kinds. Generated tests
-assert the planned sample key/amount was seeded before save/load. The committed
+rejects the built-in Item, Fluid, and NeoForge Energy kinds. Both plans require
+an exact `game_test_namespace`, and generated test classes emit the matching
+`@GameTestHolder`. Generated tests assert the planned sample key/amount was
+seeded before save/load. The committed
 `compatKitGeneratedFixture` source set is regenerated byte-for-byte and compiled
 against the public API so generated scaffold Java cannot drift silently.
 Recipe types, descriptor IDs, station item IDs, and explicit block IDs must be

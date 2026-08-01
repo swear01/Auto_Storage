@@ -5,9 +5,11 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.util.Map;
 
+@GameTestHolder("auto_storage_compat_kit_fixture")
 public final class GeneratedCompatKitConformanceGameTests {
     private GeneratedCompatKitConformanceGameTests() {
     }

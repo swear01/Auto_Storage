@@ -96,8 +96,10 @@ non-JDK superclass and interface reachable from the target jar must resolve;
 an incomplete classpath fails instead of silently omitting a structurally
 hidden recipe family. This check runs before name-bucket classification, so a
 class named like a client viewer, builder, or datagen helper cannot bypass
-ancestry validation. JDK ancestry is resolved from the selected JDK 21's
-`jmods` inventory, not from a package-prefix allowlist, so platform classes
+ancestry validation. Before reading platform classes, Compat Kit requires the
+resolved `javap` toolchain's `release` metadata to report major version 21. JDK
+ancestry is then resolved from that JDK's `jmods` inventory, not from a
+package-prefix allowlist, so platform classes
 such as `org.xml.sax.*` are recognized without weakening external dependency
 checks. At most 128 jars and 200,000 classes are read,
 duplicate/conflicting classes fail, and the sorted artifact SHA/size set is
@@ -108,7 +110,9 @@ decoded as JVM modified UTF-8, so
 unrelated NUL or supplementary string constants cannot abort a valid scan.
 `--data-root` is repeatable and follows data-pack precedence: the target jar is
 the first layer and later supplied roots override earlier recipes by exact ID.
-Roots and recipe files must be real, non-symlink paths. The deterministic audit
+Roots and recipe files must be real, non-symlink paths. Bounded `pack.mcmeta`
+bytes enter each root digest; roots declaring a top-level data-pack `filter`
+fail because filter removal semantics are not modeled. The deterministic audit
 contains NeoForge identity, artifact SHA/size, source revision and exact source
 paths, structurally classified concrete recipe and serializer classes,
 recipe types, builders, datagen classes, client/viewer wrappers, block entities,
@@ -118,8 +122,14 @@ provenance, and explicit risk flags. Risk
 detection uses bounded `javap -c -p` output so non-public implementation risks
 are not missed; only compact flags for randomness/chance, world/entity access,
 multiblocks, live machine state, generic ingredient surfaces, unbounded
-outputs, and capability mutations requiring simulation are persisted. Each
-private-bytecode result is reduced to compact flags before the next class is
+outputs, and capability mutations requiring simulation are persisted.
+Structurally discovered recipes inspect every reachable non-JDK target/classpath
+superclass and interface implementation, independently from the first path used
+to classify the class as a `Recipe`; inherited findings are attributed to each
+concrete audited recipe. Duplicate ancestry-class definitions fail closed even
+when their hierarchy metadata matches, so bytecode ownership never depends on
+classpath order. Each private-bytecode result is reduced to compact
+flags before the next class is
 read; platform-neutral concurrent pipe readers retain at most the configured
 limit plus one byte and terminate `javap` immediately on overflow, so neither
 one process nor all classes can bypass the memory bound. `RandomSource`,
@@ -129,11 +139,16 @@ cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
 Data-root scans bind the ordered layer digests into their cache identity;
-ancestry classpaths bind their exact artifact set. The
-current scanner format is `9`; formats `7` and `8` remain readable only as
-explicit legacy evidence while committed contracts are migrated. Format 9
-persists the structural hierarchy separately from the final classification and
-requires hierarchy to win before every name-term bucket. Validation also
+ancestry classpaths bind their exact artifact set. Cache metadata also records
+the selected JDK 21 installation, release version, and module-file identity.
+JDK validation occurs before every cache return, and an identity change forces
+a fresh scan rather than reusing evidence from another module inventory. The
+current scanner format is `10`; formats `7`, `8`, and `9` remain readable only
+as explicit legacy evidence while committed contracts are migrated. Format 10
+persists a sorted top-level `structural_hierarchy` inventory separately from
+candidate classifications and requires hierarchy to win before every name-term
+bucket. Deleting an indirect candidate hierarchy path therefore cannot demote
+that class without conflicting with the independent inventory. Validation also
 cross-checks direct `extends`/`implements` parents in the public declaration;
 generic type bounds are not treated as direct ancestry. The scanner format is
 also stored in every audit and required by its published
@@ -151,6 +166,9 @@ splitting the binary name on every `$`; a legal top-level `Recipe$1Variant`
 therefore maps to `Recipe$1Variant.java`, while anonymous/local classes and
 every class carrying the JVM
 `ACC_SYNTHETIC` access flag are excluded.
+Family IDs use normalized simple class names. A legal identifier that normalizes
+to an empty string uses `class_<binary-name-hex>` instead, while normalized
+collisions append the same collision-free binary-name encoding.
 
 Archive limits, the 1 MiB per-entry NeoForge metadata limit, the 16 MiB
 per-entry class limit, candidate counts, signature size, source-file counts,
@@ -208,6 +226,7 @@ valid station.
 tools/compat-kit/compat-kit probe \
   compat/audits/target/1.2.3.json \
   --plan compat/probes/target.json \
+  --game-test-namespace target_auto_storage \
   --output build/compat-kit/target-probe
 
 tools/compat-kit/compat-kit validate-probe \
@@ -216,7 +235,10 @@ tools/compat-kit/compat-kit validate-probe \
   --plan compat/probes/target.json
 ```
 
-The generated GameTest is server-only and evidence-only. It requires an
+The generated GameTest is server-only and evidence-only.
+`--game-test-namespace` is mandatory, is recorded in `probe-spec.json`, and
+becomes the class's exact `@GameTestHolder`; pass the namespace enabled by the
+Gradle run that will execute it. The probe requires an
 explicit `compatKitProbeOutput` system property, sorts and records every loaded
 `RecipeManager` recipe ID/type/serializer/concrete class plus common public
 ingredient/result values, and records target-namespace block, item, and block
@@ -308,8 +330,9 @@ tools/compat-kit/compat-kit migrate-contract \
 ```
 
 The command preserves a decision only when the recipe class, its public
-signature, its class-owned risk evidence, and the recipe-data inventory digest
-are all unchanged. New or changed classes reopen as `needs_decision`. Removing
+signature, its class-owned risk evidence, ancestry artifact SHA/size inventory,
+and the recipe-data inventory digest are all unchanged. New or changed classes
+reopen as `needs_decision`. Removing
 an accepted family fails; removed rejected legacy false positives are reported.
 Target or artifact-SHA drift is rejected.
 
@@ -413,7 +436,11 @@ harness performs snapshot/delta/unchanged and success/failure assertions; the
 integration supplies only the reviewed scenario setup and operation. Happy,
 catalyst/tool/remainder, and multi-output paths carry separate expected deltas,
 and zero-valued resource keys are normalized before comparison. Dedicated-
-server isolation checks the physical NeoForge distribution instead of trusting an addon-supplied boolean. Every family batch must be at least 2, so `happy_path_and_batching` always proves a repeated operation rather than duplicating a single-craft assertion.
+server isolation checks the physical NeoForge distribution instead of trusting
+an addon-supplied boolean. Every conformance plan declares the exact
+`game_test_namespace`; the generated class uses it in `@GameTestHolder`. Every
+family batch must be at least 2, so `happy_path_and_batching` always proves a
+repeated operation rather than duplicating a single-craft assertion.
 
 `resource-scaffold` emits API-only kind/container/block/renderer boundaries and
 real persistence, transfer, rollback, and dedicated-server test scenarios for
@@ -421,7 +448,8 @@ an optional custom resource kind. It rejects Item, Fluid, and NeoForge Energy,
 which must reuse Auto Storage's built-in support. Generated common source may
 not import Core internals or client classes; the renderer bridge remains
 generic and client registration stays isolated. Each resource plan binds a
-sample amount and unique snapshot key. The generated tests own the before/after
+sample amount, unique snapshot key, and exact `game_test_namespace`; the
+generated test class uses that namespace in `@GameTestHolder`. The tests own the before/after
 snapshot, first assert that reset/seed produced that exact key and amount, then
 own the delta, save/load round-trip, rollback, and physical-side assertions;
 an addon provider exposes operations and bytes, not self-attested persistence
@@ -659,7 +687,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-9 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-10 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
 finds twelve

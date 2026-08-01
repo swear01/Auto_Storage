@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 9
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8})
+SCAN_CACHE_VERSION = 10
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -36,6 +36,7 @@ MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
 MAX_SOURCE_FILES = 10_000
 MAX_RECIPE_FILES = 50_000
 MAX_RECIPE_JSON_BYTES = 1024 * 1024
+MAX_PACK_METADATA_BYTES = 1024 * 1024
 MAX_RECIPE_SAMPLES_PER_SERIALIZER = 16
 MAX_RUNTIME_PROBE_RECIPES = 50_000
 MAX_RUNTIME_PROBE_VALUES = 4_096
@@ -174,6 +175,7 @@ AUDIT_TOP_KEYS = {
     "artifact",
     "ancestry_classpath",
     "source",
+    "structural_hierarchy",
     "candidates",
     "recipe_data",
     "risks",
@@ -622,14 +624,21 @@ def _is_inspectable_class(
     )
 
 
-def _classpath_metadata(paths) -> tuple[dict[str, dict], list[dict]]:
+def _classpath_metadata(paths) -> tuple[
+    dict[str, dict],
+    list[dict],
+    dict[str, Path],
+    list[tuple[Path, str, int]],
+]:
     raw_paths = list(paths or ())
     if len(raw_paths) > MAX_CLASSPATH_JARS:
         raise ValueError(
             f"ancestry classpath exceeds {MAX_CLASSPATH_JARS} jars"
         )
     metadata_by_class = {}
+    class_locations = {}
     records = []
+    artifact_checks = []
     class_count = 0
     seen_artifacts = set()
     for raw_path in raw_paths:
@@ -661,17 +670,23 @@ def _classpath_metadata(paths) -> tuple[dict[str, dict], list[dict]]:
                     archive.read(entry_name),
                     entry_name,
                 )
-                previous = metadata_by_class.get(class_name)
-                if previous is not None and previous != metadata:
+                if class_name in metadata_by_class:
                     raise ValueError(
-                        "ancestry classpath has conflicting class " + class_name
+                        "ancestry classpath repeats class " + class_name
                     )
                 metadata_by_class[class_name] = metadata
+                class_locations[class_name] = path
         _require_unchanged_artifact(path, digest, size, "classpath jar")
         records.append({"sha256": digest, "size": size})
-    return metadata_by_class, sorted(
-        records,
-        key=lambda record: (record["sha256"], record["size"]),
+        artifact_checks.append((path, digest, size))
+    return (
+        metadata_by_class,
+        sorted(
+            records,
+            key=lambda record: (record["sha256"], record["size"]),
+        ),
+        class_locations,
+        artifact_checks,
     )
 
 
@@ -697,22 +712,88 @@ KNOWN_ANCESTRY_ROOTS = frozenset({
     BLOCK_ENTITY_CLASS,
 })
 _JDK_MODULE_CLASSES = None
+_JDK_MODULE_KEY = None
 
 
-def _jdk_module_classes() -> frozenset[str]:
-    global _JDK_MODULE_CLASSES
-    if _JDK_MODULE_CLASSES is not None:
-        return _JDK_MODULE_CLASSES
+def _jdk_21_toolchain() -> tuple[Path, Path, str, dict]:
     javap = shutil.which("javap")
     if javap is None:
         raise RuntimeError(
             "javap was not found; set JAVA_HOME to JDK 21 before scanning"
         )
-    jmods = Path(javap).resolve().parent.parent / "jmods"
+    jdk = Path(javap).resolve().parent.parent
+    release = jdk / "release"
+    try:
+        if not release.is_file() or release.stat().st_size > 64 * 1024:
+            raise RuntimeError(
+                "JDK module inventory requires JDK 21; resolved toolchain "
+                "has no bounded release metadata"
+            )
+        release_text = release.read_text()
+    except (OSError, UnicodeError) as error:
+        raise RuntimeError(
+            "JDK module inventory requires JDK 21; failed to read release metadata"
+        ) from error
+    version_match = re.search(
+        r'^JAVA_VERSION=(?:"([^"]+)"|([^\s]+))$',
+        release_text,
+        re.MULTILINE,
+    )
+    version = (
+        next(
+            (group for group in version_match.groups() if group is not None),
+            None,
+        )
+        if version_match is not None
+        else None
+    )
+    try:
+        major = int(version.split(".", 1)[0])
+    except (AttributeError, ValueError) as error:
+        raise RuntimeError(
+            "JDK module inventory requires JDK 21; release metadata has no "
+            "valid JAVA_VERSION"
+        ) from error
+    if major != 21:
+        raise RuntimeError(
+            "JDK module inventory requires JDK 21; resolved "
+            f"JAVA_VERSION={version}"
+        )
+    jmods = jdk / "jmods"
     if not jmods.is_dir():
         raise RuntimeError(
             "JDK module metadata was not found; set JAVA_HOME to JDK 21 before scanning"
         )
+    try:
+        modules = [
+            {
+                "name": module.name,
+                "size": module.stat().st_size,
+                "mtime_ns": module.stat().st_mtime_ns,
+            }
+            for module in sorted(jmods.glob("*.jmod"))
+            if module.is_file()
+        ]
+    except OSError as error:
+        raise RuntimeError(
+            f"failed to inspect JDK module metadata: {error}"
+        ) from error
+    if not modules:
+        raise RuntimeError("JDK module metadata contains no modules")
+    identity = {
+        "home": str(jdk),
+        "java_version": version,
+        "modules": modules,
+    }
+    return jdk, jmods, version, identity
+
+
+def _jdk_module_classes() -> frozenset[str]:
+    global _JDK_MODULE_CLASSES, _JDK_MODULE_KEY
+    _, jmods, _, identity = _jdk_21_toolchain()
+    key = hashlib.sha256(canonical_json(identity).encode("utf-8")).hexdigest()
+    if _JDK_MODULE_CLASSES is not None and _JDK_MODULE_KEY == key:
+        return _JDK_MODULE_CLASSES
     classes = set()
     try:
         for jmod in sorted(jmods.glob("*.jmod")):
@@ -733,6 +814,7 @@ def _jdk_module_classes() -> frozenset[str]:
     if not classes:
         raise RuntimeError("JDK module metadata contains no classes")
     _JDK_MODULE_CLASSES = frozenset(classes)
+    _JDK_MODULE_KEY = key
     return _JDK_MODULE_CLASSES
 
 
@@ -817,6 +899,34 @@ def _require_resolved_ancestry(
     for class_name in target_classes:
         if metadata_by_class.get(class_name) is not None:
             visit(class_name, class_name)
+
+
+def _implementation_ancestry(
+    class_name: str,
+    metadata_by_class: dict[str, dict | None],
+) -> list[str]:
+    implementations = []
+    visited = set()
+
+    def visit(current: str, *, root: bool = False):
+        if current in visited or current in KNOWN_ANCESTRY_ROOTS:
+            return
+        visited.add(current)
+        metadata = metadata_by_class.get(current)
+        if metadata is None:
+            if root:
+                implementations.append(current)
+            return
+        implementations.append(current)
+        parents = [
+            *metadata["interfaces"],
+            *([metadata["super_class"]] if metadata["super_class"] else []),
+        ]
+        for parent in parents:
+            visit(parent)
+
+    visit(class_name, root=True)
+    return implementations
 
 
 def _classify_candidate(
@@ -1162,6 +1272,7 @@ RECIPE_PATH = re.compile(
     r"(?P<path>[a-z0-9_./-]+)\.json$"
 )
 RESOURCE_LOCATION = re.compile(r"^[a-z0-9_.-]+:[a-z0-9_./-]+$")
+GAME_TEST_NAMESPACE = re.compile(r"^[a-z0-9_.-]+$")
 
 
 def _recipe_record(source_id: str, relative_path: str, payload: bytes) -> dict:
@@ -1223,6 +1334,36 @@ def _data_root_digest(root: Path, files: list[Path]) -> str:
     return digest.hexdigest()
 
 
+def _validated_pack_metadata(root: Path, source_id: str) -> Path | None:
+    path = root / "pack.mcmeta"
+    if path.is_symlink():
+        raise ValueError(f"recipe data {source_id} pack metadata is a symlink")
+    if not path.exists():
+        return None
+    if not path.is_file():
+        raise ValueError(f"recipe data {source_id} pack metadata is not a file")
+    try:
+        if path.stat().st_size > MAX_PACK_METADATA_BYTES:
+            raise ValueError(
+                "recipe data pack metadata exceeds "
+                f"{MAX_PACK_METADATA_BYTES} bytes: {source_id}/pack.mcmeta"
+            )
+        metadata = json.loads(path.read_text())
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(
+            f"invalid recipe data pack metadata: {source_id}/pack.mcmeta"
+        ) from error
+    if not isinstance(metadata, dict):
+        raise ValueError(
+            f"recipe data pack metadata must be an object: {source_id}/pack.mcmeta"
+        )
+    if "filter" in metadata:
+        raise ValueError(
+            f"recipe data pack filter is unsupported: {source_id}/pack.mcmeta"
+        )
+    return path
+
+
 def _recipe_data_inventory(
     archive: zipfile.ZipFile,
     artifact_sha: str,
@@ -1243,6 +1384,7 @@ def _recipe_data_inventory(
 
     for index, raw_root in enumerate(data_roots or (), start=1):
         root = Path(raw_root).resolve()
+        source_id = f"data_root_{index}"
         if not root.is_dir():
             raise ValueError(f"recipe data root is not a directory: {raw_root}")
         if Path(raw_root).is_symlink():
@@ -1271,9 +1413,12 @@ def _recipe_data_inventory(
                     f"{path.relative_to(root).as_posix()}"
                 )
             entries.append((path.relative_to(root).as_posix(), path.read_bytes()))
-        layers.append(
-            (f"data_root_{index}", _data_root_digest(root, files), entries)
-        )
+        digest_files = [*files]
+        pack_metadata = _validated_pack_metadata(root, source_id)
+        if pack_metadata is not None:
+            digest_files.append(pack_metadata)
+        digest_files.sort(key=lambda path: path.relative_to(root).as_posix())
+        layers.append((source_id, _data_root_digest(root, digest_files), entries))
 
     if sum(len(entries) for _, _, entries in layers) > MAX_RECIPE_FILES:
         raise ValueError(f"recipe inventory exceeds {MAX_RECIPE_FILES} files")
@@ -1344,28 +1489,55 @@ def _recipe_data_inventory(
     }
 
 
+def _risk_matches(signature: str) -> tuple[tuple[str, str], ...]:
+    return tuple(
+        (code, label)
+        for code, pattern, label in RISK_PATTERNS
+        if pattern.search(signature)
+    )
+
+
+def _record_risk_evidence(
+    collected: dict[str, set[str]],
+    class_name: str,
+    matches: tuple[tuple[str, str], ...],
+    source_class: str | None = None,
+):
+    for code, label in matches:
+        inherited = (
+            ""
+            if source_class is None or source_class == class_name
+            else f" via {source_class}"
+        )
+        if label in {
+            "drain",
+            "extractEnergy",
+            "extractItem",
+            "fill",
+            "getChance",
+            "getIngredients",
+            "insertItem",
+            "random",
+            "receiveEnergy",
+        }:
+            evidence = f"{class_name}#{label}{inherited}"
+        else:
+            evidence = f"{class_name}: {label}{inherited}"
+        collected.setdefault(code, set()).add(evidence)
+
+
 def _collect_risk_evidence(
     collected: dict[str, set[str]],
     class_name: str,
     signature: str,
+    source_class: str | None = None,
 ):
-    for code, pattern, label in RISK_PATTERNS:
-        if pattern.search(signature):
-            if label in {
-                "drain",
-                "extractEnergy",
-                "extractItem",
-                "fill",
-                "getChance",
-                "getIngredients",
-                "insertItem",
-                "random",
-                "receiveEnergy",
-            }:
-                evidence = f"{class_name}#{label}"
-            else:
-                evidence = f"{class_name}: {label}"
-            collected.setdefault(code, set()).add(evidence)
+    _record_risk_evidence(
+        collected,
+        class_name,
+        _risk_matches(signature),
+        source_class,
+    )
 
 
 def _finalize_risk_evidence(
@@ -1527,6 +1699,60 @@ def _validate_hierarchy_priority(
     )
     if bucket != hierarchy_bucket or classification != hierarchy:
         raise ValueError(f"{location} candidate bucket mismatch")
+
+
+def _validate_structural_hierarchy(value: object) -> dict[str, dict]:
+    if not isinstance(value, list):
+        raise ValueError("audit structural_hierarchy must be a list")
+    by_class = {}
+    for index, record in enumerate(value):
+        location = f"audit structural_hierarchy {index}"
+        if not isinstance(record, dict) or set(record) != {
+            "class",
+            "classification",
+        }:
+            raise ValueError(
+                f"{location} requires class and classification"
+            )
+        class_name = record["class"]
+        if not isinstance(class_name, str) or not re.fullmatch(
+            r"[A-Za-z_$][A-Za-z0-9_$.]*",
+            class_name,
+        ):
+            raise ValueError(f"{location} has invalid class")
+        if class_name in by_class:
+            raise ValueError(
+                f"audit structural_hierarchy repeats class {class_name}"
+            )
+        classification = record["classification"]
+        evidence = (
+            classification.get("evidence")
+            if isinstance(classification, dict)
+            else None
+        )
+        target_buckets = {
+            RECIPE_INTERFACE: "recipe_classes",
+            RECIPE_TYPE_INTERFACE: "recipe_types",
+            RECIPE_SERIALIZER_INTERFACE: "recipe_serializers",
+            BLOCK_ENTITY_CLASS: "block_entity_classes",
+        }
+        bucket = (
+            target_buckets.get(evidence[-1])
+            if isinstance(evidence, list) and evidence
+            else None
+        )
+        if bucket is None:
+            raise ValueError(f"{location} candidate bucket mismatch")
+        _validate_classification(
+            class_name,
+            bucket,
+            classification,
+            location,
+        )
+        by_class[class_name] = classification
+    if list(by_class) != sorted(by_class):
+        raise ValueError("audit structural_hierarchy must be sorted by class")
+    return by_class
 
 
 def _validate_recipe_data(value: dict, artifact_sha: str):
@@ -1788,6 +2014,19 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
+    if scanner_format == SCAN_CACHE_VERSION:
+        if "structural_hierarchy" not in audit:
+            raise ValueError("audit is missing structural_hierarchy")
+        structural_hierarchy = _validate_structural_hierarchy(
+            audit["structural_hierarchy"]
+        )
+    else:
+        if "structural_hierarchy" in audit:
+            raise ValueError(
+                "legacy audit must not contain structural_hierarchy"
+            )
+        structural_hierarchy = {}
+
     candidates = audit["candidates"]
     candidate_buckets = {
         "recipe_classes",
@@ -1810,7 +2049,7 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format == SCAN_CACHE_VERSION:
+            if scanner_format == 9:
                 record_keys.add("hierarchy")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
@@ -1834,12 +2073,21 @@ def _validate_audit(audit: dict):
                     record["classification"],
                     location,
                 )
-                if scanner_format == SCAN_CACHE_VERSION:
+                if scanner_format == 9:
                     _validate_hierarchy_priority(
                         class_name,
                         bucket,
                         record["classification"],
                         record["hierarchy"],
+                        record["public_signature"],
+                        location,
+                    )
+                elif scanner_format == SCAN_CACHE_VERSION:
+                    _validate_hierarchy_priority(
+                        class_name,
+                        bucket,
+                        record["classification"],
+                        structural_hierarchy.get(class_name),
                         record["public_signature"],
                         location,
                     )
@@ -1853,6 +2101,16 @@ def _validate_audit(audit: dict):
             if class_name in seen_classes:
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
+
+    if scanner_format == SCAN_CACHE_VERSION:
+        unknown_structural_classes = sorted(
+            set(structural_hierarchy) - seen_classes
+        )
+        if unknown_structural_classes:
+            raise ValueError(
+                "audit structural_hierarchy owner is not an audited candidate: "
+                + ", ".join(unknown_structural_classes)
+            )
 
     if scanner_format != 7:
         _validate_recipe_data(audit["recipe_data"], artifact["sha256"])
@@ -1917,26 +2175,21 @@ def scan_jar(
     if artifact_size > MAX_JAR_BYTES:
         raise ValueError(f"target jar exceeds {MAX_JAR_BYTES} bytes: {jar}")
     artifact_sha = _sha256_file(jar)
-    external_metadata, ancestry_classpath = _classpath_metadata(classpath)
+    (
+        external_metadata,
+        ancestry_classpath,
+        classpath_class_locations,
+        classpath_artifact_checks,
+    ) = _classpath_metadata(classpath)
     classpath_digest = hashlib.sha256(
         canonical_json(ancestry_classpath).encode("utf-8")
     ).hexdigest()
+    _, _, _, jdk_identity = _jdk_21_toolchain()
     cache_path = None
+    cache_jdk_path = None
 
     reader = signature_reader or (
         lambda class_name: _run_javap(jar, class_name, "-public")
-    )
-    private_reader = risk_reader or (
-        signature_reader
-        if signature_reader is not None
-        else lambda class_name: _run_javap(
-            jar,
-            class_name,
-            "-c",
-            "-p",
-            output_limit=MAX_PRIVATE_BYTECODE_BYTES,
-            output_label="private bytecode",
-        )
     )
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
@@ -1963,9 +2216,24 @@ def scan_jar(
                 / f"v{SCAN_CACHE_VERSION}"
                 / "audit.json"
             )
+            cache_jdk_path = cache_path.with_name("jdk-toolchain.json")
             if cache_path.is_file():
                 cached = json.loads(cache_path.read_text())
                 _validate_audit(cached)
+                if not cache_jdk_path.is_file():
+                    raise ValueError(
+                        f"cached JDK identity is missing: {cache_jdk_path}"
+                    )
+                try:
+                    cached_jdk_identity = json.loads(cache_jdk_path.read_text())
+                except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                    raise ValueError(
+                        f"malformed cached JDK identity: {cache_jdk_path}"
+                    ) from error
+            else:
+                cached = None
+                cached_jdk_identity = None
+            if cached_jdk_identity == jdk_identity:
                 if cached["artifact"]["sha256"] != artifact_sha:
                     raise ValueError(f"cached audit SHA mismatch: {cache_path}")
                 if cached["recipe_data"]["digest"] != recipe_data["digest"]:
@@ -1978,9 +2246,17 @@ def scan_jar(
                     data_roots,
                 ) != recipe_data:
                     raise ValueError("recipe data roots changed during scan")
+                for path, digest, size in classpath_artifact_checks:
+                    _require_unchanged_artifact(
+                        path,
+                        digest,
+                        size,
+                        "classpath jar",
+                    )
                 _require_unchanged_artifact(jar, artifact_sha, artifact_size)
                 return cached
         classified = {bucket: [] for bucket in CURRENT_CANDIDATE_BUCKETS}
+        structural_hierarchy = []
         class_entries = {
             _class_name(name): name
             for name in archive.namelist()
@@ -1998,6 +2274,37 @@ def scan_jar(
             )
             for class_name in class_names
         }
+        duplicate_target_classes = sorted(
+            set(target_metadata) & set(external_metadata)
+        )
+        if duplicate_target_classes:
+            raise ValueError(
+                "target jar repeats ancestry classpath class "
+                + duplicate_target_classes[0]
+            )
+        if risk_reader is not None:
+            private_reader = risk_reader
+        elif signature_reader is not None:
+            private_reader = signature_reader
+        else:
+            def private_reader(class_name: str) -> str:
+                owner = (
+                    jar
+                    if class_name in target_metadata
+                    else classpath_class_locations.get(class_name)
+                )
+                if owner is None:
+                    raise ValueError(
+                        "private bytecode owner is unresolved: " + class_name
+                    )
+                return _run_javap(
+                    owner,
+                    class_name,
+                    "-c",
+                    "-p",
+                    output_limit=MAX_PRIVATE_BYTECODE_BYTES,
+                    output_label="private bytecode",
+                )
         metadata_by_class = dict(external_metadata)
         metadata_by_class.update(target_metadata)
         _require_resolved_ancestry(class_names, metadata_by_class)
@@ -2016,6 +2323,7 @@ def scan_jar(
                 f"target jar exceeds {MAX_CANDIDATE_CLASSES} candidate classes"
             )
         collected_risks: dict[str, set[str]] = {}
+        risk_matches_by_class: dict[str, tuple[tuple[str, str], ...]] = {}
         for class_name, bucket, classification in candidates:
             signature = reader(class_name)
             if not isinstance(signature, str) or not signature.strip():
@@ -2029,31 +2337,55 @@ def scan_jar(
                     "class": class_name,
                     "public_signature": signature.strip(),
                     "classification": classification,
-                    "hierarchy": (
-                        copy.deepcopy(classification)
-                        if classification["method"] == "class_hierarchy"
-                        else None
-                    ),
                 }
             )
-            if bucket == "recipe_classes":
-                risk_signature = private_reader(class_name)
-                if not isinstance(risk_signature, str) or not risk_signature.strip():
-                    raise ValueError(f"empty private bytecode for {class_name}")
-                if (
-                    len(risk_signature.encode("utf-8"))
-                    > MAX_PRIVATE_BYTECODE_BYTES
-                ):
-                    raise ValueError(
-                        "private bytecode exceeds "
-                        f"{MAX_PRIVATE_BYTECODE_BYTES} bytes: {class_name}"
-                    )
-                _collect_risk_evidence(
-                    collected_risks,
-                    class_name,
-                    risk_signature,
+            if classification["method"] == "class_hierarchy":
+                structural_hierarchy.append(
+                    {
+                        "class": class_name,
+                        "classification": copy.deepcopy(classification),
+                    }
                 )
-                del risk_signature
+            if bucket == "recipe_classes":
+                implementation_classes = _implementation_ancestry(
+                    class_name,
+                    metadata_by_class,
+                )
+                for implementation_class in implementation_classes:
+                    if (
+                        implementation_class not in target_metadata
+                        and implementation_class not in external_metadata
+                    ):
+                        continue
+                    matches = risk_matches_by_class.get(implementation_class)
+                    if matches is None:
+                        risk_signature = private_reader(implementation_class)
+                        if (
+                            not isinstance(risk_signature, str)
+                            or not risk_signature.strip()
+                        ):
+                            raise ValueError(
+                                "empty private bytecode for "
+                                + implementation_class
+                            )
+                        if (
+                            len(risk_signature.encode("utf-8"))
+                            > MAX_PRIVATE_BYTECODE_BYTES
+                        ):
+                            raise ValueError(
+                                "private bytecode exceeds "
+                                f"{MAX_PRIVATE_BYTECODE_BYTES} bytes: "
+                                + implementation_class
+                            )
+                        matches = _risk_matches(risk_signature)
+                        risk_matches_by_class[implementation_class] = matches
+                        del risk_signature
+                    _record_risk_evidence(
+                        collected_risks,
+                        class_name,
+                        matches,
+                        implementation_class,
+                    )
         if data_roots and _recipe_data_inventory(
             archive,
             artifact_sha,
@@ -2087,15 +2419,19 @@ def scan_jar(
                 for candidate in all_candidates
             },
         ),
+        "structural_hierarchy": structural_hierarchy,
         "candidates": classified,
         "recipe_data": recipe_data,
         "risks": _finalize_risk_evidence(collected_risks),
     }
+    for path, digest, size in classpath_artifact_checks:
+        _require_unchanged_artifact(path, digest, size, "classpath jar")
     _require_unchanged_artifact(jar, artifact_sha, artifact_size)
     _validate_audit(audit)
     if cache_path is not None:
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_text(canonical_json(audit))
+        cache_jdk_path.write_text(canonical_json(jdk_identity))
     return audit
 
 
@@ -2134,7 +2470,10 @@ def migrate_audit(
 def _family_id(class_name: str) -> str:
     simple = class_name.rsplit(".", 1)[-1]
     words = re.sub(r"(?<!^)(?=[A-Z])", "_", simple).lower()
-    return re.sub(r"[^a-z0-9_]+", "_", words).strip("_")
+    normalized = re.sub(r"[^a-z0-9_]+", "_", words).strip("_")
+    if normalized:
+        return normalized
+    return f"class_{class_name.encode('utf-8').hex()}"
 
 
 def _audited_risks_by_class(audit: dict) -> dict[str, list[str]]:
@@ -2269,11 +2608,16 @@ def migrate_contract(
                 if owner in risks:
                     risks[owner].append((risk["code"], item))
         recipe_digest = audit.get("recipe_data", {}).get("digest")
+        ancestry = tuple(
+            (record["sha256"], record["size"])
+            for record in audit.get("ancestry_classpath", [])
+        )
         return {
             class_name: (
                 signature,
                 tuple(sorted(risks[class_name])),
                 recipe_digest,
+                ancestry,
             )
             for class_name, signature in signatures.items()
         }
@@ -4386,8 +4730,13 @@ def diff_audits(old: dict, new: dict) -> dict:
             f"{old['target']['mod_id']} != {new['target']['mod_id']}"
         )
     bucket_changes = {}
+    ancestry_changed = (
+        old.get("ancestry_classpath", [])
+        != new.get("ancestry_classpath", [])
+    )
     contract_affected = (
         old["artifact"]["sha256"] != new["artifact"]["sha256"]
+        or ancestry_changed
     )
     for bucket in CURRENT_CANDIDATE_BUCKETS:
         old_map = _candidate_map(old, bucket)
@@ -4440,6 +4789,7 @@ def diff_audits(old: dict, new: dict) -> dict:
         "from_version": old["target"]["version"],
         "to_version": new["target"]["version"],
         **bucket_changes,
+        "ancestry_changed": ancestry_changed,
         "recipe_data": recipe_data_changes,
         "risks": risk_changes,
         "contract_affected": contract_affected,
@@ -4625,7 +4975,11 @@ def propose_audit(audit: dict) -> dict:
     return proposals
 
 
-def _runtime_probe_spec(audit: dict, plan: dict | None = None) -> dict:
+def _runtime_probe_spec(
+    audit: dict,
+    game_test_namespace: str,
+    plan: dict | None = None,
+) -> dict:
     proposals = propose_audit(audit)
     unresolved = [
         {
@@ -4651,6 +5005,7 @@ def _runtime_probe_spec(audit: dict, plan: dict | None = None) -> dict:
         "kind": "auto_storage_runtime_probe_spec",
         "authority": "evidence_only",
         "target": dict(audit["target"]),
+        "game_test_namespace": game_test_namespace,
         "source_audit_digest": hashlib.sha256(
             canonical_json(audit).encode("utf-8")
         ).hexdigest(),
@@ -4730,6 +5085,7 @@ def _validate_runtime_probe_plan(plan: dict, audit: dict):
 def _runtime_probe_java(
     audit: dict,
     spec: dict,
+    game_test_namespace: str,
     plan: dict | None = None,
 ) -> tuple[str, str]:
     mod_id = audit["target"]["mod_id"]
@@ -4777,6 +5133,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -4786,6 +5143,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
+@GameTestHolder("{game_test_namespace}")
 public final class {class_name} {{
     private static final int MAX_LOADED_RECIPES = {MAX_RUNTIME_PROBE_RECIPES};
     private static final String TARGET_MOD_ID = "{mod_id}";
@@ -4928,15 +5286,26 @@ def scaffold_runtime_probe(
     audit: dict,
     output,
     *,
+    game_test_namespace: str,
     plan: dict | None = None,
 ) -> list[Path]:
     _validate_audit(audit)
     if audit["scanner_format"] != SCAN_CACHE_VERSION:
         raise ValueError("probe requires a current scanner-format audit")
+    if (
+        not isinstance(game_test_namespace, str)
+        or not GAME_TEST_NAMESPACE.fullmatch(game_test_namespace)
+    ):
+        raise ValueError("probe has invalid game_test_namespace")
     if plan is not None:
         _validate_runtime_probe_plan(plan, audit)
-    spec = _runtime_probe_spec(audit, plan)
-    package_name, source = _runtime_probe_java(audit, spec, plan)
+    spec = _runtime_probe_spec(audit, game_test_namespace, plan)
+    package_name, source = _runtime_probe_java(
+        audit,
+        spec,
+        game_test_namespace,
+        plan,
+    )
     package_path = package_name.replace(".", "/")
     class_name = f"{_pascal(audit['target']['mod_id'])}RuntimeProbeGameTests"
     files = {
@@ -6016,6 +6385,7 @@ def _validate_conformance_plan(plan: dict, contract: dict):
         "target",
         "package",
         "class_name",
+        "game_test_namespace",
         "families",
     }:
         raise ValueError("conformance plan has invalid fields")
@@ -6033,6 +6403,11 @@ def _validate_conformance_plan(plan: dict, contract: dict):
         raise ValueError("conformance plan has invalid package")
     if not _is_java_member(plan["class_name"]):
         raise ValueError("conformance plan has invalid class_name")
+    if (
+        not isinstance(plan["game_test_namespace"], str)
+        or not GAME_TEST_NAMESPACE.fullmatch(plan["game_test_namespace"])
+    ):
+        raise ValueError("conformance plan has invalid game_test_namespace")
     if (
         plan["class_name"] in JAVA_RESERVED_IDENTIFIERS
         or plan["class_name"] == "CompatibilityConformanceHarness"
@@ -6330,9 +6705,11 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.util.Map;
 
+@GameTestHolder("{plan['game_test_namespace']}")
 public final class {plan['class_name']} {{
     private {plan['class_name']}() {{
     }}
@@ -6411,6 +6788,7 @@ def _validate_resource_plan(plan: dict, contract: dict):
         "target",
         "package",
         "class_name",
+        "game_test_namespace",
         "resources",
     }:
         raise ValueError("resource plan has invalid fields")
@@ -6428,6 +6806,11 @@ def _validate_resource_plan(plan: dict, contract: dict):
         raise ValueError("resource plan has invalid package")
     if not _is_java_member(plan["class_name"]):
         raise ValueError("resource plan has invalid class_name")
+    if (
+        not isinstance(plan["game_test_namespace"], str)
+        or not GAME_TEST_NAMESPACE.fullmatch(plan["game_test_namespace"])
+    ):
+        raise ValueError("resource plan has invalid game_test_namespace")
     resources = plan["resources"]
     if not isinstance(resources, list) or not resources:
         raise ValueError("resource plan requires resources")
@@ -6731,11 +7114,13 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@GameTestHolder("{plan['game_test_namespace']}")
 public final class {plan['class_name']}GameTests {{
     public record Snapshot(Map<String, Long> amounts) {{
         public Snapshot {{
@@ -6882,6 +7267,7 @@ def _build_parser() -> argparse.ArgumentParser:
     probe = subparsers.add_parser("probe")
     probe.add_argument("audit")
     probe.add_argument("--plan")
+    probe.add_argument("--game-test-namespace", required=True)
     probe.add_argument("--output", required=True)
 
     validate_probe = subparsers.add_parser("validate-probe")
@@ -6989,6 +7375,7 @@ def main(argv=None) -> int:
             scaffold_runtime_probe(
                 _read_json(args.audit),
                 args.output,
+                game_test_namespace=args.game_test_namespace,
                 plan=_read_json(args.plan) if args.plan else None,
             )
         elif args.command == "validate-probe":

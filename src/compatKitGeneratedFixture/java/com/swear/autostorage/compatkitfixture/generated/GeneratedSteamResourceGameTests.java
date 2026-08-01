@@ -4,11 +4,13 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.gametest.GameTestHolder;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@GameTestHolder("auto_storage_compat_kit_fixture")
 public final class GeneratedSteamResourceGameTests {
     public record Snapshot(Map<String, Long> amounts) {
         public Snapshot {

@@ -705,6 +705,54 @@ class CompatKitAuditTests(unittest.TestCase):
                 data_roots=[data_root],
             )
 
+    def test_scan_rejects_datapack_recipe_roots_with_pack_filters(self):
+        data_root = self.root / "filtered-data"
+        recipe = data_root / "data/samplemod/recipe/filtered.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({"type": "samplemod:crushing"}))
+        (data_root / "pack.mcmeta").write_text(json.dumps({
+            "pack": {"pack_format": 48, "description": "filtered"},
+            "filter": {
+                "block": [{"namespace": "samplemod", "path": "recipe/.*"}],
+            },
+        }))
+
+        with self.assertRaisesRegex(ValueError, "pack filter"):
+            self.compat_kit.scan_jar(
+                self.jar,
+                signature_reader=self.signatures,
+                data_roots=[data_root],
+            )
+
+    def test_recipe_data_digest_binds_unfiltered_pack_metadata(self):
+        data_root = self.root / "metadata-data"
+        recipe = data_root / "data/samplemod/recipe/metadata.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({"type": "samplemod:crushing"}))
+        metadata = data_root / "pack.mcmeta"
+        metadata.write_text(json.dumps({
+            "pack": {"pack_format": 48, "description": "first"},
+        }))
+        first = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            data_roots=[data_root],
+        )
+
+        metadata.write_text(json.dumps({
+            "pack": {"pack_format": 48, "description": "second"},
+        }))
+        second = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            data_roots=[data_root],
+        )
+
+        self.assertNotEqual(
+            first["recipe_data"]["digest"],
+            second["recipe_data"]["digest"],
+        )
+
     def test_scan_cache_is_keyed_by_ordered_data_root_content(self):
         cache = self.root / "cache"
         first_root = self.root / "first-data"
@@ -821,9 +869,155 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertNotIn("RandomSource", crushing["public_signature"])
         self.assertEqual(
-            {"class", "public_signature", "classification", "hierarchy"},
+            {"class", "public_signature", "classification"},
             set(crushing),
         )
+
+    def test_scan_attributes_inherited_recipe_risks_to_concrete_candidates(self):
+        target_jar = self.root / "external-target.jar"
+        classpath_jar = self.root / "external-support.jar"
+        write_external_hierarchy_fixture_jars(
+            self.root,
+            target_jar,
+            classpath_jar,
+        )
+
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[classpath_jar],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: (
+                "protected void choose() { RandomSource random; }"
+                if class_name == "fixture.base.BaseTransformer"
+                else f"public class {class_name} {{ }}"
+            ),
+        )
+
+        randomness = next(
+            risk for risk in audit["risks"] if risk["code"] == "randomness"
+        )
+        self.assertIn(
+            "samplemod.handler.OreHandler: Random via fixture.base.BaseTransformer",
+            randomness["evidence"],
+        )
+
+    def test_scan_attributes_risks_from_superclass_outside_recipe_path(self):
+        support_source = self.root / "side-super-support-source"
+        support_classes = self.root / "side-super-support-classes"
+        support_sources = {
+            "net/minecraft/world/item/crafting/Recipe.java": (
+                "package net.minecraft.world.item.crafting; "
+                "public interface Recipe {}\n"
+            ),
+            "fixture/base/RiskyBase.java": (
+                "package fixture.base; public abstract class RiskyBase {}\n"
+            ),
+        }
+        for relative, source in support_sources.items():
+            path = support_source / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(source)
+        support_classes.mkdir()
+        subprocess.run(
+            [
+                "javac",
+                "-d",
+                str(support_classes),
+                *[str(support_source / path) for path in sorted(support_sources)],
+            ],
+            check=True,
+        )
+        support_jar = self.root / "side-super-support.jar"
+        with zipfile.ZipFile(support_jar, "w") as archive:
+            for class_file in sorted(support_classes.rglob("*.class")):
+                archive.write(
+                    class_file,
+                    class_file.relative_to(support_classes).as_posix(),
+                )
+
+        target_source = self.root / "side-super-target-source"
+        target_classes = self.root / "side-super-target-classes"
+        concrete = target_source / "samplemod/recipe/ConcreteRecipe.java"
+        concrete.parent.mkdir(parents=True)
+        concrete.write_text(
+            "package samplemod.recipe; public final class ConcreteRecipe "
+            "extends fixture.base.RiskyBase implements "
+            "net.minecraft.world.item.crafting.Recipe {}\n"
+        )
+        target_classes.mkdir()
+        subprocess.run(
+            [
+                "javac",
+                "-cp",
+                str(support_classes),
+                "-d",
+                str(target_classes),
+                str(concrete),
+            ],
+            check=True,
+        )
+        target_jar = self.root / "side-super-target.jar"
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            for class_file in sorted(target_classes.rglob("*.class")):
+                archive.write(
+                    class_file,
+                    class_file.relative_to(target_classes).as_posix(),
+                )
+
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            classpath=[support_jar],
+            signature_reader=lambda class_name: f"public class {class_name} {{ }}",
+            risk_reader=lambda class_name: (
+                "protected void choose() { RandomSource random; }"
+                if class_name == "fixture.base.RiskyBase"
+                else f"public class {class_name} {{ }}"
+            ),
+        )
+
+        randomness = next(
+            risk for risk in audit["risks"] if risk["code"] == "randomness"
+        )
+        self.assertIn(
+            "samplemod.recipe.ConcreteRecipe: Random via fixture.base.RiskyBase",
+            randomness["evidence"],
+        )
+
+    def test_scan_rejects_duplicate_classpath_class_with_matching_hierarchy(self):
+        jars = []
+        for value in (1, 2):
+            source = self.root / f"duplicate-source-{value}"
+            classes = self.root / f"duplicate-classes-{value}"
+            base = source / "fixture/base/BaseRecipe.java"
+            base.parent.mkdir(parents=True)
+            base.write_text(
+                "package fixture.base; public class BaseRecipe { "
+                f"public int value() {{ return {value}; }} }}\n"
+            )
+            classes.mkdir()
+            subprocess.run(
+                ["javac", "-d", str(classes), str(base)],
+                check=True,
+            )
+            jar = self.root / f"duplicate-{value}.jar"
+            with zipfile.ZipFile(jar, "w") as archive:
+                archive.write(
+                    classes / "fixture/base/BaseRecipe.class",
+                    "fixture/base/BaseRecipe.class",
+                )
+            jars.append(jar)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "ancestry classpath repeats class fixture.base.BaseRecipe",
+        ):
+            self.compat_kit._classpath_metadata(jars)
 
     def test_scan_releases_private_bytecode_before_reading_next_candidate(self):
         previous = None
@@ -859,7 +1053,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(9, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(10, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -1049,6 +1243,86 @@ class CompatKitAuditTests(unittest.TestCase):
             / "audit.json"
         )
         self.assertEqual(first, json.loads(cached.read_text()))
+
+    def test_scan_cache_revalidates_jdk_before_returning_cached_audit(self):
+        cache = self.root / "cache"
+        self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=self.signatures,
+        )
+        fake_jdk = self.root / "fake-jdk-17"
+        javap = fake_jdk / "bin/javap"
+        javap.parent.mkdir(parents=True)
+        javap.write_text("")
+        (fake_jdk / "release").write_text('JAVA_VERSION="17.0.12"\n')
+
+        with mock.patch.object(
+            self.compat_kit.shutil,
+            "which",
+            return_value=str(javap),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "requires JDK 21"):
+                self.compat_kit.scan_jar(
+                    self.jar,
+                    cache_dir=cache,
+                    signature_reader=lambda _class_name: (_ for _ in ()).throw(
+                        AssertionError("cache miss unexpectedly invoked reader")
+                    ),
+                )
+
+    def test_scan_cache_binds_jdk_21_module_inventory(self):
+        cache = self.root / "cache"
+
+        def fake_jdk(name: str, classes: list[str]) -> Path:
+            jdk = self.root / name
+            javap = jdk / "bin/javap"
+            javap.parent.mkdir(parents=True)
+            javap.write_text("")
+            (jdk / "release").write_text('JAVA_VERSION="21.0.7"\n')
+            jmods = jdk / "jmods"
+            jmods.mkdir()
+            with zipfile.ZipFile(jmods / "java.base.jmod", "w") as archive:
+                for class_name in classes:
+                    archive.writestr(
+                        "classes/" + class_name.replace(".", "/") + ".class",
+                        b"fixture",
+                    )
+            return javap
+
+        first_javap = fake_jdk("fake-jdk-a", ["java.lang.Object"])
+        second_javap = fake_jdk(
+            "fake-jdk-b",
+            ["java.lang.Object", "java.lang.Record"],
+        )
+        self.addCleanup(setattr, self.compat_kit, "_JDK_MODULE_CLASSES", None)
+        self.addCleanup(setattr, self.compat_kit, "_JDK_MODULE_KEY", None)
+        with mock.patch.object(
+            self.compat_kit.shutil,
+            "which",
+            return_value=str(first_javap),
+        ):
+            self.compat_kit.scan_jar(
+                self.jar,
+                cache_dir=cache,
+                signature_reader=self.signatures,
+            )
+
+        calls = []
+        with mock.patch.object(
+            self.compat_kit.shutil,
+            "which",
+            return_value=str(second_javap),
+        ):
+            self.compat_kit.scan_jar(
+                self.jar,
+                cache_dir=cache,
+                signature_reader=lambda class_name: (
+                    calls.append(class_name) or self.signatures(class_name)
+                ),
+            )
+
+        self.assertTrue(calls)
 
     def test_scan_ignores_cache_from_an_older_scanner_format(self):
         cache = self.root / "cache"
@@ -1294,6 +1568,7 @@ class CompatKitAuditTests(unittest.TestCase):
         legacy["scanner_format"] = 7
         legacy.pop("recipe_data")
         legacy.pop("ancestry_classpath")
+        legacy.pop("structural_hierarchy")
         for bucket in tuple(legacy["candidates"]):
             if bucket not in {
                 "recipe_classes",
@@ -1304,7 +1579,6 @@ class CompatKitAuditTests(unittest.TestCase):
         for records in legacy["candidates"].values():
             for record in records:
                 record.pop("classification")
-                record.pop("hierarchy")
         self.compat_kit._validate_audit(legacy)
 
         audit["scanner_format"] = 6
@@ -1323,6 +1597,7 @@ class CompatKitAuditTests(unittest.TestCase):
         legacy["scanner_format"] = 7
         legacy.pop("recipe_data")
         legacy.pop("ancestry_classpath")
+        legacy.pop("structural_hierarchy")
         for bucket in tuple(legacy["candidates"]):
             if bucket not in {
                 "recipe_classes",
@@ -1333,7 +1608,6 @@ class CompatKitAuditTests(unittest.TestCase):
         for records in legacy["candidates"].values():
             for record in records:
                 record.pop("classification")
-                record.pop("hierarchy")
 
         migrated = self.compat_kit.migrate_audit(
             legacy,
@@ -1350,10 +1624,16 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
         legacy_structural = copy.deepcopy(current)
-        legacy_structural["scanner_format"] = 8
+        legacy_structural["scanner_format"] = 9
+        hierarchy_by_class = {
+            record["class"]: record["classification"]
+            for record in legacy_structural.pop("structural_hierarchy")
+        }
         for records in legacy_structural["candidates"].values():
             for record in records:
-                record.pop("hierarchy")
+                record["hierarchy"] = copy.deepcopy(
+                    hierarchy_by_class.get(record["class"])
+                )
         migrated_structural = self.compat_kit.migrate_audit(
             legacy_structural,
             self.jar,
@@ -1363,9 +1643,13 @@ class CompatKitAuditTests(unittest.TestCase):
             self.compat_kit.SCAN_CACHE_VERSION,
             migrated_structural["scanner_format"],
         )
+        self.assertIn(
+            "structural_hierarchy",
+            migrated_structural,
+        )
         self.assertTrue(
             all(
-                "hierarchy" in record
+                "hierarchy" not in record
                 for records in migrated_structural["candidates"].values()
                 for record in records
             )
@@ -1593,6 +1877,36 @@ class CompatKitAuditTests(unittest.TestCase):
 
         audit = self.compat_kit.scan_jar(target_jar)
         self.assertEqual([], audit["candidates"]["recipe_classes"])
+
+    def test_jdk_module_inventory_requires_exact_jdk_21_toolchain(self):
+        jdk = self.root / "fake-jdk"
+        javap = jdk / "bin/javap"
+        javap.parent.mkdir(parents=True)
+        javap.write_text("")
+        jmods = jdk / "jmods"
+        jmods.mkdir()
+        with zipfile.ZipFile(jmods / "java.base.jmod", "w") as archive:
+            archive.writestr("classes/java/lang/Object.class", b"fixture")
+        self.addCleanup(setattr, self.compat_kit, "_JDK_MODULE_CLASSES", None)
+        self.addCleanup(setattr, self.compat_kit, "_JDK_MODULE_KEY", None)
+
+        with mock.patch.object(
+            self.compat_kit.shutil,
+            "which",
+            return_value=str(javap),
+        ):
+            (jdk / "release").write_text('JAVA_VERSION="17.0.12"\n')
+            with self.assertRaisesRegex(RuntimeError, "requires JDK 21"):
+                self.compat_kit._jdk_module_classes()
+
+            (jdk / "release").write_text('JAVA_VERSION="21.0.7"\n')
+            self.assertEqual(
+                frozenset({"java.lang.Object"}),
+                self.compat_kit._jdk_module_classes(),
+            )
+            (jdk / "release").write_text('JAVA_VERSION="25"\n')
+            with self.assertRaisesRegex(RuntimeError, "requires JDK 21"):
+                self.compat_kit._jdk_module_classes()
 
     def test_scan_rejects_unresolved_class_that_only_uses_a_platform_prefix(self):
         support_source = self.root / "fake-platform-support-source"
@@ -1896,7 +2210,12 @@ displayName="Sample Machines"
             for entry in audit["candidates"]["recipe_classes"]
             if entry["class"] == "samplemod.process.CrusherRecipe"
         )
-        self.assertIsNot(candidate["classification"], candidate["hierarchy"])
+        hierarchy = next(
+            entry["classification"]
+            for entry in audit["structural_hierarchy"]
+            if entry["class"] == candidate["class"]
+        )
+        self.assertIsNot(candidate["classification"], hierarchy)
         audit["candidates"]["recipe_classes"].remove(candidate)
         candidate["classification"] = {
             "method": "name_term",
@@ -1910,7 +2229,73 @@ displayName="Sample Machines"
         with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
             self.compat_kit._validate_audit(audit)
 
-        candidate["hierarchy"] = None
+        audit["structural_hierarchy"] = [
+            entry
+            for entry in audit["structural_hierarchy"]
+            if entry["class"] != candidate["class"]
+        ]
+        with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
+            self.compat_kit._validate_audit(audit)
+
+    def test_audit_validation_rejects_removed_indirect_hierarchy_evidence(self):
+        structural_jar = self.root / "samplemod-indirect-hierarchy.jar"
+        write_fixture_jar(structural_jar)
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                "samplemod/machine/BaseMachine.class",
+                b"abstract block entity base",
+            )
+            archive.writestr(
+                "samplemod/machine/MolecularAssemblerBlockEntity.class",
+                b"indirect block entity with station name",
+            )
+
+        metadata = {
+            "samplemod.machine.BaseMachine": {
+                "access_flags": 0x0400,
+                "super_class": "net.minecraft.world.level.block.entity.BlockEntity",
+                "interfaces": [],
+            },
+            "samplemod.machine.MolecularAssemblerBlockEntity": {
+                "access_flags": 0,
+                "super_class": "samplemod.machine.BaseMachine",
+                "interfaces": [],
+            },
+        }
+        audit = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=lambda class_name: (
+                "public class samplemod.machine.MolecularAssemblerBlockEntity "
+                "extends samplemod.machine.BaseMachine { }"
+                if class_name == "samplemod.machine.MolecularAssemblerBlockEntity"
+                else f"public class {class_name} {{ }}"
+            ),
+            risk_reader=lambda class_name: f"public class {class_name} {{ }}",
+            class_metadata_reader=lambda class_name: metadata.get(
+                class_name,
+                {
+                    "access_flags": 0,
+                    "super_class": "java.lang.Object",
+                    "interfaces": [],
+                },
+            ),
+        )
+        candidate = next(
+            entry
+            for entry in audit["candidates"]["block_entity_classes"]
+            if entry["class"]
+            == "samplemod.machine.MolecularAssemblerBlockEntity"
+        )
+        audit["candidates"]["block_entity_classes"].remove(candidate)
+        candidate["classification"] = {
+            "method": "name_term",
+            "evidence": ["assembler"],
+        }
+        audit["candidates"]["station_classes"].append(candidate)
+        audit["candidates"]["station_classes"].sort(
+            key=lambda entry: entry["class"]
+        )
+
         with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
             self.compat_kit._validate_audit(audit)
 
@@ -1979,6 +2364,50 @@ displayName="Sample Machines"
         )
         for family_id in colliding_ids.values():
             self.assertRegex(family_id, r"^recipe_[0-9a-f]+$")
+
+    def test_decide_encodes_dollar_only_recipe_class_family_id(self):
+        audit = self.source_audit()
+        candidate = next(
+            entry
+            for entry in audit["candidates"]["recipe_classes"]
+            if entry["class"] == "samplemod.recipe.CrushingRecipe"
+        )
+        candidate["class"] = "samplemod.$"
+        candidate["public_signature"] = (
+            "public class samplemod.$ implements "
+            "net.minecraft.world.item.crafting.Recipe { }"
+        )
+        hierarchy = {
+            "method": "class_hierarchy",
+            "evidence": [
+                "samplemod.$",
+                "net.minecraft.world.item.crafting.Recipe",
+            ],
+        }
+        candidate["classification"] = copy.deepcopy(hierarchy)
+        audit["structural_hierarchy"].append(
+            {
+                "class": "samplemod.$",
+                "classification": copy.deepcopy(hierarchy),
+            }
+        )
+        audit["structural_hierarchy"].sort(
+            key=lambda entry: entry["class"]
+        )
+        audit["candidates"]["recipe_classes"].sort(
+            key=lambda entry: entry["class"]
+        )
+
+        contract, _ = self.compat_kit.decide_audit(audit)
+
+        family = next(
+            entry for entry in contract["families"]
+            if entry["class"] == "samplemod.$"
+        )
+        self.assertEqual(
+            "class_" + "samplemod.$".encode("utf-8").hex(),
+            family["id"],
+        )
 
     def test_contract_validation_rejects_unknown_keys_and_incomplete_acceptance(self):
         audit = self.compat_kit.scan_jar(
@@ -2282,6 +2711,30 @@ displayName="Sample Machines"
         )
         self.assertTrue(delta["contract_affected"])
 
+    def test_ancestry_artifact_changes_affect_diff_and_reopen_contracts(self):
+        old_audit = self.source_audit()
+        old_contract = self.accepted_contract()
+        changed_audit = copy.deepcopy(old_audit)
+        changed_audit["ancestry_classpath"] = [{
+            "sha256": "f" * 64,
+            "size": 1,
+        }]
+
+        delta = self.compat_kit.diff_audits(old_audit, changed_audit)
+        self.assertTrue(delta["ancestry_changed"])
+        self.assertTrue(delta["contract_affected"])
+
+        migrated, actions = self.compat_kit.migrate_contract(
+            old_contract,
+            old_audit,
+            changed_audit,
+        )
+        self.assertTrue(all(
+            family["status"] == "needs_decision"
+            for family in migrated["families"]
+        ))
+        self.assertIn("changed evidence", actions)
+
     def test_proposals_surface_rate_parallel_and_requirement_evidence_without_deciding(self):
         self.assertTrue(hasattr(self.compat_kit, "propose_audit"))
         proposal_jar = self.root / "samplemod-proposals.jar"
@@ -2377,12 +2830,20 @@ displayName="Sample Machines"
         )
         output = self.root / "runtime-probe"
 
-        first = self.compat_kit.scaffold_runtime_probe(audit, output)
+        first = self.compat_kit.scaffold_runtime_probe(
+            audit,
+            output,
+            game_test_namespace="samplemod_auto_storage",
+        )
         first_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
             for path in first
         }
-        second = self.compat_kit.scaffold_runtime_probe(audit, output)
+        second = self.compat_kit.scaffold_runtime_probe(
+            audit,
+            output,
+            game_test_namespace="samplemod_auto_storage",
+        )
         second_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
             for path in second
@@ -2391,12 +2852,20 @@ displayName="Sample Machines"
         self.assertEqual(first_bytes, second_bytes)
         probe_spec = json.loads((output / "probe-spec.json").read_text())
         self.assertEqual("evidence_only", probe_spec["authority"])
+        self.assertEqual(
+            "samplemod_auto_storage",
+            probe_spec["game_test_namespace"],
+        )
         self.assertEqual(50_000, probe_spec["limits"]["loaded_recipes"])
         self.assertTrue(probe_spec["unresolved"])
         sources = list((output / "src/main/java").rglob("*.java"))
         self.assertEqual(1, len(sources))
         source = sources[0].read_text()
         self.assertIn("@GameTest", source)
+        self.assertIn(
+            '@GameTestHolder("samplemod_auto_storage")',
+            source,
+        )
         self.assertIn("getRecipeManager().getRecipes()", source)
         self.assertIn("BuiltInRegistries.RECIPE_TYPE", source)
         self.assertIn("BuiltInRegistries.RECIPE_SERIALIZER", source)
@@ -2410,10 +2879,19 @@ displayName="Sample Machines"
         args = self.compat_kit._build_parser().parse_args([
             "probe",
             "audit.json",
+            "--game-test-namespace",
+            "samplemod_auto_storage",
             "--output",
             "probe-output",
         ])
         self.assertEqual("probe", args.command)
+
+        with self.assertRaisesRegex(ValueError, "game_test_namespace"):
+            self.compat_kit.scaffold_runtime_probe(
+                audit,
+                self.root / "invalid-runtime-probe",
+                game_test_namespace="Bad:Namespace",
+            )
 
     def test_runtime_probe_output_validation_rejects_unordered_or_foreign_evidence(self):
         audit = self.compat_kit.scan_jar(
@@ -2534,7 +3012,12 @@ displayName="Sample Machines"
         }
         output = self.root / "runtime-probe-bound"
 
-        self.compat_kit.scaffold_runtime_probe(audit, output, plan=plan)
+        self.compat_kit.scaffold_runtime_probe(
+            audit,
+            output,
+            game_test_namespace="samplemod_auto_storage",
+            plan=plan,
+        )
 
         source = next((output / "src/main/java").rglob("*.java")).read_text()
         plan_digest = hashlib.sha256(
@@ -2565,6 +3048,8 @@ displayName="Sample Machines"
             "audit.json",
             "--plan",
             "probe-plan.json",
+            "--game-test-namespace",
+            "samplemod_auto_storage",
             "--output",
             "probe-output",
         ])
@@ -3409,6 +3894,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             },
             "package": "com.swear.autostorage.fixture.samplemod",
             "class_name": "SamplemodGeneratedConformanceGameTests",
+            "game_test_namespace": "auto_storage_samplemod_fixture",
             "families": [
                 {
                     "id": "crushing_recipe",
@@ -3493,6 +3979,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertNotIn("java.lang.reflect", combined)
         self.assertNotIn("clientClassesLoaded()", combined)
         self.assertIn("FMLEnvironment.dist != Dist.DEDICATED_SERVER", combined)
+        self.assertIn(
+            '@GameTestHolder("auto_storage_samplemod_fixture")',
+            combined,
+        )
 
         args = self.compat_kit._build_parser().parse_args([
             "conformance",
@@ -3544,6 +4034,13 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract, audit, plan, self.root / "single-conformance"
             )
 
+        plan = self.conformance_plan(contract)
+        plan["game_test_namespace"] = "Bad:Namespace"
+        with self.assertRaisesRegex(ValueError, "game_test_namespace"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract, audit, plan, self.root / "invalid-conformance-namespace"
+            )
+
         schema = json.loads(
             (
                 ROOT
@@ -3566,6 +4063,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             },
             "package": "com.swear.autostorage.compat.samplemod.resource",
             "class_name": "SamplemodSteamResource",
+            "game_test_namespace": "auto_storage_samplemod_fixture",
             "resources": [
                 {
                     "id": "samplemod:steam",
@@ -3633,6 +4131,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertNotIn("persistenceRoundTrip()", combined)
         self.assertNotIn("containerDepositAndWithdraw()", combined)
         self.assertNotIn("clientClassesLoaded()", combined)
+        self.assertIn(
+            '@GameTestHolder("auto_storage_samplemod_fixture")',
+            combined,
+        )
 
         args = self.compat_kit._build_parser().parse_args([
             "resource-scaffold",
@@ -3683,6 +4185,13 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         with self.assertRaisesRegex(ValueError, "generated class collision"):
             self.compat_kit.scaffold_resource_integration(
                 contract, audit, plan, self.root / "resource-class-collision"
+            )
+
+        plan = self.resource_scaffold_plan(contract)
+        plan["game_test_namespace"] = "Bad:Namespace"
+        with self.assertRaisesRegex(ValueError, "game_test_namespace"):
+            self.compat_kit.scaffold_resource_integration(
+                contract, audit, plan, self.root / "invalid-resource-namespace"
             )
 
     def source_audit(self) -> dict:
@@ -4586,6 +5095,11 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         self.assertFalse(
             audit_schema["properties"]["candidates"]["additionalProperties"]
+        )
+        self.assertIn("structural_hierarchy", audit_schema["required"])
+        self.assertNotIn(
+            "hierarchy",
+            audit_schema["$defs"]["candidates"]["items"]["required"],
         )
         hierarchy = audit_schema["$defs"]["hierarchy"]
         self.assertEqual(
