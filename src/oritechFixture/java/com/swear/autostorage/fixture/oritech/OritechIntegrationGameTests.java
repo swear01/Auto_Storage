@@ -206,6 +206,12 @@ public final class OritechIntegrationGameTests {
     public static void runtime_pulverizer_energy_maps_to_exact_fe_and_work(
             GameTestHelper helper
     ) {
+        if (OritechConfig.processingMachines == null
+                || OritechConfig.processingMachines.pulverizerData == null
+                || OritechConfig.processingMachines.pulverizerData.energyPerTick == null) {
+            helper.fail("Oritech pulverizer config holders were unexpectedly null");
+            return;
+        }
         int perTick = energyPerTick();
         long adamant = expectedEnergy(ADAMANT, helper);
         long rawIron = expectedEnergy(RAW_IRON, helper);

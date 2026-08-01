@@ -1836,6 +1836,40 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("zero production recipe families", compatibility_doc)
         self.assertIn("not an exact player dependency pin", compatibility_doc)
 
+    def test_oritech_energy_per_tick_reads_live_config_without_null_fallback(self):
+        compat = self.read_required(
+            "src/compat/oritech/java/com/swear/autostorage/compat/"
+            "oritech/OritechCompat.java"
+        )
+        fixture = self.read_required(
+            "src/oritechFixture/java/com/swear/autostorage/fixture/"
+            "oritech/OritechIntegrationGameTests.java"
+        )
+
+        self.assertIn("MachineVariant.derived(", compat)
+        self.assertRegex(
+            compat,
+            r"private static int energyPerTick\(\)\s*\{\s*"
+            r"return OritechConfig\.processingMachines\.pulverizerData"
+            r"\.energyPerTick\.get\(\);\s*\}",
+        )
+        self.assertNotIn("processingMachines != null", compat)
+        self.assertNotIn("pulverizerData != null", compat)
+        self.assertNotIn("return 32;", compat)
+        self.assertNotIn("value != null ? value : 32", compat)
+        self.assertIn(
+            "OritechConfig.processingMachines == null",
+            fixture,
+        )
+        self.assertIn(
+            "OritechConfig.processingMachines.pulverizerData == null",
+            fixture,
+        )
+        self.assertIn(
+            "OritechConfig.processingMachines.pulverizerData.energyPerTick == null",
+            fixture,
+        )
+
     def test_prism_gui_support_pack_stages_macfix_and_optional_mods_without_player_dependency_pins(self):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
