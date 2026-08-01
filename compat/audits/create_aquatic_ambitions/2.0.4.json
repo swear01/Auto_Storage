@@ -1,0 +1,155 @@
+{
+  "artifact": {
+    "sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44",
+    "size": 1074131
+  },
+  "candidates": {
+    "recipe_classes": [
+      {
+        "class": "net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen",
+        "public_signature": "Compiled from \"ChannelingRecipeGen.java\"\npublic abstract class net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen extends com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe> {\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe convert(net.minecraft.world.level.ItemLike, net.minecraft.world.level.ItemLike);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe convert(java.util.function.Supplier<net.minecraft.world.item.crafting.Ingredient>, java.util.function.Supplier<net.minecraft.world.level.ItemLike>);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe coralRevival(net.minecraft.world.item.Item, java.util.function.Supplier<net.minecraft.world.level.ItemLike>);\n  public net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent",
+        "public_signature": "Compiled from \"ProcessingOutputRecipeComponent.java\"\npublic class net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent extends dev.latvian.mods.kubejs.recipe.component.SimpleRecipeComponent<com.simibubi.create.content.processing.recipe.ProcessingOutput> {\n  public static final dev.latvian.mods.rhino.type.TypeInfo TYPE_INFO;\n  public static final dev.latvian.mods.kubejs.recipe.component.RecipeComponentType<com.simibubi.create.content.processing.recipe.ProcessingOutput> TYPE;\n  public net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent(dev.latvian.mods.kubejs.recipe.component.RecipeComponentType<?>);\n  public boolean hasPriority(dev.latvian.mods.kubejs.recipe.filter.RecipeMatchContext, java.lang.Object);\n  public boolean matches(dev.latvian.mods.kubejs.recipe.filter.RecipeMatchContext, com.simibubi.create.content.processing.recipe.ProcessingOutput, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo);\n  public com.simibubi.create.content.processing.recipe.ProcessingOutput replace(dev.latvian.mods.kubejs.recipe.RecipeScriptContext, com.simibubi.create.content.processing.recipe.ProcessingOutput, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo, java.lang.Object);\n  public boolean isEmpty(com.simibubi.create.content.processing.recipe.ProcessingOutput);\n  public void buildUniqueId(dev.latvian.mods.kubejs.recipe.component.UniqueIdBuilder, com.simibubi.create.content.processing.recipe.ProcessingOutput);\n  public void buildUniqueId(dev.latvian.mods.kubejs.recipe.component.UniqueIdBuilder, java.lang.Object);\n  public boolean isEmpty(java.lang.Object);\n  public java.lang.Object replace(dev.latvian.mods.kubejs.recipe.RecipeScriptContext, java.lang.Object, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo, java.lang.Object);\n  public boolean matches(dev.latvian.mods.kubejs.recipe.filter.RecipeMatchContext, java.lang.Object, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.compat.KubeJS.schemas.ChannelingRecipeSchema",
+        "public_signature": "Compiled from \"ChannelingRecipeSchema.java\"\npublic interface net.davio.aquaticambitions.compat.KubeJS.schemas.ChannelingRecipeSchema {\n  public static final dev.latvian.mods.kubejs.recipe.RecipeKey<java.util.List<net.minecraft.world.item.crafting.Ingredient>> INGREDIENT;\n  public static final dev.latvian.mods.kubejs.recipe.RecipeKey<java.util.List<com.simibubi.create.content.processing.recipe.ProcessingOutput>> RESULTS;\n  public static final dev.latvian.mods.kubejs.recipe.schema.RecipeSchema SCHEMA;\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+        "public_signature": "Compiled from \"ChannelingRecipe.java\"\npublic class net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe extends com.simibubi.create.content.processing.recipe.StandardProcessingRecipe<net.minecraft.world.item.crafting.SingleRecipeInput> {\n  public net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe(com.simibubi.create.content.processing.recipe.ProcessingRecipeParams);\n  public boolean matches(net.minecraft.world.item.crafting.SingleRecipeInput, net.minecraft.world.level.Level);\n  public static com.simibubi.create.content.processing.recipe.StandardProcessingRecipe$Builder<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe> builder(net.minecraft.resources.ResourceLocation);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen",
+        "public_signature": "Compiled from \"CAAChannelingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen extends net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe moddedConversion(com.simibubi.create.foundation.data.recipe.Mods, java.lang.String, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe moddedCoralRevival(com.simibubi.create.foundation.data.recipe.Mods, java.lang.String);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen",
+        "public_signature": "Compiled from \"CAACompactingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen extends com.simibubi.create.api.data.recipe.CompactingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen",
+        "public_signature": "Compiled from \"CAACrushingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen extends com.simibubi.create.api.data.recipe.CrushingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen",
+        "public_signature": "Compiled from \"CAAMillingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen extends com.simibubi.create.api.data.recipe.MillingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen",
+        "public_signature": "Compiled from \"CAAMixingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen extends com.simibubi.create.api.data.recipe.MixingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider",
+        "public_signature": "Compiled from \"CAARecipeProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider extends net.minecraft.data.recipes.RecipeProvider {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public static void registerAllProcessing(net.minecraft.data.DataGenerator, net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I",
+        "public_signature": "Compiled from \"CAARecipeProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I {\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen extends com.simibubi.create.api.data.recipe.BaseRecipeProvider {\n  public void buildRecipes(net.minecraft.data.recipes.RecipeOutput);\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder(java.lang.String, com.google.common.base.Supplier<? extends net.minecraft.world.level.ItemLike>);\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder(net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen, java.lang.String, net.minecraft.resources.ResourceLocation);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder {\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker {\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput extends java.lang.Record implements net.minecraft.data.recipes.RecipeOutput {\n  public net.minecraft.advancements.Advancement$Builder advancement();\n  public void accept(net.minecraft.resources.ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>, net.minecraft.advancements.AdvancementHolder, net.neoforged.neoforge.common.conditions.ICondition...);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.data.recipes.RecipeOutput wrapped();\n  public net.minecraft.resources.ResourceLocation outputOverride();\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack extends java.lang.Record {\n  public static com.mojang.serialization.Codec<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack> CODEC;\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.resources.ResourceLocation id();\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer extends java.lang.Record implements net.minecraft.world.item.crafting.RecipeSerializer<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> {\n  public com.mojang.serialization.MapCodec<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> streamCodec();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public com.mojang.serialization.MapCodec<net.minecraft.world.item.crafting.Recipe<?>> wrappedCodec();\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen",
+        "public_signature": "Compiled from \"CAAWashingDataGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen extends com.simibubi.create.api.data.recipe.WashingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.registry.CAARecipeTypes",
+        "public_signature": "Compiled from \"CAARecipeTypes.java\"\npublic final class net.davio.aquaticambitions.registry.CAARecipeTypes extends java.lang.Enum<net.davio.aquaticambitions.registry.CAARecipeTypes> implements com.simibubi.create.foundation.recipe.IRecipeTypeInfo, net.minecraft.util.StringRepresentable {\n  public static final net.davio.aquaticambitions.registry.CAARecipeTypes CHANNELING;\n  public static final java.util.function.Predicate<net.minecraft.world.item.crafting.RecipeHolder<?>> CAN_BE_AUTOMATED;\n  public final net.minecraft.resources.ResourceLocation id;\n  public final java.util.function.Supplier<net.minecraft.world.item.crafting.RecipeSerializer<?>> serializerSupplier;\n  public final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<?>> serializerObject;\n  public final java.util.function.Supplier<net.minecraft.world.item.crafting.RecipeType<?>> type;\n  public static final com.mojang.serialization.Codec<net.davio.aquaticambitions.registry.CAARecipeTypes> CODEC;\n  public static net.davio.aquaticambitions.registry.CAARecipeTypes[] values();\n  public static net.davio.aquaticambitions.registry.CAARecipeTypes valueOf(java.lang.String);\n  public static void register(net.neoforged.bus.api.IEventBus);\n  public net.minecraft.resources.ResourceLocation getId();\n  public <T extends net.minecraft.world.item.crafting.RecipeSerializer<?>> T getSerializer();\n  public <I extends net.minecraft.world.item.crafting.RecipeInput, R extends net.minecraft.world.item.crafting.Recipe<I>> net.minecraft.world.item.crafting.RecipeType<R> getType();\n  public <I extends net.minecraft.world.item.crafting.RecipeInput, R extends net.minecraft.world.item.crafting.Recipe<I>> java.util.Optional<net.minecraft.world.item.crafting.RecipeHolder<R>> find(I, net.minecraft.world.level.Level);\n  public static boolean shouldIgnoreInAutomation(net.minecraft.world.item.crafting.RecipeHolder<?>);\n  public java.lang.String getSerializedName();\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.registry.CAARecipeTypes$Registers",
+        "public_signature": "Compiled from \"CAARecipeTypes.java\"\nclass net.davio.aquaticambitions.registry.CAARecipeTypes$Registers {\n}"
+      }
+    ],
+    "resource_apis": [
+      {
+        "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel",
+        "public_signature": "Compiled from \"MechanicalConduitBlock.java\"\npublic final class net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel extends java.lang.Enum<net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel> implements net.minecraft.util.StringRepresentable {\n  public static final net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel IDLE;\n  public static final net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel AWAKENED;\n  public static final com.mojang.serialization.Codec<net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel> CODEC;\n  public static net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel[] values();\n  public static net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel valueOf(java.lang.String);\n  public boolean isAwakened();\n  public java.lang.String getSerializedName();\n}"
+      },
+      {
+        "class": "net.davio.aquaticambitions.registry.CAATags$CAAFluidTags",
+        "public_signature": "Compiled from \"CAATags.java\"\npublic final class net.davio.aquaticambitions.registry.CAATags$CAAFluidTags extends java.lang.Enum<net.davio.aquaticambitions.registry.CAATags$CAAFluidTags> {\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags CONDUIT_FUEL;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags CLEARS_EFFECTS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_FIRE_RES;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_HASTE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_INFESTED;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_INVIS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_JUMP;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_LUCK;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_NIGHT_VISION;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_OOZING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_POISON;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_REGEN;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_RESISTANCE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SLOW_FALL;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SLOWNESS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SPEED;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_STRENGTH;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WATER_BREATHING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WEAKNESS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WEAVING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WIND;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WITHER;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SATURATION;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags SETS_ON_FIRE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags FAN_PROCESSING_CATALYSTS_CHANNELING;\n  public final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> tag;\n  public final boolean alwaysDatagen;\n  public static net.davio.aquaticambitions.registry.CAATags$CAAFluidTags[] values();\n  public static net.davio.aquaticambitions.registry.CAATags$CAAFluidTags valueOf(java.lang.String);\n  public boolean matches(net.minecraft.world.level.material.Fluid);\n  public boolean matches(net.minecraft.world.level.material.FluidState);\n}"
+      }
+    ],
+    "station_classes": []
+  },
+  "kind": "auto_storage_compat_audit",
+  "risks": [
+    {
+      "code": "chance_output",
+      "disposition": "needs_decision",
+      "evidence": [
+        "net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent#getChance"
+      ]
+    },
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe: world API",
+        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim: world API",
+        "net.davio.aquaticambitions.registry.CAARecipeTypes: world API"
+      ]
+    }
+  ],
+  "scanner_format": 7,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/net/davio/aquaticambitions/api/data/recipe/ChannelingRecipeGen.java",
+      "src/main/java/net/davio/aquaticambitions/compat/KubeJS/create/ProcessingOutputRecipeComponent.java",
+      "src/main/java/net/davio/aquaticambitions/compat/KubeJS/schemas/ChannelingRecipeSchema.java",
+      "src/main/java/net/davio/aquaticambitions/content/kinetics/fan/processing/ChannelingRecipe.java",
+      "src/main/java/net/davio/aquaticambitions/content/processing/conduit/MechanicalConduitBlock.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAChannelingRecipeGen.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAACompactingRecipeGen.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAACrushingRecipeGen.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAMillingRecipeGen.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAMixingRecipeGen.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAARecipeProvider.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAStandardRecipeGen.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAWashingDataGen.java",
+      "src/main/java/net/davio/aquaticambitions/registry/CAARecipeTypes.java",
+      "src/main/java/net/davio/aquaticambitions/registry/CAATags.java"
+    ],
+    "revision": "c584e179ae64ce2373597899402bdd0cab9a22e7"
+  },
+  "target": {
+    "display_name": "Create Aquatic Ambitions",
+    "mod_id": "create_aquatic_ambitions",
+    "version": "2.0.4"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:create-aquatic-ambitions:DoI3PpXj",
+    "sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+  },
+  "dependencies": [
+    "maven.modrinth:create-aquatic-ambitions:DoI3PpXj"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.createaquaticambitions.CreateAquaticAmbitionsCompatModule",
+  "expectedTests": 4,
+  "fixture": "createAquaticAmbitionsFixture",
+  "id": "auto_storage:create_aquatic_ambitions",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "create_aquatic_ambitions"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "create_aquatic_ambitions"
+      ],
+      "sha256": "5084d1ab9696fd443d49d14fe855d936451b5f8895f5ae1760fb7b636650d189"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "create_aquatic_ambitions"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:create-aquatic-ambitions:DoI3PpXj",
+    "maven.modrinth:create:${create_ci_version}"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatCreateAquaticAmbitions"
+}
