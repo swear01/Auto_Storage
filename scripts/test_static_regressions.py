@@ -1011,7 +1011,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertNotIn('versionRange="[1.1.24]"', metadata)
 
-    def test_ci_stages_exact_ae2_optional_ancestry_before_script_tests(self):
+    def test_ci_stages_exact_ae2_ancestry_before_script_tests(self):
         build = self.read_required("build.gradle")
         workflow = self.read_required(".github/workflows/ci.yml")
 
@@ -1023,6 +1023,7 @@ class StaticRegressionTests(unittest.TestCase):
             "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.729",
             "dev.emi:emi-neoforge:1.1.22+1.21.1:api",
             "curse.maven:jade-324717:5427817",
+            "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7",
         ):
             self.assertIn(dependency, build)
         for unreachable_dependency in (
@@ -1032,7 +1033,22 @@ class StaticRegressionTests(unittest.TestCase):
         ):
             self.assertNotIn(unreachable_dependency, build)
         self.assertIn('tasks.register("stageAe2CompatAuditAncestry")', build)
-        self.assertIn("audit.ancestry_dependencies.collectEntries", build)
+        stage_block = build[
+            build.index('tasks.register("stageAe2CompatAuditAncestry")'):
+            build.index("\ndef compatArtifactVerificationTasks")
+        ]
+        self.assertIn("audit.ancestry_classpath.collectEntries", stage_block)
+        self.assertIn("configurations.additionalRuntimeClasspath", stage_block)
+        self.assertIn('tasks.named("createMinecraftArtifacts")', stage_block)
+        self.assertIn(
+            'digest.digest().encodeHex().toString()',
+            stage_block,
+        )
+        self.assertIn("it.size.longValue()", stage_block)
+        self.assertNotIn(
+            'artifacts.size() != expected.size()',
+            stage_block,
+        )
         stage = "./gradlew stageAe2CompatAuditAncestry"
         tests = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts"
         self.assertIn(stage, workflow)

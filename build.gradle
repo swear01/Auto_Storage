@@ -622,6 +622,7 @@ dependencies {
     ae2CompatAuditAncestry "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.729"
     ae2CompatAuditAncestry "dev.emi:emi-neoforge:1.1.22+1.21.1:api"
     ae2CompatAuditAncestry "curse.maven:jade-324717:5427817"
+    ae2CompatAuditAncestry "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7"
     compatModules.each { spec ->
         spec.dependencies.each { notation ->
             add(sourceSets[spec.sourceSet].compileOnlyConfigurationName, notation) {
@@ -737,8 +738,11 @@ def ae2CompatAuditAncestryManifest =
         layout.buildDirectory.file("compat-kit/ae2-audit-optional-ancestry.txt")
 tasks.register("stageAe2CompatAuditAncestry") {
     group = "verification"
-    description = "Stages the exact optional API jars used by the committed AE2 audit."
-    inputs.files(configurations.ae2CompatAuditAncestry)
+    description = "Stages every exact ancestry jar used by the committed AE2 audit."
+    inputs.files(
+            configurations.ae2CompatAuditAncestry,
+            configurations.additionalRuntimeClasspath,
+            tasks.named("createMinecraftArtifacts"))
     inputs.file("compat/audits/ae2/19.2.17.json")
     outputs.dir(ae2CompatAuditAncestryDir)
     outputs.file(ae2CompatAuditAncestryManifest)
@@ -747,22 +751,19 @@ tasks.register("stageAe2CompatAuditAncestry") {
             it.name == "19.2.17.json"
         }
         def audit = new JsonSlurper().parse(auditFile)
-        def expected = audit.ancestry_dependencies.collectEntries { record ->
+        def expected = audit.ancestry_classpath.collectEntries { record ->
             [("${record.sha256}:${record.size}"): record]
         }
         def artifacts = inputs.files.files.findAll {
             it.name.endsWith(".jar")
         }
-        if (artifacts.size() != expected.size()) {
-            throw new GradleException(
-                    "AE2 audit optional ancestry expected ${expected.size()} jars, found ${artifacts.size()}")
-        }
-        def outputDir = outputs.files.files.find {
-            it.name == "ae2-audit-optional-ancestry"
-        }
-        outputDir.deleteDir()
-        outputDir.mkdirs()
-        def staged = artifacts.collect { artifact ->
+        def expectedSizes = audit.ancestry_classpath.collect {
+            it.size.longValue()
+        }.toSet()
+        def matches = [:]
+        artifacts.findAll {
+            expectedSizes.contains(it.length())
+        }.each { artifact ->
             def digest = java.security.MessageDigest.getInstance("SHA-256")
             artifact.withInputStream { input ->
                 byte[] buffer = new byte[8192]
@@ -770,13 +771,26 @@ tasks.register("stageAe2CompatAuditAncestry") {
                     digest.update(buffer, 0, read)
                 }
             }
-            def sha256 = digest.digest().encodeHex().toString()
-            def identity = "${sha256}:${artifact.length()}"
-            if (!expected.containsKey(identity)) {
-                throw new GradleException(
-                        "AE2 audit optional ancestry is not present in the committed audit: ${artifact.name}")
+            def identity = "${digest.digest().encodeHex().toString()}:${artifact.length()}"
+            if (expected.containsKey(identity)) {
+                matches[identity] = artifact
             }
-            def target = new File(outputDir, "${sha256}.jar")
+        }
+        def missing = expected.keySet() - matches.keySet()
+        if (!missing.isEmpty()) {
+            throw new GradleException(
+                    "AE2 audit ancestry is unresolved: "
+                            + missing.toList().sort().join(", "))
+        }
+        def outputDir = outputs.files.files.find {
+            it.name == "ae2-audit-optional-ancestry"
+        }
+        outputDir.deleteDir()
+        outputDir.mkdirs()
+        def staged = audit.ancestry_classpath.collect { record ->
+            def identity = "${record.sha256}:${record.size}"
+            def artifact = matches[identity]
+            def target = new File(outputDir, "${record.sha256}.jar")
             java.nio.file.Files.copy(
                     artifact.toPath(),
                     target.toPath(),
