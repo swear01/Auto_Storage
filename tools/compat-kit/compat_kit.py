@@ -42,6 +42,10 @@ MAX_RUNTIME_PROBE_RECIPES = 50_000
 MAX_RUNTIME_PROBE_VALUES = 4_096
 GRADLE_INTEGER_MAX = 2_147_483_647
 TOOL_VERSION = "0.3.0"
+SOURCE_EVIDENCE_PATH_PATTERN = (
+    r"^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\.\.?(?:/|$))(?!.*//)(?!.*\\)"
+    r"(?!.*[\u0000-\u001f\u007f])(?:[^/]+/)*[^/]+\.java$"
+)
 PUBLISHED_ADDON_EXAMPLE_FILES = (
     "src/main/java/example/autostorage/ExampleAddon.java",
 )
@@ -2065,6 +2069,15 @@ def _validate_audit(audit: dict):
         raise ValueError("audit source files must be a string list")
     if len(set(files)) != len(files):
         raise ValueError("audit source files must not contain duplicates")
+    if files != sorted(files):
+        raise ValueError("audit source files must be sorted")
+    for path in files:
+        if not re.fullmatch(SOURCE_EVIDENCE_PATH_PATTERN, path):
+            raise ValueError(
+                "audit source files must be safe repository-relative Java paths"
+            )
+    if revision is None and files:
+        raise ValueError("audit source null revision requires empty files")
 
     if scanner_format != 7 and "recipe_data" not in audit:
         raise ValueError("audit is missing recipe_data")
@@ -2171,6 +2184,11 @@ def _validate_audit(audit: dict):
             if class_name in seen_classes:
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
+
+    if revision is not None and seen_classes and not files:
+        raise ValueError(
+            "audit with classified candidates requires at least one source file"
+        )
 
     if scanner_format in {10, 11, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
@@ -3132,6 +3150,13 @@ def validate_contract(
         )
     if source_audit is not None:
         _validate_audit(source_audit)
+        if (
+            require_complete
+            and source_audit["scanner_format"] != SCAN_CACHE_VERSION
+        ):
+            raise ValueError(
+                "complete contract requires a current scanner-format audit"
+            )
         audit_target = source_audit["target"]
         for key in ("mod_id", "display_name", "version"):
             if target[key] != audit_target.get(key):
@@ -4088,6 +4113,12 @@ def _default_command_runner(command, cwd):
 
 
 def _clear_game_test_world(root: Path):
+    root = Path(os.path.abspath(root))
+    for path in (*root.parents, root):
+        if path.is_symlink():
+            raise ValueError(
+                f"GameTest world path has symlinked ancestor: {path}"
+            )
     resolved_root = root.resolve()
     run = root / "run"
     world = run / "world"

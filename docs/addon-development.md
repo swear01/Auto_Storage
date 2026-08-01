@@ -211,9 +211,10 @@ addon's enabled `<target_mod_id>_auto_storage` namespace; a test compiled in
 another namespace is not evidence. Comments inside the method do not count,
 while executable string arguments may carry assertion markers. Eligible Java
 Unicode escapes are rejected before evidence parsing so they cannot create
-comments or method boundaries before tokenization. Its fresh-world
-cleanup rejects symlinked parents and paths outside the addon root before
-deletion. Bundled task names are not translated or treated as equivalent.
+comments or method boundaries before tokenization. Its fresh-world cleanup
+rejects a symlinked lexical addon root, every ancestor of that root, `run`, or
+`world`, plus resolved paths outside the addon root before deletion. Bundled
+task names are not translated or treated as equivalent.
 GameTest output must contain
 exactly one success summary with the reviewed count; conflicting summaries fail
 even when one count matches. A published passing report must carry the strict

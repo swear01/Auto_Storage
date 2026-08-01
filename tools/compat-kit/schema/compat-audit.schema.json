@@ -17,6 +17,133 @@
     "recipe_data",
     "risks"
   ],
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "source",
+          "candidates"
+        ],
+        "properties": {
+          "source": {
+            "required": [
+              "revision"
+            ],
+            "properties": {
+              "revision": {
+                "type": "string"
+              }
+            }
+          },
+          "candidates": {
+            "anyOf": [
+              {
+                "required": [
+                  "recipe_classes"
+                ],
+                "properties": {
+                  "recipe_classes": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "recipe_types"
+                ],
+                "properties": {
+                  "recipe_types": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "recipe_serializers"
+                ],
+                "properties": {
+                  "recipe_serializers": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "recipe_builders"
+                ],
+                "properties": {
+                  "recipe_builders": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "datagen_classes"
+                ],
+                "properties": {
+                  "datagen_classes": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "client_viewer_classes"
+                ],
+                "properties": {
+                  "client_viewer_classes": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "resource_apis"
+                ],
+                "properties": {
+                  "resource_apis": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "station_classes"
+                ],
+                "properties": {
+                  "station_classes": {
+                    "minItems": 1
+                  }
+                }
+              },
+              {
+                "required": [
+                  "block_entity_classes"
+                ],
+                "properties": {
+                  "block_entity_classes": {
+                    "minItems": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "source": {
+            "properties": {
+              "files": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "schema": {
       "const": 1
@@ -84,11 +211,33 @@
         "files": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*\\\\)(?!.*[\\u0000-\\u001f\\u007f])(?:[^/]+/)*[^/]+\\.java$"
           },
           "uniqueItems": true
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "revision"
+            ],
+            "properties": {
+              "revision": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "files": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
     },
     "structural_hierarchy": {
       "type": "array",

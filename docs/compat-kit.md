@@ -78,6 +78,12 @@ the supplied module; ignored build output and a clean but unrelated checkout
 are rejected instead of borrowing HEAD. Matching is segment-aware: a path such
 as `notsamplemod/recipe/CrushingRecipe.java` cannot satisfy the candidate
 `samplemod.recipe.CrushingRecipe`. Never silently replace a failed source.
+Committed source evidence is also fail-closed: file entries are sorted, unique,
+canonical POSIX repository-relative `.java` paths. A null revision requires an
+empty file list; a recorded revision plus classified candidates requires at
+least one source file. Validation does not reconstruct a class-to-file name
+from the binary class name because legal package-private classes may live in a
+differently named compilation unit.
 
 ### 2. Scan
 
@@ -156,6 +162,9 @@ JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
 current scanner format is `12`; formats `7`, `8`, `9`, `10`, and `11` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
+Complete validation, scaffolding, generation, and verification require a
+current-format audit; only explicit migration paths may consume legacy audit
+formats.
 Format 12 retains each candidate's structural classification and a separate
 sorted top-level `structural_hierarchy` inventory, requires both copies to
 agree, and requires hierarchy to win before every name-term bucket. Removing
@@ -629,8 +638,9 @@ per-check evidence links, exact commands, exit codes, output hashes, tool
 version, target, and manifest hash. Bundled verification runs every declared
 Gradle task as a separate process and removes only `run/world` before each task
 so stale GameTest state cannot leak between fixtures. Cleanup rejects a
-symlinked `run`/`world` path or any resolved path outside the verification root
-before deletion. RED and forbidden-link scans are scoped to `src/`; ignored
+symlinked lexical verification root, any of its ancestors, `run`, or `world`,
+and rejects any resolved path outside the verification root before deletion.
+RED and forbidden-link scans are scoped to `src/`; ignored
 `build/` outputs and previously extracted scaffolds cannot poison a later
 verification. The expected hashes for the bundled descriptor or complete
 external Gradle execution chain are recomputed from the reviewed contract and

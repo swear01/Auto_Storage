@@ -39,7 +39,14 @@ uses the enclosing Git worktree's status and HEAD; evidence paths remain
 relative to the supplied module. Supplying a non-Git source directory fails;
 omit `--source` when no versioned source is available. Current-format cache
 entries and committed audits carry the scanner format and are fully
-schema-validated before reuse. If the target has classified candidates, a
+schema-validated before reuse. Complete consumers reject legacy scanner
+formats; only explicit migration commands may read formats 7 through 11.
+Committed source files must be sorted, unique, canonical POSIX
+repository-relative `.java` paths. A null revision requires no files, while a
+recorded revision with classified candidates requires at least one file. The
+validator does not guess a source filename from a binary class name because a
+package-private class may legally live in another compilation unit. If the
+target has classified candidates, a
 supplied source module must contain at least one matching tracked, non-ignored
 Java source file; ignored outputs and unrelated clean checkouts are rejected.
 Candidate paths match only at a package-path segment boundary, and every
@@ -257,7 +264,8 @@ separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing
 count. Runtime output must contain exactly one matching success summary;
 missing, duplicate, or conflicting summaries fail. World cleanup rejects
-symlinked parents and paths outside the verification root. Passing reports
+a symlinked lexical verification root, any of its ancestors, `run`, or `world`,
+plus resolved paths outside the verification root. Passing reports
 require strict target identity, all twelve exact checks, and nonempty command
 evidence; addon reports require exactly `build` and `runGameTestServer`.
 Comment/string-aware annotation extraction ignores fake `@GameTest` text when

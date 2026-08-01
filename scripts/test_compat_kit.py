@@ -1860,6 +1860,90 @@ class CompatKitAuditTests(unittest.TestCase):
         ):
             self.compat_kit._validate_audit(audit)
 
+    def test_complete_contract_requires_current_scanner_format_audit(self):
+        current_audit = self.source_audit()
+        contract = self.accepted_contract()
+        legacy_audit = copy.deepcopy(current_audit)
+        legacy_audit["scanner_format"] = 11
+
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=False,
+            source_audit=legacy_audit,
+        )
+        with self.assertRaisesRegex(ValueError, "current scanner-format audit"):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=legacy_audit,
+            )
+
+    def test_audit_validation_requires_canonical_source_evidence(self):
+        audit = self.source_audit()
+        audit["source"] = {
+            "revision": None,
+            "files": ["../../untracked/Fake.java"],
+        }
+        with self.assertRaisesRegex(ValueError, "safe repository-relative Java"):
+            self.compat_kit._validate_audit(audit)
+
+        audit["source"] = {
+            "revision": None,
+            "files": ["src/main/java/samplemod/Fake.java"],
+        }
+        with self.assertRaisesRegex(ValueError, "null revision.*empty files"):
+            self.compat_kit._validate_audit(audit)
+
+        audit["source"] = {
+            "revision": "a" * 40,
+            "files": [],
+        }
+        with self.assertRaisesRegex(ValueError, "classified candidates.*source file"):
+            self.compat_kit._validate_audit(audit)
+
+        audit["source"] = {
+            "revision": "a" * 40,
+            "files": ["src/main/java/samplemod/Fake.txt"],
+        }
+        with self.assertRaisesRegex(ValueError, "safe repository-relative Java"):
+            self.compat_kit._validate_audit(audit)
+
+        unsafe_paths = (
+            "/tmp/Fake.java",
+            "C:/tmp/Fake.java",
+            "src\\main\\java\\Fake.java",
+            "src/main/java/Bad\x00Name.java",
+            "./src/main/java/Fake.java",
+            "src//main/java/Fake.java",
+        )
+        for path in unsafe_paths:
+            with self.subTest(path=repr(path)):
+                audit["source"] = {
+                    "revision": "a" * 40,
+                    "files": [path],
+                }
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "safe repository-relative Java",
+                ):
+                    self.compat_kit._validate_audit(audit)
+
+        audit["source"] = {
+            "revision": "a" * 40,
+            "files": [
+                "src/main/java/samplemod/Z.java",
+                "src/main/java/samplemod/A.java",
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, "source files must be sorted"):
+            self.compat_kit._validate_audit(audit)
+
+        audit["source"] = {
+            "revision": "a" * 40,
+            "files": ["src/main/java/samplemod/Container.java"],
+        }
+        self.compat_kit._validate_audit(audit)
+
     def test_migrate_audit_requires_legacy_evidence_and_rescans_exact_artifact(self):
         current = self.compat_kit.scan_jar(
             self.jar,
@@ -5508,6 +5592,21 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "class_hierarchy",
             hierarchy["properties"]["method"]["const"],
         )
+        source_schema = audit_schema["properties"]["source"]
+        self.assertEqual(
+            self.compat_kit.SOURCE_EVIDENCE_PATH_PATTERN,
+            source_schema["properties"]["files"]["items"]["pattern"],
+        )
+        self.assertEqual(
+            {"maxItems": 0},
+            source_schema["allOf"][0]["then"]["properties"]["files"],
+        )
+        self.assertEqual(
+            {"minItems": 1},
+            audit_schema["allOf"][0]["then"]["properties"]["source"][
+                "properties"
+            ]["files"],
+        )
         report_schema = json.loads(
             (schema_root / "compat-report.schema.json").read_text()
         )
@@ -6996,6 +7095,27 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             )
 
         self.assertEqual(["build"], [command[1] for command in commands])
+        self.assertEqual("keep", sentinel.read_text())
+
+    def test_gametest_cleanup_rejects_symlinked_verification_root_ancestor(self):
+        actual_parent = self.root / "actual-parent"
+        project = actual_parent / "project"
+        world = project / "run/world"
+        world.mkdir(parents=True)
+        sentinel = world / "sentinel"
+        sentinel.write_text("keep")
+        linked_parent = self.root / "linked-parent"
+        linked_parent.symlink_to(actual_parent, target_is_directory=True)
+        linked_project = self.root / "linked-project"
+        linked_project.symlink_to(project, target_is_directory=True)
+
+        for verification_root in (linked_project, linked_parent / "project"):
+            with self.subTest(verification_root=verification_root), self.assertRaisesRegex(
+                ValueError,
+                "GameTest world path has symlinked ancestor",
+            ):
+                self.compat_kit._clear_game_test_world(verification_root)
+
         self.assertEqual("keep", sentinel.read_text())
 
     def test_publish_archive_is_reproducible_and_self_contained(self):
