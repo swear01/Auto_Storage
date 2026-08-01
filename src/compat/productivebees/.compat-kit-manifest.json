@@ -1,0 +1,14 @@
+{
+  "contract_sha256": "df0249a5be6ddd2047a3fdbe2b0e18190e10b3e35437f321da422907c236072f",
+  "files": {
+    "src/compat/productivebees/compat-module.json": "704551c7960ff8c9dc450502c82bf01ab2a8be49e5e53aa341061ea3320dc811",
+    "src/compat/productivebees/java/com/swear/autostorage/compat/productivebees/ProductivebeesCompatModule.java": "308e4a6c0a9b0a7d459e5682004eca42d9911c0da872feb0934904a7144caa16",
+    "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesFixtureMod.java": "942ad68d0b600da5a3e28ced3e8954d728c0f772354b144b38cda5def69ec900",
+    "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java": "968dea5131ff5266f8a9803de327384d0b0cfc62a32d564fdb709f825fb21ab8",
+    "src/productivebeesFixture/resources/META-INF/neoforge.mods.toml": "ac7aee8bb29e374b1d46ac145b6703feac971855a07d6339775020a8846733f7",
+    "src/productivebeesFixture/resources/data/auto_storage_productivebees_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
+}
+

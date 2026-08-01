@@ -1,0 +1,1256 @@
+{
+  "families": [
+    {
+      "class": "cy.jdkdigital.productivebees.client.helper.RecipeHelper",
+      "costs": [],
+      "decision": "Client/runtime recipe listing helper over world and entity bee maps; not a deterministic Auto Storage recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.client.helper.RecipeHelper#public_signature"
+      ],
+      "id": "recipe_helper",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.block.entity.IRecipeProcessingBlockEntity",
+      "costs": [],
+      "decision": "Block-entity processing interface for live centrifuge/incubator machines; not an independent recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.block.entity.IRecipeProcessingBlockEntity#public_signature"
+      ],
+      "id": "i_recipe_processing_block_entity",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.AdvancedBeehiveRecipe",
+      "costs": [],
+      "decision": "Advanced beehive production uses BeeIngredient identity plus ChancedOutput results and live hive upgrade modifiers; no exact simulate-then-commit contract without bee/entity state.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.AdvancedBeehiveRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/AdvancedBeehiveRecipe.java",
+        "src/main/java/cy/jdkdigital/productivebees/common/block/entity/AdvancedBeehiveBlockEntity.java"
+      ],
+      "id": "advanced_beehive_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.AdvancedBeehiveRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected AdvancedBeehiveRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.AdvancedBeehiveRecipe$Serializer#public_signature"
+      ],
+      "id": "advanced_beehive_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeBombBeeCageRecipe",
+      "costs": [],
+      "decision": "Special crafting that embeds live cage bee NBT into bee bombs; world/generic-ingredient surface, not a station transaction family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeBombBeeCageRecipe#public_signature"
+      ],
+      "id": "bee_bomb_bee_cage_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeBombBeeCageRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BeeBombBeeCageRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeBombBeeCageRecipe$Serializer#public_signature"
+      ],
+      "id": "bee_bomb_bee_cage_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeBreedingRecipe",
+      "costs": [],
+      "decision": "Bee breeding depends on live bee entities/cages in a breeding chamber with world mutation; not a bounded item/fluid transaction.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeBreedingRecipe#public_signature"
+      ],
+      "id": "bee_breeding_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeBreedingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BeeBreedingRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeBreedingRecipe$Serializer#public_signature"
+      ],
+      "id": "bee_breeding_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeConversionRecipe",
+      "costs": [],
+      "decision": "Bee conversion uses chance plus live bee identity/item interaction in the world; fail closed without guaranteed deterministic subset.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeConversionRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/BeeConversionRecipe.java"
+      ],
+      "id": "bee_conversion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeConversionRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BeeConversionRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeConversionRecipe$Serializer#public_signature"
+      ],
+      "id": "bee_conversion_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeFishingRecipe",
+      "costs": [],
+      "decision": "Bee fishing is chance-gated biome/world fishing behavior; not a deterministic station family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeFishingRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/BeeFishingRecipe.java"
+      ],
+      "id": "bee_fishing_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeFishingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BeeFishingRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeFishingRecipe$Serializer#public_signature"
+      ],
+      "id": "bee_fishing_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeFloweringRecipe",
+      "costs": [],
+      "decision": "Flowering lookup for bee AI/world flower targets; not a craftable Auto Storage recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeFloweringRecipe#public_signature"
+      ],
+      "id": "bee_flowering_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeNBTChangerRecipe",
+      "costs": [],
+      "decision": "Mutates live bee NBT/components in the world; entity/world mutation without a simulate-then-commit plan.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeNBTChangerRecipe#public_signature"
+      ],
+      "id": "bee_n_b_t_changer_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeNBTChangerRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BeeNBTChangerRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeNBTChangerRecipe$Serializer#public_signature"
+      ],
+      "id": "bee_n_b_t_changer_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeSpawningRecipe",
+      "costs": [],
+      "decision": "Nest/world bee spawning depends on block and entity state; not a deterministic storage transaction.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeSpawningRecipe#public_signature"
+      ],
+      "id": "bee_spawning_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeSpawningRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BeeSpawningRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeSpawningRecipe$Serializer#public_signature"
+      ],
+      "id": "bee_spawning_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BlockConversionRecipe",
+      "costs": [],
+      "decision": "Block conversion is chance-gated bee pollination that mutates world BlockStates; fail closed.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BlockConversionRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/BlockConversionRecipe.java"
+      ],
+      "id": "block_conversion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BlockConversionRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BlockConversionRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BlockConversionRecipe$Serializer#public_signature"
+      ],
+      "id": "block_conversion_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BottlerRecipe",
+      "costs": [],
+      "decision": "Bottler fluid fill is entangled with live BottlerBlockEntity world paths (piston+bee kill for gene bottles, FluidUtil capability fill fallback, HAS_BOTTLE block-state mutation) and has no recipe-declared work/energy cost; reject until an isolated exact fluid/item contract exists without those live side paths.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BottlerRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/BottlerRecipe.java",
+        "src/main/java/cy/jdkdigital/productivebees/common/block/entity/BottlerBlockEntity.java#tick",
+        "src/main/java/cy/jdkdigital/productivebees/common/block/entity/BottlerBlockEntity.java#tickFluidTank"
+      ],
+      "id": "bottler_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BottlerRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected BottlerRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BottlerRecipe$Serializer#public_signature"
+      ],
+      "id": "bottler_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe",
+      "costs": [],
+      "decision": "Centrifuge outputs are ChancedOutput lists rolled with RandomSource; heated/powered variants also apply upgrade productivity/stability and energy drain. Chance outputs lack a guaranteed deterministic subset usable as an Auto Storage transaction.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/CentrifugeRecipe.java",
+        "src/main/java/cy/jdkdigital/productivebees/common/block/entity/CentrifugeBlockEntity.java#completeRecipeProcessing"
+      ],
+      "id": "centrifuge_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected CentrifugeRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe$Serializer#public_signature"
+      ],
+      "id": "centrifuge_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe$Serializer$IRecipeFactory",
+      "costs": [],
+      "decision": "Datagen/network factory nested under rejected CentrifugeRecipe serializer; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe$Serializer$IRecipeFactory#public_signature"
+      ],
+      "id": "centrifuge_recipe__serializer__i_recipe_factory",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.CombineGeneRecipe",
+      "costs": [],
+      "decision": "Special crafting that merges gene NBT/purity stacks; generic-ingredient special recipe outside installed-station transaction contract.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.CombineGeneRecipe#public_signature"
+      ],
+      "id": "combine_gene_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.CombineGeneRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected CombineGeneRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.CombineGeneRecipe$Serializer#public_signature"
+      ],
+      "id": "combine_gene_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ConfigurableCombBlockRecipe",
+      "costs": [],
+      "decision": "Special crafting that packs configurable comb blocks from bee_type components; not an installed-station family and not a vanilla shaped/shapeless class.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ConfigurableCombBlockRecipe#public_signature"
+      ],
+      "id": "configurable_comb_block_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ConfigurableCombBlockRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected ConfigurableCombBlockRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ConfigurableCombBlockRecipe$Serializer#public_signature"
+      ],
+      "id": "configurable_comb_block_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ConfigurableHoneycombRecipe",
+      "costs": [],
+      "decision": "Special crafting that packs configurable honeycombs by bee_type component; not an installed-station family and not a vanilla shaped/shapeless class.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ConfigurableHoneycombRecipe#public_signature"
+      ],
+      "id": "configurable_honeycomb_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ConfigurableHoneycombRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected ConfigurableHoneycombRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ConfigurableHoneycombRecipe$Serializer#public_signature"
+      ],
+      "id": "configurable_honeycomb_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.HoneyTreatGeneRecipe",
+      "costs": [],
+      "decision": "Special crafting that applies gene NBT onto honey treats; not a deterministic station family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.HoneyTreatGeneRecipe#public_signature"
+      ],
+      "id": "honey_treat_gene_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.HoneyTreatGeneRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected HoneyTreatGeneRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.HoneyTreatGeneRecipe$Serializer#public_signature"
+      ],
+      "id": "honey_treat_gene_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.IncubationRecipe",
+      "costs": [],
+      "decision": "Incubator runtime completes via IncubatorBlockEntity hard-coded egg/cage/gene paths with RandomSource purity rolls, energy, upgrades, and live BeeCage entity capture; IncubationRecipe is not a complete simulate-then-commit contract.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.IncubationRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/IncubationRecipe.java",
+        "src/main/java/cy/jdkdigital/productivebees/common/block/entity/IncubatorBlockEntity.java#completeIncubation"
+      ],
+      "id": "incubation_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.IncubationRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected IncubationRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.IncubationRecipe$Serializer#public_signature"
+      ],
+      "id": "incubation_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ItemConversionRecipe",
+      "costs": [],
+      "decision": "Item conversion is chance-gated bee pollination of items in the world; fail closed.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ItemConversionRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivebees/common/recipe/ItemConversionRecipe.java"
+      ],
+      "id": "item_conversion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ItemConversionRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer for rejected ItemConversionRecipe; not an independent family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ItemConversionRecipe$Serializer#public_signature"
+      ],
+      "id": "item_conversion_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.TimedRecipeInterface",
+      "costs": [],
+      "decision": "Marker interface exposing processingTime for live machines; not a recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.TimedRecipeInterface#public_signature"
+      ],
+      "id": "timed_recipe_interface",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BeeBreedingEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BeeBreedingEmiRecipe#public_signature"
+      ],
+      "id": "bee_breeding_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BeeConversionEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BeeConversionEmiRecipe#public_signature"
+      ],
+      "id": "bee_conversion_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BeeEmiStackSerializer",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BeeEmiStackSerializer#public_signature"
+      ],
+      "id": "bee_emi_stack_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BeeFishingEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BeeFishingEmiRecipe#public_signature"
+      ],
+      "id": "bee_fishing_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BeeFloweringEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BeeFloweringEmiRecipe#public_signature"
+      ],
+      "id": "bee_flowering_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BeeProduceEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BeeProduceEmiRecipe#public_signature"
+      ],
+      "id": "bee_produce_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BeeSpawningEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BeeSpawningEmiRecipe#public_signature"
+      ],
+      "id": "bee_spawning_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BlockCentrifugeEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BlockCentrifugeEmiRecipe#public_signature"
+      ],
+      "id": "block_centrifuge_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.BlockConversionEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.BlockConversionEmiRecipe#public_signature"
+      ],
+      "id": "block_conversion_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.CentrifugeEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.CentrifugeEmiRecipe#public_signature"
+      ],
+      "id": "centrifuge_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.IncubationEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.IncubationEmiRecipe#public_signature"
+      ],
+      "id": "incubation_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.emi.ItemConversionEmiRecipe",
+      "costs": [],
+      "decision": "Client EMI recipe/widget helper; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.emi.ItemConversionEmiRecipe#public_signature"
+      ],
+      "id": "item_conversion_emi_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.AdvancedBeehiveRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.AdvancedBeehiveRecipeCategory#public_signature"
+      ],
+      "id": "advanced_beehive_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.BeeBreedingRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.BeeBreedingRecipeCategory#public_signature"
+      ],
+      "id": "bee_breeding_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.BeeConversionRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.BeeConversionRecipeCategory#public_signature"
+      ],
+      "id": "bee_conversion_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.BeeFishingRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.BeeFishingRecipeCategory#public_signature"
+      ],
+      "id": "bee_fishing_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.BeeFloweringRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.BeeFloweringRecipeCategory#public_signature"
+      ],
+      "id": "bee_flowering_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.BeeSpawningRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.BeeSpawningRecipeCategory#public_signature"
+      ],
+      "id": "bee_spawning_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.BlockConversionRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.BlockConversionRecipeCategory#public_signature"
+      ],
+      "id": "block_conversion_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.BottlerRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.BottlerRecipeCategory#public_signature"
+      ],
+      "id": "bottler_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.CentrifugeRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.CentrifugeRecipeCategory#public_signature"
+      ],
+      "id": "centrifuge_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.HeatedCentrifugeRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.HeatedCentrifugeRecipeCategory#public_signature"
+      ],
+      "id": "heated_centrifuge_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.IncubationRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.IncubationRecipeCategory#public_signature"
+      ],
+      "id": "incubation_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.compat.jei.ItemConversionRecipeCategory",
+      "costs": [],
+      "decision": "Client JEI category; Auto Storage never uses EMI/JEI to infer recipe semantics.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.compat.jei.ItemConversionRecipeCategory#public_signature"
+      ],
+      "id": "item_conversion_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder#public_signature"
+      ],
+      "id": "abstract_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder$FluidOutput",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder$FluidOutput#public_signature"
+      ],
+      "id": "abstract_recipe_builder__fluid_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder$IngredientOutput",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder$IngredientOutput#public_signature"
+      ],
+      "id": "abstract_recipe_builder__ingredient_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder$ModItemOutput",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.AbstractRecipeBuilder$ModItemOutput#public_signature"
+      ],
+      "id": "abstract_recipe_builder__mod_item_output",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.BeeProduceRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.BeeProduceRecipeBuilder#public_signature"
+      ],
+      "id": "bee_produce_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.BeeProduceRecipeBuilder$RecipeConfig",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.BeeProduceRecipeBuilder$RecipeConfig#public_signature"
+      ],
+      "id": "bee_produce_recipe_builder__recipe_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.CentrifugeRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.CentrifugeRecipeBuilder#public_signature"
+      ],
+      "id": "centrifuge_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.builder.CentrifugeRecipeBuilder$RecipeConfig",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.builder.CentrifugeRecipeBuilder$RecipeConfig#public_signature"
+      ],
+      "id": "centrifuge_recipe_builder__recipe_config",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.recipe.provider.RecipeProvider",
+      "costs": [],
+      "decision": "Datagen builder/provider only; not a runtime recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.datagen.recipe.provider.RecipeProvider#public_signature"
+      ],
+      "id": "recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.init.ModRecipeTypes",
+      "costs": [],
+      "decision": "Recipe type/serializer registry only; not a recipe family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.init.ModRecipeTypes#public_signature"
+      ],
+      "id": "mod_recipe_types",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "9d48d198bc6eacf3b7729f4d60b91e661cfa15d105264ba225dee87b1d547ba1",
+  "source_recipe_inventory_sha256": "184087f189d0e6bb6cdef00a375f19dada0dec4a46545ace0dbea2cc9b376dcd",
+  "target": {
+    "mod_id": "productivebees",
+    "display_name": "Productive Bees",
+    "version": "1.21.1-13.13.5",
+    "dependency": "curse.maven:productivebees-377897:8022994",
+    "repositories": [
+      "https://www.cursemaven.com/"
+    ],
+    "runtime_dependencies": []
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Productive Bees unsafe machine contract was registered",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Unsafe Productive Bees recipe was accepted: centrifuge/honeycomb_breeze",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Unsafe Productive Bees recipe type accepted",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Audited Productive Bees recipe type is empty",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Missing representative Productive Bees recipe bottler/honey_bottle",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Productive Bees fail-closed boundary changed",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 8,
+    "fixture": "productivebeesFixture",
+    "game_test_task": "runProductivebeesGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runProductivebeesGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}
