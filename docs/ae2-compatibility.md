@@ -36,10 +36,14 @@ artifact binds the exact target-class count and graph digest, and validation
 reconstructs the twelve candidate classifications from that complete graph
 rather than trusting the candidate list or two derived hierarchy copies. An artifact/classpath-bound
 structural-candidate digest still binds the structural class inventory. Scanner
-v12's JDK-21 verification and inherited
+v15's executable JDK-21 verification and inherited
 implementation-risk pass produce byte-identical evidence for this exact
 artifact/classpath set. Class-file hierarchy inspection finds exactly twelve concrete
 `Recipe` implementations:
+
+Complete generation and verification also reopen the exact AE2 19.2.17 jar,
+check its committed SHA/size, and rebuild all 1,689 sorted target class metadata
+records. The JSON count/digest alone cannot authorize a reduced graph.
 
 - `appeng.recipes.entropy.EntropyRecipe`;
 - `appeng.recipes.game.AddItemUpgradeRecipe`;

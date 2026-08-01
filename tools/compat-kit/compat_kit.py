@@ -817,13 +817,14 @@ _JDK_MODULE_CLASSES = None
 _JDK_MODULE_KEY = None
 
 
-def _jdk_21_toolchain() -> tuple[Path, Path, str, dict]:
+def _jdk_21_toolchain() -> tuple[Path, Path, Path, str, dict]:
     javap = shutil.which("javap")
     if javap is None:
         raise RuntimeError(
             "javap was not found; set JAVA_HOME to JDK 21 before scanning"
         )
-    jdk = Path(javap).resolve().parent.parent
+    javap = Path(javap).resolve()
+    jdk = javap.parent.parent
     release = jdk / "release"
     try:
         if not release.is_file() or release.stat().st_size > 64 * 1024:
@@ -861,6 +862,34 @@ def _jdk_21_toolchain() -> tuple[Path, Path, str, dict]:
             "JDK module inventory requires JDK 21; resolved "
             f"JAVA_VERSION={version}"
         )
+    try:
+        javap_version = subprocess.run(
+            [str(javap), "-version"],
+            capture_output=True,
+            check=False,
+            text=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RuntimeError(
+            "javap executable could not be verified as JDK 21"
+        ) from error
+    javap_output = (
+        javap_version.stdout.strip() or javap_version.stderr.strip()
+    )
+    javap_match = re.fullmatch(
+        r"(?:javap\s+)?([0-9]+)(?:\.[0-9]+)*(?:[-+][^\s]+)?",
+        javap_output,
+    )
+    if (
+        javap_version.returncode != 0
+        or javap_match is None
+        or int(javap_match.group(1)) != 21
+    ):
+        raise RuntimeError(
+            "javap executable must report JDK 21; reported "
+            + (javap_output or f"exit {javap_version.returncode}")
+        )
     jmods = jdk / "jmods"
     if not jmods.is_dir():
         raise RuntimeError(
@@ -885,14 +914,20 @@ def _jdk_21_toolchain() -> tuple[Path, Path, str, dict]:
     identity = {
         "home": str(jdk),
         "java_version": version,
+        "javap": {
+            "path": str(javap),
+            "version": javap_output,
+            "size": javap.stat().st_size,
+            "sha256": _sha256_file(javap),
+        },
         "modules": modules,
     }
-    return jdk, jmods, version, identity
+    return javap, jdk, jmods, version, identity
 
 
 def _jdk_module_classes() -> frozenset[str]:
     global _JDK_MODULE_CLASSES, _JDK_MODULE_KEY
-    _, jmods, _, identity = _jdk_21_toolchain()
+    _, _, jmods, _, identity = _jdk_21_toolchain()
     key = hashlib.sha256(canonical_json(identity).encode("utf-8")).hexdigest()
     if _JDK_MODULE_CLASSES is not None and _JDK_MODULE_KEY == key:
         return _JDK_MODULE_CLASSES
@@ -1108,8 +1143,11 @@ def _run_javap(
     *options: str,
     output_limit: int = MAX_SIGNATURE_BYTES,
     output_label: str = "public signature",
+    javap: Path | None = None,
 ) -> str:
-    command = ["javap", *options, "-classpath", str(jar), class_name]
+    if javap is None:
+        javap, _, _, _, _ = _jdk_21_toolchain()
+    command = [str(javap), *options, "-classpath", str(jar), class_name]
     try:
         process = subprocess.Popen(
             command,
@@ -1236,18 +1274,17 @@ def _run_javap(
 def _candidate_source_suffix(
     class_name: str,
     metadata: dict | None,
-) -> str:
-    if metadata is not None and "source_file" in metadata:
-        source_file = metadata["source_file"]
-        if source_file is not None:
-            package, _, _ = class_name.rpartition(".")
-            return (
-                f"{package.replace('.', '/')}/{source_file}"
-                if package
-                else source_file
-            )
-        if not metadata.get("inner_class_entry"):
-            return class_name.replace(".", "/") + ".java"
+) -> str | None:
+    if metadata is not None:
+        source_file = metadata.get("source_file")
+        if source_file is None:
+            return None
+        package, _, _ = class_name.rpartition(".")
+        return (
+            f"{package.replace('.', '/')}/{source_file}"
+            if package
+            else source_file
+        )
     return class_name.split("$", 1)[0].replace(".", "/") + ".java"
 
 
@@ -2635,6 +2672,65 @@ def _validate_audit(audit: dict):
                 )
 
 
+def _validate_audit_target_artifact(audit: dict, source_artifact) -> None:
+    _validate_audit(audit)
+    if audit["scanner_format"] != SCAN_CACHE_VERSION:
+        raise ValueError(
+            "target artifact class inventory requires a current scanner-format audit"
+        )
+    artifact = audit["artifact"]
+    jar = Path(source_artifact).resolve()
+    _require_unchanged_artifact(
+        jar,
+        artifact["sha256"],
+        artifact["size"],
+        "target artifact",
+    )
+    records = []
+    seen_classes = set()
+    with zipfile.ZipFile(jar) as archive:
+        _validate_archive(jar, archive)
+        for entry_name in sorted(archive.namelist()):
+            if not _is_inspectable_class(archive, entry_name):
+                continue
+            class_name = _class_name(entry_name)
+            if class_name in seen_classes:
+                raise ValueError(
+                    "target artifact repeats normalized class " + class_name
+                )
+            seen_classes.add(class_name)
+            records.append({
+                "class": class_name,
+                "metadata": _structural_metadata(
+                    _class_metadata(archive.read(entry_name), entry_name)
+                ),
+            })
+    records.sort(key=lambda record: record["class"])
+    expected_records = [
+        {
+            "class": record["class"],
+            "metadata": record["metadata"],
+        }
+        for record in audit["structural_class_graph"]
+        if record["owner_sha256"] == artifact["sha256"]
+    ]
+    if (
+        len(records) != artifact["class_count"]
+        or _target_class_inventory_sha256(records)
+        != artifact["class_inventory_sha256"]
+        or records != expected_records
+    ):
+        raise ValueError(
+            "target artifact class inventory does not match source audit"
+        )
+    _require_unchanged_artifact(
+        jar,
+        artifact["sha256"],
+        artifact["size"],
+        "target artifact",
+    )
+
+
 def scan_jar(
     jar,
     *,
@@ -2663,12 +2759,17 @@ def scan_jar(
     classpath_digest = hashlib.sha256(
         canonical_json(ancestry_classpath).encode("utf-8")
     ).hexdigest()
-    _, _, _, jdk_identity = _jdk_21_toolchain()
+    javap, _, _, _, jdk_identity = _jdk_21_toolchain()
     cache_path = None
     cache_jdk_path = None
 
     reader = signature_reader or (
-        lambda class_name: _run_javap(jar, class_name, "-public")
+        lambda class_name: _run_javap(
+            jar,
+            class_name,
+            "-public",
+            javap=javap,
+        )
     )
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
@@ -2788,6 +2889,7 @@ def scan_jar(
                     "-p",
                     output_limit=MAX_PRIVATE_BYTECODE_BYTES,
                     output_label="private bytecode",
+                    javap=javap,
                 )
         metadata_by_class = dict(external_metadata)
         metadata_by_class.update(target_metadata)
@@ -2908,6 +3010,22 @@ def scan_jar(
         ),
     }
     source_path = Path(source) if source is not None else None
+    source_suffixes = {
+        candidate["class"]: _candidate_source_suffix(
+            candidate["class"],
+            target_metadata.get(candidate["class"]),
+        )
+        for candidate in all_candidates
+    }
+    unavailable_source_classes = sorted(
+        class_name
+        for class_name, suffix in source_suffixes.items()
+        if suffix is None
+    )
+    if source_path is not None and unavailable_source_classes:
+        raise ValueError(
+            "source mapping unavailable for " + unavailable_source_classes[0]
+        )
     audit = {
         "schema": SCHEMA_VERSION,
         "scanner_format": SCAN_CACHE_VERSION,
@@ -2918,11 +3036,9 @@ def scan_jar(
         "source": _source_evidence(
             source_path,
             {
-                _candidate_source_suffix(
-                    candidate["class"],
-                    target_metadata.get(candidate["class"]),
-                )
-                for candidate in all_candidates
+                suffix
+                for suffix in source_suffixes.values()
+                if suffix is not None
             },
         ),
         "structural_class_graph": structural_class_graph,
@@ -2940,6 +3056,12 @@ def scan_jar(
     }
     for path, digest, size in classpath_artifact_checks:
         _require_unchanged_artifact(path, digest, size, "classpath jar")
+    _require_unchanged_artifact(
+        javap,
+        jdk_identity["javap"]["sha256"],
+        jdk_identity["javap"]["size"],
+        "javap executable",
+    )
     _require_unchanged_artifact(jar, artifact_sha, artifact_size)
     _validate_audit(audit)
     if data_roots:
@@ -3445,6 +3567,7 @@ def validate_contract(
     *,
     require_complete: bool,
     source_audit: dict | None = None,
+    source_artifact=None,
 ):
     if not isinstance(contract, dict):
         raise ValueError("contract must be a JSON object")
@@ -3683,6 +3806,9 @@ def validate_contract(
         _validate_verification_evidence(verification)
         if source_audit is None:
             raise ValueError("complete contract requires its source audit")
+        if source_artifact is None:
+            raise ValueError("complete contract requires exact source artifact")
+        _validate_audit_target_artifact(source_audit, source_artifact)
     else:
         verification = contract.get("verification")
         if not isinstance(verification, dict) or set(verification) != VERIFICATION_KEYS:
@@ -4418,11 +4544,13 @@ def scaffold_bundled(
     root,
     *,
     source_audit: dict,
+    source_artifact,
 ) -> list[Path]:
     validate_contract(
         contract,
         require_complete=True,
         source_audit=source_audit,
+        source_artifact=source_artifact,
     )
     _validate_bundled_verification(contract)
     mod_id = contract["target"]["mod_id"]
@@ -4476,11 +4604,13 @@ def scaffold_addon(
     output,
     *,
     source_audit: dict,
+    source_artifact,
 ) -> list[Path]:
     validate_contract(
         contract,
         require_complete=True,
         source_audit=source_audit,
+        source_artifact=source_artifact,
     )
     _validate_addon_verification(contract)
     return _materialize(
@@ -4897,6 +5027,7 @@ def _java_string_constant_expressions(
     expressions = {}
     for path in sources:
         text = _java_without_comments(path.read_text())
+        class_spans = _java_class_spans(text)
         for match in re.finditer(
             r"\b(?:public\s+|protected\s+|private\s+)?"
             r"(?:static\s+final|final\s+static)\s+String\s+"
@@ -4906,13 +5037,24 @@ def _java_string_constant_expressions(
             r"[A-Za-z_$][A-Za-z0-9_$]*)\s*;",
             text,
         ):
-            key = (path.stem, match.group(1))
+            owners = [
+                span
+                for span in class_spans
+                if span["opening"] < match.start() < span["closing"]
+            ]
+            if not owners:
+                continue
+            owner = min(
+                owners,
+                key=lambda span: span["closing"] - span["opening"],
+            )
+            key = (owner["name"], match.group(1))
             expression = match.group(2)
             previous = expressions.get(key)
             if previous is not None and previous != expression:
                 raise ValueError(
                     "ambiguous Java string constant for GameTest holder namespace: "
-                    f"{path.stem}.{match.group(1)}"
+                    f"{owner['name']}.{match.group(1)}"
                 )
             expressions[key] = expression
 
@@ -5024,7 +5166,7 @@ def _java_class_spans(text: str) -> list[dict]:
     spans = []
     for declaration in re.finditer(
         r"\b(?:class|interface|enum|record)\s+"
-        r"[A-Za-z_$][A-Za-z0-9_$]*\b[^{};]*\{",
+        r"(?P<name>[A-Za-z_$][A-Za-z0-9_$]*)\b[^{};]*\{",
         code,
     ):
         opening = code.rfind("{", declaration.start(), declaration.end())
@@ -5035,6 +5177,7 @@ def _java_class_spans(text: str) -> list[dict]:
             code.rfind("}", 0, declaration.start()),
         ) + 1
         spans.append({
+            "name": declaration.group("name"),
             "declaration_start": declaration.start(),
             "declaration_boundary": declaration_boundary,
             "opening": opening,
@@ -5208,6 +5351,7 @@ def verify_contract(
     contract: dict,
     *,
     source_audit: dict,
+    source_artifact,
     bundled_root=None,
     addon_root=None,
     command_runner=None,
@@ -5216,6 +5360,7 @@ def verify_contract(
         contract,
         require_complete=True,
         source_audit=source_audit,
+        source_artifact=source_artifact,
     )
     if (bundled_root is None) == (addon_root is None):
         raise ValueError("verify requires exactly one of bundled_root or addon_root")
@@ -7103,8 +7248,15 @@ def generate_compatibility(
     audit: dict,
     plan: dict,
     output,
+    *,
+    source_artifact,
 ) -> list[Path]:
-    validate_contract(contract, require_complete=True, source_audit=audit)
+    validate_contract(
+        contract,
+        require_complete=True,
+        source_audit=audit,
+        source_artifact=source_artifact,
+    )
     _validate_generation_plan(plan, contract)
     source, boundaries = _generated_compat_java(contract, audit, plan)
     package_path = plan["package"].replace(".", "/")
@@ -7511,8 +7663,15 @@ def scaffold_conformance_tests(
     audit: dict,
     plan: dict,
     output,
+    *,
+    source_artifact,
 ) -> list[Path]:
-    validate_contract(contract, require_complete=True, source_audit=audit)
+    validate_contract(
+        contract,
+        require_complete=True,
+        source_audit=audit,
+        source_artifact=source_artifact,
+    )
     _validate_conformance_plan(plan, contract)
     package_path = plan["package"].replace(".", "/")
     files = {
@@ -7537,6 +7696,7 @@ STANDARD_RESOURCE_KIND_IDS = frozenset({
     "auto_storage:item",
     "auto_storage:fluid",
     "auto_storage:neoforge_energy",
+    "auto_storage:work",
 })
 
 
@@ -7949,8 +8109,15 @@ def scaffold_resource_integration(
     audit: dict,
     plan: dict,
     output,
+    *,
+    source_artifact,
 ) -> list[Path]:
-    validate_contract(contract, require_complete=True, source_audit=audit)
+    validate_contract(
+        contract,
+        require_complete=True,
+        source_audit=audit,
+        source_artifact=source_artifact,
+    )
     _validate_resource_plan(plan, contract)
     package_path = plan["package"].replace(".", "/")
     files = {
@@ -8045,18 +8212,21 @@ def _build_parser() -> argparse.ArgumentParser:
     generate = subparsers.add_parser("generate")
     generate.add_argument("contract")
     generate.add_argument("--audit", required=True)
+    generate.add_argument("--jar", required=True)
     generate.add_argument("--plan", required=True)
     generate.add_argument("--output", required=True)
 
     conformance = subparsers.add_parser("conformance")
     conformance.add_argument("contract")
     conformance.add_argument("--audit", required=True)
+    conformance.add_argument("--jar", required=True)
     conformance.add_argument("--plan", required=True)
     conformance.add_argument("--output", required=True)
 
     resource = subparsers.add_parser("resource-scaffold")
     resource.add_argument("contract")
     resource.add_argument("--audit", required=True)
+    resource.add_argument("--jar", required=True)
     resource.add_argument("--plan", required=True)
     resource.add_argument("--output", required=True)
 
@@ -8075,10 +8245,12 @@ def _build_parser() -> argparse.ArgumentParser:
     scaffold_target.add_argument("--addon")
     scaffold.add_argument("--output")
     scaffold.add_argument("--audit", required=True)
+    scaffold.add_argument("--jar", required=True)
 
     verify = subparsers.add_parser("verify")
     verify.add_argument("contract")
     verify.add_argument("--audit", required=True)
+    verify.add_argument("--jar", required=True)
     verify_target = verify.add_mutually_exclusive_group(required=True)
     verify_target.add_argument("--bundled", nargs="?", const=".")
     verify_target.add_argument("--addon")
@@ -8159,6 +8331,7 @@ def main(argv=None) -> int:
                 _read_json(args.audit),
                 _read_json(args.plan),
                 args.output,
+                source_artifact=args.jar,
             )
         elif args.command == "conformance":
             scaffold_conformance_tests(
@@ -8166,6 +8339,7 @@ def main(argv=None) -> int:
                 _read_json(args.audit),
                 _read_json(args.plan),
                 args.output,
+                source_artifact=args.jar,
             )
         elif args.command == "resource-scaffold":
             scaffold_resource_integration(
@@ -8173,6 +8347,7 @@ def main(argv=None) -> int:
                 _read_json(args.audit),
                 _read_json(args.plan),
                 args.output,
+                source_artifact=args.jar,
             )
         elif args.command == "diff":
             old = _read_json(args.old_audit)
@@ -8198,6 +8373,7 @@ def main(argv=None) -> int:
                     contract,
                     root,
                     source_audit=source_audit,
+                    source_artifact=args.jar,
                 )
             else:
                 if not args.output:
@@ -8206,12 +8382,14 @@ def main(argv=None) -> int:
                     contract,
                     args.output,
                     source_audit=source_audit,
+                    source_artifact=args.jar,
                 )
         elif args.command == "verify":
             contract = _read_json(args.contract)
             report = verify_contract(
                 contract,
                 source_audit=_read_json(args.audit),
+                source_artifact=args.jar,
                 bundled_root=args.bundled,
                 addon_root=args.addon,
             )

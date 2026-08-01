@@ -1508,6 +1508,7 @@ class CompatKitAuditTests(unittest.TestCase):
                     "-p",
                     output_limit=1024,
                     output_label="private bytecode",
+                    javap=fake_javap,
                 )
 
         self.assertEqual("terminated", marker.read_text())
@@ -1536,6 +1537,7 @@ class CompatKitAuditTests(unittest.TestCase):
                     "-p",
                     output_limit=1024,
                     output_label="private bytecode",
+                    javap=fake_javap,
                 )
 
         self.assertEqual("portable output", output)
@@ -1629,7 +1631,8 @@ class CompatKitAuditTests(unittest.TestCase):
             jdk = self.root / name
             javap = jdk / "bin/javap"
             javap.parent.mkdir(parents=True)
-            javap.write_text("")
+            javap.write_text("#!/bin/sh\nprintf '21.0.7\\n'\n")
+            javap.chmod(0o755)
             (jdk / "release").write_text('JAVA_VERSION="21.0.7"\n')
             jmods = jdk / "jmods"
             jmods.mkdir()
@@ -1779,6 +1782,68 @@ class CompatKitAuditTests(unittest.TestCase):
                 source=source,
                 signature_reader=self.signatures,
             )
+
+    def test_scan_does_not_guess_source_file_when_attribute_is_absent(self):
+        source = self.root / "source-without-debug-metadata"
+        recipe_api = (
+            source
+            / "src/main/java/net/minecraft/world/item/crafting/Recipe.java"
+        )
+        recipe_api.parent.mkdir(parents=True)
+        recipe_api.write_text(
+            "package net.minecraft.world.item.crafting; public interface Recipe {}\n"
+        )
+        recipe = source / "src/main/java/samplemod/recipe/Recipes.java"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(
+            "package samplemod.recipe; final class HiddenRecipe implements "
+            "net.minecraft.world.item.crafting.Recipe {}\n"
+        )
+        classes = self.root / "source-without-debug-classes"
+        classes.mkdir()
+        subprocess.run(
+            [
+                "javac",
+                "-g:none",
+                "-d",
+                str(classes),
+                str(recipe_api),
+                str(recipe),
+            ],
+            check=True,
+        )
+        target_jar = self.root / "source-without-debug.jar"
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            archive.write(
+                classes / "samplemod/recipe/HiddenRecipe.class",
+                "samplemod/recipe/HiddenRecipe.class",
+            )
+        subprocess.run(["git", "init", "-q", source], check=True)
+        subprocess.run(["git", "-C", source, "add", "."], check=True)
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                source,
+                "-c",
+                "user.name=Compat Kit Test",
+                "-c",
+                "user.email=compat-kit@example.invalid",
+                "commit",
+                "-qm",
+                "fixture",
+            ],
+            check=True,
+        )
+
+        with self.assertRaisesRegex(ValueError, "source mapping unavailable"):
+            self.compat_kit.scan_jar(target_jar, source=source)
 
     def test_scan_requires_candidate_source_path_segment_boundary(self):
         source = self.root / "source"
@@ -1966,6 +2031,7 @@ class CompatKitAuditTests(unittest.TestCase):
                 contract,
                 require_complete=True,
                 source_audit=legacy_audit,
+                source_artifact=self.jar,
             )
 
     def test_audit_binds_structural_inventory_and_source_class_shape(self):
@@ -2390,6 +2456,7 @@ class CompatKitAuditTests(unittest.TestCase):
                     "interfaces": [
                         "net.minecraft.world.item.crafting.Recipe"
                     ],
+                    "source_file": "CrusherRecipes.java",
                 }
                 if class_name
                 == "samplemod.recipe.CrusherRecipes$PolishingRecipe"
@@ -2508,7 +2575,8 @@ class CompatKitAuditTests(unittest.TestCase):
         jdk = self.root / "fake-jdk"
         javap = jdk / "bin/javap"
         javap.parent.mkdir(parents=True)
-        javap.write_text("")
+        javap.write_text("#!/bin/sh\nprintf '21.0.7\\n'\n")
+        javap.chmod(0o755)
         jmods = jdk / "jmods"
         jmods.mkdir()
         with zipfile.ZipFile(jmods / "java.base.jmod", "w") as archive:
@@ -2530,6 +2598,9 @@ class CompatKitAuditTests(unittest.TestCase):
                 frozenset({"java.lang.Object"}),
                 self.compat_kit._jdk_module_classes(),
             )
+            javap.write_text("#!/bin/sh\nprintf '25\\n'\n")
+            with self.assertRaisesRegex(RuntimeError, "javap.*JDK 21"):
+                self.compat_kit._jdk_module_classes()
             (jdk / "release").write_text('JAVA_VERSION="25"\n')
             with self.assertRaisesRegex(RuntimeError, "requires JDK 21"):
                 self.compat_kit._jdk_module_classes()
@@ -2980,6 +3051,37 @@ displayName="Sample Machines"
         with self.assertRaisesRegex(ValueError, "target class inventory"):
             self.compat_kit._validate_audit(audit)
 
+    def test_exact_artifact_rejects_self_consistent_reduced_class_inventory(self):
+        audit = self.source_audit()
+        class_name = "samplemod.recipe.CrushingRecipe"
+        audit["candidates"]["recipe_classes"] = [
+            candidate
+            for candidate in audit["candidates"]["recipe_classes"]
+            if candidate["class"] != class_name
+        ]
+        self.remove_audit_graph_target(audit, class_name)
+        self.compat_kit._validate_audit(audit)
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "target artifact class inventory",
+        ):
+            self.compat_kit._validate_audit_target_artifact(
+                audit,
+                self.jar,
+            )
+
+    def test_complete_contract_requires_exact_source_artifact(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "requires exact source artifact",
+        ):
+            self.compat_kit.validate_contract(
+                self.accepted_contract(),
+                require_complete=True,
+                source_audit=self.source_audit(),
+            )
+
     def test_audit_validation_binds_risk_evidence_to_recipe_candidates(self):
         audit = self.source_audit()
         audit["risks"][0]["evidence"] = ["not.a.Candidate#getChance"]
@@ -3160,6 +3262,7 @@ displayName="Sample Machines"
                 contract,
                 require_complete=True,
                 source_audit=audit,
+                source_artifact=self.jar,
             )
 
     def test_complete_contract_preserves_audited_family_risks(self):
@@ -3178,6 +3281,7 @@ displayName="Sample Machines"
                 contract,
                 require_complete=True,
                 source_audit=audit,
+                source_artifact=self.jar,
             )
 
     def test_complete_contract_rejects_recipe_data_digest_drift(self):
@@ -3193,6 +3297,7 @@ displayName="Sample Machines"
                 contract,
                 require_complete=True,
                 source_audit=audit,
+                source_artifact=self.jar,
             )
 
     def test_contract_station_rates_match_runtime_categories(self):
@@ -3216,6 +3321,7 @@ displayName="Sample Machines"
                         contract,
                         require_complete=True,
                         source_audit=audit,
+                        source_artifact=self.jar,
                     )
 
     def test_contract_rejects_duplicate_station_variant_items(self):
@@ -3235,6 +3341,7 @@ displayName="Sample Machines"
                 contract,
                 require_complete=True,
                 source_audit=audit,
+                source_artifact=self.jar,
             )
 
     def test_complete_contract_requires_resource_location_recipe_and_descriptor_ids(self):
@@ -3260,6 +3367,7 @@ displayName="Sample Machines"
                         contract,
                         require_complete=True,
                         source_audit=audit,
+                        source_artifact=self.jar,
                     )
 
     def test_accepted_family_can_declare_no_resource_costs(self):
@@ -3276,6 +3384,7 @@ displayName="Sample Machines"
             contract,
             require_complete=True,
             source_audit=audit,
+            source_artifact=self.jar,
         )
 
     def test_contract_validation_rejects_malformed_nested_semantics(self):
@@ -4158,6 +4267,7 @@ displayName="Sample Machines"
             audit,
             plan,
             output,
+            source_artifact=self.jar,
         )
         first_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
@@ -4168,6 +4278,7 @@ displayName="Sample Machines"
             audit,
             plan,
             output,
+            source_artifact=self.jar,
         )
         second_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
@@ -4206,6 +4317,8 @@ displayName="Sample Machines"
             "contract.json",
             "--audit",
             "audit.json",
+            "--jar",
+            "samplemod.jar",
             "--plan",
             "generation-plan.json",
             "--output",
@@ -4252,6 +4365,7 @@ displayName="Sample Machines"
             contract,
             require_complete=True,
             source_audit=audit,
+            source_artifact=nested_jar,
         )
 
         single_plan = self.generation_plan(contract)
@@ -4262,6 +4376,7 @@ displayName="Sample Machines"
             audit,
             single_plan,
             single_output,
+            source_artifact=nested_jar,
         )
         single_source = next(
             (single_output / "src/main/java").rglob("*.java")
@@ -4292,6 +4407,7 @@ displayName="Sample Machines"
             audit,
             typed_plan,
             typed_output,
+            source_artifact=nested_jar,
         )
         typed_source = next(
             (typed_output / "src/main/java").rglob("*.java")
@@ -4325,6 +4441,7 @@ displayName="Sample Machines"
             audit,
             generation_plan,
             generation_output,
+            source_artifact=self.jar,
         )
         generated_source = next(
             (generation_output / "src/main/java").rglob("*.java")
@@ -4342,6 +4459,7 @@ displayName="Sample Machines"
             audit,
             conformance_plan,
             conformance_output,
+            source_artifact=self.jar,
         )
         conformance_source = "\n".join(
             path.read_text()
@@ -4359,7 +4477,8 @@ displayName="Sample Machines"
         plan["source_contract_digest"] = "0" * 64
         with self.assertRaisesRegex(ValueError, "contract digest"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "wrong-digest"
+                contract, audit, plan, self.root / "wrong-digest",
+                source_artifact=self.jar,
             )
 
         plan = self.generation_plan(contract)
@@ -4368,21 +4487,24 @@ displayName="Sample Machines"
         )
         with self.assertRaisesRegex(ValueError, "invalid member"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "unsafe-member"
+                contract, audit, plan, self.root / "unsafe-member",
+                source_artifact=self.jar,
             )
 
         plan = self.generation_plan(contract)
         plan["families"][0]["rate_bindings"][0]["template"] = "reflection"
         with self.assertRaisesRegex(ValueError, "rate template"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "unsafe-template"
+                contract, audit, plan, self.root / "unsafe-template",
+                source_artifact=self.jar,
             )
 
         plan = self.generation_plan(contract)
         plan["families"][0]["rate_bindings"][0]["numerator"] = 2
         with self.assertRaisesRegex(ValueError, "fixed rate does not match contract"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "rate-drift"
+                contract, audit, plan, self.root / "rate-drift",
+                source_artifact=self.jar,
             )
 
         plan = self.generation_plan(contract)
@@ -4391,7 +4513,8 @@ displayName="Sample Machines"
         )
         with self.assertRaisesRegex(ValueError, "duplicate rate binding item"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "duplicate-rate-item"
+                contract, audit, plan, self.root / "duplicate-rate-item",
+                source_artifact=self.jar,
             )
 
         shape_mutations = (
@@ -4433,27 +4556,31 @@ displayName="Sample Machines"
                         self.source_audit(),
                         mutated_plan,
                         self.root / ("unsupported-" + name.replace(" ", "-")),
+                        source_artifact=self.jar,
                     )
 
         plan = self.generation_plan(contract)
         plan["families"].append(copy.deepcopy(plan["families"][0]))
         with self.assertRaisesRegex(ValueError, "duplicate family"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "duplicate-family"
+                contract, audit, plan, self.root / "duplicate-family",
+                source_artifact=self.jar,
             )
 
         plan = self.generation_plan(contract)
         plan["families"][0]["station_label_key"] = 'bad";System.exit(0)'
         with self.assertRaisesRegex(ValueError, "station_label_key"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "unsafe-label"
+                contract, audit, plan, self.root / "unsafe-label",
+                source_artifact=self.jar,
             )
 
         plan = self.generation_plan(contract)
         plan["families"][0]["registration_id"] = "othermod:samplemod_crusher"
         with self.assertRaisesRegex(ValueError, "registration namespace"):
             self.compat_kit.generate_compatibility(
-                contract, audit, plan, self.root / "unsafe-registration-namespace"
+                contract, audit, plan, self.root / "unsafe-registration-namespace",
+                source_artifact=self.jar,
             )
 
     def test_generation_uses_reviewed_descriptor_namespace_and_rejects_shared_drift(self):
@@ -4468,7 +4595,7 @@ displayName="Sample Machines"
         plan["families"][0]["registration_id"] = "sampleaddon:samplemod_crusher"
         output = self.root / "descriptor-namespace"
 
-        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+        self.compat_kit.generate_compatibility(contract, audit, plan, output, source_artifact=self.jar)
 
         source = next((output / "src/main/java").rglob("*.java")).read_text()
         self.assertIn('id("sampleaddon", "samplemod_crusher")', source)
@@ -4505,6 +4632,7 @@ displayName="Sample Machines"
                 audit,
                 plan,
                 self.root / "shared-descriptor-drift",
+                source_artifact=self.jar,
             )
 
     def test_generation_rate_templates_are_bounded_direct_calls(self):
@@ -4774,7 +4902,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         }
         output = self.root / "generated-typed-compat"
 
-        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+        self.compat_kit.generate_compatibility(contract, audit, plan, output, source_artifact=self.jar)
 
         source = next((output / "src/main/java").rglob("*.java")).read_text()
         self.assertIn("RecipeFamilyFactories.deterministicResources", source)
@@ -4809,7 +4937,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         generated["rate_bindings"][0]["numerator"] = 0
         output = self.root / "generated-instant-compat"
 
-        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+        self.compat_kit.generate_compatibility(contract, audit, plan, output, source_artifact=self.jar)
 
         source = next((output / "src/main/java").rglob("*.java")).read_text()
         self.assertIn("MachineWorkRate.of(0L, 1L)", source)
@@ -4867,14 +4995,16 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         output = self.root / "conformance"
 
         first = self.compat_kit.scaffold_conformance_tests(
-            contract, audit, plan, output
+            contract, audit, plan, output,
+            source_artifact=self.jar,
         )
         first_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
             for path in first
         }
         second = self.compat_kit.scaffold_conformance_tests(
-            contract, audit, plan, output
+            contract, audit, plan, output,
+            source_artifact=self.jar,
         )
         second_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
@@ -4922,6 +5052,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "contract.json",
             "--audit",
             "audit.json",
+            "--jar",
+            "samplemod.jar",
             "--plan",
             "conformance-plan.json",
             "--output",
@@ -4936,35 +5068,40 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         plan["families"] = []
         with self.assertRaisesRegex(ValueError, "accepted contract families"):
             self.compat_kit.scaffold_conformance_tests(
-                contract, audit, plan, self.root / "missing-family"
+                contract, audit, plan, self.root / "missing-family",
+                source_artifact=self.jar,
             )
 
         plan = self.conformance_plan(contract)
         plan["families"][0]["provider"]["owner"] = "bad.Owner;System.exit"
         with self.assertRaisesRegex(ValueError, "provider owner"):
             self.compat_kit.scaffold_conformance_tests(
-                contract, audit, plan, self.root / "unsafe-provider"
+                contract, audit, plan, self.root / "unsafe-provider",
+                source_artifact=self.jar,
             )
 
         plan = self.conformance_plan(contract)
         plan["families"].append(copy.deepcopy(plan["families"][0]))
         with self.assertRaisesRegex(ValueError, "duplicate family"):
             self.compat_kit.scaffold_conformance_tests(
-                contract, audit, plan, self.root / "duplicate-conformance"
+                contract, audit, plan, self.root / "duplicate-conformance",
+                source_artifact=self.jar,
             )
 
         plan = self.conformance_plan(contract)
         plan["class_name"] = "CompatibilityConformanceHarness"
         with self.assertRaisesRegex(ValueError, "reserved generated class"):
             self.compat_kit.scaffold_conformance_tests(
-                contract, audit, plan, self.root / "conformance-class-collision"
+                contract, audit, plan, self.root / "conformance-class-collision",
+                source_artifact=self.jar,
             )
 
         plan = self.conformance_plan(contract)
         plan["families"][0]["batch"] = 1
         with self.assertRaisesRegex(ValueError, "batch must be at least 2"):
             self.compat_kit.scaffold_conformance_tests(
-                contract, audit, plan, self.root / "single-conformance"
+                contract, audit, plan, self.root / "single-conformance",
+                source_artifact=self.jar,
             )
 
         plan = self.conformance_plan(contract)
@@ -4975,14 +5112,16 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         happy[key] += 1
         with self.assertRaisesRegex(ValueError, "batch product overflows signed long"):
             self.compat_kit.scaffold_conformance_tests(
-                contract, audit, plan, self.root / "batch-overflow-conformance"
+                contract, audit, plan, self.root / "batch-overflow-conformance",
+                source_artifact=self.jar,
             )
 
         plan = self.conformance_plan(contract)
         plan["game_test_namespace"] = "Bad:Namespace"
         with self.assertRaisesRegex(ValueError, "game_test_namespace"):
             self.compat_kit.scaffold_conformance_tests(
-                contract, audit, plan, self.root / "invalid-conformance-namespace"
+                contract, audit, plan, self.root / "invalid-conformance-namespace",
+                source_artifact=self.jar,
             )
 
         schema = json.loads(
@@ -5036,6 +5175,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 audit,
                 generation,
                 self.root / "generation-import-shadow",
+                source_artifact=self.jar,
             )
 
         conformance = self.conformance_plan(contract)
@@ -5046,6 +5186,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 audit,
                 conformance,
                 self.root / "conformance-import-shadow",
+                source_artifact=self.jar,
             )
 
         resource = self.resource_scaffold_plan(contract)
@@ -5056,6 +5197,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 audit,
                 resource,
                 self.root / "resource-import-shadow",
+                source_artifact=self.jar,
             )
 
         for bridge_name in ("Item", "ItemStack"):
@@ -5071,6 +5213,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                         audit,
                         resource,
                         self.root / f"resource-{bridge_name}-import-shadow",
+                        source_artifact=self.jar,
                     )
 
     def test_resource_scaffold_is_api_only_and_covers_resource_boundaries(self):
@@ -5080,14 +5223,16 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         output = self.root / "resource-scaffold"
 
         first = self.compat_kit.scaffold_resource_integration(
-            contract, audit, plan, output
+            contract, audit, plan, output,
+            source_artifact=self.jar,
         )
         first_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
             for path in first
         }
         second = self.compat_kit.scaffold_resource_integration(
-            contract, audit, plan, output
+            contract, audit, plan, output,
+            source_artifact=self.jar,
         )
         second_bytes = {
             path.relative_to(output).as_posix(): path.read_bytes()
@@ -5138,6 +5283,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "contract.json",
             "--audit",
             "audit.json",
+            "--jar",
+            "samplemod.jar",
             "--plan",
             "resource-plan.json",
             "--output",
@@ -5148,18 +5295,25 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
     def test_resource_scaffold_reuses_standard_kinds_and_rejects_unsafe_bridge(self):
         audit = self.source_audit()
         contract = self.accepted_contract()
-        plan = self.resource_scaffold_plan(contract)
-        plan["resources"][0]["id"] = "auto_storage:fluid"
-        with self.assertRaisesRegex(ValueError, "reuse standard"):
-            self.compat_kit.scaffold_resource_integration(
-                contract, audit, plan, self.root / "standard-kind"
-            )
+        for resource_id in ("auto_storage:fluid", "auto_storage:work"):
+            with self.subTest(resource_id=resource_id):
+                plan = self.resource_scaffold_plan(contract)
+                plan["resources"][0]["id"] = resource_id
+                with self.assertRaisesRegex(ValueError, "reuse standard"):
+                    self.compat_kit.scaffold_resource_integration(
+                        contract,
+                        audit,
+                        plan,
+                        self.root / resource_id.rsplit(":", 1)[-1],
+                        source_artifact=self.jar,
+                    )
 
         plan = self.resource_scaffold_plan(contract)
         plan["resources"][0]["bridge_name"] = "Bridge;Runtime"
         with self.assertRaisesRegex(ValueError, "bridge_name"):
             self.compat_kit.scaffold_resource_integration(
-                contract, audit, plan, self.root / "unsafe-bridge"
+                contract, audit, plan, self.root / "unsafe-bridge",
+                source_artifact=self.jar,
             )
 
         plan = self.resource_scaffold_plan(contract)
@@ -5174,21 +5328,24 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         plan["resources"][1]["id"] = "samplemod:steam_vapor"
         with self.assertRaisesRegex(ValueError, "generated name collision"):
             self.compat_kit.scaffold_resource_integration(
-                contract, audit, plan, self.root / "resource-name-collision"
+                contract, audit, plan, self.root / "resource-name-collision",
+                source_artifact=self.jar,
             )
 
         plan = self.resource_scaffold_plan(contract)
         plan["resources"][0]["bridge_name"] = plan["class_name"]
         with self.assertRaisesRegex(ValueError, "generated class collision"):
             self.compat_kit.scaffold_resource_integration(
-                contract, audit, plan, self.root / "resource-class-collision"
+                contract, audit, plan, self.root / "resource-class-collision",
+                source_artifact=self.jar,
             )
 
         plan = self.resource_scaffold_plan(contract)
         plan["game_test_namespace"] = "Bad:Namespace"
         with self.assertRaisesRegex(ValueError, "game_test_namespace"):
             self.compat_kit.scaffold_resource_integration(
-                contract, audit, plan, self.root / "invalid-resource-namespace"
+                contract, audit, plan, self.root / "invalid-resource-namespace",
+                source_artifact=self.jar,
             )
 
     def test_resource_scaffold_prefixes_digit_leading_generated_identifiers(self):
@@ -5199,7 +5356,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         output = self.root / "digit-leading-resource"
 
         self.compat_kit.scaffold_resource_integration(
-            contract, audit, plan, output
+            contract, audit, plan, output,
+            source_artifact=self.jar,
         )
 
         registration = (
@@ -5226,6 +5384,27 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         return self.compat_kit.scan_jar(
             self.jar,
             signature_reader=self.signatures,
+        )
+
+    def committed_ae2_jar(self) -> Path:
+        audit = json.loads(
+            (ROOT / "compat/audits/ae2/19.2.17.json").read_text()
+        )
+        artifact = audit["artifact"]
+        cache_root = (
+            Path.home()
+            / ".gradle/caches/modules-2/files-2.1/org.appliedenergistics/"
+            "appliedenergistics2/19.2.17"
+        )
+        for candidate in sorted(cache_root.glob("*/*.jar")):
+            if (
+                candidate.stat().st_size == artifact["size"]
+                and hashlib.sha256(candidate.read_bytes()).hexdigest()
+                == artifact["sha256"]
+            ):
+                return candidate
+        self.fail(
+            "missing exact AE2 19.2.17 artifact; resolve the Gradle fixture first"
         )
 
     @staticmethod
@@ -5357,6 +5536,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             require_complete=True,
             source_audit=audit,
+            source_artifact=self.jar,
         )
         return contract
 
@@ -5382,6 +5562,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             require_complete=True,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
         return contract
 
@@ -5393,6 +5574,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
 
         expected = {
@@ -5459,6 +5641,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
         self.assertEqual(generated, regenerated)
         descriptor_path = output_root / "src/compat/samplemod/compat-module.json"
@@ -5468,6 +5651,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output_root,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
     def test_external_scaffold_is_api_only_and_has_reusable_ci(self):
@@ -5478,6 +5662,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
 
         relative = {path.relative_to(output).as_posix() for path in generated}
@@ -5571,6 +5756,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
         self.assertEqual(
@@ -5598,6 +5784,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
         self.assertEqual(
@@ -5626,6 +5813,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
         self.assertEqual([], list(external.iterdir()))
@@ -5646,6 +5834,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
         self.assertEqual([], list(external.iterdir()))
@@ -5666,6 +5855,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
         self.assertFalse((self.root / "missing").exists())
@@ -5679,6 +5869,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         launchers = (
             output / "gradlew",
@@ -5691,6 +5882,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
 
         for launcher in launchers:
@@ -5704,6 +5896,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
 
         metadata = (
@@ -5723,6 +5916,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
 
         build = (output / "build.gradle").read_text()
@@ -5748,6 +5942,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             bundled,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
         descriptor = json.loads(
             (bundled / "src/compat/samplemod/compat-module.json").read_text()
@@ -5772,6 +5967,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
 
         build = (output / "build.gradle").read_text()
@@ -5798,6 +5994,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                         contract,
                         require_complete=True,
                         source_audit=self.source_audit(),
+                        source_artifact=self.jar,
                     )
 
     def test_contract_validation_rejects_malformed_dependency_coordinates(self):
@@ -5820,6 +6017,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                         contract,
                         require_complete=True,
                         source_audit=self.source_audit(),
+                        source_artifact=self.jar,
                     )
 
     def test_external_scaffold_escapes_target_display_name_as_toml(self):
@@ -5834,6 +6032,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=audit,
+            source_artifact=self.jar,
         )
 
         metadata = tomllib.loads(
@@ -5856,6 +6055,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=audit,
+            source_artifact=self.jar,
         )
 
         metadata_path = output / "src/main/resources/META-INF/neoforge.mods.toml"
@@ -5877,6 +6077,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
 
         build = (output / "build.gradle").read_text()
@@ -5898,6 +6099,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=audit,
+            source_artifact=self.jar,
         )
 
         metadata = tomllib.loads(
@@ -5920,6 +6122,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 self.accepted_contract(),
                 self.root / "addon",
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
     def test_bundled_scaffold_rejects_unsafe_fixture_paths(self):
@@ -5934,6 +6137,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 self.root / "bundled",
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
         self.assertFalse((self.root / "outside").exists())
 
@@ -5958,6 +6162,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 self.root / "bundled",
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
     def test_bundled_scaffold_rejects_normalized_identifier_collision(self):
@@ -6001,6 +6206,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=audit,
+                source_artifact=self.jar,
             )
 
         self.assertFalse((output / "src/compat/foo__bar").exists())
@@ -6026,6 +6232,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 output,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
         self.assertFalse((output / "src/compat/samplemod").exists())
@@ -6041,6 +6248,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 self.root / "bundled",
                 source_audit=audit,
+                source_artifact=self.jar,
             )
 
     def test_scaffold_rejects_unresolved_or_semantically_incomplete_contracts(self):
@@ -6054,12 +6262,14 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 unresolved,
                 self.root / "bundled",
                 source_audit=audit,
+                source_artifact=self.jar,
             )
         with self.assertRaisesRegex(ValueError, "unresolved"):
             self.compat_kit.scaffold_addon(
                 unresolved,
                 self.root / "addon",
                 source_audit=audit,
+                source_artifact=self.jar,
             )
 
     def test_schemas_are_versioned_strict_and_cover_all_machine_readable_documents(self):
@@ -6501,6 +6711,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract,
                 require_complete=True,
                 source_audit=self.source_audit(),
+                source_artifact=self.jar,
             )
 
         schema = json.loads(
@@ -6628,6 +6839,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             require_complete=True,
             source_audit=audit,
+            source_artifact=self.committed_ae2_jar(),
         )
         self.assertEqual(
             set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
@@ -6651,7 +6863,13 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         output = self.root / "ae2-generated"
 
-        self.compat_kit.generate_compatibility(contract, audit, plan, output)
+        self.compat_kit.generate_compatibility(
+            contract,
+            audit,
+            plan,
+            output,
+            source_artifact=self.committed_ae2_jar(),
+        )
 
         generated = next((output / "src/main/java").rglob("*.java"))
         committed = (
@@ -6688,12 +6906,14 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             audit,
             conformance_plan,
             generated_root / "conformance",
+            source_artifact=self.committed_ae2_jar(),
         )
         resources = self.compat_kit.scaffold_resource_integration(
             contract,
             audit,
             resource_plan,
             generated_root / "resource",
+            source_artifact=self.committed_ae2_jar(),
         )
 
         committed_root = ROOT / "src/compatKitGeneratedFixture/java"
@@ -6761,6 +6981,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -6828,6 +7049,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             source_audit=source_audit,
             bundled_root=output_root,
             command_runner=runner,
+            source_artifact=self.jar,
         )
 
         self.assertEqual("auto_storage_compat_report", report["kind"])
@@ -6862,6 +7084,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
         source = (
             output_root
@@ -6937,6 +7160,34 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             {},
         )
 
+    def test_gametest_holder_constant_uses_declaring_class_not_file_name(self):
+        source_root = self.root / "holder-constant-owner"
+        source_root.mkdir()
+        source = source_root / "Tests.java"
+        source.write_text(
+            'final class FixtureIds { static final String MOD_ID = "owner_namespace"; }\n'
+            '@net.neoforged.neoforge.gametest.GameTestHolder(FixtureIds.MOD_ID)\n'
+            "final class Tests {\n"
+            "    @net.minecraft.gametest.framework.GameTest("
+            'template = "craftingtests.platform")\n'
+            "    static void check() {}\n"
+            "}\n"
+        )
+
+        expressions = self.compat_kit._java_string_constant_expressions(
+            (source_root,)
+        )
+        self.assertEqual(
+            '"owner_namespace"',
+            expressions[("FixtureIds", "MOD_ID")],
+        )
+        self.compat_kit._validate_game_test_holder_namespace(
+            source,
+            source.read_text(),
+            "owner_namespace",
+            expressions,
+        )
+
     def test_verification_evidence_binds_marker_to_owning_gametest_holder(self):
         contract = self.accepted_contract()
         contract["verification"]["gradle_tasks"].append(
@@ -6955,6 +7206,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
         source = (
             output_root
@@ -6996,6 +7248,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -7028,6 +7281,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 2 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_verify_rejects_conflicting_gametest_success_summaries(self):
@@ -7038,6 +7292,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -7080,6 +7335,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                     ),
                     "",
                 ),
+                source_artifact=self.jar,
             )
 
     def test_verify_rejects_gametest_marker_outside_annotated_method(self):
@@ -7093,6 +7349,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -7135,6 +7392,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_verify_rejects_gametest_marker_only_in_method_declaration(self):
@@ -7149,6 +7407,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -7185,6 +7444,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_verify_ignores_commented_gametest_annotations(self):
@@ -7199,6 +7459,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -7242,6 +7503,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_verify_skips_braces_in_annotations_before_gametest_method(self):
@@ -7256,6 +7518,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -7298,6 +7561,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_gametest_parser_keeps_escaped_text_block_delimiter_inside_literal(self):
@@ -7435,6 +7699,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output_root
@@ -7485,6 +7750,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_verify_fails_closed_on_red_scaffold_contract_drift_or_command_failure(self):
@@ -7495,6 +7761,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output_root,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         with self.assertRaisesRegex(ValueError, "intentionally RED"):
             self.compat_kit.verify_contract(
@@ -7504,6 +7771,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
                 ),
+                source_artifact=self.jar,
             )
 
         descriptor = output_root / "src/compat/samplemod/compat-module.json"
@@ -7524,6 +7792,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
                 ),
+                source_artifact=self.jar,
             )
 
         adapter = (
@@ -7541,6 +7810,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_external_verify_rejects_implementation_links(self):
@@ -7551,6 +7821,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output
@@ -7591,6 +7862,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_external_verify_rejects_manifest_self_attested_build_changes(self):
@@ -7601,6 +7873,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output
@@ -7649,6 +7922,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_external_verify_rejects_manifest_self_attested_wrapper_changes(self):
@@ -7659,6 +7933,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         wrapper = output / "gradlew"
         wrapper.write_text("#!/bin/sh\nprintf 'forged verification output\\n'\n")
@@ -7683,6 +7958,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 command_runner=lambda command, cwd: subprocess.CompletedProcess(
                     command, 0, "All 1 required tests passed :)\n", ""
                 ),
+                source_artifact=self.jar,
             )
 
     def test_external_verify_runs_build_and_fresh_gametest_world(self):
@@ -7693,6 +7969,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output
@@ -7737,6 +8014,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             source_audit=source_audit,
             addon_root=output,
             command_runner=runner,
+            source_artifact=self.jar,
         )
 
         self.assertEqual("passed", report["status"])
@@ -7752,6 +8030,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             contract,
             output,
             source_audit=source_audit,
+            source_artifact=self.jar,
         )
         adapter = (
             output
@@ -7796,6 +8075,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 source_audit=source_audit,
                 addon_root=output,
                 command_runner=runner,
+                source_artifact=self.jar,
             )
 
         self.assertEqual(["build"], [command[1] for command in commands])
@@ -7882,6 +8162,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             self.addon_contract(),
             self.root / "extracted-addon",
             source_audit=self.source_audit(),
+            source_artifact=self.jar,
         )
         self.assertTrue((self.root / "extracted-addon/gradlew").is_file())
 

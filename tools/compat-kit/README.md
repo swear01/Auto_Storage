@@ -40,12 +40,16 @@ relative to the supplied module. Supplying a non-Git source directory fails;
 omit `--source` when no versioned source is available. Current-format cache
 entries and committed audits carry the scanner format and are fully
 schema-validated before reuse. Complete consumers reject legacy scanner
-formats; only explicit migration commands may read formats 7 through 14.
+formats and require the exact target jar so they can rehash it and rebuild the
+complete sorted class/metadata inventory; only explicit migration commands may
+read formats 7 through 14.
 Committed source files must be sorted, unique, canonical POSIX
 repository-relative `.java` paths. A null revision requires no files, while a
 recorded revision with classified candidates requires at least one file. The
 validator does not guess a source filename from a binary class name because a
-package-private class may legally live in another compilation unit. If the
+package-private class may legally live in another compilation unit. A supplied
+source therefore fails explicitly when a classified class has no authoritative
+class-file `SourceFile` attribute. If the
 target has classified candidates, a
 supplied source module must contain at least one matching tracked, non-ignored
 Java source file; ignored outputs and unrelated clean checkouts are rejected.
@@ -63,10 +67,11 @@ identities enter the audit/cache, and every ancestry jar is rehashed after
 inspection to reject in-flight replacement. A binary class may be owned by
 only one ancestry jar; duplicate definitions fail even when their hierarchy
 metadata matches. Platform ancestry requires exact
-membership in the selected JDK 21 `jmods` inventory. The resolved `javap`
-toolchain's `release` metadata must report major version 21 before that
-inventory is read or a cached audit is returned. Cache metadata binds the
-selected JDK installation, version, and module-file identity; a changed JDK 21
+membership in the selected JDK 21 `jmods` inventory. The resolved toolchain's
+`release` metadata and the actual `javap -version` process must both report
+major version 21 before that inventory is read or a cached audit is returned.
+Cache metadata binds the selected JDK installation, version, module-file
+identity, and resolved `javap` path/version/size/SHA; a changed JDK 21
 inventory forces a fresh scan. A `java.*` or `javax.*` prefix alone never
 authorizes an unresolved class.
 JVM modified UTF-8 class constants are handled correctly. Repeatable
@@ -129,9 +134,10 @@ values fail validation. Markers assigned to `run*GameTestServer` tasks must
 occur inside annotated `@GameTest` method bodies. Simple and fully qualified
 annotations count, and each marker method's own enclosing class must declare
 the `@GameTestHolder` namespace enabled by the declared Gradle run; another
-class in the same source cannot authorize it. After
-the contract has no `needs_decision` entry, pass the same committed audit to
-every later command. Validation compares that audit's exact candidate set with
+class in the same source cannot authorize it. Holder constants are keyed by
+their actual declaring class rather than the source file name. After
+the contract has no `needs_decision` entry, pass the same committed audit and
+exact target jar to every later command. Validation compares that audit's exact candidate set with
 the contract, including every per-family scanner risk, so recomputing a
 contract-only inventory digest cannot hide an omitted recipe family or risk.
 The contract separately binds the effective recipe-data/data-pack digest, so a
@@ -196,11 +202,11 @@ platform-specific JDK path.
 For a complete reviewed contract:
 
 ```bash
-./compat-kit generate contract.json --audit audit.json \
+./compat-kit generate contract.json --audit audit.json --jar target.jar \
   --plan generation-plan.json --output generated
-./compat-kit conformance contract.json --audit audit.json \
+./compat-kit conformance contract.json --audit audit.json --jar target.jar \
   --plan conformance-plan.json --output conformance
-./compat-kit resource-scaffold contract.json --audit audit.json \
+./compat-kit resource-scaffold contract.json --audit audit.json --jar target.jar \
   --plan resource-plan.json --output resource
 ```
 
@@ -223,7 +229,7 @@ shared real transaction assertion harness with separate happy,
 catalyst/tool/remainder, and multi-output deltas while the integration supplies
 scenarios. `resource-scaffold` emits API-only
 custom-kind/container/block/renderer and operation-based snapshot tests and
-rejects the built-in Item, Fluid, and NeoForge Energy kinds. Both plans require
+rejects the built-in Item, Fluid, NeoForge Energy, and Work kinds. Both plans require
 an exact `game_test_namespace`, and generated test classes emit the matching
 `@GameTestHolder`. Generated tests assert the planned sample key/amount was
 seeded, require `clear()` to remove that key, and only then prove `load()`
@@ -237,9 +243,10 @@ lowercase resource locations; duplicate descriptor variant items and duplicate
 generation-plan rate bindings are rejected.
 
 ```bash
-./compat-kit scaffold --addon contract.json --audit audit.json \
+./compat-kit scaffold --addon contract.json --audit audit.json --jar target.jar \
   --output target-auto-storage
-./compat-kit verify contract.json --audit audit.json --addon target-auto-storage \
+./compat-kit verify contract.json --audit audit.json --jar target.jar \
+  --addon target-auto-storage \
   --output report.json
 ```
 
@@ -269,8 +276,8 @@ artifacts from the reviewed contract and current generator, then checks every
 byte and manifest entry. Replacing the launcher or SHA gate and self-attesting
 a new manifest hash is therefore explicit drift rather than a pass.
 
-Use `scaffold --bundled contract.json --audit audit.json` and
-`verify contract.json --audit audit.json --bundled <repo>` inside the Auto
+Use `scaffold --bundled contract.json --audit audit.json --jar target.jar` and
+`verify contract.json --audit audit.json --jar target.jar --bundled <repo>` inside the Auto
 Storage repository. Bundled verification runs each declared Gradle task
 separately, removes only `run/world` before each one, validates every evidence
 marker, and checks both the source GameTest annotation count and runtime passing
@@ -288,7 +295,8 @@ requires each GameTest evidence file to belong to the source set executed by its
 declared task and its holder namespace to match that task's
 `neoforge.enabledGameTestNamespaces` value. Literal namespaces and bounded
 `static final String` references are resolved; missing, ambiguous, or mismatched
-holders fail closed. Eligible Java Unicode escapes are rejected before marker
+holders fail closed, and constant ownership comes from the declaring class
+rather than the file stem. Eligible Java Unicode escapes are rejected before marker
 matching so pre-lexical escapes cannot manufacture comments, annotations, or
 method boundaries.
 Bundled descriptors preserve reviewed HTTPS repository order, and fixture names

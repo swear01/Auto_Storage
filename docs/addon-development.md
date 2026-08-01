@@ -76,15 +76,22 @@ contracts separately bind the
 recipe-class inventory and effective recipe-data/data-pack digest. Runtime
 probe JSON must pass `validate-probe` with the same audit and optional plan;
 schema validation alone does not prove those cross-file identities.
+Every complete generation, conformance, resource, scaffold, and verification
+command also receives the exact target jar. Compat Kit rehashes it and rebuilds
+the complete sorted class/metadata inventory instead of trusting an edited
+audit's self-consistent count or digest.
 
 The scanner first verifies that resolved `javap` belongs to a JDK whose
-`release` metadata reports major version 21, then accepts platform ancestry only
+`release` metadata and actual `javap -version` both report major version 21,
+then accepts platform ancestry only
 when the class is present in that JDK's module inventory. Package prefixes such as `javax.*` do not
 bypass missing classpath evidence. It uses class-file `SourceFile`,
 `InnerClasses`, and `EnclosingMethod` metadata for source ownership and nested
 classes. Thus a top-level or named class whose identifier contains `$` remains
-auditable while local, anonymous, and synthetic classes stay excluded. Format
-15 stores binary and source-level Java names, each candidate's structural
+auditable while local, anonymous, and synthetic classes stay excluded. When
+`SourceFile` is absent, a supplied source checkout fails as unavailable rather
+than guessing a same-named compilation unit. Format 15 stores binary and
+source-level Java names, each candidate's structural
 classification, a separate sorted top-level `structural_hierarchy` inventory,
 an artifact/classpath-bound structural candidate digest, and direct metadata for
 every target class plus reachable ancestry. The artifact also binds the complete
@@ -215,7 +222,8 @@ and detached helpers are rejected. Runtime probes require an explicit
 `game_test_namespace`, and every generated class emits it in
 `@GameTestHolder`. An addon's holder must resolve to the
 addon's enabled `<target_mod_id>_auto_storage` namespace; a test compiled in
-another namespace is not evidence. Comments inside the method do not count,
+another namespace is not evidence. Referenced holder constants are resolved by
+their actual declaring class, not the source file stem. Comments inside the method do not count,
 while executable string arguments may carry assertion markers. Eligible Java
 Unicode escapes are rejected before evidence parsing so they cannot create
 comments or method boundaries before tokenization. Its fresh-world cleanup

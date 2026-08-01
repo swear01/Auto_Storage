@@ -103,7 +103,8 @@ an incomplete classpath fails instead of silently omitting a structurally
 hidden recipe family. This check runs before name-bucket classification, so a
 class named like a client viewer, builder, or datagen helper cannot bypass
 ancestry validation. Before reading platform classes, Compat Kit requires the
-resolved `javap` toolchain's `release` metadata to report major version 21. JDK
+resolved `javap` toolchain's `release` metadata and the actual `javap -version`
+process to report major version 21. JDK
 ancestry is then resolved from that JDK's `jmods` inventory, not from a
 package-prefix allowlist, so platform classes
 such as `org.xml.sax.*` are recognized without weakening external dependency
@@ -157,14 +158,18 @@ repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
 Data-root scans bind the ordered layer digests into their cache identity;
 ancestry classpaths bind their exact artifact set. Cache metadata also records
-the selected JDK 21 installation, release version, and module-file identity.
+the selected JDK 21 installation, release version, module-file identity, and
+the resolved `javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
 current scanner format is `15`; formats `7` through `14` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
-current-format audit; only explicit migration paths may consume legacy audit
-formats.
+current-format audit plus the exact target jar; only explicit migration paths
+may consume legacy audit formats. Each complete consumer rehashes that jar and
+independently rebuilds its complete sorted class/metadata inventory. A
+self-consistent edited audit count or digest cannot replace those artifact
+bytes.
 Format 15 retains each candidate's structural classification and source-level
 Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
 artifact/classpath-bound `structural_candidate_inventory_sha256`. Its
@@ -193,6 +198,9 @@ splitting the binary name on every `$`; a legal top-level `Recipe$1Variant`
 therefore maps to `Recipe$1Variant.java`, while anonymous/local classes and
 every class carrying the JVM
 `ACC_SYNTHETIC` access flag are excluded.
+If a classified class has no `SourceFile` attribute and `--source` was
+supplied, scanning fails with an unavailable source mapping; it never guesses
+that a package-private binary class lives in a same-named source file.
 Family IDs use normalized simple class names. A legal identifier that normalizes
 to an empty string uses `class_<binary-name-hex>` instead, while normalized
 collisions append the same collision-free binary-name encoding.
@@ -309,12 +317,12 @@ nonempty Gradle tasks, all twelve exact checks, and one evidence mapping for
 every check.
 `source_recipe_inventory_sha256` binds the sorted recipe-class inventory;
 `source_recipe_data_sha256` separately binds the effective recipe-data and
-data-pack override digest. Every
-complete `scaffold`/`verify` invocation must also load the committed
-source audit. Validation compares the contract's exact family-class set,
+data-pack override digest. Every complete `generate`/`conformance`/
+`resource-scaffold`/`scaffold`/`verify` invocation must also load the committed
+source audit and exact target jar. Validation compares the contract's exact family-class set,
 per-family scanner risk set, target identity, artifact SHA, and inventory digest
-with that separate audit; deleting a family or risk and recomputing a contract
-field still fails.
+with that separate audit, then reconstructs the jar's class inventory; deleting
+a family, graph record, or risk and recomputing JSON fields still fails.
 
 An accepted family records:
 
@@ -400,6 +408,7 @@ exact canonical contract digest and run:
 tools/compat-kit/compat-kit generate \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
+  --jar build/compat-kit/artifacts/target.jar \
   --plan compat/generation/target.json \
   --output build/compat-kit/target-generated
 ```
@@ -458,12 +467,14 @@ ID is not assumed to be the owning block registry ID.
 tools/compat-kit/compat-kit conformance \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
+  --jar build/compat-kit/artifacts/target.jar \
   --plan compat/conformance/target.json \
   --output build/compat-kit/target-conformance
 
 tools/compat-kit/compat-kit resource-scaffold \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
+  --jar build/compat-kit/artifacts/target.jar \
   --plan compat/resources/target.json \
   --output build/compat-kit/target-resource
 ```
@@ -486,7 +497,8 @@ happy-path expected delta multiplied by that batch must fit a signed Java
 
 `resource-scaffold` emits API-only kind/container/block/renderer boundaries and
 real persistence, transfer, rollback, and dedicated-server test scenarios for
-an optional custom resource kind. It rejects Item, Fluid, and NeoForge Energy,
+an optional custom resource kind. It rejects Item, Fluid, NeoForge Energy, and
+Work,
 which must reuse Auto Storage's built-in support. Generated common source may
 not import Core internals or client classes; the renderer bridge remains
 generic and client registration stays isolated. Each resource plan binds a
@@ -530,7 +542,8 @@ Bundled module:
 ```bash
 tools/compat-kit/compat-kit scaffold \
   --bundled compat/contracts/target.json \
-  --audit compat/audits/target/1.2.3.json
+  --audit compat/audits/target/1.2.3.json \
+  --jar build/compat-kit/artifacts/target.jar
 ```
 
 Independent addon:
@@ -539,6 +552,7 @@ Independent addon:
 tools/compat-kit/compat-kit scaffold \
   --addon compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
+  --jar build/compat-kit/artifacts/target.jar \
   --output ../target-auto-storage
 ```
 
@@ -617,6 +631,7 @@ client isolation, API-only compilation, and all-mod coexistence.
 tools/compat-kit/compat-kit verify \
   compat/contracts/target.json \
   --audit compat/audits/target/1.2.3.json \
+  --jar build/compat-kit/artifacts/target.jar \
   --bundled . \
   --output build/compat-kit/target-report.json
 ```
@@ -648,7 +663,8 @@ cannot authorize it. Simple and fully qualified `@GameTest` and
 `@GameTestHolder` annotations are parsed consistently for evidence and exact
 test counts. Literal holders and bounded
 `static final String` references are accepted, while missing, unresolved,
-ambiguous, or mismatched holders fail closed. A check is marked passed only
+ambiguous, or mismatched holders fail closed. Constants are keyed by their
+actual innermost declaring class, never the source file stem. A check is marked passed only
 when all of its declared source markers
 exist in the correct execution boundary and the associated Gradle task
 succeeds. The report records those
