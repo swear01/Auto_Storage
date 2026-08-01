@@ -1,0 +1,44 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:advancedae:lHSZ2gYI",
+    "sha256": "891e1f8ee0f3ac1bbce03fc2848b761f9c52bea4533eb3419ae849582e15ced7"
+  },
+  "dependencies": [
+    "maven.modrinth:advancedae:lHSZ2gYI"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.advancedae.AdvancedAeCompatModule",
+  "expectedTests": 8,
+  "fixture": "advancedAeFixture",
+  "id": "auto_storage:advanced_ae",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "advanced_ae"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "advanced_ae"
+      ],
+      "sha256": "0adc34a90c85458883b43ae02cbc4d4522e0f4f63678d5423da1938606f3ee94"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "advanced_ae"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:advancedae:lHSZ2gYI",
+    "org.appliedenergistics:appliedenergistics2:19.2.17",
+    "maven.modrinth:guideme:rduAfwb7",
+    "maven.modrinth:geckolib:RVIo5f6E"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatAdvancedAe"
+}

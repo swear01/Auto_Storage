@@ -1,0 +1,133 @@
+{
+  "artifact": {
+    "sha256": "891e1f8ee0f3ac1bbce03fc2848b761f9c52bea4533eb3419ae849582e15ced7",
+    "size": 4797100
+  },
+  "candidates": {
+    "recipe_classes": [
+      {
+        "class": "net.pedroksl.advanced_ae.datagen.AAERecipeProvider",
+        "public_signature": "Compiled from \"AAERecipeProvider.java\"\npublic class net.pedroksl.advanced_ae.datagen.AAERecipeProvider extends net.minecraft.data.recipes.RecipeProvider {\n  public net.pedroksl.advanced_ae.datagen.AAERecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.recipes.InitRecipeSerializers",
+        "public_signature": "Compiled from \"InitRecipeSerializers.java\"\npublic final class net.pedroksl.advanced_ae.recipes.InitRecipeSerializers {\n  public static void init(net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeSerializer<?>>);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.recipes.InitRecipeTypes",
+        "public_signature": "Compiled from \"InitRecipeTypes.java\"\npublic class net.pedroksl.advanced_ae.recipes.InitRecipeTypes {\n  public net.pedroksl.advanced_ae.recipes.InitRecipeTypes();\n  public static <T extends net.minecraft.world.item.crafting.Recipe<?>> net.minecraft.world.item.crafting.RecipeType<T> register(java.lang.String);\n  public static void init(net.minecraft.core.Registry<net.minecraft.world.item.crafting.RecipeType<?>>);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.recipes.InitRecipeTypes$ToRegister",
+        "public_signature": "Compiled from \"InitRecipeTypes.java\"\nfinal class net.pedroksl.advanced_ae.recipes.InitRecipeTypes$ToRegister extends java.lang.Record {\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.item.crafting.RecipeType<?> recipeType();\n  public net.minecraft.resources.ResourceLocation id();\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe",
+        "public_signature": "Compiled from \"ReactionChamberRecipe.java\"\npublic class net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public static final net.minecraft.resources.ResourceLocation TYPE_ID;\n  public static final net.minecraft.world.item.crafting.RecipeType<net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe> TYPE;\n  public final appeng.api.stacks.GenericStack output;\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe(appeng.api.stacks.GenericStack, java.util.List<net.pedroksl.ae2addonlib.recipes.IngredientStack$Item>, net.pedroksl.ae2addonlib.recipes.IngredientStack$Fluid, int);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public boolean isItemOutput();\n  public net.minecraft.world.item.ItemStack getResultItem();\n  public net.neoforged.neoforge.fluids.FluidStack getResultFluid();\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public java.util.List<net.pedroksl.ae2addonlib.recipes.IngredientStack$Item> getInputs();\n  public java.util.List<net.pedroksl.ae2addonlib.recipes.IngredientStack<?, ?>> getValidInputs();\n  public net.pedroksl.ae2addonlib.recipes.IngredientStack$Fluid getFluid();\n  public int getEnergy();\n  public boolean isSpecial();\n  public boolean containsIngredient(net.minecraft.world.item.ItemStack);\n  public boolean containsIngredient(net.neoforged.neoforge.fluids.FluidStack);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder",
+        "public_signature": "Compiled from \"ReactionChamberRecipeBuilder.java\"\npublic class net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder {\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder(appeng.api.stacks.GenericStack, int);\n  public static net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder react(net.minecraft.world.item.ItemStack, int);\n  public static net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder react(net.minecraft.world.level.ItemLike, int);\n  public static net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder react(net.minecraft.world.level.ItemLike, int, int);\n  public static net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder react(net.neoforged.neoforge.fluids.FluidStack, int);\n  public static net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder react(net.minecraft.world.level.material.Fluid, int);\n  public static net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder react(net.minecraft.world.level.material.Fluid, int, int);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder fluid(net.neoforged.neoforge.fluids.FluidStack);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder fluid(net.minecraft.world.level.material.Fluid, int);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder fluid(net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid>, int);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder input(net.minecraft.world.item.ItemStack);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder input(net.minecraft.world.level.ItemLike);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder input(net.minecraft.world.level.ItemLike, int);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder input(net.minecraft.tags.TagKey<net.minecraft.world.item.Item>);\n  public net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder input(net.minecraft.tags.TagKey<net.minecraft.world.item.Item>, int);\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n  public void save(net.minecraft.data.recipes.RecipeOutput, java.lang.String);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeSerializer",
+        "public_signature": "Compiled from \"ReactionChamberRecipeSerializer.java\"\npublic class net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeSerializer implements net.minecraft.world.item.crafting.RecipeSerializer<net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe> {\n  public static final net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeSerializer INSTANCE;\n  public static final com.mojang.serialization.MapCodec<net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe> STREAM_CODEC;\n  public com.mojang.serialization.MapCodec<net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe> streamCodec();\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipes",
+        "public_signature": "Compiled from \"ReactionChamberRecipes.java\"\npublic final class net.pedroksl.advanced_ae.recipes.ReactionChamberRecipes {\n  public static java.lang.Iterable<net.minecraft.world.item.crafting.RecipeHolder<net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe>> getRecipes(net.minecraft.world.level.Level);\n  public static net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe findRecipe(net.minecraft.world.level.Level, java.util.List<net.minecraft.world.item.ItemStack>, appeng.api.stacks.GenericStack);\n  public static boolean isValidIngredient(net.minecraft.world.item.ItemStack, net.minecraft.world.level.Level);\n  public static boolean isValidIngredient(net.neoforged.neoforge.fluids.FluidStack, net.minecraft.world.level.Level);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.xmod.emi.recipes.AAERecipeCategory",
+        "public_signature": "Compiled from \"AAERecipeCategory.java\"\npublic class net.pedroksl.advanced_ae.xmod.emi.recipes.AAERecipeCategory extends dev.emi.emi.api.recipe.EmiRecipeCategory {\n  public net.pedroksl.advanced_ae.xmod.emi.recipes.AAERecipeCategory(java.lang.String, dev.emi.emi.api.render.EmiRenderable, net.minecraft.network.chat.Component);\n  public net.minecraft.network.chat.Component getName();\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.xmod.emi.recipes.EMIReactionChamberRecipe",
+        "public_signature": "Compiled from \"EMIReactionChamberRecipe.java\"\npublic class net.pedroksl.advanced_ae.xmod.emi.recipes.EMIReactionChamberRecipe extends dev.emi.emi.api.recipe.BasicEmiRecipe {\n  public static final dev.emi.emi.api.recipe.EmiRecipeCategory CATEGORY;\n  public net.pedroksl.advanced_ae.xmod.emi.recipes.EMIReactionChamberRecipe(net.minecraft.world.item.crafting.RecipeHolder<net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe>);\n  public void addWidgets(dev.emi.emi.api.widget.WidgetHolder);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberCategory",
+        "public_signature": "Compiled from \"REIReactionChamberCategory.java\"\npublic class net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberCategory implements me.shedaniel.rei.api.client.registry.display.DisplayCategory<net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay> {\n  public net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberCategory();\n  public me.shedaniel.rei.api.client.gui.Renderer getIcon();\n  public net.minecraft.network.chat.Component getTitle();\n  public me.shedaniel.rei.api.common.category.CategoryIdentifier<net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay> getCategoryIdentifier();\n  public java.util.List<me.shedaniel.rei.api.client.gui.widgets.Widget> setupDisplay(net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay, me.shedaniel.math.Rectangle);\n  public int getDisplayHeight();\n  public int getDisplayWidth(net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay);\n  public int getDisplayWidth(me.shedaniel.rei.api.common.display.Display);\n  public java.util.List setupDisplay(me.shedaniel.rei.api.common.display.Display, me.shedaniel.math.Rectangle);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay",
+        "public_signature": "Compiled from \"REIReactionChamberDisplay.java\"\npublic class net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay implements me.shedaniel.rei.api.common.display.Display {\n  public static final me.shedaniel.rei.api.common.category.CategoryIdentifier<net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay> ID;\n  public net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay(net.minecraft.world.item.crafting.RecipeHolder<net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe>);\n  public java.util.List<me.shedaniel.rei.api.common.entry.EntryIngredient> getInputItems();\n  public me.shedaniel.rei.api.common.entry.EntryIngredient getInputFluid();\n  public int getEnergy();\n  public java.util.List<me.shedaniel.rei.api.common.entry.EntryIngredient> getInputEntries();\n  public java.util.List<me.shedaniel.rei.api.common.entry.EntryIngredient> getOutputEntries();\n  public me.shedaniel.rei.api.common.category.CategoryIdentifier<?> getCategoryIdentifier();\n  public java.util.Optional<net.minecraft.resources.ResourceLocation> getDisplayLocation();\n}"
+      }
+    ],
+    "resource_apis": [
+      {
+        "class": "net.pedroksl.advanced_ae.common.definitions.AAEFluids",
+        "public_signature": "Compiled from \"AAEFluids.java\"\npublic class net.pedroksl.advanced_ae.common.definitions.AAEFluids extends net.pedroksl.ae2addonlib.registry.FluidRegistry {\n  public static final net.pedroksl.advanced_ae.common.definitions.AAEFluids INSTANCE;\n  public static final net.pedroksl.ae2addonlib.registry.helpers.FluidDefinition<?, ?> QUANTUM_INFUSION;\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.common.fluids.QuantumInfusionBlock",
+        "public_signature": "Compiled from \"QuantumInfusionBlock.java\"\npublic class net.pedroksl.advanced_ae.common.fluids.QuantumInfusionBlock extends net.minecraft.world.level.block.LiquidBlock {\n  public net.pedroksl.advanced_ae.common.fluids.QuantumInfusionBlock();\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid",
+        "public_signature": "Compiled from \"QuantumInfusionFluid.java\"\npublic abstract class net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid extends net.neoforged.neoforge.fluids.BaseFlowingFluid {\n  public static final net.neoforged.neoforge.fluids.BaseFlowingFluid$Properties PROPERTIES;\n  public net.minecraft.world.level.material.Fluid getFlowing();\n  public net.minecraft.world.level.material.Fluid getSource();\n  public net.minecraft.world.item.Item getBucket();\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid$Flowing",
+        "public_signature": "Compiled from \"QuantumInfusionFluid.java\"\npublic class net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid$Flowing extends net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid {\n  public net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid$Flowing();\n  public int getAmount(net.minecraft.world.level.material.FluidState);\n  public boolean isSource(net.minecraft.world.level.material.FluidState);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid$Source",
+        "public_signature": "Compiled from \"QuantumInfusionFluid.java\"\npublic class net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid$Source extends net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid {\n  public net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluid$Source();\n  public int getAmount(net.minecraft.world.level.material.FluidState);\n  public boolean isSource(net.minecraft.world.level.material.FluidState);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluidType",
+        "public_signature": "Compiled from \"QuantumInfusionFluidType.java\"\npublic class net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluidType extends net.pedroksl.ae2addonlib.util.WaterBasedFluidType {\n  public net.pedroksl.advanced_ae.common.fluids.QuantumInfusionFluidType();\n  public boolean canConvertToSource(net.minecraft.world.level.material.FluidState, net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.common.items.armors.PoweredItem",
+        "public_signature": "Compiled from \"PoweredItem.java\"\npublic class net.pedroksl.advanced_ae.common.items.armors.PoweredItem extends net.minecraft.world.item.ArmorItem implements appeng.api.implementations.items.IAEItemPowerStorage,net.pedroksl.ae2addonlib.registry.helpers.ICreativeTabItem {\n  public net.pedroksl.advanced_ae.common.items.armors.PoweredItem(net.minecraft.core.Holder<net.minecraft.world.item.ArmorMaterial>, net.minecraft.world.item.ArmorItem$Type, net.minecraft.world.item.Item$Properties, java.util.function.DoubleSupplier);\n  public void addToMainCreativeTab(net.minecraft.world.item.CreativeModeTab$ItemDisplayParameters, net.minecraft.world.item.CreativeModeTab$Output);\n  public void appendHoverText(net.minecraft.world.item.ItemStack, net.minecraft.world.item.Item$TooltipContext, java.util.List<net.minecraft.network.chat.Component>, net.minecraft.world.item.TooltipFlag);\n  public boolean isBarVisible(net.minecraft.world.item.ItemStack);\n  public int getBarWidth(net.minecraft.world.item.ItemStack);\n  public int getBarColor(net.minecraft.world.item.ItemStack);\n  public double injectAEPower(net.minecraft.world.item.ItemStack, double, appeng.api.config.Actionable);\n  public double extractAEPower(net.minecraft.world.item.ItemStack, double, appeng.api.config.Actionable);\n  public double getAEMaxPower(net.minecraft.world.item.ItemStack);\n  public double getAECurrentPower(net.minecraft.world.item.ItemStack);\n  public appeng.api.config.AccessRestriction getPowerFlow(net.minecraft.world.item.ItemStack);\n  public double getChargeRate(net.minecraft.world.item.ItemStack);\n}"
+      },
+      {
+        "class": "net.pedroksl.advanced_ae.xmod.appmek.AppMekPlugin$ChemicalStorageReaderImpl",
+        "public_signature": "Compiled from \"AppMekPlugin.java\"\nclass net.pedroksl.advanced_ae.xmod.appmek.AppMekPlugin$ChemicalStorageReaderImpl implements net.pedroksl.advanced_ae.common.helpers.StorageReader {\n  public long getCurrentStock(appeng.api.stacks.AEKey);\n}"
+      }
+    ],
+    "station_classes": []
+  },
+  "kind": "auto_storage_compat_audit",
+  "risks": [
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe: world API",
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipes: world API"
+      ]
+    }
+  ],
+  "scanner_format": 7,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/net/pedroksl/advanced_ae/common/definitions/AAEFluids.java",
+      "src/main/java/net/pedroksl/advanced_ae/common/fluids/QuantumInfusionBlock.java",
+      "src/main/java/net/pedroksl/advanced_ae/common/fluids/QuantumInfusionFluid.java",
+      "src/main/java/net/pedroksl/advanced_ae/common/fluids/QuantumInfusionFluidType.java",
+      "src/main/java/net/pedroksl/advanced_ae/common/items/armors/PoweredItem.java",
+      "src/main/java/net/pedroksl/advanced_ae/datagen/AAERecipeProvider.java",
+      "src/main/java/net/pedroksl/advanced_ae/recipes/InitRecipeSerializers.java",
+      "src/main/java/net/pedroksl/advanced_ae/recipes/InitRecipeTypes.java",
+      "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipe.java",
+      "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipeBuilder.java",
+      "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipeSerializer.java",
+      "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipes.java",
+      "src/main/java/net/pedroksl/advanced_ae/xmod/appmek/AppMekPlugin.java",
+      "src/main/java/net/pedroksl/advanced_ae/xmod/emi/recipes/AAERecipeCategory.java",
+      "src/main/java/net/pedroksl/advanced_ae/xmod/emi/recipes/EMIReactionChamberRecipe.java",
+      "src/main/java/net/pedroksl/advanced_ae/xmod/rei/recipes/REIReactionChamberCategory.java",
+      "src/main/java/net/pedroksl/advanced_ae/xmod/rei/recipes/REIReactionChamberDisplay.java"
+    ],
+    "revision": "9378212e1fc81930c1fe914c9d8a9a130b34e2b2"
+  },
+  "target": {
+    "display_name": "Advanced AE",
+    "mod_id": "advanced_ae",
+    "version": "1.6.11-1.21.1"
+  }
+}

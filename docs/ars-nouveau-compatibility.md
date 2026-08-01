@@ -7,7 +7,7 @@ families only when the mod is loaded; the normal dedicated server does not link
 Ars Nouveau classes.
 
 The representative CI artifact is Ars Nouveau `5.12.1`, resolved from immutable
-Modrinth version ID `7IK2KsiH`. GeckoLib `4.6.6` and Curios
+Modrinth version ID `7IK2KsiH`. GeckoLib `4.8.2` (`RVIo5f6E`) and Curios
 `9.3.1+1.21.1` are present only in that isolated fixture runtime. This
 representative CI artifact is not an exact player dependency pin or a
 multi-version promise. Other installed versions remain accepted, and

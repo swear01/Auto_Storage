@@ -1,0 +1,338 @@
+{
+  "families": [
+    {
+      "class": "net.pedroksl.advanced_ae.datagen.AAERecipeProvider",
+      "costs": [],
+      "decision": "Datagen provider only; not a runtime recipe family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.datagen.AAERecipeProvider#public_signature"
+      ],
+      "id": "a_a_e_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.InitRecipeSerializers",
+      "costs": [],
+      "decision": "Serializer registry bootstrap only; not an independent recipe family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.InitRecipeSerializers#public_signature"
+      ],
+      "id": "init_recipe_serializers",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.InitRecipeTypes",
+      "costs": [],
+      "decision": "RecipeType registry bootstrap only; not an independent recipe family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.InitRecipeTypes#public_signature"
+      ],
+      "id": "init_recipe_types",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.InitRecipeTypes$ToRegister",
+      "costs": [],
+      "decision": "Nested RecipeType registration record; not an independent recipe family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.InitRecipeTypes$ToRegister#public_signature"
+      ],
+      "id": "init_recipe_types__to_register",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe",
+      "costs": [],
+      "decision": "Reaction Chamber (advanced_ae:reaction) is a live AE-network machine contract, not a simulate-then-commit Auto Storage family. Runtime progress spends recipe energy across ticks with floor/ceil floating-point power ratios, optional Applied Flux recharge, and grid idle-power partial progress; speed cards change requiredTicks from an unconfigured station ItemStack; recipes declare IngredientStack item/fluid inputs that may be tags; GenericStack output may be item or fluid; isSpecial() is true. No exact integer FE/work transaction was established without approximating network/live-machine state.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe#public_signature",
+        "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipe.java",
+        "src/main/java/net/pedroksl/advanced_ae/common/entities/ReactionChamberEntity.java",
+        "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipeBuilder.java"
+      ],
+      "id": "reaction_chamber_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder",
+      "costs": [],
+      "decision": "Datagen builder for rejected ReactionChamberRecipe; not an independent family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder#public_signature"
+      ],
+      "id": "reaction_chamber_recipe_builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeSerializer",
+      "costs": [],
+      "decision": "Serializer for rejected ReactionChamberRecipe; not an independent family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeSerializer#public_signature"
+      ],
+      "id": "reaction_chamber_recipe_serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipes",
+      "costs": [],
+      "decision": "Live Level/RecipeManager lookup helper over ReactionChamberRecipe that mutates temporary ItemStack aggregates while matching; not a deterministic Auto Storage recipe family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipes#public_signature",
+        "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipes.java"
+      ],
+      "id": "reaction_chamber_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.xmod.emi.recipes.AAERecipeCategory",
+      "costs": [],
+      "decision": "Client EMI category helper; not a server recipe family. Auto Storage never registers third-party EMI workstations.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.xmod.emi.recipes.AAERecipeCategory#public_signature"
+      ],
+      "id": "a_a_e_recipe_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.xmod.emi.recipes.EMIReactionChamberRecipe",
+      "costs": [],
+      "decision": "Client EMI display wrapper; viewer authority is excluded.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.xmod.emi.recipes.EMIReactionChamberRecipe#public_signature"
+      ],
+      "id": "e_m_i_reaction_chamber_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberCategory",
+      "costs": [],
+      "decision": "Client REI category helper; not a server recipe family.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberCategory#public_signature"
+      ],
+      "id": "r_e_i_reaction_chamber_category",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay",
+      "costs": [],
+      "decision": "Client REI display wrapper; viewer authority is excluded.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay#public_signature"
+      ],
+      "id": "r_e_i_reaction_chamber_display",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "891e1f8ee0f3ac1bbce03fc2848b761f9c52bea4533eb3419ae849582e15ced7",
+  "source_recipe_inventory_sha256": "268937aae1f3fbe8c4775a3461f9095dbc697143fcb32b9fd746c8cfae377345",
+  "target": {
+    "dependency": "maven.modrinth:advancedae:lHSZ2gYI",
+    "display_name": "Advanced AE",
+    "mod_id": "advanced_ae",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "org.appliedenergistics:appliedenergistics2:19.2.17",
+      "maven.modrinth:guideme:rduAfwb7",
+      "maven.modrinth:geckolib:RVIo5f6E"
+    ],
+    "version": "1.6.11-1.21.1"
+  },
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "advanced_ae"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "advanced_ae"
+      ],
+      "sha256": "0adc34a90c85458883b43ae02cbc4d4522e0f4f63678d5423da1938606f3ee94"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Advanced AE fail-closed boundary changed",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Missing representative Advanced AE recipe shatteredsingularity",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Audited Advanced AE recipe type is empty",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Unsafe Advanced AE recipe type accepted",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Unsafe Advanced AE recipe was accepted: quantum_alloy",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Advanced AE unsafe machine contract was registered",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 8,
+    "fixture": "advancedAeFixture",
+    "game_test_task": "runAdvancedAeGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runAdvancedAeGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}
