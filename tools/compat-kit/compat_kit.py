@@ -7165,7 +7165,9 @@ def _resource_tests_java(plan: dict) -> str:
         }}
         byte[] saved = Objects.requireNonNull(scenario.save(), "saved resource state");
         scenario.clear();
-        if (before.equals(scenario.snapshot())) helper.fail("Resource clear did not change state");
+        if (scenario.snapshot().amounts().containsKey({snapshot_key})) {{
+            helper.fail("Resource clear retained seeded key");
+        }}
         scenario.load(saved);
         assertUnchanged(helper, before, scenario.snapshot());
         helper.succeed();

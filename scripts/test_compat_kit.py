@@ -4247,6 +4247,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertNotIn("containerDepositAndWithdraw()", combined)
         self.assertNotIn("clientClassesLoaded()", combined)
         self.assertIn(
+            'scenario.snapshot().amounts().containsKey("resource/samplemod:steam")',
+            combined,
+        )
+        self.assertIn(
             '@GameTestHolder("auto_storage_samplemod_fixture")',
             combined,
         )

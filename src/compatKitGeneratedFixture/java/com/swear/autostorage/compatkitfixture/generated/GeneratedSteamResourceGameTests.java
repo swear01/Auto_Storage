@@ -83,7 +83,9 @@ public final class GeneratedSteamResourceGameTests {
         }
         byte[] saved = Objects.requireNonNull(scenario.save(), "saved resource state");
         scenario.clear();
-        if (before.equals(scenario.snapshot())) helper.fail("Resource clear did not change state");
+        if (scenario.snapshot().amounts().containsKey("resource/compat_kit_fixture:steam")) {
+            helper.fail("Resource clear retained seeded key");
+        }
         scenario.load(saved);
         assertUnchanged(helper, before, scenario.snapshot());
         helper.succeed();

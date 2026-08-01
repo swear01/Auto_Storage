@@ -111,7 +111,8 @@ separately from the representative station item. The generated
 `single_item_to_item` path accepts only the documented one-input/one-primary
 output selectors and exact amount expressions; all other shapes need a reviewed
 provider. Generated custom-resource tests verify that their sample key and
-amount were actually seeded before exercising persistence. `worker-package`
+amount were seeded, that `clear()` removes that key, and that `load()` restores
+the exact snapshot before exercising the remaining persistence boundaries. `worker-package`
 runs every declared Gradle task without replacing the worker's JDK environment,
 so the target's authoritative GameTest remains part of a delegated worker gate.
 

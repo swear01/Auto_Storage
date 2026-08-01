@@ -455,7 +455,8 @@ generic and client registration stays isolated. Each resource plan binds a
 sample amount, unique snapshot key, and exact `game_test_namespace`; the
 generated test class uses that namespace in `@GameTestHolder`. The tests own the before/after
 snapshot, first assert that reset/seed produced that exact key and amount, then
-own the delta, save/load round-trip, rollback, and physical-side assertions;
+require `clear()` to remove that key before `load()` restores the exact saved
+snapshot. They also own the delta, rollback, and physical-side assertions;
 an addon provider exposes operations and bytes, not self-attested persistence
 or client-isolation booleans. Resource IDs may begin with digits; every
 constant, registration method, and generated GameTest identifier is derived by
