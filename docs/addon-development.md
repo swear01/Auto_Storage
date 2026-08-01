@@ -50,7 +50,10 @@ an explicit RED boundary. Dynamic rate accessors are reviewed as integral and
 converted exactly; families sharing a descriptor must share the same reviewed
 definition. Each generated family also declares its runtime `registration_id`;
 the audit family key is evidence identity and is not assumed to be a registry
-path. `conformance` requires a batch of at least 2 and generates repeated snapshot/delta/rollback assertions
+path. Family-derived Java names use a collision-free `family$` prefix for
+digit-leading or reserved IDs and shared identifier validation. `conformance`
+requires a batch of at least 2, rejects happy-delta × batch signed-long overflow, and
+generates repeated snapshot/delta/rollback assertions
 around addon-supplied operations rather than trusting booleans returned by the
 addon. `resource-scaffold` generates only public-API custom-resource boundaries,
 sample-keyed persistence/transfer assertions, and rejects built-in Item, Fluid,

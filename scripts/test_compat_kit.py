@@ -3870,6 +3870,51 @@ displayName="Sample Machines"
         ])
         self.assertEqual("generate", args.command)
 
+    def test_generation_and_conformance_prefix_family_java_identifiers(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        family = next(
+            family
+            for family in contract["families"]
+            if family["status"] == "accepted"
+        )
+        family["id"] = "1recipe"
+
+        generation_plan = self.generation_plan(contract)
+        generation_plan["families"][0]["id"] = "1recipe"
+        generation_output = self.root / "digit-leading-family-generation"
+        self.compat_kit.generate_compatibility(
+            contract,
+            audit,
+            generation_plan,
+            generation_output,
+        )
+        generated_source = next(
+            (generation_output / "src/main/java").rglob("*.java")
+        ).read_text()
+        self.assertIn(
+            "ResourceLocation family$1recipeDescriptor",
+            generated_source,
+        )
+
+        conformance_plan = self.conformance_plan(contract)
+        conformance_plan["families"][0]["id"] = "1recipe"
+        conformance_output = self.root / "digit-leading-family-conformance"
+        self.compat_kit.scaffold_conformance_tests(
+            contract,
+            audit,
+            conformance_plan,
+            conformance_output,
+        )
+        conformance_source = "\n".join(
+            path.read_text()
+            for path in (conformance_output / "src/main/java").rglob("*.java")
+        )
+        self.assertIn(
+            "void family$1recipe_happy_path_and_batching",
+            conformance_source,
+        )
+
     def test_generation_plan_rejects_unreviewed_or_unsafe_bindings(self):
         audit = self.source_audit()
         contract = self.accepted_contract()
@@ -4483,6 +4528,17 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         with self.assertRaisesRegex(ValueError, "batch must be at least 2"):
             self.compat_kit.scaffold_conformance_tests(
                 contract, audit, plan, self.root / "single-conformance"
+            )
+
+        plan = self.conformance_plan(contract)
+        happy = plan["families"][0]["expected_deltas"]["happy"]
+        key = next(iter(happy))
+        happy[key] = 9_223_372_036_854_775_807 // plan["families"][0]["batch"]
+        self.compat_kit._validate_conformance_plan(plan, contract)
+        happy[key] += 1
+        with self.assertRaisesRegex(ValueError, "batch product overflows signed long"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract, audit, plan, self.root / "batch-overflow-conformance"
             )
 
         plan = self.conformance_plan(contract)

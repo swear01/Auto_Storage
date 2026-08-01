@@ -3274,6 +3274,12 @@ def _generated_java_identifier(value: str) -> str:
     return value
 
 
+def _family_java_identifier(value: str) -> str:
+    if value[0].isdigit() or value in JAVA_RESERVED_IDENTIFIERS:
+        value = "family$" + value
+    return _generated_java_identifier(value)
+
+
 def _resource_java_names(resource_id: str) -> tuple[str, str, str]:
     suffix = _generated_java_identifier(
         _pascal(resource_id.split(":", 1)[1])
@@ -6389,7 +6395,7 @@ def _generated_compat_java(contract: dict, plan: dict) -> tuple[str, list[dict]]
         family = contract_by_id[entry["id"]]
         descriptor_id = family["station"]["descriptor_id"]
         descriptor_path = descriptor_id.split(":", 1)[1]
-        descriptor_variable = re.sub(r"[^A-Za-z0-9_]", "_", entry["id"]) + "Descriptor"
+        descriptor_variable = _family_java_identifier(entry["id"]) + "Descriptor"
         descriptor_item_namespace = descriptor_id.split(":", 1)[0]
         body.append(
             f"        ResourceLocation {descriptor_variable} = id(\"{descriptor_item_namespace}\", \"{descriptor_path}\");"
@@ -6698,6 +6704,15 @@ def _validate_conformance_plan(plan: dict, contract: dict):
                     raise ValueError(
                         f"{location} expected_deltas {mode} has invalid amount"
                     )
+                if (
+                    mode == "happy"
+                    and abs(value)
+                    > 9_223_372_036_854_775_807 // family["batch"]
+                ):
+                    raise ValueError(
+                        f"{location} expected_deltas happy batch product "
+                        "overflows signed long"
+                    )
     return plan
 
 
@@ -6799,7 +6814,7 @@ def _java_map_entries(delta: dict[str, int]) -> str:
 def _conformance_tests_java(plan: dict) -> str:
     cases = []
     for index, family in enumerate(plan["families"]):
-        name = re.sub(r"[^a-z0-9_]", "_", family["id"].lower())
+        name = _family_java_identifier(family["id"].lower())
         provider = family["provider"]
         factory = (
             f"{provider['owner']}.{provider['factory_member']}(helper, "

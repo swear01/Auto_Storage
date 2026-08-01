@@ -421,8 +421,11 @@ catalysts/tools/remainders, and mixed resource costs; code generation only owns
 registration boilerplate. Every generated family therefore declares an exact
 `registration_id`; the audit family ID identifies review evidence and must not
 be guessed to be the runtime registry path. The registration namespace must
-match the reviewed station descriptor namespace. Commit plans and generated source, then keep a
-byte-for-byte regeneration test so drift is visible.
+match the reviewed station descriptor namespace. Family-derived Java variables
+and conformance methods use a collision-free `family$` prefix for digit-leading
+or reserved IDs plus the shared Java-identifier validator, so those IDs cannot
+emit invalid source or collide with another family. Commit plans and generated source, then
+keep a byte-for-byte regeneration test so drift is visible.
 
 The built-in `single_item_to_item` template accepts only its canonical contract
 shape: one consumed Item selected by `recipe.input` with amount `1`, one primary
@@ -468,7 +471,9 @@ server isolation checks the physical NeoForge distribution instead of trusting
 an addon-supplied boolean. Every conformance plan declares the exact
 `game_test_namespace`; the generated class uses it in `@GameTestHolder`. Every
 family batch must be at least 2, so `happy_path_and_batching` always proves a
-repeated operation rather than duplicating a single-craft assertion.
+repeated operation rather than duplicating a single-craft assertion. Every
+happy-path expected delta multiplied by that batch must fit a signed Java
+`long`; an overflowing plan fails before source generation.
 
 `resource-scaffold` emits API-only kind/container/block/renderer boundaries and
 real persistence, transfer, rollback, and dedicated-server test scenarios for

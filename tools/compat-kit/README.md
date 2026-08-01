@@ -204,10 +204,14 @@ and enum constant numeric fields are explicit reviewed accessors; unsupported
 shapes remain RED. Dynamic rate accessors are reviewed as integral and converted
 exactly, shared descriptors require identical definitions, and every generated
 family declares a reviewed runtime `registration_id` distinct from its audit
-family key. The `single_item_to_item` template requires the canonical
+family key. Family-derived Java variables and conformance methods use a
+collision-free `family$` prefix for digit-leading or reserved IDs plus the shared
+identifier validator. The `single_item_to_item` template requires the canonical
 `recipe.input`/`recipe.output` selectors and exact amount expressions;
 `registry_block_method` requires an explicit block ID separate from its station
-item. `conformance` requires every family batch to be at least 2 and emits the shared real transaction assertion harness with separate happy,
+item. `conformance` requires every family batch to be at least 2, rejects any
+happy expected-delta × batch product outside signed-long range, and emits the
+shared real transaction assertion harness with separate happy,
 catalyst/tool/remainder, and multi-output deltas while the integration supplies
 scenarios. `resource-scaffold` emits API-only
 custom-kind/container/block/renderer and operation-based snapshot tests and
