@@ -22,7 +22,7 @@
       "const": 1
     },
     "scanner_format": {
-      "const": 10
+      "const": 11
     },
     "kind": {
       "const": "auto_storage_compat_audit"
@@ -265,7 +265,8 @@
         "required": [
           "class",
           "public_signature",
-          "classification"
+          "classification",
+          "hierarchy"
         ],
         "properties": {
           "class": {
@@ -278,6 +279,16 @@
           },
           "classification": {
             "$ref": "#/$defs/classification"
+          },
+          "hierarchy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/$defs/hierarchy"
+              }
+            ]
           }
         }
       }

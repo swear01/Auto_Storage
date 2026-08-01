@@ -110,9 +110,11 @@ decoded as JVM modified UTF-8, so
 unrelated NUL or supplementary string constants cannot abort a valid scan.
 `--data-root` is repeatable and follows data-pack precedence: the target jar is
 the first layer and later supplied roots override earlier recipes by exact ID.
-Roots and recipe files must be real, non-symlink paths. Bounded `pack.mcmeta`
-bytes enter each root digest; roots declaring a top-level data-pack `filter`
-fail because filter removal semantics are not modeled. The deterministic audit
+Roots and recipe/tag files must be real, non-symlink paths. Every bounded
+`data/*/tags/**/*.json` resource and bounded `pack.mcmeta` enter each root
+digest without being counted as recipes; the file bound applies globally
+across ordered roots. Roots declaring a top-level data-pack `filter` fail
+because filter removal semantics are not modeled. The deterministic audit
 contains NeoForge identity, artifact SHA/size, source revision and exact source
 paths, structurally classified concrete recipe and serializer classes,
 recipe types, builders, datagen classes, client/viewer wrappers, block entities,
@@ -143,12 +145,13 @@ ancestry classpaths bind their exact artifact set. Cache metadata also records
 the selected JDK 21 installation, release version, and module-file identity.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `10`; formats `7`, `8`, and `9` remain readable only
-as explicit legacy evidence while committed contracts are migrated. Format 10
-persists a sorted top-level `structural_hierarchy` inventory separately from
-candidate classifications and requires hierarchy to win before every name-term
-bucket. Deleting an indirect candidate hierarchy path therefore cannot demote
-that class without conflicting with the independent inventory. Validation also
+current scanner format is `11`; formats `7`, `8`, `9`, and `10` remain readable
+only as explicit legacy evidence while committed contracts are migrated.
+Format 11 retains each candidate's structural classification and a separate
+sorted top-level `structural_hierarchy` inventory, requires both copies to
+agree, and requires hierarchy to win before every name-term bucket. Removing
+only one indirect path therefore cannot demote that class without conflicting
+with the other independently persisted record. Validation also
 cross-checks direct `extends`/`implements` parents in the public declaration;
 generic type bounds are not treated as direct ancestry. The scanner format is
 also stored in every audit and required by its published
@@ -453,7 +456,9 @@ generated test class uses that namespace in `@GameTestHolder`. The tests own the
 snapshot, first assert that reset/seed produced that exact key and amount, then
 own the delta, save/load round-trip, rollback, and physical-side assertions;
 an addon provider exposes operations and bytes, not self-attested persistence
-or client-isolation booleans.
+or client-isolation booleans. Resource IDs may begin with digits; every
+constant, registration method, and generated GameTest identifier is derived by
+one collision-checked Java-identifier normalizer that prefixes `_` when needed.
 
 Repository declarations are build inputs, not discovery hints. A target
 published through Modrinth Maven, Curse Maven, or its own Maven must list the
@@ -592,7 +597,10 @@ A marker assigned to a `run*GameTestServer` task must occur inside an
 annotated `@GameTest` method body; a detached constant, helper, or comment does
 not prove that the behavior ran. Comments inside a real GameTest are removed
 before matching evidence, while markers in executable string arguments remain
-valid. The declaring source's `@GameTestHolder` must resolve to the exact
+valid. Eligible Java Unicode escapes are rejected in evidence sources before
+raw marker matching because Java translates them before comment/token parsing;
+escaped literal `\\u` text remains allowed. The declaring source's
+`@GameTestHolder` must resolve to the exact
 namespace enabled by that Gradle run; evidence in a different namespace cannot
 borrow another test's successful task result. Literal holders and bounded
 `static final String` references are accepted, while missing, unresolved,
@@ -687,7 +695,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-10 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-11 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification plus the reviewed NeoForge/Minecraft ancestry jar
 finds twelve

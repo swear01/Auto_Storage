@@ -54,7 +54,9 @@ path. `conformance` requires a batch of at least 2 and generates repeated snapsh
 around addon-supplied operations rather than trusting booleans returned by the
 addon. `resource-scaffold` generates only public-API custom-resource boundaries,
 sample-keyed persistence/transfer assertions, and rejects built-in Item, Fluid,
-and NeoForge Energy support. None of these commands add runtime reflection or
+and NeoForge Energy support. Valid digit-leading resource IDs are normalized
+through one collision-checked Java-name derivation that prefixes `_` where
+required. None of these commands add runtime reflection or
 make the client authoritative. Repository tests regenerate and compile the
 committed generated-scaffold fixture against the public API jar.
 
@@ -79,15 +81,17 @@ bypass missing classpath evidence. It uses class-file `SourceFile`,
 `InnerClasses`, and `EnclosingMethod` metadata for source ownership and nested
 classes. Thus a top-level or named class whose identifier contains `$` remains
 auditable while local, anonymous, and synthetic classes stay excluded. Format
-10 stores a sorted top-level `structural_hierarchy` inventory independently
-from candidate classifications, and scan/audit validation requires it to
-outrank name buckets, so deleting an indirect path and moving a structural
-recipe into a station record cannot bypass review. Direct public
+11 stores each candidate's structural classification and a separate sorted
+top-level `structural_hierarchy` inventory. Validation requires both records to
+agree and hierarchy to outrank name buckets, so removing only one indirect path
+and moving a structural recipe into a station record cannot bypass review. Direct public
 `extends`/`implements` declarations provide a second bucket cross-check;
-generic type bounds do not count as direct ancestry. Legacy formats 7, 8, and 9
+generic type bounds do not count as direct ancestry. Legacy formats 7, 8, 9,
+and 10
 must be rescanned with `migrate-audit`. A class name that normalizes to no
 alphanumeric family ID uses deterministic `class_<binary-name-hex>` evidence.
-Explicit `--data-root` evidence binds bounded `pack.mcmeta` bytes; a root with a
+Explicit `--data-root` evidence binds all bounded tag JSON and bounded
+`pack.mcmeta` bytes while keeping recipe counts recipe-only; a root with a
 top-level data-pack `filter` is rejected rather than misreporting filtered
 recipes as effective. Any ancestry artifact SHA/size change affects `diff` and
 reopens migrated family decisions even when target public signatures are stable.
@@ -203,7 +207,9 @@ and detached helpers are rejected. Runtime probes require an explicit
 `@GameTestHolder`. An addon's holder must resolve to the
 addon's enabled `<target_mod_id>_auto_storage` namespace; a test compiled in
 another namespace is not evidence. Comments inside the method do not count,
-while executable string arguments may carry assertion markers. Its fresh-world
+while executable string arguments may carry assertion markers. Eligible Java
+Unicode escapes are rejected before evidence parsing so they cannot create
+comments or method boundaries before tokenization. Its fresh-world
 cleanup rejects symlinked parents and paths outside the addon root before
 deletion. Bundled task names are not translated or treated as equivalent.
 GameTest output must contain

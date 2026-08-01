@@ -753,6 +753,60 @@ class CompatKitAuditTests(unittest.TestCase):
             second["recipe_data"]["digest"],
         )
 
+    def test_recipe_data_digest_binds_data_root_tag_overrides(self):
+        data_root = self.root / "tag-data"
+        recipe = data_root / "data/samplemod/recipe/tagged.json"
+        recipe.parent.mkdir(parents=True)
+        recipe.write_text(json.dumps({
+            "type": "samplemod:crushing",
+            "ingredient": {"tag": "c:metal"},
+            "result": {"id": "samplemod:metal_dust"},
+        }))
+        tag = data_root / "data/c/tags/item/metal.json"
+        tag.parent.mkdir(parents=True)
+        tag.write_text(json.dumps({"values": ["minecraft:iron_ingot"]}))
+
+        first = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            data_roots=[data_root],
+        )
+        tag.write_text(json.dumps({"values": ["minecraft:gold_ingot"]}))
+        second = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+            data_roots=[data_root],
+        )
+
+        self.assertNotEqual(
+            first["recipe_data"]["sources"][1]["sha256"],
+            second["recipe_data"]["sources"][1]["sha256"],
+        )
+        self.assertNotEqual(
+            first["recipe_data"]["digest"],
+            second["recipe_data"]["digest"],
+        )
+
+    def test_recipe_data_tag_bound_is_global_across_roots(self):
+        roots = []
+        for index in range(2):
+            root = self.root / f"tag-root-{index}"
+            tag = root / f"data/c/tags/item/metal_{index}.json"
+            tag.parent.mkdir(parents=True)
+            tag.write_text(json.dumps({"values": ["minecraft:iron_ingot"]}))
+            roots.append(root)
+        original_limit = self.compat_kit.MAX_RECIPE_FILES
+        self.compat_kit.MAX_RECIPE_FILES = 1
+        try:
+            with self.assertRaisesRegex(ValueError, "recipe data inventory"):
+                self.compat_kit.scan_jar(
+                    self.jar,
+                    signature_reader=self.signatures,
+                    data_roots=roots,
+                )
+        finally:
+            self.compat_kit.MAX_RECIPE_FILES = original_limit
+
     def test_scan_cache_is_keyed_by_ordered_data_root_content(self):
         cache = self.root / "cache"
         first_root = self.root / "first-data"
@@ -869,7 +923,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertNotIn("RandomSource", crushing["public_signature"])
         self.assertEqual(
-            {"class", "public_signature", "classification"},
+            {"class", "public_signature", "classification", "hierarchy"},
             set(crushing),
         )
 
@@ -1053,7 +1107,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(10, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(11, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -1579,6 +1633,7 @@ class CompatKitAuditTests(unittest.TestCase):
         for records in legacy["candidates"].values():
             for record in records:
                 record.pop("classification")
+                record.pop("hierarchy")
         self.compat_kit._validate_audit(legacy)
 
         audit["scanner_format"] = 6
@@ -1608,6 +1663,7 @@ class CompatKitAuditTests(unittest.TestCase):
         for records in legacy["candidates"].values():
             for record in records:
                 record.pop("classification")
+                record.pop("hierarchy")
 
         migrated = self.compat_kit.migrate_audit(
             legacy,
@@ -1649,10 +1705,24 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertTrue(
             all(
-                "hierarchy" not in record
+                "hierarchy" in record
                 for records in migrated_structural["candidates"].values()
                 for record in records
             )
+        )
+        legacy_top_level = copy.deepcopy(current)
+        legacy_top_level["scanner_format"] = 10
+        for records in legacy_top_level["candidates"].values():
+            for record in records:
+                record.pop("hierarchy")
+        migrated_top_level = self.compat_kit.migrate_audit(
+            legacy_top_level,
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        self.assertEqual(
+            self.compat_kit.SCAN_CACHE_VERSION,
+            migrated_top_level["scanner_format"],
         )
         with self.assertRaisesRegex(ValueError, "legacy scanner-format audit"):
             self.compat_kit.migrate_audit(
@@ -2295,6 +2365,11 @@ displayName="Sample Machines"
         audit["candidates"]["station_classes"].sort(
             key=lambda entry: entry["class"]
         )
+        audit["structural_hierarchy"] = [
+            entry
+            for entry in audit["structural_hierarchy"]
+            if entry["class"] != candidate["class"]
+        ]
 
         with self.assertRaisesRegex(ValueError, "candidate bucket mismatch"):
             self.compat_kit._validate_audit(audit)
@@ -2385,6 +2460,7 @@ displayName="Sample Machines"
             ],
         }
         candidate["classification"] = copy.deepcopy(hierarchy)
+        candidate["hierarchy"] = copy.deepcopy(hierarchy)
         audit["structural_hierarchy"].append(
             {
                 "class": "samplemod.$",
@@ -4194,6 +4270,37 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 contract, audit, plan, self.root / "invalid-resource-namespace"
             )
 
+    def test_resource_scaffold_prefixes_digit_leading_generated_identifiers(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.resource_scaffold_plan(contract)
+        plan["resources"][0]["id"] = "1compat:1steam"
+        output = self.root / "digit-leading-resource"
+
+        self.compat_kit.scaffold_resource_integration(
+            contract, audit, plan, output
+        )
+
+        registration = (
+            output
+            / "src/main/java/com/swear/autostorage/compat/samplemod/resource/"
+            "SamplemodSteamResource.java"
+        ).read_text()
+        tests = (
+            output
+            / "src/main/java/com/swear/autostorage/compat/samplemod/resource/"
+            "SamplemodSteamResourceGameTests.java"
+        ).read_text()
+        self.assertIn(
+            "public static final ResourceLocation _1COMPAT_1STEAM",
+            registration,
+        )
+        self.assertIn("StorageResourceKind _1steamKind()", registration)
+        self.assertIn(
+            "public static void _1compat_1steam_persistence_round_trip",
+            tests,
+        )
+
     def source_audit(self) -> dict:
         return self.compat_kit.scan_jar(
             self.jar,
@@ -5097,7 +5204,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             audit_schema["properties"]["candidates"]["additionalProperties"]
         )
         self.assertIn("structural_hierarchy", audit_schema["required"])
-        self.assertNotIn(
+        self.assertIn(
             "hierarchy",
             audit_schema["$defs"]["candidates"]["items"]["required"],
         )
@@ -6170,6 +6277,49 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
             set(resolved),
         )
+
+    def test_verification_evidence_rejects_java_unicode_escape_comments(self):
+        self.assertTrue(
+            self.compat_kit._has_eligible_java_unicode_escape(r"\u002f")
+        )
+        self.assertTrue(
+            self.compat_kit._has_eligible_java_unicode_escape(r"\uuuu002F")
+        )
+        self.assertFalse(
+            self.compat_kit._has_eligible_java_unicode_escape(r"\\u002f")
+        )
+        contract = self.accepted_contract()
+        marker = "unicode_escape_comment_marker"
+        for records in contract["verification"]["evidence"].values():
+            for record in records:
+                record["marker"] = marker
+        source = (
+            self.root
+            / "src/samplemodFixture/java/com/example/"
+            "SamplemodIntegrationGameTests.java"
+        )
+        source.parent.mkdir(parents=True)
+        source.write_text(
+            'import net.neoforged.neoforge.gametest.GameTestHolder;\n'
+            '@GameTestHolder("auto_storage_samplemod_fixture")\n'
+            "final class SamplemodIntegrationGameTests {\n"
+            '    @GameTest(template = "craftingtests.platform")\n'
+            "    static void evidence(GameTestHelper helper) {\n"
+            f"        \\u002f\\u002f {marker}\n"
+            "        helper.succeed();\n"
+            "    }\n"
+            "}\n"
+        )
+        descriptor = self.root / "src/compat/samplemod/compat-module.json"
+        descriptor.parent.mkdir(parents=True)
+        descriptor.write_text('{"fixture":"samplemodFixture"}\n')
+
+        with self.assertRaisesRegex(ValueError, "Unicode escape"):
+            self.compat_kit._verification_evidence(
+                contract,
+                self.root,
+                "bundled",
+            )
 
     def test_verify_binds_gametest_evidence_source_to_declared_task(self):
         contract = self.accepted_contract()

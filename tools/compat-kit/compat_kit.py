@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 10
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9})
+SCAN_CACHE_VERSION = 11
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -1271,6 +1271,9 @@ RECIPE_PATH = re.compile(
     r"^data/(?P<namespace>[a-z0-9_.-]+)/recipe/"
     r"(?P<path>[a-z0-9_./-]+)\.json$"
 )
+TAG_PATH = re.compile(
+    r"^data/[a-z0-9_.-]+/tags/[a-z0-9_./-]+\.json$"
+)
 RESOURCE_LOCATION = re.compile(r"^[a-z0-9_.-]+:[a-z0-9_./-]+$")
 GAME_TEST_NAMESPACE = re.compile(r"^[a-z0-9_.-]+$")
 
@@ -1370,6 +1373,7 @@ def _recipe_data_inventory(
     data_roots,
 ) -> dict:
     layers: list[tuple[str, str, list[tuple[str, bytes]]]] = []
+    external_evidence_files = 0
     jar_entries = []
     for name in sorted(archive.namelist()):
         if RECIPE_PATH.fullmatch(name) is None:
@@ -1390,19 +1394,29 @@ def _recipe_data_inventory(
         if Path(raw_root).is_symlink():
             raise ValueError(f"recipe data root is a symlink: data_root_{index}")
         files = []
+        tag_files = []
         for path in sorted(root.rglob("*.json")):
             relative = path.relative_to(root)
-            if RECIPE_PATH.fullmatch(relative.as_posix()) is None:
+            relative_path = relative.as_posix()
+            is_recipe = RECIPE_PATH.fullmatch(relative_path) is not None
+            is_tag = TAG_PATH.fullmatch(relative_path) is not None
+            if not is_recipe and not is_tag:
                 continue
             if path.is_symlink() or any(parent.is_symlink() for parent in path.parents if parent != root.parent):
                 raise ValueError(
                     f"recipe data contains a symlink: data_root_{index}/{relative.as_posix()}"
                 )
             if path.is_file():
-                files.append(path)
-        if len(files) > MAX_RECIPE_FILES:
+                (files if is_recipe else tag_files).append(path)
+        if len(files) + len(tag_files) > MAX_RECIPE_FILES:
             raise ValueError(
-                f"recipe data root exceeds {MAX_RECIPE_FILES} files: data_root_{index}"
+                "recipe data root exceeds "
+                f"{MAX_RECIPE_FILES} recipe/tag files: data_root_{index}"
+            )
+        external_evidence_files += len(files) + len(tag_files)
+        if external_evidence_files > MAX_RECIPE_FILES:
+            raise ValueError(
+                f"recipe data inventory exceeds {MAX_RECIPE_FILES} files"
             )
         entries = []
         for path in files:
@@ -1413,7 +1427,14 @@ def _recipe_data_inventory(
                     f"{path.relative_to(root).as_posix()}"
                 )
             entries.append((path.relative_to(root).as_posix(), path.read_bytes()))
-        digest_files = [*files]
+        for path in tag_files:
+            if path.stat().st_size > MAX_RECIPE_JSON_BYTES:
+                raise ValueError(
+                    "recipe tag JSON exceeds "
+                    f"{MAX_RECIPE_JSON_BYTES} bytes: data_root_{index}/"
+                    f"{path.relative_to(root).as_posix()}"
+                )
+        digest_files = [*files, *tag_files]
         pack_metadata = _validated_pack_metadata(root, source_id)
         if pack_metadata is not None:
             digest_files.append(pack_metadata)
@@ -2014,7 +2035,7 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {10, SCAN_CACHE_VERSION}:
         if "structural_hierarchy" not in audit:
             raise ValueError("audit is missing structural_hierarchy")
         structural_hierarchy = _validate_structural_hierarchy(
@@ -2049,7 +2070,7 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format == 9:
+            if scanner_format in {9, SCAN_CACHE_VERSION}:
                 record_keys.add("hierarchy")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
@@ -2082,12 +2103,25 @@ def _validate_audit(audit: dict):
                         record["public_signature"],
                         location,
                     )
-                elif scanner_format == SCAN_CACHE_VERSION:
+                elif scanner_format == 10:
                     _validate_hierarchy_priority(
                         class_name,
                         bucket,
                         record["classification"],
                         structural_hierarchy.get(class_name),
+                        record["public_signature"],
+                        location,
+                    )
+                elif scanner_format == SCAN_CACHE_VERSION:
+                    candidate_hierarchy = record["hierarchy"]
+                    persisted_hierarchy = structural_hierarchy.get(class_name)
+                    if candidate_hierarchy != persisted_hierarchy:
+                        raise ValueError(f"{location} candidate bucket mismatch")
+                    _validate_hierarchy_priority(
+                        class_name,
+                        bucket,
+                        record["classification"],
+                        candidate_hierarchy,
                         record["public_signature"],
                         location,
                     )
@@ -2102,7 +2136,7 @@ def _validate_audit(audit: dict):
                 raise ValueError(f"audit repeats candidate class {class_name}")
             seen_classes.add(class_name)
 
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {10, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
             set(structural_hierarchy) - seen_classes
         )
@@ -2337,6 +2371,11 @@ def scan_jar(
                     "class": class_name,
                     "public_signature": signature.strip(),
                     "classification": classification,
+                    "hierarchy": (
+                        copy.deepcopy(classification)
+                        if classification["method"] == "class_hierarchy"
+                        else None
+                    ),
                 }
             )
             if classification["method"] == "class_hierarchy":
@@ -3101,6 +3140,26 @@ def _pascal(identifier: str) -> str:
     if not words:
         raise ValueError(f"identifier has no Java-safe characters: {identifier}")
     return "".join(word[:1].upper() + word[1:].lower() for word in words)
+
+
+def _generated_java_identifier(value: str) -> str:
+    if not value:
+        raise ValueError("generated Java identifier is empty")
+    if value[0].isdigit() or value in JAVA_RESERVED_IDENTIFIERS:
+        value = "_" + value
+    if JAVA_MEMBER.fullmatch(value) is None:
+        raise ValueError(f"invalid generated Java identifier: {value}")
+    return value
+
+
+def _resource_java_names(resource_id: str) -> tuple[str, str, str]:
+    suffix = _generated_java_identifier(
+        _pascal(resource_id.split(":", 1)[1])
+    )
+    normalized = re.sub(r"[^A-Za-z0-9_]", "_", resource_id)
+    constant = _generated_java_identifier(normalized.upper())
+    test_name = _generated_java_identifier(normalized.lower())
+    return suffix, constant, test_name
 
 
 def _java_segment(identifier: str) -> str:
@@ -4145,6 +4204,22 @@ def _java_without_comments(text: str) -> str:
     return "".join(masked)
 
 
+def _has_eligible_java_unicode_escape(text: str) -> bool:
+    contiguous_backslashes = 0
+    index = 0
+    while index < len(text):
+        if text[index] != "\\":
+            contiguous_backslashes = 0
+            index += 1
+            continue
+        eligible = contiguous_backslashes % 2 == 0
+        if eligible and re.match(r"\\u+[0-9a-fA-F]{4}", text[index:]):
+            return True
+        contiguous_backslashes += 1
+        index += 1
+    return False
+
+
 def _game_test_method_opening(code: str, annotation_end: int) -> int:
     parentheses = 1
     for index in range(annotation_end, len(code)):
@@ -4420,6 +4495,12 @@ def _verification_evidence(
                     f"{record['source']}"
                 )
             matching_texts = [path.read_text() for path in matches]
+            for path, text in zip(matches, matching_texts):
+                if _has_eligible_java_unicode_escape(text):
+                    raise ValueError(
+                        "Unicode escapes are unsupported in verification evidence: "
+                        f"{path}"
+                    )
             if not any(record["marker"] in text for text in matching_texts):
                 raise ValueError(
                     f"verification evidence marker not found for {check}: "
@@ -6865,12 +6946,9 @@ def _validate_resource_plan(plan: dict, contract: dict):
             raise ValueError(f"{location} repeats snapshot_key")
         seen_snapshot_keys.add(snapshot_key)
         _validate_positive_long(resource["sample_amount"], f"{location} sample_amount")
-        suffix = _pascal(resource_id.split(":", 1)[1])
-        constant = re.sub(r"[^A-Za-z0-9_]", "_", resource_id).upper()
+        suffix, constant, _ = _resource_java_names(resource_id)
         if (
-            not JAVA_MEMBER.fullmatch(suffix)
-            or suffix in JAVA_RESERVED_IDENTIFIERS
-            or suffix in generated_suffixes
+            suffix in generated_suffixes
             or constant in generated_constants
         ):
             raise ValueError(f"{location} has generated name collision")
@@ -6937,13 +7015,13 @@ public interface {bridge_name}<C> {{
 def _resource_registration_java(plan: dict) -> str:
     methods = []
     for index, resource in enumerate(plan["resources"]):
-        suffix = _pascal(resource["id"].split(":", 1)[1])
+        suffix, constant, _ = _resource_java_names(resource["id"])
         kind_id = _java_resource_location(resource["id"])
         representative_id = _java_resource_location(resource["representative_item"])
         bridge = resource["bridge_name"]
         factory = "variantAware" if resource["variant_aware"] else "variantless"
         methods.append(f'''
-    public static final ResourceLocation {re.sub(r'[^A-Za-z0-9_]', '_', resource['id']).upper()} =
+    public static final ResourceLocation {constant} =
             {kind_id};
 
     public static StorageResourceKind {suffix}Kind() {{
@@ -7052,7 +7130,7 @@ public final class {plan['class_name']} {{
 def _resource_tests_java(plan: dict) -> str:
     tests = []
     for index, resource in enumerate(plan["resources"]):
-        name = re.sub(r"[^a-z0-9_]", "_", resource["id"].lower())
+        _, _, name = _resource_java_names(resource["id"])
         provider = resource["test_provider"]
         create = f"{provider['owner']}.{provider['factory_member']}(helper)"
         snapshot_key = _java_string(resource["snapshot_key"])
