@@ -1,0 +1,573 @@
+{
+  "families": [
+    {
+      "class": "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipe",
+      "costs": [],
+      "decision": "Server PrintingRecipe exists, but printer execution is owned by live PrinterBehaviour template filter state plus template-specific PrintingBehaviour implementations. Enchanted-book/copy paths depend on enchantment NBT, CEIConfig multipliers, denylist tags, and retained fluid-tank state. Recipe also samples RandomSource for sound pitch. No complete Auto Storage simulate-then-commit contract without approximating live printer state.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipe#public_signature"
+      ],
+      "id": "printing_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "generic_ingredients",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipe$Builder",
+      "costs": [],
+      "decision": "Builder/datagen helper nested in PrintingRecipe; not an independent RecipeType family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipe$Builder#public_signature"
+      ],
+      "id": "printing_recipe__builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipe$Serializer",
+      "costs": [],
+      "decision": "RecipeSerializer nested helper; not a Recipe family Auto Storage can register.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipe$Serializer#public_signature"
+      ],
+      "id": "printing_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipeParams",
+      "costs": [],
+      "decision": "Codec/params carrier for PrintingRecipe; not a Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.common.fluids.printer.PrintingRecipeParams#public_signature"
+      ],
+      "id": "printing_recipe_params",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.common.fluids.printer.behaviour.RecipePrintingBehaviour",
+      "costs": [],
+      "decision": "Live printer behaviour bound to installed template ItemStack and SmartFluidTankBehaviour; not a RecipeType. World/block-entity mutation is required to finish printing.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.common.fluids.printer.behaviour.RecipePrintingBehaviour#public_signature"
+      ],
+      "id": "recipe_printing_behaviour",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.common.kinetics.grindstone.GrindingRecipe",
+      "costs": [],
+      "decision": "Mechanical Grindstone+Drain is a KineticBlockEntity whose process duration is getProcessingDuration()*stack-sizeModifier and also accepts sandpaper polishing conversion plus GrindstoneHelper enchanted-item disenchant paths into experience fluid. Insertion is gated by live tank free space. Accepting only the JSON item→fluid payloads would bypass kinetic/live-tank/disenchant semantics; Create already owns deterministic filling/emptying and milling separately. Rejected until a complete kinetic+XP contract exists.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.common.kinetics.grindstone.GrindingRecipe#public_signature"
+      ],
+      "id": "grinding_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.common.registry.CEIRecipes",
+      "costs": [],
+      "decision": "Registry bootstrap for PRINTING/GRINDING RecipeTypeInfo; not a Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.common.registry.CEIRecipes#public_signature"
+      ],
+      "id": "c_e_i_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.data.CEIRecipeProvider",
+      "costs": [],
+      "decision": "Datagen provider only; emits grinding/printing/create-family recipe JSON. Not runtime Recipe.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.data.CEIRecipeProvider#public_signature"
+      ],
+      "id": "c_e_i_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apotheosis.common.kinetics.fan.salvaging.SalvagingRecipe",
+      "costs": [],
+      "decision": "Optional Apotheosis fan salvaging recipe; fan/world catalyst processing is outside Auto Storage installed-station scope (same boundary as Create Splashing/Haunting).",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apotheosis.common.kinetics.fan.salvaging.SalvagingRecipe#public_signature"
+      ],
+      "id": "salvaging_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apotheosis.common.registry.CEIAXRecipes",
+      "costs": [],
+      "decision": "Optional Apotheosis integration registry bootstrap; not a Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apotheosis.common.registry.CEIAXRecipes#public_signature"
+      ],
+      "id": "c_e_i_a_x_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apotheosis.data.CEIAXRecipeProvider",
+      "costs": [],
+      "decision": "Optional Apotheosis datagen provider; not a runtime Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apotheosis.data.CEIAXRecipeProvider#public_signature"
+      ],
+      "id": "c_e_i_a_x_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipe",
+      "costs": [],
+      "decision": "Optional Apothic Enchanting Infuser recipe mutates live InfuserBlockEntity + Basin inventories via extract/drain during apply(); scanner flags live_machine_state, randomness, and simulation_required. Not representable as a pure Core transaction.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipe#public_signature"
+      ],
+      "id": "infusing_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "live_machine_state",
+        "randomness",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipe$Builder",
+      "costs": [],
+      "decision": "Builder nested helper for InfusingRecipe; not an independent family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipe$Builder#public_signature"
+      ],
+      "id": "infusing_recipe__builder",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipe$Serializer",
+      "costs": [],
+      "decision": "Serializer nested helper for InfusingRecipe; not a Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipe$Serializer#public_signature"
+      ],
+      "id": "infusing_recipe__serializer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipeParams",
+      "costs": [],
+      "decision": "Params/codec carrier for InfusingRecipe; not a Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.processing.infuser.InfusingRecipeParams#public_signature"
+      ],
+      "id": "infusing_recipe_params",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.registry.CEIARecipes",
+      "costs": [],
+      "decision": "Optional Apothic Enchanting registry bootstrap; not a Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.common.registry.CEIARecipes#public_signature"
+      ],
+      "id": "c_e_i_a_recipes",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.data.CEIARecipeProvider",
+      "costs": [],
+      "decision": "Optional Apothic Enchanting datagen provider; not a runtime Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.apothic_enchanting.data.CEIARecipeProvider#public_signature"
+      ],
+      "id": "c_e_i_a_recipe_provider",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.AddressPrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI display helper; Auto Storage never uses viewer recipes as server authority.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.AddressPrintingRecipeJEI#public_signature"
+      ],
+      "id": "address_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.BannerPatternPrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI display helper; not a server Recipe/RecipeType.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.BannerPatternPrintingRecipeJEI#public_signature"
+      ],
+      "id": "banner_pattern_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.CopyPrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI display helper; not a server Recipe/RecipeType.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.CopyPrintingRecipeJEI#public_signature"
+      ],
+      "id": "copy_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.CustomNamePrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI display helper; not a server Recipe/RecipeType.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.CustomNamePrintingRecipeJEI#public_signature"
+      ],
+      "id": "custom_name_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.EnchantedBookPrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI synthetic enchanted-book printing entries; not server Recipe authority.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.EnchantedBookPrintingRecipeJEI#public_signature"
+      ],
+      "id": "enchanted_book_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.PatternPrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI display helper; not a server Recipe/RecipeType.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.PatternPrintingRecipeJEI#public_signature"
+      ],
+      "id": "pattern_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.PrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI printing recipe interface; not a server Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.PrintingRecipeJEI#public_signature"
+      ],
+      "id": "printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.PrintingRecipeJEI$Type",
+      "costs": [],
+      "decision": "Client JEI type registry nested helper; not a server Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.PrintingRecipeJEI$Type#public_signature"
+      ],
+      "id": "printing_recipe_j_e_i__type",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.StandardPrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI wrapper around PrintingRecipe holders; viewer-only, not server authority.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.StandardPrintingRecipeJEI#public_signature"
+      ],
+      "id": "standard_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.integration.jei.category.printing.WrittenBookPrintingRecipeJEI",
+      "costs": [],
+      "decision": "Client JEI display helper; not a server Recipe/RecipeType.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.integration.jei.category.printing.WrittenBookPrintingRecipeJEI#public_signature"
+      ],
+      "id": "written_book_printing_recipe_j_e_i",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "plus.dragons.createenchantmentindustry.mixin.accessor.CreateRecipeCategoryAccessor",
+      "costs": [],
+      "decision": "JEI CreateRecipeCategory mixin accessor; not a Recipe family.",
+      "evidence": [
+        "plus.dragons.createenchantmentindustry.mixin.accessor.CreateRecipeCategoryAccessor#public_signature"
+      ],
+      "id": "create_recipe_category_accessor",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "b25cc57696e6a26fef16437d88f3fe5a2690090e6f9728b6c72ca3e945cb07eb",
+  "source_recipe_inventory_sha256": "ec8c17106a5d97ca84c75b81955d61e22e30460da6a1d93137c2b194828340dc",
+  "target": {
+    "dependency": "maven.modrinth:create-enchantment-industry:8XedJhwv",
+    "display_name": "Create: Enchantment Industry",
+    "mod_id": "create_enchantment_industry",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:create:UjX6dr61",
+      "maven.modrinth:create-dragons-plus:LxesD770"
+    ],
+    "version": "2.5.0-preview-alpha1"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "Create Enchantment Industry fail-closed boundary changed",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Create Enchantment Industry vanilla crafting under its namespace must stay supported",
+          "source": "src/createEnchantmentIndustryFixture/java/com/swear/autostorage/fixture/createenchantmentindustry/CreateEnchantmentIndustryIntegrationGameTests.java",
+          "task": "runCreateEnchantmentIndustryGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Create Enchantment Industry grinding/printing/infusing must remain fail closed",
+          "source": "src/createEnchantmentIndustryFixture/java/com/swear/autostorage/fixture/createenchantmentindustry/CreateEnchantmentIndustryIntegrationGameTests.java",
+          "task": "runCreateEnchantmentIndustryGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Create Enchantment Industry grinding/printing/infusing must remain fail closed",
+          "source": "src/createEnchantmentIndustryFixture/java/com/swear/autostorage/fixture/createenchantmentindustry/CreateEnchantmentIndustryIntegrationGameTests.java",
+          "task": "runCreateEnchantmentIndustryGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Create Enchantment Industry grinding/printing/infusing must remain fail closed",
+          "source": "src/createEnchantmentIndustryFixture/java/com/swear/autostorage/fixture/createenchantmentindustry/CreateEnchantmentIndustryIntegrationGameTests.java",
+          "task": "runCreateEnchantmentIndustryGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Create Enchantment Industry unsafe recipe contract was registered",
+          "source": "src/createEnchantmentIndustryFixture/java/com/swear/autostorage/fixture/createenchantmentindustry/CreateEnchantmentIndustryIntegrationGameTests.java",
+          "task": "runCreateEnchantmentIndustryGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 5,
+    "fixture": "createEnchantmentIndustryFixture",
+    "game_test_task": "runCreateEnchantmentIndustryGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runCreateEnchantmentIndustryGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

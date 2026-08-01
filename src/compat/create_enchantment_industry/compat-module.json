@@ -1,0 +1,27 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:create-enchantment-industry:8XedJhwv",
+    "sha256": "b25cc57696e6a26fef16437d88f3fe5a2690090e6f9728b6c72ca3e945cb07eb"
+  },
+  "dependencies": [
+    "maven.modrinth:create-enchantment-industry:8XedJhwv"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.createenchantmentindustry.CreateEnchantmentIndustryCompatModule",
+  "expectedTests": 5,
+  "fixture": "createEnchantmentIndustryFixture",
+  "id": "auto_storage:create_enchantment_industry",
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "create_enchantment_industry"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:create-enchantment-industry:8XedJhwv",
+    "maven.modrinth:create:UjX6dr61",
+    "maven.modrinth:create-dragons-plus:LxesD770"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatCreateEnchantmentIndustry"
+}
