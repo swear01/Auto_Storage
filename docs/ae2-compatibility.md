@@ -119,5 +119,8 @@ The base
 `exact_recipe_selection_accepts_supported_backing_recipe_and_rejects_stale_id`
 GameTest also executes the absent-target no-classload assertion, so its contract
 marker is bound inside an actual annotated GameTest method's braces. Method
-declarations are not accepted as evidence. The all-mod compatibility matrix
+declarations are not accepted as evidence. Compat Kit also resolves
+`AutoStorage.MODID` through its public constant chain and verifies that the
+holder equals the `auto_storage` namespace enabled by `runGameTestServer`.
+The all-mod compatibility matrix
 protects coexistence.

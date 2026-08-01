@@ -39,6 +39,7 @@ MAX_RECIPE_JSON_BYTES = 1024 * 1024
 MAX_RECIPE_SAMPLES_PER_SERIALIZER = 16
 MAX_RUNTIME_PROBE_RECIPES = 50_000
 MAX_RUNTIME_PROBE_VALUES = 4_096
+GRADLE_INTEGER_MAX = 2_147_483_647
 TOOL_VERSION = "0.3.0"
 PUBLISHED_ADDON_EXAMPLE_FILES = (
     "src/main/java/example/autostorage/ExampleAddon.java",
@@ -2711,6 +2712,10 @@ def validate_contract(
             or verification["expected_game_tests"] <= 0
         ):
             raise ValueError("verification requires positive expected_game_tests")
+        if verification["expected_game_tests"] > GRADLE_INTEGER_MAX:
+            raise ValueError(
+                "verification expected_game_tests must not exceed 2147483647"
+            )
         if not isinstance(verification["gradle_tasks"], list) or not verification["gradle_tasks"]:
             raise ValueError("verification requires gradle_tasks")
         _validate_unique_strings(
@@ -3823,23 +3828,194 @@ def _game_test_blocks(text: str) -> list[str]:
     return blocks
 
 
-def _game_test_task_source_root(
+def _bundled_game_test_namespace(root: Path, fixture: str) -> str:
+    special_namespaces = {
+        "main": "auto_storage",
+        "recipeAddonFixture": "auto_storage_recipe_fixture",
+        "pneumaticCraftFixture": "auto_storage_pneumaticcraft_fixture",
+        "compatibilityMatrixFixture": "auto_storage_compatibility_matrix_fixture",
+    }
+    if fixture in special_namespaces:
+        return special_namespaces[fixture]
+    descriptors = sorted(root.glob("src/compat/*/compat-module.json"))
+    if len(descriptors) > MAX_SOURCE_FILES:
+        raise ValueError(
+            f"verification root exceeds {MAX_SOURCE_FILES} compatibility modules"
+        )
+    matching_directories = []
+    for descriptor_path in descriptors:
+        try:
+            descriptor = json.loads(descriptor_path.read_text())
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise ValueError(
+                f"invalid compatibility module descriptor: {descriptor_path}"
+            ) from error
+        if descriptor.get("fixture") == fixture:
+            matching_directories.append(descriptor_path.parent.name)
+    if len(matching_directories) != 1:
+        raise ValueError(
+            "GameTest task fixture must map to exactly one compatibility module: "
+            f"{fixture}"
+        )
+    return f"auto_storage_{matching_directories[0]}_fixture"
+
+
+def _game_test_task_context(
     contract: dict,
     root: Path,
     mode: str,
     task: str,
-) -> Path | None:
+) -> tuple[Path, str] | None:
     if not re.fullmatch(r"run(?:[A-Za-z0-9]+)?GameTestServer", task):
         return None
-    if mode == "addon" or task == "runGameTestServer":
-        return root / "src/main/java"
-    verification = contract["verification"]
-    if task == verification["game_test_task"]:
-        fixture = verification["fixture"]
+    if mode == "addon":
+        return (
+            root / "src/main/java",
+            f"{contract['target']['mod_id']}_auto_storage",
+        )
+    if task == "runGameTestServer":
+        fixture = "main"
+    elif task == contract["verification"]["game_test_task"]:
+        fixture = contract["verification"]["fixture"]
     else:
         task_name = task.removeprefix("run").removesuffix("GameTestServer")
         fixture = task_name[0].lower() + task_name[1:] + "Fixture"
-    return root / f"src/{fixture}/java"
+    source_root = (
+        root / "src/main/java"
+        if fixture == "main"
+        else root / f"src/{fixture}/java"
+    )
+    return source_root, _bundled_game_test_namespace(root, fixture)
+
+
+def _java_string_constant_expressions(
+    source_roots: tuple[Path, ...],
+) -> dict[tuple[str, str], str]:
+    sources = sorted({
+        path
+        for source_root in source_roots
+        for path in source_root.rglob("*.java")
+    })
+    if len(sources) > MAX_SOURCE_FILES:
+        raise ValueError(f"verification root exceeds {MAX_SOURCE_FILES} Java files")
+    expressions = {}
+    for path in sources:
+        text = _java_without_comments(path.read_text())
+        for match in re.finditer(
+            r"\b(?:public\s+|protected\s+|private\s+)?"
+            r"(?:static\s+final|final\s+static)\s+String\s+"
+            r"([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*"
+            r"(\"(?:\\.|[^\"\\])*\"|"
+            r"(?:[A-Za-z_$][A-Za-z0-9_$]*\.)+"
+            r"[A-Za-z_$][A-Za-z0-9_$]*)\s*;",
+            text,
+        ):
+            key = (path.stem, match.group(1))
+            expression = match.group(2)
+            previous = expressions.get(key)
+            if previous is not None and previous != expression:
+                raise ValueError(
+                    "ambiguous Java string constant for GameTest holder namespace: "
+                    f"{path.stem}.{match.group(1)}"
+                )
+            expressions[key] = expression
+
+    return expressions
+
+
+def _resolve_java_string_constant(
+    key: tuple[str, str],
+    expressions: dict[tuple[str, str], str],
+    resolving: set[tuple[str, str]] | None = None,
+) -> str:
+    resolving = set() if resolving is None else resolving
+    if key in resolving or key not in expressions:
+        raise ValueError(
+            "unresolved Java string constant for GameTest holder namespace: "
+            f"{key[0]}.{key[1]}"
+        )
+    expression = expressions[key]
+    if expression.startswith('"'):
+        try:
+            return json.loads(expression)
+        except json.JSONDecodeError as error:
+            raise ValueError(
+                "invalid Java string constant for GameTest holder namespace: "
+                f"{key[0]}.{key[1]}"
+            ) from error
+    parts = expression.split(".")
+    resolving.add(key)
+    value = _resolve_java_string_constant(
+        (parts[-2], parts[-1]),
+        expressions,
+        resolving,
+    )
+    resolving.remove(key)
+    return value
+
+
+def _game_test_holder_namespaces(
+    text: str,
+    constant_expressions: dict[tuple[str, str], str],
+) -> list[str]:
+    code = _java_code_mask(text)
+    uncommented = _java_without_comments(text)
+    namespaces = []
+    for annotation in re.finditer(r"@GameTestHolder\s*\(", code):
+        opening = code.find("(", annotation.start())
+        depth = 1
+        closing = None
+        for index in range(opening + 1, len(code)):
+            if code[index] == "(":
+                depth += 1
+            elif code[index] == ")":
+                depth -= 1
+                if depth == 0:
+                    closing = index
+                    break
+        if closing is None:
+            raise ValueError("invalid @GameTestHolder annotation")
+        expression = uncommented[opening + 1:closing].strip()
+        if re.fullmatch(r'"(?:\\.|[^"\\])*"', expression):
+            try:
+                namespaces.append(json.loads(expression))
+            except json.JSONDecodeError as error:
+                raise ValueError(
+                    "invalid GameTest holder namespace string"
+                ) from error
+            continue
+        constant = re.fullmatch(
+            r"(?:[A-Za-z_$][A-Za-z0-9_$]*\.)*"
+            r"([A-Za-z_$][A-Za-z0-9_$]*)\."
+            r"([A-Za-z_$][A-Za-z0-9_$]*)",
+            expression,
+        )
+        if constant is None:
+            raise ValueError(
+                f"unresolved GameTest holder namespace: {expression}"
+            )
+        key = (constant.group(1), constant.group(2))
+        namespaces.append(
+            _resolve_java_string_constant(key, constant_expressions)
+        )
+    return namespaces
+
+
+def _validate_game_test_holder_namespace(
+    path: Path,
+    text: str,
+    expected_namespace: str,
+    constant_expressions: dict[tuple[str, str], str],
+):
+    namespaces = _game_test_holder_namespaces(text, constant_expressions)
+    if not namespaces or any(
+        namespace != expected_namespace for namespace in namespaces
+    ):
+        found = ", ".join(namespaces) if namespaces else "none"
+        raise ValueError(
+            "GameTest holder namespace does not match declared task: "
+            f"{path} expected {expected_namespace}, found {found}"
+        )
 
 
 def _verification_evidence(
@@ -3848,6 +4024,7 @@ def _verification_evidence(
     mode: str,
 ) -> dict[str, list[str]]:
     resolved = {}
+    java_constant_expressions_by_roots = {}
     for check, records in contract["verification"]["evidence"].items():
         resolved_records = []
         for record in records:
@@ -3861,13 +4038,14 @@ def _verification_evidence(
                     f"verification evidence source matched no files: {record['source']}"
                 )
             task = record["task"]
-            task_source_root = _game_test_task_source_root(
+            task_context = _game_test_task_context(
                 contract,
                 root,
                 mode,
                 task,
             )
-            if task_source_root is not None:
+            if task_context is not None:
+                task_source_root, expected_namespace = task_context
                 resolved_root = root.resolve()
                 resolved_task_source = task_source_root.resolve()
                 if (
@@ -3903,15 +4081,43 @@ def _verification_evidence(
                     f"verification evidence marker not found for {check}: "
                     f"{record['marker']}"
                 )
-            if re.fullmatch(r"run(?:[A-Za-z0-9]+)?GameTestServer", task) and not any(
-                record["marker"] in _java_without_comments(block)
-                for text in matching_texts
-                for block in _game_test_blocks(text)
-            ):
-                raise ValueError(
-                    "evidence marker is not inside an @GameTest method for "
-                    f"{check}: {record['marker']}"
+            if task_context is not None:
+                marker_sources = [
+                    (path, text)
+                    for path, text in zip(matches, matching_texts)
+                    if any(
+                        record["marker"] in _java_without_comments(block)
+                        for block in _game_test_blocks(text)
+                    )
+                ]
+                if not marker_sources:
+                    raise ValueError(
+                        "evidence marker is not inside an @GameTest method for "
+                        f"{check}: {record['marker']}"
+                    )
+                constant_roots = (task_source_root,)
+                if (
+                    mode == "bundled"
+                    and task_source_root == root / "src/main/java"
+                ):
+                    constant_roots += (root / "src/api/java",)
+                constant_root_key = tuple(
+                    source_root.resolve() for source_root in constant_roots
                 )
+                if constant_root_key not in java_constant_expressions_by_roots:
+                    java_constant_expressions_by_roots[constant_root_key] = (
+                        _java_string_constant_expressions(constant_roots)
+                    )
+                java_constant_expressions = (
+                    java_constant_expressions_by_roots[constant_root_key]
+                )
+                for path, text in marker_sources:
+                    _validate_game_test_holder_namespace(
+                        path,
+                        text,
+                        expected_namespace,
+                        java_constant_expressions,
+                    )
             resolved_records.append(
                 f"{task}:{record['source']}#{record['marker']}"
             )

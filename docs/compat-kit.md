@@ -558,11 +558,18 @@ count different from `expected_game_tests`, GameTest output that does not
 report one and only one exact passing summary, an undeclared evidence task, or
 any non-zero command. Multiple success summaries are rejected even when one
 matches, because editable fixture output cannot outrank the framework result.
+`expected_game_tests` is restricted to `1..2147483647`, matching the positive
+JSON `Integer` required by the generated Gradle descriptor.
 A marker assigned to a `run*GameTestServer` task must occur inside an
 annotated `@GameTest` method body; a detached constant, helper, or comment does
 not prove that the behavior ran. Comments inside a real GameTest are removed
 before matching evidence, while markers in executable string arguments remain
-valid. A check is marked passed only when all of its declared source markers
+valid. The declaring source's `@GameTestHolder` must resolve to the exact
+namespace enabled by that Gradle run; evidence in a different namespace cannot
+borrow another test's successful task result. Literal holders and bounded
+`static final String` references are accepted, while missing, unresolved,
+ambiguous, or mismatched holders fail closed. A check is marked passed only
+when all of its declared source markers
 exist in the correct execution boundary and the associated Gradle task
 succeeds. The report records those
 per-check evidence links, exact commands, exit codes, output hashes, tool

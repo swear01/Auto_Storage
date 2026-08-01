@@ -81,10 +81,12 @@ repositories, additional required runtime artifacts, and evidence. Each
 required verification check must name the successful Gradle task plus a source
 glob and marker; the declared
 `game_test_task` must report exactly `expected_game_tests` passing tests.
-Bundled descriptor `expectedTests` is emitted and accepted only as a positive
-JSON integer; fractions and wider overflow values fail validation.
-Markers assigned to `run*GameTestServer` tasks must occur inside annotated
-`@GameTest` method bodies. After
+Both that count and bundled descriptor `expectedTests` are limited to the
+positive Gradle/Groovy `Integer` range `1..2147483647`; fractions and wider
+values fail validation. Markers assigned to `run*GameTestServer` tasks must
+occur inside annotated `@GameTest` method bodies, and that source's
+`@GameTestHolder` namespace must equal the namespace enabled by the declared
+Gradle run. After
 the contract has no `needs_decision` entry, pass the same committed audit to
 every later command. Validation compares that audit's exact candidate set with
 the contract, including every per-family scanner risk, so recomputing a
@@ -218,7 +220,10 @@ counting tests and locating marker-bearing method bodies, skips brace-bearing
 intermediate annotations, keeps escaped triple quotes inside Java text blocks,
 removes comments before marker matching while retaining executable strings, and
 requires each GameTest evidence file to belong to the source set executed by its
-declared task.
+declared task and its holder namespace to match that task's
+`neoforge.enabledGameTestNamespaces` value. Literal namespaces and bounded
+`static final String` references are resolved; missing, ambiguous, or mismatched
+holders fail closed.
 Bundled descriptors preserve reviewed HTTPS repository order, and fixture names
 must be Java-safe identifiers ending in `Fixture`. Their authoritative GameTest
 task is derived from the same fixture name (`evilCraftFixture` becomes

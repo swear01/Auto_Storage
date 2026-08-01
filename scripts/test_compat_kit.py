@@ -4819,7 +4819,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             verification["properties"]["fixture"],
         )
         self.assertEqual(
-            {"type": "integer", "minimum": 1},
+            {"type": "integer", "minimum": 1, "maximum": 2147483647},
             verification["properties"]["expected_game_tests"],
         )
         self.assertEqual(
@@ -4856,6 +4856,28 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             set(evidence["properties"]),
         )
 
+    def test_contract_rejects_gametest_count_above_gradle_integer_max(self):
+        contract = self.accepted_contract()
+        contract["verification"]["expected_game_tests"] = 2147483648
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "expected_game_tests must not exceed 2147483647",
+        ):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=self.source_audit(),
+            )
+
+        schema = json.loads(
+            (ROOT / "tools/compat-kit/schema/compat-contract.schema.json").read_text()
+        )
+        nullable = schema["properties"]["verification"]["properties"][
+            "expected_game_tests"
+        ]["oneOf"][1]
+        self.assertEqual(2147483647, nullable["maximum"])
+
     def test_report_schema_requires_target_identity(self):
         schema = json.loads(
             (
@@ -4887,6 +4909,9 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         descriptor = json.loads(
             (ROOT / "src/compat/ae2/compat-module.json").read_text()
+        )
+        manifest = json.loads(
+            (ROOT / "src/compat/ae2/.compat-kit-manifest.json").read_text()
         )
 
         audited_recipe_classes = {
@@ -4941,6 +4966,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         self.assertEqual(8, contract["verification"]["expected_game_tests"])
         self.assertEqual(8, descriptor["expectedTests"])
+        self.assertEqual(
+            self.compat_kit._contract_sha256(contract),
+            manifest["contract_sha256"],
+        )
         self.assertEqual(
             "AE2 missing-ingredient transaction was not an atomic no-op",
             contract["verification"]["evidence"]["ingredient_shortage_atomic"][0][
@@ -5163,6 +5192,77 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertTrue(all(command[0][0] == "./gradlew" for command in commands))
         self.assertTrue(all(command[1] == output_root for command in commands))
         self.assertTrue(all(check["evidence"] for check in report["checks"]))
+
+    def test_verification_evidence_rejects_wrong_gametest_holder_namespace(self):
+        contract = self.accepted_contract()
+        contract["verification"]["gradle_tasks"].append(
+            "runRecipeAddonGameTestServer"
+        )
+        for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS:
+            contract["verification"]["evidence"][check] = [
+                {
+                    "task": "runRecipeAddonGameTestServer",
+                    "source": "src/recipeAddonFixture/java/**/*.java",
+                    "marker": "wrongNamespaceMarker();",
+                }
+            ]
+        output_root = self.root / "wrong-holder-namespace"
+        self.compat_kit.scaffold_bundled(
+            contract,
+            output_root,
+            source_audit=self.source_audit(),
+        )
+        source = (
+            output_root
+            / "src/recipeAddonFixture/java/example/WrongNamespaceGameTests.java"
+        )
+        source.parent.mkdir(parents=True)
+        source.write_text(
+            'import net.minecraft.gametest.framework.GameTest;\n'
+            'import net.neoforged.neoforge.gametest.GameTestHolder;\n'
+            '@GameTestHolder("wrong_namespace")\n'
+            'final class WrongNamespaceGameTests {\n'
+            '    @GameTest(template = "craftingtests.platform")\n'
+            '    static void check() { wrongNamespaceMarker(); }\n'
+            '}\n'
+        )
+
+        with self.assertRaisesRegex(ValueError, "GameTest holder namespace"):
+            self.compat_kit._verification_evidence(
+                contract,
+                output_root,
+                "bundled",
+            )
+
+        source.write_text(
+            source.read_text().replace(
+                '@GameTestHolder("wrong_namespace")\n',
+                "",
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "GameTest holder namespace"):
+            self.compat_kit._verification_evidence(
+                contract,
+                output_root,
+                "bundled",
+            )
+
+        source.write_text(
+            source.read_text().replace(
+                "final class WrongNamespaceGameTests",
+                '@GameTestHolder("auto_storage_recipe_fixture")\n'
+                "final class WrongNamespaceGameTests",
+            )
+        )
+        resolved = self.compat_kit._verification_evidence(
+            contract,
+            output_root,
+            "bundled",
+        )
+        self.assertEqual(
+            set(self.compat_kit.REQUIRED_VERIFICATION_CHECKS),
+            set(resolved),
+        )
 
     def test_verify_rejects_missing_check_evidence_or_wrong_gametest_count(self):
         contract = self.accepted_contract()
@@ -5517,6 +5617,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         source.parent.mkdir(parents=True)
         source.write_text(
+            'import net.neoforged.neoforge.gametest.GameTestHolder;\n'
+            '@GameTestHolder("auto_storage_samplemod_fixture")\n'
             "final class SamplemodIntegrationGameTests {\n"
             '    @GameTest(template = "craftingtests.platform")\n'
             "    static void evidence(GameTestHelper helper) {\n"
@@ -5525,6 +5627,9 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "    }\n"
             "}\n"
         )
+        descriptor = self.root / "src/compat/samplemod/compat-module.json"
+        descriptor.parent.mkdir(parents=True)
+        descriptor.write_text('{"fixture":"samplemodFixture"}\n')
 
         with self.assertRaisesRegex(
             ValueError,

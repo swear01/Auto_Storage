@@ -176,11 +176,13 @@ Byte-identical reruns repair both generated launchers to mode `0755`.
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
 tasks. Published completed-contract schemas require that non-null fixture,
-positive GameTest count, authoritative task, nonempty task list, all twelve
+GameTest count in `1..2147483647`, authoritative task, nonempty task list, all twelve
 exact checks, and every evidence mapping; unresolved RED drafts may keep those
 fields empty. A `runGameTestServer` evidence marker must live inside the annotated
 GameTest method that executes the assertion; file-level constants, comments,
-and detached helpers are rejected. Comments inside the method do not count,
+and detached helpers are rejected. Its `@GameTestHolder` must resolve to the
+addon's enabled `<target_mod_id>_auto_storage` namespace; a test compiled in
+another namespace is not evidence. Comments inside the method do not count,
 while executable string arguments may carry assertion markers. Its fresh-world
 cleanup rejects symlinked parents and paths outside the addon root before
 deletion. Bundled task names are not translated or treated as equivalent.
