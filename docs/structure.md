@@ -1,3 +1,8 @@
+# Structure
+
+| Path | Purpose |
+|------|---------|
+| `.cursor/skills/full-repo-audit/` | Cursor Cloud 手動全 repo、唯讀 audit Skill；查證官方與相似專案後，把去重結果發布為單一 GitHub issue；not a PR diff review，也不取代 GitHub-triggered Codex/Bugbot gate。 |
 | `.github/workflows/` | GitHub Actions CI/CD:push/PR build + Modrinth EMI minimum/latest-compatible release compile + AE2 exact ancestry fail-fast gate + base/recipe-addon GameTests + descriptor-derived `runCompatFixtureGameTestServers` aggregate + PneumaticCraft reject-only companion + compatibility-matrix GameTest + Python unittest + datagen drift check + runtime/API/source/Javadoc/Compat Kit與log/report artifacts；ancestry failure列出observed canonical ModDev SHA/size/name；full EMI client/data runtime由exact Modrinth version ID供應，optional-mod artifacts各只代表一個CI版本且不成為玩家端exact pin；Botania mutable snapshot另以expected SHA-256守住；`v<mod_version>` tag release重跑同一組 gates，並以`publishing` environment設定將player alpha jar發佈到GitHub/Modrinth/CurseForge，再把API/sources/Javadocs/Compat Kit附加到GitHub Release；手動`client-smoke.yml`放入required Patchouli、釘選Fusion與最新相容exact EMI，再以10分鐘上限跑NeoForge client boot/resource smoke。 |
 | `LICENSE` | Auto Storage 原始碼與資產的 MIT License；`jar` task會把它封裝進發布jar。0.3.0 canonical mod ID為`auto_storage`、Java package為`com.swear.autostorage`、repository為`Auto_Storage`，且不遷移0.2.x技術identity。 |
 | `art/release/` | Modrinth、CurseForge與GitHub release listing共用的512×512專案icon；不打進mod jar。 |
