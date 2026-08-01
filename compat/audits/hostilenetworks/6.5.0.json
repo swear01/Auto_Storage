@@ -1,0 +1,2596 @@
+{
+  "ancestry_classpath": [
+    {
+      "sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad",
+      "size": 324058
+    },
+    {
+      "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+      "size": 56279815
+    },
+    {
+      "sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288",
+      "size": 712301
+    },
+    {
+      "sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107",
+      "size": 133591
+    }
+  ],
+  "ancestry_dependencies": [
+    {
+      "dependency": "curse.maven:jade-324717:5884231",
+      "sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288",
+      "size": 712301
+    },
+    {
+      "dependency": "maven.modrinth:placebo:1Ypo4tf4",
+      "sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad",
+      "size": 324058
+    },
+    {
+      "dependency": "mezz.jei:jei-1.21.1-common-api:19.27.0.340",
+      "sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107",
+      "size": 133591
+    }
+  ],
+  "artifact": {
+    "class_count": 110,
+    "class_inventory_sha256": "822a638e194b772f619767f1e29ef204a90c41775665689ea2900a4aa2f87130",
+    "sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357",
+    "size": 490411
+  },
+  "candidates": {
+    "block_entity_classes": [
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity",
+        "classification": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"DataCenterIOPortTileEntity.java\"\npublic class dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity extends net.minecraft.world.level.block.entity.BlockEntity {\n  public dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public dev.shadowsoffire.hostilenetworks.util.IOPortMode getMode();\n  public net.minecraft.core.BlockPos getOwnerPos();\n  public void setOwner(net.minecraft.core.BlockPos);\n  public void clearOwner();\n  public dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity resolveOwner();\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket();\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergyHandler(net.minecraft.core.Direction);\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler(net.minecraft.core.Direction);\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup$Provider);\n  public void handleUpdateTag(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.Packet getUpdatePacket();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity",
+        "classification": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"DataCenterTileEntity.java\"\npublic class dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity extends net.minecraft.world.level.block.entity.BlockEntity implements dev.shadowsoffire.placebo.block_entity.TickingBlockEntity,dev.shadowsoffire.placebo.menu.SimpleDataSlots$IDataAutoRegister {\n  public static final int MODEL_SLOTS;\n  public static final int INPUT_SLOTS;\n  public static final int OUTPUT_SLOTS;\n  public static final int TOTAL_SLOTS;\n  public static final int INPUT_START;\n  public static final int OUTPUT_START;\n  public static final int RUNTIME_TICKS;\n  public static final int SHELL_RECHECK_INTERVAL;\n  public static final int DISPLAY_SLOT_COUNT;\n  public float[][] displaySlotPositions;\n  public float[] displaySlotPhaseOffsets;\n  public final int[] displaySlotCycleIdx;\n  public final int[] displaySlotEntityIdx;\n  public dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void registerSlots(java.util.function.Consumer<net.minecraft.world.inventory.DataSlot>);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void setRemoved();\n  public void clearPortOwnersOnBreak();\n  public static void validateLoadedTickets(net.minecraft.server.level.ServerLevel, net.neoforged.neoforge.common.world.chunk.TicketHelper);\n  public dev.shadowsoffire.hostilenetworks.util.FabSelection getSelection(dev.shadowsoffire.hostilenetworks.data.DataModel);\n  public void cycleMode(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>);\n  public void setFixedDrop(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, int);\n  public void appendToQueue(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, int);\n  public void clearQueue(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>);\n  public void removeFromQueue(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, int);\n  public dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity$DataCenterItemHandler getInventory();\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergy();\n  public int getEnergyStored();\n  public int getRuntime(int);\n  public dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$FailureState getFailState(int);\n  public boolean isShellValid();\n  public dev.shadowsoffire.hostilenetworks.multiblock.DataCenterShell$Layout getCachedLayout();\n  public void setRedstoneState(dev.shadowsoffire.hostilenetworks.util.RedstoneState);\n  public dev.shadowsoffire.hostilenetworks.util.RedstoneState getRedstoneState();\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket();\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup$Provider);\n  public void handleUpdateTag(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public int getActiveSlotsMask();\n  public net.minecraft.network.protocol.Packet getUpdatePacket();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity",
+        "classification": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"LootFabTileEntity.java\"\npublic class dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity extends net.minecraft.world.level.block.entity.BlockEntity implements dev.shadowsoffire.placebo.block_entity.TickingBlockEntity,dev.shadowsoffire.placebo.menu.SimpleDataSlots$IDataAutoRegister {\n  public dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void registerSlots(java.util.function.Consumer<net.minecraft.world.inventory.DataSlot>);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity$FabItemHandler getInventory();\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergy();\n  public java.util.Map<dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, dev.shadowsoffire.hostilenetworks.util.FabSelection> getSelections();\n  public void setSelections(java.util.Map<dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, dev.shadowsoffire.hostilenetworks.util.FabSelection>);\n  public dev.shadowsoffire.hostilenetworks.util.FabSelection getSelection(dev.shadowsoffire.hostilenetworks.data.DataModel);\n  public void cycleMode(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>);\n  public void setFixedDrop(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, int);\n  public void appendToQueue(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, int);\n  public void clearQueue(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>);\n  public void removeFromQueue(dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel>, int);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket();\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup$Provider);\n  public int getEnergyStored();\n  public int getRuntime();\n  public void setRedstoneState(dev.shadowsoffire.hostilenetworks.util.RedstoneState);\n  public dev.shadowsoffire.hostilenetworks.util.RedstoneState getRedstoneState();\n  public int getSelectedDrop(dev.shadowsoffire.hostilenetworks.data.DataModel);\n  public net.minecraft.network.protocol.Packet getUpdatePacket();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity",
+        "classification": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"SimChamberTileEntity.java\"\npublic class dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity extends net.minecraft.world.level.block.entity.BlockEntity implements dev.shadowsoffire.placebo.block_entity.TickingBlockEntity,dev.shadowsoffire.placebo.menu.SimpleDataSlots$IDataAutoRegister {\n  public dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void registerSlots(java.util.function.Consumer<net.minecraft.world.inventory.DataSlot>);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public boolean canStartSimulation();\n  public boolean canStack(net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);\n  public boolean hasPowerFor(dev.shadowsoffire.hostilenetworks.data.DataModel);\n  public boolean canUpgrade(dev.shadowsoffire.hostilenetworks.data.DataModelInstance);\n  public dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$SimItemHandler getInventory();\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergy();\n  public int getEnergyStored();\n  public int getRuntime();\n  public boolean didPredictionSucceed();\n  public dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$FailureState getFailState();\n  public void setRedstoneState(dev.shadowsoffire.hostilenetworks.util.RedstoneState);\n  public dev.shadowsoffire.hostilenetworks.util.RedstoneState getRedstoneState();\n  public void setSimMode(dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$SimMode);\n  public dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$SimMode getSimMode();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity"
+      }
+    ],
+    "client_viewer_classes": [
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.DataCenterRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataCenterRenderer.java\"\npublic class dev.shadowsoffire.hostilenetworks.client.DataCenterRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity> {\n  public dev.shadowsoffire.hostilenetworks.client.DataCenterRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public int getViewDistance();\n  public net.minecraft.world.phys.AABB getRenderBoundingBox(dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity);\n  public void render(dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public net.minecraft.world.phys.AABB getRenderBoundingBox(net.minecraft.world.level.block.entity.BlockEntity);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.DataCenterRenderer"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.DataModelItemStackRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataModelItemStackRenderer.java\"\npublic class dev.shadowsoffire.hostilenetworks.client.DataModelItemStackRenderer extends net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer {\n  public dev.shadowsoffire.hostilenetworks.client.DataModelItemStackRenderer();\n  public void renderByItem(net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemDisplayContext, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public static void renderEntityInInventory(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.world.item.ItemDisplayContext, net.minecraft.world.entity.Entity, dev.shadowsoffire.hostilenetworks.util.DisplayEntity);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.DataModelItemStackRenderer"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.DataModelTooltipRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataModelTooltipRenderer.java\"\npublic final class dev.shadowsoffire.hostilenetworks.client.DataModelTooltipRenderer extends java.lang.Record implements net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent {\n  public dev.shadowsoffire.hostilenetworks.client.DataModelTooltipRenderer(dev.shadowsoffire.hostilenetworks.data.DataModelInstance);\n  public int getHeight();\n  public int getWidth(net.minecraft.client.gui.Font);\n  public void renderImage(net.minecraft.client.gui.Font, int, int, net.minecraft.client.gui.GuiGraphics);\n  public void renderText(net.minecraft.client.gui.Font, int, int, org.joml.Matrix4f, net.minecraft.client.renderer.MultiBufferSource$BufferSource);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public dev.shadowsoffire.hostilenetworks.data.DataModelInstance model();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.DataModelTooltipRenderer"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.DeepLearnerHudRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DeepLearnerHudRenderer.java\"\npublic class dev.shadowsoffire.hostilenetworks.client.DeepLearnerHudRenderer implements net.minecraft.client.gui.LayeredDraw$Layer {\n  public static final net.minecraft.resources.ResourceLocation DL_HUD;\n  public static final net.minecraft.resources.ResourceLocation DL_HUD_BG;\n  public static final int SPACING;\n  public dev.shadowsoffire.hostilenetworks.client.DeepLearnerHudRenderer();\n  public void render(net.minecraft.client.gui.GuiGraphics, net.minecraft.client.DeltaTracker);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.DeepLearnerHudRenderer"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.GhostVertexBuilder",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GhostVertexBuilder.java\"\npublic class dev.shadowsoffire.hostilenetworks.client.GhostVertexBuilder implements com.mojang.blaze3d.vertex.VertexConsumer {\n  public dev.shadowsoffire.hostilenetworks.client.GhostVertexBuilder(com.mojang.blaze3d.vertex.VertexConsumer, int);\n  public com.mojang.blaze3d.vertex.VertexConsumer addVertex(float, float, float);\n  public com.mojang.blaze3d.vertex.VertexConsumer setColor(int, int, int, int);\n  public com.mojang.blaze3d.vertex.VertexConsumer setUv(float, float);\n  public com.mojang.blaze3d.vertex.VertexConsumer setUv1(int, int);\n  public com.mojang.blaze3d.vertex.VertexConsumer setUv2(int, int);\n  public com.mojang.blaze3d.vertex.VertexConsumer setNormal(float, float, float);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.GhostVertexBuilder"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.PerTypeBufferSource",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PerTypeBufferSource.java\"\npublic class dev.shadowsoffire.hostilenetworks.client.PerTypeBufferSource implements net.minecraft.client.renderer.MultiBufferSource {\n  public dev.shadowsoffire.hostilenetworks.client.PerTypeBufferSource();\n  public com.mojang.blaze3d.vertex.VertexConsumer getBuffer(net.minecraft.client.renderer.RenderType);\n  public void endBatch();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.PerTypeBufferSource"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.WeirdRenderThings",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"WeirdRenderThings.java\"\npublic class dev.shadowsoffire.hostilenetworks.client.WeirdRenderThings {\n  public static boolean translucent;\n  public static final net.minecraft.client.renderer.RenderStateShard$TransparencyStateShard TRANSLUCENT_TRANSPARENCY;\n  public dev.shadowsoffire.hostilenetworks.client.WeirdRenderThings();\n  public static void setup();\n  public static void cleanup();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.WeirdRenderThings"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.client.WrappedRTBuffer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"WrappedRTBuffer.java\"\npublic class dev.shadowsoffire.hostilenetworks.client.WrappedRTBuffer implements net.minecraft.client.renderer.MultiBufferSource {\n  public dev.shadowsoffire.hostilenetworks.client.WrappedRTBuffer(net.minecraft.client.renderer.MultiBufferSource);\n  public com.mojang.blaze3d.vertex.VertexConsumer getBuffer(net.minecraft.client.renderer.RenderType);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.client.WrappedRTBuffer"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"HostileJeiPlugin.java\"\npublic class dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin implements mezz.jei.api.IModPlugin {\n  public static final net.minecraft.resources.ResourceLocation UID;\n  public dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin();\n  public void registerItemSubtypes(mezz.jei.api.registration.ISubtypeRegistration);\n  public void registerCategories(mezz.jei.api.registration.IRecipeCategoryRegistration);\n  public void registerRecipes(mezz.jei.api.registration.IRecipeRegistration);\n  public void registerRecipeCatalysts(mezz.jei.api.registration.IRecipeCatalystRegistration);\n  public net.minecraft.resources.ResourceLocation getPluginUid();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin$ModelSubtypes",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"HostileJeiPlugin.java\"\nclass dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin$ModelSubtypes implements mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter<net.minecraft.world.item.ItemStack> {\n  public dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.DataModel> getSubtypeData(net.minecraft.world.item.ItemStack, mezz.jei.api.ingredients.subtypes.UidContext);\n  public java.lang.String getLegacyStringSubtypeInfo(net.minecraft.world.item.ItemStack, mezz.jei.api.ingredients.subtypes.UidContext);\n  public java.lang.String getLegacyStringSubtypeInfo(java.lang.Object, mezz.jei.api.ingredients.subtypes.UidContext);\n  public java.lang.Object getSubtypeData(java.lang.Object, mezz.jei.api.ingredients.subtypes.UidContext);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin.ModelSubtypes"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.jei.LootFabCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootFabCategory.java\"\npublic class dev.shadowsoffire.hostilenetworks.jei.LootFabCategory implements mezz.jei.api.recipe.category.IRecipeCategory<dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe> {\n  public static final mezz.jei.api.recipe.RecipeType<dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe> TYPE;\n  public static final net.minecraft.resources.ResourceLocation TEXTURES;\n  public dev.shadowsoffire.hostilenetworks.jei.LootFabCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.recipe.RecipeType<dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe> getRecipeType();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.jei.LootFabCategory"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootFabRecipe.java\"\npublic class dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe {\n  public dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe(dev.shadowsoffire.hostilenetworks.data.DataModel, int);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.jei.SimChamberCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SimChamberCategory.java\"\npublic class dev.shadowsoffire.hostilenetworks.jei.SimChamberCategory implements mezz.jei.api.recipe.category.IRecipeCategory<dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper> {\n  public static final mezz.jei.api.recipe.RecipeType<dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper> TYPE;\n  public static final net.minecraft.resources.ResourceLocation TEXTURES;\n  public dev.shadowsoffire.hostilenetworks.jei.SimChamberCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.recipe.RecipeType<dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper> getRecipeType();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.jei.SimChamberCategory"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TickingDataModelWrapper.java\"\npublic class dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper {\n  public dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper(dev.shadowsoffire.hostilenetworks.data.DataModel);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.mixin.client.MixinRenderType",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MixinRenderType.java\"\npublic abstract class dev.shadowsoffire.hostilenetworks.mixin.client.MixinRenderType {\n  public dev.shadowsoffire.hostilenetworks.mixin.client.MixinRenderType();\n  public void hnn_setupNoLighting(com.mojang.blaze3d.vertex.MeshData, org.spongepowered.asm.mixin.injection.callback.CallbackInfo);\n  public void hnn_cleanNoLighting(com.mojang.blaze3d.vertex.MeshData, org.spongepowered.asm.mixin.injection.callback.CallbackInfo);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.mixin.client.MixinRenderType"
+      }
+    ],
+    "datagen_classes": [
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.BlockAttunement",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockAttunement.java\"\npublic final class dev.shadowsoffire.hostilenetworks.data.BlockAttunement extends java.lang.Record {\n  public static com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.BlockAttunement> CODEC;\n  public dev.shadowsoffire.hostilenetworks.data.BlockAttunement(boolean, net.minecraft.advancements.critereon.BlockPredicate);\n  public boolean matches(net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public boolean attunable();\n  public net.minecraft.advancements.critereon.BlockPredicate predicate();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.BlockAttunement"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.BlockDataModel",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockDataModel.java\"\npublic final class dev.shadowsoffire.hostilenetworks.data.BlockDataModel extends java.lang.Record implements dev.shadowsoffire.hostilenetworks.data.DataModel {\n  public static final com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.BlockDataModel> CODEC;\n  public dev.shadowsoffire.hostilenetworks.data.BlockDataModel(dev.shadowsoffire.hostilenetworks.data.BlockDataModel, java.util.List<net.minecraft.world.item.ItemStack>);\n  public dev.shadowsoffire.hostilenetworks.data.BlockDataModel(dev.shadowsoffire.hostilenetworks.util.DisplayableBlock, java.util.List<dev.shadowsoffire.hostilenetworks.util.DisplayableBlock>, java.util.Optional<net.minecraft.network.chat.Component>, net.minecraft.network.chat.TextColor, dev.shadowsoffire.hostilenetworks.util.DisplayData, int, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, java.lang.String, java.util.List<net.minecraft.world.item.ItemStack>, dev.shadowsoffire.hostilenetworks.util.RequiredData, dev.shadowsoffire.hostilenetworks.util.DataGained, java.util.Optional<dev.shadowsoffire.hostilenetworks.data.BlockAttunement>, java.util.List<net.minecraft.world.level.storage.loot.predicates.LootItemCondition>);\n  public boolean canUpgrade(net.minecraft.world.level.storage.loot.LootContext);\n  public net.minecraft.network.chat.Component name();\n  public java.util.List<net.minecraft.network.chat.Component> variantNames();\n  public java.lang.String actionWordKey();\n  public java.lang.String dataPerActionKey();\n  public int statIconColumn();\n  public java.util.List<net.minecraft.network.chat.Component> getStatistics(net.minecraft.world.level.Level);\n  public com.mojang.serialization.Codec<? extends dev.shadowsoffire.hostilenetworks.data.BlockDataModel> getCodec();\n  public boolean hasAttunement();\n  public boolean attunesTo(net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos);\n  public dev.shadowsoffire.hostilenetworks.util.DisplayEntity displayEntity(net.minecraft.world.level.Level);\n  public java.util.List<dev.shadowsoffire.hostilenetworks.util.DisplayEntity> displayVariants(net.minecraft.world.level.Level);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public dev.shadowsoffire.hostilenetworks.util.DisplayableBlock block();\n  public java.util.List<dev.shadowsoffire.hostilenetworks.util.DisplayableBlock> variants();\n  public java.util.Optional<net.minecraft.network.chat.Component> displayName();\n  public net.minecraft.network.chat.TextColor nameColor();\n  public dev.shadowsoffire.hostilenetworks.util.DisplayData display();\n  public int simCost();\n  public net.minecraft.world.item.crafting.Ingredient input();\n  public net.minecraft.world.item.ItemStack baseDrop();\n  public java.lang.String triviaKey();\n  public java.util.List<net.minecraft.world.item.ItemStack> fabDrops();\n  public dev.shadowsoffire.hostilenetworks.util.RequiredData requiredData();\n  public dev.shadowsoffire.hostilenetworks.util.DataGained dataGained();\n  public java.util.Optional<dev.shadowsoffire.hostilenetworks.data.BlockAttunement> attunement();\n  public java.util.List<net.minecraft.world.level.storage.loot.predicates.LootItemCondition> upgradeConditions();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.BlockDataModel"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.BlockDataModelsCondition",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockDataModelsCondition.java\"\npublic class dev.shadowsoffire.hostilenetworks.data.BlockDataModelsCondition implements net.neoforged.neoforge.common.conditions.ICondition {\n  public static final dev.shadowsoffire.hostilenetworks.data.BlockDataModelsCondition INSTANCE;\n  public static final com.mojang.serialization.MapCodec<dev.shadowsoffire.hostilenetworks.data.BlockDataModelsCondition> CODEC;\n  public dev.shadowsoffire.hostilenetworks.data.BlockDataModelsCondition();\n  public boolean test(net.neoforged.neoforge.common.conditions.ICondition$IContext);\n  public com.mojang.serialization.MapCodec<? extends net.neoforged.neoforge.common.conditions.ICondition> codec();\n  public java.lang.String toString();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.BlockDataModelsCondition"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.DataModel",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataModel.java\"\npublic interface dev.shadowsoffire.hostilenetworks.data.DataModel extends dev.shadowsoffire.placebo.codec.CodecProvider<dev.shadowsoffire.hostilenetworks.data.DataModel> {\n  public abstract dev.shadowsoffire.hostilenetworks.util.DisplayEntity displayEntity(net.minecraft.world.level.Level);\n  public abstract java.util.List<dev.shadowsoffire.hostilenetworks.util.DisplayEntity> displayVariants(net.minecraft.world.level.Level);\n  public abstract net.minecraft.network.chat.Component name();\n  public abstract net.minecraft.network.chat.TextColor nameColor();\n  public abstract int simCost();\n  public abstract net.minecraft.world.item.crafting.Ingredient input();\n  public abstract net.minecraft.world.item.ItemStack baseDrop();\n  public abstract java.lang.String triviaKey();\n  public abstract java.util.List<net.minecraft.world.item.ItemStack> fabDrops();\n  public abstract dev.shadowsoffire.hostilenetworks.util.RequiredData requiredData();\n  public abstract dev.shadowsoffire.hostilenetworks.util.DataGained dataGained();\n  public default net.minecraft.world.item.ItemStack getPredictionDrop();\n  public default int getRequiredData(dev.shadowsoffire.hostilenetworks.data.ModelTier);\n  public default int getDataGained(dev.shadowsoffire.hostilenetworks.data.ModelTier);\n  public abstract java.util.List<net.minecraft.network.chat.Component> variantNames();\n  public abstract java.lang.String actionWordKey();\n  public abstract java.lang.String dataPerActionKey();\n  public abstract int statIconColumn();\n  public abstract java.util.List<net.minecraft.network.chat.Component> getStatistics(net.minecraft.world.level.Level);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.DataModel"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.DataModelInstance",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataModelInstance.java\"\npublic class dev.shadowsoffire.hostilenetworks.data.DataModelInstance implements net.minecraft.world.inventory.tooltip.TooltipComponent {\n  public static final dev.shadowsoffire.hostilenetworks.data.DataModelInstance EMPTY;\n  public dev.shadowsoffire.hostilenetworks.data.DataModelInstance(net.minecraft.world.item.ItemStack, int);\n  public dev.shadowsoffire.hostilenetworks.data.DataModel getModel();\n  public int getData();\n  public dev.shadowsoffire.hostilenetworks.data.ModelTier getTier();\n  public dev.shadowsoffire.hostilenetworks.data.ModelTier getNextTier();\n  public int getDataGained();\n  public int getTierData();\n  public int getNextTierData();\n  public void setData(int);\n  public int getSlot();\n  public float getAccuracy();\n  public net.minecraft.network.chat.Component getAccuracyComponent();\n  public int getActionsNeeded();\n  public dev.shadowsoffire.hostilenetworks.util.DisplayEntity getDisplayEntity(net.minecraft.world.level.Level, int);\n  public net.minecraft.world.entity.Entity getEntity(net.minecraft.world.level.Level);\n  public net.minecraft.world.entity.Entity getEntity(net.minecraft.world.level.Level, int);\n  public net.minecraft.world.item.ItemStack getPredictionDrop();\n  public net.minecraft.world.item.ItemStack getSourceStack();\n  public boolean isValid();\n  public int rollPredictions(net.minecraft.util.RandomSource);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.DataModelInstance"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.DataModelRegistry",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataModelRegistry.java\"\npublic class dev.shadowsoffire.hostilenetworks.data.DataModelRegistry extends dev.shadowsoffire.placebo.reload.DynamicRegistry<dev.shadowsoffire.hostilenetworks.data.DataModel> {\n  public static final dev.shadowsoffire.hostilenetworks.data.DataModelRegistry INSTANCE;\n  public dev.shadowsoffire.hostilenetworks.data.DataModelRegistry();\n  public java.util.Collection<dev.shadowsoffire.hostilenetworks.data.EntityDataModel> getForEntity(net.minecraft.world.entity.EntityType<?>);\n  public java.util.Collection<dev.shadowsoffire.hostilenetworks.data.BlockDataModel> getForBlock(net.minecraft.world.level.block.Block);\n  public java.util.Map<net.minecraft.resources.ResourceLocation, com.google.gson.JsonElement> prepare(net.minecraft.server.packs.resources.ResourceManager, net.minecraft.util.profiling.ProfilerFiller);\n  public java.lang.Object prepare(net.minecraft.server.packs.resources.ResourceManager, net.minecraft.util.profiling.ProfilerFiller);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.DataModelRegistry"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.EntityAttunement",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EntityAttunement.java\"\npublic final class dev.shadowsoffire.hostilenetworks.data.EntityAttunement extends java.lang.Record {\n  public static com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.EntityAttunement> CODEC;\n  public dev.shadowsoffire.hostilenetworks.data.EntityAttunement(boolean, net.minecraft.advancements.critereon.EntityPredicate);\n  public boolean matches(net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public boolean attunable();\n  public net.minecraft.advancements.critereon.EntityPredicate predicate();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.EntityAttunement"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.EntityDataModel",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EntityDataModel.java\"\npublic final class dev.shadowsoffire.hostilenetworks.data.EntityDataModel extends java.lang.Record implements dev.shadowsoffire.hostilenetworks.data.DataModel {\n  public static final com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.EntityDataModel> NEW_CODEC;\n  public static final com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.EntityDataModel> OLD_CODEC;\n  public static final com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.EntityDataModel> CODEC;\n  public dev.shadowsoffire.hostilenetworks.data.EntityDataModel(dev.shadowsoffire.hostilenetworks.data.EntityDataModel, java.util.List<net.minecraft.world.item.ItemStack>);\n  public dev.shadowsoffire.hostilenetworks.data.EntityDataModel(net.minecraft.world.entity.EntityType<?>, java.util.List<net.minecraft.world.entity.EntityType<?>>, java.util.Optional<net.minecraft.network.chat.Component>, net.minecraft.network.chat.TextColor, dev.shadowsoffire.hostilenetworks.util.DisplayData, int, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, java.lang.String, java.util.List<net.minecraft.world.item.ItemStack>, dev.shadowsoffire.hostilenetworks.util.RequiredData, dev.shadowsoffire.hostilenetworks.util.DataGained, java.util.Optional<dev.shadowsoffire.hostilenetworks.data.EntityAttunement>);\n  public static dev.shadowsoffire.hostilenetworks.data.EntityDataModel fromOld(net.minecraft.world.entity.EntityType<?>, java.util.List<net.minecraft.world.entity.EntityType<?>>, net.minecraft.network.chat.Component, dev.shadowsoffire.hostilenetworks.util.DisplayData, int, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, java.lang.String, java.util.List<net.minecraft.world.item.ItemStack>, dev.shadowsoffire.hostilenetworks.util.RequiredData, dev.shadowsoffire.hostilenetworks.util.DataGained, java.util.Optional<dev.shadowsoffire.hostilenetworks.data.EntityAttunement>);\n  public net.minecraft.network.chat.Component name();\n  public java.util.List<net.minecraft.network.chat.Component> variantNames();\n  public int statIconColumn();\n  public java.util.List<net.minecraft.network.chat.Component> getStatistics(net.minecraft.world.level.Level);\n  public com.mojang.serialization.Codec<? extends dev.shadowsoffire.hostilenetworks.data.EntityDataModel> getCodec();\n  public java.lang.String actionWordKey();\n  public java.lang.String dataPerActionKey();\n  public java.util.stream.Stream<net.minecraft.world.entity.EntityType<?>> entityAndVariants();\n  public boolean hasAttunement();\n  public boolean attunesTo(net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity);\n  public static com.mojang.serialization.DataResult<dev.shadowsoffire.hostilenetworks.data.EntityDataModel> validate(dev.shadowsoffire.hostilenetworks.data.EntityDataModel);\n  public dev.shadowsoffire.hostilenetworks.util.DisplayEntity displayEntity(net.minecraft.world.level.Level);\n  public java.util.List<dev.shadowsoffire.hostilenetworks.util.DisplayEntity> displayVariants(net.minecraft.world.level.Level);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.entity.EntityType<?> entity();\n  public java.util.List<net.minecraft.world.entity.EntityType<?>> variants();\n  public java.util.Optional<net.minecraft.network.chat.Component> displayName();\n  public net.minecraft.network.chat.TextColor nameColor();\n  public dev.shadowsoffire.hostilenetworks.util.DisplayData display();\n  public int simCost();\n  public net.minecraft.world.item.crafting.Ingredient input();\n  public net.minecraft.world.item.ItemStack baseDrop();\n  public java.lang.String triviaKey();\n  public java.util.List<net.minecraft.world.item.ItemStack> fabDrops();\n  public dev.shadowsoffire.hostilenetworks.util.RequiredData requiredData();\n  public dev.shadowsoffire.hostilenetworks.util.DataGained dataGained();\n  public java.util.Optional<dev.shadowsoffire.hostilenetworks.data.EntityAttunement> attunement();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.EntityDataModel"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.ModelTier",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ModelTier.java\"\npublic final class dev.shadowsoffire.hostilenetworks.data.ModelTier extends java.lang.Record implements dev.shadowsoffire.placebo.codec.CodecProvider<dev.shadowsoffire.hostilenetworks.data.ModelTier> {\n  public static final com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.ModelTier> NEW_CODEC;\n  public static final com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.ModelTier> OLD_CODEC;\n  public static final com.mojang.serialization.Codec<dev.shadowsoffire.hostilenetworks.data.ModelTier> CODEC;\n  public dev.shadowsoffire.hostilenetworks.data.ModelTier(int, int, net.minecraft.network.chat.TextColor, float, boolean);\n  public net.minecraft.network.chat.Component getComponent();\n  public boolean isMax();\n  public boolean isMin();\n  public java.lang.String name();\n  public dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.ModelTier> asHolder();\n  public int colorValue();\n  public com.mojang.serialization.Codec<? extends dev.shadowsoffire.hostilenetworks.data.ModelTier> getCodec();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public int requiredData();\n  public int dataGained();\n  public net.minecraft.network.chat.TextColor color();\n  public float accuracy();\n  public boolean canSim();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.ModelTier"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.data.ModelTierRegistry",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ModelTierRegistry.java\"\npublic class dev.shadowsoffire.hostilenetworks.data.ModelTierRegistry extends dev.shadowsoffire.placebo.reload.DynamicRegistry<dev.shadowsoffire.hostilenetworks.data.ModelTier> {\n  public static final dev.shadowsoffire.hostilenetworks.data.ModelTierRegistry INSTANCE;\n  public dev.shadowsoffire.hostilenetworks.data.ModelTierRegistry();\n  public static dev.shadowsoffire.hostilenetworks.data.ModelTier getMaxTier();\n  public static dev.shadowsoffire.hostilenetworks.data.ModelTier getMinTier();\n  public static dev.shadowsoffire.hostilenetworks.data.ModelTier getByData(dev.shadowsoffire.hostilenetworks.data.DataModel, int);\n  public static java.util.List<dev.shadowsoffire.hostilenetworks.data.ModelTier> getSortedTiers();\n  public static dev.shadowsoffire.hostilenetworks.data.ModelTier next(dev.shadowsoffire.hostilenetworks.data.ModelTier);\n  public static com.mojang.serialization.Codec<dev.shadowsoffire.placebo.reload.DynamicHolder<dev.shadowsoffire.hostilenetworks.data.ModelTier>> tierHolderCodec();\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.data.ModelTierRegistry"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.datagen.BlockTagProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockTagProvider.java\"\npublic class dev.shadowsoffire.hostilenetworks.datagen.BlockTagProvider extends net.neoforged.neoforge.common.data.BlockTagsProvider {\n  public dev.shadowsoffire.hostilenetworks.datagen.BlockTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.datagen.BlockTagProvider"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.datagen.HNNRecipeProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"HNNRecipeProvider.java\"\npublic class dev.shadowsoffire.hostilenetworks.datagen.HNNRecipeProvider extends dev.shadowsoffire.placebo.datagen.LegacyRecipeProvider {\n  public dev.shadowsoffire.hostilenetworks.datagen.HNNRecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.datagen.HNNRecipeProvider"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.datagen.LootProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootProvider.java\"\npublic class dev.shadowsoffire.hostilenetworks.datagen.LootProvider extends net.minecraft.data.loot.LootTableProvider {\n  public static dev.shadowsoffire.hostilenetworks.datagen.LootProvider create(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.datagen.LootProvider"
+      },
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.datagen.LootProvider$BlockLoot",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootProvider.java\"\npublic class dev.shadowsoffire.hostilenetworks.datagen.LootProvider$BlockLoot extends net.minecraft.data.loot.BlockLootSubProvider {\n  public static final java.util.Set<net.minecraft.world.item.Item> EXPLOSION_RESISTANT;\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.datagen.LootProvider.BlockLoot"
+      }
+    ],
+    "recipe_builders": [],
+    "recipe_classes": [],
+    "recipe_serializers": [],
+    "recipe_types": [],
+    "resource_apis": [
+      {
+        "class": "dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource",
+        "classification": {
+          "evidence": [
+            "source"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DeepLearnerMenu.java\"\npublic final class dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource extends java.lang.Enum<dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource> {\n  public static final dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource MAIN_HAND;\n  public static final dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource OFF_HAND;\n  public static final dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource CURIOS;\n  public static dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource[] values();\n  public static dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource valueOf(java.lang.String);\n  public net.minecraft.world.item.ItemStack getStack(net.minecraft.world.entity.player.Player);\n  public static dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource fromHand(net.minecraft.world.InteractionHand);\n}",
+        "source_class": "dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu.DeepLearnerSource"
+      }
+    ],
+    "station_classes": []
+  },
+  "kind": "auto_storage_compat_audit",
+  "recipe_data": {
+    "declared_recipes": 37,
+    "digest": "76f6b23c508813dcf1453c4e4cf999ee623c8cfaeafec3670b975186b13b18c6",
+    "effective_recipes": 37,
+    "format": 1,
+    "overrides": [],
+    "serializers": [
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "group",
+          "key",
+          "pattern",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "pattern": 3
+        },
+        "recipe_count": 10,
+        "sample_recipe_ids": [
+          "hostilenetworks:data_center",
+          "hostilenetworks:data_center_io_port",
+          "hostilenetworks:deep_learner",
+          "hostilenetworks:fab_directive",
+          "hostilenetworks:framework",
+          "hostilenetworks:living_matter/nether_to_ender",
+          "hostilenetworks:living_matter/overworld_to_nether",
+          "hostilenetworks:loot_fabricator",
+          "hostilenetworks:prediction_matrix",
+          "hostilenetworks:sim_chamber"
+        ],
+        "serializer_id": "minecraft:crafting_shaped"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 7,
+        "fields": [
+          "category",
+          "group",
+          "ingredients",
+          "neoforge:conditions",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 5,
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 27,
+        "sample_recipe_ids": [
+          "hostilenetworks:living_matter/extraterrestrial/chorus_fruit",
+          "hostilenetworks:living_matter/extraterrestrial/end_stone",
+          "hostilenetworks:living_matter/extraterrestrial/ender_pearl",
+          "hostilenetworks:living_matter/hellish/blaze_powder",
+          "hostilenetworks:living_matter/hellish/blaze_rod",
+          "hostilenetworks:living_matter/hellish/ghast_tear",
+          "hostilenetworks:living_matter/hellish/gold_ingot",
+          "hostilenetworks:living_matter/hellish/nether_wart",
+          "hostilenetworks:living_matter/hellish/soul_sand",
+          "hostilenetworks:living_matter/overworldian/arrow",
+          "hostilenetworks:living_matter/overworldian/bone",
+          "hostilenetworks:living_matter/overworldian/carrot",
+          "hostilenetworks:living_matter/overworldian/cobweb",
+          "hostilenetworks:living_matter/overworldian/grass",
+          "hostilenetworks:living_matter/overworldian/gunpowder",
+          "hostilenetworks:living_matter/overworldian/iron_ingot"
+        ],
+        "serializer_id": "minecraft:crafting_shapeless"
+      }
+    ],
+    "sources": [
+      {
+        "declared_recipes": 37,
+        "id": "target_jar",
+        "sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+      }
+    ]
+  },
+  "risks": [],
+  "scanner_format": 16,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/DataCenterRenderer.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/DataModelItemStackRenderer.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/DataModelTooltipRenderer.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/DeepLearnerHudRenderer.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/GhostVertexBuilder.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/PerTypeBufferSource.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/WeirdRenderThings.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/client/WrappedRTBuffer.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/BlockAttunement.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/BlockDataModel.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/BlockDataModelsCondition.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/DataModel.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/DataModelInstance.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/DataModelRegistry.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/EntityAttunement.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/EntityDataModel.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/ModelTier.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/data/ModelTierRegistry.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/datagen/BlockTagProvider.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/datagen/HNNRecipeProvider.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/datagen/LootProvider.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/gui/DeepLearnerMenu.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/jei/HostileJeiPlugin.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/jei/LootFabCategory.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/jei/LootFabRecipe.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/jei/SimChamberCategory.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/jei/TickingDataModelWrapper.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/mixin/client/MixinRenderType.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/tile/DataCenterIOPortTileEntity.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/tile/DataCenterTileEntity.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/tile/LootFabTileEntity.java",
+      "src/main/java/dev/shadowsoffire/hostilenetworks/tile/SimChamberTileEntity.java"
+    ],
+    "revision": "54a1d8e15abc215e164b2247d7a3b72ad0310ebe"
+  },
+  "structural_candidate_inventory_sha256": "6e17870ce236fcc61c2f52c2ce0798e528047ce723bbe83dd214c06538a42394",
+  "structural_class_graph": [
+    {
+      "class": "com.mojang.blaze3d.vertex.VertexConsumer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IVertexConsumerExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Blocks",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Components",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Conditions",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Containers",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Items",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Tabs",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Tags",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$Tickets",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.Hostile$TileEntities",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.HostileClient",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.HostileConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.HostileConfig$ConfigPayload",
+      "metadata": {
+        "access_flags": 48,
+        "interfaces": [
+          "net.minecraft.network.protocol.common.custom.CustomPacketPayload"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.HostileConfig$ConfigPayload$Provider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.network.PayloadProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.HostileEvents",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.HostileNetworks",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.block.DataCenterBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.block_entity.TickingEntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.HorizontalDirectionalBlock"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.block.DataCenterIOPortBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.block.LootFabBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.block_entity.TickingEntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.HorizontalDirectionalBlock"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.block.SimChamberBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.block_entity.TickingEntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.HorizontalDirectionalBlock"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.DataCenterRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.DataModelItemStackRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.DataModelTooltipRenderer",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.DeepLearnerHudRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.gui.LayeredDraw$Layer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.GhostVertexBuilder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "com.mojang.blaze3d.vertex.VertexConsumer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.PerTypeBufferSource",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.MultiBufferSource"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.WeirdRenderThings",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.client.WrappedRTBuffer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.MultiBufferSource"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.command.GenerateModelCommand",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.command.GenerateModelCommand$CountedStack",
+      "metadata": {
+        "access_flags": 48,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.command.GiveModelCommand",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.compat.jade.HostileJadePlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "snownee.jade.api.IWailaPlugin",
+          "snownee.jade.api.IBlockComponentProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.curios.CuriosCompat",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.BlockAttunement",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.BlockDataModel",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "dev.shadowsoffire.hostilenetworks.data.DataModel"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.BlockDataModelsCondition",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.common.conditions.ICondition"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.DataModel",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.codec.CodecProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.DataModelInstance",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.inventory.tooltip.TooltipComponent"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.DataModelRegistry",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.reload.DynamicRegistry"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.EntityAttunement",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.EntityDataModel",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "dev.shadowsoffire.hostilenetworks.data.DataModel"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.ModelTier",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.codec.CodecProvider"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.data.ModelTierRegistry",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.reload.DynamicRegistry"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.datagen.BlockTagProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.BlockTagsProvider"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.datagen.HNNRecipeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.datagen.LegacyRecipeProvider"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.datagen.LootProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.loot.LootTableProvider"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.datagen.LootProvider$BlockLoot",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.loot.BlockLootSubProvider"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DataCenterFabConfigScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.screens.Screen"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DataCenterMenu",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.menu.BlockEntityMenu"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DataCenterScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.util.DrawsOnLeft"
+        ],
+        "super_class": "dev.shadowsoffire.placebo.screen.PlaceboContainerScreen"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.menu.PlaceboContainerMenu"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DataModelSlot",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.items.ItemHandlerCopySlot"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$DeepLearnerSource",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DeepLearnerMenu$LockedSlot",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.inventory.Slot"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.DeepLearnerScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.screen.PlaceboContainerScreen"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.FabDirectiveMenu",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.menu.PlaceboContainerMenu"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.FabDirectiveScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.LootFabMenu",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.menu.BlockEntityMenu"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.LootFabScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.util.DrawsOnLeft"
+        ],
+        "super_class": "dev.shadowsoffire.placebo.screen.PlaceboContainerScreen"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.SimChamberMenu",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.menu.BlockEntityMenu"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.SimChamberScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.screen.PlaceboContainerScreen"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.SimChamberScreen$RedstoneButton",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.components.AbstractWidget"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.gui.SimChamberScreen$SimModeButton",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.components.AbstractWidget"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.BlankDataModelItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.DataModelItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.tabs.ITabFiller"
+        ],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.DeepLearnerItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.DeepLearnerItem$Provider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.MenuProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.FabDirectiveItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.util.SpecialTooltipItem"
+        ],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.FabDirectiveItem$ClientAccess",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.MobPredictionItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.tabs.ITabFiller"
+        ],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.item.TooltipBlockItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.item.BlockItem"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.IModPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.jei.HostileJeiPlugin$ModelSubtypes",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.jei.LootFabCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.jei.LootFabRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.jei.SimChamberCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.jei.TickingDataModelWrapper",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.mixin.client.MixinRenderType",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.multiblock.DataCenterShell",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.multiblock.DataCenterShell$CellKind",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.multiblock.DataCenterShell$InvalidEntry",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.multiblock.DataCenterShell$InvalidType",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.multiblock.DataCenterShell$Layout",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.net.OpenDeepLearnerPayload",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.network.protocol.common.custom.CustomPacketPayload"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.net.OpenDeepLearnerPayload$Provider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.network.PayloadProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.block_entity.TickingBlockEntity",
+          "dev.shadowsoffire.placebo.menu.SimpleDataSlots$IDataAutoRegister"
+        ],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity$DataCenterItemHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.cap.InternalItemHandler"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.block_entity.TickingBlockEntity",
+          "dev.shadowsoffire.placebo.menu.SimpleDataSlots$IDataAutoRegister"
+        ],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity$FabItemHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.cap.InternalItemHandler"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.block_entity.TickingBlockEntity",
+          "dev.shadowsoffire.placebo.menu.SimpleDataSlots$IDataAutoRegister"
+        ],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$FailureState",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$SimItemHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.cap.InternalItemHandler"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity$SimMode",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.proxy.ModelPortHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.proxy.OffsetRangedPortHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.ClientEntityCache",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.Color",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.DataGained",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.DisplayData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.DisplayEntity",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.DisplayableBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.FabSelection",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.FabSelection$ProductionMode",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.IOPortMode",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.MiscCodecs",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.RedstoneState",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.ReflectionThings",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.RequiredData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.util.SavedSelections",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.block_entity.TickingBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.block_entity.TickingEntityBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.level.block.EntityBlock"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.cap.InternalItemHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.items.ItemStackHandler"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.codec.CodecProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.datagen.LegacyRecipeProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.recipes.RecipeProvider"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.menu.BlockEntityMenu",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "dev.shadowsoffire.placebo.menu.PlaceboContainerMenu"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.menu.PlaceboContainerMenu",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "dev.shadowsoffire.placebo.menu.QuickMoveHandler$QuickMoveMenu"
+        ],
+        "super_class": "net.minecraft.world.inventory.AbstractContainerMenu"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.menu.QuickMoveHandler$QuickMoveMenu",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.menu.SimpleDataSlots$IDataAutoRegister",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.network.PayloadProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.reload.DynamicRegistry",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.screen.PlaceboContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.MenuAccess"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.tabs.ITabFiller",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.util.DrawsOnLeft",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "dev.shadowsoffire.placebo.util.SpecialTooltipItem",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad"
+    },
+    {
+      "class": "mezz.jei.api.IModPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107"
+    },
+    {
+      "class": "mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107"
+    },
+    {
+      "class": "mezz.jei.api.recipe.category.IRecipeCategory",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107"
+    },
+    {
+      "class": "net.minecraft.client.gui.LayeredDraw$Layer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.AbstractWidget",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.Renderable",
+          "net.minecraft.client.gui.components.events.GuiEventListener",
+          "net.minecraft.client.gui.layouts.LayoutElement",
+          "net.minecraft.client.gui.narration.NarratableEntry",
+          "net.neoforged.neoforge.client.extensions.IAbstractWidgetExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.Renderable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.TabOrderedElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.ContainerEventHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.ContainerEventHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.GuiEventListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.GuiEventListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.TabOrderedElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.layouts.LayoutElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.narration.NarratableEntry",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.TabOrderedElement",
+          "net.minecraft.client.gui.narration.NarrationSupplier"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.narration.NarrationSupplier",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.Screen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.Renderable"
+        ],
+        "super_class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.MenuAccess"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.Screen"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.MenuAccess",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.server.packs.resources.ResourceManagerReloadListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.renderer.MultiBufferSource",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.renderer.blockentity.BlockEntityRenderer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.DataProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.loot.BlockLootSubProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.loot.LootTableSubProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.loot.LootTableProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.loot.LootTableSubProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.TagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.TagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.network.protocol.common.custom.CustomPacketPayload",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.resources.PreparableReloadListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.resources.ResourceManagerReloadListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.server.packs.resources.PreparableReloadListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.server.packs.resources.SimplePreparableReloadListener"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.resources.SimplePreparableReloadListener",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.server.packs.resources.PreparableReloadListener"
+        ],
+        "super_class": "net.neoforged.neoforge.resource.ContextAwareReloadListener"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.util.StringRepresentable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.MenuProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.inventory.MenuConstructor",
+          "net.neoforged.neoforge.client.extensions.IMenuProviderExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.flag.FeatureElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.AbstractContainerMenu",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.MenuConstructor",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.Slot",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.tooltip.TooltipComponent",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.BlockItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.Item",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement",
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IItemExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.ItemLike",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BaseEntityBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.level.block.EntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.Block",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IBlockExtension"
+        ],
+        "super_class": "net.minecraft.world.level.block.state.BlockBehaviour"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.EntityBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.HorizontalDirectionalBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.BlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBlockEntityExtension"
+        ],
+        "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.state.BlockBehaviour",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.AttachmentHolder",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.attachment.IAttachmentHolder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.IAttachmentHolder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IAbstractWidgetExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IMenuProviderExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IVertexConsumerExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.conditions.ICondition",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.BlockTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockEntityExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IItemExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.util.INBTSerializable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.IItemHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.IItemHandlerModifiable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.ItemHandlerCopySlot",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.items.StackCopySlot"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.ItemStackHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler",
+          "net.neoforged.neoforge.items.IItemHandlerModifiable",
+          "net.neoforged.neoforge.common.util.INBTSerializable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.StackCopySlot",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.inventory.Slot"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.resource.ContextAwareReloadListener",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.server.packs.resources.PreparableReloadListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "snownee.jade.api.IBlockComponentProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IComponentProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IComponentProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IToggleableProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IJadeProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IToggleableProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IJadeProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IWailaPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    }
+  ],
+  "structural_hierarchy": [
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity",
+      "classification": {
+        "evidence": [
+          "dev.shadowsoffire.hostilenetworks.tile.DataCenterIOPortTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity",
+      "classification": {
+        "evidence": [
+          "dev.shadowsoffire.hostilenetworks.tile.DataCenterTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity",
+      "classification": {
+        "evidence": [
+          "dev.shadowsoffire.hostilenetworks.tile.LootFabTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity",
+      "classification": {
+        "evidence": [
+          "dev.shadowsoffire.hostilenetworks.tile.SimChamberTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    }
+  ],
+  "target": {
+    "display_name": "Hostile Neural Networks",
+    "mod_id": "hostilenetworks",
+    "version": "6.5.0"
+  }
+}

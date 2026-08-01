@@ -1,0 +1,42 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+    "sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
+  },
+  "dependencies": [
+    "maven.modrinth:hostile-neural-networks:ZbsbtrNE"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.hostilenetworks.HostilenetworksCompatModule",
+  "expectedTests": 4,
+  "fixture": "hostilenetworksFixture",
+  "id": "auto_storage:hostilenetworks",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "hostilenetworks"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "hostilenetworks"
+      ],
+      "sha256": "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "hostilenetworks"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+    "maven.modrinth:placebo:1Ypo4tf4"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatHostilenetworks"
+}
