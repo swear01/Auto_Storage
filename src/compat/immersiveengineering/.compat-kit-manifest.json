@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "tool_version": "0.3.0",
+  "contract_sha256": "2c22ce51e80025330a8c681630257bebf26e8c5738ea52ccb3f3264083b72426",
+  "files": {
+    "src/compat/immersiveengineering/compat-module.json": "0475fd241d0e195d86827497d01981b49b4ab94956910c23319e1d77a6468e98",
+    "src/compat/immersiveengineering/java/com/swear/autostorage/compat/immersiveengineering/ImmersiveengineeringCompatModule.java": "0b2fdf763b33dc9d81a0d371401b4829d605adec61ab5538f10fec6d55d7cdf6",
+    "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/immersiveengineering/ImmersiveengineeringFixtureMod.java": "ea01eecb60f235f59931fea288a644e98c1e073dfffef97d952cc9222a9523bc",
+    "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/immersiveengineering/ImmersiveengineeringIntegrationGameTests.java": "f07b8db9a1b7061377bf61facff68b4cd54c47c8b71f546a0279312f50078552",
+    "src/immersiveengineeringFixture/resources/META-INF/neoforge.mods.toml": "a4317cfaab87868117f63f40530e7b630940f806b0bf4c8693bab85ab7e37925",
+    "src/immersiveengineeringFixture/resources/data/auto_storage_immersiveengineering_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  }
+}

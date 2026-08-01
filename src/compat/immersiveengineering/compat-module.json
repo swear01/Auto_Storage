@@ -1,0 +1,41 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:immersiveengineering:uNRARSH2",
+    "sha256": "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc"
+  },
+  "dependencies": [
+    "maven.modrinth:immersiveengineering:uNRARSH2"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.immersiveengineering.ImmersiveengineeringCompatModule",
+  "expectedTests": 8,
+  "fixture": "immersiveengineeringFixture",
+  "id": "auto_storage:immersiveengineering",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "immersiveengineering"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "immersiveengineering"
+      ],
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "immersiveengineering"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:immersiveengineering:uNRARSH2"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatImmersiveengineering"
+}

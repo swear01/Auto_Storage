@@ -148,6 +148,8 @@ leave stale FE/work costs.
 - **Productive Metalworks:** present-mod CI intentionally registers no custom family. Item melting, fluid alloying, item/block casting, and entity melting depend on Foundry multiblock fuel/temperature/upgrades, live casting-block cooling/`Config`, and/or entity mutation; see [`productivemetalworks-compatibility.md`](productivemetalworks-compatibility.md).
 
 - **Railcraft Reborn:** present-mod CI intentionally registers no family. Crusher chance outputs, Blast Furnace / Coke Oven multiblock+live fuel/creosote, Rolling Machine live Charge/matrix, and special crafting fluid/damage/component/Patchouli helpers all fail closed; see [`railcraft-compatibility.md`](railcraft-compatibility.md).
+- **Immersive Engineering:** present-mod CI intentionally registers no custom family. Alloy/Coke/Blast stone multiblocks, powered multiblock multipliers, chance secondaries, Cloche randomness, and `TagOutput` preference resolution remain fail closed; see [`immersiveengineering-compatibility.md`](immersiveengineering-compatibility.md).
+
 
 Mekanism 10.7.19 still has two explicit fail-closed boundaries. A one-way Rotary recipe is supported in either fluid-to-chemical or chemical-to-fluid direction, but the shipped recipes put both directions in one `BasicRotaryRecipe`; the current one-plan-per-holder API cannot condition output on the selected input, so bidirectional Rotary recipes are rejected instead of duplicating output. Nutritional Liquifier recipes are synthetic `NutritionalLiquifierIRecipe` values whose `getType()` and `getSerializer()` are both `null` and which never enter the server `RecipeManager`. Their fluid output and optional container remainder therefore cannot be safely exposed by a registered exact recipe family. The representative fixture uses Mushroom Stew to prove the synthetic recipe returns both Nutritional Paste and the exact `usingConvertsTo()` Bowl; an ordinary crafting remainder alone is not this API contract. Supporting those two shapes requires a conditional-plan/synthetic-recipe discovery API rather than a Mekanism-only fallback.
 
@@ -169,5 +171,6 @@ Every optional recipe compatibility module loads only after `ModList` confirms t
 ./gradlew runRecipeAddonGameTestServer
 ./gradlew runCompatFixtureGameTestServers
 ./gradlew runPneumaticCraftGameTestServer
+./gradlew runImmersiveengineeringGameTestServer
 ./gradlew runCompatibilityMatrixGameTestServer
 ```
