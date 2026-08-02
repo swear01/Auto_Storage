@@ -99,8 +99,10 @@ sorted, fixed-timestamp, stored-entry normalization only for ModDev outputs.
 Maven artifacts remain raw exact bytes. Scanner-format-16
 `ancestry_dependencies` are emitted
 automatically as non-transitive `compileOnly` and
-`compatKitAncestryArtifacts` declarations; hand-editing generated Gradle is not
-a supported workaround, and an unresolved hash remains a hard failure.
+`compatKitAncestryArtifacts` declarations in independent addons, and as
+descriptor-owned compile dependencies in bundled modules when the same exact
+coordinate is a reviewed target runtime companion; hand-editing root Gradle is
+not a supported workaround, and an unresolved hash remains a hard failure.
 Complete consumers reopen the target and every supplied ancestry jar,
 reconstruct the reachable external metadata graph, reject duplicate
 inspectable classes across the complete supplied set, rebuild exact NeoForge

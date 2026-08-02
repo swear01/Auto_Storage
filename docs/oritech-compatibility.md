@@ -63,7 +63,10 @@ that token changes, and exact item candidates remain indexed. Eligibility never 
 `Recipe#getIngredients()` for inference; it reads Oritech's public
 `getInputs()` / `getResults()` / `getFluidInput()` / `getFluidOutputs()` /
 `getTime()` surfaces. Fluid outputs use Architectury's public typed
-`FluidStack` API directly; reflection is not used.
+`FluidStack` API directly; reflection is not used. Architectury artifact
+`ZxYGwlk0` is therefore recorded as exact compile ancestry in the format-16
+audit and emitted into both bundled and independent-addon compile classpaths,
+rather than being hidden by a repository-only Gradle declaration.
 
 ## Explicit exclusions
 

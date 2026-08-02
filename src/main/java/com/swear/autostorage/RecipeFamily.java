@@ -239,6 +239,24 @@ public final class RecipeFamily {
             return typedCandidateIndex(plan, level.registryAccess());
         }
 
+        @Override
+        public RecipeAdapterMatch match(RecipeHolder<?> holder, Level level) {
+            Recipe<?> recipe = checkedRecipe(holder);
+            if (typedPlan == null || level == null) {
+                return RecipeAdapter.super.match(holder, level);
+            }
+            TypedRecipePlan plan = typedPlanFor(recipe, level.registryAccess());
+            RecipeAdapterMatch.Contract contract = cacheTypedPlan
+                    ? typedContractCache.computeIfAbsent(
+                            recipe, ignored -> typedContract(recipe, plan))
+                    : typedContract(recipe, plan);
+            return new RecipeAdapterMatch(
+                    this,
+                    holder,
+                    typedCandidateIndex(plan, level.registryAccess()),
+                    contract);
+        }
+
         private RecipeCandidateIndex typedCandidateIndex(
                 TypedRecipePlan plan,
                 HolderLookup.Provider registries

@@ -33,7 +33,13 @@
       "size": 1241625
     }
   ],
-  "ancestry_dependencies": [],
+  "ancestry_dependencies": [
+    {
+      "dependency": "maven.modrinth:architectury-api:ZxYGwlk0",
+      "sha256": "5ec578f814e8cca87aeffa6e424032e78d9ea5ea6b603dd834c2dc13c31141ee",
+      "size": 584004
+    }
+  ],
   "artifact": {
     "class_count": 638,
     "class_inventory_sha256": "ed9033eb7f264e50d82cabe00ea40d604395571e2fbc9f782edaacea228ff8ef",

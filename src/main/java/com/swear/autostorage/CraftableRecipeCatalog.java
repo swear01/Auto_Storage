@@ -144,7 +144,7 @@ final class CraftableRecipeCatalog {
                 unindexed.stream().mapToInt(Integer::intValue).toArray());
     }
 
-    private static int[][] requiredItemGroups(RecipeAdapterMatch match, Level level) {
+    static int[][] requiredItemGroups(RecipeAdapterMatch match, Level level) {
         List<int[]> groups = new ArrayList<>();
         TypedRecipePlan plan = match.typedRecipePlan().orElse(null);
         if (plan != null) {
@@ -179,7 +179,7 @@ final class CraftableRecipeCatalog {
         return groups.toArray(int[][]::new);
     }
 
-    private static boolean requirementsMet(int[][] groups, BitSet availableItems) {
+    static boolean requirementsMet(int[][] groups, BitSet availableItems) {
         if (groups == null) return true;
         for (int[] group : groups) {
             boolean matched = false;

@@ -109,8 +109,7 @@ final class RecipeAdapterRegistry {
             RecipeHolder<?> holder,
             Level level
     ) {
-        return new RecipeAdapterMatch(
-                adapter, holder, adapter.candidateIndex(holder, level));
+        return adapter.match(holder, level);
     }
 
     @SuppressWarnings("unchecked")

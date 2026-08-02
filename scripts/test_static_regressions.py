@@ -1096,7 +1096,7 @@ class StaticRegressionTests(unittest.TestCase):
     def test_all_gametest_gates_reject_any_selftest_failure(self):
         build = self.read_required("build.gradle")
         explicit_expected = {
-            "runGameTestServer": 405,
+            "runGameTestServer": 406,
             "runRecipeAddonGameTestServer": 17,
             "runPneumaticCraftGameTestServer": 9,
             "runCompatibilityMatrixGameTestServer": 3,
@@ -1875,12 +1875,35 @@ class StaticRegressionTests(unittest.TestCase):
             "src/compat/oritech/java/com/swear/autostorage/compat/"
             "oritech/OritechCompat.java"
         )
+        audit = json.loads(self.read_required(
+            "compat/audits/oritech/1.2.9.json"
+        ))
+        descriptor = json.loads(self.read_required(
+            "src/compat/oritech/compat-module.json"
+        ))
+        build = self.read_required("build.gradle")
 
         self.assertIn("import dev.architectury.fluid.FluidStack;", compat)
         self.assertIn("List<FluidStack> outputs = recipe.getFluidOutputs();", compat)
         self.assertIn("stack == null || !stack.isEmpty()", compat)
         self.assertNotIn("getMethod(\"getFluidOutputs\")", compat)
         self.assertNotIn(".invoke(recipe)", compat)
+        self.assertIn(
+            {
+                "dependency": "maven.modrinth:architectury-api:ZxYGwlk0",
+                "sha256": "5ec578f814e8cca87aeffa6e424032e78d9ea5ea6b603dd834c2dc13c31141ee",
+                "size": 584004,
+            },
+            audit["ancestry_dependencies"],
+        )
+        self.assertEqual(
+            [
+                "maven.modrinth:oritech:gMBPdWrE",
+                "maven.modrinth:architectury-api:ZxYGwlk0",
+            ],
+            descriptor["dependencies"],
+        )
+        self.assertNotIn("compatOritechCompileOnly", build)
 
     def test_prism_gui_support_pack_stages_macfix_and_optional_mods_without_player_dependency_pins(self):
         build = self.read_required("build.gradle")

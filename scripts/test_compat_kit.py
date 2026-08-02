@@ -6355,6 +6355,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_bundled_descriptor_preserves_reviewed_matrix_contract(self):
         contract = self.accepted_contract()
+        audit = self.source_audit()
         reviewed_matrix = {
             "mods": ["samplemod"],
             "descriptors": ["auto_storage:samplemod_crusher"],
@@ -6376,12 +6377,51 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             source_artifact=self.jar,
         )
         descriptor = json.loads(
-            self.compat_kit._bundled_files(contract)[
+            self.compat_kit._bundled_files(contract, audit)[
                 "src/compat/samplemod/compat-module.json"
             ]
         )
 
         self.assertEqual(reviewed_matrix, descriptor["matrix"])
+
+    def test_bundled_descriptor_includes_reviewed_runtime_compile_ancestry(self):
+        contract = self.accepted_contract()
+        contract["target"]["runtime_dependencies"] = [
+            "com.example:compile-api:4.5.6",
+        ]
+        audit = self.source_audit()
+        audit["ancestry_classpath"] = [
+            {"sha256": "a" * 64, "size": 123},
+            {"sha256": "b" * 64, "size": 456},
+        ]
+        audit["ancestry_dependencies"] = [
+            {
+                "dependency": "com.example:compile-api:4.5.6",
+                "sha256": "a" * 64,
+                "size": 123,
+            },
+            {
+                "dependency": "com.example:scan-only-api:7.8.9",
+                "sha256": "b" * 64,
+                "size": 456,
+            },
+        ]
+        self.refresh_audit_target_class_inventory(audit)
+        self.compat_kit._validate_audit(audit)
+
+        descriptor = json.loads(
+            self.compat_kit._bundled_files(contract, audit)[
+                "src/compat/samplemod/compat-module.json"
+            ]
+        )
+
+        self.assertEqual(
+            [
+                "com.example:samplemod:1.2.3",
+                "com.example:compile-api:4.5.6",
+            ],
+            descriptor["dependencies"],
+        )
 
     def test_complete_contract_rejects_pending_matrix_inventory(self):
         contract = self.accepted_contract()

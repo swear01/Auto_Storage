@@ -4,7 +4,8 @@
     "sha256": "fcb30b4f6ae89d115164b82f3c1f9938e9b8a80662047e204562361845764963"
   },
   "dependencies": [
-    "maven.modrinth:oritech:gMBPdWrE"
+    "maven.modrinth:oritech:gMBPdWrE",
+    "maven.modrinth:architectury-api:ZxYGwlk0"
   ],
   "entrypoint": "com.swear.autostorage.compat.oritech.OritechCompatModule",
   "expectedTests": 20,

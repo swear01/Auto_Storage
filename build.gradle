@@ -833,9 +833,6 @@ dependencies {
             }
         }
     }
-    compatOritechCompileOnly("maven.modrinth:architectury-api:ZxYGwlk0") {
-        transitive = false
-    }
     pneumaticCraftFixtureCompileOnly(
             "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}") {
         transitive = false
@@ -1403,7 +1400,7 @@ tasks.named('runGameTestServer').configure {
             throw new GradleException('Base GameTest did not produce run/logs/latest.log')
         }
         def text = baseGameTestLatestLog.getText('UTF-8')
-        if (!text.contains('All 405 required tests passed')
+        if (!text.contains('All 406 required tests passed')
                 || !text.contains(expectedSelfTestSummary)
                 || text.contains('TESTS FAILED!')) {
             throw new GradleException('Base GameTest or SelfTest did not pass; inspect run/logs/latest.log')

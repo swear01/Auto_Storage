@@ -1,7 +1,7 @@
 {
   "contract_sha256": "201c791d2b6e923548e588ca1b2f7dda1e3badffccf142df131e9dee6de8b9f3",
   "files": {
-    "src/compat/oritech/compat-module.json": "3ad5c1cc08dc628faf000cc647909ea4c1035941172b9bdaec1181761c7c303f",
+    "src/compat/oritech/compat-module.json": "d925047717a083cef5fc7d3d85cdc79c083ca3adfaf8bbd1a70074eeecf61ede",
     "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "ded636c5cc90ac94e5799f4460e4dbbc5a504d60a3c4b6cbf971a1b3b48caa80",
     "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompatModule.java": "5d6bb71971ce83f6e717256b4a759765dc8afd5b1907c355cdae8bb87882c8d4",
     "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechFixtureMod.java": "3749b869c9b8a7a01117b1210464f53c914338c8f8773d5dea053fa0e0f60904",

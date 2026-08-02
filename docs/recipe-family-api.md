@@ -86,7 +86,13 @@ RECIPE_FAMILIES.register("infusion", () -> RecipeFamilyFactories.deterministicRe
         RecipePresentationKind.STONECUTTING));
 ```
 
-The resolver must be deterministic and side-effect free. Chance outputs, runtime machine polling, arbitrary Core/player/world callbacks, and external-machine send-and-wait are rejected by design. Multi-step planning remains a separate future server graph; EMI is presentation and selection only.
+The resolver must be deterministic and side-effect free. A fixed
+`deterministicResources` holder caches both its plan and final contract;
+catalog classification reuses that contract rather than rebuilding costs and
+presentation state on every Craftable rebuild. Chance outputs, runtime machine
+polling, arbitrary Core/player/world callbacks, and external-machine
+send-and-wait are rejected by design. Multi-step planning remains a separate
+future server graph; EMI is presentation and selection only.
 
 ### `deterministicResourceVariants`
 
@@ -101,7 +107,10 @@ holder still has one deterministic plan, but server configuration can change
 its typed amounts or cost after registration. The family keeps its exact item
 candidate index, but does not retain the per-recipe plan or final contract;
 preview and commit therefore resolve the current server values and compare
-them normally. The required `LongSupplier dynamicStateToken` must return the
+them normally. Catalog construction resolves the current plan once, carries
+that same transient plan into its required-item groups, then discards it; a
+missing secondary input therefore prunes the recipe without retaining stale
+configured amounts. The required `LongSupplier dynamicStateToken` must return the
 current complete identity of every server value that can affect the plan or
 cost. Equal behavior may reuse a token; changed behavior must not. Family
 eligibility and candidate-index shape must remain stable across token changes;
