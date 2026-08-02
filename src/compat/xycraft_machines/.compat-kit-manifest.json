@@ -1,0 +1,14 @@
+{
+  "contract_sha256": "6e39b03301aca5426bb2430649ea8e0a5da51dfeb1a5208327ed3072cf9d8ba7",
+  "files": {
+    "src/compat/xycraft_machines/compat-module.json": "758f4463cd132d6f5946960ce918fbe2827f45c3eefecde14302d801b06da871",
+    "src/compat/xycraft_machines/java/com/swear/autostorage/compat/xycraftmachines/XycraftMachinesCompat.java": "f207a89e2e42cac1875fb6389a052c188d8359056dc0a15861f5ea68814ec01c",
+    "src/compat/xycraft_machines/java/com/swear/autostorage/compat/xycraftmachines/XycraftMachinesCompatModule.java": "8cccb259b9ddd8abe4973e1ffe65a8b10b6ffef101ee3c69f6ddd79ec02b376d",
+    "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesFixtureMod.java": "6313e4507b3258a43b3d1326bfc3203f2e2c17e51d78bc86f0340bd70484611a",
+    "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesIntegrationGameTests.java": "eca4613e5c6faeff90cc531e090a6840ddca2c7f704c3aeb5edee4867ec59338",
+    "src/xycraftMachinesFixture/resources/META-INF/neoforge.mods.toml": "cd5865f4e9ebdf0168df985e199d0afb543ef0643b6fd1b409b20a70bc5af29b",
+    "src/xycraftMachinesFixture/resources/data/auto_storage_xycraft_machines_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
+}

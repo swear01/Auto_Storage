@@ -1,0 +1,410 @@
+{
+  "families": [
+    {
+      "id": "buildings_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.buildings.BuildingsRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "simulation_required",
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.buildings.BuildingsRecipe#public_signature"
+      ],
+      "decision": "Buildings consumes/extracts live inventories and uses world API; capability mutation requires simulation that the current exact transaction contract cannot own."
+    },
+    {
+      "id": "isolator_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.energy.isolator.IsolatorRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.energy.isolator.IsolatorRecipe#public_signature"
+      ],
+      "decision": "Isolator matches live BlockState targets through IRule and world API; not representable as a Core item/fluid transaction."
+    },
+    {
+      "id": "fluid_tank_drain_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.fluid.FluidTankDrainRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.fluid.FluidTankDrainRecipe#public_signature"
+      ],
+      "decision": "Fluid tank drain executes against the live MultiTank multiblock and tank IO graph; payload alone would bypass required formed-tank state."
+    },
+    {
+      "id": "fluid_tank_fill_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.fluid.FluidTankFillRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.fluid.FluidTankFillRecipe#public_signature"
+      ],
+      "decision": "Fluid tank fill executes against the live MultiTank multiblock and tank IO graph; payload alone would bypass required formed-tank state."
+    },
+    {
+      "id": "ark_melter_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.arkmelter.ArkMelterRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.arkmelter.ArkMelterRecipe#public_signature"
+      ],
+      "decision": "Ark Melter carries an entropy field compared to live machine heat and runs through ProducerTickSystem multiblock/world state plus Xynergy; no complete deterministic Core transaction."
+    },
+    {
+      "id": "atmospheric_vacuum_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.atmospheric.AtmosphericVacuumRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.atmospheric.AtmosphericVacuumRecipe#public_signature"
+      ],
+      "decision": "Atmospheric Vacuum requires a biome TagKey and live world context; not a Core transaction."
+    },
+    {
+      "id": "blender_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.blender.BlenderRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.blender.BlenderRecipe#public_signature"
+      ],
+      "decision": "Blender is a ProducerTickSystem multiblock with live ServerLevel validation and Xynergy net power; item/fluid payload alone is insufficient."
+    },
+    {
+      "id": "centrifuge_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.centrifuge.CentrifugeRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.centrifuge.CentrifugeRecipe#public_signature"
+      ],
+      "decision": "Centrifuge is a ProducerTickSystem multiblock with live ServerLevel validation and Xynergy net power; item/fluid payload alone is insufficient."
+    },
+    {
+      "id": "crusher_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.crusher.CrusherRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "randomness",
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.crusher.CrusherRecipe#public_signature"
+      ],
+      "decision": "Crusher results are ChanceOutput lists finalized with RandomSource (e.g. 100%/25% cobble\u2192gravel/flint); nondeterministic secondary outputs stay fail closed. Also runs via world/ProducerTickSystem."
+    },
+    {
+      "id": "cryo_chamber_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.cryochamber.CryoChamberRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.cryochamber.CryoChamberRecipe#public_signature"
+      ],
+      "decision": "Cryo Chamber compares recipe entropy to live getHeatValue() machine heat and uses ProducerTickSystem/Xynergy; not an exact Core transaction."
+    },
+    {
+      "id": "extractor_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.extractor.ExtractorRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.extractor.ExtractorRecipe#public_signature"
+      ],
+      "decision": "Extractor matches live BlockState/FluidState/Direction plus adjacent IRule catalysts and optional waterlogged fluid; world-harvest semantics are outside installed-station Core crafting."
+    },
+    {
+      "id": "ore_tap_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.oretap.OreTapRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.oretap.OreTapRecipe#public_signature"
+      ],
+      "decision": "Ore Tap matches a live world block node through IRule; world-harvest semantics are unsupported."
+    },
+    {
+      "id": "refinery_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.refinery.RefineryRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.refinery.RefineryRecipe#public_signature"
+      ],
+      "decision": "Refinery is a ProducerTickSystem multiblock with live ServerLevel validation and Xynergy net power; dual item/fluid IO payload alone is insufficient."
+    },
+    {
+      "id": "squasher_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.producers.squasher.SquasherRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.producers.squasher.SquasherRecipe#public_signature"
+      ],
+      "decision": "SquasherRecipe.matches throws NotImplementedException; execution is owned by SquasherTickSystem multiblock/live BlockState validation and Xynergy. Optional IStage gating is also unresolved. No complete deterministic Core transaction."
+    },
+    {
+      "id": "solidifier_recipe",
+      "class": "tv.soaryn.xycraft.machines.content.recipes.solidifier.SolidifierRecipe",
+      "status": "rejected",
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": [],
+      "risks": [
+        "world_mutation"
+      ],
+      "evidence": [
+        "tv.soaryn.xycraft.machines.content.recipes.solidifier.SolidifierRecipe#public_signature"
+      ],
+      "decision": "Solidifier outputs a BlockState via IRule world matching; world mutation/placement is unsupported."
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "xycraft_machines"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "xycraft",
+        "xycraft_machines"
+      ],
+      "sha256": "76a97d1fd84fd8e5b38ea80c54f13dedbe27539424b38e99e3c22d0e390e4bdf"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [
+      "xycraft_machines:xynergy"
+    ],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "51e82887cf9b09654e3e34b230e8ff5532db624a9dd1f5c7dfa01c4841b7ffef",
+  "source_recipe_data_sha256": "5b17aff5d9e319a159da994e54e6e3846fa8302534e6c57b9fca7f305ad7536c",
+  "source_recipe_inventory_sha256": "849cd037ae148b3544a16eca17c4d6b14e061a4636704f0f089fff0ee45d4c10",
+  "target": {
+    "dependency": "curse.maven:xycraft-machines-653791:6872530",
+    "display_name": "XyCraft Machines",
+    "mod_id": "xycraft_machines",
+    "repositories": [
+      "https://www.cursemaven.com"
+    ],
+    "runtime_dependencies": [
+      "curse.maven:xycraft-653786:6872525",
+      "curse.maven:xycraft-world-653789:6872532"
+    ],
+    "version": "0.7.53"
+  },
+  "verification": {
+    "fixture": "xycraftMachinesFixture",
+    "expected_game_tests": 8,
+    "game_test_task": "runXycraftMachinesGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runXycraftMachinesGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ],
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "task": "runGameTestServer",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "task": "runXycraftMachinesGameTestServer",
+          "source": "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesIntegrationGameTests.java",
+          "marker": "XyCraft Machines unsafe contract was registered"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "task": "runXycraftMachinesGameTestServer",
+          "source": "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesIntegrationGameTests.java",
+          "marker": "Unsafe XyCraft Machines recipe was accepted"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "task": "runXycraftMachinesGameTestServer",
+          "source": "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesIntegrationGameTests.java",
+          "marker": "Unsafe XyCraft Machines recipe type accepted"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "task": "runXycraftMachinesGameTestServer",
+          "source": "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesIntegrationGameTests.java",
+          "marker": "Missing audited XyCraft Machines recipe"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "task": "runGameTestServer",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "marker": "Unknown recipe id must fail closed"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "task": "runXycraftMachinesGameTestServer",
+          "source": "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesIntegrationGameTests.java",
+          "marker": "Unsafe XyCraft Machines recipe was accepted"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "task": "runRecipeAddonGameTestServer",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "marker": "Typed family changed the wrong exact resources or output amounts"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "task": "runRecipeAddonGameTestServer",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "marker": "Failed typed family commit partially mutated resources"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "task": "build",
+          "source": "build.gradle",
+          "marker": "verifyCompatIsolation"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "task": "build",
+          "source": "build.gradle",
+          "marker": "compileAddonExampleJava"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "task": "runCompatibilityMatrixGameTestServer",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")"
+        }
+      ]
+    }
+  }
+}

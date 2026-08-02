@@ -1,0 +1,46 @@
+{
+  "auditArtifact": {
+    "dependency": "curse.maven:xycraft-machines-653791:6872530",
+    "sha256": "51e82887cf9b09654e3e34b230e8ff5532db624a9dd1f5c7dfa01c4841b7ffef"
+  },
+  "dependencies": [
+    "curse.maven:xycraft-machines-653791:6872530"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.xycraftmachines.XycraftMachinesCompatModule",
+  "expectedTests": 8,
+  "fixture": "xycraftMachinesFixture",
+  "id": "auto_storage:xycraft_machines",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "xycraft_machines"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "xycraft",
+        "xycraft_machines"
+      ],
+      "sha256": "76a97d1fd84fd8e5b38ea80c54f13dedbe27539424b38e99e3c22d0e390e4bdf"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [
+      "xycraft_machines:xynergy"
+    ],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://www.cursemaven.com"
+  ],
+  "requires": [
+    "xycraft_machines"
+  ],
+  "runtimeDependencies": [
+    "curse.maven:xycraft-machines-653791:6872530",
+    "curse.maven:xycraft-653786:6872525",
+    "curse.maven:xycraft-world-653789:6872532"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatXycraftMachines"
+}
