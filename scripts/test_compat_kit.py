@@ -6384,7 +6384,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
         self.assertEqual(reviewed_matrix, descriptor["matrix"])
 
-    def test_bundled_descriptor_includes_reviewed_runtime_compile_ancestry(self):
+    def test_bundled_descriptor_includes_all_audited_compile_ancestry(self):
         contract = self.accepted_contract()
         contract["target"]["runtime_dependencies"] = [
             "com.example:compile-api:4.5.6",
@@ -6419,6 +6419,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             [
                 "com.example:samplemod:1.2.3",
                 "com.example:compile-api:4.5.6",
+                "com.example:scan-only-api:7.8.9",
             ],
             descriptor["dependencies"],
         )

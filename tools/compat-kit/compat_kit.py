@@ -4665,7 +4665,6 @@ def _bundled_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
             *(
                 record["dependency"]
                 for record in source_audit["ancestry_dependencies"]
-                if record["dependency"] in target["runtime_dependencies"]
             ),
         ],
         "runtimeDependencies": [
