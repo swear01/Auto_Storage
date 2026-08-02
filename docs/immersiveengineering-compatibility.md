@@ -85,9 +85,12 @@ are recorded only in the matrix report.
 tools/compat-kit/compat-kit verify \
   compat/contracts/immersiveengineering.json \
   --audit compat/audits/immersiveengineering/12.4.2-194.json \
+  --jar build/compat-kit/artifacts/ImmersiveEngineering-1.21.1-12.4.2-194.jar \
   --bundled . \
   --output build/compat-kit/immersiveengineering-report.json
 ```
 
 Passing report path: `build/compat-kit/immersiveengineering-report.json`.
+
+The committed audit/contract currently remain scanner format 7, matching the merged Theurgy dogfood on main. Compat Kit v2 complete verify requires a format-16 audit; upgrading is blocked until the optional ComputerCraft peripheral ancestry used by IE's embedded CC compat classes is supplied as exact classpath evidence.
 

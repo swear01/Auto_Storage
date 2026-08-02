@@ -2142,7 +2142,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Immersive Engineering fail-closed boundary changed",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }
