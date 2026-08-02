@@ -163,5 +163,8 @@
   "gui.auto_storage.station.oritech_pulverizer": "粉碎機",
   "gui.auto_storage.station.theurgy_calcination": "煅燒",
   "gui.auto_storage.station.theurgy_distillation": "煉金蒸餾",
-  "gui.auto_storage.station.theurgy_liquefaction": "液化"
+  "gui.auto_storage.station.theurgy_liquefaction": "液化",
+  "gui.auto_storage.station.actuallyadditions_crushing": "粉碎",
+  "gui.auto_storage.station.actuallyadditions_pressing": "壓榨",
+  "gui.auto_storage.station.actuallyadditions_fermenting": "發酵"
 }

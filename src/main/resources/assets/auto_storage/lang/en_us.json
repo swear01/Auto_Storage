@@ -163,5 +163,8 @@
   "gui.auto_storage.station.oritech_pulverizer": "Pulverizer",
   "gui.auto_storage.station.theurgy_calcination": "Calcination",
   "gui.auto_storage.station.theurgy_distillation": "Distillation",
-  "gui.auto_storage.station.theurgy_liquefaction": "Liquefaction"
+  "gui.auto_storage.station.theurgy_liquefaction": "Liquefaction",
+  "gui.auto_storage.station.actuallyadditions_crushing": "Crushing",
+  "gui.auto_storage.station.actuallyadditions_pressing": "Pressing",
+  "gui.auto_storage.station.actuallyadditions_fermenting": "Fermenting"
 }

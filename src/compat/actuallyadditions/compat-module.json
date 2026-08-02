@@ -1,0 +1,56 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:actually-additions:iNeJmgFj",
+    "sha256": "072451bb6069025e255a39216edc0f892cda00c12b9905b552e7dd4631d44a41"
+  },
+  "dependencies": [
+    "maven.modrinth:actually-additions:iNeJmgFj",
+    "mezz.jei:jei-1.21.1-common-api:19.27.0.340",
+    "top.theillusivec4.curios:curios-neoforge:9.5.1+1.21.1",
+    "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE",
+    "xyz.brassgoggledcoders:PatchouliProvider:1.21.1-1.0.11-Snapshot.5"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.actuallyadditions.ActuallyadditionsCompatModule",
+  "expectedTests": 14,
+  "fixture": "actuallyadditionsFixture",
+  "id": "auto_storage:actuallyadditions",
+  "matrix": {
+    "acceptedRecipes": [
+      "actuallyadditions:crushing/blaze_rod",
+      "actuallyadditions:pressing/canola",
+      "actuallyadditions:fermenting/refined_canola"
+    ],
+    "descriptors": [
+      "auto_storage:actuallyadditions_crushing",
+      "auto_storage:actuallyadditions_pressing",
+      "auto_storage:actuallyadditions_fermenting"
+    ],
+    "mods": [
+      "actuallyadditions"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "actuallyadditions"
+      ],
+      "sha256": "ee098fe82eb718eaad44abd60312e2a7e34be6cadca12900aeab6719edefddc1"
+    },
+    "rejectedDescriptors": [
+      "auto_storage:actuallyadditions_empowering",
+      "auto_storage:actuallyadditions_laser"
+    ],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "actuallyadditions"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:actually-additions:iNeJmgFj"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatActuallyadditions"
+}

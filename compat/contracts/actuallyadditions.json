@@ -1,0 +1,485 @@
+{
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "072451bb6069025e255a39216edc0f892cda00c12b9905b552e7dd4631d44a41",
+  "source_recipe_inventory_sha256": "cdf0b8250c2b1e92f8d0d09367ba7f525ea820e5cfc9ba2e2e69b57c09096d03",
+  "source_recipe_data_sha256": "1baa31128d8a7e6d5469b7266838e37de876e8e09aa7aaf4436594bef44680ea",
+  "target": {
+    "dependency": "maven.modrinth:actually-additions:iNeJmgFj",
+    "display_name": "Actually Additions",
+    "mod_id": "actuallyadditions",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [],
+    "version": "1.3.26"
+  },
+  "families": [
+    {
+      "id": "coffee_ingredient_recipe",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe",
+      "status": "rejected",
+      "decision": "Coffee ingredient effects mutate player/entity state and are not a deterministic Core transaction family.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe#public_signature"
+      ],
+      "risks": [
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    },
+    {
+      "id": "color_change_recipe",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.ColorChangeRecipe",
+      "status": "rejected",
+      "decision": "Color Change is a world laser-beam transformation; Auto Storage does not simulate world/entity laser paths.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.ColorChangeRecipe#public_signature"
+      ],
+      "risks": [
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    },
+    {
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.CrushingRecipe",
+      "costs": [
+        {
+          "amount": 4000,
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": 4000,
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept CrushingRecipe only when the input Ingredient is simple/non-empty, the primary output is non-empty with positive count and guaranteed (first chance == 1.0), and the secondary output is either empty or guaranteed (second chance == 1.0). Fractional primary or secondary chance stays fail-closed. Single crusher only: ENERGY_USE 40 FE/tick for 100 ticks (4000 FE and 4000 station work); crusher_double uses a different 150-tick/6000 FE contract and is not inferred from the plain crusher item. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
+      "evidence": [
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getInput",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getOutputOne",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getOutputTwo",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getSecondChance",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/ActuallyRecipes.java#Types.CRUSHING",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityCrusher.java#ENERGY_USE",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityCrusher.java#getMaxCrushTime",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityCrusher.java#finishCrushing"
+      ],
+      "id": "crushing_recipe",
+      "inputs": [
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.input simple Ingredient alternatives"
+        },
+        {
+          "amount": 4000,
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.outputOne.count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.outputOne"
+        },
+        {
+          "amount": "recipe.outputTwo.count when non-empty and chance==1.0",
+          "resource_kind": "item",
+          "role": "remainder",
+          "selector": "recipe.outputTwo"
+        }
+      ],
+      "recipe_type": "actuallyadditions:crushing",
+      "risks": [
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:actuallyadditions_crushing",
+        "variants": [
+          {
+            "bounds": "plain crusher item; crusher_double is a different 150-tick/6000 FE contract and is not inferred",
+            "item": "actuallyadditions:crusher",
+            "rate": {
+              "numerator": 40,
+              "denominator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "id": "empowerer_recipe",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.EmpowererRecipe",
+      "status": "rejected",
+      "decision": "Empowerer requires a multiblock display-stand arrangement and live world state outside a single Core transaction.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.EmpowererRecipe#public_signature"
+      ],
+      "risks": [
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    },
+    {
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.FermentingRecipe",
+      "costs": [
+        {
+          "amount": "recipe.time",
+          "resource_kind": "auto_storage:station_work"
+        }
+      ],
+      "decision": "Accept FermentingRecipe when input and output FluidStacks are non-empty with positive amounts, the output fluid has a non-empty bucket presentation, and recipe.time is positive. Bucketless outputs fail closed before catalog plan construction. Fermenting Barrel consumes no FE; station work equals recipe.time at 1 work/tick. Family costs are station work only. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
+      "evidence": [
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/FermentingRecipe.java#getInput",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/FermentingRecipe.java#getOutput",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/FermentingRecipe.java#getTime",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/ActuallyRecipes.java#Types.FERMENTING",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityFermentingBarrel.java#serverTick"
+      ],
+      "id": "fermenting_recipe",
+      "inputs": [
+        {
+          "amount": "recipe.input.amount",
+          "resource_kind": "fluid",
+          "role": "consume",
+          "selector": "recipe.input FluidStack"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.output.amount",
+          "resource_kind": "fluid",
+          "role": "primary",
+          "selector": "recipe.output FluidStack"
+        }
+      ],
+      "recipe_type": "actuallyadditions:fermenting",
+      "risks": [
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:actuallyadditions_fermenting",
+        "variants": [
+          {
+            "bounds": "plain fermenting_barrel item",
+            "item": "actuallyadditions:fermenting_barrel",
+            "rate": {
+              "numerator": 1,
+              "denominator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "id": "laser_recipe",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.LaserRecipe",
+      "status": "rejected",
+      "decision": "Atomic Reconstructor laser recipes mutate world blocks/entities along a beam; not a deterministic Core transaction.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.LaserRecipe#public_signature"
+      ],
+      "risks": [
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    },
+    {
+      "id": "liquid_fuel_recipe",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.LiquidFuelRecipe",
+      "status": "rejected",
+      "decision": "Liquid Fuel recipes feed generators rather than producing bounded Core outputs; energy generation is out of scope.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.LiquidFuelRecipe#public_signature"
+      ],
+      "risks": [
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    },
+    {
+      "id": "mining_lens_recipe",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.MiningLensRecipe",
+      "status": "rejected",
+      "decision": "Mining Lens recipes are world laser mining outcomes; not a deterministic Core transaction.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.MiningLensRecipe#public_signature"
+      ],
+      "risks": [
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    },
+    {
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.PressingRecipe",
+      "costs": [
+        {
+          "amount": 1050,
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": 1050,
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept PressingRecipe when the input Ingredient is simple/non-empty, the FluidStack output is non-empty with positive amount, and the output fluid has a non-empty bucket presentation. Bucketless outputs fail closed before catalog plan construction. Canola Press uses ENERGY_USE 35 FE/tick for TIME 30 ticks (1050 FE and 1050 station work). Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
+      "evidence": [
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/PressingRecipe.java#getInput",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/PressingRecipe.java#getOutput",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/ActuallyRecipes.java#Types.PRESSING",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityCanolaPress.java#ENERGY_USE",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityCanolaPress.java#TIME",
+        "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityCanolaPress.java#serverTick"
+      ],
+      "id": "pressing_recipe",
+      "inputs": [
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.input simple Ingredient alternatives"
+        },
+        {
+          "amount": 1050,
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.output.amount",
+          "resource_kind": "fluid",
+          "role": "primary",
+          "selector": "recipe.output FluidStack"
+        }
+      ],
+      "recipe_type": "actuallyadditions:pressing",
+      "risks": [
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:actuallyadditions_pressing",
+        "variants": [
+          {
+            "bounds": "plain canola_press item",
+            "item": "actuallyadditions:canola_press",
+            "rate": {
+              "numerator": 35,
+              "denominator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "id": "recipe_keep_data_shaped",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShaped",
+      "status": "rejected",
+      "decision": "KeepData shaped crafting copies NBT through generic ingredients and is covered by vanilla shaped adapters when exact; no separate AA family.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShaped#public_signature"
+      ],
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    },
+    {
+      "id": "recipe_keep_data_shapeless",
+      "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShapeless",
+      "status": "rejected",
+      "decision": "KeepData shapeless crafting copies NBT through generic ingredients and is covered by vanilla shapeless adapters when exact; no separate AA family.",
+      "evidence": [
+        "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShapeless#public_signature"
+      ],
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "recipe_type": null,
+      "station": null,
+      "inputs": [],
+      "outputs": [],
+      "costs": []
+    }
+  ],
+  "matrix": {
+    "mods": [
+      "actuallyadditions"
+    ],
+    "descriptors": [
+      "auto_storage:actuallyadditions_crushing",
+      "auto_storage:actuallyadditions_pressing",
+      "auto_storage:actuallyadditions_fermenting"
+    ],
+    "resourceKinds": [],
+    "acceptedRecipes": [
+      "actuallyadditions:crushing/blaze_rod",
+      "actuallyadditions:pressing/canola",
+      "actuallyadditions:fermenting/refined_canola"
+    ],
+    "rejectedDescriptors": [
+      "auto_storage:actuallyadditions_empowering",
+      "auto_storage:actuallyadditions_laser"
+    ],
+    "rejectedResourceKinds": [],
+    "recipeInventory": {
+      "namespaces": [
+        "actuallyadditions"
+      ],
+      "sha256": "ee098fe82eb718eaad44abd60312e2a7e34be6cadca12900aeab6719edefddc1"
+    }
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Guaranteed Crushing secondary did not emit both exact outputs",
+          "source": "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java",
+          "task": "runActuallyadditionsGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Long.MAX_VALUE",
+          "source": "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java",
+          "task": "runActuallyadditionsGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Actually Additions full destination transaction was not an atomic no-op",
+          "source": "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java",
+          "task": "runActuallyadditionsGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Actually Additions missing-ingredient transaction was not an atomic no-op",
+          "source": "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java",
+          "task": "runActuallyadditionsGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Actually Additions registration or excluded family boundary was incorrect",
+          "source": "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java",
+          "task": "runActuallyadditionsGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 14,
+    "fixture": "actuallyadditionsFixture",
+    "game_test_task": "runActuallyadditionsGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runActuallyadditionsGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}
