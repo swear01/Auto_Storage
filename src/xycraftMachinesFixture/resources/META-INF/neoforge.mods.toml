@@ -1,0 +1,37 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="auto_storage_xycraft_machines_fixture"
+version="1.0.0"
+displayName="Auto Storage XycraftMachines Fixture"
+description="Compat Kit generated RED fixture for XyCraft Machines."
+
+[[dependencies.auto_storage_xycraft_machines_fixture]]
+modId="neoforge"
+type="required"
+versionRange="[21.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.auto_storage_xycraft_machines_fixture]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.22)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.auto_storage_xycraft_machines_fixture]]
+modId="auto_storage"
+type="required"
+versionRange="[0.3,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.auto_storage_xycraft_machines_fixture]]
+modId="xycraft_machines"
+type="required"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"

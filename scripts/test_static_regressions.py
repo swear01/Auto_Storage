@@ -5511,6 +5511,30 @@ class StaticRegressionTests(unittest.TestCase):
                 f"Import and Export Bus {face} faces must remain distinguishable",
             )
 
+    def test_xycraft_exhaustive_scan_seeds_distinct_drain_and_buildings_types(self):
+        text = self.read_required(
+            "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/"
+            "xycraftmachines/XycraftMachinesIntegrationGameTests.java"
+        )
+        method = "every_recipe_in_each_audited_machine_type_fails_closed"
+        start = text.index(method)
+        body_start = text.index("{", start)
+        body_end = text.index("private static void assertUnsupported", body_start)
+        body = text[body_start:body_end]
+        self.assertIn('xycraft("fluid_tank_fill/water_bottle")', body)
+        self.assertIn('xycraft("fluid_tank_drain/water_bottle")', body)
+        self.assertIn('xycraft("buildings/temp")', body)
+        self.assertRegex(
+            text,
+            r"assertUnsupported\([\s\S]*?"
+            r'xycraft\("fluid_tank_drain/water_bottle"\)',
+        )
+        self.assertRegex(
+            text,
+            r"assertUnsupported\([\s\S]*?"
+            r'xycraft\("buildings/temp"\)',
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
