@@ -513,6 +513,135 @@ def normalize_jar(source, output) -> Path:
     return output_path
 
 
+def _validate_exact_zip_entry_path(entry: str, location: str):
+    if not isinstance(entry, str) or not entry:
+        raise ValueError(f"{location} must be a non-empty exact ZIP entry path")
+    if (
+        entry.startswith("/")
+        or entry.endswith("/")
+        or "\\" in entry
+        or re.search(r"[\x00-\x1f\x7f]", entry) is not None
+        or any(part in ("", ".", "..") for part in entry.split("/"))
+        or any(character in entry for character in "*?[]")
+    ):
+        raise ValueError(f"{location} must be a safe exact ZIP entry path")
+
+
+def transform_runtime_artifact(
+    source,
+    output,
+    *,
+    expected_sha256: str,
+    remove_entries,
+) -> Path:
+    if not isinstance(expected_sha256, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", expected_sha256
+    ):
+        raise ValueError("runtime artifact expected SHA must be a SHA-256 digest")
+    if not isinstance(remove_entries, list) or not remove_entries:
+        raise ValueError("runtime artifact remove entries must be a non-empty list")
+    if len(set(remove_entries)) != len(remove_entries):
+        raise ValueError("runtime artifact remove entries must be unique")
+    for index, entry in enumerate(remove_entries):
+        _validate_exact_zip_entry_path(
+            entry,
+            f"runtime artifact remove entry {index}",
+        )
+
+    unresolved_source = Path(source)
+    if unresolved_source.is_symlink():
+        raise ValueError(f"runtime artifact source is a symlink: {source}")
+    source_path = unresolved_source.resolve()
+    if not source_path.is_file():
+        raise ValueError(f"runtime artifact source does not exist: {source}")
+    source_size = source_path.stat().st_size
+    source_sha256 = _sha256_file(source_path)
+    if source_sha256 != expected_sha256:
+        raise ValueError(
+            "runtime artifact SHA-256 mismatch: expected "
+            f"{expected_sha256}, got {source_sha256}"
+        )
+
+    output_path = Path(output).absolute()
+    if output_path.is_symlink():
+        raise ValueError(f"runtime artifact output is a symlink: {output}")
+    if output_path.resolve() == source_path:
+        raise ValueError("runtime artifact output must differ from source")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_name(f".{output_path.name}.tmp-{os.getpid()}")
+    temporary.unlink(missing_ok=True)
+    try:
+        with zipfile.ZipFile(source_path) as source_archive:
+            _validate_archive(source_path, source_archive)
+            entries = source_archive.infolist()
+            names = [entry.filename for entry in entries]
+            if len(set(names)) != len(names):
+                raise ValueError("runtime artifact repeats a ZIP entry")
+            for name in names:
+                logical_name = name[:-1] if name.endswith("/") else name
+                if (
+                    not logical_name
+                    or logical_name.startswith("/")
+                    or "\\" in logical_name
+                    or any(
+                        part in ("", ".", "..")
+                        for part in logical_name.split("/")
+                    )
+                ):
+                    raise ValueError(
+                        "runtime artifact has a non-canonical ZIP entry path"
+                    )
+            missing = sorted(set(remove_entries) - set(names))
+            if missing:
+                raise ValueError(
+                    "runtime artifact is missing exact ZIP entries: "
+                    + ", ".join(missing)
+                )
+            removed = set(remove_entries)
+            with zipfile.ZipFile(
+                temporary,
+                "w",
+                compression=zipfile.ZIP_STORED,
+                allowZip64=True,
+            ) as transformed_archive:
+                for entry in sorted(entries, key=lambda item: item.filename):
+                    if entry.filename in removed:
+                        continue
+                    info = zipfile.ZipInfo(
+                        entry.filename,
+                        (1980, 1, 1, 0, 0, 0),
+                    )
+                    info.compress_type = zipfile.ZIP_STORED
+                    info.create_system = 3
+                    info.external_attr = (
+                        (0o40755 if entry.is_dir() else 0o100644) << 16
+                    )
+                    if entry.is_dir():
+                        transformed_archive.writestr(info, b"")
+                        continue
+                    with source_archive.open(entry) as input_stream:
+                        with transformed_archive.open(
+                            info,
+                            "w",
+                            force_zip64=True,
+                        ) as output_stream:
+                            shutil.copyfileobj(
+                                input_stream,
+                                output_stream,
+                                length=64 * 1024,
+                            )
+        _require_unchanged_artifact(
+            source_path,
+            source_sha256,
+            source_size,
+            "runtime artifact",
+        )
+        os.replace(temporary, output_path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return output_path
+
+
 def _read_mod_metadata(
     archive: zipfile.ZipFile,
     *,

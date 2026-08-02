@@ -572,6 +572,41 @@ class ModularCompatSdkTests(unittest.TestCase):
         ):
             self.assertNotIn(fixture_id, build)
 
+    def test_descriptor_runtime_transforms_are_shared_exact_and_runtime_only(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("descriptor.runtimeArtifactTransforms", build)
+        self.assertIn("sharedCompatRuntimeTransforms", build)
+        self.assertIn(
+            "Conflicting compatibility runtime artifact transform",
+            build,
+        )
+        self.assertIn(
+            "Compatibility runtime artifact SHA is declared by multiple dependencies",
+            build,
+        )
+        self.assertIn('"transform-runtime-artifact"', build)
+        self.assertIn('"--expected-sha256"', build)
+        self.assertIn('"--remove-entry"', build)
+        self.assertIn("outputs.cacheIf", build)
+        self.assertIn("runtimeTransformOutputs", build)
+        self.assertIn("builtBy(runtimeTransformTasks", build)
+        self.assertIn("mergeCompatRuntimeTransform", build)
+        self.assertIn("verifyCompatRuntimeTransformPlanning", build)
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\('check'\).*?"
+            r"dependsOn verifyCompatRuntimeTransformPlanning",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)spec\.runtimeDependencies\.each \{ notation ->.*?"
+            r"if \(spec\.runtimeArtifactTransformsByDependency\.containsKey\(notation\)\)"
+            r".*?return",
+        )
+        self.assertNotIn("integratedDynamicsRsGameTestClass", build)
+        self.assertNotIn("GameTestsAspectsRefinedStorage", build)
+
     def test_registration_and_reload_lifecycle_are_fail_closed_and_ordered(self):
         addon = (
             ROOT

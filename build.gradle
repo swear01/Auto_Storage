@@ -93,11 +93,30 @@ def expandCompatDependency = { String notation ->
     }
 }
 
+def isSafeExactZipEntry = { value ->
+    value instanceof String
+            && !value.isEmpty()
+            && !value.startsWith('/')
+            && !value.endsWith('/')
+            && !value.contains('\\')
+            && !value.contains('*')
+            && !value.contains('?')
+            && !value.contains('[')
+            && !value.contains(']')
+            && !value.any { character ->
+                ((int) character) < 32 || ((int) character) == 127
+            }
+            && !value.split('/', -1).any { it in ['', '.', '..'] }
+}
+
 def compatModules = compatModuleFiles.collect { descriptorFile ->
     def descriptor = new JsonSlurper().parse(descriptorFile)
     def directoryId = descriptorFile.parentFile.name
     def auditArtifact = descriptor.auditArtifact
     def descriptorRepositories = descriptor.repositories == null ? [] : descriptor.repositories
+    def descriptorRuntimeTransforms = descriptor.runtimeArtifactTransforms == null
+            ? []
+            : descriptor.runtimeArtifactTransforms
     if (descriptor.schema != 1
             || descriptor.id != "auto_storage:${directoryId}"
             || !(descriptor.entrypoint instanceof String)
@@ -116,7 +135,31 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || descriptorRepositories.toSet().size() != descriptorRepositories.size()
             || !(descriptor.runtimeDependencies instanceof List)
             || descriptor.runtimeDependencies.isEmpty()
+            || descriptor.runtimeDependencies.toSet().size()
+            != descriptor.runtimeDependencies.size()
             || !descriptor.runtimeDependencies.contains(descriptor.dependencies[0])
+            || !(descriptorRuntimeTransforms instanceof List)
+            || descriptorRuntimeTransforms.any { transform ->
+                !(transform instanceof Map)
+                        || transform.keySet()
+                        != ['dependency', 'sha256', 'remove_entries'] as Set
+                        || !(transform.dependency instanceof String)
+                        || !(transform.dependency
+                        ==~ /[^:\s]+:[^:\s]+:[^:\s]+/)
+                        || !(transform.sha256 instanceof String)
+                        || !(transform.sha256 ==~ /[0-9a-f]{64}/)
+                        || !(transform.remove_entries instanceof List)
+                        || transform.remove_entries.isEmpty()
+                        || transform.remove_entries.toSet().size()
+                        != transform.remove_entries.size()
+                        || !transform.remove_entries.every(isSafeExactZipEntry)
+                        || !descriptor.runtimeDependencies.contains(
+                        transform.dependency)
+            }
+            || descriptorRuntimeTransforms.collect { it.dependency }.toSet().size()
+            != descriptorRuntimeTransforms.size()
+            || descriptorRuntimeTransforms.collect { it.sha256 }.toSet().size()
+            != descriptorRuntimeTransforms.size()
             || (auditArtifact != null
             && (!(auditArtifact instanceof Map)
             || auditArtifact.keySet() != ['dependency', 'sha256'] as Set
@@ -127,6 +170,11 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || descriptor.dependencies[0] != auditArtifact.dependency
             || !(descriptor.runtimeDependencies instanceof List)
             || !descriptor.runtimeDependencies.contains(auditArtifact.dependency)))
+            || (auditArtifact != null
+            && descriptorRuntimeTransforms.any { transform ->
+                transform.dependency == auditArtifact.dependency
+                        && transform.sha256 != auditArtifact.sha256
+            })
             || !(descriptor.matrix instanceof Map)
             || descriptor.matrix.mods == null
             || descriptor.matrix.descriptors == null
@@ -170,6 +218,16 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             runtimeDependencies: descriptor.runtimeDependencies.collect {
                 expandCompatDependency(it.toString())
             },
+            runtimeArtifactTransforms: descriptorRuntimeTransforms.collect { transform ->
+                [
+                        dependency   : expandCompatDependency(
+                                transform.dependency.toString()),
+                        sha256      : transform.sha256.toString(),
+                        removeEntries: transform.remove_entries.collect {
+                            it.toString()
+                        }.sort(),
+                ]
+            },
             auditArtifact: auditArtifact == null ? null : [
                     dependency: expandCompatDependency(
                             auditArtifact.dependency.toString()),
@@ -180,6 +238,87 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
 
 if (compatModules.collect { it.moduleId }.toSet().size() != compatModules.size()) {
     throw new GradleException('Duplicate compatibility module ID')
+}
+
+compatModules.each { spec ->
+    spec.runtimeArtifactTransformsByDependency =
+            spec.runtimeArtifactTransforms.collectEntries { transform ->
+                [(transform.dependency): transform]
+            }
+}
+def sharedCompatRuntimeTransforms = [:]
+def sharedCompatRuntimeTransformDependenciesBySha = [:]
+def mergeCompatRuntimeTransform = { shared, dependenciesBySha, transform ->
+    def existing = shared[transform.dependency]
+    if (existing != null
+            && (existing.sha256 != transform.sha256
+            || existing.removeEntries != transform.removeEntries)) {
+        throw new GradleException(
+                "Conflicting compatibility runtime artifact transform for ${transform.dependency}")
+    }
+    def existingDependency = dependenciesBySha[transform.sha256]
+    if (existingDependency != null
+            && existingDependency != transform.dependency) {
+        throw new GradleException(
+                'Compatibility runtime artifact SHA is declared by multiple dependencies')
+    }
+    shared[transform.dependency] = transform
+    dependenciesBySha[transform.sha256] = transform.dependency
+}
+compatModules.each { spec ->
+    spec.runtimeArtifactTransforms.each { transform ->
+        mergeCompatRuntimeTransform(
+                sharedCompatRuntimeTransforms,
+                sharedCompatRuntimeTransformDependenciesBySha,
+                transform)
+    }
+}
+compatModules.each { spec ->
+    spec.runtimeDependencies.each { dependency ->
+        if (sharedCompatRuntimeTransforms.containsKey(dependency)
+                && !spec.runtimeArtifactTransformsByDependency.containsKey(
+                dependency)) {
+            throw new GradleException(
+                    "Compatibility runtime dependency ${dependency} must use its shared exact transform")
+        }
+    }
+}
+def verifyCompatRuntimeTransformPlanning = tasks.register(
+        'verifyCompatRuntimeTransformPlanning') {
+    group = 'verification'
+    description = 'Proves identical runtime transforms share one artifact and conflicts fail closed'
+    doLast {
+        def dependency = 'example.group:shared-runtime:1.0.0'
+        def exact = [
+                dependency   : dependency,
+                sha256      : '1' * 64,
+                removeEntries: ['example/gametest/ForeignTests.class'],
+        ]
+        def shared = [:]
+        def dependenciesBySha = [:]
+        mergeCompatRuntimeTransform(shared, dependenciesBySha, exact)
+        mergeCompatRuntimeTransform(shared, dependenciesBySha,
+                new LinkedHashMap(exact))
+        if (shared.size() != 1) {
+            throw new GradleException(
+                    'Identical compatibility runtime transforms did not deduplicate')
+        }
+        for (conflict in [
+                exact + [sha256: '2' * 64],
+                exact + [removeEntries: ['example/gametest/OtherTests.class']],
+        ]) {
+            try {
+                mergeCompatRuntimeTransform(shared, dependenciesBySha, conflict)
+                throw new GradleException(
+                        'Conflicting compatibility runtime transform was accepted')
+            } catch (GradleException expected) {
+                if (!expected.message.startsWith(
+                        'Conflicting compatibility runtime artifact transform')) {
+                    throw expected
+                }
+            }
+        }
+    }
 }
 
 def generatedCompatModuleIndexDir =
@@ -801,6 +940,84 @@ repositories {
     }
 }
 
+def runtimeTransformTasks = [:]
+def runtimeTransformOutputs = [:]
+def compatKitRuntimeTransformScript =
+        layout.projectDirectory.file('tools/compat-kit/compat_kit.py').asFile
+def compatKitRuntimeTransformWorkingDirectory =
+        layout.projectDirectory.asFile
+sharedCompatRuntimeTransforms.values().sort { left, right ->
+    left.dependency <=> right.dependency
+}.eachWithIndex { transform, index ->
+    def configurationName = "compatRuntimeTransform${index}Artifact"
+    def artifactConfiguration = configurations.create(configurationName) {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    dependencies.add(configurationName, transform.dependency) {
+        transitive = false
+    }
+    def planDigest = java.security.MessageDigest.getInstance('SHA-256')
+            .digest(([transform.dependency, transform.sha256]
+            + transform.removeEntries).join('\n')
+            .getBytes(java.nio.charset.StandardCharsets.UTF_8))
+            .encodeHex().toString()
+    def outputJar = layout.buildDirectory.file(
+            "compat-kit/runtime-transforms/${transform.sha256}-${planDigest}.jar")
+    def outputFile = outputJar.get().asFile
+    def transformDependency = transform.dependency.toString()
+    def transformSha256 = transform.sha256.toString()
+    def transformRemoveEntries = transform.removeEntries.collect {
+        it.toString()
+    }
+    def transformTask = tasks.register(
+            "transformCompatRuntimeArtifact${planDigest}", Exec) {
+        inputs.files(artifactConfiguration)
+        inputs.file(compatKitRuntimeTransformScript)
+        inputs.property('dependency', transformDependency)
+        inputs.property('expectedSha256', transformSha256)
+        inputs.property('removeEntries', transformRemoveEntries)
+        outputs.file(outputFile)
+        outputs.cacheIf { true }
+        workingDir = compatKitRuntimeTransformWorkingDirectory
+        doFirst {
+            def artifacts = inputs.files.files.findAll {
+                it != compatKitRuntimeTransformScript
+            }
+            if (artifacts.size() != 1
+                    || !artifacts.iterator().next().name.endsWith('.jar')) {
+                throw new GradleException(
+                        "Compatibility runtime transform expected one resolved jar for "
+                                + "${transformDependency}, found ${artifacts.size()}")
+            }
+            def command = [
+                    'python3',
+                    compatKitRuntimeTransformScript.absolutePath,
+                    "transform-runtime-artifact",
+                    artifacts.iterator().next().absolutePath,
+                    outputFile.absolutePath,
+                    "--expected-sha256",
+                    transformSha256,
+            ]
+            transformRemoveEntries.each { entry ->
+                command.add("--remove-entry")
+                command.add(entry)
+            }
+            commandLine command
+        }
+    }
+    runtimeTransformTasks[transform.dependency] = transformTask
+    runtimeTransformOutputs[transform.dependency] = outputJar
+}
+compatModules.each { spec ->
+    tasks.named(spec.runTask).configure {
+        dependsOn spec.runtimeArtifactTransforms.collect { transform ->
+            runtimeTransformTasks[transform.dependency]
+        }
+    }
+}
+
 dependencies {
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
@@ -825,6 +1042,9 @@ dependencies {
             }
         }
         spec.runtimeDependencies.each { notation ->
+            if (spec.runtimeArtifactTransformsByDependency.containsKey(notation)) {
+                return
+            }
             add(sourceSets[spec.fixture].runtimeOnlyConfigurationName, notation) {
                 transitive = false
             }
@@ -832,6 +1052,21 @@ dependencies {
                 transitive = false
             }
         }
+        spec.runtimeArtifactTransforms.each { transform ->
+            def transformedFiles = files(
+                    runtimeTransformOutputs[transform.dependency])
+            transformedFiles.builtBy(
+                    runtimeTransformTasks[transform.dependency])
+            add(sourceSets[spec.fixture].runtimeOnlyConfigurationName,
+                    transformedFiles)
+        }
+    }
+    sharedCompatRuntimeTransforms.values().each { transform ->
+        def transformedFiles = files(
+                runtimeTransformOutputs[transform.dependency])
+        transformedFiles.builtBy(runtimeTransformTasks[transform.dependency])
+        add(sourceSets.compatibilityMatrixFixture.runtimeOnlyConfigurationName,
+                transformedFiles)
     }
     pneumaticCraftFixtureCompileOnly(
             "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}") {
@@ -1388,6 +1623,7 @@ tasks.named('check').configure {
     dependsOn tasks.named('compileCompatKitGeneratedFixtureJava')
     dependsOn tasks.named('verifyApiSurface')
     dependsOn tasks.named('verifyCompatIsolation')
+    dependsOn verifyCompatRuntimeTransformPlanning
     dependsOn checkCompatibilitySummary
     dependsOn compatArtifactVerificationTasks
 }
@@ -1465,6 +1701,7 @@ def compatibilityMatrixLatestLog =
         layout.projectDirectory.file('run/logs/latest.log').asFile
 tasks.named('runCompatibilityMatrixGameTestServer').configure {
     dependsOn compatArtifactVerificationTasks
+    dependsOn runtimeTransformTasks.values()
     dependsOn tasks.named('verifyBotaniaFixtureArtifact')
     dependsOn generateCompatibilityMatrixManifest
     doLast {

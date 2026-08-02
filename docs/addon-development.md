@@ -235,6 +235,14 @@ Reviewed repository URLs, dependency coordinates, and group filters are
 serialized as literal Groovy strings rather than interpolated text. Maven
 coordinates must use exact `group:name:version` structure and cannot contain
 control characters.
+Repository-owned bundled fixtures may additionally declare exact
+`target.runtime_artifact_transforms` for reviewed removal of unrelated test-only
+ZIP entries. The pristine coordinate and SHA remain the audit, compile, and
+artifact-gate input; only isolated/matrix test runtimes receive the deterministic
+transformed output. Identical transforms shared by multiple bundled descriptors
+deduplicate to one artifact, and conflicting declarations fail closed. Independent
+addon scaffolds reject this bundled-descriptor-only field rather than silently
+running a different artifact contract.
 Because Auto Storage requires Patchouli on both sides, the generated
 GameTest runtime includes the matching Patchouli artifact and its repository.
 A different target artifact or source audit fails before compatibility
@@ -485,6 +493,10 @@ descriptors also carry the reviewed target repositories and artifact SHA, so a
 non-central Maven target resolves through contract-owned configuration rather
 than a root-build guess. Compat Kit rejects target IDs that would become Java
 reserved package segments instead of emitting uncompilable source.
+When present, descriptor `runtimeArtifactTransforms` is generated from the
+reviewed contract. Exact dependency/SHA/entry validation happens before Gradle
+wires a transformed jar, and the pristine jar never shares an isolated or matrix
+runtime classpath with that output.
 Before scaffold writes, the generated module ID, entrypoint, source set, and
 fixture are compared with all existing descriptors so normalized Java/Gradle
 identifier collisions fail closed.

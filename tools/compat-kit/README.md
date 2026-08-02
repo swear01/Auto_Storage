@@ -399,6 +399,16 @@ evidence markers must occur between the annotated method's braces; a marker
 that appears only in its declaration is not execution evidence. The published
 archive includes its own Gradle wrapper template, so an extracted copy can
 scaffold an addon without an Auto Storage checkout.
+Bundled contracts may own exact `runtime_artifact_transforms`; generated
+descriptors copy them as `runtimeArtifactTransforms`. Each record binds one
+declared runtime dependency, pristine SHA-256, and literal non-empty unique ZIP
+entry list. `transform-runtime-artifact` verifies the pristine bytes and every
+entry, then writes a sorted fixed-timestamp stored-entry jar atomically. Pristine
+bytes remain on audit/compile/SHA gates, while only isolated and matrix runtimes
+receive the transformed output. Identical declarations across descriptors share
+one cacheable artifact; conflicting declarations, unsafe/absent paths, duplicate
+artifacts, or pristine + transformed runtime copies fail closed. Independent
+addon scaffolds reject this descriptor-only feature.
 Bundled scaffolding also compares derived module IDs and entrypoints with
 existing descriptors before writing. Generated compatibility source sets and
 fixtures share one Gradle namespace, so they must also avoid each other, every

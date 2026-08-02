@@ -633,6 +633,21 @@ backslashes cannot alter the reviewed build input. Target and runtime
 dependencies must use exact `group:name:version` Maven coordinates; malformed
 or control-character-bearing values are rejected before scaffolding.
 
+A bundled fixture may declare `target.runtime_artifact_transforms` only when an
+exact reviewed runtime artifact embeds unrelated test-only ZIP entries that the
+loader classloads before fixture namespace filtering. Each declaration binds one
+existing runtime dependency, its pristine SHA-256, and a non-empty unique list of
+literal `remove_entries`. Absolute/traversal/directory paths, wildcards, control
+characters, absent entries, duplicate ZIP entries, unexpected artifacts, and SHA
+drift fail closed. Audit, compile, and artifact verification continue to use the
+pristine jar; only the descriptor-owned isolated fixture and aggregate matrix use
+the deterministic transformed jar. Identical dependency + SHA + entry sets across
+multiple descriptors share one cacheable output, while a conflicting SHA or entry
+set for the same dependency is rejected before runtime resolution. A transformed
+dependency cannot also appear untransformed in another descriptor's matrix
+runtime. This field is intentionally rejected for independent-addon scaffolds,
+which do not consume the repository's bundled descriptor runtime.
+
 ### 4. Scaffold a RED integration
 
 Bundled module:
@@ -686,6 +701,13 @@ module GameTest resolve exactly one target jar and reject a SHA different from
 the reviewed audit. For an audited descriptor, that same coordinate must be the
 primary compile dependency and must also appear unchanged in the explicit
 runtime dependencies. No central compatibility switch is added.
+If the contract owns a runtime transform, the generated descriptor also owns the
+exact `runtimeArtifactTransforms` block. Gradle resolves the pristine artifact
+non-transitively, runs `transform-runtime-artifact` with the reviewed SHA and
+entries, and wires the single shared output only into the affected fixture and
+matrix runtime classpaths. The task has declared inputs/outputs, deterministic
+stored-entry ZIP bytes, and Gradle output caching; repeated unchanged runs are
+up-to-date rather than rewriting the jar.
 
 External output is an ordinary NeoForge project with the Gradle wrapper,
 compile-only Auto Storage API dependency, reviewed target repositories and
