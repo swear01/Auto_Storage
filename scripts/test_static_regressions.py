@@ -4793,6 +4793,133 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("candidateIndex(RecipeHolder<?> holder, Level level)", adapter)
         self.assertIn("typedCandidateIndex", family)
 
+    def test_craftable_retained_state_releases_transient_classification_graphs(self):
+        family = self.read_required(
+            "src/main/java/com/swear/autostorage/RecipeFamily.java"
+        )
+        catalog = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftableRecipeCatalog.java"
+        )
+        menu = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
+        )
+        api_docs = self.read_required("docs/recipe-family-api.md")
+        matrix = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CraftablePerformanceGameTests.java"
+        )
+        self.assertIn(
+            "void clearRuntimeCaches()",
+            family,
+            "RecipeFamily must expose production cache release for typed plan/contract maps",
+        )
+        release = self.java_block(
+            catalog,
+            r"\bstatic\s+void\s+releaseTransientMatches\s*\(",
+            "CraftableRecipeCatalog.releaseTransientMatches",
+        )
+        self.assertIn(
+            "RECIPE_FAMILY_REGISTRY",
+            release,
+            "transient release must clear optional RecipeFamily plan/contract caches",
+        )
+        self.assertIn(
+            "clearRuntimeCaches()",
+            release,
+            "transient release must clear RecipeFamily runtime caches",
+        )
+        entry = self.java_block(
+            catalog,
+            r"\bprivate\s+static\s+final\s+class\s+CatalogEntry\b",
+            "CraftableRecipeCatalog.CatalogEntry",
+        )
+        self.assertIn(
+            "releaseTransientMatches",
+            entry,
+            "CatalogEntry must drop lazy RecipeAdapterMatch after shared listing exists",
+        )
+        self.assertNotIn(
+            "fixedVariants",
+            entry,
+            "CatalogEntry must not retain a fixedVariants cache across Craftable prepares",
+        )
+        self.assertIn(
+            "match = null",
+            entry,
+            "CatalogEntry release must drop retained RecipeAdapterMatch graphs",
+        )
+        shared_cache = self.java_block(
+            menu,
+            r"\bprivate\s+void\s+cacheSharedCraftable\s*\(",
+            "CraftingTerminalMenu.cacheSharedCraftable",
+        )
+        self.assertIn(
+            "CraftableRecipeCatalog.releaseTransientMatches()",
+            shared_cache,
+            "production shared Craftable cache must release transient catalog/family graphs",
+        )
+        self.assertIn(
+            "server.tell(new net.minecraft.server.TickTask(server.getTickCount() + 1,",
+            shared_cache,
+            "transient release must run on the next server tick after selection and preview "
+            "follow-up work completes",
+        )
+        self.assertNotIn(
+            "server.execute(CraftableRecipeCatalog::releaseTransientMatches)",
+            shared_cache,
+            "same-thread execute may release before selection and preview repopulate caches",
+        )
+        self.assertNotIn(
+            "if (usePlayerInventory) return;",
+            shared_cache,
+            "player-inventory Craftable builds must also release transient catalog/family graphs",
+        )
+        self.assertIn(
+            "if (!usePlayerInventory && level != null)",
+            shared_cache,
+            "only the shared-result write may be skipped for player-inventory Craftable builds",
+        )
+        self.assertRegex(
+            api_docs,
+            r"until the completed\s+Craftable listing releases them",
+            "the public addon contract must document the actual fixed-plan cache lifetime",
+        )
+        self.assertNotIn(
+            "presentation state on every Craftable rebuild",
+            api_docs,
+            "the public addon contract must not promise world-lifetime fixed-plan caching",
+        )
+        has_potential = self.java_block(
+            menu,
+            r"\bprivate\s+boolean\s+hasPotentialRecipeInputs\s*\(",
+            "CraftingTerminalMenu.hasPotentialRecipeInputs",
+        )
+        self.assertIn(
+            "representativeItemsExhaustive()",
+            has_potential,
+            "hasPotentialRecipeInputs must use exhaustive representative ItemKey totals "
+            "instead of scanning every stored component variant",
+        )
+        measure = self.java_block(
+            matrix,
+            r"\bprivate\s+void\s+measureSharedIndex\s*\(",
+            "CraftablePerformanceGameTests.measureSharedIndex",
+        )
+        self.assertNotIn(
+            "releaseTransientMatches",
+            measure,
+            "shared-index measurement must not call catalog release itself",
+        )
+        self.assertNotIn(
+            "clearRecipeFamilyCaches()",
+            measure,
+            "shared-index measurement must not clear family caches after production steady state",
+        )
+        self.assertIn(
+            "MAX_BASELINE_INDEX_RETAINED_BYTES = 9L * 1024L * 1024L",
+            matrix,
+        )
+
     def test_processing_cells_keep_fixed_status_panel_free_of_duplicate_details(self):
         layout = self.read_required(
             "src/main/java/com/swear/autostorage/TerminalLayout.java"

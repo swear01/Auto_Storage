@@ -92,8 +92,12 @@ expected SHA values.
 
 The current-main `CraftableRecipeCatalog` weak shared index, recipe-snapshot
 invalidation, ingredient index, and candidate bitsets remain necessary and
-current-main-safe. The Railcraft branch does not duplicate or replace those
-production changes. With Productive Bees and every earlier representative module loaded, the current
+current-main-safe. Typed plan/contract caches and catalog entry lazy match
+graphs are only transient through first shared Craftable listing, then released
+by production `releaseTransientMatches()`, so steady-state
+`shared_index_retained_bytes` stays the compact catalog plus shared listing.
+The Railcraft branch does not duplicate or replace those production changes.
+With Productive Bees and every earlier representative module loaded, the current
 combined inventory contains 14,408 recipes. A contended local run still measured
 3.809 ms first prefetch, 0.547 ms switch p95, a 9,155,000-byte shared index, and
 114,906 bytes per menu, but its 111.297 ms prepare time correctly failed the 50 ms

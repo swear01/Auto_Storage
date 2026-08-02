@@ -274,7 +274,6 @@ public final class CraftablePerformanceGameTests {
             run(() -> {
                 clearCatalogCache();
                 clearBuiltInCaches();
-                clearRecipeFamilyCaches();
                 heapWithoutIndex = usedHeapAfterFullGc();
                 schedule(this::measureSharedIndex);
             });
@@ -284,6 +283,12 @@ public final class CraftablePerformanceGameTests {
             run(() -> {
                 prewarmCatalog(helper.getLevel());
                 prewarmCraftable(player, core);
+                schedule(this::captureSharedIndex);
+            });
+        }
+
+        private void captureSharedIndex() {
+            run(() -> {
                 indexRetainedBytes = Math.max(
                         0L, usedHeapAfterFullGc() - heapWithoutIndex);
                 heapBeforeMenus = usedHeapAfterFullGc();
@@ -729,28 +734,6 @@ public final class CraftablePerformanceGameTests {
         ((Map<?, ?>) shared.get(null)).clear();
     }
 
-    private static void clearRecipeFamilyCaches() throws ReflectiveOperationException {
-        Class<?> adaptersClass = Class.forName(
-                "com.swear.autostorage.BuiltInRecipeAdapters");
-        Method registryMethod = adaptersClass.getDeclaredMethod("registry");
-        registryMethod.setAccessible(true);
-        Object registry = registryMethod.invoke(null);
-        Method adaptersMethod = registry.getClass().getDeclaredMethod("adapters");
-        adaptersMethod.setAccessible(true);
-        for (Object adapter : (List<?>) adaptersMethod.invoke(registry)) {
-            Field outer = Arrays.stream(adapter.getClass().getDeclaredFields())
-                    .filter(Field::isSynthetic)
-                    .filter(field -> field.getType().getName().endsWith(".RecipeFamily"))
-                    .findFirst()
-                    .orElse(null);
-            if (outer == null) continue;
-            outer.setAccessible(true);
-            Object family = outer.get(adapter);
-            clearMapField(family, "typedPlanCache");
-            clearMapField(family, "typedContractCache");
-        }
-    }
-
     private static void clearBuiltInCaches() throws ReflectiveOperationException {
         Class<?> adaptersClass = Class.forName(
                 "com.swear.autostorage.BuiltInRecipeAdapters");
@@ -759,13 +742,6 @@ public final class CraftablePerformanceGameTests {
             field.setAccessible(true);
             ((Map<?, ?>) field.get(null)).clear();
         }
-    }
-
-    private static void clearMapField(Object target, String name)
-            throws ReflectiveOperationException {
-        Field field = target.getClass().getDeclaredField(name);
-        field.setAccessible(true);
-        ((Map<?, ?>) field.get(target)).clear();
     }
 
     private static void prewarmCatalog(net.minecraft.world.level.Level level)

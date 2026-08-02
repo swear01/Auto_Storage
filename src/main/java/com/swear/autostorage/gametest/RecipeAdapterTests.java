@@ -185,10 +185,20 @@ public final class RecipeAdapterTests {
                     new ShapelessRecipe("", CraftingBookCategory.MISC,
                             new ItemStack(Items.EMERALD),
                             NonNullList.of(Ingredient.EMPTY, ingredient)));
+            RecipeHolder<ShapelessRecipe> conflictingHolder = new RecipeHolder<>(
+                    ResourceLocation.fromNamespaceAndPath(
+                            "test_mod", "mixed_exhaustive_non_exhaustive_catalog"),
+                    new ShapelessRecipe("", CraftingBookCategory.MISC,
+                            new ItemStack(Items.NETHER_STAR),
+                            NonNullList.of(
+                                    Ingredient.EMPTY,
+                                    Ingredient.of(Items.STONE),
+                                    ingredient)));
             var manager = level.getRecipeManager();
             var original = java.util.List.copyOf(manager.getRecipes());
             var registered = new java.util.ArrayList<>(original);
             registered.add(holder);
+            registered.add(conflictingHolder);
             try {
                 manager.replaceRecipes(registered);
                 var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
@@ -206,11 +216,33 @@ public final class RecipeAdapterTests {
                     helper.fail("A non-exhaustive displayed-item list omitted a matching recipe");
                     return;
                 }
+                if (containsDisplayItem(menu, Items.NETHER_STAR)) {
+                    helper.fail(
+                            "Mixed exhaustive and non-exhaustive ingredients reused one item source");
+                    return;
+                }
+                if (core.insertItem(new ItemStack(Items.STONE)) != 1) {
+                    helper.fail("Could not add the second mixed-ingredient source");
+                    return;
+                }
+                menu.refreshDisplayItems(core);
+                if (!containsDisplayItem(menu, Items.NETHER_STAR)) {
+                    helper.fail(
+                            "Mixed exhaustive and non-exhaustive ingredients rejected two sources");
+                    return;
+                }
             } finally {
                 manager.replaceRecipes(original);
             }
             helper.succeed();
         });
+    }
+
+    private static boolean containsDisplayItem(CraftingTerminalMenu menu, Item item) {
+        for (int slot = 0; slot < StorageTerminalMenu.DISPLAY_SLOTS; slot++) {
+            if (menu.getSlot(slot).getItem().is(item)) return true;
+        }
+        return false;
     }
 
     @GameTest(template = "craftingtests.platform")
