@@ -1,12 +1,12 @@
 {
-  "contract_sha256": "91217fe217fac454fd3f29da7583c26648e3ae79b7754f30423d5a0748eee27b",
+  "contract_sha256": "b28b1cd226b451323ab08a42621b84b495145736017ed544b85d03b2b5e1284e",
   "files": {
-    "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsFixtureMod.java": "b546821fd02a0a22bebe37fc2b65e15338d790304825f4eb2dba86026cf4742e",
-    "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java": "89be10aa14a604025a8ca12c192efb179fc23ed4668492462615bb8ab987124f",
+    "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsFixtureMod.java": "56069bbc4c04111a8801565b257afb1c2c146de048ca8432ade31eb95ed67396",
+    "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java": "f7bc7ba6afd39ebc9e13e566d698e8588d44264582f9d3b2f33eb89d5e8ff10c",
     "src/actuallyadditionsFixture/resources/META-INF/neoforge.mods.toml": "c243b7a802f1bb170c518cdcb6c9eba7b79fb4626520106da90c1c696126a696",
     "src/actuallyadditionsFixture/resources/data/auto_storage_actuallyadditions_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc",
-    "src/compat/actuallyadditions/compat-module.json": "6bdb13a15e0275ef01cd579d45d58c985d719dda7501134e8151a056dcb67375",
-    "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompat.java": "9094cd36561792ed021b3d9e951095a5fe018383b09c6d0306be58ed68d4b007",
+    "src/compat/actuallyadditions/compat-module.json": "6c69ba729a3f818e2163879ee7eae8b9b1bc7587210e68753d51897db2e9d4b5",
+    "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompat.java": "89923a7ac35e76d2111749789eb8e72ac583d7eb9537648f09ad20ad7e9ac821",
     "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompatModule.java": "4a4866cb0073b5330a5377d8041033c1c0195ad26b8dfcb2447c9b1f675e6400"
   },
   "schema": 1,

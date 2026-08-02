@@ -146,7 +146,7 @@
           "resource_kind": "auto_storage:station_work"
         }
       ],
-      "decision": "Accept FermentingRecipe when input and output FluidStacks are non-empty with positive amounts and recipe.time is positive. Fermenting Barrel consumes no FE; station work equals recipe.time at 1 work/tick. Family costs are station work only. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
+      "decision": "Accept FermentingRecipe when input and output FluidStacks are non-empty with positive amounts, the output fluid has a non-empty bucket presentation, and recipe.time is positive. Bucketless outputs fail closed before catalog plan construction. Fermenting Barrel consumes no FE; station work equals recipe.time at 1 work/tick. Family costs are station work only. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
       "evidence": [
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/FermentingRecipe.java#getInput",
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/FermentingRecipe.java#getOutput",
@@ -254,7 +254,7 @@
           "resource_kind": "neoforge_energy"
         }
       ],
-      "decision": "Accept PressingRecipe when the input Ingredient is simple/non-empty and the FluidStack output is non-empty with positive amount. Canola Press uses ENERGY_USE 35 FE/tick for TIME 30 ticks (1050 FE and 1050 station work). Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
+      "decision": "Accept PressingRecipe when the input Ingredient is simple/non-empty, the FluidStack output is non-empty with positive amount, and the output fluid has a non-empty bucket presentation. Bucketless outputs fail closed before catalog plan construction. Canola Press uses ENERGY_USE 35 FE/tick for TIME 30 ticks (1050 FE and 1050 station work). Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
       "evidence": [
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/PressingRecipe.java#getInput",
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/PressingRecipe.java#getOutput",
@@ -471,7 +471,7 @@
         }
       ]
     },
-    "expected_game_tests": 10,
+    "expected_game_tests": 13,
     "fixture": "actuallyadditionsFixture",
     "game_test_task": "runActuallyadditionsGameTestServer",
     "gradle_tasks": [

@@ -13,6 +13,7 @@ import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import de.ellpeck.actuallyadditions.mod.crafting.PressingRecipe;
 import de.ellpeck.actuallyadditions.mod.tile.TileEntityCanolaPress;
 import de.ellpeck.actuallyadditions.mod.tile.TileEntityCrusher;
 import net.minecraft.core.BlockPos;
@@ -23,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
@@ -47,6 +49,8 @@ public final class ActuallyadditionsIntegrationGameTests {
             ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, "actuallyadditions_laser");
     private static final ResourceLocation BLAZE_ROD = aaRecipe("crushing/blaze_rod");
     private static final ResourceLocation IRON_ORE = aaRecipe("crushing/iron_ore");
+    private static final ResourceLocation GUARANTEED_SECONDARY = fixtureRecipe(
+            "guaranteed_secondary");
     private static final ResourceLocation CANOLA_PRESS = aaRecipe("pressing/canola");
     private static final ResourceLocation REFINED_CANOLA = aaRecipe("fermenting/refined_canola");
     private static final ResourceLocation LASER_DIAMOND =
@@ -133,6 +137,70 @@ public final class ActuallyadditionsIntegrationGameTests {
             return;
         }
         helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void bucketless_fluid_recipe_stays_unsupported(GameTestHelper helper) {
+        PressingRecipe recipe = new PressingRecipe(
+                Ingredient.of(Items.STONE),
+                new FluidStack(ActuallyadditionsFixtureMod.BUCKETLESS_FLUID.get(), 80));
+        if (CraftingTerminalMenu.supportsRecipeContract(recipe)) {
+            helper.fail("Bucketless fluid recipe was accepted without a presentation item");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void crushing_guaranteed_secondary_emits_both_outputs(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            seedItem(context.core(), Items.COBBLESTONE, 1);
+            seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), CRUSHER_COST);
+            installStation(context, "crusher", CRUSHING);
+            tick(context.core(), 100);
+            if (!craft(context, GUARANTEED_SECONDARY)
+                    || itemCount(context.core(), Items.COBBLESTONE) != 0
+                    || itemCount(context.core(), Items.DIAMOND) != 2
+                    || itemCount(context.core(), Items.EMERALD) != 3
+                    || context.core().getResourceAmount(
+                    StorageResourceKey.neoforgeEnergy()) != 0
+                    || context.core().getStationWork(CRUSHING) != 0) {
+                helper.fail("Guaranteed Crushing secondary did not emit both exact outputs");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void crushing_guaranteed_secondary_capacity_is_atomic_noop(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            seedItem(context.core(), Items.COBBLESTONE, 1);
+            seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), CRUSHER_COST);
+            seedResource(
+                    context.core(),
+                    StorageResourceKey.item(
+                            new ItemStack(Items.EMERALD),
+                            context.level().registryAccess()),
+                    Long.MAX_VALUE - 2);
+            installStation(context, "crusher", CRUSHING);
+            tick(context.core(), 100);
+            if (craft(context, GUARANTEED_SECONDARY)
+                    || itemCount(context.core(), Items.COBBLESTONE) != 1
+                    || itemCount(context.core(), Items.DIAMOND) != 0
+                    || itemCount(context.core(), Items.EMERALD) != Long.MAX_VALUE - 2
+                    || context.core().getResourceAmount(
+                    StorageResourceKey.neoforgeEnergy()) != CRUSHER_COST
+                    || context.core().getStationWork(CRUSHING) != CRUSHER_COST) {
+                helper.fail("Guaranteed Crushing secondary capacity was not an atomic no-op");
+                return;
+            }
+            helper.succeed();
+        });
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -414,6 +482,11 @@ public final class ActuallyadditionsIntegrationGameTests {
 
     private static ResourceLocation aaRecipe(String path) {
         return aaId(path);
+    }
+
+    private static ResourceLocation fixtureRecipe(String path) {
+        return ResourceLocation.fromNamespaceAndPath(
+                ActuallyadditionsFixtureMod.MODID, path);
     }
 
     private static ResourceLocation aaId(String path) {

@@ -186,7 +186,7 @@ public final class ActuallyadditionsCompat {
     private static boolean supportsPressing(PressingRecipe recipe) {
         return recipe != null
                 && exact(recipe.getInput())
-                && exactFluid(recipe.getOutput());
+                && presentableFluid(recipe.getOutput());
     }
 
     private static TypedRecipePlan pressingPlan(
@@ -214,7 +214,7 @@ public final class ActuallyadditionsCompat {
         return recipe != null
                 && recipe.getTime() > 0
                 && exactFluid(recipe.getInput())
-                && exactFluid(recipe.getOutput());
+                && presentableFluid(recipe.getOutput());
     }
 
     private static TypedRecipePlan fermentingPlan(
@@ -252,6 +252,10 @@ public final class ActuallyadditionsCompat {
 
     private static boolean exactFluid(FluidStack stack) {
         return stack != null && !stack.isEmpty() && stack.getAmount() > 0;
+    }
+
+    private static boolean presentableFluid(FluidStack stack) {
+        return exactFluid(stack) && stack.getFluid().getBucket() != Items.AIR;
     }
 
     private static List<StorageResourceKey> keys(

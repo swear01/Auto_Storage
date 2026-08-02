@@ -48,6 +48,9 @@ delta.
 - primary: non-empty `getOutputOne()`;
 - secondary: only when empty, or when exact and `getSecondChance() == 1.0F`
   (fractional chance recipes such as iron ore stay unavailable);
+- guaranteed secondary outputs join the same atomic transaction as the primary;
+  insufficient capacity for either output leaves every input, FE, work, and
+  output unchanged;
 - `crusher_double` (150 ticks / 6000 FE) is not inferred from a plain station
   item.
 
@@ -58,7 +61,9 @@ delta.
 - station item: `actuallyadditions:canola_press`;
 - rate: `TileEntityCanolaPress.ENERGY_USE` (35) work per tick;
 - FE and station work: `ENERGY_USE × TIME` = `1050`;
-- consume one simple exact item; emit exact sized fluid.
+- consume one simple exact item; emit exact sized fluid;
+- the output fluid must expose a non-empty bucket item for terminal
+  presentation; bucketless outputs fail closed before catalog construction.
 
 ### Fermenting (`actuallyadditions:fermenting`)
 
@@ -67,7 +72,9 @@ delta.
 - station item: `actuallyadditions:fermenting_barrel`;
 - rate: 1 work per tick;
 - station work: `recipe.getTime()` (no FE);
-- consume exact sized fluid; emit exact sized fluid.
+- consume exact sized fluid; emit exact sized fluid;
+- the output fluid must expose a non-empty bucket item for terminal
+  presentation; bucketless outputs fail closed before catalog construction.
 
 ## Explicit exclusions
 
@@ -87,11 +94,12 @@ Storage does not register Actually Additions workstations into EMI.
 ./gradlew runActuallyadditionsGameTestServer
 ```
 
-Ten real GameTests cover registration and Empowerer/Laser exclusion, blaze-rod
-crushing with exact powder output, pressing canola oil, fermenting refined
-canola, fractional-chance crushing rejection, missing-ingredient / insufficient
-FE / insufficient work atomic no-ops, destination-capacity and long-overflow
-rollback. The isolated fixture also asserts the descriptor-owned
+Thirteen real GameTests cover registration and Empowerer/Laser exclusion,
+blaze-rod crushing with exact powder output, guaranteed two-output crushing and
+secondary-capacity rollback, pressing canola oil, fermenting refined canola,
+bucketless-fluid and fractional-chance rejection, missing-ingredient /
+insufficient FE / insufficient work atomic no-ops, destination-capacity and
+long-overflow rollback. The isolated fixture also asserts the descriptor-owned
 `actuallyadditions` recipe-inventory digest. Compat Kit verify writes
 `build/compat-kit/actuallyadditions-report.json`. The all-mod compatibility
 matrix structurally validates coexistence claims and records actual

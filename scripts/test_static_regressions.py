@@ -1703,7 +1703,7 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
 
         self.assert_descriptor_driven_fixture(
-            build, "actuallyadditions", "actuallyadditionsFixture", 10
+            build, "actuallyadditions", "actuallyadditionsFixture", 13
         )
         self.assertNotIn('modId="actuallyadditions"', metadata)
         self.assertIn('"actuallyadditions"', module_index)
@@ -1726,6 +1726,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("EmpowererRecipe.class", compat)
         self.assertNotIn("LaserRecipe.class", compat)
         self.assertNotIn("keysWithoutRegistries", compat)
+        self.assertIn("presentableFluid(recipe.getOutput())", compat)
+        self.assertIn("bucketless_fluid_recipe_stays_unsupported", fixture)
+        self.assertIn("crushing_guaranteed_secondary_emits_both_outputs", fixture)
+        self.assertIn("crushing_guaranteed_secondary_capacity_is_atomic_noop", fixture)
         self.assertRegex(
             compat,
             r"private static boolean exact\(Ingredient ingredient\) \{\s*"
