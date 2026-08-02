@@ -237,6 +237,8 @@ a lower-priority bucket cannot hide it from contract review. Every risk-evidence
 owner must also be one of the audited recipe
 candidates, so risk cannot be detached from the class under review.
 
+Recipe interfaces that structurally extend `Recipe` classify as `recipe_classes` before station/resource name terms; abstract non-interface bases remain concrete-gated. Otherwise public-signature validation rejects the audit.
+
 Legacy format-7 through format-15 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
 
 ```bash

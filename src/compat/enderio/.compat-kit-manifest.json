@@ -1,11 +1,11 @@
 {
-  "contract_sha256": "91c5158a663c7be023bf6731d603107bdeb63335161829567bbd8854620fa29a",
+  "contract_sha256": "949f970e201cf05a3460888afd1262f897e4ea0df41661c723750c3e6b07511a",
   "files": {
-    "src/compat/enderio/compat-module.json": "263105f654bc4eb94ed97cc2f8585eb75e974eafb2813fdc9a565e35e8175325",
+    "src/compat/enderio/compat-module.json": "14cdc44fd086416c9e45de49c5b4d616a4840a0fc10bbc8f8de47fa3b33170f6",
     "src/compat/enderio/java/com/swear/autostorage/compat/enderio/EnderioCompat.java": "3359e1679e4f8078130e64fe3e318ed6b3f402ad0fa82da751ed3db5452c829e",
     "src/compat/enderio/java/com/swear/autostorage/compat/enderio/EnderioCompatModule.java": "3be02d79ac6aba1a1a59440173001607937aa501064859096bdf95149ec44155",
     "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioFixtureMod.java": "262ea2ee5cb6a7af8585499b24c08632ebe2ca5dcba213bc918f872495c2a92e",
-    "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java": "17ebed9e37373d9e73758d0b1fc979f2e981f53ff82ba90188254c5b9034bbd9",
+    "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java": "642b03c2072f47ea68e4f7a55e95564ac8bff31b40c0ab7dd01b1647f42632fa",
     "src/enderIoFixture/resources/META-INF/neoforge.mods.toml": "de805cdc58d989460652e44ca7627d575f442e652f5a6fdffa35dfbd46047003",
     "src/enderIoFixture/resources/data/auto_storage_enderio_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

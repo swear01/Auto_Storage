@@ -11,7 +11,7 @@ present. Ender IO remains an optional player dependency.
 - Modrinth jar SHA-256:
   `e01af48907781f2d5ccdfa8d71975b611c33f295be11b7021cb91be06ce8070c`;
 - Maven coordinate: `maven.modrinth:enderio:Tfs8aJPH`;
-- audit: `compat/audits/enderio/8.2.11-beta.json`;
+- audit: `compat/audits/enderio/8.2.11-beta.json` (scanner format 16; 13 structural recipe classes);
 - reviewed contract: `compat/contracts/enderio.json`.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
@@ -65,7 +65,9 @@ not register Ender IO workstations into EMI.
 `./gradlew runEnderIoGameTestServer` loads the representative Modrinth artifact
 and runs 6 GameTests for exact registration/rate, official Conductive Alloy
 crafting, FE/work/ingredient shortages, destination overflow rollback, and
-rejection of smelting-batch plus Sag Mill holders. The fixture datapack recipe
+rejection of smelting-batch plus Sag Mill holders. The first GameTest also
+asserts the descriptor-owned isolated `enderio` recipe-inventory digest.
+The fixture datapack recipe
 `enderio:smelting/auto_storage_enderio_fixture/rejection` proves the
 `is_smelting` fail-closed boundary when mixin-generated smelting copies are not
 present in the GameTest recipe manager.

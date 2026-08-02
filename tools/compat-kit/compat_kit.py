@@ -1187,18 +1187,27 @@ def _classify_candidate(
 ) -> tuple[str, dict] | None:
     metadata = metadata_by_class.get(class_name)
     if metadata is not None:
-        concrete = metadata["access_flags"] & (0x0200 | 0x0400) == 0
-        if concrete:
+        access_flags = metadata["access_flags"]
+        is_interface = access_flags & 0x0200 != 0
+        concrete = access_flags & (0x0200 | 0x0400) == 0
+        # Recipe interfaces must classify by hierarchy before station/resource name
+        # terms; otherwise public-signature validation rejects the audit (Ender IO
+        # MachineRecipe). Abstract non-interface bases stay concrete-gated.
+        if concrete or is_interface:
             recipe_path = _inheritance_path(
                 class_name,
                 RECIPE_INTERFACE,
                 metadata_by_class,
             )
-            if recipe_path is not None:
+            if (
+                recipe_path is not None
+                and class_name != RECIPE_INTERFACE
+            ):
                 return "recipe_classes", {
                     "method": "class_hierarchy",
                     "evidence": recipe_path,
                 }
+        if concrete:
             serializer_path = _inheritance_path(
                 class_name,
                 RECIPE_SERIALIZER_INTERFACE,

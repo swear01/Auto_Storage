@@ -455,6 +455,69 @@ class CompatKitAuditTests(unittest.TestCase):
             serializer_classes,
         )
 
+    def test_scan_classifies_recipe_interfaces_before_station_name_terms(self):
+        structural_jar = self.root / "samplemod-machine-recipe-interface.jar"
+        write_fixture_jar(structural_jar)
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                "samplemod/machine/MachineRecipe.class",
+                b"recipe interface whose name also matches station terms",
+            )
+
+        metadata = {
+            "samplemod.machine.MachineRecipe": {
+                "access_flags": 0x0200,
+                "super_class": "java.lang.Object",
+                "interfaces": ["net.minecraft.world.item.crafting.Recipe"],
+            },
+        }
+
+        def structural_metadata(class_name: str):
+            return metadata.get(
+                class_name,
+                {
+                    "access_flags": 0,
+                    "super_class": "java.lang.Object",
+                    "interfaces": [],
+                },
+            )
+
+        audit = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=lambda class_name: (
+                f"public interface {class_name} extends "
+                "net.minecraft.world.item.crafting.Recipe {{ }}"
+                if class_name == "samplemod.machine.MachineRecipe"
+                else f"public final class {class_name} {{ }}"
+            ),
+            risk_reader=lambda class_name: f"public final class {class_name} {{ }}",
+            class_metadata_reader=structural_metadata,
+        )
+
+        recipe_classes = {
+            candidate["class"]
+            for candidate in audit["candidates"]["recipe_classes"]
+        }
+        station_classes = {
+            candidate["class"]
+            for candidate in audit["candidates"]["station_classes"]
+        }
+        machine_recipe = next(
+            candidate
+            for candidate in audit["candidates"]["recipe_classes"]
+            if candidate["class"] == "samplemod.machine.MachineRecipe"
+        )
+        self.assertIn("samplemod.machine.MachineRecipe", recipe_classes)
+        self.assertNotIn("samplemod.machine.MachineRecipe", station_classes)
+        self.assertEqual("class_hierarchy", machine_recipe["classification"]["method"])
+        self.assertEqual(
+            [
+                "samplemod.machine.MachineRecipe",
+                "net.minecraft.world.item.crafting.Recipe",
+            ],
+            machine_recipe["classification"]["evidence"],
+        )
+
     def test_scan_separates_recipe_types_builders_datagen_viewers_and_block_entities(self):
         structural_jar = self.root / "samplemod-candidate-groups.jar"
         write_fixture_jar(structural_jar)

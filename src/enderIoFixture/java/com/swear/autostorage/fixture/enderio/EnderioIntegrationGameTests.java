@@ -5,6 +5,7 @@ import com.swear.autostorage.Action;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import com.swear.autostorage.ItemKey;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
@@ -48,6 +49,9 @@ public final class EnderioIntegrationGameTests {
     public static void alloy_smelting_registers_exact_rate_and_rejects_unsafe(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                EnderioIntegrationGameTests.class);
         MachineDescriptor descriptor = MachineEnergyTable.get(ALLOY_SMELTING);
         ItemStack smelter = new ItemStack(enderioItem("alloy_smelter"));
         int usage = MachinesConfig.COMMON.ENERGY.ALLOY_SMELTER_USAGE.get();
