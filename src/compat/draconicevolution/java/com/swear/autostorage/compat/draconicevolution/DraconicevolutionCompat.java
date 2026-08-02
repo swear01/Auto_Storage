@@ -12,9 +12,5 @@ public final class DraconicevolutionCompat {
             DeferredRegister<MachineDescriptor> machines,
             DeferredRegister<RecipeFamily> recipes
     ) {
-        // Intentionally empty: Fusion Crafting depends on live multiblock injectors,
-        // injector-local energy charging, DEConfig craft/charge times, and generic
-        // Ingredient/StackIngredient payloads. Vanilla crafting/smelting under the
-        // draconicevolution namespace remains covered by Auto Storage built-ins.
     }
 }
