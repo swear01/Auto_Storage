@@ -62,6 +62,18 @@ PUBLISHED_SCHEMA_FILES = (
     "compat-runtime-probe-plan.schema.json",
     "compat-runtime-probe.schema.json",
 )
+BUNDLED_FIXED_SOURCE_SETS = frozenset({
+    "main",
+    "test",
+    "fusionRuntime",
+    "apiTest",
+    "recipeAddonFixture",
+    "pneumaticCraftFixture",
+    "compatibilityMatrixFixture",
+    "api",
+    "addonExample",
+    "compatKitGeneratedFixture",
+})
 REQUIRED_VERIFICATION_CHECKS = (
     "absent_target_no_classload",
     "present_target_load_once",
@@ -5282,6 +5294,21 @@ def _validate_bundled_identifier_collisions(
     mod_id: str,
 ):
     root = _validate_materialization_root(root)
+    generated_source_sets = {
+        generated_descriptor["sourceSet"],
+        generated_descriptor["fixture"],
+    }
+    if len(generated_source_sets) != 2:
+        raise ValueError(
+            "bundled compatibility identifier collision: source set "
+            f"{generated_descriptor['sourceSet']}"
+        )
+    for source_set in sorted(generated_source_sets):
+        if source_set in BUNDLED_FIXED_SOURCE_SETS:
+            raise ValueError(
+                "bundled compatibility identifier collision: source set "
+                f"{source_set}"
+            )
     own_descriptor = root / f"src/compat/{mod_id}/compat-module.json"
     compat_root = root
     for part in ("src", "compat"):
@@ -5325,11 +5352,21 @@ def _validate_bundled_identifier_collisions(
             raise ValueError(
                 f"invalid existing compatibility descriptor: {descriptor_path}"
             )
-        for key in ("id", "entrypoint", "sourceSet", "fixture"):
+        for key in ("id", "entrypoint"):
             if existing.get(key) == generated_descriptor[key]:
                 raise ValueError(
                     "bundled compatibility identifier collision: "
                     f"{key} {generated_descriptor[key]}"
+                )
+        existing_source_sets = {
+            existing.get("sourceSet"),
+            existing.get("fixture"),
+        }
+        for source_set in sorted(generated_source_sets):
+            if source_set in existing_source_sets:
+                raise ValueError(
+                    "bundled compatibility identifier collision: source set "
+                    f"{source_set}"
                 )
 
 

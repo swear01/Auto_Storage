@@ -6979,6 +6979,33 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
         self.assertFalse((output / "src/compat/foo__bar").exists())
 
+    def test_bundled_scaffold_rejects_fixed_source_set_collision(self):
+        contract = self.accepted_contract()
+        target_jar = self.root / "fixed-source-set-target.jar"
+        write_fixture_jar(target_jar, mod_id="kit_generated_fixture")
+        audit = self.compat_kit.scan_jar(
+            target_jar,
+            signature_reader=self.signatures,
+        )
+        contract["target"]["mod_id"] = "kit_generated_fixture"
+        self.rebind_contract_source(contract, audit)
+        output = self.root / "bundled-fixed-source-set"
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "bundled compatibility identifier collision",
+        ):
+            self.compat_kit.scaffold_bundled(
+                contract,
+                output,
+                source_audit=audit,
+                source_artifact=target_jar,
+            )
+
+        self.assertFalse(
+            (output / "src/compat/kit_generated_fixture").exists()
+        )
+
     def test_bundled_collision_scan_rejects_symlinked_existing_module(self):
         contract = self.accepted_contract()
         output = self.root / "bundled"

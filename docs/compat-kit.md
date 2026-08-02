@@ -597,10 +597,13 @@ run task, expected test gate, and audited target artifact from that descriptor;
 `expectedTests` must be a positive JSON integer representable by Gradle's
 `Integer` parser; fractions and wider overflow values are rejected rather than
 truncated.
-Before writing a bundled module, Compat Kit compares its derived module ID,
-entrypoint, source-set name, and fixture name with every existing descriptor;
-different mod IDs that normalize to the same Java/Gradle identifiers fail
-before materialization. The target is on both compile and fixture runtime
+Before writing a bundled module, Compat Kit compares its derived module ID and
+entrypoint with every existing descriptor. The generated compatibility source
+set and fixture share Gradle's source-set namespace, so both are compared with
+each other, every existing descriptor source set/fixture, and the repository's
+fixed source sets. Different mod IDs that normalize to the same Java/Gradle
+identifier, or a target such as `kit_generated_fixture` that would reuse
+`compatKitGeneratedFixture`, fail before materialization. The target is on both compile and fixture runtime
 classpaths, with both
 declarations non-transitive. `build` and the
 module GameTest resolve exactly one target jar and reject a SHA different from

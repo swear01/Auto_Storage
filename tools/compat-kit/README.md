@@ -354,8 +354,11 @@ evidence markers must occur between the annotated method's braces; a marker
 that appears only in its declaration is not execution evidence. The published
 archive includes its own Gradle wrapper template, so an extracted copy can
 scaffold an addon without an Auto Storage checkout.
-Bundled scaffolding also compares derived module IDs, entrypoints, source sets,
-and fixtures with existing descriptors before writing. Publication requires
+Bundled scaffolding also compares derived module IDs and entrypoints with
+existing descriptors before writing. Generated compatibility source sets and
+fixtures share one Gradle namespace, so they must also avoid each other, every
+descriptor source set/fixture, and every fixed root source set before writing.
+Publication requires
 `publish --version <mod_version>` to match the embedded tool version and
 includes only the explicit addon example and ten schema allowlists; local
 outputs are excluded.
