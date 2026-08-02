@@ -1,10 +1,10 @@
 {
-  "contract_sha256": "fdba1692a68b8615480e28f4eb21f3c1bf28369457065529e126a9e11e501d2f",
+  "contract_sha256": "afc289619ba4eae05e57190c24dfee2da999ce415e4e2b8a80bdfc248d385b52",
   "files": {
-    "src/compat/productivemetalworks/compat-module.json": "23fc1634292dec1161642064068bd021e48fe9727fa3bbf796b41cb9cd54cef1",
+    "src/compat/productivemetalworks/compat-module.json": "873854340552a0073a481ba688456db6330fdfac97f1e8a53b6f226007755124",
     "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompatModule.java": "03a9f30f2e9b926ae83fdcf9639ec1039759d55630a3692454440b6c833b4f10",
     "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksFixtureMod.java": "de0407a0f8c25bc49c659bd49c4b7d61a74c9a36e3290d9cc19d9619b095a85b",
-    "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java": "caa3b9a8ba38d0fe368e8d21fb630feeea436ad01e15cc0b234c3187860f2540",
+    "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java": "1573633682d3d8a47d9764920c7662a7083d168417d2be81ea1c7a079632cdd2",
     "src/productivemetalworksFixture/resources/META-INF/neoforge.mods.toml": "0d672132894504d0f45b40340d6917cde4f0429b760d77b673c450cb16f86ec3",
     "src/productivemetalworksFixture/resources/data/auto_storage_productivemetalworks_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

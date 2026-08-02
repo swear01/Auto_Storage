@@ -61,8 +61,8 @@ The module descriptor and reviewed contract both declare the target mod present
 with zero descriptors, resource kinds, accepted recipes, rejected registry IDs,
 or Productive Metalworks-owned recipe families. Loaded `productivemetalworks:*`
 recipes remain in `RecipeManager` for vanilla-class coverage and fail-closed
-assertions; their exact inventory digest is locked by the descriptor-owned
-matrix `recipeInventory` SHA-256. No shared workflow or matrix Java list is
+assertions; the combined runtime loads 576 `productivemetalworks:*` recipes, locked by
+SHA-256 `23250d98ba63179bf160f42498545142109f69bd58cba322bfc5f18feb504f88`. No shared workflow or matrix Java list is
 extended for this module.
 
 ## Verification

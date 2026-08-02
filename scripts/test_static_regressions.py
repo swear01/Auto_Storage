@@ -1736,7 +1736,7 @@ class StaticRegressionTests(unittest.TestCase):
             "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/"
             "productivemetalworks/ProductivemetalworksIntegrationGameTests.java"
         )
-        matrix = self.read_required(
+        coexistence = self.read_required(
             "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
             "compatibilitymatrix/CompatibilityMatrixGameTests.java"
         )
@@ -1751,24 +1751,27 @@ class StaticRegressionTests(unittest.TestCase):
             r'helper\.fail\("Expected 4 unique audited Productive Metalworks '
             r'recipe types, but found " \+ types\.size\(\)\);',
         )
-        for source_name, source in (
-            ("fixture", fixture),
-            ("matrix", matrix),
-        ):
-            with self.subTest(source=source_name):
-                self.assertIn(
-                    'id.getNamespace().equals("productivemetalworks")',
-                    source,
-                )
-                self.assertIn(
-                    'id.getPath().startsWith("productivemetalworks_")',
-                    source,
-                )
-                self.assertRegex(
-                    source,
-                    r"id\.getNamespace\(\)\.equals\(\"productivemetalworks\"\)\s*"
-                    r"\|\|\s*id\.getPath\(\)\.startsWith\(\"productivemetalworks_\"\)",
-                )
+        self.assertIn(
+            'id.getNamespace().equals("productivemetalworks")',
+            fixture,
+        )
+        self.assertIn(
+            'id.getPath().startsWith("productivemetalworks_")',
+            fixture,
+        )
+        self.assertRegex(
+            fixture,
+            r"id\.getNamespace\(\)\.equals\(\"productivemetalworks\"\)\s*"
+            r"\|\|\s*id\.getPath\(\)\.startsWith\(\"productivemetalworks_\"\)",
+        )
+        self.assertIn(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            coexistence,
+        )
+        self.assertNotIn(
+            'id.getNamespace().equals("productivemetalworks")',
+            coexistence,
+        )
 
     def test_pneumaticcraft_fixture_locks_unsafe_contracts_out(self):
         build = self.read_required("build.gradle")
