@@ -287,7 +287,6 @@ final class CraftableRecipeCatalog {
 
         private void releaseTransientMatches() {
             match = null;
-            fixedVariants = null;
         }
 
         private List<RecipeAdapterMatch> resolveVariants(

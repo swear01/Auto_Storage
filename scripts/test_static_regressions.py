@@ -4835,12 +4835,12 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn(
             "releaseTransientMatches",
             entry,
-            "CatalogEntry must drop classify-time match/fixedVariants after shared listing exists",
+            "CatalogEntry must drop lazy RecipeAdapterMatch after shared listing exists",
         )
-        self.assertIn(
-            "fixedVariants = null",
+        self.assertNotIn(
+            "fixedVariants",
             entry,
-            "CatalogEntry release must drop retained fixedVariants",
+            "CatalogEntry must not retain a fixedVariants cache across Craftable prepares",
         )
         self.assertIn(
             "match = null",

@@ -92,7 +92,7 @@ expected SHA values.
 
 The current-main `CraftableRecipeCatalog` weak shared index, recipe-snapshot
 invalidation, ingredient index, and candidate bitsets remain necessary and
-current-main-safe. Typed plan/contract caches and catalog entry match/variant
+current-main-safe. Typed plan/contract caches and catalog entry lazy match
 graphs are only transient through first shared Craftable listing, then released
 by production `releaseTransientMatches()`, so steady-state
 `shared_index_retained_bytes` stays the compact catalog plus shared listing.
