@@ -1190,9 +1190,6 @@ def _classify_candidate(
         access_flags = metadata["access_flags"]
         is_interface = access_flags & 0x0200 != 0
         concrete = access_flags & (0x0200 | 0x0400) == 0
-        # Recipe interfaces must classify by hierarchy before station/resource name
-        # terms; otherwise public-signature validation rejects the audit (Ender IO
-        # MachineRecipe). Abstract non-interface bases stay concrete-gated.
         if concrete or is_interface:
             recipe_path = _inheritance_path(
                 class_name,
