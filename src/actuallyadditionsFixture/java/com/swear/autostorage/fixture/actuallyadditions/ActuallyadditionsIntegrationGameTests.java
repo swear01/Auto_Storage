@@ -4,6 +4,7 @@ import com.swear.autostorage.Action;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import com.swear.autostorage.ItemKey;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
@@ -62,6 +63,9 @@ public final class ActuallyadditionsIntegrationGameTests {
     public static void registration_and_excluded_families(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                ActuallyadditionsIntegrationGameTests.class);
         MachineDescriptor crusher = MachineEnergyTable.get(CRUSHING);
         MachineDescriptor press = MachineEnergyTable.get(PRESSING);
         MachineDescriptor barrel = MachineEnergyTable.get(FERMENTING);

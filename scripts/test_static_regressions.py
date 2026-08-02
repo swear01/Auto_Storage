@@ -1681,6 +1681,73 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("representative CI artifact", compatibility_doc)
         self.assertIn("not an exact player dependency pin", compatibility_doc)
 
+    def test_actuallyadditions_compat_is_optional_and_isolated(self):
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("actuallyadditions")
+        module = self.read_required(
+            "src/compat/actuallyadditions/java/com/swear/autostorage/compat/"
+            "actuallyadditions/ActuallyadditionsCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/actuallyadditions/java/com/swear/autostorage/compat/"
+            "actuallyadditions/ActuallyadditionsCompat.java"
+        )
+        fixture = self.read_required(
+            "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/"
+            "actuallyadditions/ActuallyadditionsIntegrationGameTests.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/actuallyadditionsFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required("docs/actuallyadditions-compatibility.md")
+        build = self.read_required("build.gradle")
+
+        self.assert_descriptor_driven_fixture(
+            build, "actuallyadditions", "actuallyadditionsFixture", 10
+        )
+        self.assertNotIn('modId="actuallyadditions"', metadata)
+        self.assertIn('"actuallyadditions"', module_index)
+        self.assertIn("maven.modrinth:actually-additions:iNeJmgFj", module_index)
+        self.assertIn(
+            "072451bb6069025e255a39216edc0f892cda00c12b9905b552e7dd4631d44a41",
+            module_index,
+        )
+        self.assertEqual(
+            module_index.count("maven.modrinth:actually-additions:iNeJmgFj"),
+            3,
+            "auditArtifact, dependencies, and runtimeDependencies once each",
+        )
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("ActuallyadditionsCompat.register(MACHINES, RECIPES)", module)
+        self.assertNotIn("import de.ellpeck.actuallyadditions.", module)
+        self.assertIn("CrushingRecipe.class", compat)
+        self.assertIn("PressingRecipe.class", compat)
+        self.assertIn("FermentingRecipe.class", compat)
+        self.assertNotIn("EmpowererRecipe.class", compat)
+        self.assertNotIn("LaserRecipe.class", compat)
+        self.assertNotIn("keysWithoutRegistries", compat)
+        self.assertRegex(
+            compat,
+            r"private static boolean exact\(Ingredient ingredient\) \{\s*"
+            r"return ingredient != null\s*"
+            r"&& !ingredient\.isEmpty\(\)\s*"
+            r"&& ingredient\.isSimple\(\)\s*"
+            r"&& Arrays\.stream\(ingredient\.getItems\(\)\)\.anyMatch\("
+            r"stack -> !stack\.isEmpty\(\)\);",
+        )
+        self.assertIn("IsolatedRecipeInventoryEvidence", fixture)
+        self.assertIn(
+            "IsolatedRecipeInventoryEvidence.assertMatchesDescriptor",
+            fixture,
+        )
+        self.assertIn('modId="actuallyadditions"', fixture_metadata)
+        self.assertIn("representative CI", compatibility_doc)
+        self.assertIn("Crushing", compatibility_doc)
+        self.assertIn("Pressing", compatibility_doc)
+        self.assertIn("Fermenting", compatibility_doc)
+        self.assertNotIn("peer digest sync", compatibility_doc)
+        self.assertIn("isolated recipe-inventory digest", compatibility_doc)
+
     def test_theurgy_compat_is_optional_and_isolated(self):
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
         module_index = self.read_compat_module("theurgy")

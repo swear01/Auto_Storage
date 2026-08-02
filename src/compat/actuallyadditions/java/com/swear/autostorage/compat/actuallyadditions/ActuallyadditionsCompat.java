@@ -243,7 +243,7 @@ public final class ActuallyadditionsCompat {
         return ingredient != null
                 && !ingredient.isEmpty()
                 && ingredient.isSimple()
-                && !keysWithoutRegistries(ingredient).isEmpty();
+                && Arrays.stream(ingredient.getItems()).anyMatch(stack -> !stack.isEmpty());
     }
 
     private static boolean exactOutput(ItemStack stack) {
@@ -262,14 +262,6 @@ public final class ActuallyadditionsCompat {
                 .filter(stack -> !stack.isEmpty())
                 .map(stack -> StorageResourceKey.item(
                         stack.copyWithCount(1), registries))
-                .distinct()
-                .toList();
-    }
-
-    private static List<ItemStack> keysWithoutRegistries(Ingredient ingredient) {
-        return Arrays.stream(ingredient.getItems())
-                .filter(stack -> !stack.isEmpty())
-                .map(stack -> stack.copyWithCount(1))
                 .distinct()
                 .toList();
     }

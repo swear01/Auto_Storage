@@ -11,9 +11,7 @@
     "repositories": [
       "https://api.modrinth.com/maven"
     ],
-    "runtime_dependencies": [
-      "maven.modrinth:actually-additions:iNeJmgFj"
-    ],
+    "runtime_dependencies": [],
     "version": "1.3.26"
   },
   "families": [
@@ -369,7 +367,7 @@
       "namespaces": [
         "actuallyadditions"
       ],
-      "sha256": "e929c43975ff99387a82a9327c11edc4a990bffa83c54e5794df571565dd369d"
+      "sha256": "ee098fe82eb718eaad44abd60312e2a7e34be6cadca12900aeab6719edefddc1"
     }
   },
   "verification": {

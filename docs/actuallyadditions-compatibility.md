@@ -24,8 +24,9 @@ Actually Additions.
   `1baa31128d8a7e6d5469b7266838e37de876e8e09aa7aaf4436594bef44680ea`;
 - scanner format: `16`;
 - isolated recipe-inventory digest (descriptor-owned; verified by isolated fixture):
-  `e929c43975ff99387a82a9327c11edc4a990bffa83c54e5794df571565dd369d`
-  (521 runtime recipes; jar JSON count is 540 before conditions);
+  `ee098fe82eb718eaad44abd60312e2a7e34be6cadca12900aeab6719edefddc1`
+  (509 runtime recipes in the isolated fixture; jar JSON count is 540 before
+  conditions; coexistence counts belong only to the matrix report);
 - coexistence/unclaimed digests belong only to the compatibility-matrix
   build report, not peer descriptors or committed global baselines.
 
