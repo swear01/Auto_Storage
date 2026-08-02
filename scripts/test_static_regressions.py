@@ -1033,6 +1033,8 @@ class StaticRegressionTests(unittest.TestCase):
         ):
             self.assertNotIn(unreachable_dependency, build)
         self.assertIn('tasks.register("stageAe2CompatAuditAncestry")', build)
+        self.assertIn("enable {", build)
+        self.assertIn("disableRecompilation = true", build)
         stage_block = build[
             build.index('tasks.register("stageAe2CompatAuditAncestry")'):
             build.index("\ndef compatArtifactVerificationTasks")

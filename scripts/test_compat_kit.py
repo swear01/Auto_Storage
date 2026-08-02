@@ -6390,6 +6390,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             'tasks.named("createMinecraftArtifacts").get().outputs.files',
             build,
         )
+        self.assertIn("enable {", build)
+        self.assertIn("disableRecompilation = true", build)
         self.assertNotIn("sourceSets.main.compileClasspath", build)
         properties = (output / "gradle.properties").read_text()
         self.assertIn("parchment_minecraft_version=1.21.1", properties)

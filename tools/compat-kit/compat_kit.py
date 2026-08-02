@@ -4835,7 +4835,10 @@ repositories {{
 }}
 
 neoForge {{
-    version = neo_version
+    enable {{
+        version = neo_version
+        disableRecompilation = true
+    }}
 
     parchment {{
         mappingsVersion = parchment_mappings_version

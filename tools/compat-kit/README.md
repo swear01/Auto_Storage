@@ -290,9 +290,11 @@ ancestry task searches the target's transitive dependencies, NeoForge
 additional runtime classpath, and ModDev `createMinecraftArtifacts` outputs,
 normalizes their archive layout, stages only exact SHA/size matches, and reports
 missing hashes. The generated project pins the same Parchment baseline as Auto
-Storage so its transformed NeoForge/Minecraft development artifact reproduces
-the scanner's canonical input. Build that input with `./compat-kit normalize-jar
-raw.jar canonical.jar`; raw ModDev ZIP metadata is not cross-run stable. Root
+Storage and explicitly enables ModDev's binary pipeline with
+`disableRecompilation = true` so local and CI transformed NeoForge/Minecraft
+artifacts reproduce the scanner's canonical input. Build that input with
+`./compat-kit normalize-jar raw.jar canonical.jar`; raw ModDev ZIP metadata is
+not cross-run stable. Root
 and generated staging repeat the sorted, fixed-timestamp, stored-entry
 normalization only for ModDev outputs. Maven dependencies remain raw exact
 artifacts.

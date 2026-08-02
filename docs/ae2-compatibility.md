@@ -28,12 +28,12 @@ compatibility promise.
 
 The committed audit uses Scanner format v16. A complete 92-jar compile
 classpath is supplied to scanning, but the audit retains only the 13 artifacts
-actually reachable from AE2's structural class graph. Six non-transitive compile
-APIs also carry exact resolvable coordinates: WTHIT API, The One Probe, GuideME,
-REI, EMI API, and Jade. Generated addons emit those coordinates automatically
+actually reachable from AE2's structural class graph. Seven non-transitive
+compile APIs also carry exact resolvable coordinates: WTHIT API, The One Probe,
+GuideME, REI, EMI API, Jade, and Sponge Mixin. Generated addons emit those coordinates automatically
 instead of requiring an unverifiable Gradle edit. One retained platform artifact
 is the deterministic normalization of ModDev's project-transformed
-NeoForge/Minecraft jar (SHA-256 `044e177eaf5327587352121ffda188dfbb8ab57b425e28fd674da787249c256f`);
+NeoForge/Minecraft binary-pipeline jar (SHA-256 `2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f`);
 root and generated-addon staging reproduce that archive before exact matching,
 while Maven artifacts remain raw exact bytes. Every candidate retains its
 binary identity, source-level Java type, and structural classification
@@ -82,7 +82,7 @@ accepted and the other eleven classes are rejected.
 
 The reviewed runtime list carries GuideME through exact Modrinth artifact
 `rduAfwb7`; bundled and generated-addon fixtures reproduce AE2's required
-runtime instead of relying on a hand-edited descriptor. The reviewed repository list also contains the exact upstream Maven endpoints needed to resolve the six persisted compile-only coordinates.
+runtime instead of relying on a hand-edited descriptor. The reviewed repository list also contains the exact upstream Maven endpoints needed to resolve the seven persisted compile-only coordinates.
 
 `compat/generation/ae2.json` is bound to the canonical contract digest. It
 generates `Ae2GeneratedCompat.java`, which owns direct typed descriptor and

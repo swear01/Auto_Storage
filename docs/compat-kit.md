@@ -692,8 +692,9 @@ The generated staging task searches the target's transitive dependencies,
 NeoForge additional runtime classpath, and ModDev
 `createMinecraftArtifacts` outputs, normalizes their archive layout, and copies
 only exact SHA/size matches. The scaffold pins Auto Storage's Parchment baseline
-so the generated NeoForge/Minecraft development artifact reproduces the
-scanner's canonical archive. Before scanning a raw ModDev platform jar, run
+and explicitly sets ModDev `disableRecompilation = true` so local and CI use
+the same binary NeoForge/Minecraft development artifact. Before scanning a raw
+ModDev platform jar, run
 `tools/compat-kit/compat-kit normalize-jar <raw.jar> <canonical.jar>` and pass
 the canonical jar through `--classpath`; raw ZIP metadata is not cross-run
 stable. The command fixes entry order, timestamps, storage mode, and permissions.
@@ -817,7 +818,7 @@ generator's Java/API surface.
 
 The committed AE2 19.2.17 scanner-format-16 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
-Structural classification retains 13 reachable ancestry jars and six exact
+Structural classification retains 13 reachable ancestry jars and seven exact
 non-transitive compile coordinates, then finds twelve
 actual `Recipe` implementations while inventorying 556 effective recipe JSONs
 across 18 serializer groups. The accepted slice remains only
