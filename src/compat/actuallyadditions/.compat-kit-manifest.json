@@ -1,11 +1,11 @@
 {
-  "contract_sha256": "175182e05f2bac8ad7e657f8496290b7511198e5c5be75f75b6d1e39dae6c87e",
+  "contract_sha256": "dbb079d6fc1fdbf065d94dd8c675842c00ede52367c71fa2fb1639e09fa18c7a",
   "files": {
     "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsFixtureMod.java": "b546821fd02a0a22bebe37fc2b65e15338d790304825f4eb2dba86026cf4742e",
     "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java": "e999f0da71c2259c6306dad7630ec410cb7f6cecc68c3a5219029da5ddcf4e65",
     "src/actuallyadditionsFixture/resources/META-INF/neoforge.mods.toml": "c243b7a802f1bb170c518cdcb6c9eba7b79fb4626520106da90c1c696126a696",
     "src/actuallyadditionsFixture/resources/data/auto_storage_actuallyadditions_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc",
-    "src/compat/actuallyadditions/compat-module.json": "3273184ecd741cc7a42222913059877c1fa85115bd17b4d4bef5e3815e9b791d",
+    "src/compat/actuallyadditions/compat-module.json": "81e71b5bb5de95a631f2d042b3d2115b9f615c930bfd9493549141bbfc650764",
     "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompat.java": "2240990b93d8e964486d8726296c5b684ab1e48ab8fe4ec2ced3a94839eb306a",
     "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompatModule.java": "4a4866cb0073b5330a5377d8041033c1c0195ad26b8dfcb2447c9b1f675e6400"
   },

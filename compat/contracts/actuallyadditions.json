@@ -1,398 +1,55 @@
 {
+  "kind": "auto_storage_compat_contract",
+  "schema": 1,
+  "source_audit_sha256": "072451bb6069025e255a39216edc0f892cda00c12b9905b552e7dd4631d44a41",
+  "source_recipe_inventory_sha256": "cdf0b8250c2b1e92f8d0d09367ba7f525ea820e5cfc9ba2e2e69b57c09096d03",
+  "source_recipe_data_sha256": "1baa31128d8a7e6d5469b7266838e37de876e8e09aa7aaf4436594bef44680ea",
+  "target": {
+    "dependency": "maven.modrinth:actually-additions:iNeJmgFj",
+    "display_name": "Actually Additions",
+    "mod_id": "actuallyadditions",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:actually-additions:iNeJmgFj"
+    ],
+    "version": "1.3.26"
+  },
   "families": [
     {
-      "class": "de.ellpeck.actuallyadditions.api.recipe.CoffeeIngredient",
-      "costs": [],
-      "decision": "Legacy API coffee ingredient payload; superseded by CoffeeIngredientRecipe and not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.api.recipe.CoffeeIngredient#public_signature"
-      ],
-      "id": "coffee_ingredient",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.api.recipe.WeightedOre",
-      "costs": [],
-      "decision": "Weighted ore helper implementing WeightedEntry; mining-lens randomness, not a deterministic Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.api.recipe.WeightedOre#public_signature"
-      ],
-      "id": "weighted_ore",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator#public_signature"
-      ],
-      "id": "block_recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator$Recipe",
-      "costs": [],
-      "decision": "Datagen nested builder helper; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator$Recipe#public_signature"
-      ],
-      "id": "block_recipe_generator__recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator$Recipe$Shaped",
-      "costs": [],
-      "decision": "Datagen nested shaped helper; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator$Recipe$Shaped#public_signature"
-      ],
-      "id": "block_recipe_generator__recipe__shaped",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator$Recipe$Shapeless",
-      "costs": [],
-      "decision": "Datagen nested shapeless helper; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.BlockRecipeGenerator$Recipe$Shapeless#public_signature"
-      ],
-      "id": "block_recipe_generator__recipe__shapeless",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.CrushingRecipeGenerator",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.CrushingRecipeGenerator#public_signature"
-      ],
-      "id": "crushing_recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.CrushingRecipeGenerator$CrushingBuilder",
-      "costs": [],
-      "decision": "Datagen builder only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.CrushingRecipeGenerator$CrushingBuilder#public_signature"
-      ],
-      "id": "crushing_recipe_generator__crushing_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.EmpoweringRecipeGenerator",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.EmpoweringRecipeGenerator#public_signature"
-      ],
-      "id": "empowering_recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.EmpoweringRecipeGenerator$EmpoweringBuilder",
-      "costs": [],
-      "decision": "Datagen builder only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.EmpoweringRecipeGenerator$EmpoweringBuilder#public_signature"
-      ],
-      "id": "empowering_recipe_generator__empowering_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.FuelRecipeGenerator",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.FuelRecipeGenerator#public_signature"
-      ],
-      "id": "fuel_recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator#public_signature"
-      ],
-      "id": "item_recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator$Recipe",
-      "costs": [],
-      "decision": "Datagen nested builder helper; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator$Recipe#public_signature"
-      ],
-      "id": "item_recipe_generator__recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator$Recipe$Shaped",
-      "costs": [],
-      "decision": "Datagen nested shaped helper; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator$Recipe$Shaped#public_signature"
-      ],
-      "id": "item_recipe_generator__recipe__shaped",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator$Recipe$Shapeless",
-      "costs": [],
-      "decision": "Datagen nested shapeless helper; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.ItemRecipeGenerator$Recipe$Shapeless#public_signature"
-      ],
-      "id": "item_recipe_generator__recipe__shapeless",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.LaserRecipeGenerator",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.LaserRecipeGenerator#public_signature"
-      ],
-      "id": "laser_recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.MiscMachineRecipeGenerator",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.MiscMachineRecipeGenerator#public_signature"
-      ],
-      "id": "misc_machine_recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.data.compat.ClocheRecipes",
-      "costs": [],
-      "decision": "Immersive Engineering cloche datapack bridge; not an Auto Storage Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.data.compat.ClocheRecipes#public_signature"
-      ],
-      "id": "cloche_recipes",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.ActuallyRecipes",
-      "costs": [],
-      "decision": "Serializer/type registry container; not a Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.ActuallyRecipes#public_signature"
-      ],
-      "id": "actually_recipes",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.ActuallyRecipes$Ingredients",
-      "costs": [],
-      "decision": "Custom ingredient-type registry nested helper; not a Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.ActuallyRecipes$Ingredients#public_signature"
-      ],
-      "id": "actually_recipes__ingredients",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.ActuallyRecipes$Types",
-      "costs": [],
-      "decision": "RecipeType registry nested helper; not a Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.ActuallyRecipes$Types#public_signature"
-      ],
-      "id": "actually_recipes__types",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
+      "id": "coffee_ingredient_recipe",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe",
-      "costs": [],
-      "decision": "Coffee Machine ingredient applies potion effects onto a cup through live machine state and methodHandler mutation; no complete deterministic item transaction.",
+      "status": "rejected",
+      "decision": "Coffee ingredient effects mutate player/entity state and are not a deterministic Core transaction family.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe#public_signature"
       ],
-      "id": "coffee_ingredient_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
         "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe$EffectInstance",
-      "costs": [],
-      "decision": "Nested effect record owned by rejected CoffeeIngredientRecipe.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe$EffectInstance#public_signature"
-      ],
-      "id": "coffee_ingredient_recipe__effect_instance",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     },
     {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected CoffeeIngredientRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.CoffeeIngredientRecipe$Serializer#public_signature"
-      ],
-      "id": "coffee_ingredient_recipe__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
+      "id": "color_change_recipe",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.ColorChangeRecipe",
-      "costs": [],
-      "decision": "Executed only by Atomic Reconstructor LensColor world laser conversion of blocks/items in-world; not an installed-station transaction.",
+      "status": "rejected",
+      "decision": "Color Change is a world laser-beam transformation; Auto Storage does not simulate world/entity laser paths.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.ColorChangeRecipe#public_signature"
       ],
-      "id": "color_change_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
         "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.ColorChangeRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected ColorChangeRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.ColorChangeRecipe$Serializer#public_signature"
-      ],
-      "id": "color_change_recipe__serializer",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     },
     {
       "class": "de.ellpeck.actuallyadditions.mod.crafting.CrushingRecipe",
@@ -406,7 +63,7 @@
           "resource_kind": "neoforge_energy"
         }
       ],
-      "decision": "Accept CrushingRecipe only when the input Ingredient is simple/non-empty, primary output is non-empty with positive count, and the secondary output is either empty or guaranteed (chance == 1.0). Fractional secondary chance stays fail-closed. Single crusher only: ENERGY_USE 40 FE/tick for 100 ticks (4000 FE and 4000 station work); crusher_double uses a different 150-tick/6000 FE contract and is not inferred from the plain crusher item.",
+      "decision": "Accept CrushingRecipe only when the input Ingredient is simple/non-empty, primary output is non-empty with positive count, and the secondary output is either empty or guaranteed (chance == 1.0). Fractional secondary chance stays fail-closed. Single crusher only: ENERGY_USE 40 FE/tick for 100 ticks (4000 FE and 4000 station work); crusher_double uses a different 150-tick/6000 FE contract and is not inferred from the plain crusher item. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
       "evidence": [
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getInput",
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getOutputOne",
@@ -467,66 +124,21 @@
       "status": "accepted"
     },
     {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.CrushingRecipe$CrushingResult",
-      "costs": [],
-      "decision": "Nested chance/result record; accepted CrushingRecipe contract owns its deterministic subset semantics.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.CrushingRecipe$CrushingResult#public_signature"
-      ],
-      "id": "crushing_recipe__crushing_result",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.CrushingRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for accepted CrushingRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.CrushingRecipe$Serializer#public_signature"
-      ],
-      "id": "crushing_recipe__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
+      "id": "empowerer_recipe",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.EmpowererRecipe",
-      "costs": [],
-      "decision": "Requires four Display Stands at fixed offsets with live per-stand FE drain (energyPerStand/time); multiblock/live-station state cannot be represented by an unconfigured Empowerer item.",
+      "status": "rejected",
+      "decision": "Empowerer requires a multiblock display-stand arrangement and live world state outside a single Core transaction.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.EmpowererRecipe#public_signature"
       ],
-      "id": "empowerer_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
         "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.EmpowererRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected EmpowererRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.EmpowererRecipe$Serializer#public_signature"
-      ],
-      "id": "empowerer_recipe__serializer",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     },
     {
       "class": "de.ellpeck.actuallyadditions.mod.crafting.FermentingRecipe",
@@ -536,7 +148,7 @@
           "resource_kind": "auto_storage:station_work"
         }
       ],
-      "decision": "Accept FermentingRecipe when input and output FluidStacks are non-empty with positive amounts and recipe.time is positive. Fermenting Barrel consumes no FE; station work equals recipe.time at 1 work/tick. Family costs are station work only.",
+      "decision": "Accept FermentingRecipe when input and output FluidStacks are non-empty with positive amounts and recipe.time is positive. Fermenting Barrel consumes no FE; station work equals recipe.time at 1 work/tick. Family costs are station work only. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
       "evidence": [
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/FermentingRecipe.java#getInput",
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/FermentingRecipe.java#getOutput",
@@ -582,115 +194,55 @@
       "status": "accepted"
     },
     {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.FermentingRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for accepted FermentingRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.FermentingRecipe$Serializer#public_signature"
-      ],
-      "id": "fermenting_recipe__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
+      "id": "laser_recipe",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.LaserRecipe",
-      "costs": [],
-      "decision": "Atomic Reconstructor default conversion lens fires a world laser beam that mutates hit blocks/items; not an installed-station transaction.",
+      "status": "rejected",
+      "decision": "Atomic Reconstructor laser recipes mutate world blocks/entities along a beam; not a deterministic Core transaction.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.LaserRecipe#public_signature"
       ],
-      "id": "laser_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
         "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.LaserRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected LaserRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.LaserRecipe$Serializer#public_signature"
-      ],
-      "id": "laser_recipe__serializer",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     },
     {
+      "id": "liquid_fuel_recipe",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.LiquidFuelRecipe",
-      "costs": [],
-      "decision": "Oil Generator fuel table producing FE over burn_time; generator fuel is not a Crafting Terminal recipe family.",
+      "status": "rejected",
+      "decision": "Liquid Fuel recipes feed generators rather than producing bounded Core outputs; energy generation is out of scope.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.LiquidFuelRecipe#public_signature"
       ],
-      "id": "liquid_fuel_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
         "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.LiquidFuelRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected LiquidFuelRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.LiquidFuelRecipe$Serializer#public_signature"
-      ],
-      "id": "liquid_fuel_recipe__serializer",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     },
     {
+      "id": "mining_lens_recipe",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.MiningLensRecipe",
-      "costs": [],
-      "decision": "WeightedEntry mining-lens outcomes selected randomly when the Atomic Reconstructor mining lens hits replaceable stone; probabilistic world mutation.",
+      "status": "rejected",
+      "decision": "Mining Lens recipes are world laser mining outcomes; not a deterministic Core transaction.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.MiningLensRecipe#public_signature"
       ],
-      "id": "mining_lens_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
         "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.MiningLensRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected MiningLensRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.MiningLensRecipe$Serializer#public_signature"
-      ],
-      "id": "mining_lens_recipe__serializer",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     },
     {
       "class": "de.ellpeck.actuallyadditions.mod.crafting.PressingRecipe",
@@ -704,7 +256,7 @@
           "resource_kind": "neoforge_energy"
         }
       ],
-      "decision": "Accept PressingRecipe when the input Ingredient is simple/non-empty and the FluidStack output is non-empty with positive amount. Canola Press uses ENERGY_USE 35 FE/tick for TIME 30 ticks (1050 FE and 1050 station work).",
+      "decision": "Accept PressingRecipe when the input Ingredient is simple/non-empty and the FluidStack output is non-empty with positive amount. Canola Press uses ENERGY_USE 35 FE/tick for TIME 30 ticks (1050 FE and 1050 station work). Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
       "evidence": [
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/PressingRecipe.java#getInput",
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/PressingRecipe.java#getOutput",
@@ -757,235 +309,68 @@
       "status": "accepted"
     },
     {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.PressingRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer for accepted PressingRecipe; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.PressingRecipe$Serializer#public_signature"
-      ],
-      "id": "pressing_recipe__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipeBioMash",
-      "costs": [],
-      "decision": "Deprecated empty stub; historical Bio Mash crafting was never ported to a 1.21 Recipe.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.RecipeBioMash#public_signature"
-      ],
-      "id": "recipe_bio_mash",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
+      "id": "recipe_keep_data_shaped",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShaped",
-      "costs": [],
-      "decision": "Custom shaped crafting that copies donor components via TargetComponentIngredient; outside this machine-family slice and not covered by the built-in ShapedRecipe adapter.",
+      "status": "rejected",
+      "decision": "KeepData shaped crafting copies NBT through generic ingredients and is covered by vanilla shaped adapters when exact; no separate AA family.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShaped#public_signature"
       ],
-      "id": "recipe_keep_data_shaped",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
-        "generic_ingredients"
+        "generic_ingredients",
+        "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShaped$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected RecipeKeepDataShaped; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShaped$Serializer#public_signature"
-      ],
-      "id": "recipe_keep_data_shaped__serializer",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     },
     {
+      "id": "recipe_keep_data_shapeless",
       "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShapeless",
-      "costs": [],
-      "decision": "Custom shapeless crafting that copies donor components via TargetComponentIngredient; outside this machine-family slice.",
+      "status": "rejected",
+      "decision": "KeepData shapeless crafting copies NBT through generic ingredients and is covered by vanilla shapeless adapters when exact; no separate AA family.",
       "evidence": [
         "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShapeless#public_signature"
       ],
-      "id": "recipe_keep_data_shapeless",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
-        "generic_ingredients"
+        "generic_ingredients",
+        "world_mutation"
       ],
+      "recipe_type": null,
       "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShapeless$Serializer",
-      "costs": [],
-      "decision": "Serializer for rejected RecipeKeepDataShapeless; not an independent family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.RecipeKeepDataShapeless$Serializer#public_signature"
-      ],
-      "id": "recipe_keep_data_shapeless__serializer",
       "inputs": [],
       "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.crafting.RecipePotionRingCharging",
-      "costs": [],
-      "decision": "Deprecated empty stub; historical potion-ring charging was never ported to a 1.21 Recipe.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.crafting.RecipePotionRingCharging#public_signature"
-      ],
-      "id": "recipe_potion_ring_charging",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.jei.empowerer.EmpowererRecipeCategory",
-      "costs": [],
-      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI to infer recipe semantics.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.jei.empowerer.EmpowererRecipeCategory#public_signature"
-      ],
-      "id": "empowerer_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.jei.laser.LaserRecipeCategory",
-      "costs": [],
-      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI to infer recipe semantics.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.jei.laser.LaserRecipeCategory#public_signature"
-      ],
-      "id": "laser_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.jei.lens.MiningLensRecipeCategory",
-      "costs": [],
-      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI to infer recipe semantics.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.jei.lens.MiningLensRecipeCategory#public_signature"
-      ],
-      "id": "mining_lens_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.recipe.CrusherRecipeRegistry",
-      "costs": [],
-      "decision": "Legacy registry/helper surface; runtime crushing uses CrushingRecipe + ActuallyAdditionsAPI.CRUSHER_RECIPES.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.recipe.CrusherRecipeRegistry#public_signature"
-      ],
-      "id": "crusher_recipe_registry",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.util.NoAdvRecipeOutput",
-      "costs": [],
-      "decision": "Datagen RecipeOutput wrapper; not a Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.util.NoAdvRecipeOutput#public_signature"
-      ],
-      "id": "no_adv_recipe_output",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.util.RecipeInjector",
-      "costs": [],
-      "decision": "Utility helper; not a Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.util.RecipeInjector#public_signature"
-      ],
-      "id": "recipe_injector",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "de.ellpeck.actuallyadditions.mod.util.RecipeUnlocker",
-      "costs": [],
-      "decision": "Player recipe-book unlock helper with entity mutation; not a Recipe family.",
-      "evidence": [
-        "de.ellpeck.actuallyadditions.mod.util.RecipeUnlocker#public_signature"
-      ],
-      "id": "recipe_unlocker",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "entity_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
+      "costs": []
     }
   ],
-  "kind": "auto_storage_compat_contract",
-  "schema": 1,
-  "source_audit_sha256": "072451bb6069025e255a39216edc0f892cda00c12b9905b552e7dd4631d44a41",
-  "source_recipe_inventory_sha256": "98ce538f61594a755feb42a6fa98bd885c4c574d82c1936221bf8198deccf24a",
-  "target": {
-    "dependency": "maven.modrinth:actually-additions:iNeJmgFj",
-    "display_name": "Actually Additions",
-    "mod_id": "actuallyadditions",
-    "repositories": [
-      "https://api.modrinth.com/maven"
+  "matrix": {
+    "mods": [
+      "actuallyadditions"
     ],
-    "runtime_dependencies": [],
-    "version": "1.3.26"
+    "descriptors": [
+      "auto_storage:actuallyadditions_crushing",
+      "auto_storage:actuallyadditions_pressing",
+      "auto_storage:actuallyadditions_fermenting"
+    ],
+    "resourceKinds": [],
+    "acceptedRecipes": [
+      "actuallyadditions:crushing/blaze_rod",
+      "actuallyadditions:pressing/canola",
+      "actuallyadditions:fermenting/refined_canola"
+    ],
+    "rejectedDescriptors": [
+      "auto_storage:actuallyadditions_empowering",
+      "auto_storage:actuallyadditions_laser"
+    ],
+    "rejectedResourceKinds": [],
+    "recipeInventory": {
+      "namespaces": [
+        "actuallyadditions"
+      ],
+      "sha256": "e929c43975ff99387a82a9327c11edc4a990bffa83c54e5794df571565dd369d"
+    }
   },
   "verification": {
     "checks": [
@@ -1012,7 +397,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Combined compatibility registry is missing",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }

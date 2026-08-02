@@ -10,6 +10,33 @@
   "expectedTests": 10,
   "fixture": "actuallyadditionsFixture",
   "id": "auto_storage:actuallyadditions",
+  "matrix": {
+    "acceptedRecipes": [
+      "actuallyadditions:crushing/blaze_rod",
+      "actuallyadditions:pressing/canola",
+      "actuallyadditions:fermenting/refined_canola"
+    ],
+    "descriptors": [
+      "auto_storage:actuallyadditions_crushing",
+      "auto_storage:actuallyadditions_pressing",
+      "auto_storage:actuallyadditions_fermenting"
+    ],
+    "mods": [
+      "actuallyadditions"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "actuallyadditions"
+      ],
+      "sha256": "e929c43975ff99387a82a9327c11edc4a990bffa83c54e5794df571565dd369d"
+    },
+    "rejectedDescriptors": [
+      "auto_storage:actuallyadditions_empowering",
+      "auto_storage:actuallyadditions_laser"
+    ],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
     "https://api.modrinth.com/maven"
   ],
@@ -17,6 +44,7 @@
     "actuallyadditions"
   ],
   "runtimeDependencies": [
+    "maven.modrinth:actually-additions:iNeJmgFj",
     "maven.modrinth:actually-additions:iNeJmgFj"
   ],
   "schema": 1,

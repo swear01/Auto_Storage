@@ -14,11 +14,20 @@ Actually Additions.
 - jar SHA-256:
   `072451bb6069025e255a39216edc0f892cda00c12b9905b552e7dd4631d44a41`;
 - official source tag: `v1.3.26`;
+- compile ancestry: Auto Storage normalized NeoForge `21.1.229` merged jar plus reachable Curios/Patchouli/PatchouliProvider/JEI API jars from the representative compile classpath (IE optional jars excluded to avoid duplicate class ownership);
 - source commit: `cd9d9c63254f471f966ee51b078afdf47af5f852`;
 - audit: `compat/audits/actuallyadditions/1.3.26.json`;
 - reviewed contract: `compat/contracts/actuallyadditions.json`;
-- inventory digest:
-  `98ce538f61594a755feb42a6fa98bd885c4c574d82c1936221bf8198deccf24a`.
+- class inventory digest:
+  `cdf0b8250c2b1e92f8d0d09367ba7f525ea820e5cfc9ba2e2e69b57c09096d03`;
+- recipe-data digest:
+  `1baa31128d8a7e6d5469b7266838e37de876e8e09aa7aaf4436594bef44680ea`;
+- scanner format: `16`;
+- isolated recipe-inventory digest (descriptor-owned; verified by isolated fixture):
+  `e929c43975ff99387a82a9327c11edc4a990bffa83c54e5794df571565dd369d`
+  (521 runtime recipes; jar JSON count is 540 before conditions);
+- coexistence/unclaimed digests belong only to the compatibility-matrix
+  build report, not peer descriptors or committed global baselines.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Actually Additions version on players and does not claim a multi-version
@@ -61,7 +70,7 @@ delta.
 
 ## Explicit exclusions
 
-Fifty-one audited candidates remain rejected, including Empowerer multiblock
+Eight audited recipe-class candidates remain rejected, including Empowerer multiblock
 stands, Laser / Color Change / Mining Lens world beams, Liquid Fuel generator
 recipes, Coffee effects, KeepData shaped/shapeless, datagen/JEI/helpers,
 deprecated stubs, and nested serializer/result helpers. Vanilla-class recipes
@@ -81,6 +90,8 @@ Ten real GameTests cover registration and Empowerer/Laser exclusion, blaze-rod
 crushing with exact powder output, pressing canola oil, fermenting refined
 canola, fractional-chance crushing rejection, missing-ingredient / insufficient
 FE / insufficient work atomic no-ops, destination-capacity and long-overflow
-rollback. Compat Kit verify writes
+rollback. The isolated fixture also asserts the descriptor-owned
+`actuallyadditions` recipe-inventory digest. Compat Kit verify writes
 `build/compat-kit/actuallyadditions-report.json`. The all-mod compatibility
-matrix protects coexistence and locks the 12,178-recipe baseline.
+matrix structurally validates coexistence claims and records actual
+coexistence/unclaimed digests only in `build/reports/terminal-scale-*.json`.
