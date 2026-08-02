@@ -3505,23 +3505,23 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             StorageCoreBlockEntity core,
             List<ItemStack> stacks
     ) {
-        if (usePlayerInventory) return;
         Level level = core.getLevel();
-        if (level == null) return;
-        SHARED_CRAFTABLE_CACHE.put(core, new SharedCraftableCache(
-                level.getRecipeManager().getRecipes(),
-                core.getCraftableRevision(),
-                core.getMachineRevision(),
-                core.getTopologyRevision(),
-                currentFilter,
-                getSortMode(),
-                getSortOrder(),
-                getResourceView(),
-                currentDynamicRecipeState(),
-                stacks,
-                nextCraftableEnergyThreshold,
-                nextCraftableStationThreshold));
-        var server = level.getServer();
+        if (!usePlayerInventory && level != null) {
+            SHARED_CRAFTABLE_CACHE.put(core, new SharedCraftableCache(
+                    level.getRecipeManager().getRecipes(),
+                    core.getCraftableRevision(),
+                    core.getMachineRevision(),
+                    core.getTopologyRevision(),
+                    currentFilter,
+                    getSortMode(),
+                    getSortOrder(),
+                    getResourceView(),
+                    currentDynamicRecipeState(),
+                    stacks,
+                    nextCraftableEnergyThreshold,
+                    nextCraftableStationThreshold));
+        }
+        var server = level == null ? null : level.getServer();
         if (server != null) {
             server.execute(CraftableRecipeCatalog::releaseTransientMatches);
         } else {

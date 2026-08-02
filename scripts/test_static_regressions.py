@@ -4803,6 +4803,7 @@ class StaticRegressionTests(unittest.TestCase):
         menu = self.read_required(
             "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
         )
+        api_docs = self.read_required("docs/recipe-family-api.md")
         matrix = self.read_required(
             "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
             "compatibilitymatrix/CraftablePerformanceGameTests.java"
@@ -4862,6 +4863,26 @@ class StaticRegressionTests(unittest.TestCase):
             shared_cache,
             "transient release must run after prepare returns so craftable_prepare_ms "
             "measures listing construction rather than cache teardown",
+        )
+        self.assertNotIn(
+            "if (usePlayerInventory) return;",
+            shared_cache,
+            "player-inventory Craftable builds must also release transient catalog/family graphs",
+        )
+        self.assertIn(
+            "if (!usePlayerInventory && level != null)",
+            shared_cache,
+            "only the shared-result write may be skipped for player-inventory Craftable builds",
+        )
+        self.assertRegex(
+            api_docs,
+            r"until the completed\s+Craftable listing releases them",
+            "the public addon contract must document the actual fixed-plan cache lifetime",
+        )
+        self.assertNotIn(
+            "presentation state on every Craftable rebuild",
+            api_docs,
+            "the public addon contract must not promise world-lifetime fixed-plan caching",
         )
         has_potential = self.java_block(
             menu,

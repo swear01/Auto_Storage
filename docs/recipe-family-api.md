@@ -87,12 +87,14 @@ RECIPE_FAMILIES.register("infusion", () -> RecipeFamilyFactories.deterministicRe
 ```
 
 The resolver must be deterministic and side-effect free. A fixed
-`deterministicResources` holder caches both its plan and final contract;
-catalog classification reuses that contract rather than rebuilding costs and
-presentation state on every Craftable rebuild. Chance outputs, runtime machine
-polling, arbitrary Core/player/world callbacks, and external-machine
-send-and-wait are rejected by design. Multi-step planning remains a separate
-future server graph; EMI is presentation and selection only.
+`deterministicResources` holder caches both its plan and final contract during
+catalog classification and Craftable preparation, until the completed
+Craftable listing releases them. A later invalidated listing rebuilds the plan
+and contract once; one listing does not rebuild costs or presentation state per
+candidate or output. Chance outputs, runtime machine polling, arbitrary
+Core/player/world callbacks, and external-machine send-and-wait are rejected by
+design. Multi-step planning remains a separate future server graph; EMI is
+presentation and selection only.
 
 ### `deterministicResourceVariants`
 
