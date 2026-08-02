@@ -4,6 +4,7 @@ import com.swear.autostorage.Action;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import com.swear.autostorage.ItemKey;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
@@ -55,6 +56,9 @@ public final class IntegrateddynamicsIntegrationGameTests {
     public static void registers_exact_stations_and_rejects_manual_squeezer(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                IntegrateddynamicsIntegrationGameTests.class);
         if (!validStation(DRYING_BASIN, "drying_basin")
                 || !validStation(MECHANICAL_DRYING_BASIN, "mechanical_drying_basin")
                 || !validStation(MECHANICAL_SQUEEZER, "mechanical_squeezer")

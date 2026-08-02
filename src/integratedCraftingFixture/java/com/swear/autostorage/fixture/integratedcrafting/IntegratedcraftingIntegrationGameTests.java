@@ -2,6 +2,7 @@ package com.swear.autostorage.fixture.integratedcrafting;
 
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +18,9 @@ public final class IntegratedcraftingIntegrationGameTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void present_mod_registers_no_unsafe_families(GameTestHelper helper) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                IntegratedcraftingIntegrationGameTests.class);
         if (!ModList.get().isLoaded("integratedcrafting")
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
                         .anyMatch(id -> id.getPath().startsWith("integratedcrafting"))

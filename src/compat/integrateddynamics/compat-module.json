@@ -40,7 +40,7 @@
       "namespaces": [
         "integrateddynamics"
       ],
-      "sha256": "8ee33cfc2a8b6a5b6961d3897b8e3eb20edd40cc151783e9acaf2ea7a9a417fa"
+      "sha256": "22990962ac2a4058027e307c1f38bace89abc07336b71b1a2ac812ab0789da9b"
     },
     "rejectedDescriptors": [
       "auto_storage:integrateddynamics_squeezer"

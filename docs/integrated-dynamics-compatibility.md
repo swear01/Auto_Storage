@@ -55,6 +55,15 @@ item outputs below `1.0F` fail closed.
 - Logic-programmer recipe value types, operators, JEI/REI helpers, and network
   recipe-handler operators.
 
+## Declarative matrix and isolated evidence
+
+The Integrated Dynamics descriptor owns the isolated `integrateddynamics`
+recipe-inventory digest (`22990962…da9b` / 252 recipes). The isolated fixture calls
+`IsolatedRecipeInventoryEvidence.assertMatchesDescriptor` against that digest.
+Cross-module coexistence inventories are recorded only in the compatibility
+matrix report (`build/reports/terminal-scale-*.json`); this module does not pin
+peer Create digests or commit global coexistence/unclaimed expected SHA values.
+
 ## Verification
 
 ```bash

@@ -1,11 +1,11 @@
 {
   "contract_sha256": "c0d6713cc38265d485352bbabe715a0e7069d6d02583affd56f54c39313dcb17",
   "files": {
-    "src/compat/integrateddynamics/compat-module.json": "f172090b68d55ea4af89ccd94464ea7b62fad61262ff2e9b050ce0b661c815e8",
-    "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompat.java": "42e8d624fc116714a35addcb5a97ebeb09390a8a8869c97867a8b7c11106bb98",
+    "src/compat/integrateddynamics/compat-module.json": "afb39d0763df0dab9e7afd8928d9bf3ac42e3025e474a83021af78509cdb4164",
+    "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompat.java": "f933f453f9dc1c5b42707d620232b1ac7124a13db4b8067300d5192f7014a182",
     "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompatModule.java": "b0a9ed875ed11eb77bb6de0204801c59bfc8d36b2d99b440dd4ebcc3afbc5818",
     "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsFixtureMod.java": "09cafe93da5cb14084a3e3714efd1f786edcb81b2d7f605cfa1f33d8d71a7d64",
-    "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java": "895a6eb795b2f4a342856ee4ac2f3f89897a7f09cb4f92d723c3cebc446f2b8a",
+    "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java": "b022d12832837e1f85dae840fdec61de2e3024f416bc7db27baedbdf8184528e",
     "src/integratedDynamicsFixture/resources/META-INF/neoforge.mods.toml": "4239b7340d73f8654adea976c2dd182084fd99d1d96150ccb2c76f378c6effdb",
     "src/integratedDynamicsFixture/resources/data/auto_storage_integrateddynamics_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

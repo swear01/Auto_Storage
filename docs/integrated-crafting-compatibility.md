@@ -43,6 +43,14 @@ recipe used for upstream game tests. Shears durability uses player/entity
 mutation and `CommonHooks` remainders, so it has no complete Auto Storage
 transaction contract.
 
+## Declarative matrix and isolated evidence
+
+The Integrated Crafting descriptor owns the isolated `integratedcrafting`
+recipe-inventory digest (`35939862…9aa7`). The isolated fixture calls
+`IsolatedRecipeInventoryEvidence.assertMatchesDescriptor` against that digest.
+Coexistence effects belong only in the compatibility-matrix report; this module
+does not rewrite peer descriptors or commit global expected SHA values.
+
 ## Verification
 
 ```bash
