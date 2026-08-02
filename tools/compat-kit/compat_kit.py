@@ -3516,14 +3516,13 @@ def scan_jar(
             base_cache_identity = (
                 recipe_data["digest"] if data_roots else artifact_sha
             )
-            if selected_mod_id is not None:
-                base_cache_identity = hashlib.sha256(
-                    (
-                        base_cache_identity
-                        + ":mod_id:"
-                        + target["mod_id"]
-                    ).encode("utf-8")
-                ).hexdigest()
+            base_cache_identity = hashlib.sha256(
+                (
+                    base_cache_identity
+                    + ":mod_id:"
+                    + target["mod_id"]
+                ).encode("utf-8")
+            ).hexdigest()
             cache_identity = (
                 hashlib.sha256(
                     (base_cache_identity + ":" + classpath_digest).encode("utf-8")

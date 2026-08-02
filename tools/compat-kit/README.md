@@ -87,8 +87,9 @@ major version 21 before that inventory is read or a cached audit is returned.
 Cache metadata binds the selected JDK installation, version, module-file
 identity, and resolved `javap` path/version/size/SHA; a changed JDK 21
 inventory forces a fresh scan. A `java.*` or `javax.*` prefix alone never
-authorizes an unresolved class. Explicit selected mod IDs also enter the cache
-identity, isolating audits for multiple targets declared by the same jar.
+authorizes an unresolved class. The resolved target mod ID always enters the
+cache identity, so implicit and explicit selection of one target reuse the same
+audit while multiple targets declared by the same jar remain isolated.
 JVM modified UTF-8 class constants are handled correctly. Repeatable
 `--data-root` inputs use normal
 data-pack precedence and add bounded recipe counts, sample IDs, fields,

@@ -1453,6 +1453,36 @@ class CompatKitAuditTests(unittest.TestCase):
             ))),
         )
 
+    def test_scan_cache_reuses_single_mod_target_with_explicit_selection(self):
+        cache = self.root / "single-mod-cache"
+        calls = []
+
+        def counted_reader(class_name: str):
+            calls.append(class_name)
+            return self.signatures(class_name)
+
+        implicit = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=counted_reader,
+        )
+        implicit_calls = len(calls)
+        explicit = self.compat_kit.scan_jar(
+            self.jar,
+            selected_mod_id="samplemod",
+            cache_dir=cache,
+            signature_reader=counted_reader,
+        )
+
+        self.assertEqual(implicit, explicit)
+        self.assertEqual(implicit_calls, len(calls))
+        self.assertEqual(
+            1,
+            len(list(cache.glob(
+                f"*/{self.compat_kit.SCAN_CACHE_DIRECTORY}/audit.json"
+            ))),
+        )
+
     def test_scan_cache_rechecks_recipe_data_after_artifact_validation(self):
         cache = self.root / "late-cache"
         data_root = self.root / "late-cache-data"
@@ -2050,9 +2080,12 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
         self.assertEqual(first, second)
+        cache_identity = hashlib.sha256(
+            f'{first["artifact"]["sha256"]}:mod_id:samplemod'.encode("utf-8")
+        ).hexdigest()
         cached = (
             cache
-            / first["artifact"]["sha256"]
+            / cache_identity
             / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )
@@ -2061,9 +2094,12 @@ class CompatKitAuditTests(unittest.TestCase):
     def test_scan_ignores_cache_from_previous_candidate_classifier(self):
         cache = self.root / "cache"
         artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
+        cache_identity = hashlib.sha256(
+            f"{artifact_sha}:mod_id:samplemod".encode("utf-8")
+        ).hexdigest()
         stale = (
             cache
-            / artifact_sha
+            / cache_identity
             / f"v{self.compat_kit.SCAN_CACHE_VERSION}-classifier-3"
             / "audit.json"
         )
@@ -2078,7 +2114,7 @@ class CompatKitAuditTests(unittest.TestCase):
 
         current = (
             cache
-            / artifact_sha
+            / cache_identity
             / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )
@@ -2926,9 +2962,12 @@ class CompatKitAuditTests(unittest.TestCase):
     def test_scan_rejects_malformed_current_cache_structure(self):
         cache = self.root / "cache"
         artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
+        cache_identity = hashlib.sha256(
+            f"{artifact_sha}:mod_id:samplemod".encode("utf-8")
+        ).hexdigest()
         cached = (
             cache
-            / artifact_sha
+            / cache_identity
             / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )

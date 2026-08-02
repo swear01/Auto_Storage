@@ -177,11 +177,12 @@ present in the same archive; a missing owner fails closed rather than allowing
 a descendant of an excluded anonymous, local, or synthetic owner through a
 split classpath.
 Data-root scans bind the ordered layer digests into their cache identity;
-ancestry classpaths bind their exact artifact set. An explicit selected mod ID
-also enters the cache identity, so two targets declared by the same jar cannot
-reuse each other's audit. Cache metadata also records the selected JDK 21
-installation, release version, module-file identity, and the resolved `javap`
-path, reported version, size, and SHA-256.
+ancestry classpaths bind their exact artifact set. The resolved target mod ID
+always enters the cache identity, so implicit and explicit selection of the
+same single-mod target reuse one audit while two targets declared by the same
+jar cannot reuse each other's audit. Cache metadata also records the selected
+JDK 21 installation, release version, module-file identity, and the resolved
+`javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
 current scanner format is `17` with candidate classifier `4`; formats `7`
