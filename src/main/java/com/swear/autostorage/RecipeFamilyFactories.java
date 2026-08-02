@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -66,7 +67,7 @@ public final class RecipeFamilyFactories {
     ) {
         return deterministicResourcesInternal(
                 exactRecipeClass, recipeType, stationDescriptorId, recipe -> true,
-                plan, cost, presentationKind, false);
+                plan, cost, presentationKind, false, true, null);
     }
 
     public static <R extends Recipe<?>> RecipeFamily deterministicResourceVariants(
@@ -111,7 +112,23 @@ public final class RecipeFamilyFactories {
     ) {
         return deterministicResourcesInternal(
                 exactRecipeClass, recipeType, stationDescriptorId, eligibility,
-                plan, cost, presentationKind, true);
+                plan, cost, presentationKind, true, true, null);
+    }
+
+    public static <R extends Recipe<?>> RecipeFamily dynamicDeterministicResources(
+            Class<R> exactRecipeClass,
+            Supplier<? extends RecipeType<?>> recipeType,
+            ResourceLocation stationDescriptorId,
+            Predicate<? super R> eligibility,
+            BiFunction<? super R, HolderLookup.Provider, TypedRecipePlan> plan,
+            Function<? super R, RecipeFamilyCost> cost,
+            LongSupplier dynamicStateToken,
+            RecipePresentationKind presentationKind
+    ) {
+        Objects.requireNonNull(dynamicStateToken, "dynamicStateToken");
+        return deterministicResourcesInternal(
+                exactRecipeClass, recipeType, stationDescriptorId, eligibility,
+                plan, cost, presentationKind, true, false, dynamicStateToken);
     }
 
     private static <R extends Recipe<?>> RecipeFamily deterministicResourcesInternal(
@@ -122,7 +139,9 @@ public final class RecipeFamilyFactories {
             BiFunction<? super R, HolderLookup.Provider, TypedRecipePlan> plan,
             Function<? super R, RecipeFamilyCost> cost,
             RecipePresentationKind presentationKind,
-            boolean allowSpecial
+            boolean allowSpecial,
+            boolean cachePlan,
+            LongSupplier dynamicStateToken
     ) {
         Objects.requireNonNull(exactRecipeClass, "exactRecipeClass");
         Objects.requireNonNull(recipeType, "recipeType");
@@ -142,6 +161,8 @@ public final class RecipeFamilyFactories {
                 (recipe, registries) -> plan.apply(exactRecipeClass.cast(recipe), registries),
                 recipe -> cost.apply(exactRecipeClass.cast(recipe)),
                 presentationKind,
-                allowSpecial);
+                allowSpecial,
+                cachePlan,
+                dynamicStateToken);
     }
 }

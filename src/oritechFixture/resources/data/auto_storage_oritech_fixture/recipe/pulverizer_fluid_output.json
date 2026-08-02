@@ -1,0 +1,21 @@
+{
+  "type": "oritech:pulverizer",
+  "fluidOutputs": [
+    {
+      "amount": 100,
+      "fluid": "minecraft:water"
+    }
+  ],
+  "ingredients": [
+    {
+      "item": "minecraft:cobblestone"
+    }
+  ],
+  "results": [
+    {
+      "count": 1,
+      "id": "minecraft:gravel"
+    }
+  ],
+  "time": 100
+}

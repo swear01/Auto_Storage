@@ -33,13 +33,131 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @GameTestHolder(AutoStorage.MODID)
 @PrefixGameTestTemplate(false)
 public final class RecipeAdapterTests {
     private RecipeAdapterTests() {
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void typed_family_catalog_match_preserves_dynamic_and_cached_plans(
+            GameTestHelper helper
+    ) {
+        final class DynamicRecipe extends StonecutterRecipe {
+            private DynamicRecipe() {
+                super("", Ingredient.of(Items.DIRT), new ItemStack(Items.DIAMOND));
+            }
+        }
+        AtomicInteger planBuilds = new AtomicInteger();
+        RecipeFamily family = RecipeFamilyFactories.dynamicDeterministicResources(
+                DynamicRecipe.class,
+                () -> net.minecraft.world.item.crafting.RecipeType.STONECUTTING,
+                MachineEnergyTable.STONECUTTER_ID,
+                recipe -> true,
+                (recipe, registries) -> {
+                    planBuilds.incrementAndGet();
+                    return TypedRecipePlan.builder()
+                            .input(TypedRecipeInput.consume(
+                                    StorageResourceKey.item(
+                                            new ItemStack(Items.DIRT), registries), 1))
+                            .input(TypedRecipeInput.consume(
+                                    StorageResourceKey.item(
+                                            new ItemStack(Items.COBBLESTONE), registries), 1))
+                            .output(TypedRecipeOutput.primary(
+                                    StorageResourceKey.item(
+                                            new ItemStack(Items.DIAMOND), registries), 1))
+                            .presentationOutput(new ItemStack(Items.DIAMOND))
+                            .layout(2, 1, true)
+                            .build();
+                },
+                recipe -> RecipeFamilyCost.free(),
+                () -> 1L,
+                RecipePresentationKind.STONECUTTING);
+        RecipeAdapterRegistry registry = new RecipeAdapterRegistry(List.of(
+                family.adapter(ResourceLocation.fromNamespaceAndPath(
+                        "test_mod", "dynamic_catalog"), 1_000)));
+        RecipeHolder<DynamicRecipe> holder = new RecipeHolder<>(
+                ResourceLocation.fromNamespaceAndPath(
+                        "test_mod", "dynamic_catalog_recipe"),
+                new DynamicRecipe());
+        RecipeAdapterMatch match = registry.classify(holder, helper.getLevel())
+                .orElse(null);
+
+        if (match == null
+                || match.typedRecipePlan().isEmpty()
+                || match.typedRecipePlan().orElseThrow().inputs().size() != 2
+                || planBuilds.get() != 1) {
+            helper.fail("Dynamic catalog classification did not carry one resolved plan");
+            return;
+        }
+        int[][] requiredGroups = CraftableRecipeCatalog.requiredItemGroups(
+                match, helper.getLevel());
+        BitSet availableItems = new BitSet();
+        availableItems.set(net.minecraft.core.registries.BuiltInRegistries.ITEM
+                .getId(Items.DIRT));
+        if (CraftableRecipeCatalog.requirementsMet(requiredGroups, availableItems)) {
+            helper.fail("Dynamic catalog admitted a recipe missing its second input");
+            return;
+        }
+        availableItems.set(net.minecraft.core.registries.BuiltInRegistries.ITEM
+                .getId(Items.COBBLESTONE));
+        if (!CraftableRecipeCatalog.requirementsMet(requiredGroups, availableItems)) {
+            helper.fail("Dynamic catalog rejected a recipe with every required input");
+            return;
+        }
+
+        final class StaticRecipe extends StonecutterRecipe {
+            private StaticRecipe() {
+                super("", Ingredient.of(Items.DIRT), new ItemStack(Items.EMERALD));
+            }
+        }
+        AtomicInteger staticPlanBuilds = new AtomicInteger();
+        AtomicInteger staticCostBuilds = new AtomicInteger();
+        RecipeFamily staticFamily = RecipeFamilyFactories.deterministicResources(
+                StaticRecipe.class,
+                () -> net.minecraft.world.item.crafting.RecipeType.STONECUTTING,
+                MachineEnergyTable.STONECUTTER_ID,
+                (recipe, registries) -> {
+                    staticPlanBuilds.incrementAndGet();
+                    return TypedRecipePlan.builder()
+                            .input(TypedRecipeInput.consume(
+                                    StorageResourceKey.item(
+                                            new ItemStack(Items.DIRT), registries), 1))
+                            .output(TypedRecipeOutput.primary(
+                                    StorageResourceKey.item(
+                                            new ItemStack(Items.EMERALD), registries), 1))
+                            .presentationOutput(new ItemStack(Items.EMERALD))
+                            .layout(1, 1, true)
+                            .build();
+                },
+                recipe -> {
+                    staticCostBuilds.incrementAndGet();
+                    return RecipeFamilyCost.free();
+                },
+                RecipePresentationKind.STONECUTTING);
+        RecipeAdapter staticAdapter = staticFamily.adapter(
+                ResourceLocation.fromNamespaceAndPath(
+                        "test_mod", "static_catalog"), 1_000);
+        RecipeHolder<StaticRecipe> staticHolder = new RecipeHolder<>(
+                ResourceLocation.fromNamespaceAndPath(
+                        "test_mod", "static_catalog_recipe"),
+                new StaticRecipe());
+        RecipeAdapterMatch firstStatic = staticAdapter.match(
+                staticHolder, helper.getLevel());
+        RecipeAdapterMatch secondStatic = staticAdapter.match(
+                staticHolder, helper.getLevel());
+        if (firstStatic.contract() != secondStatic.contract()
+                || staticPlanBuilds.get() != 1
+                || staticCostBuilds.get() != 1) {
+            helper.fail("Static typed catalog classification did not reuse its contract");
+            return;
+        }
+        helper.succeed();
     }
 
     @GameTest(template = "craftingtests.platform")

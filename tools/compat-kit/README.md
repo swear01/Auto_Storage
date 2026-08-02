@@ -299,7 +299,10 @@ every audited ancestry jar. Generated and example GitHub Actions workflows pass
 both the target to `verify --jar` and every staged ancestry jar through
 repeatable `--classpath` rather than trusting only the committed audit.
 Scanner-format-16 `ancestry_dependencies` make the generated build emit exact
-non-transitive `compileOnly` and `compatKitAncestryArtifacts` coordinates. The
+non-transitive `compileOnly` and `compatKitAncestryArtifacts` coordinates;
+bundled descriptors likewise include every reachable audited ancestry
+coordinate as a descriptor-owned compile dependency instead of relying on
+root-build one-offs. The
 ancestry task searches the target's transitive dependencies, NeoForge
 additional runtime classpath, and ModDev `createMinecraftArtifacts` outputs,
 normalizes their archive layout, stages only exact SHA/size matches, and reports

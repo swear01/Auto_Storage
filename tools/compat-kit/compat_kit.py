@@ -4640,7 +4640,7 @@ side="BOTH"
 """
 
 
-def _bundled_files(contract: dict) -> dict[str, bytes]:
+def _bundled_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
     target = contract["target"]
     mod_id = target["mod_id"]
     package_segment = _java_segment(mod_id)
@@ -4660,7 +4660,13 @@ def _bundled_files(contract: dict) -> dict[str, bytes]:
         "sourceSet": source_set,
         "fixture": fixture,
         "expectedTests": contract["verification"]["expected_game_tests"],
-        "dependencies": [target["dependency"]],
+        "dependencies": [
+            target["dependency"],
+            *(
+                record["dependency"]
+                for record in source_audit["ancestry_dependencies"]
+            ),
+        ],
         "runtimeDependencies": [
             target["dependency"],
             *target["runtime_dependencies"],
@@ -5514,7 +5520,7 @@ def scaffold_bundled(
     _validate_bundled_verification(contract)
     mod_id = contract["target"]["mod_id"]
     root = Path(root)
-    files = _bundled_files(contract)
+    files = _bundled_files(contract, source_audit)
     descriptor_path = f"src/compat/{mod_id}/compat-module.json"
     descriptor = json.loads(files[descriptor_path])
     _validate_bundled_identifier_collisions(
@@ -6536,7 +6542,7 @@ def verify_contract(
         else root / ".compat-kit-manifest.json"
     )
     generated_files = (
-        _bundled_files(contract)
+        _bundled_files(contract, source_audit)
         if mode == "bundled"
         else _addon_files(contract, source_audit)
     )

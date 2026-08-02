@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.WeakHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -31,6 +33,8 @@ public final class RecipeFamily {
     private final TypedPlanVariants typedPlanVariants;
     private final Predicate<Recipe<?>> eligibility;
     private final boolean allowSpecial;
+    private final boolean cacheTypedPlan;
+    private final LongSupplier dynamicStateToken;
     private final Function<Recipe<?>, RecipeFamilyCost> cost;
     private final RecipePresentationKind presentationKind;
     private final Map<Recipe<?>, TypedRecipePlan> typedPlanCache =
@@ -56,6 +60,8 @@ public final class RecipeFamily {
         this.typedPlanVariants = null;
         this.eligibility = recipe -> true;
         this.allowSpecial = false;
+        this.cacheTypedPlan = false;
+        this.dynamicStateToken = null;
         this.cost = Objects.requireNonNull(cost, "cost");
         this.presentationKind = Objects.requireNonNull(presentationKind, "presentationKind");
     }
@@ -68,7 +74,9 @@ public final class RecipeFamily {
             BiFunction<Recipe<?>, HolderLookup.Provider, TypedRecipePlan> typedPlan,
             Function<Recipe<?>, RecipeFamilyCost> cost,
             RecipePresentationKind presentationKind,
-            boolean allowSpecial
+            boolean allowSpecial,
+            boolean cacheTypedPlan,
+            LongSupplier dynamicStateToken
     ) {
         this.exactRecipeClass = Objects.requireNonNull(exactRecipeClass, "exactRecipeClass");
         this.recipeType = Objects.requireNonNull(recipeType, "recipeType");
@@ -77,6 +85,8 @@ public final class RecipeFamily {
         this.output = null;
         this.eligibility = Objects.requireNonNull(eligibility, "eligibility");
         this.allowSpecial = allowSpecial;
+        this.cacheTypedPlan = cacheTypedPlan;
+        this.dynamicStateToken = dynamicStateToken;
         this.typedPlan = Objects.requireNonNull(typedPlan, "typedPlan");
         this.typedPlanVariants = null;
         this.cost = Objects.requireNonNull(cost, "cost");
@@ -100,6 +110,8 @@ public final class RecipeFamily {
         this.output = null;
         this.eligibility = Objects.requireNonNull(eligibility, "eligibility");
         this.allowSpecial = allowSpecial;
+        this.cacheTypedPlan = false;
+        this.dynamicStateToken = null;
         this.typedPlan = null;
         this.typedPlanVariants = Objects.requireNonNull(
                 typedPlanVariants, "typedPlanVariants");
@@ -144,6 +156,9 @@ public final class RecipeFamily {
             HolderLookup.Provider registries
     ) {
         if (typedPlan == null) throw new IllegalStateException("Legacy recipe family has no typed plan");
+        if (!cacheTypedPlan) {
+            return Objects.requireNonNull(typedPlan.apply(recipe, registries), "typed recipe plan");
+        }
         return typedPlanCache.computeIfAbsent(recipe, ignored ->
                 Objects.requireNonNull(typedPlan.apply(recipe, registries), "typed recipe plan"));
     }
@@ -218,8 +233,28 @@ public final class RecipeFamily {
             Recipe<?> recipe = checkedRecipe(holder);
             if (typedPlan == null || level == null) return candidateIndex(holder);
             TypedRecipePlan plan = typedPlanFor(recipe, level.registryAccess());
-            typedContractCache.computeIfAbsent(recipe, ignored -> typedContract(recipe, plan));
+            if (cacheTypedPlan) {
+                typedContractCache.computeIfAbsent(recipe, ignored -> typedContract(recipe, plan));
+            }
             return typedCandidateIndex(plan, level.registryAccess());
+        }
+
+        @Override
+        public RecipeAdapterMatch match(RecipeHolder<?> holder, Level level) {
+            Recipe<?> recipe = checkedRecipe(holder);
+            if (typedPlan == null || level == null) {
+                return RecipeAdapter.super.match(holder, level);
+            }
+            TypedRecipePlan plan = typedPlanFor(recipe, level.registryAccess());
+            RecipeAdapterMatch.Contract contract = cacheTypedPlan
+                    ? typedContractCache.computeIfAbsent(
+                            recipe, ignored -> typedContract(recipe, plan))
+                    : typedContract(recipe, plan);
+            return new RecipeAdapterMatch(
+                    this,
+                    holder,
+                    typedCandidateIndex(plan, level.registryAccess()),
+                    contract);
         }
 
         private RecipeCandidateIndex typedCandidateIndex(
@@ -250,7 +285,9 @@ public final class RecipeFamily {
         public RecipeAdapterMatch.Contract contract(RecipeHolder<?> holder) {
             Recipe<?> recipe = checkedRecipe(holder);
             if (isTyped()) {
-                RecipeAdapterMatch.Contract cached = typedContractCache.get(recipe);
+                RecipeAdapterMatch.Contract cached = cacheTypedPlan
+                        ? typedContractCache.get(recipe)
+                        : null;
                 if (cached != null) return cached;
                 RecipeAdapterMatch.Presentation presentation = new RecipeAdapterMatch.Presentation(
                         presentationKind,
@@ -312,7 +349,9 @@ public final class RecipeFamily {
             if (isTyped()) {
                 if (level == null) return List.of();
                 if (typedPlan != null) {
-                    if (baseContract.typedRecipePlan() != null) return List.of(baseContract);
+                    if (cacheTypedPlan && baseContract.typedRecipePlan() != null) {
+                        return List.of(baseContract);
+                    }
                     return List.of(typedContract(
                             recipe, typedPlanFor(recipe, level.registryAccess())));
                 }
@@ -327,6 +366,13 @@ public final class RecipeFamily {
         @Override
         public boolean requiresAvailableStacksForVariants() {
             return typedPlanVariants != null;
+        }
+
+        @Override
+        public OptionalLong dynamicStateToken() {
+            return dynamicStateToken == null
+                    ? OptionalLong.empty()
+                    : OptionalLong.of(dynamicStateToken.getAsLong());
         }
 
         @Override

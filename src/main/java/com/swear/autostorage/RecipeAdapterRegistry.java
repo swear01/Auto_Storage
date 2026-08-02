@@ -8,6 +8,7 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,6 +63,14 @@ final class RecipeAdapterRegistry {
         return Optional.ofNullable(adaptersById.get(Objects.requireNonNull(id, "id")));
     }
 
+    Map<ResourceLocation, Long> dynamicStateTokens() {
+        Map<ResourceLocation, Long> tokens = new LinkedHashMap<>();
+        for (RecipeAdapter adapter : adapters) {
+            adapter.dynamicStateToken().ifPresent(token -> tokens.put(adapter.id(), token));
+        }
+        return Map.copyOf(tokens);
+    }
+
     Optional<RecipeAdapterMatch> classify(RecipeHolder<?> holder) {
         return classify(holder, null);
     }
@@ -100,8 +109,7 @@ final class RecipeAdapterRegistry {
             RecipeHolder<?> holder,
             Level level
     ) {
-        return new RecipeAdapterMatch(
-                adapter, holder, adapter.candidateIndex(holder, level));
+        return adapter.match(holder, level);
     }
 
     @SuppressWarnings("unchecked")

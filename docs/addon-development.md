@@ -99,8 +99,10 @@ sorted, fixed-timestamp, stored-entry normalization only for ModDev outputs.
 Maven artifacts remain raw exact bytes. Scanner-format-16
 `ancestry_dependencies` are emitted
 automatically as non-transitive `compileOnly` and
-`compatKitAncestryArtifacts` declarations; hand-editing generated Gradle is not
-a supported workaround, and an unresolved hash remains a hard failure.
+`compatKitAncestryArtifacts` declarations in independent addons, and as
+descriptor-owned compile dependencies in bundled modules for every reachable
+audited ancestry coordinate; hand-editing root Gradle is not a supported
+workaround, and an unresolved hash remains a hard failure.
 Complete consumers reopen the target and every supplied ancestry jar,
 reconstruct the reachable external metadata graph, reject duplicate
 inspectable classes across the complete supplied set, rebuild exact NeoForge
@@ -332,6 +334,11 @@ recipe class plus exact `RecipeType`, not individual recipe IDs.
 - `singleItemToItem` covers one consumed item and one deterministic item output.
 - `deterministicResources` covers bounded exact item/fluid/energy/chemical/addon
   inputs, catalysts, tools, remainders, multiple outputs, and station costs.
+- `dynamicDeterministicResources` covers the same one-plan contract when loaded
+  server configuration can change its exact plan or cost after registration;
+  it re-resolves those values without dropping the exact candidate index. Its
+  required side-effect-free `dynamicStateToken` must change whenever those
+  values change so shared Craftable results cannot survive a config reload.
 - `deterministicResourceVariants` covers a bounded set of complete deterministic
   plans selected from exact available stacks.
 

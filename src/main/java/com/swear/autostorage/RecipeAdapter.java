@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 interface RecipeAdapter {
     ResourceLocation id();
@@ -19,6 +20,10 @@ interface RecipeAdapter {
 
     default RecipeCandidateIndex candidateIndex(RecipeHolder<?> holder, Level level) {
         return candidateIndex(holder);
+    }
+
+    default RecipeAdapterMatch match(RecipeHolder<?> holder, Level level) {
+        return new RecipeAdapterMatch(this, holder, candidateIndex(holder, level));
     }
 
     RecipeAdapterMatch.Contract contract(RecipeHolder<?> holder);
@@ -43,6 +48,10 @@ interface RecipeAdapter {
 
     default Optional<RecipeFamilyKey> exactFamilyKey() {
         return Optional.empty();
+    }
+
+    default OptionalLong dynamicStateToken() {
+        return OptionalLong.empty();
     }
 
 }

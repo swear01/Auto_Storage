@@ -115,6 +115,23 @@ public final class RecipeFamilyApiCompileFixture {
                 RecipePresentationKind.STONECUTTING);
     }
 
+    public static RecipeFamily createDynamicTyped() {
+        return RecipeFamilyFactories.dynamicDeterministicResources(
+                StonecutterRecipe.class,
+                () -> RecipeType.STONECUTTING,
+                AutoStorageApi.id("stonecutter"),
+                recipe -> !recipe.getGroup().isEmpty(),
+                (recipe, registries) -> TypedRecipePlan.builder()
+                        .input(TypedRecipeInput.consume(resource("mana", "blue"), 100))
+                        .output(TypedRecipeOutput.primary(resource("item", "redstone"), 2))
+                        .presentationOutput(new ItemStack(Items.REDSTONE, 2))
+                        .layout(1, 1, false)
+                        .build(),
+                recipe -> RecipeFamilyCost.free(),
+                () -> 1L,
+                RecipePresentationKind.STONECUTTING);
+    }
+
     public static DeferredRegister<RecipeFamily> register() {
         DeferredRegister<RecipeFamily> families = RecipeFamilyApi.createDeferredRegister("fixture_mod");
         families.register("stonecutting", RecipeFamilyApiCompileFixture::create);

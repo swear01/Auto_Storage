@@ -180,12 +180,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             SortMode sortMode,
             SortOrder sortOrder,
             TerminalResourceView resourceView,
+            Map<ResourceLocation, Long> dynamicRecipeState,
             List<ItemStack> stacks,
             long[] energyThresholds,
             Map<ResourceLocation, Long> stationThresholds
     ) {
         private SharedCraftableCache {
             stacks = stacks.stream().map(ItemStack::copy).toList();
+            dynamicRecipeState = Map.copyOf(dynamicRecipeState);
             energyThresholds = energyThresholds.clone();
             stationThresholds = Map.copyOf(stationThresholds);
         }
@@ -311,6 +313,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private int lastPlayerInventoryFingerprint;
     private long lastTopologyRevision;
     private long lastMachineRevision;
+    private Map<ResourceLocation, Long> lastDynamicRecipeState = Map.of();
     private final long[] nextCraftableEnergyThreshold = new long[EnergyType.values().length];
     private final Map<ResourceLocation, Long> nextCraftableStationThreshold = new HashMap<>();
 
@@ -326,6 +329,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         this.lastPlayerInventoryFingerprint = playerInventoryFingerprint();
         this.lastTopologyRevision = core.getTopologyRevision();
         this.lastMachineRevision = core.getMachineRevision();
+        this.lastDynamicRecipeState = currentDynamicRecipeState();
         Arrays.fill(nextCraftableEnergyThreshold, Long.MAX_VALUE);
         refreshEnergyAmounts(core);
         addContainerData();
@@ -3116,9 +3120,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             if (topologyChanged) lastTopologyRevision = core.getTopologyRevision();
             boolean machinesChanged = core != null && core.getMachineRevision() != lastMachineRevision;
             if (machinesChanged) lastMachineRevision = core.getMachineRevision();
+            Map<ResourceLocation, Long> dynamicRecipeState = currentDynamicRecipeState();
+            boolean dynamicRecipeStateChanged =
+                    !dynamicRecipeState.equals(lastDynamicRecipeState);
+            if (dynamicRecipeStateChanged) lastDynamicRecipeState = dynamicRecipeState;
             sendDescriptorState = machinesChanged;
 
             if (core != null && (topologyChanged || machinesChanged
+                    || dynamicRecipeStateChanged
                     || playerInventoryChanged && usePlayerInventory)) {
                 if (machinesChanged) refreshEnergyAmounts(core);
                 if (topologyChanged || machinesChanged || page == CraftingTerminalPage.CRAFTABLE) {
@@ -3508,6 +3517,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 getSortMode(),
                 getSortOrder(),
                 getResourceView(),
+                currentDynamicRecipeState(),
                 stacks,
                 nextCraftableEnergyThreshold,
                 nextCraftableStationThreshold));
@@ -3526,6 +3536,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 || cache.sortMode() != getSortMode()
                 || cache.sortOrder() != getSortOrder()
                 || cache.resourceView() != getResourceView()
+                || !cache.dynamicRecipeState().equals(
+                        currentDynamicRecipeState())
                 || generatedWorkCrossedThreshold(core, cache)) {
             return false;
         }
@@ -3560,6 +3572,10 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             if (core.getStationWork(entry.getKey()) >= entry.getValue()) return true;
         }
         return false;
+    }
+
+    private static Map<ResourceLocation, Long> currentDynamicRecipeState() {
+        return BuiltInRecipeAdapters.registry().dynamicStateTokens();
     }
 
     private static ItemStack updateCraftableDisplayAmount(

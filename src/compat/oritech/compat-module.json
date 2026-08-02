@@ -1,0 +1,48 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:oritech:gMBPdWrE",
+    "sha256": "fcb30b4f6ae89d115164b82f3c1f9938e9b8a80662047e204562361845764963"
+  },
+  "dependencies": [
+    "maven.modrinth:oritech:gMBPdWrE",
+    "maven.modrinth:architectury-api:ZxYGwlk0"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.oritech.OritechCompatModule",
+  "expectedTests": 20,
+  "fixture": "oritechFixture",
+  "id": "auto_storage:oritech",
+  "matrix": {
+    "acceptedRecipes": [
+      "oritech:pulverizer/adamant"
+    ],
+    "descriptors": [
+      "auto_storage:oritech_pulverizer"
+    ],
+    "mods": [
+      "oritech"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "oritech"
+      ],
+      "sha256": "abc0f6addf6b1f9922e7d05a2ca57b8c210071692030dfaa083b578a59a221f8"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "oritech"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:oritech:gMBPdWrE",
+    "maven.modrinth:architectury-api:ZxYGwlk0",
+    "maven.modrinth:geckolib:RVIo5f6E"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatOritech"
+}

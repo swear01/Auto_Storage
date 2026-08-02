@@ -144,7 +144,7 @@ final class CraftableRecipeCatalog {
                 unindexed.stream().mapToInt(Integer::intValue).toArray());
     }
 
-    private static int[][] requiredItemGroups(RecipeAdapterMatch match, Level level) {
+    static int[][] requiredItemGroups(RecipeAdapterMatch match, Level level) {
         List<int[]> groups = new ArrayList<>();
         TypedRecipePlan plan = match.typedRecipePlan().orElse(null);
         if (plan != null) {
@@ -179,7 +179,7 @@ final class CraftableRecipeCatalog {
         return groups.toArray(int[][]::new);
     }
 
-    private static boolean requirementsMet(int[][] groups, BitSet availableItems) {
+    static boolean requirementsMet(int[][] groups, BitSet availableItems) {
         if (groups == null) return true;
         for (int[] group : groups) {
             boolean matched = false;
@@ -221,14 +221,12 @@ final class CraftableRecipeCatalog {
     }
 
     private static final class CatalogEntry {
-        private final ResourceLocation id;
         private final RecipeAdapter adapter;
         private final RecipeHolder<?> holder;
         private final ResourceLocation stationDescriptorId;
         private final RecipeAdapterMatch.ToolCost toolCost;
         private final int[][] requiredItemGroups;
         private RecipeAdapterMatch match;
-        private List<RecipeAdapterMatch> fixedVariants;
 
         private CatalogEntry(
                 RecipeHolder<?> holder,
@@ -237,7 +235,6 @@ final class CraftableRecipeCatalog {
                 RecipeAdapterMatch.ToolCost toolCost,
                 int[][] requiredItemGroups
         ) {
-            this.id = holder.id();
             this.adapter = adapter;
             this.holder = holder;
             this.stationDescriptorId = stationDescriptorId;
@@ -246,7 +243,7 @@ final class CraftableRecipeCatalog {
         }
 
         private ResourceLocation id() {
-            return id;
+            return holder.id();
         }
 
         private RecipeAdapter adapter() {
@@ -284,11 +281,7 @@ final class CraftableRecipeCatalog {
                 return baseMatch.resolveVariantsFromSnapshot(
                         availableStacks, level);
             }
-            if (fixedVariants == null) {
-                fixedVariants = baseMatch.resolveVariantsFromSnapshot(
-                        List.of(), level);
-            }
-            return fixedVariants;
+            return baseMatch.resolveVariantsFromSnapshot(List.of(), level);
         }
     }
 
