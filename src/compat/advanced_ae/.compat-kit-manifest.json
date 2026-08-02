@@ -1,0 +1,13 @@
+{
+  "contract_sha256": "a6d87daa9da0a45a037d79244d0a58612999ad436ef7834147abd17c8aa56ede",
+  "files": {
+    "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeFixtureMod.java": "6862a940ebdd06b2c579d8b29bd75a56a78ce324f0cfc5c2f78ce204e6215238",
+    "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java": "f6cdaf3c7baebcde174488b02c2496db78a828ee877c2e7e449077119d3056ad",
+    "src/advancedAeFixture/resources/META-INF/neoforge.mods.toml": "7bb44652fb4b7dd46043b15572274e721a631cd4de041ae7e814846d116b5b06",
+    "src/advancedAeFixture/resources/data/auto_storage_advanced_ae_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc",
+    "src/compat/advanced_ae/compat-module.json": "9518c45fbb7cc14ff96f5429add8a8c900adc5fd2ab3b205b5123d7919e50c26",
+    "src/compat/advanced_ae/java/com/swear/autostorage/compat/advancedae/AdvancedAeCompatModule.java": "bbd6c59fd8e96d7f7ba4db49c46798ddd091209db515e315b3327073c2a37491"
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
+}

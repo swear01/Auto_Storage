@@ -1,0 +1,168 @@
+{
+  "families": [
+    {
+      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe",
+      "costs": [],
+      "decision": "Reaction Chamber (advanced_ae:reaction) is a live AE-network machine contract, not a simulate-then-commit Auto Storage family. Runtime progress spends recipe energy across ticks with floor/ceil floating-point power ratios, optional Applied Flux recharge, and grid idle-power partial progress; speed cards change requiredTicks from an unconfigured station ItemStack; recipes declare IngredientStack item/fluid inputs that may be tags; GenericStack output may be item or fluid; isSpecial() is true. No exact integer FE/work transaction was established without approximating network/live-machine state.",
+      "evidence": [
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe#public_signature"
+      ],
+      "id": "reaction_chamber_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "advanced_ae"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "advanced_ae"
+      ],
+      "sha256": "0adc34a90c85458883b43ae02cbc4d4522e0f4f63678d5423da1938606f3ee94"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "891e1f8ee0f3ac1bbce03fc2848b761f9c52bea4533eb3419ae849582e15ced7",
+  "source_recipe_data_sha256": "3d3845933a72f4350deb9705e6134e9d5fc45b0ff8b68571abaca3c0ed50de09",
+  "source_recipe_inventory_sha256": "ec3796afdd173bb717d488211fa9cb9a78215cc6c09eec376e952e0895465ead",
+  "target": {
+    "dependency": "maven.modrinth:advancedae:lHSZ2gYI",
+    "display_name": "Advanced AE",
+    "mod_id": "advanced_ae",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "org.appliedenergistics:appliedenergistics2:19.2.17",
+      "maven.modrinth:guideme:rduAfwb7",
+      "maven.modrinth:geckolib:RVIo5f6E"
+    ],
+    "version": "1.6.11-1.21.1"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Missing representative Advanced AE recipe shatteredsingularity",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Audited Advanced AE recipe type is empty",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Unsafe Advanced AE recipe type accepted",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Unsafe Advanced AE recipe was accepted: quantum_alloy",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Advanced AE unsafe machine contract was registered",
+          "source": "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java",
+          "task": "runAdvancedAeGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 8,
+    "fixture": "advancedAeFixture",
+    "game_test_task": "runAdvancedAeGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runAdvancedAeGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}
