@@ -10,6 +10,22 @@
   "expectedTests": 8,
   "fixture": "productivebeesFixture",
   "id": "auto_storage:productivebees",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "productivebees"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "productivebees"
+      ],
+      "sha256": "7531084b4c3b85d9ba3ec3e6514a08ac99a4bc5396e6e1182260e273fea5ac01"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
     "https://www.cursemaven.com/"
   ],
