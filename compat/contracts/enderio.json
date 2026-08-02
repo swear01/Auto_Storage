@@ -1239,6 +1239,26 @@
       "status": "rejected"
     }
   ],
+  "matrix": {
+    "acceptedRecipes": [
+      "enderio:alloy_smelting/conductive_alloy_ingot"
+    ],
+    "descriptors": [
+      "auto_storage:enderio_alloy_smelting"
+    ],
+    "mods": [
+      "enderio"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "enderio"
+      ],
+      "sha256": "7e58bfcab4de76b4e588be375fa50bb4fb6ee09088f2284048d7850eb82f821e"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "verification": {
     "fixture": "enderIoFixture",
     "expected_game_tests": 6,
