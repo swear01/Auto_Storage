@@ -1,0 +1,3407 @@
+{
+  "ancestry_classpath": [
+    {
+      "sha256": "182fcee7ed6e2be4c815bd08d2c766d355c58ab1e227b6ffd84ed26a0f71b6d6",
+      "size": 504899
+    },
+    {
+      "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+      "size": 56279815
+    },
+    {
+      "sha256": "46a26d5d551d448abab49a2c829e7a1d7c23d9b52dc3959a0981b0bdd3edaff9",
+      "size": 36811
+    },
+    {
+      "sha256": "5961f78d85b7bd88205bc65c9f8182bc041646aa3579fa39810878d9b5b87c0c",
+      "size": 532912
+    },
+    {
+      "sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7",
+      "size": 154249
+    },
+    {
+      "sha256": "705e24f37752809499a5cd0c7dd31eaabf3d933c5d3b2060168e94e9ef62593a",
+      "size": 30340
+    },
+    {
+      "sha256": "b94099a82d51fa378f6ce30d788ca3f8cf0699fe16bbb536b516b03025301a42",
+      "size": 820115
+    },
+    {
+      "sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288",
+      "size": 712301
+    },
+    {
+      "sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107",
+      "size": 133591
+    }
+  ],
+  "ancestry_dependencies": [
+    {
+      "dependency": "curse.maven:jade-324717:5884231",
+      "sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288",
+      "size": 712301
+    },
+    {
+      "dependency": "cy.jdkdigital.productivelib:productivelib:1.21.1-0.2.0",
+      "sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7",
+      "size": 154249
+    },
+    {
+      "dependency": "maven.modrinth:fusion-connected-textures:h2GrA0Ku",
+      "sha256": "5961f78d85b7bd88205bc65c9f8182bc041646aa3579fa39810878d9b5b87c0c",
+      "size": 532912
+    },
+    {
+      "dependency": "mezz.jei:jei-1.21.1-common-api:19.27.0.340",
+      "sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107",
+      "size": 133591
+    },
+    {
+      "dependency": "net.createmod.ponder:ponder-neoforge:1.0.81+mc1.21.1",
+      "sha256": "b94099a82d51fa378f6ce30d788ca3f8cf0699fe16bbb536b516b03025301a42",
+      "size": 820115
+    },
+    {
+      "dependency": "net.neoforged.fancymodloader:loader:4.0.42",
+      "sha256": "182fcee7ed6e2be4c815bd08d2c766d355c58ab1e227b6ffd84ed26a0f71b6d6",
+      "size": 504899
+    },
+    {
+      "dependency": "net.neoforged:bus:8.0.5",
+      "sha256": "705e24f37752809499a5cd0c7dd31eaabf3d933c5d3b2060168e94e9ef62593a",
+      "size": 30340
+    },
+    {
+      "dependency": "xyz.brassgoggledcoders:PatchouliProvider:1.21.1-1.0.11-Snapshot.4",
+      "sha256": "46a26d5d551d448abab49a2c829e7a1d7c23d9b52dc3959a0981b0bdd3edaff9",
+      "size": 36811
+    }
+  ],
+  "artifact": {
+    "class_count": 103,
+    "class_inventory_sha256": "d791fe6217a452ebc476cc7f0602ac911b9f1f2ee51d54f9839bb58a29a8a1f8",
+    "sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124",
+    "size": 3042019
+  },
+  "candidates": {
+    "block_entity_classes": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"CastingBlockEntity.java\"\npublic class cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity {\n  public int coolingTime;\n  public int maxAmount;\n  public net.neoforged.neoforge.items.ItemStackHandler castInv;\n  public cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public boolean isCooling();\n  public static void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity);\n  public static void clientTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity);\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public boolean canAcceptCast();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler();\n  public net.neoforged.neoforge.fluids.capability.templates.FluidTank getFluidHandler();\n  public void sync(net.minecraft.server.level.ServerLevel);\n  public net.neoforged.neoforge.fluids.capability.IFluidHandler getFluidHandler();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FoundryCapacitorBlockEntity.java\"\npublic class cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity implements cy.jdkdigital.productivelib.common.block.entity.IMultiBlockPeripheralBlockEntity {\n  public net.neoforged.neoforge.energy.EnergyStorage energyHandler;\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.neoforged.neoforge.energy.EnergyStorage getEnergyHandler();\n  public void setMultiblockController(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getMultiblockController();\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void sync(net.minecraft.world.level.Level);\n  public static void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FoundryControllerBlockEntity.java\"\npublic class cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity implements cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity,cy.jdkdigital.productivelib.common.block.entity.IMultiBlockControllerBlockEntity,net.minecraft.world.MenuProvider {\n  public net.neoforged.neoforge.fluids.FluidStack fuel;\n  public cy.jdkdigital.productivelib.util.MultiFluidTank fluidHandler;\n  public cy.jdkdigital.productivemetalworks.util.CoilType getCoilType();\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.neoforged.neoforge.items.IItemHandlerModifiable getUpgradeHandler();\n  public static void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity);\n  public static void clientTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity);\n  public int getSpeedModifier();\n  public void tickFluidTank(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity);\n  public int tankTickRate();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler();\n  public cy.jdkdigital.productivelib.util.MultiFluidTank getFluidHandler();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.neoforged.neoforge.fluids.FluidStack getFuel();\n  public int getPower();\n  public int getPowerMax();\n  public void setMultiBlockData(cy.jdkdigital.productivelib.util.MultiBlockDetector$MultiBlockData);\n  public cy.jdkdigital.productivelib.util.MultiBlockDetector$MultiBlockData getMultiblockData();\n  public void sync(net.minecraft.world.level.Level);\n  public void moveTankFirst(int);\n  public net.neoforged.neoforge.fluids.capability.IFluidHandler getFluidHandler();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FoundryDrainBlockEntity.java\"\npublic class cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity implements cy.jdkdigital.productivelib.common.block.entity.IMultiBlockPeripheralBlockEntity {\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void setMultiblockController(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getMultiblockController();\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FoundryTankBlockEntity.java\"\npublic class cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity implements cy.jdkdigital.productivelib.common.block.entity.IMultiBlockPeripheralBlockEntity {\n  public net.neoforged.neoforge.fluids.capability.templates.FluidTank fluidHandler;\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tickFluidTank(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity);\n  public int tankTickRate();\n  public net.neoforged.neoforge.fluids.capability.templates.FluidTank getFluidHandler();\n  public void setMultiblockController(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getMultiblockController();\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void sync(net.minecraft.world.level.Level);\n  public static void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity);\n  public net.neoforged.neoforge.fluids.capability.IFluidHandler getFluidHandler();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FoundryTapBlockEntity.java\"\npublic class cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity {\n  public boolean isActive;\n  public int fluidId;\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity);\n  public void setActive(boolean);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void sync(net.minecraft.world.level.Level);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity"
+      }
+    ],
+    "client_viewer_classes": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.client.render.block.CastingBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CastingBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivemetalworks.client.render.block.CastingBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity> {\n  public cy.jdkdigital.productivemetalworks.client.render.block.CastingBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.client.render.block.CastingBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryCapacitorBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryCapacitorBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivemetalworks.client.render.block.FoundryCapacitorBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity> {\n  public cy.jdkdigital.productivemetalworks.client.render.block.FoundryCapacitorBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryCapacitorBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryControllerBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryControllerBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivemetalworks.client.render.block.FoundryControllerBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity> {\n  public cy.jdkdigital.productivemetalworks.client.render.block.FoundryControllerBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public int getViewDistance();\n  public net.minecraft.world.phys.AABB getRenderBoundingBox(cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public net.minecraft.world.phys.AABB getRenderBoundingBox(net.minecraft.world.level.block.entity.BlockEntity);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryControllerBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryTankBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryTankBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivemetalworks.client.render.block.FoundryTankBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity> {\n  public cy.jdkdigital.productivemetalworks.client.render.block.FoundryTankBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryTankBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryTapBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryTapBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivemetalworks.client.render.block.FoundryTapBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity> {\n  public cy.jdkdigital.productivemetalworks.client.render.block.FoundryTapBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryTapBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.client.screen.FoundryControllerScreen",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryControllerScreen.java\"\npublic class cy.jdkdigital.productivemetalworks.client.screen.FoundryControllerScreen extends cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen<cy.jdkdigital.productivemetalworks.common.menu.FoundryControllerContainer> {\n  public cy.jdkdigital.productivemetalworks.client.screen.FoundryControllerScreen(cy.jdkdigital.productivemetalworks.common.menu.FoundryControllerContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public void render(net.minecraft.client.gui.GuiGraphics, int, int, float);\n  public boolean mouseClicked(double, double, int);\n  public boolean mouseReleased(double, double, int);\n  public boolean mouseDragged(double, double, int, double, double);\n  public boolean mouseScrolled(double, double, double, double);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.client.screen.FoundryControllerScreen"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.integration.jei.BlockCastingRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockCastingRecipeCategory.java\"\npublic class cy.jdkdigital.productivemetalworks.integration.jei.BlockCastingRecipeCategory extends mezz.jei.api.recipe.category.AbstractRecipeCategory<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe>> {\n  public cy.jdkdigital.productivemetalworks.integration.jei.BlockCastingRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public void draw(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe>, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe>, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.integration.jei.BlockCastingRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.integration.jei.EntityMeltingRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EntityMeltingRecipeCategory.java\"\npublic class cy.jdkdigital.productivemetalworks.integration.jei.EntityMeltingRecipeCategory extends mezz.jei.api.recipe.category.AbstractRecipeCategory<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe>> {\n  public cy.jdkdigital.productivemetalworks.integration.jei.EntityMeltingRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public void draw(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe>, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void getTooltip(mezz.jei.api.gui.builder.ITooltipBuilder, net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe>, mezz.jei.api.gui.ingredient.IRecipeSlotsView, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe>, mezz.jei.api.recipe.IFocusGroup);\n  public void getTooltip(mezz.jei.api.gui.builder.ITooltipBuilder, java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, double, double);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.integration.jei.EntityMeltingRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.integration.jei.FluidAlloyingRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidAlloyingRecipeCategory.java\"\npublic class cy.jdkdigital.productivemetalworks.integration.jei.FluidAlloyingRecipeCategory extends mezz.jei.api.recipe.category.AbstractRecipeCategory<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe>> {\n  public cy.jdkdigital.productivemetalworks.integration.jei.FluidAlloyingRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public void draw(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe>, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe>, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.integration.jei.FluidAlloyingRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemCastingRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ItemCastingRecipeCategory.java\"\npublic class cy.jdkdigital.productivemetalworks.integration.jei.ItemCastingRecipeCategory extends mezz.jei.api.recipe.category.AbstractRecipeCategory<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe>> {\n  public cy.jdkdigital.productivemetalworks.integration.jei.ItemCastingRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public void draw(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe>, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe>, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemCastingRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemMeltingRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ItemMeltingRecipeCategory.java\"\npublic class cy.jdkdigital.productivemetalworks.integration.jei.ItemMeltingRecipeCategory extends mezz.jei.api.recipe.category.AbstractRecipeCategory<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe>> {\n  public cy.jdkdigital.productivemetalworks.integration.jei.ItemMeltingRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public void draw(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe>, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe>, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemMeltingRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.integration.jei.JeiPlugin",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"JeiPlugin.java\"\npublic class cy.jdkdigital.productivemetalworks.integration.jei.JeiPlugin implements mezz.jei.api.IModPlugin {\n  public static final mezz.jei.api.recipe.RecipeType<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe>> ITEM_MELTING;\n  public static final mezz.jei.api.recipe.RecipeType<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe>> ENTITY_MELTING;\n  public static final mezz.jei.api.recipe.RecipeType<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe>> ITEM_CASTING;\n  public static final mezz.jei.api.recipe.RecipeType<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe>> BLOCK_CASTING;\n  public static final mezz.jei.api.recipe.RecipeType<net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe>> FLUID_ALLOYING;\n  public static final mezz.jei.api.ingredients.IIngredientType<net.minecraft.world.entity.Entity> ENTITY_INGREDIENT;\n  public cy.jdkdigital.productivemetalworks.integration.jei.JeiPlugin();\n  public net.minecraft.resources.ResourceLocation getPluginUid();\n  public void registerCategories(mezz.jei.api.registration.IRecipeCategoryRegistration);\n  public void registerRecipeCatalysts(mezz.jei.api.registration.IRecipeCatalystRegistration);\n  public void registerRecipes(mezz.jei.api.registration.IRecipeRegistration);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.integration.jei.JeiPlugin"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.integration.jei.ingredient.EntityRenderer",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EntityRenderer.java\"\npublic class cy.jdkdigital.productivemetalworks.integration.jei.ingredient.EntityRenderer {\n  public static java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.world.entity.Entity> cache;\n  public cy.jdkdigital.productivemetalworks.integration.jei.ingredient.EntityRenderer();\n  public static net.minecraft.world.entity.Entity get(net.minecraft.resources.ResourceLocation, net.minecraft.client.Minecraft);\n  public static void render(net.minecraft.client.gui.GuiGraphics, int, int, net.minecraft.resources.ResourceLocation, net.minecraft.client.Minecraft);\n  public static void render(net.minecraft.client.gui.GuiGraphics, int, int, net.minecraft.world.entity.Entity, net.minecraft.client.Minecraft);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.integration.jei.ingredient.EntityRenderer"
+      }
+    ],
+    "datagen_classes": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockModelProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider(net.minecraft.data.PackOutput);\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider$ModelGenerator",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockModelProvider.java\"\nclass cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider$ModelGenerator {\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider.ModelGenerator"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.BlockTagProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockTagProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.BlockTagProvider extends net.neoforged.neoforge.common.data.BlockTagsProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.BlockTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.BlockTagProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.DataMapProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataMapProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.DataMapProvider extends net.neoforged.neoforge.common.data.DataMapProvider {\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.DataMapProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.FluidTagProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidTagProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.FluidTagProvider extends net.minecraft.data.tags.FluidTagsProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.FluidTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.FluidTagProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.FusionBlockModelProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FusionBlockModelProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.FusionBlockModelProvider extends com.supermartijn642.fusion.api.provider.FusionModelProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.FusionBlockModelProvider(net.minecraft.data.PackOutput);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.FusionBlockModelProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.FusionTextureMetadataProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FusionTextureMetadataProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.FusionTextureMetadataProvider extends com.supermartijn642.fusion.api.provider.FusionTextureMetadataProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.FusionTextureMetadataProvider(net.minecraft.data.PackOutput);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.FusionTextureMetadataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.GuideBookProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuideBookProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.GuideBookProvider extends xyz.brassgoggledcoders.patchouliprovider.PatchouliBookProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.GuideBookProvider(net.minecraft.data.PackOutput, java.lang.String, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.GuideBookProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.ItemModelProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ItemModelProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.ItemModelProvider extends net.neoforged.neoforge.client.model.generators.ItemModelProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.ItemModelProvider(net.minecraft.data.PackOutput, net.neoforged.neoforge.common.data.ExistingFileHelper);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.ItemModelProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.ItemTagProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ItemTagProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.ItemTagProvider extends net.minecraft.data.tags.ItemTagsProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.ItemTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.util.concurrent.CompletableFuture<net.minecraft.data.tags.TagsProvider$TagLookup<net.minecraft.world.level.block.Block>>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.ItemTagProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.LanguageProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LanguageProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.LanguageProvider extends net.neoforged.neoforge.common.data.LanguageProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.LanguageProvider(net.minecraft.data.PackOutput, java.lang.String);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.LanguageProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.LootDataProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootDataProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.LootDataProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.LootDataProvider(net.minecraft.data.PackOutput, java.util.List<net.minecraft.data.loot.LootTableProvider$SubProviderEntry>, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.LootDataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.LootDataProvider$LootProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootDataProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.LootDataProvider$LootProvider extends net.minecraft.data.loot.BlockLootSubProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.LootDataProvider$LootProvider(net.minecraft.core.HolderLookup$Provider);\n  public void dropSelf(net.minecraft.world.level.block.Block);\n  public void dropFluidContainer(net.minecraft.world.level.block.Block);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.LootDataProvider.LootProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.LootModifierProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootModifierProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.LootModifierProvider extends net.neoforged.neoforge.common.data.GlobalLootModifierProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.LootModifierProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.LootModifierProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MetalworksDataProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider {\n  public cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider();\n  public static void gatherData(net.neoforged.neoforge.data.event.GatherDataEvent);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider$Data",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MetalworksDataProvider.java\"\nclass cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider$Data {\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider.Data"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.RecipeProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RecipeProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.RecipeProvider extends net.minecraft.data.recipes.RecipeProvider implements net.neoforged.neoforge.common.conditions.IConditionBuilder {\n  public cy.jdkdigital.productivemetalworks.datagen.RecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public static void metalCompat(java.lang.String, java.lang.String[], net.minecraft.data.recipes.RecipeOutput);\n  public static void modMetalCompat(java.lang.String, java.lang.String[], net.minecraft.data.recipes.RecipeOutput);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.RecipeProvider"
+      }
+    ],
+    "recipe_builders": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockCastingRecipeBuilder.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder implements net.minecraft.data.recipes.RecipeBuilder {\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder of(net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder of(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder of(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder of(net.minecraft.tags.TagKey<net.minecraft.world.item.Item>, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder of(net.minecraft.world.item.crafting.Ingredient, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidAlloyingRecipeBuilder.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder implements net.minecraft.data.recipes.RecipeBuilder {\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder of(java.util.List<net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient>, net.neoforged.neoforge.fluids.FluidStack);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder of(java.util.List<net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient>, int, net.neoforged.neoforge.fluids.FluidStack);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ItemCastingRecipeBuilder.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder implements net.minecraft.data.recipes.RecipeBuilder {\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder of(net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder of(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder of(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder of(net.minecraft.tags.TagKey<net.minecraft.world.item.Item>, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder of(net.minecraft.world.item.crafting.Ingredient, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ItemMeltingRecipeBuilder.java\"\npublic class cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder implements net.minecraft.data.recipes.RecipeBuilder {\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder of(net.minecraft.world.item.crafting.Ingredient, net.neoforged.neoforge.fluids.FluidStack);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder of(net.minecraft.world.item.crafting.Ingredient, net.neoforged.neoforge.fluids.FluidStack, int, int);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder of(net.minecraft.world.item.crafting.Ingredient, java.util.List<net.neoforged.neoforge.fluids.FluidStack>);\n  public static cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder of(net.minecraft.world.item.crafting.Ingredient, java.util.List<net.neoforged.neoforge.fluids.FluidStack>, int, int);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder"
+      }
+    ],
+    "recipe_classes": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"BlockCastingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe extends cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe {\n  public cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe(net.minecraft.world.item.crafting.Ingredient, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"EntityMeltingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public final net.minecraft.resources.ResourceLocation entity;\n  public final java.util.List<net.neoforged.neoforge.fluids.FluidStack> result;\n  public cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe(net.minecraft.resources.ResourceLocation, java.util.List<net.neoforged.neoforge.fluids.FluidStack>);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public boolean isSpecial();\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FluidAlloyingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public final java.util.List<net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient> fluids;\n  public final int speed;\n  public final net.neoforged.neoforge.fluids.FluidStack result;\n  public cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe(java.util.List<net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient>, int, net.neoforged.neoforge.fluids.FluidStack);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public boolean matches(java.util.List<net.neoforged.neoforge.fluids.FluidStack>);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public boolean isSpecial();\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ItemCastingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe implements cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe {\n  public final net.minecraft.world.item.crafting.Ingredient cast;\n  public final net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient fluid;\n  public final net.minecraft.world.item.ItemStack result;\n  public final boolean consumeCast;\n  public cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe(net.minecraft.world.item.crafting.Ingredient, net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient, net.minecraft.world.item.ItemStack, boolean);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public boolean matches(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.FluidStack, net.minecraft.world.level.Level);\n  public boolean matches(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.FluidStack, boolean, net.minecraft.world.level.Level);\n  public int getFluidAmount(net.minecraft.world.level.Level, net.neoforged.neoforge.fluids.FluidStack);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public boolean isSpecial();\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.world.level.Level, net.neoforged.neoforge.fluids.FluidStack);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ItemMeltingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public final net.minecraft.world.item.crafting.Ingredient item;\n  public final java.util.List<net.neoforged.neoforge.fluids.FluidStack> result;\n  public final int minTemperature;\n  public final int maxTemperature;\n  public cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe(net.minecraft.world.item.crafting.Ingredient, java.util.List<net.neoforged.neoforge.fluids.FluidStack>, int, int);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public boolean isSpecial();\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public boolean matches(net.minecraft.world.item.ItemStack, int);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe"
+      }
+    ],
+    "recipe_serializers": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"BlockCastingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe> STREAM_CODEC;\n  public cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe> streamCodec();\n  public static cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe.Serializer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"EntityMeltingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe> STREAM_CODEC;\n  public cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe> streamCodec();\n  public static cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe.Serializer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FluidAlloyingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe> STREAM_CODEC;\n  public cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe> streamCodec();\n  public static cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe.Serializer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ItemCastingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe> STREAM_CODEC;\n  public cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe> streamCodec();\n  public static cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe.Serializer"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ItemMeltingRecipe.java\"\npublic class cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe> STREAM_CODEC;\n  public cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe> streamCodec();\n  public static cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe.Serializer"
+      }
+    ],
+    "recipe_types": [],
+    "resource_apis": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$EnergyMelter",
+        "classification": {
+          "evidence": [
+            "energy"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryControllerBlockEntity.java\"\npublic class cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$EnergyMelter implements cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$IMelterProcessor {\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$EnergyMelter();\n  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity);\n  public cy.jdkdigital.productivemetalworks.util.IFoundryFuel getFoundryFuel(net.minecraft.world.level.Level, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity.EnergyMelter"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$FluidFuel",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryControllerBlockEntity.java\"\nclass cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$FluidFuel implements cy.jdkdigital.productivemetalworks.util.IFoundryFuel {\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$FluidFuel(net.neoforged.neoforge.fluids.FluidStack);\n  public cy.jdkdigital.productivemetalworks.common.datamap.FuelMap getFuelData();\n  public int getAmount();\n  public void grow(int);\n  public void shrink(int);\n  public boolean isEmpty();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity.FluidFuel"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$PowerFuel",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryControllerBlockEntity.java\"\nclass cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$PowerFuel implements cy.jdkdigital.productivemetalworks.util.IFoundryFuel {\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$PowerFuel(int, net.minecraft.world.level.block.Block);\n  public cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$PowerFuel(int, cy.jdkdigital.productivemetalworks.common.datamap.FuelMap);\n  public cy.jdkdigital.productivemetalworks.common.datamap.FuelMap getFuelData();\n  public int getAmount();\n  public void grow(int);\n  public void shrink(int);\n  public boolean isEmpty();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity.PowerFuel"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.damagesource.FoundryDeathMessageProvider",
+        "classification": {
+          "evidence": [
+            "source"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryDeathMessageProvider.java\"\npublic class cy.jdkdigital.productivemetalworks.common.damagesource.FoundryDeathMessageProvider implements net.neoforged.neoforge.common.damagesource.IDeathMessageProvider {\n  public static net.neoforged.neoforge.common.damagesource.IDeathMessageProvider INSTANCE;\n  public cy.jdkdigital.productivemetalworks.common.damagesource.FoundryDeathMessageProvider();\n  public net.minecraft.network.chat.Component getDeathMessage(net.minecraft.world.entity.LivingEntity, net.minecraft.world.damagesource.CombatEntry, net.minecraft.world.damagesource.CombatEntry);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.damagesource.FoundryDeathMessageProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MoveFoundryFluidData.java\"\npublic final class cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData extends java.lang.Record implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {\n  public static final net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData> TYPE;\n  public static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData> STREAM_CODEC;\n  public cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData(net.minecraft.core.BlockPos, int);\n  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<? extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> type();\n  public static void clientHandle(cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData, net.neoforged.neoforge.network.handling.IPayloadContext);\n  public static void serverHandle(cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData, net.neoforged.neoforge.network.handling.IPayloadContext);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.core.BlockPos pos();\n  public int tank();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.registry.ModTags$Fluids",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ModTags.java\"\npublic class cy.jdkdigital.productivemetalworks.registry.ModTags$Fluids {\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MEAT;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> HONEY;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_WAX;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_HEAVY_CORE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_AMETHYST;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_GLOWSTONE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_REDSTONE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_OBSIDIAN;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_GLASS;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_EMERALD;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_DIAMOND;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_LAPIS;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_QUARTZ;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_CARBON;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_ENDER;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_ANCIENT_DEBRIS;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_SHULKER_SHELL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_BLAZE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_SLIME;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_MAGMA_CREAM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_IRON;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_COPPER;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_GOLD;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_NETHERITE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_ALUMINUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_SILVER;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_TIN;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_ZINC;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_NICKEL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_OSMIUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_LEAD;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_PLATINUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_URANIUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_IRIDIUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_STEEL;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_INVAR;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_ELECTRUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_BRONZE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_BRASS;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_ENDERIUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_LUMIUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_SIGNALUM;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_CONSTANTAN;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_REFINED_GLOWSTONE;\n  public static final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> MOLTEN_REFINED_OBSIDIAN;\n  public cy.jdkdigital.productivemetalworks.registry.ModTags$Fluids();\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.registry.ModTags.Fluids"
+      },
+      {
+        "class": "cy.jdkdigital.productivemetalworks.util.FluidHelper",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidHelper.java\"\npublic class cy.jdkdigital.productivemetalworks.util.FluidHelper {\n  public cy.jdkdigital.productivemetalworks.util.FluidHelper();\n  public static net.neoforged.neoforge.fluids.FluidStack itemToFluid(net.minecraft.world.level.Level, net.minecraft.world.item.ItemStack);\n  public static java.util.Map<net.minecraft.world.level.material.Fluid, com.mojang.datafixers.util.Pair<net.minecraft.world.item.ItemStack, java.lang.Integer>> materialsToFluids(net.minecraft.world.level.Level, java.util.stream.Stream<net.minecraft.world.item.ItemStack>, int);\n  public static java.util.List<net.minecraft.network.chat.Component> formatTooltip(net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient);\n  public static java.util.List<net.minecraft.network.chat.Component> formatTooltip(net.neoforged.neoforge.fluids.FluidStack);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.util.FluidHelper"
+      }
+    ],
+    "station_classes": [
+      {
+        "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$IMelterProcessor",
+        "classification": {
+          "evidence": [
+            "processor"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FoundryControllerBlockEntity.java\"\npublic interface cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$IMelterProcessor {\n  public abstract void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity);\n  public abstract cy.jdkdigital.productivemetalworks.util.IFoundryFuel getFoundryFuel(net.minecraft.world.level.Level, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity);\n  public default boolean meltItems(net.minecraft.world.level.Level, cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity, cy.jdkdigital.productivemetalworks.util.IFoundryFuel, cy.jdkdigital.productivemetalworks.util.IFoundryFuel);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity.IMelterProcessor"
+      }
+    ]
+  },
+  "kind": "auto_storage_compat_audit",
+  "recipe_data": {
+    "declared_recipes": 1118,
+    "digest": "d3bee949a7a15e789e4f5aa5df37434cb500b0686294a40c4e354b734815a380",
+    "effective_recipes": 1118,
+    "format": 1,
+    "overrides": [],
+    "serializers": [
+      {
+        "condition_types": [
+          "productivelib:lazy"
+        ],
+        "conditional_recipes": 1,
+        "fields": [
+          "category",
+          "cookingtime",
+          "experience",
+          "ingredient",
+          "neoforge:conditions",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "productivemetalworks:fire_brick_from_baking"
+        ],
+        "serializer_id": "clayworks:baking"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "cookingtime",
+          "experience",
+          "ingredient",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {},
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "productivemetalworks:blasting/fire_brick"
+        ],
+        "serializer_id": "minecraft:blasting"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 1,
+        "fields": [
+          "category",
+          "key",
+          "neoforge:conditions",
+          "pattern",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 1,
+          "pattern": 3
+        },
+        "recipe_count": 30,
+        "sample_recipe_ids": [
+          "productivemetalworks:crafting/black_fire_bricks",
+          "productivemetalworks:crafting/black_fire_bricks_from_dye",
+          "productivemetalworks:crafting/black_foundry_controller",
+          "productivemetalworks:crafting/black_foundry_drain",
+          "productivemetalworks:crafting/black_foundry_tank",
+          "productivemetalworks:crafting/black_foundry_window",
+          "productivemetalworks:crafting/blue_fire_bricks_from_dye",
+          "productivemetalworks:crafting/brown_fire_bricks_from_dye",
+          "productivemetalworks:crafting/casting_basin",
+          "productivemetalworks:crafting/casting_table",
+          "productivemetalworks:crafting/cyan_fire_bricks_from_dye",
+          "productivemetalworks:crafting/fire_clay",
+          "productivemetalworks:crafting/foundry_tap",
+          "productivemetalworks:crafting/gray_fire_bricks_from_dye",
+          "productivemetalworks:crafting/green_fire_bricks_from_dye",
+          "productivemetalworks:crafting/guide_book"
+        ],
+        "serializer_id": "minecraft:crafting_shaped"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "ingredients",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 2
+        },
+        "recipe_count": 114,
+        "sample_recipe_ids": [
+          "productivemetalworks:crafting/black_fire_bricks_from_dye_single",
+          "productivemetalworks:crafting/black_foundry_capacitor_from_dye",
+          "productivemetalworks:crafting/black_foundry_controller_from_dye",
+          "productivemetalworks:crafting/black_foundry_drain_from_dye",
+          "productivemetalworks:crafting/black_foundry_tank_from_dye",
+          "productivemetalworks:crafting/black_foundry_window_from_dye",
+          "productivemetalworks:crafting/blue_fire_bricks_from_dye_single",
+          "productivemetalworks:crafting/blue_foundry_capacitor_from_dye",
+          "productivemetalworks:crafting/blue_foundry_controller_from_dye",
+          "productivemetalworks:crafting/blue_foundry_drain_from_dye",
+          "productivemetalworks:crafting/blue_foundry_tank_from_dye",
+          "productivemetalworks:crafting/blue_foundry_window_from_dye",
+          "productivemetalworks:crafting/brown_fire_bricks_from_dye_single",
+          "productivemetalworks:crafting/brown_foundry_capacitor_from_dye",
+          "productivemetalworks:crafting/brown_foundry_controller_from_dye",
+          "productivemetalworks:crafting/brown_foundry_drain_from_dye"
+        ],
+        "serializer_id": "minecraft:crafting_shapeless"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "cookingtime",
+          "experience",
+          "ingredient",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {},
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "productivemetalworks:smelting/fire_brick"
+        ],
+        "serializer_id": "minecraft:smelting"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded",
+          "neoforge:not"
+        ],
+        "conditional_recipes": 86,
+        "fields": [
+          "cast",
+          "consume_cast",
+          "fluid",
+          "neoforge:conditions",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "cast": 0,
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 122,
+        "sample_recipe_ids": [
+          "productivemetalworks:casting/atm/allthemodium_block",
+          "productivemetalworks:casting/atm/high_powered_heating_coil",
+          "productivemetalworks:casting/atm/unobtainium_block",
+          "productivemetalworks:casting/atm/vibranium_block",
+          "productivemetalworks:casting/black_foundry_capacitor",
+          "productivemetalworks:casting/blue_foundry_capacitor",
+          "productivemetalworks:casting/brown_foundry_capacitor",
+          "productivemetalworks:casting/create/brass_block",
+          "productivemetalworks:casting/create/zinc_block",
+          "productivemetalworks:casting/create_ironworks/bronze_block",
+          "productivemetalworks:casting/create_ironworks/steel_block",
+          "productivemetalworks:casting/create_ironworks/tin_block",
+          "productivemetalworks:casting/cyan_foundry_capacitor",
+          "productivemetalworks:casting/everythingcopper/lantern",
+          "productivemetalworks:casting/everythingcopper/soul_lantern",
+          "productivemetalworks:casting/gems/amethyst_block"
+        ],
+        "serializer_id": "productivemetalworks:block_casting"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded",
+          "neoforge:not"
+        ],
+        "conditional_recipes": 16,
+        "fields": [
+          "fluids",
+          "neoforge:conditions",
+          "result",
+          "speed",
+          "type"
+        ],
+        "max_array_sizes": {
+          "fluids": 3,
+          "neoforge:conditions": 3
+        },
+        "recipe_count": 16,
+        "sample_recipe_ids": [
+          "productivemetalworks:alloying/molten_brass",
+          "productivemetalworks:alloying/molten_bronze",
+          "productivemetalworks:alloying/molten_constantan",
+          "productivemetalworks:alloying/molten_electrum",
+          "productivemetalworks:alloying/molten_enderium",
+          "productivemetalworks:alloying/molten_invar",
+          "productivemetalworks:alloying/molten_lumium",
+          "productivemetalworks:alloying/molten_magma_cream",
+          "productivemetalworks:alloying/molten_netherite",
+          "productivemetalworks:alloying/molten_obsidian",
+          "productivemetalworks:alloying/molten_refined_glowstone",
+          "productivemetalworks:alloying/molten_refined_obsidian",
+          "productivemetalworks:alloying/molten_signalum",
+          "productivemetalworks:alloying/molten_steel",
+          "productivemetalworks:alloying/pnc/plastic_from_biodiesel",
+          "productivemetalworks:alloying/pnc/plastic_from_lpg"
+        ],
+        "serializer_id": "productivemetalworks:fluid_alloying"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded",
+          "neoforge:not",
+          "productivelib:lazy"
+        ],
+        "conditional_recipes": 377,
+        "fields": [
+          "cast",
+          "consume_cast",
+          "fluid",
+          "neoforge:conditions",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "cast": 0,
+          "neoforge:conditions": 4
+        },
+        "recipe_count": 410,
+        "sample_recipe_ids": [
+          "productivemetalworks:casting/atm/allthemodium_gear",
+          "productivemetalworks:casting/atm/allthemodium_ingot",
+          "productivemetalworks:casting/atm/allthemodium_nugget",
+          "productivemetalworks:casting/atm/allthemodium_plate",
+          "productivemetalworks:casting/atm/allthemodium_rod",
+          "productivemetalworks:casting/atm/apple",
+          "productivemetalworks:casting/atm/carrot",
+          "productivemetalworks:casting/atm/unobtainium_gear",
+          "productivemetalworks:casting/atm/unobtainium_ingot",
+          "productivemetalworks:casting/atm/unobtainium_nugget",
+          "productivemetalworks:casting/atm/unobtainium_plate",
+          "productivemetalworks:casting/atm/unobtainium_rod",
+          "productivemetalworks:casting/atm/vibranium_gear",
+          "productivemetalworks:casting/atm/vibranium_ingot",
+          "productivemetalworks:casting/atm/vibranium_nugget",
+          "productivemetalworks:casting/atm/vibranium_plate"
+        ],
+        "serializer_id": "productivemetalworks:item_casting"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded",
+          "neoforge:not"
+        ],
+        "conditional_recipes": 361,
+        "fields": [
+          "ingredient",
+          "maximum_temperature",
+          "minimum_temperature",
+          "neoforge:conditions",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredient": 8,
+          "neoforge:conditions": 1,
+          "result": 3
+        },
+        "recipe_count": 423,
+        "sample_recipe_ids": [
+          "productivemetalworks:melting/ancient_debris",
+          "productivemetalworks:melting/blaze_powder",
+          "productivemetalworks:melting/blaze_rod",
+          "productivemetalworks:melting/chiseled_copper",
+          "productivemetalworks:melting/clock",
+          "productivemetalworks:melting/coals",
+          "productivemetalworks:melting/compass",
+          "productivemetalworks:melting/copper",
+          "productivemetalworks:melting/copper_bulb",
+          "productivemetalworks:melting/copper_door",
+          "productivemetalworks:melting/copper_grate",
+          "productivemetalworks:melting/copper_trapdoor",
+          "productivemetalworks:melting/create/bar_of_chocolate",
+          "productivemetalworks:melting/create/crushed_raw_aluminum",
+          "productivemetalworks:melting/create/crushed_raw_copper",
+          "productivemetalworks:melting/create/crushed_raw_gold"
+        ],
+        "serializer_id": "productivemetalworks:item_melting"
+      }
+    ],
+    "sources": [
+      {
+        "declared_recipes": 1118,
+        "id": "target_jar",
+        "sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+      }
+    ]
+  },
+  "risks": [
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe: world API via cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+        "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe: world API via cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+        "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe: world API",
+        "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe: world API",
+        "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe: world API",
+        "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe: world API via cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+        "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe: world API"
+      ]
+    }
+  ],
+  "scanner_format": 16,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/cy/jdkdigital/productivemetalworks/client/render/block/CastingBlockEntityRenderer.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/client/render/block/FoundryCapacitorBlockEntityRenderer.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/client/render/block/FoundryControllerBlockEntityRenderer.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/client/render/block/FoundryTankBlockEntityRenderer.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/client/render/block/FoundryTapBlockEntityRenderer.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/client/screen/FoundryControllerScreen.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/CastingBlockEntity.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryCapacitorBlockEntity.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryControllerBlockEntity.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryDrainBlockEntity.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryTankBlockEntity.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryTapBlockEntity.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/common/damagesource/FoundryDeathMessageProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/BlockModelProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/BlockTagProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/DataMapProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/FluidTagProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/FusionBlockModelProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/FusionTextureMetadataProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/GuideBookProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/ItemModelProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/ItemTagProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/LanguageProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/LootDataProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/LootModifierProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/MetalworksDataProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/RecipeProvider.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/recipe/BlockCastingRecipeBuilder.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/recipe/FluidAlloyingRecipeBuilder.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/recipe/ItemCastingRecipeBuilder.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/datagen/recipe/ItemMeltingRecipeBuilder.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/integration/jei/BlockCastingRecipeCategory.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/integration/jei/EntityMeltingRecipeCategory.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/integration/jei/FluidAlloyingRecipeCategory.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/integration/jei/ItemCastingRecipeCategory.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/integration/jei/ItemMeltingRecipeCategory.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/integration/jei/JeiPlugin.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/integration/jei/ingredient/EntityRenderer.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/network/MoveFoundryFluidData.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/recipe/BlockCastingRecipe.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/recipe/EntityMeltingRecipe.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/recipe/FluidAlloyingRecipe.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemCastingRecipe.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemMeltingRecipe.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/registry/ModTags.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/util/FluidHelper.java"
+    ],
+    "revision": "7c6483c51e1a9def633a939ea75e0018dd079ffa"
+  },
+  "structural_candidate_inventory_sha256": "5e61e79d4a3778c31da983524c429cabed5e225feeaabfb033d7cb0c4413493f",
+  "structural_class_graph": [
+    {
+      "class": "com.mojang.blaze3d.vertex.VertexConsumer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IVertexConsumerExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "com.supermartijn642.fusion.api.provider.FusionModelProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "5961f78d85b7bd88205bc65c9f8182bc041646aa3579fa39810878d9b5b87c0c"
+    },
+    {
+      "class": "com.supermartijn642.fusion.api.provider.FusionTextureMetadataProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "5961f78d85b7bd88205bc65c9f8182bc041646aa3579fa39810878d9b5b87c0c"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.IMultiBlockController",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.IMultiBlockPeripheral",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.entity.ICapabilityBlockEntity",
+          "net.minecraft.world.Nameable"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.ICapabilityBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.IMultiBlockControllerBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.IMultiBlockPeripheralBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.InventoryHandlerHelper$BlockEntityItemStackHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeInput"
+        ],
+        "super_class": "net.neoforged.neoforge.items.ItemStackHandler"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.container.AbstractContainer",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.inventory.AbstractContainerMenu"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.Config",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.ProductiveMetalworks",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.client.render.block.CastingBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryCapacitorBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryControllerBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryTankBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.client.render.block.FoundryTapBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.client.screen.FoundryControllerScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.CastingBasinBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivemetalworks.common.block.CastingTableBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.CastingTableBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.FireBricksBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.HorizontalDirectionalBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.FoundryCapacitorBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.IMultiBlockPeripheral"
+        ],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.FoundryControllerBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.IMultiBlockController"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.FoundryDrainBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.IMultiBlockPeripheral"
+        ],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.FoundryTankBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.IMultiBlockPeripheral"
+        ],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.FoundryTapBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.IMultiBlockPeripheral"
+        ],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.FoundryWindowBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.TransparentBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.HeatingCoilBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivemetalworks.common.block.IHeatingCoilBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.HotLiquidBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.LiquidBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.IHeatingCoilBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.MeatBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.RotatedPillarBlock"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.entity.IMultiBlockPeripheralBlockEntity"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.IMultiBlockControllerBlockEntity",
+          "net.minecraft.world.MenuProvider"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$EnergyMelter",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$IMelterProcessor"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$FluidFuel",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "cy.jdkdigital.productivemetalworks.util.IFoundryFuel"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$IMelterProcessor",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$LiquidMelter",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$IMelterProcessor"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity$PowerFuel",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "cy.jdkdigital.productivemetalworks.util.IFoundryFuel"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.entity.IMultiBlockPeripheralBlockEntity"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.entity.IMultiBlockPeripheralBlockEntity"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.damagesource.FoundryDeathMessageProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.common.damagesource.IDeathMessageProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.datamap.EntityMeltingMap",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.datamap.FuelMap",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.datamap.UnitMap",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.datamap.UnitMap$Unit",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.menu.FoundryControllerContainer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.container.AbstractContainer"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.BlockModelProvider$ModelGenerator",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.BlockTagProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.BlockTagsProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.DataMapProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.DataMapProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.FluidTagProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.FluidTagsProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.FusionBlockModelProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.supermartijn642.fusion.api.provider.FusionModelProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.FusionTextureMetadataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.supermartijn642.fusion.api.provider.FusionTextureMetadataProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.GuideBookProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "xyz.brassgoggledcoders.patchouliprovider.PatchouliBookProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.ItemModelProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.client.model.generators.ItemModelProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.ItemTagProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.ItemTagsProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.LanguageProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.LanguageProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.LootDataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.LootDataProvider$LootProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.loot.BlockLootSubProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.LootModifierProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.GlobalLootModifierProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.MetalworksDataProvider$Data",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.RecipeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.common.conditions.IConditionBuilder"
+        ],
+        "super_class": "net.minecraft.data.recipes.RecipeProvider"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.BlockCastingRecipeBuilder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.FluidAlloyingRecipeBuilder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemCastingRecipeBuilder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.datagen.recipe.ItemMeltingRecipeBuilder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.event.CastingRecipeEvent",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.fml.event.IModBusEvent"
+        ],
+        "super_class": "net.neoforged.bus.api.Event"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.event.ClientEventHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.event.EventHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.event.ModEventHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jade.CastingTableProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "snownee.jade.api.IBlockComponentProvider",
+          "snownee.jade.api.StreamServerDataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jade.CastingTableProvider$Data",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jade.JadePlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "snownee.jade.api.IWailaPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.BlockCastingRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mezz.jei.api.recipe.category.AbstractRecipeCategory"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.EntityMeltingRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mezz.jei.api.recipe.category.AbstractRecipeCategory"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.FluidAlloyingRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mezz.jei.api.recipe.category.AbstractRecipeCategory"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemCastingRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mezz.jei.api.recipe.category.AbstractRecipeCategory"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.ItemMeltingRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mezz.jei.api.recipe.category.AbstractRecipeCategory"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.JeiPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.IModPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.jei.ingredient.EntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.ponder.MetalworksPonderPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.createmod.ponder.api.registration.PonderPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.ponder.MetalworksPonderScenes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.ponder.MetalworksPonderTags",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.integration.ponder.scenes.FoundryScenes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.network.MoveFoundryFluidData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.network.protocol.common.custom.CustomPacketPayload"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.registry.MetalworksRegistrator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.registry.ModTags",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.registry.ModTags$Blocks",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.registry.ModTags$Fluids",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.registry.ModTags$Items",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.CoilType",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.EnumParams",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.FluidHelper",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.IFoundryFuel",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.RecipeHelper",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.RenderHelper",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.TickingSlotInventoryHandler",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.InventoryHandlerHelper$BlockEntityItemStackHandler"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.TintedItemRenderTypeBuffer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.MultiBufferSource"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.util.TintedVertexBuilder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "com.mojang.blaze3d.vertex.VertexConsumer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124"
+    },
+    {
+      "class": "mezz.jei.api.IModPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107"
+    },
+    {
+      "class": "mezz.jei.api.recipe.category.AbstractRecipeCategory",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107"
+    },
+    {
+      "class": "mezz.jei.api.recipe.category.IRecipeCategory",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "cea02392a0e82fd97fc1c6209fc5488c439fbbedd8eacc98085e4bf2c1193107"
+    },
+    {
+      "class": "net.createmod.ponder.api.registration.PonderPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b94099a82d51fa378f6ce30d788ca3f8cf0699fe16bbb536b516b03025301a42"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.Renderable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.TabOrderedElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.ContainerEventHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.ContainerEventHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.GuiEventListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.GuiEventListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.TabOrderedElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.Screen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.Renderable"
+        ],
+        "super_class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.MenuAccess"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.Screen"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.MenuAccess",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.renderer.MultiBufferSource",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.renderer.blockentity.BlockEntityRenderer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.DataProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.loot.BlockLootSubProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.loot.LootTableSubProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.loot.LootTableSubProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeBuilder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.FluidTagsProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.TagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.ItemTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.TagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.network.protocol.common.custom.CustomPacketPayload",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.MenuProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.inventory.MenuConstructor",
+          "net.neoforged.neoforge.client.extensions.IMenuProviderExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.Nameable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.flag.FeatureElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.AbstractContainerMenu",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.MenuConstructor",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.Recipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.RecipeInput",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.RecipeSerializer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.ItemLike",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BaseEntityBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.level.block.EntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.Block",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IBlockExtension"
+        ],
+        "super_class": "net.minecraft.world.level.block.state.BlockBehaviour"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BucketPickup",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBucketPickupExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.EntityBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.HalfTransparentBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.HorizontalDirectionalBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.LiquidBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.block.BucketPickup"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.RotatedPillarBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.TransparentBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.HalfTransparentBlock"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.BlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBlockEntityExtension"
+        ],
+        "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.state.BlockBehaviour",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.bus.api.Event",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "705e24f37752809499a5cd0c7dd31eaabf3d933c5d3b2060168e94e9ef62593a"
+    },
+    {
+      "class": "net.neoforged.fml.event.IModBusEvent",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "182fcee7ed6e2be4c815bd08d2c766d355c58ab1e227b6ffd84ed26a0f71b6d6"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.AttachmentHolder",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.attachment.IAttachmentHolder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.IAttachmentHolder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IMenuProviderExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IVertexConsumerExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.model.generators.ItemModelProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.client.model.generators.ModelProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.model.generators.ModelProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.conditions.IConditionBuilder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.damagesource.IDeathMessageProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.BlockTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.DataMapProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.GlobalLootModifierProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.LanguageProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockEntityExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBucketPickupExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.util.INBTSerializable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.IItemHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.IItemHandlerModifiable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.ItemStackHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler",
+          "net.neoforged.neoforge.items.IItemHandlerModifiable",
+          "net.neoforged.neoforge.common.util.INBTSerializable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "snownee.jade.api.IBlockComponentProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IComponentProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IComponentProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IToggleableProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IJadeProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IServerDataProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IJadeProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IToggleableProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IJadeProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.IWailaPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "snownee.jade.api.StreamServerDataProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "snownee.jade.api.IServerDataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "ce2679d0f115e7323f6cb5a2904b20bdd1b2f36c2b9faf3685aa7be6e4546288"
+    },
+    {
+      "class": "xyz.brassgoggledcoders.patchouliprovider.PatchouliBookProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "46a26d5d551d448abab49a2c829e7a1d7c23d9b52dc3959a0981b0bdd3edaff9"
+    }
+  ],
+  "structural_hierarchy": [
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.CastingBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryCapacitorBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryControllerBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryDrainBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTankBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.FluidTankBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.common.block.entity.FoundryTapBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+          "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+          "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+          "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    }
+  ],
+  "target": {
+    "display_name": "Productive Metalworks",
+    "mod_id": "productivemetalworks",
+    "version": "1.21.1-1.15.0"
+  }
+}

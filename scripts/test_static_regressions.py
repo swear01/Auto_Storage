@@ -1731,6 +1731,47 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("Calcination", compatibility_doc)
         self.assertIn("Distillation", compatibility_doc)
         self.assertIn("Liquefaction", compatibility_doc)
+    def test_productivemetalworks_registry_checks_cover_namespace_and_path(self):
+        fixture = self.read_required(
+            "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/"
+            "productivemetalworks/ProductivemetalworksIntegrationGameTests.java"
+        )
+        coexistence = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CompatibilityMatrixGameTests.java"
+        )
+
+        self.assertIn(
+            'helper.fail("Productive Metalworks mod is not loaded")',
+            fixture,
+        )
+        self.assertRegex(
+            fixture,
+            r'if \(types\.size\(\) != 4\) \{\s*'
+            r'helper\.fail\("Expected 4 unique audited Productive Metalworks '
+            r'recipe types, but found " \+ types\.size\(\)\);',
+        )
+        self.assertIn(
+            'id.getNamespace().equals("productivemetalworks")',
+            fixture,
+        )
+        self.assertIn(
+            'id.getPath().startsWith("productivemetalworks_")',
+            fixture,
+        )
+        self.assertRegex(
+            fixture,
+            r"id\.getNamespace\(\)\.equals\(\"productivemetalworks\"\)\s*"
+            r"\|\|\s*id\.getPath\(\)\.startsWith\(\"productivemetalworks_\"\)",
+        )
+        self.assertIn(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            coexistence,
+        )
+        self.assertNotIn(
+            'id.getNamespace().equals("productivemetalworks")',
+            coexistence,
+        )
 
     def test_pneumaticcraft_fixture_locks_unsafe_contracts_out(self):
         build = self.read_required("build.gradle")
@@ -1897,6 +1938,18 @@ class StaticRegressionTests(unittest.TestCase):
             "79904d59892c4c5384811a384f3ce88aa5b3d6e8224dbde1b78dc2f80020080c",
             docs,
         )
+
+    def test_active_roadmap_does_not_keep_superseded_merge_statuses(self):
+        roadmap = self.read_required("docs/roadmap.md")
+        self.assertEqual(
+            1,
+            roadmap.count("GitHub #68 Create Aquatic Ambitions Compat Kit"),
+        )
+        self.assertEqual(
+            1,
+            roadmap.count("GitHub #65／PR #73 Advanced AE Compat Kit"),
+        )
+        self.assertNotIn("GitHub review, remote CI, and merge remain", roadmap)
 
     def test_items_share_the_universal_live_transaction_ledger(self):
         record = self.read_required(

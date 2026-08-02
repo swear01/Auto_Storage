@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "3804b3e9786db91a82f61015e6f30bc046ce23e1060f9faa8e4520f0ae57441f",
+  "contract_sha256": "62e3bbbef6ed56abe852a362394eb9edc89fb70e4fa3af50d3c976f256b9c688",
   "files": {
-    "src/compat/productivebees/compat-module.json": "71931bd06a7460b5a70d001fe48487330d4406d37264444c79d05250ce8e20b2",
+    "src/compat/productivebees/compat-module.json": "724d5b1a1b822ae91a6e1a9a4e0c17696588853e7be37a541c1468050eada3bb",
     "src/compat/productivebees/java/com/swear/autostorage/compat/productivebees/ProductivebeesCompatModule.java": "308e4a6c0a9b0a7d459e5682004eca42d9911c0da872feb0934904a7144caa16",
     "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesFixtureMod.java": "942ad68d0b600da5a3e28ced3e8954d728c0f772354b144b38cda5def69ec900",
     "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java": "968dea5131ff5266f8a9803de327384d0b0cfc62a32d564fdb709f825fb21ab8",

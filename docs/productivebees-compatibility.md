@@ -85,11 +85,11 @@ approximating source semantics away.
 ## Matrix isolation
 
 The Productive Bees descriptor owns only its `productivebees` namespace and
-locks the 619 recipes that enter the combined server `RecipeManager` at SHA-256
-`6638d8abfeaac5e9d5039883da68be091a5fa2d724b0419d3ce5423b277b8711`.
-Merged Draconic Evolution and the representative Railcraft matrix satisfy additional
-Productive Bees data conditions, so the current combined inventory contains ten more
-recipes than the pre-Draconic 609-recipe inventory.
+locks the 617 recipes that enter the combined server `RecipeManager` at SHA-256
+`29eae13b02c34d2f44c4dd2bbc5aefe44e1dbf054c19c9c6e099f61e6b2367b9`.
+Merged Draconic Evolution plus the representative Railcraft and Productive Metalworks
+matrices satisfy additional Productive Bees data conditions, so the current combined
+inventory contains eight more recipes than the pre-Draconic 609-recipe inventory.
 
 Productive Bees also ships three recipes under the
 `modern_industrialization` namespace, so that existing descriptor remains their
