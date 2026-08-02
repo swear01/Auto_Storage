@@ -19,4 +19,12 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v6
       - run: ./gradlew build --console=plain --no-daemon
-      - run: tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --addon .
+      - run: ./gradlew stageCompatKitTargetArtifact --console=plain --no-daemon
+      - run: ./gradlew stageCompatKitAncestryArtifacts --console=plain --no-daemon
+      - shell: bash
+        run: |
+          classpath_args=()
+          while IFS= read -r artifact; do
+            classpath_args+=(--classpath "$artifact")
+          done < <(find build/compat-kit/ancestry -type f -name '*.jar' -print | sort)
+          tools/compat-kit/compat-kit verify compat/contract.json --audit compat/audit.json --jar build/compat-kit/target.jar "${classpath_args[@]}" --addon .

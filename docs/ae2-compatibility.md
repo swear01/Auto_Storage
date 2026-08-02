@@ -26,17 +26,70 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-Scanner format v7 audits named nested classes while excluding anonymous/local
-classes by name and JVM `ACC_SYNTHETIC` class files by access flag. It also
-recognizes the method-descriptor form that `javap` emits for chance,
-randomness, generic-ingredient, and capability-mutation calls. The reviewed
-contract explicitly rejects all 25 new nested recipe-name candidates as UI,
-datagen, codec, result, condition, or value helpers;
-`InscriberRecipe$Ingredients` remains owned by the accepted
-parent `InscriberRecipe` contract rather than becoming another family. The
-reviewed runtime list also carries GuideME through exact Modrinth artifact
-`rduAfwb7`; both bundled and generated-addon fixtures therefore reproduce AE2's
-required runtime instead of relying on a hand-edited descriptor.
+The committed audit uses Scanner format v16. A complete 92-jar compile
+classpath is supplied to scanning, but the audit retains only the 13 artifacts
+actually reachable from AE2's structural class graph. Seven non-transitive
+compile APIs also carry exact resolvable coordinates: WTHIT API, The One Probe,
+GuideME, REI, EMI API, Jade, and Sponge Mixin. Generated addons emit those coordinates automatically
+instead of requiring an unverifiable Gradle edit. One retained platform artifact
+is the deterministic normalization of ModDev's project-transformed
+NeoForge/Minecraft binary-pipeline jar (SHA-256 `2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f`);
+root and generated-addon staging reproduce that archive before exact matching,
+while Maven artifacts remain raw exact bytes. Every candidate retains its
+binary identity, source-level Java type, and structural classification
+independently from the matching top-level hierarchy inventory. The audit
+preserves a compact direct class-file graph for all 1,689 target classes plus
+reachable ancestry (1,890 records total); the artifact binds the exact
+target-class count and graph digest, and validation reconstructs the twelve
+candidate classifications from that complete graph rather than trusting the
+candidate list or two derived hierarchy copies. An artifact/classpath-bound
+structural-candidate digest still binds the structural class inventory. Scanner
+v16's executable JDK-21 verification and inherited implementation-risk pass
+produce deterministic evidence for this exact artifact/classpath set.
+Class-file hierarchy inspection finds exactly twelve concrete `Recipe`
+implementations:
+
+Complete generation and verification also reopen the exact AE2 19.2.17 jar,
+check its committed SHA/size and NeoForge metadata, rebuild all 1,689 sorted
+target class records, every candidate public signature with pinned JDK 21
+`javap`, plus the complete 556-recipe target-jar inventory, derive nested source
+names from exact `InnerClasses` metadata, and recompute private-bytecode risk
+evidence from the exact target/ancestry jars. Validation enumerates the complete
+supplied ancestry first, so even an unreachable duplicate inspectable class is
+rejected. The JSON count/digest alone cannot authorize a reduced graph, rewritten
+target, public signature, source type, or risk list.
+
+- `appeng.recipes.entropy.EntropyRecipe`;
+- `appeng.recipes.game.AddItemUpgradeRecipe`;
+- `appeng.recipes.game.CraftingUnitTransformRecipe`;
+- `appeng.recipes.game.FacadeRecipe`;
+- `appeng.recipes.game.RemoveItemUpgradeRecipe`;
+- `appeng.recipes.game.StorageCellDisassemblyRecipe`;
+- `appeng.recipes.game.StorageCellUpgradeRecipe`;
+- `appeng.recipes.handlers.ChargerRecipe`;
+- `appeng.recipes.handlers.InscriberRecipe`;
+- `appeng.recipes.mattercannon.MatterCannonAmmo`;
+- `appeng.recipes.quartzcutting.QuartzCuttingRecipe`;
+- `appeng.recipes.transform.TransformRecipe`.
+
+Builders, datagen classes, client/viewer wrappers, serializers, station
+candidates, block entities, and resource APIs remain separate evidence buckets;
+they no longer become recipe families merely because their names contain
+`Recipe`. The bounded data inventory records 556 declared/effective recipes in
+18 serializer groups. The migrated contract therefore contains twelve exact
+decisions rather than the old name-based candidate surface: Inscriber is
+accepted and the other eleven classes are rejected.
+
+The reviewed runtime list carries GuideME through exact Modrinth artifact
+`rduAfwb7`; bundled and generated-addon fixtures reproduce AE2's required
+runtime instead of relying on a hand-edited descriptor. The reviewed repository list also contains the exact upstream Maven endpoints needed to resolve the seven persisted compile-only coordinates.
+
+`compat/generation/ae2.json` is bound to the canonical contract digest. It
+generates `Ae2GeneratedCompat.java`, which owns direct typed descriptor and
+recipe-family registration. `Ae2Compat` retains only the reviewed semantic
+providers for eligibility, typed transaction planning, and exact cost. A
+Python golden test regenerates the class byte-for-byte, and the isolated AE2
+source set compiles the committed result. Neither side uses reflection.
 
 ## Accepted family
 
@@ -73,8 +126,9 @@ range, or fractional. Auto Storage never rounds an AE cost.
   synthetic transaction cost.
 - Speed-card variants: not representable by an unconfigured Inscriber
   `ItemStack`.
-- Every other AE2 recipe candidate: rejected until it has its own complete
-  deterministic contract.
+- Entropy, the six custom crafting families, Quartz Cutting, Matter Cannon
+  Ammo, and Transform: rejected until each has its own complete deterministic
+  contract.
 - AE2 networks, storage, spatial, world/entity, and live-machine operations:
   outside this recipe-family module.
 
@@ -84,7 +138,7 @@ range, or fractional. Auto Storage never rounds an AE cost.
 ./gradlew runAe2GameTestServer
 ```
 
-Eight real GameTests cover registration/Charger exclusion, retained INSCRIBE
+Eight real GameTests cover generated registration/Charger exclusion, retained INSCRIBE
 presses, consumed PRESS inputs, exact FE/work, missing middle ingredient,
 insufficient FE, insufficient work, destination overflow rollback, and runtime
 conversion representation. The missing-ingredient case keeps both remaining
@@ -93,5 +147,8 @@ The base
 `exact_recipe_selection_accepts_supported_backing_recipe_and_rejects_stale_id`
 GameTest also executes the absent-target no-classload assertion, so its contract
 marker is bound inside an actual annotated GameTest method's braces. Method
-declarations are not accepted as evidence. The all-mod compatibility matrix
+declarations are not accepted as evidence. Compat Kit also resolves
+`AutoStorage.MODID` through its public constant chain and verifies that the
+holder equals the `auto_storage` namespace enabled by `runGameTestServer`.
+The all-mod compatibility matrix
 protects coexistence.

@@ -132,8 +132,10 @@ to canonical `swear01/Auto_Storage` links), and push that Wiki commit before
 creating the release tag. Do not add either developer page to the player-manual
 Home contents or sidebar. The Wiki pages must not contain an older API or tool
 surface than the tagged guides.
-The workflow reruns build, minimum/latest EMI compilation, every isolated and
-combined GameTest gate, Python tests, and datagen drift before publishing.
+The workflow reruns build, minimum/latest EMI compilation, exact AE2 ancestry
+staging, every isolated and combined GameTest gate, Python tests, and datagen
+drift before publishing. Ancestry staging runs before the first release
+GameTest so a missing canonical dependency fails before the expensive matrix.
 
 ## Publish
 

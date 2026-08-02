@@ -1,0 +1,47 @@
+{
+  "class_name": "Ae2GeneratedCompat",
+  "families": [
+    {
+      "bindings": {
+        "cost": {
+          "kind": "static_recipe_family_cost_method",
+          "member": "cost",
+          "owner": "com.swear.autostorage.compat.ae2.Ae2Compat"
+        },
+        "eligibility": {
+          "kind": "static_recipe_predicate_method",
+          "member": "supports",
+          "owner": "com.swear.autostorage.compat.ae2.Ae2Compat"
+        },
+        "plan": {
+          "kind": "static_typed_plan_method",
+          "member": "plan",
+          "owner": "com.swear.autostorage.compat.ae2.Ae2Compat"
+        }
+      },
+      "id": "inscriber_recipe",
+      "rate_bindings": [
+        {
+          "denominator": 1,
+          "item": "ae2:inscriber",
+          "numerator": 2,
+          "template": "fixed"
+        }
+      ],
+      "registration_id": "auto_storage:ae2_inscriber",
+      "shape": "typed_resources",
+      "station_label_key": "gui.auto_storage.station.ae2_inscriber",
+      "status": "generate"
+    }
+  ],
+  "kind": "auto_storage_compat_generation_plan",
+  "package": "com.swear.autostorage.compat.ae2",
+  "resource_kinds": [],
+  "schema": 1,
+  "source_contract_digest": "a661af820432b004e80eaab517e7d4322aa84f42019434c400fc99df6a5e4e11",
+  "target": {
+    "display_name": "Applied Energistics 2",
+    "mod_id": "ae2",
+    "version": "19.2.17"
+  }
+}

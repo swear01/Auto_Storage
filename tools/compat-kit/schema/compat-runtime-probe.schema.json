@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/swear01/Auto_Storage/tools/compat-kit/schema/compat-runtime-probe.schema.json",
+  "title": "Auto Storage runtime probe evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "kind",
+    "authority",
+    "target",
+    "source_audit_digest",
+    "source_probe_plan_digest",
+    "loaded_recipe_count",
+    "recipes",
+    "registries",
+    "config_values",
+    "capability_surfaces"
+  ],
+  "properties": {
+    "schema": { "const": 1 },
+    "kind": { "const": "auto_storage_runtime_probe" },
+    "authority": { "const": "evidence_only" },
+    "target": { "$ref": "#/$defs/target" },
+    "source_audit_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_probe_plan_digest": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "loaded_recipe_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 50000
+    },
+    "recipes": {
+      "type": "array",
+      "maxItems": 50000,
+      "items": { "$ref": "#/$defs/recipe" }
+    },
+    "registries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blocks", "items", "block_entity_types"],
+      "properties": {
+        "blocks": { "$ref": "#/$defs/resource_locations" },
+        "items": { "$ref": "#/$defs/resource_locations" },
+        "block_entity_types": { "$ref": "#/$defs/resource_locations" }
+      }
+    },
+    "config_values": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": { "$ref": "#/$defs/config_value" }
+    },
+    "capability_surfaces": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": { "$ref": "#/$defs/capability_surface" }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mod_id", "display_name", "version"],
+      "properties": {
+        "mod_id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+        "display_name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resource_location": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+    },
+    "resource_locations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/resource_location" }
+    },
+    "recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "serializer",
+        "class",
+        "ingredient_count",
+        "special",
+        "result_item",
+        "result_count"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/resource_location" },
+        "type": { "$ref": "#/$defs/resource_location" },
+        "serializer": { "$ref": "#/$defs/resource_location" },
+        "class": { "type": "string", "minLength": 1 },
+        "ingredient_count": { "type": "integer", "minimum": 0 },
+        "special": { "type": "boolean" },
+        "result_item": { "$ref": "#/$defs/resource_location" },
+        "result_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "config_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "value", "source"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "value": { "type": "number" },
+        "source": { "type": "string", "minLength": 1 }
+      }
+    },
+    "capability_surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "surface", "available", "source"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "surface": { "type": "string", "minLength": 1 },
+        "available": { "type": "boolean" },
+        "source": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

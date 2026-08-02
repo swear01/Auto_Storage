@@ -4,7 +4,7 @@
   "title": "Auto Storage compatibility contract",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "kind", "target", "source_audit_sha256", "source_recipe_inventory_sha256", "families", "verification"],
+  "required": ["schema", "kind", "target", "source_audit_sha256", "source_recipe_inventory_sha256", "source_recipe_data_sha256", "families", "verification"],
   "properties": {
     "schema": {"const": 1},
     "kind": {"const": "auto_storage_compat_contract"},
@@ -39,6 +39,7 @@
     },
     "source_audit_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "source_recipe_inventory_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_recipe_data_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "families": {
       "type": "array",
       "items": {
@@ -61,7 +62,7 @@
           "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
           "class": {"type": "string", "minLength": 1},
           "status": {"enum": ["accepted", "rejected", "needs_decision"]},
-          "recipe_type": {"oneOf": [{"type": "null"}, {"type": "string", "minLength": 1}]},
+          "recipe_type": {"oneOf": [{"type": "null"}, {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"}]},
           "station": {
             "oneOf": [
               {"type": "null"},
@@ -70,7 +71,7 @@
                 "additionalProperties": false,
                 "required": ["descriptor_id", "category", "variants"],
                 "properties": {
-                  "descriptor_id": {"type": "string", "minLength": 1},
+                  "descriptor_id": {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"},
                   "category": {"enum": ["instant", "process", "transform"]},
                   "variants": {
                     "type": "array",
@@ -80,14 +81,14 @@
                       "additionalProperties": false,
                       "required": ["item", "rate"],
                       "properties": {
-                        "item": {"type": "string", "minLength": 1},
+                        "item": {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"},
                         "rate": {
                           "type": "object",
                           "additionalProperties": false,
                           "required": ["numerator", "denominator"],
                           "properties": {
-                            "numerator": {"type": "integer", "minimum": 0},
-                            "denominator": {"type": "integer", "minimum": 1}
+                            "numerator": {"type": "integer", "minimum": 0, "maximum": 9223372036854775807},
+                            "denominator": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807}
                           }
                         },
                         "bounds": {"type": "string", "minLength": 1}
@@ -166,7 +167,7 @@
             },
             "then": {
               "properties": {
-                "recipe_type": {"type": "string", "minLength": 1},
+                "recipe_type": {"type": "string", "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"},
                 "station": {"type": "object"},
                 "inputs": {"minItems": 1},
                 "outputs": {
@@ -211,7 +212,7 @@
         "expected_game_tests": {
           "oneOf": [
             {"type": "null"},
-            {"type": "integer", "minimum": 1}
+            {"type": "integer", "minimum": 1, "maximum": 2147483647}
           ]
         },
         "game_test_task": {
@@ -282,7 +283,7 @@
           "verification": {
             "properties": {
               "fixture": {"type": "string", "minLength": 1},
-              "expected_game_tests": {"type": "integer", "minimum": 1},
+              "expected_game_tests": {"type": "integer", "minimum": 1, "maximum": 2147483647},
               "game_test_task": {
                 "type": "string",
                 "pattern": "^[A-Za-z][A-Za-z0-9]*$"

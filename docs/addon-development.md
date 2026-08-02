@@ -13,9 +13,10 @@ not listed in the player-manual Home contents or sidebar.
 
 Use the [Auto Storage Compat Kit](compat-kit.md) before writing a bundled
 integration or independent addon. It scans one reproducible target jar/source
-revision, creates an explicit reviewed recipe contract, generates a deliberately
-RED SDK-only scaffold, and runs the contract's verification gates. It does not
-infer consumption, catalysts, outputs, units, station costs, or determinism.
+revision, creates an explicit reviewed recipe contract, generates either a
+deliberately RED SDK-only scaffold or reviewed mechanical registration, and
+runs the contract's verification gates. It does not infer consumption,
+catalysts, outputs, units, station costs, or determinism.
 Every scaffold/verify command also loads the committed source audit. The exact
 audited recipe-candidate set, target identity, artifact SHA, and inventory
 digest must match the contract, so recomputing a contract-only field cannot
@@ -32,9 +33,135 @@ atomically replaced jar cannot mix two artifacts in one audit.
 ```bash
 tools/compat-kit/compat-kit scan --help
 tools/compat-kit/compat-kit decide --help
+tools/compat-kit/compat-kit migrate-contract --help
+tools/compat-kit/compat-kit validate-probe --help
+tools/compat-kit/compat-kit generate --help
+tools/compat-kit/compat-kit conformance --help
+tools/compat-kit/compat-kit resource-scaffold --help
 tools/compat-kit/compat-kit scaffold --help
 tools/compat-kit/compat-kit verify --help
 ```
+
+`generate` accepts only a completed contract plus a reviewed plan bound to its
+exact digest. It emits direct typed station/family registration for bounded
+safe shapes and rate bindings; a handwritten provider still owns exact typed
+selection, catalysts/tools/remainders, and costs. Unsupported semantics remain
+an explicit RED boundary. Dynamic rate accessors are reviewed as integral and
+converted exactly; families sharing a descriptor must share the same reviewed
+definition. Each generated family also declares its runtime `registration_id`;
+the audit family key is evidence identity and is not assumed to be a registry
+path. Family-derived Java names use a collision-free `family$` prefix for
+digit-leading or reserved IDs and shared identifier validation. `conformance`
+requires a batch in `2..Long.MAX_VALUE`, rejects happy-delta × batch signed-long overflow, and
+generates repeated snapshot/delta/rollback assertions
+around addon-supplied operations rather than trusting booleans returned by the
+addon. `resource-scaffold` requires a positive signed-long sample amount and generates only public-API custom-resource boundaries,
+sample-keyed persistence/transfer assertions, and rejects built-in Item, Fluid,
+and NeoForge Energy support. Valid digit-leading resource IDs are normalized
+through one collision-checked Java-name derivation that prefixes `_` where
+required. None of these commands add runtime reflection or
+make the client authoritative. Repository tests regenerate and compile the
+committed generated-scaffold fixture against the public API jar.
+
+Supply the target's complete non-JDK compile ancestry through repeatable
+`--classpath` for `scan` and every complete consumer; every unresolved external superclass or interface fails
+instead of silently hiding a structural recipe family, including classes whose
+names look like client viewers, builders, or datagen helpers. The audit records
+only structurally reachable classpath artifact SHA/size evidence. For each
+reachable compile API that is not transitively available from the target, pass
+`--classpath-dependency <sha256>=group:name:version[:classifier]`; the audit
+persists that exact coordinate and each ancestry jar is rehashed after all
+inherited-bytecode inspection so an in-flight replacement fails. A structurally discovered recipe inspects implementation classes along
+its target/classpath hierarchy and attributes compact inherited risks to the
+concrete recipe. Completed
+contracts separately bind the
+recipe-class inventory and effective recipe-data/data-pack digest. Runtime
+probe JSON must pass `validate-probe` with the same audit and optional plan;
+schema validation alone does not prove those cross-file identities.
+Every complete generation, conformance, resource, scaffold, and verification
+command also receives the exact target jar. Compat Kit rehashes it and rebuilds
+the complete sorted class/metadata inventory instead of trusting an edited
+audit's self-consistent count or digest. It also rebuilds the target jar recipe
+source count and, when no external data root contributed recipes, requires the
+entire recorded recipe inventory to match those jar bytes. Generated addon CI
+uses `stageCompatKitTargetArtifact` plus `stageCompatKitAncestryArtifacts`, then
+passes `build/compat-kit/target.jar` to `verify --jar` and every staged ancestry
+jar through repeatable `--classpath`.
+The generated ancestry task searches the target's transitive dependency graph,
+NeoForge's additional runtime classpath, and the ModDev
+`createMinecraftArtifacts` outputs, normalizes their archive layout, then
+stages only SHA/size matches from the audit. The scaffold uses the same pinned
+Parchment mapping baseline as Auto Storage so the generated NeoForge/Minecraft
+development artifact reproduces the scanner's canonical archive. Build that
+scanner input with `compat-kit normalize-jar <raw.jar> <canonical.jar>` because
+raw ModDev ZIP metadata is not cross-run stable; generated staging repeats the
+sorted, fixed-timestamp, stored-entry normalization only for ModDev outputs.
+Maven artifacts remain raw exact bytes. Scanner-format-16
+`ancestry_dependencies` are emitted
+automatically as non-transitive `compileOnly` and
+`compatKitAncestryArtifacts` declarations; hand-editing generated Gradle is not
+a supported workaround, and an unresolved hash remains a hard failure.
+Complete consumers reopen the target and every supplied ancestry jar,
+reconstruct the reachable external metadata graph, reject duplicate
+inspectable classes across the complete supplied set, rebuild exact NeoForge
+target metadata and candidate public signatures, derive named nested source
+types from exact `InnerClasses` metadata, and recompute bounded
+private-bytecode risk evidence, so editing target/classpath-owned records
+cannot remove structural recipe candidates while preserving a self-consistent
+JSON audit. If any reconstructed parent is neither present in those exact jars
+nor a selected JDK 21 class or known root, validation fails for missing
+ancestry instead of accepting a truncated graph.
+
+The scanner first verifies that resolved `javap` belongs to a JDK whose
+`release` metadata and actual `javap -version` both report major version 21,
+then accepts platform ancestry only
+when the class is present in that JDK's module inventory. Package prefixes such as `javax.*` do not
+bypass missing classpath evidence. It uses class-file `SourceFile`,
+`InnerClasses`, and `EnclosingMethod` metadata for source ownership and nested
+classes. Thus a top-level or named class whose identifier contains `$` remains
+auditable while local, anonymous, and synthetic classes stay excluded. When
+`SourceFile` is absent, a supplied source checkout fails as unavailable rather
+than guessing a same-named compilation unit. Format 15 stores binary and
+source-level Java names, each candidate's structural
+classification, a separate sorted top-level `structural_hierarchy` inventory,
+an artifact/classpath-bound structural candidate digest, and direct metadata for
+every target class plus reachable ancestry. The artifact also binds the complete
+target-class count and graph digest. Validation independently reconstructs each
+candidate from that graph, so removing both derived indirect-path copies cannot
+bypass review. Generated Java uses
+the source-level name for nested classes and preserves legal top-level `$`
+identifiers. Direct public
+`extends`/`implements` declarations provide a second bucket cross-check;
+generic type bounds do not count as direct ancestry. Legacy formats 7 through 15
+must be rescanned with `migrate-audit`. A class name that normalizes to no
+alphanumeric family ID uses deterministic `class_<binary-name-hex>` evidence.
+Explicit `--data-root` evidence binds all bounded tag JSON and bounded
+`pack.mcmeta` bytes while keeping recipe counts recipe-only; a root with a
+top-level data-pack `filter` or `overlays` field is rejected rather than
+misreporting filtered or overlay recipes as effective. Any ancestry artifact
+SHA/size or `ancestry_dependencies` coordinate change affects `diff` and
+reopens migrated family decisions even when target public signatures are stable.
+Each ancestry class must have exactly one jar owner. The scanner rejects
+duplicate definitions even when their hierarchy declarations match, validates
+JDK 21 before a cache hit, and invalidates the cache when the selected JDK module
+identity changes. Recipe risks traverse the complete non-JDK superclass and
+interface graph, not only the hierarchy path that established `Recipe`
+classification.
+
+Complete contracts use lowercase resource locations for recipe types, station
+descriptor IDs, and station variant items. Generated rate bindings are
+one-to-one with those station items; duplicate descriptor variants and duplicate
+rate bindings are rejected. `registry_block_method` bindings name their block ID
+separately from the representative station item. The generated
+`single_item_to_item` path accepts only the documented one-input/one-primary
+output selectors and exact amount expressions, and method bindings reject Java
+keywords; all other shapes need a reviewed provider. Generated custom-resource tests verify that their sample key and
+amount were seeded, that `clear()` removes that key, and that `load()` restores
+the exact snapshot before exercising the remaining persistence boundaries. `worker-package`
+runs every declared Gradle task without replacing the worker's JDK environment,
+so the target's authoritative GameTest remains part of a delegated worker gate.
+Worker instructions identify targets only by validated mod ID; free-form display
+metadata is retained as escaped, explicitly untrusted JSON evidence.
 
 ## Add the SDK
 
@@ -81,7 +208,8 @@ representative CI fixture versions.
 Compat Kit contracts list every target Maven repository as an explicit HTTPS
 URL. The generated addon copies those repositories into `build.gradle`; it
 does not infer Modrinth, Curse Maven, or an upstream repository from a
-dependency coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
+dependency coordinate. The same reviewed list must resolve any persisted
+`ancestry_dependencies` coordinate. Keep this list minimal, ordered, and reviewable; declaration order is preserved
 because it can change which repository serves a coordinate. Reviewed
 repositories are emitted before defaults and restricted to target/runtime
 groups. Explicit runtime groups cannot fall back to Maven Central even when
@@ -119,14 +247,23 @@ Byte-identical reruns repair both generated launchers to mode `0755`.
 An independent-addon contract uses fixture `main`, declares exactly `build`
 and `runGameTestServer`, and maps every evidence record to one of those actual
 tasks. Published completed-contract schemas require that non-null fixture,
-positive GameTest count, authoritative task, nonempty task list, all twelve
+GameTest count in `1..2147483647`, authoritative task, nonempty task list, all twelve
 exact checks, and every evidence mapping; unresolved RED drafts may keep those
 fields empty. A `runGameTestServer` evidence marker must live inside the annotated
 GameTest method that executes the assertion; file-level constants, comments,
-and detached helpers are rejected. Comments inside the method do not count,
-while executable string arguments may carry assertion markers. Its fresh-world
-cleanup rejects symlinked parents and paths outside the addon root before
-deletion. Bundled task names are not translated or treated as equivalent.
+and detached helpers are rejected. Runtime probes require an explicit
+`--game-test-namespace`; conformance and resource plans require the same exact
+`game_test_namespace`, and every generated class emits it in
+`@GameTestHolder`. An addon's holder must resolve to the
+addon's enabled `<target_mod_id>_auto_storage` namespace; a test compiled in
+another namespace is not evidence. Referenced holder constants are resolved by
+their actual declaring class, not the source file stem. Comments inside the method do not count,
+while executable string arguments may carry assertion markers. Eligible Java
+Unicode escapes are rejected before evidence parsing so they cannot create
+comments or method boundaries before tokenization. Its fresh-world cleanup
+rejects a symlinked lexical addon root, every ancestor of that root, `run`, or
+`world`, plus resolved paths outside the addon root before deletion. Bundled
+task names are not translated or treated as equivalent.
 GameTest output must contain
 exactly one success summary with the reviewed count; conflicting summaries fail
 even when one count matches. A published passing report must carry the strict
@@ -293,7 +430,9 @@ external machine and wait for world state.
 
 The reviewed contract must preserve every scanner risk attached to each recipe
 family. Process station variants use positive work rates; Instant variants use
-zero rates. Accepted families keep an explicit `costs` list, which may be empty
+zero rates. Every rational numerator and denominator must fit signed Java
+`long`, including documents checked only through the published generation-plan
+schema. Accepted families keep an explicit `costs` list, which may be empty
 only for a reviewed runtime family that is genuinely free. A bundled contract's
 GameTest task must be the task derived from its fixture name; another fixture
 with the same expected count cannot provide its runtime evidence. Compat Kit
@@ -344,7 +483,7 @@ The API artifact version equals the Auto Storage mod version.
 - Compat Kit therefore generates a current-minor dependency range; version
   0.3.0 produces `[0.3.0,0.4)`, not an open-ended pre-1.0 range.
 - Compat Kit publication receives the authoritative Gradle `mod_version` and
-  fails if it differs from the tool version. Its addon example and four
+  fails if it differs from the tool version. Its addon example and ten
   machine-readable schemas use explicit tracked allowlists, never recursive or
   globbed local-output scans.
 - Registry IDs and persisted resource/descriptor IDs are data contracts and

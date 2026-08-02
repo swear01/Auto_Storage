@@ -2,41 +2,25 @@ package com.swear.autostorage.compat.ae2;
 
 import appeng.api.config.PowerMultiplier;
 import appeng.api.config.PowerUnit;
-import appeng.recipes.AERecipeTypes;
 import appeng.recipes.handlers.InscriberProcessType;
 import appeng.recipes.handlers.InscriberRecipe;
-import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
-import com.swear.autostorage.MachineDescriptorApi;
-import com.swear.autostorage.MachineVariant;
-import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.RecipeFamily;
-import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
-import com.swear.autostorage.RecipeFamilyFactories;
-import com.swear.autostorage.RecipePresentationKind;
 import com.swear.autostorage.StorageResourceKey;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.OptionalLong;
 
 public final class Ae2Compat {
-    private static final ResourceLocation INSCRIBER_ITEM =
-            ResourceLocation.fromNamespaceAndPath("ae2", "inscriber");
     private static final long PROCESSING_STEPS = 200;
     private static final double AE_PER_STEP = 10.0D;
 
@@ -47,43 +31,10 @@ public final class Ae2Compat {
             DeferredRegister<MachineDescriptor> machineDescriptors,
             DeferredRegister<RecipeFamily> recipeFamilies
     ) {
-        Objects.requireNonNull(machineDescriptors, "machineDescriptors");
-        Objects.requireNonNull(recipeFamilies, "recipeFamilies");
-        if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
-            throw new IllegalArgumentException("AE2 descriptor register targets the wrong registry");
-        }
-        if (!recipeFamilies.getRegistryKey().equals(RecipeFamilyApi.REGISTRY_KEY)) {
-            throw new IllegalArgumentException("AE2 family register targets the wrong registry");
-        }
-        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())) {
-            throw new IllegalArgumentException(
-                    "AE2 descriptors and families must share one namespace");
-        }
-
-        ResourceLocation descriptorId = ResourceLocation.fromNamespaceAndPath(
-                machineDescriptors.getNamespace(), "ae2_inscriber");
-        machineDescriptors.register(descriptorId.getPath(), () ->
-                MachineDescriptor.installableVariants(
-                        descriptorId,
-                        Component.translatable("gui.auto_storage.station.ae2_inscriber"),
-                        () -> List.of(MachineVariant.of(
-                                new ItemStack(requiredItem(INSCRIBER_ITEM)),
-                                MachineWorkRate.of(2, 1))),
-                        MachineCategory.PROCESS,
-                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
-                        null));
-        recipeFamilies.register(descriptorId.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
-                        InscriberRecipe.class,
-                        () -> AERecipeTypes.INSCRIBER,
-                        descriptorId,
-                        Ae2Compat::supports,
-                        Ae2Compat::plan,
-                        recipe -> RecipeFamilyCost.stationWork(PROCESSING_STEPS),
-                        RecipePresentationKind.CRAFTING));
+        Ae2GeneratedCompat.register(machineDescriptors, recipeFamilies);
     }
 
-    private static boolean supports(InscriberRecipe recipe) {
+    static boolean supports(InscriberRecipe recipe) {
         return exact(recipe.getMiddleInput())
                 && optionalExact(recipe.getTopOptional())
                 && optionalExact(recipe.getBottomOptional())
@@ -91,7 +42,7 @@ public final class Ae2Compat {
                 && requiredFe().isPresent();
     }
 
-    private static TypedRecipePlan plan(
+    static TypedRecipePlan plan(
             InscriberRecipe recipe,
             HolderLookup.Provider registries
     ) {
@@ -128,6 +79,10 @@ public final class Ae2Compat {
                 .presentationOutput(output)
                 .layout(width, (inputCount + width - 1) / width, true)
                 .build();
+    }
+
+    static RecipeFamilyCost cost(InscriberRecipe recipe) {
+        return RecipeFamilyCost.stationWork(PROCESSING_STEPS);
     }
 
     private static void addOptional(
@@ -192,13 +147,5 @@ public final class Ae2Compat {
             return OptionalLong.empty();
         }
         return OptionalLong.of((long) converted);
-    }
-
-    private static Item requiredItem(ResourceLocation id) {
-        Item item = BuiltInRegistries.ITEM.get(id);
-        if (item == Items.AIR) {
-            throw new IllegalStateException("Missing AE2 station item " + id);
-        }
-        return item;
     }
 }

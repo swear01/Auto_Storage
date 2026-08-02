@@ -312,6 +312,14 @@ sourceSets.create('addonExample') {
 tasks.named(sourceSets.addonExample.compileJavaTaskName).configure {
     dependsOn apiJar
 }
+sourceSets.create('compatKitGeneratedFixture') {
+    java.srcDir('src/compatKitGeneratedFixture/java')
+    compileClasspath += files(apiJar) + configurations.compileClasspath
+    runtimeClasspath += output + compileClasspath
+}
+tasks.named(sourceSets.compatKitGeneratedFixture.compileJavaTaskName).configure {
+    dependsOn apiJar
+}
 
 base {
     archivesName = mod_id
@@ -320,13 +328,17 @@ base {
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 neoForge {
-    version = project.neo_version
+    enable {
+        version = project.neo_version
+        disableRecompilation = true
+    }
     addModdingDependenciesTo apiSourceSet
     addModdingDependenciesTo sourceSets.fusionRuntime
     addModdingDependenciesTo sourceSets.recipeAddonFixture
     addModdingDependenciesTo sourceSets.pneumaticCraftFixture
     addModdingDependenciesTo sourceSets.compatibilityMatrixFixture
     addModdingDependenciesTo sourceSets.addonExample
+    addModdingDependenciesTo sourceSets.compatKitGeneratedFixture
     compatModules.each { spec ->
         addModdingDependenciesTo compatSourceSets[spec.id]
         addModdingDependenciesTo sourceSets[spec.fixture]
@@ -435,6 +447,11 @@ configurations {
     fusionRuntimeImplementation.extendsFrom implementation
     fusionRuntimeRuntimeOnly.extendsFrom runtimeOnly
     emiRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+    ae2CompatAuditAncestry {
         canBeConsumed = false
         canBeResolved = true
         transitive = false
@@ -556,6 +573,41 @@ repositories {
         name = "C4"
         url = "https://maven.theillusivec4.top/"
     }
+    maven {
+        name = "AE2AuditShedaniel"
+        url = uri("https://maven.shedaniel.me/")
+        content {
+            includeGroup "me.shedaniel"
+        }
+    }
+    maven {
+        name = "AE2AuditWthit"
+        url = uri("https://maven2.bai.lol")
+        content {
+            includeGroup "mcp.mobius.waila"
+        }
+    }
+    maven {
+        name = "AE2AuditEmi"
+        url = uri("https://maven.terraformersmc.com/")
+        content {
+            includeGroup "dev.emi"
+        }
+    }
+    maven {
+        name = "AE2AuditCurseMaven"
+        url = uri("https://www.cursemaven.com")
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name = "AE2AuditTheOneProbe"
+        url = uri("https://maven.k-4u.nl/")
+        content {
+            includeGroup "mcjty.theoneprobe"
+        }
+    }
     compatModules.collectMany { it.repositories }.unique(false).each { repository ->
         maven {
             url = uri(repository)
@@ -567,6 +619,13 @@ dependencies {
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     compileOnly "maven.modrinth:emi:${emi_runtime_version}"
+    ae2CompatAuditAncestry "mcp.mobius.waila:wthit-api:neo-12.1.2"
+    ae2CompatAuditAncestry "mcjty.theoneprobe:theoneprobe:1.20.4_neo-11.0.1-2"
+    ae2CompatAuditAncestry "org.appliedenergistics:guideme:21.1.1"
+    ae2CompatAuditAncestry "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.729"
+    ae2CompatAuditAncestry "dev.emi:emi-neoforge:1.1.22+1.21.1:api"
+    ae2CompatAuditAncestry "curse.maven:jade-324717:5427817"
+    ae2CompatAuditAncestry "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7"
     compatModules.each { spec ->
         spec.dependencies.each { notation ->
             add(sourceSets[spec.sourceSet].compileOnlyConfigurationName, notation) {
@@ -674,6 +733,129 @@ dependencies {
     prismGuiCreate "maven.modrinth:create:${create_ci_version}"
     prismGuiExtendedCrafting "maven.modrinth:extended-crafting:${extended_crafting_ci_version}"
     prismGuiCucumber "maven.modrinth:cucumber:${cucumber_ci_version}"
+}
+
+def ae2CompatAuditAncestryDir =
+        layout.buildDirectory.dir("compat-kit/ae2-audit-optional-ancestry")
+def ae2CompatAuditAncestryManifest =
+        layout.buildDirectory.file("compat-kit/ae2-audit-optional-ancestry.txt")
+def compatKitProjectDir = layout.projectDirectory.asFile
+def compatKitMinecraftArtifacts =
+        tasks.named("createMinecraftArtifacts").get().outputs.files
+tasks.register("stageAe2CompatAuditAncestry") {
+    group = "verification"
+    description = "Stages every exact ancestry jar used by the committed AE2 audit."
+    inputs.files(
+            configurations.ae2CompatAuditAncestry,
+            configurations.additionalRuntimeClasspath,
+            compatKitMinecraftArtifacts)
+    inputs.file("compat/audits/ae2/19.2.17.json")
+    outputs.dir(ae2CompatAuditAncestryDir)
+    outputs.file(ae2CompatAuditAncestryManifest)
+    doLast {
+        def auditFile = inputs.files.files.find {
+            it.name == "19.2.17.json"
+        }
+        def audit = new JsonSlurper().parse(auditFile)
+        def expected = audit.ancestry_classpath.collectEntries { record ->
+            [("${record.sha256}:${record.size}"): record]
+        }
+        def artifacts = inputs.files.files.findAll {
+            it.name.endsWith(".jar")
+        }
+        def expectedSizes = audit.ancestry_classpath.collect {
+            it.size.longValue()
+        }.toSet()
+        def matches = [:]
+        artifacts.findAll {
+            expectedSizes.contains(it.length())
+        }.each { artifact ->
+            def digest = java.security.MessageDigest.getInstance("SHA-256")
+            artifact.withInputStream { input ->
+                byte[] buffer = new byte[8192]
+                for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {
+                    digest.update(buffer, 0, read)
+                }
+            }
+            def identity = "${digest.digest().encodeHex().toString()}:${artifact.length()}"
+            if (expected.containsKey(identity)) {
+                matches[identity] = artifact
+            }
+        }
+        def canonicalRoot = new File(
+                temporaryDir,
+                "ae2-audit-canonical")
+        canonicalRoot.deleteDir()
+        canonicalRoot.mkdirs()
+        def observedCanonical = []
+        compatKitMinecraftArtifacts.files
+                .findAll { it.isFile() && it.name.endsWith(".jar") }
+                .sort { left, right ->
+                    left.absolutePath <=> right.absolutePath
+                }
+                .eachWithIndex { artifact, index ->
+                    def canonical = new File(canonicalRoot, "${index}.jar")
+                    def process = new ProcessBuilder(
+                            "python3",
+                            "tools/compat-kit/compat_kit.py",
+                            "normalize-jar",
+                            artifact.absolutePath,
+                            canonical.absolutePath)
+                            .directory(compatKitProjectDir)
+                            .redirectErrorStream(true)
+                            .start()
+                    def processOutput = process.inputStream.getText("UTF-8").trim()
+                    def exitCode = process.waitFor()
+                    if (exitCode != 0) {
+                        throw new GradleException(
+                                "AE2 audit ancestry normalization failed: "
+                                        + artifact + " (exit " + exitCode + ")"
+                                        + (processOutput ? ": " + processOutput : ""))
+                    }
+                    def digest = java.security.MessageDigest.getInstance("SHA-256")
+                    canonical.withInputStream { input ->
+                        byte[] buffer = new byte[8192]
+                        for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {
+                            digest.update(buffer, 0, read)
+                        }
+                    }
+                    def identity = "${digest.digest().encodeHex().toString()}:${canonical.length()}"
+                    observedCanonical.add("${identity}=${artifact.name}")
+                    if (expected.containsKey(identity)) {
+                        matches[identity] = canonical
+                    }
+                }
+        def missing = expected.keySet() - matches.keySet()
+        if (!missing.isEmpty()) {
+            throw new GradleException(
+                    "AE2 audit ancestry is unresolved: "
+                            + missing.toList().sort().join(", ")
+                            + "; observed ModDev canonical artifacts: "
+                            + (observedCanonical
+                                    ? observedCanonical.sort().join(", ")
+                                    : "<none>"))
+        }
+        def outputDir = outputs.files.files.find {
+            it.name == "ae2-audit-optional-ancestry"
+        }
+        outputDir.deleteDir()
+        outputDir.mkdirs()
+        def staged = audit.ancestry_classpath.collect { record ->
+            def identity = "${record.sha256}:${record.size}"
+            def artifact = matches[identity]
+            def target = new File(outputDir, "${record.sha256}.jar")
+            java.nio.file.Files.copy(
+                    artifact.toPath(),
+                    target.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            target.absolutePath
+        }.sort()
+        def manifest = outputs.files.files.find {
+            it.name == "ae2-audit-optional-ancestry.txt"
+        }
+        manifest.parentFile.mkdirs()
+        manifest.text = staged.join("\n") + "\n"
+    }
 }
 
 def compatArtifactVerificationTasks = []
@@ -1017,6 +1199,7 @@ tasks.withType(JavaCompile).configureEach {
 tasks.named('check').configure {
     dependsOn tasks.named('compileApiTestJava')
     dependsOn tasks.named('compileAddonExampleJava')
+    dependsOn tasks.named('compileCompatKitGeneratedFixtureJava')
     dependsOn tasks.named('verifyApiSurface')
     dependsOn tasks.named('verifyCompatIsolation')
     dependsOn compatArtifactVerificationTasks
