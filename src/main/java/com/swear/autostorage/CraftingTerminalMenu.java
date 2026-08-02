@@ -3874,10 +3874,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         Map<IngredientSource, Integer> sourceMatches = new IdentityHashMap<>();
         List<IngredientSource> relevantSources = new ArrayList<>();
         Map<ItemKey, Integer> exactKeyMatches = new HashMap<>();
+        Map<Item, Integer> allVariantItemMatches = new HashMap<>();
         for (IngredientNeed need : needs) {
             if (need.ingredient().matchesAllItemVariants()) {
                 if (availability.matchingAllItemVariants(need.ingredient())
                         < need.count()) return false;
+                for (Item item : need.ingredient().representativeItems()) {
+                    allVariantItemMatches.merge(item, 1, Integer::sum);
+                }
                 continue;
             }
             if (need.ingredient().representativeItemsExhaustive()) {
@@ -3908,28 +3912,42 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             }
             if (available < need.count()) return false;
         }
-        if (!sourceMatches.isEmpty()) {
-            if (sourceMatches.values().stream().anyMatch(matches -> matches > 1)) {
-                return planIngredients(ingredients, 1, relevantSources) != null;
-            }
-            return true;
-        }
-        if (exactKeyMatches.values().stream().anyMatch(matches -> matches > 1)) {
-            for (IngredientNeed need : needs) {
-                if (need.ingredient().matchesAllItemVariants()
-                        || !need.ingredient().representativeItemsExhaustive()) {
-                    continue;
-                }
-                for (IngredientSource source : availability.matching(need.ingredient())) {
-                    if (!need.ingredient().test(source.stack())) continue;
-                    if (sourceMatches.merge(source, 1, Integer::sum) == 1) {
-                        relevantSources.add(source);
-                    }
+        boolean hasConflict = sourceMatches.values().stream()
+                .anyMatch(matches -> matches > 1)
+                || exactKeyMatches.values().stream()
+                .anyMatch(matches -> matches > 1)
+                || allVariantItemMatches.values().stream()
+                .anyMatch(matches -> matches > 1);
+        if (!hasConflict) {
+            for (ItemKey key : exactKeyMatches.keySet()) {
+                if (allVariantItemMatches.containsKey(key.item())) {
+                    hasConflict = true;
+                    break;
                 }
             }
-            return planIngredients(ingredients, 1, relevantSources) != null;
         }
-        return true;
+        if (!hasConflict) {
+            for (IngredientSource source : sourceMatches.keySet()) {
+                if (exactKeyMatches.containsKey(source.key())
+                        || allVariantItemMatches.containsKey(source.stack().getItem())) {
+                    hasConflict = true;
+                    break;
+                }
+            }
+        }
+        if (!hasConflict) return true;
+        for (IngredientNeed need : needs) {
+            if (!need.ingredient().representativeItemsExhaustive()) {
+                continue;
+            }
+            for (IngredientSource source : availability.matching(need.ingredient())) {
+                if (!need.ingredient().test(source.stack())) continue;
+                if (sourceMatches.merge(source, 1, Integer::sum) == 1) {
+                    relevantSources.add(source);
+                }
+            }
+        }
+        return planIngredients(ingredients, 1, relevantSources) != null;
     }
 
     private static long typedInputAvailable(
