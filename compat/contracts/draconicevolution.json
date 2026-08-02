@@ -17,6 +17,25 @@
       ],
       "station": null,
       "status": "rejected"
+    },
+    {
+      "class": "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+      "costs": [],
+      "decision": "Abstract Fusion Crafting Recipe interface exposes the live Fusion Crafting Core/injector state machine, world-dependent matching, injector charging, and completion mutation. It has no independent deterministic station contract, and binding the interface would also silently claim future implementations beyond the separately audited FusionRecipe.",
+      "evidence": [
+        "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe#public_signature",
+        "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionRecipe.java"
+      ],
+      "id": "i_fusion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
     }
   ],
   "kind": "auto_storage_compat_contract",
@@ -39,7 +58,7 @@
   "schema": 1,
   "source_audit_sha256": "623d7d58e58428a206015b56bf67387c79ff6d97f7221cff23b1dad0bed9544e",
   "source_recipe_data_sha256": "676847ff272082c64068d965b69169ce1e08bc58438e8961fad87799c0d985ab",
-  "source_recipe_inventory_sha256": "c5660e7bbb332061ed4dbc58581eec7800e00813db0c9a4a221c71716ef4e450",
+  "source_recipe_inventory_sha256": "332985b726dcb85f7aa320095e38595408094a743ddee5afdf97f1fb6d1085f3",
   "target": {
     "dependency": "maven.modrinth:draconic-evolution:lBMsiWyw",
     "display_name": "Draconic Evolution",

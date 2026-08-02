@@ -57,6 +57,24 @@
       "status": "rejected"
     },
     {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+      "costs": [],
+      "decision": "Abstract casting Recipe interface shared by the separately audited ItemCastingRecipe and BlockCastingRecipe implementations. It has no standalone serializer, recipe type, or complete output contract, while its methods require live Level and FluidStack state. Binding the interface as one family would merge distinct live casting-table and basin semantics that are already rejected.",
+      "evidence": [
+        "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe#public_signature",
+        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ICastingRecipe.java"
+      ],
+      "id": "i_casting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
       "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
       "costs": [],
       "decision": "Table casting depends on live CastingBlockEntity coolingTime, Config.foundryCoolingModifier, optional CastingRecipeEvent injection, consumeCast/mold replacement, bucket FluidUtil fill side path, and fluid normally poured from Foundry taps; no complete simulate-then-commit contract without live block state.",
@@ -116,7 +134,7 @@
   "schema": 1,
   "source_audit_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124",
   "source_recipe_data_sha256": "d3bee949a7a15e789e4f5aa5df37434cb500b0686294a40c4e354b734815a380",
-  "source_recipe_inventory_sha256": "0631b17454db762593ac5596a1b098a3aa470b06e96e4f1dd4fad30b18b74d01",
+  "source_recipe_inventory_sha256": "c8f78deabfe554ade90c23bcb2bd89b268d57262b564b8a6ab7b2dac65ebf511",
   "target": {
     "dependency": "curse.maven:productivemetalworks-1184570:7884786",
     "display_name": "Productive Metalworks",

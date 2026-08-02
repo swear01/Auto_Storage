@@ -264,6 +264,34 @@ class CompatKitAuditTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    def test_committed_current_audits_match_current_classifier(self):
+        failures = []
+        for audit_path in sorted((ROOT / "compat/audits").glob("*/*.json")):
+            audit = json.loads(audit_path.read_text())
+            if audit["scanner_format"] != self.compat_kit.SCAN_CACHE_VERSION:
+                continue
+            try:
+                self.compat_kit._validate_audit(audit)
+                contract_path = (
+                    ROOT / "compat/contracts" / f"{audit_path.parent.name}.json"
+                )
+                contract = json.loads(contract_path.read_text())
+                self.compat_kit.validate_contract(
+                    contract,
+                    require_complete=False,
+                    source_audit=audit,
+                )
+                self.assertTrue(
+                    all(
+                        family["status"] != "needs_decision"
+                        for family in contract["families"]
+                    ),
+                    contract_path,
+                )
+            except ValueError as error:
+                failures.append(f"{audit_path.relative_to(ROOT)}: {error}")
+        self.assertEqual([], failures)
+
     @staticmethod
     def signatures(class_name: str) -> str:
         signatures = {
@@ -1836,10 +1864,36 @@ class CompatKitAuditTests(unittest.TestCase):
         cached = (
             cache
             / first["artifact"]["sha256"]
-            / f"v{self.compat_kit.SCAN_CACHE_VERSION}"
+            / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )
         self.assertEqual(first, json.loads(cached.read_text()))
+
+    def test_scan_ignores_cache_from_previous_candidate_classifier(self):
+        cache = self.root / "cache"
+        artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
+        stale = (
+            cache
+            / artifact_sha
+            / f"v{self.compat_kit.SCAN_CACHE_VERSION}"
+            / "audit.json"
+        )
+        stale.parent.mkdir(parents=True)
+        stale.write_text("{}")
+
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=self.signatures,
+        )
+
+        current = (
+            cache
+            / artifact_sha
+            / self.compat_kit.SCAN_CACHE_DIRECTORY
+            / "audit.json"
+        )
+        self.assertEqual(audit, json.loads(current.read_text()))
 
     def test_scan_cache_revalidates_jdk_before_returning_cached_audit(self):
         cache = self.root / "cache"
@@ -2622,7 +2676,7 @@ class CompatKitAuditTests(unittest.TestCase):
         cached = (
             cache
             / artifact_sha
-            / f"v{self.compat_kit.SCAN_CACHE_VERSION}"
+            / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )
         cached.parent.mkdir(parents=True)

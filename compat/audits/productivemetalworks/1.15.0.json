@@ -703,6 +703,25 @@
         "source_class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe"
       },
       {
+        "class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ICastingRecipe.java\"\npublic interface cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe extends net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public abstract boolean matches(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.FluidStack, net.minecraft.world.level.Level);\n  public abstract boolean matches(net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.FluidStack, boolean, net.minecraft.world.level.Level);\n  public abstract net.minecraft.world.item.ItemStack getResultItem(net.minecraft.world.level.Level, net.neoforged.neoforge.fluids.FluidStack);\n  public abstract int getFluidAmount(net.minecraft.world.level.Level, net.neoforged.neoforge.fluids.FluidStack);\n}",
+        "source_class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe"
+      },
+      {
         "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
         "classification": {
           "evidence": [
@@ -1255,6 +1274,7 @@
         "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe: world API via cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
         "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe: world API",
         "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe: world API",
+        "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe: world API",
         "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe: world API",
         "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe: world API via cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
         "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe: world API"
@@ -1307,6 +1327,7 @@
       "src/main/java/cy/jdkdigital/productivemetalworks/recipe/BlockCastingRecipe.java",
       "src/main/java/cy/jdkdigital/productivemetalworks/recipe/EntityMeltingRecipe.java",
       "src/main/java/cy/jdkdigital/productivemetalworks/recipe/FluidAlloyingRecipe.java",
+      "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ICastingRecipe.java",
       "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemCastingRecipe.java",
       "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemMeltingRecipe.java",
       "src/main/java/cy/jdkdigital/productivemetalworks/registry/ModTags.java",
@@ -1314,7 +1335,7 @@
     ],
     "revision": "7c6483c51e1a9def633a939ea75e0018dd079ffa"
   },
-  "structural_candidate_inventory_sha256": "5e61e79d4a3778c31da983524c429cabed5e225feeaabfb033d7cb0c4413493f",
+  "structural_candidate_inventory_sha256": "32edbc9bff713271f69e1708b93066c7d2100d0f75dc6f6e4c001e987f946b21",
   "structural_class_graph": [
     {
       "class": "com.mojang.blaze3d.vertex.VertexConsumer",
@@ -3353,6 +3374,16 @@
         "evidence": [
           "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe$Serializer",
           "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
         ],
         "method": "class_hierarchy"
       }

@@ -400,6 +400,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
             "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
             "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
             "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
             "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
         }

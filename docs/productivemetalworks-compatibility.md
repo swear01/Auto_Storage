@@ -36,11 +36,12 @@ multi-version matrix.
 
 ## Audited recipe candidates
 
-Compat Kit identified five actual `Recipe` classes. Every one is rejected in
-the committed contract. Migration from the legacy audit removed 18
+Compat Kit identified five concrete `Recipe` classes plus the shared
+`ICastingRecipe` interface. Every candidate is rejected in the committed
+contract. Migration from the legacy audit removed 17
 name-shaped false positives such as datagen builders, JEI categories,
-serializers, `RecipeHelper`, `CastingRecipeEvent`, and `ICastingRecipe`; those
-are not recipe families. The five runtime recipe families are:
+serializers, `RecipeHelper`, and `CastingRecipeEvent`; those are not recipe
+families. The six runtime recipe candidates are:
 
 | Family | Result | Reason |
 |---|---|---|
@@ -49,6 +50,7 @@ are not recipe families. The five runtime recipe families are:
 | Item casting | rejected | live `CastingBlockEntity` coolingTime, `Config.foundryCoolingModifier`, optional `CastingRecipeEvent` injection, consumeCast/mold replacement, and Foundry-tap pouring |
 | Block casting | rejected | same live casting-table/basin contract as item casting |
 | Entity melting | rejected | consumes live entities; entity/world mutation |
+| `ICastingRecipe` | rejected | abstract shared interface with no standalone serializer/type/output contract; broad binding would merge the distinct live table and basin implementations |
 Typed resources were not introduced. Casting catalysts/remainders and Foundry
 fuel cannot be reduced to a simulate-then-commit plan without retained
 multiblock or live block-entity state.
