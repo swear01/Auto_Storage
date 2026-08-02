@@ -1156,6 +1156,88 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("runCompatFixtureGameTestServers", build)
         self.assertIn("compatibility-matrix-manifest.json", build)
 
+    def test_enderio_compat_is_optional_and_isolated(self):
+        build = self.read_required("build.gradle")
+        properties = self.read_required("gradle.properties")
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("enderio")
+        descriptor = json.loads(module_index)
+        module = self.read_required(
+            "src/compat/enderio/java/com/swear/autostorage/compat/"
+            "enderio/EnderioCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/enderio/java/com/swear/autostorage/compat/"
+            "enderio/EnderioCompat.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/enderIoFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required("docs/enderio-compatibility.md")
+
+        self.assertRegex(properties, r"(?m)^enderio_ci_version=Tfs8aJPH$")
+        self.assertIn(
+            "maven.modrinth:enderio:Tfs8aJPH",
+            descriptor["dependencies"],
+        )
+        self.assertNotRegex(
+            build,
+            r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:enderio:',
+        )
+        self.assert_descriptor_driven_fixture(
+            build, "enderio", "enderIoFixture", 6
+        )
+        self.assertNotIn('modId="enderio"', metadata)
+        self.assertEqual(["enderio"], descriptor["requires"])
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("EnderioCompat.register(MACHINES, RECIPES)", module)
+        self.assertNotIn("import com.enderio.enderio.", module)
+        self.assertIn("AlloySmeltingRecipe.class", compat)
+        self.assertNotIn("SagMillingRecipe.class", compat)
+        self.assertNotIn("SlicingRecipe.class", compat)
+        supports = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+boolean\s+supports\s*\(",
+            "EnderioCompat.supports",
+        )
+        self.assertIn("!recipe.output().isEmpty()", supports)
+        self.assertIn("!recipe.inputs().isEmpty()", supports)
+        self.assertNotIn(
+            "recipe.output() != null",
+            supports,
+            "AlloySmeltingRecipe codec requires output; speculative null checks are not a behavior gap",
+        )
+        self.assertNotIn(
+            "recipe.inputs() != null",
+            supports,
+            "AlloySmeltingRecipe codec requires inputs; speculative null checks are not a behavior gap",
+        )
+        self.assertIn("!keysWithoutRegistries(ingredient).isEmpty()", compat)
+        self.assertRegex(
+            compat,
+            r"StorageResourceKey\.item\(\s*"
+            r"stack\.copyWithCount\(1\),\s*registries\)\s*\)\s*"
+            r"\.distinct\(\)",
+            "keys() must distinct StorageResourceKey identities, not ItemStack identity",
+        )
+        self.assertRegex(
+            compat,
+            r"Item item = BuiltInRegistries\.ITEM\.get\(id\);\s*"
+            r"if \(item == Items\.AIR\) \{\s*"
+            r"throw new IllegalStateException\(\"Missing Ender IO station item \" \+ id\);",
+        )
+        self.assertNotRegex(
+            compat,
+            r"item\s*==\s*null\s*\|\|",
+            "BuiltInRegistries.ITEM is DefaultedRegistry; ITEM.get never returns null",
+        )
+        self.assertIn('modId="enderio"', fixture_metadata)
+        self.assertIn('versionRange="[0,)"', fixture_metadata)
+        self.assertNotIn("8.2.11-beta", fixture_metadata)
+        self.assertIn("representative CI artifact", compatibility_doc)
+        self.assertIn("not an exact player", compatibility_doc)
+        self.assertIn("dependency pin", compatibility_doc)
+
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")

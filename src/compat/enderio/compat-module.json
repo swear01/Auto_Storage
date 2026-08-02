@@ -1,0 +1,45 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:enderio:Tfs8aJPH",
+    "sha256": "e01af48907781f2d5ccdfa8d71975b611c33f295be11b7021cb91be06ce8070c"
+  },
+  "dependencies": [
+    "maven.modrinth:enderio:Tfs8aJPH"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.enderio.EnderioCompatModule",
+  "expectedTests": 6,
+  "fixture": "enderIoFixture",
+  "id": "auto_storage:enderio",
+  "matrix": {
+    "acceptedRecipes": [
+      "enderio:alloy_smelting/conductive_alloy_ingot"
+    ],
+    "descriptors": [
+      "auto_storage:enderio_alloy_smelting"
+    ],
+    "mods": [
+      "enderio"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "enderio"
+      ],
+      "sha256": "c53c5379aebbfa7d7c12bc307218a06582c7f48d97433521cfd98a7cf4311a09"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "enderio"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:enderio:Tfs8aJPH"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatEnderio"
+}

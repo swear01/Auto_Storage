@@ -3857,6 +3857,25 @@
         },
         "public_signature": "Compiled from \"FusionRecipe.java\"\npublic class com.brandon3055.draconicevolution.api.crafting.FusionRecipe implements com.brandon3055.draconicevolution.api.crafting.IFusionRecipe {\n  public com.brandon3055.draconicevolution.api.crafting.FusionRecipe(net.minecraft.world.item.ItemStack, net.minecraft.world.item.crafting.Ingredient, long, com.brandon3055.brandonscore.api.TechLevel, java.util.List<com.brandon3055.draconicevolution.api.crafting.FusionRecipe$FusionIngredient>);\n  public com.brandon3055.brandonscore.api.TechLevel getRecipeTier();\n  public long getEnergyCost();\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public java.util.List<com.brandon3055.draconicevolution.api.crafting.IFusionRecipe$IFusionIngredient> fusionIngredients();\n  public net.minecraft.world.item.crafting.Ingredient getCatalyst();\n  public net.minecraft.world.item.ItemStack assemble(com.brandon3055.draconicevolution.api.crafting.IFusionInventory, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n}",
         "source_class": "com.brandon3055.draconicevolution.api.crafting.FusionRecipe"
+      },
+      {
+        "class": "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+        "classification": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"IFusionRecipe.java\"\npublic interface com.brandon3055.draconicevolution.api.crafting.IFusionRecipe extends net.minecraft.world.item.crafting.Recipe<com.brandon3055.draconicevolution.api.crafting.IFusionInventory> {\n  public default net.minecraft.world.item.ItemStack getToastSymbol();\n  public default net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public abstract com.brandon3055.brandonscore.api.TechLevel getRecipeTier();\n  public abstract long getEnergyCost();\n  public default net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public abstract java.util.List<com.brandon3055.draconicevolution.api.crafting.IFusionRecipe$IFusionIngredient> fusionIngredients();\n  public abstract net.minecraft.world.item.crafting.Ingredient getCatalyst();\n  public default boolean matches(com.brandon3055.draconicevolution.api.crafting.IFusionInventory, net.minecraft.world.level.Level);\n  public default void tickFusionState(com.brandon3055.draconicevolution.api.crafting.IFusionStateMachine, com.brandon3055.draconicevolution.api.crafting.IFusionInventory, net.minecraft.world.level.Level);\n  public static void completeCraft(com.brandon3055.draconicevolution.api.crafting.IFusionInventory, net.minecraft.world.level.Level, com.brandon3055.draconicevolution.api.crafting.IFusionRecipe);\n  public default boolean canStartCraft(com.brandon3055.draconicevolution.api.crafting.IFusionInventory, net.minecraft.world.level.Level, java.util.function.Consumer<net.minecraft.network.chat.Component>);\n  public default boolean canCraftInDimensions(int, int);\n  public default boolean isSpecial();\n  public default boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}",
+        "source_class": "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe"
       }
     ],
     "recipe_serializers": [
@@ -4607,14 +4626,16 @@
       "disposition": "needs_decision",
       "evidence": [
         "com.brandon3055.draconicevolution.api.crafting.FusionRecipe#getIngredients",
-        "com.brandon3055.draconicevolution.api.crafting.FusionRecipe#getIngredients via com.brandon3055.draconicevolution.api.crafting.IFusionRecipe"
+        "com.brandon3055.draconicevolution.api.crafting.FusionRecipe#getIngredients via com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+        "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe#getIngredients"
       ]
     },
     {
       "code": "world_mutation",
       "disposition": "needs_decision",
       "evidence": [
-        "com.brandon3055.draconicevolution.api.crafting.FusionRecipe: world API via com.brandon3055.draconicevolution.api.crafting.IFusionRecipe"
+        "com.brandon3055.draconicevolution.api.crafting.FusionRecipe: world API via com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+        "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe: world API"
       ]
     }
   ],
@@ -4623,6 +4644,7 @@
   "source": {
     "files": [
       "src/main/java/com/brandon3055/draconicevolution/api/crafting/FusionRecipe.java",
+      "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionRecipe.java",
       "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionStateMachine.java",
       "src/main/java/com/brandon3055/draconicevolution/api/energy/ICrystalBinder.java",
       "src/main/java/com/brandon3055/draconicevolution/api/energy/ICrystalLink.java",
@@ -4851,7 +4873,7 @@
     ],
     "revision": "d297c2657cefa6ac2af19a96ee12a51ab07d36f5"
   },
-  "structural_candidate_inventory_sha256": "c871f6eca2dd164c8f1a9433bf8c5ae5ffbfa3c90801611451b377e6b7bc4077",
+  "structural_candidate_inventory_sha256": "d80cf8ee614ec83b30ca17d21afd0dc90707fa82c23e2379f6c2389787d27e0c",
   "structural_class_graph": [
     {
       "class": "codechicken.lib.datagen.DynamicTextureProvider",
@@ -12900,6 +12922,16 @@
         "evidence": [
           "com.brandon3055.draconicevolution.api.crafting.FusionRecipe$Serializer",
           "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+      "classification": {
+        "evidence": [
+          "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
         ],
         "method": "class_hierarchy"
       }

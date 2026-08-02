@@ -1,0 +1,16 @@
+{
+  "type": "enderio:alloy_smelting",
+  "energy": 1500,
+  "experience": 0.7,
+  "inputs": [
+    {
+      "count": 1,
+      "item": "minecraft:iron_ore"
+    }
+  ],
+  "is_smelting": true,
+  "output": {
+    "count": 1,
+    "id": "minecraft:iron_ingot"
+  }
+}

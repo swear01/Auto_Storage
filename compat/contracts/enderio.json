@@ -1,0 +1,433 @@
+{
+  "families": [
+    {
+      "class": "com.enderio.enderio.compat.jei_machines_to_merge.util.WrappedEnchanterRecipe",
+      "costs": [],
+      "decision": "JEI wrapper around EnchanterRecipe; rejected with the enchanter family.",
+      "evidence": [
+        "com.enderio.enderio.compat.jei_machines_to_merge.util.WrappedEnchanterRecipe#public_signature"
+      ],
+      "id": "wrapped_enchanter_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.enchanter.EnchanterRecipe",
+      "costs": [],
+      "decision": "Special recipe with empty static result, player XP cost, and input-count-dependent enchantment level.",
+      "evidence": [
+        "com.enderio.enderio.content.enchanter.EnchanterRecipe#public_signature"
+      ],
+      "id": "enchanter_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe",
+      "costs": [],
+      "decision": "World fire-crafting with chance/min-max counts, dimension filters, and block-after-burning world mutation.",
+      "evidence": [
+        "com.enderio.enderio.content.fire_crafting.FireCraftingRecipe#public_signature"
+      ],
+      "id": "fire_crafting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.alloy.AlloySmeltingRecipe",
+      "costs": [
+        {
+          "amount": "recipe.energy",
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": "recipe.energy",
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept exact non-smelting AlloySmeltingRecipe holders when every SizedIngredient expands to nonempty simple item alternatives, energy is positive, and output is non-empty. Reject is_smelting vanilla-batch recipes. Consume each sized input, exact NeoForge Energy equal to recipe.energy, and matching station work. Station rate uses loaded Alloy Smelter base usage under Basic Capacitor level 1 (usage*1^2); higher capacitors, loot capacitors, machine mode, and unused experience are not inferred.",
+      "evidence": [
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#inputs",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#output",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#energy",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#isSmelting",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmeltingRecipe.java#craft",
+        "enderio/src/main/java/com/enderio/enderio/content/machines/alloy/AlloySmelterBlockEntity.java#TODO: Award XP",
+        "enderio/src/main/java/com/enderio/enderio/foundation/task/PoweredCraftingMachineTask.java#getProgressRequired",
+        "enderio/src/main/java/com/enderio/enderio/config/machines/common/EnergyConfig.java#ALLOY_SMELTER_USAGE",
+        "enderio/src/main/java/com/enderio/enderio/init/EIOItems.java#BASIC_CAPACITOR",
+        "enderio/src/main/java/com/enderio/enderio/api/capacitor/QuadraticScalable.java#scale",
+        "enderio/src/main/java/com/enderio/enderio/init/EIORecipes.java#ALLOY_SMELTING",
+        "enderio/src/datagen/java/com/enderio/enderio/datagen/client/EIOLanguageProvider.java#ALLOY_SMELTING_TITLE"
+      ],
+      "id": "alloy_smelting_recipe",
+      "inputs": [
+        {
+          "amount": "recipe.inputs[i].count",
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.inputs[i].ingredient alternatives"
+        },
+        {
+          "amount": "recipe.energy",
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "auto_storage:neoforge_energy"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.output.count",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.output"
+        }
+      ],
+      "recipe_type": "enderio:alloy_smelting",
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:enderio_alloy_smelting",
+        "variants": [
+          {
+            "bounds": "plain alloy_smelter item; rate assumes required Basic Capacitor level 1 (config usage * 1^2); higher/loot capacitors and machine mode are not inferred",
+            "item": "enderio:alloy_smelter",
+            "rate": {
+              "denominator": 1,
+              "numerator": 20
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe",
+      "costs": [],
+      "decision": "Produces no item/fluid output and mutates world weather state.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.obelisks.weather.WeatherChangeRecipe#public_signature"
+      ],
+      "id": "weather_change_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.painting.PaintingRecipe",
+      "costs": [],
+      "decision": "Output paint component depends on a live paint-block input and assemble returns null; not a fixed deterministic result.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.painting.PaintingRecipe#public_signature"
+      ],
+      "id": "painting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe",
+      "costs": [],
+      "decision": "Uses Random chance/bonus outputs and grinding-ball live multipliers; nondeterministic.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.sag_mill.SagMillingRecipe#public_signature"
+      ],
+      "id": "sag_milling_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.slicer.SlicingRecipe",
+      "costs": [],
+      "decision": "Slice and Splice damages axe/shears durability; tool durability mutation is outside the retained-tool contract.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.slicer.SlicingRecipe#public_signature"
+      ],
+      "id": "slicing_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe",
+      "costs": [],
+      "decision": "Requires soul-bound vial capability, entity-type/soul-data matching, and experience-fluid level conversion.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.soul_binder.SoulBindingRecipe#public_signature"
+      ],
+      "id": "soul_binding_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.machines.vat.FermentingRecipe",
+      "costs": [],
+      "decision": "Fluid output amount is scaled by live VatReagent item data-map modifiers.",
+      "evidence": [
+        "com.enderio.enderio.content.machines.vat.FermentingRecipe#public_signature"
+      ],
+      "id": "fermenting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.content.storage.fluid_tank.TankRecipe",
+      "costs": [],
+      "decision": "Mutates a live MachineFluidTank via fill/drain simulation against retained tank state.",
+      "evidence": [
+        "com.enderio.enderio.content.storage.fluid_tank.TankRecipe#public_signature"
+      ],
+      "id": "tank_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "live_machine_state",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.MachineRecipe",
+      "costs": [],
+      "decision": "Shared MachineRecipe interface; not an exact recipe class/type family.",
+      "evidence": [
+        "com.enderio.enderio.foundation.MachineRecipe#public_signature"
+      ],
+      "id": "machine_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.enderio.enderio.foundation.soul.ShapedEntityStorageRecipe",
+      "costs": [],
+      "decision": "Wrapped crafting recipe that copies live soul-bindable capability state into the result.",
+      "evidence": [
+        "com.enderio.enderio.foundation.soul.ShapedEntityStorageRecipe#public_signature"
+      ],
+      "id": "shaped_entity_storage_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [
+      "enderio:alloy_smelting/conductive_alloy_ingot"
+    ],
+    "descriptors": [
+      "auto_storage:enderio_alloy_smelting"
+    ],
+    "mods": [
+      "enderio"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "enderio"
+      ],
+      "sha256": "c53c5379aebbfa7d7c12bc307218a06582c7f48d97433521cfd98a7cf4311a09"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "e01af48907781f2d5ccdfa8d71975b611c33f295be11b7021cb91be06ce8070c",
+  "source_recipe_data_sha256": "3caf8660ef7c21a33091e5de301702d6eb8acb2f7be8e324932014a825994c84",
+  "source_recipe_inventory_sha256": "674f3b265288c61de9b091846307d327ffbdd6aa92b938ec097f40264c46b6d1",
+  "target": {
+    "dependency": "maven.modrinth:enderio:Tfs8aJPH",
+    "display_name": "Ender IO",
+    "mod_id": "enderio",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [],
+    "version": "8.2.11-beta"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Ender IO Alloy Smelting catalyst/tool/remainder behavior was incorrect",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Long.MAX_VALUE",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Ender IO full destination transaction was not an atomic no-op",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Ender IO missing-ingredient transaction was not an atomic no-op",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Ender IO Alloy Smelting registration or rejection boundary was incorrect",
+          "source": "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java",
+          "task": "runEnderIoGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 6,
+    "fixture": "enderIoFixture",
+    "game_test_task": "runEnderIoGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runEnderIoGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

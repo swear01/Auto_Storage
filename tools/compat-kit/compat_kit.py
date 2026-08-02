@@ -22,6 +22,10 @@ from pathlib import Path
 
 SCHEMA_VERSION = 1
 SCAN_CACHE_VERSION = 16
+CANDIDATE_CLASSIFIER_VERSION = 2
+SCAN_CACHE_DIRECTORY = (
+    f"v{SCAN_CACHE_VERSION}-classifier-{CANDIDATE_CLASSIFIER_VERSION}"
+)
 LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13, 14, 15})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
@@ -1187,18 +1191,24 @@ def _classify_candidate(
 ) -> tuple[str, dict] | None:
     metadata = metadata_by_class.get(class_name)
     if metadata is not None:
-        concrete = metadata["access_flags"] & (0x0200 | 0x0400) == 0
-        if concrete:
+        access_flags = metadata["access_flags"]
+        is_interface = access_flags & 0x0200 != 0
+        concrete = access_flags & (0x0200 | 0x0400) == 0
+        if concrete or is_interface:
             recipe_path = _inheritance_path(
                 class_name,
                 RECIPE_INTERFACE,
                 metadata_by_class,
             )
-            if recipe_path is not None:
+            if (
+                recipe_path is not None
+                and class_name != RECIPE_INTERFACE
+            ):
                 return "recipe_classes", {
                     "method": "class_hierarchy",
                     "evidence": recipe_path,
                 }
+        if concrete:
             serializer_path = _inheritance_path(
                 class_name,
                 RECIPE_SERIALIZER_INTERFACE,
@@ -3397,7 +3407,7 @@ def scan_jar(
             cache_path = (
                 Path(cache_dir)
                 / cache_identity
-                / f"v{SCAN_CACHE_VERSION}"
+                / SCAN_CACHE_DIRECTORY
                 / "audit.json"
             )
             cache_jdk_path = cache_path.with_name("jdk-toolchain.json")
