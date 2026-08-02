@@ -67,9 +67,10 @@ Representative datapack inventory in the audited jar: 39
 shaped/shapeless/smelting recipes under the `draconicevolution` namespace.
 The matrix locks those 179 live IDs with SHA-256
 `3044e680f5bb1cc4ad408af81aa53d54ba3e2a82dc656ec4da67a57dca58f5c6`.
-The fifteen-mod compatibility matrix loads `12,916` total recipes after loading
-the representative DE jar with Brandon's Core and CodeChicken Lib (+180 versus
-the prior fourteen-mod `12,736` baseline). The additional recipe is Industrial
+The current combined compatibility matrix loads `13,067` total recipes after
+loading merged Advanced AE, merged Create Aquatic Ambitions, and the
+representative DE jar with Brandon's Core and CodeChicken Lib (+180 versus the
+current-main `12,887` baseline). The additional recipe is Industrial
 Foregoing's conditional
 `industrialforegoing:laser_drill_ore/ores/draconium`, enabled when Draconic
 Evolution makes `c:ores/draconium` nonempty; the Industrial Foregoing namespace
