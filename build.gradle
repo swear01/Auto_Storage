@@ -784,6 +784,7 @@ tasks.register("stageAe2CompatAuditAncestry") {
                 "ae2-audit-canonical")
         canonicalRoot.deleteDir()
         canonicalRoot.mkdirs()
+        def observedCanonical = []
         compatKitMinecraftArtifacts.files
                 .findAll { it.isFile() && it.name.endsWith(".jar") }
                 .sort { left, right ->
@@ -816,6 +817,7 @@ tasks.register("stageAe2CompatAuditAncestry") {
                         }
                     }
                     def identity = "${digest.digest().encodeHex().toString()}:${canonical.length()}"
+                    observedCanonical.add("${identity}=${artifact.name}")
                     if (expected.containsKey(identity)) {
                         matches[identity] = canonical
                     }
@@ -824,7 +826,11 @@ tasks.register("stageAe2CompatAuditAncestry") {
         if (!missing.isEmpty()) {
             throw new GradleException(
                     "AE2 audit ancestry is unresolved: "
-                            + missing.toList().sort().join(", "))
+                            + missing.toList().sort().join(", ")
+                            + "; observed ModDev canonical artifacts: "
+                            + (observedCanonical
+                                    ? observedCanonical.sort().join(", ")
+                                    : "<none>"))
         }
         def outputDir = outputs.files.files.find {
             it.name == "ae2-audit-optional-ancestry"

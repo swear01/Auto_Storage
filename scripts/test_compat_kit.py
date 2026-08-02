@@ -6374,6 +6374,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn("configurations.additionalRuntimeClasspath", build)
         self.assertIn('tasks.named("createMinecraftArtifacts")', build)
         self.assertIn("compatKitNormalizeJar", build)
+        self.assertIn("observedCanonical", build)
+        self.assertIn("observed ModDev canonical artifacts", build)
         self.assertIn('"normalize-jar"', build)
         self.assertIn(
             'def command = [\n        "python3",\n'

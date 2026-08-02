@@ -1057,6 +1057,8 @@ class StaticRegressionTests(unittest.TestCase):
             stage_block,
         )
         self.assertIn("ae2-audit-canonical", stage_block)
+        self.assertIn("observedCanonical", stage_block)
+        self.assertIn("observed ModDev canonical artifacts", stage_block)
         self.assertIn(
             'digest.digest().encodeHex().toString()',
             stage_block,
@@ -1069,6 +1071,8 @@ class StaticRegressionTests(unittest.TestCase):
         stage = "./gradlew stageAe2CompatAuditAncestry"
         tests = "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts"
         self.assertIn(stage, workflow)
+        self.assertEqual(1, workflow.count(stage))
+        self.assertLess(workflow.index(stage), workflow.index("./gradlew runGameTestServer"))
         self.assertLess(workflow.index(stage), workflow.index(tests))
 
     def test_build_script_uses_gradle_10_safe_repository_url_assignment(self):

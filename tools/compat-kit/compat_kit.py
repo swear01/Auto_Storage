@@ -4985,6 +4985,7 @@ def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArti
                 temporaryDir,
                 "compat-kit-canonical-platform")
         canonicalRoot.deleteDir()
+        def observedCanonical = []
         compatKitMinecraftArtifacts.files
                 .findAll {{ it.isFile() && it.name.endsWith(".jar") }}
                 .sort {{ left, right ->
@@ -4996,6 +4997,8 @@ def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArti
                             new File(canonicalRoot, index + ".jar"))
                     def size = canonical.length()
                     def sha256 = compatKitSha256(canonical)
+                    observedCanonical.add(
+                            sha256 + ":" + size + "=" + artifact.name)
                     def expected = expectedBySha256[sha256]
                     if (expected != null && expected.size == size) {{
                         matches[sha256] = canonical
@@ -5005,7 +5008,11 @@ def stageCompatKitAncestryArtifacts = tasks.register("stageCompatKitAncestryArti
         if (!missing.isEmpty()) {{
             throw new GradleException(
                     "Compat Kit exact ancestry artifacts are unresolved: "
-                    + missing.toList().sort().join(", "))
+                    + missing.toList().sort().join(", ")
+                    + "; observed ModDev canonical artifacts: "
+                    + (observedCanonical
+                            ? observedCanonical.sort().join(", ")
+                            : "<none>"))
         }}
         def stagedRoot = stagedCompatKitAncestryArtifacts.get().asFile
         project.delete(stagedRoot)

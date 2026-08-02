@@ -50,6 +50,11 @@ jobs:
           ./gradlew compileJava -Pemi_version="$MIN_EMI" -Pemi_runtime_version="$MIN_EMI_RUNTIME" --console=plain --no-daemon 2>&1 | tee build/ci-logs/emi-minimum.log
           ./gradlew compileJava -Pemi_version="$LATEST_EMI" -Pemi_runtime_version="$LATEST_EMI_RUNTIME" --rerun-tasks --console=plain --no-daemon 2>&1 | tee build/ci-logs/emi-latest.log
 
+      - name: Verify AE2 audit ancestry
+        run: |
+          set -o pipefail
+          ./gradlew stageAe2CompatAuditAncestry --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-audit-ancestry.log
+
       - name: Run GameTest server
         run: |
           set -o pipefail
@@ -155,7 +160,6 @@ jobs:
       - name: Run script tests
         run: |
           set -o pipefail
-          ./gradlew stageAe2CompatAuditAncestry --console=plain --no-daemon 2>&1 | tee build/ci-logs/ae2-audit-ancestry.log
           PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts 2>&1 | tee build/ci-logs/python-unittest.log
 
       - name: Check datagen drift
