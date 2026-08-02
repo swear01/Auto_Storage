@@ -96,7 +96,7 @@ development artifact reproduces the scanner's canonical archive. Build that
 scanner input with `compat-kit normalize-jar <raw.jar> <canonical.jar>` because
 raw ModDev ZIP metadata is not cross-run stable; generated staging repeats the
 sorted, fixed-timestamp, stored-entry normalization only for ModDev outputs.
-Maven artifacts remain raw exact bytes. Scanner-format-16
+Maven artifacts remain raw exact bytes. Scanner-format-16 and later
 `ancestry_dependencies` are emitted
 automatically as non-transitive `compileOnly` and
 `compatKitAncestryArtifacts` declarations in independent addons, and as
@@ -123,7 +123,8 @@ bypass missing classpath evidence. It uses class-file `SourceFile`,
 classes. Thus a top-level or source-addressable named class whose identifier
 contains `$` remains auditable while local, anonymous, and synthetic classes
 stay excluded. A named class under an excluded owner is also excluded rather
-than assigned a source-level owner derived from its binary name. When
+than assigned a source-level owner derived from its binary name. Owner-chain
+inspection is iterative, archive-memoized, and limited to 1,024 levels. When
 `SourceFile` is absent, a supplied source checkout fails as unavailable rather
 than guessing a same-named compilation unit. Format 15 stores binary and
 source-level Java names, each candidate's structural
@@ -136,7 +137,7 @@ bypass review. Generated Java uses
 the source-level name for source-addressable nested classes and preserves legal
 top-level `$` identifiers. Direct public
 `extends`/`implements` declarations provide a second bucket cross-check;
-generic type bounds do not count as direct ancestry. Legacy formats 7 through 15
+generic type bounds do not count as direct ancestry. Legacy formats 7 through 16
 must be rescanned with `migrate-audit`. A class name that normalizes to no
 alphanumeric family ID uses deterministic `class_<binary-name-hex>` evidence.
 Explicit `--data-root` evidence binds all bounded tag JSON and bounded

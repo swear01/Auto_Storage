@@ -168,8 +168,8 @@ the selected JDK 21 installation, release version, module-file identity, and
 the resolved `javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `16` with candidate classifier `3`; formats `7`
-through `15` remain readable
+current scanner format is `17` with candidate classifier `3`; formats `7`
+through `16` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit plus the exact target jar; only explicit migration paths
@@ -216,7 +216,9 @@ every class carrying the JVM
 `ACC_SYNTHETIC` access flag are excluded. A named class whose ownership chain
 passes through any of those excluded classes is also excluded: a binary name
 such as `Outer$1$Key` has no truthful source-level owner, so the scanner never
-reinterprets it as a top-level `$` identifier or invents a source name.
+reinterprets it as a top-level `$` identifier or invents a source name. Owner
+inspection is iterative, memoized once per archive, and fails if a chain exceeds
+1,024 levels instead of relying on Python recursion or reparsing every ancestor.
 If a classified class has no `SourceFile` attribute and `--source` was
 supplied, scanning fails with an unavailable source mapping; it never guesses
 that a package-private binary class lives in a same-named source file.
@@ -243,7 +245,7 @@ candidates, so risk cannot be detached from the class under review.
 
 Recipe interfaces that structurally extend `Recipe` classify as `recipe_classes` before station/resource name terms; abstract non-interface bases remain concrete-gated. Otherwise public-signature validation rejects the audit.
 
-Legacy format-7 through format-15 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
+Legacy format-7 through format-16 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
 
 ```bash
 tools/compat-kit/compat-kit migrate-audit \
@@ -864,7 +866,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-16 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-17 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification retains 13 reachable ancestry jars and seven exact
 non-transitive compile coordinates, then finds twelve

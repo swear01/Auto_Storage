@@ -44,7 +44,7 @@ schema-validated before reuse. Complete consumers reject legacy scanner
 formats and require the exact target jar so they can rehash it, rebuild the
 complete sorted class/metadata inventory, derive nested source names from exact
 class metadata, and recompute private-bytecode risk evidence; only explicit migration commands may
-read formats 7 through 15. Complete consumers also rebuild the target jar's
+read formats 7 through 16. Complete consumers also rebuild the target jar's
 recipe source count; when it is the only recipe-data source, the complete
 effective inventory, serializer summary, overrides, and digest must match the
 reopened jar.
@@ -97,7 +97,7 @@ the same bytes are used for validation, parsing, and hashing. Ordered roots
 are inventoried again after source evidence is built and immediately before a
 scan can cache or return, so a persistent in-flight change fails instead of
 producing mixed evidence. Legacy
-formats 7 through 15 remain readable for explicit migration, but current-only
+formats 7 through 16 remain readable for explicit migration, but current-only
 commands reject them. Format 16 stores each candidate's binary and source-level
 Java names, structural classification, a separate sorted top-level
 `structural_hierarchy` inventory, and an artifact/classpath-bound structural
@@ -115,7 +115,7 @@ interface implementation, rather than only the first path from a concrete
 recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
-explicitly rescan an exact format-7 through format-15 artifact;
+explicitly rescan an exact format-7 through format-16 artifact;
 identity or SHA drift fails.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
@@ -298,7 +298,7 @@ dependencies are non-transitive, and evidence task names are never remapped.
 every audited ancestry jar. Generated and example GitHub Actions workflows pass
 both the target to `verify --jar` and every staged ancestry jar through
 repeatable `--classpath` rather than trusting only the committed audit.
-Scanner-format-16 `ancestry_dependencies` make the generated build emit exact
+Scanner-format-16 and later `ancestry_dependencies` make the generated build emit exact
 non-transitive `compileOnly` and `compatKitAncestryArtifacts` coordinates;
 bundled descriptors likewise include every reachable audited ancestry
 coordinate as a descriptor-owned compile dependency instead of relying on

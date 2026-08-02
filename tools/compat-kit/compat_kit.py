@@ -21,12 +21,12 @@ from pathlib import Path
 
 
 SCHEMA_VERSION = 1
-SCAN_CACHE_VERSION = 16
+SCAN_CACHE_VERSION = 17
 CANDIDATE_CLASSIFIER_VERSION = 3
 SCAN_CACHE_DIRECTORY = (
     f"v{SCAN_CACHE_VERSION}-classifier-{CANDIDATE_CLASSIFIER_VERSION}"
 )
-LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13, 14, 15})
+LEGACY_SCAN_CACHE_VERSIONS = frozenset({7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
 MAX_JAR_BYTES = 512 * 1024 * 1024
 MAX_ARCHIVE_ENTRIES = 100_000
 MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
@@ -35,6 +35,7 @@ MAX_CLASS_BYTES = 16 * 1024 * 1024
 MAX_CLASSPATH_JARS = 128
 MAX_CLASSPATH_CLASSES = 200_000
 MAX_CANDIDATE_CLASSES = 2_000
+MAX_NESTED_CLASS_OWNER_DEPTH = 1_024
 MAX_SIGNATURE_BYTES = 256 * 1024
 MAX_PRIVATE_BYTECODE_BYTES = 1024 * 1024
 MAX_SOURCE_FILES = 10_000
@@ -816,50 +817,72 @@ def _class_access_flags(payload: bytes, entry_name: str) -> int:
 def _is_inspectable_class(
     archive: zipfile.ZipFile,
     entry_name: str,
-    ancestry: tuple[str, ...] = (),
+    *,
+    inspectable_cache: dict[str, bool] | None = None,
 ) -> bool:
-    if (
-        entry_name.startswith("META-INF/versions/")
-        or not entry_name.endswith(".class")
-        or entry_name.endswith("module-info.class")
-    ):
-        return False
-    entry = archive.getinfo(entry_name)
-    if entry.file_size > MAX_CLASS_BYTES:
-        raise ValueError(
-            f"class entry exceeds {MAX_CLASS_BYTES} bytes: {entry_name}"
-        )
-    metadata = _class_metadata(archive.read(entry_name), entry_name)
-    if metadata is None:
-        nested_segments = _class_name(entry_name).split("$")[1:]
-        return all(
-            re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
-            for segment in nested_segments
-        )
-    if (
-        metadata["access_flags"] & 0x1000
-        or metadata["enclosing_method"]
-        or (
-            metadata["inner_class_entry"]
-            and metadata["inner_name"] is None
-        )
-    ):
-        return False
-    outer_class = metadata.get("outer_class")
-    if not metadata["inner_class_entry"] or outer_class is None:
-        return True
-    outer_entry = outer_class.replace(".", "/") + ".class"
-    if outer_entry in ancestry:
-        raise ValueError("nested class ownership contains a cycle: " + entry_name)
-    try:
-        archive.getinfo(outer_entry)
-    except KeyError:
-        return True
-    return _is_inspectable_class(
-        archive,
-        outer_entry,
-        ancestry + (entry_name,),
-    )
+    cache = inspectable_cache if inspectable_cache is not None else {}
+    if entry_name in cache:
+        return cache[entry_name]
+    pending = []
+    pending_set = set()
+    current_entry = entry_name
+    while current_entry not in cache:
+        if current_entry in pending_set:
+            raise ValueError(
+                "nested class ownership contains a cycle: " + entry_name
+            )
+        if (
+            current_entry.startswith("META-INF/versions/")
+            or not current_entry.endswith(".class")
+            or current_entry.endswith("module-info.class")
+        ):
+            cache[current_entry] = False
+            break
+        entry = archive.getinfo(current_entry)
+        if entry.file_size > MAX_CLASS_BYTES:
+            raise ValueError(
+                f"class entry exceeds {MAX_CLASS_BYTES} bytes: {current_entry}"
+            )
+        metadata = _class_metadata(archive.read(current_entry), current_entry)
+        if metadata is None:
+            nested_segments = _class_name(current_entry).split("$")[1:]
+            cache[current_entry] = all(
+                re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
+                for segment in nested_segments
+            )
+            break
+        if (
+            metadata["access_flags"] & 0x1000
+            or metadata["enclosing_method"]
+            or (
+                metadata["inner_class_entry"]
+                and metadata["inner_name"] is None
+            )
+        ):
+            cache[current_entry] = False
+            break
+        outer_class = metadata.get("outer_class")
+        if not metadata["inner_class_entry"] or outer_class is None:
+            cache[current_entry] = True
+            break
+        outer_entry = outer_class.replace(".", "/") + ".class"
+        try:
+            archive.getinfo(outer_entry)
+        except KeyError:
+            cache[current_entry] = True
+            break
+        if len(pending) >= MAX_NESTED_CLASS_OWNER_DEPTH:
+            raise ValueError(
+                "nested class ownership exceeds "
+                f"{MAX_NESTED_CLASS_OWNER_DEPTH} levels: {entry_name}"
+            )
+        pending.append(current_entry)
+        pending_set.add(current_entry)
+        current_entry = outer_entry
+    inspectable = cache[current_entry]
+    for nested_entry in reversed(pending):
+        cache[nested_entry] = inspectable
+    return cache[entry_name]
 
 
 def _classpath_metadata(paths) -> tuple[
@@ -894,8 +917,13 @@ def _classpath_metadata(paths) -> tuple[
         seen_artifacts.add(identity)
         with zipfile.ZipFile(path) as archive:
             _validate_archive(path, archive)
+            inspectable_cache = {}
             for entry_name in sorted(archive.namelist()):
-                if not _is_inspectable_class(archive, entry_name):
+                if not _is_inspectable_class(
+                    archive,
+                    entry_name,
+                    inspectable_cache=inspectable_cache,
+                ):
                     continue
                 class_count += 1
                 if class_count > MAX_CLASSPATH_CLASSES:
@@ -2576,7 +2604,7 @@ def _validate_audit(audit: dict):
     structural_inventory_sha256 = audit.get(
         "structural_candidate_inventory_sha256"
     )
-    if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
+    if scanner_format in {13, 14, 15, 16, SCAN_CACHE_VERSION}:
         if not isinstance(structural_inventory_sha256, str) or not re.fullmatch(
             r"[0-9a-f]{64}",
             structural_inventory_sha256,
@@ -2611,7 +2639,7 @@ def _validate_audit(audit: dict):
 
     artifact = audit["artifact"]
     artifact_keys = {"sha256", "size"}
-    if scanner_format in {15, SCAN_CACHE_VERSION}:
+    if scanner_format in {15, 16, SCAN_CACHE_VERSION}:
         artifact_keys.update({"class_count", "class_inventory_sha256"})
     if not isinstance(artifact, dict) or set(artifact) != artifact_keys:
         raise ValueError(
@@ -2628,7 +2656,7 @@ def _validate_audit(audit: dict):
         or artifact["size"] <= 0
     ):
         raise ValueError("audit artifact size must be a positive integer")
-    if scanner_format in {15, SCAN_CACHE_VERSION}:
+    if scanner_format in {15, 16, SCAN_CACHE_VERSION}:
         if (
             isinstance(artifact["class_count"], bool)
             or not isinstance(artifact["class_count"], int)
@@ -2683,7 +2711,7 @@ def _validate_audit(audit: dict):
     elif "ancestry_classpath" in audit:
         raise ValueError("legacy audit must not contain ancestry_classpath")
 
-    if scanner_format == SCAN_CACHE_VERSION:
+    if scanner_format in {16, SCAN_CACHE_VERSION}:
         ancestry_dependencies = audit.get("ancestry_dependencies")
         if not isinstance(ancestry_dependencies, list):
             raise ValueError("audit is missing ancestry_dependencies")
@@ -2750,7 +2778,7 @@ def _validate_audit(audit: dict):
             "legacy audit must not contain ancestry_dependencies"
         )
 
-    if scanner_format in {14, 15, SCAN_CACHE_VERSION}:
+    if scanner_format in {14, 15, 16, SCAN_CACHE_VERSION}:
         if "structural_class_graph" not in audit:
             raise ValueError("audit is missing structural_class_graph")
         structural_class_graph = audit["structural_class_graph"]
@@ -2792,7 +2820,7 @@ def _validate_audit(audit: dict):
     if scanner_format == 7 and "recipe_data" in audit:
         raise ValueError("legacy audit must not contain recipe_data")
 
-    if scanner_format in {10, 11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, 14, 15, 16, SCAN_CACHE_VERSION}:
         if "structural_hierarchy" not in audit:
             raise ValueError("audit is missing structural_hierarchy")
         structural_hierarchy = _validate_structural_hierarchy(
@@ -2828,9 +2856,9 @@ def _validate_audit(audit: dict):
             record_keys = {"class", "public_signature"}
             if scanner_format != 7:
                 record_keys.add("classification")
-            if scanner_format in {9, 11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
+            if scanner_format in {9, 11, 12, 13, 14, 15, 16, SCAN_CACHE_VERSION}:
                 record_keys.add("hierarchy")
-            if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
+            if scanner_format in {13, 14, 15, 16, SCAN_CACHE_VERSION}:
                 record_keys.add("source_class")
             if not isinstance(record, dict) or set(record) != record_keys:
                 raise ValueError(
@@ -2847,7 +2875,7 @@ def _validate_audit(audit: dict):
                 or not record["public_signature"].strip()
             ):
                 raise ValueError(f"{location} has empty public_signature")
-            if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
+            if scanner_format in {13, 14, 15, 16, SCAN_CACHE_VERSION}:
                 _validate_candidate_source_class(
                     class_name,
                     record["source_class"],
@@ -2878,7 +2906,7 @@ def _validate_audit(audit: dict):
                         record["public_signature"],
                         location,
                     )
-                elif scanner_format in {11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
+                elif scanner_format in {11, 12, 13, 14, 15, 16, SCAN_CACHE_VERSION}:
                     candidate_hierarchy = record["hierarchy"]
                     persisted_hierarchy = structural_hierarchy.get(class_name)
                     if candidate_hierarchy != persisted_hierarchy:
@@ -2912,7 +2940,7 @@ def _validate_audit(audit: dict):
             "audit with classified candidates requires at least one source file"
         )
 
-    if scanner_format in {10, 11, 12, 13, 14, 15, SCAN_CACHE_VERSION}:
+    if scanner_format in {10, 11, 12, 13, 14, 15, 16, SCAN_CACHE_VERSION}:
         unknown_structural_classes = sorted(
             set(structural_hierarchy) - seen_classes
         )
@@ -2921,7 +2949,7 @@ def _validate_audit(audit: dict):
                 "audit structural_hierarchy owner is not an audited candidate: "
                 + ", ".join(unknown_structural_classes)
             )
-    if scanner_format in {13, 14, 15, SCAN_CACHE_VERSION}:
+    if scanner_format in {13, 14, 15, 16, SCAN_CACHE_VERSION}:
         expected_structural_inventory_sha256 = (
             _structural_candidate_inventory_sha256(
                 artifact,
@@ -2937,7 +2965,7 @@ def _validate_audit(audit: dict):
                 "audit structural candidate inventory does not match "
                 "structural hierarchy"
             )
-    if scanner_format in {14, 15, SCAN_CACHE_VERSION}:
+    if scanner_format in {14, 15, 16, SCAN_CACHE_VERSION}:
         structural_graph_metadata, structural_graph_target_classes = (
             _validate_structural_class_graph(
                 structural_class_graph,
@@ -2945,7 +2973,7 @@ def _validate_audit(audit: dict):
                 audit["ancestry_classpath"],
             )
         )
-        if scanner_format in {15, SCAN_CACHE_VERSION}:
+        if scanner_format in {15, 16, SCAN_CACHE_VERSION}:
             target_records = [
                 {
                     "class": class_name,
@@ -3070,8 +3098,13 @@ def _validate_audit_ancestry_graph(
         seen_artifacts.add(identity)
         with zipfile.ZipFile(path) as archive:
             _validate_archive(path, archive)
+            inspectable_cache = {}
             for entry_name in archive.namelist():
-                if not _is_inspectable_class(archive, entry_name):
+                if not _is_inspectable_class(
+                    archive,
+                    entry_name,
+                    inspectable_cache=inspectable_cache,
+                ):
                     continue
                 class_name = _class_name(entry_name)
                 if class_name in class_entries:
@@ -3174,8 +3207,13 @@ def _validate_audit_target_artifact(
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
         target = _read_mod_metadata(archive)
+        inspectable_cache = {}
         for entry_name in sorted(archive.namelist()):
-            if not _is_inspectable_class(archive, entry_name):
+            if not _is_inspectable_class(
+                archive,
+                entry_name,
+                inspectable_cache=inspectable_cache,
+            ):
                 continue
             class_name = _class_name(entry_name)
             if class_name in seen_classes:
@@ -3482,8 +3520,13 @@ def scan_jar(
         classified = {bucket: [] for bucket in CURRENT_CANDIDATE_BUCKETS}
         structural_hierarchy = []
         class_entries = {}
+        inspectable_cache = {}
         for name in archive.namelist():
-            if not _is_inspectable_class(archive, name):
+            if not _is_inspectable_class(
+                archive,
+                name,
+                inspectable_cache=inspectable_cache,
+            ):
                 continue
             class_name = _class_name(name)
             if class_name in class_entries:

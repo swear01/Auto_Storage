@@ -1577,7 +1577,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(16, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(17, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -2310,6 +2310,29 @@ class CompatKitAuditTests(unittest.TestCase):
         ):
             self.compat_kit._validate_audit(audit)
 
+    def test_candidate_classifier_change_advances_persisted_scanner_format(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+
+        self.assertEqual(17, audit["scanner_format"])
+        stale = copy.deepcopy(audit)
+        stale["scanner_format"] = 16
+        with self.assertRaisesRegex(ValueError, "current scanner-format audit"):
+            self.compat_kit.validate_contract(
+                self.accepted_contract(),
+                require_complete=True,
+                source_audit=stale,
+                source_artifact=self.jar,
+            )
+        migrated = self.compat_kit.migrate_audit(
+            stale,
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        self.assertEqual(17, migrated["scanner_format"])
+
     def test_complete_contract_requires_current_scanner_format_audit(self):
         current_audit = self.source_audit()
         contract = self.accepted_contract()
@@ -2918,6 +2941,88 @@ class CompatKitAuditTests(unittest.TestCase):
             nested_class,
             {record["class"] for record in audit["structural_class_graph"]},
         )
+
+    def test_nested_owner_depth_fails_with_bounded_validation_error(self):
+        target_jar = self.root / "deep-nested-owner.jar"
+        entries = [f"samplemod/Owner{index}.class" for index in range(1026)]
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            for entry_name in entries:
+                archive.writestr(entry_name, b"class")
+
+        def metadata(_payload: bytes, entry_name: str):
+            index = int(
+                entry_name.removeprefix("samplemod/Owner").removesuffix(".class")
+            )
+            return {
+                "access_flags": 0,
+                "super_class": None,
+                "interfaces": [],
+                "inner_class_entry": index > 0,
+                "inner_name": f"Owner{index}" if index > 0 else None,
+                "outer_class": (
+                    f"samplemod.Owner{index - 1}" if index > 0 else None
+                ),
+                "enclosing_method": False,
+                "source_file": "Owner0.java",
+            }
+
+        with zipfile.ZipFile(target_jar) as archive:
+            with mock.patch.object(
+                self.compat_kit,
+                "_class_metadata",
+                side_effect=metadata,
+            ):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "nested class ownership exceeds 1024 levels",
+                ):
+                    self.compat_kit._is_inspectable_class(
+                        archive,
+                        entries[-1],
+                    )
+
+    def test_nested_owner_inspection_memoizes_each_class(self):
+        target_jar = self.root / "memoized-nested-owner.jar"
+        entries = [f"samplemod/Owner{index}.class" for index in range(64)]
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            for entry_name in entries:
+                archive.writestr(entry_name, b"class")
+        metadata_reads = 0
+
+        def metadata(_payload: bytes, entry_name: str):
+            nonlocal metadata_reads
+            metadata_reads += 1
+            index = int(
+                entry_name.removeprefix("samplemod/Owner").removesuffix(".class")
+            )
+            return {
+                "access_flags": 0,
+                "super_class": None,
+                "interfaces": [],
+                "inner_class_entry": index > 0,
+                "inner_name": f"Owner{index}" if index > 0 else None,
+                "outer_class": (
+                    f"samplemod.Owner{index - 1}" if index > 0 else None
+                ),
+                "enclosing_method": False,
+                "source_file": "Owner0.java",
+            }
+
+        inspectable_cache = {}
+        with zipfile.ZipFile(target_jar) as archive:
+            with mock.patch.object(
+                self.compat_kit,
+                "_class_metadata",
+                side_effect=metadata,
+            ):
+                for entry_name in reversed(entries):
+                    self.assertTrue(self.compat_kit._is_inspectable_class(
+                        archive,
+                        entry_name,
+                        inspectable_cache=inspectable_cache,
+                    ))
+
+        self.assertEqual(len(entries), metadata_reads)
 
     def test_scan_recognizes_jdk_module_ancestry_outside_java_prefixes(self):
         source = self.root / "jdk-ancestry-source"
