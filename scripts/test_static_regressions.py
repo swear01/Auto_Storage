@@ -1836,6 +1836,135 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("Calcination", compatibility_doc)
         self.assertIn("Distillation", compatibility_doc)
         self.assertIn("Liquefaction", compatibility_doc)
+
+    def test_hostilenetworks_fail_closed_boundary_is_locked(self):
+        fixture = self.read_required(
+            "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/"
+            "hostilenetworks/HostilenetworksIntegrationGameTests.java"
+        )
+        coexistence = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CompatibilityMatrixGameTests.java"
+        )
+        docs = self.read_required("docs/hostilenetworks-compatibility.md")
+        module = self.read_required(
+            "src/compat/hostilenetworks/java/com/swear/autostorage/compat/"
+            "hostilenetworks/HostilenetworksCompat.java"
+        )
+        descriptor = self.read_required("src/compat/hostilenetworks/compat-module.json")
+        contract = self.read_required("compat/contracts/hostilenetworks.json")
+
+        self.assertIn("IsolatedRecipeInventoryEvidence", fixture)
+        self.assertIn(
+            'helper.fail("Hostile Neural Networks mod is not loaded")',
+            fixture,
+        )
+        self.assertIn(
+            "Hostile Neural Networks unsafe recipe contract was registered",
+            fixture,
+        )
+        self.assertIn(
+            "Hostile Neural Networks living-matter vanilla crafting must stay supported",
+            fixture,
+        )
+        self.assertIn(
+            "Hostile Neural Networks simulation and loot fabricator must remain fail closed",
+            fixture,
+        )
+        self.assertIn(
+            'id.getNamespace().equals("hostilenetworks")',
+            fixture,
+        )
+        self.assertIn(
+            'id.getPath().startsWith("hostilenetworks")',
+            fixture,
+        )
+        self.assertRegex(
+            fixture,
+            r"id\.getNamespace\(\)\.equals\(\"hostilenetworks\"\)\s*"
+            r"\|\|\s*id\.getPath\(\)\.startsWith\(\"hostilenetworks\"\)",
+        )
+        self.assertIn(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            coexistence,
+        )
+        self.assertNotIn(
+            'id.getNamespace().equals("hostilenetworks")',
+            coexistence,
+        )
+        self.assertNotIn(
+            "Hostile Neural Networks fail-closed boundary changed",
+            coexistence,
+        )
+        self.assertIn("outcome **C**", docs)
+        self.assertIn("ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6", docs)
+        self.assertIn("Intentionally empty", module)
+        self.assertNotIn("compat-kit scaffold is intentionally RED", module)
+        self.assertNotIn("compat-kit scaffold is intentionally RED", fixture)
+        self.assertIn('"hostilenetworks"', descriptor)
+        self.assertIn(
+            "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6",
+            descriptor,
+        )
+        descriptor_data = json.loads(descriptor)
+        self.assertEqual(
+            [
+                "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+                "curse.maven:jade-324717:5884231",
+                "maven.modrinth:placebo:1Ypo4tf4",
+                "mezz.jei:jei-1.21.1-common-api:19.27.0.340",
+            ],
+            descriptor_data["dependencies"],
+        )
+        self.assertEqual(
+            [
+                "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+                "maven.modrinth:placebo:1Ypo4tf4",
+            ],
+            descriptor_data["runtimeDependencies"],
+        )
+        rejected_descriptors = [
+            "auto_storage:hostilenetworks_sim_chamber",
+            "auto_storage:hostilenetworks_loot_fabricator",
+            "auto_storage:hostilenetworks_data_center",
+        ]
+        self.assertEqual(
+            rejected_descriptors,
+            descriptor_data["matrix"]["rejectedDescriptors"],
+        )
+        contract_data = json.loads(contract)
+        self.assertEqual(
+            rejected_descriptors,
+            contract_data["matrix"]["rejectedDescriptors"],
+        )
+        evidence = contract_data["verification"]["evidence"]
+        self.assertEqual(
+            "No-energy smelting must not consume cobblestone",
+            evidence["ingredient_shortage_atomic"][0]["marker"],
+        )
+        self.assertEqual(
+            "Failed typed family commit partially mutated resources",
+            evidence["destination_capacity_atomic"][0]["marker"],
+        )
+        self.assertEqual(
+            "One-item-short Storage capacity must reject the whole batch before mutation",
+            evidence["checked_overflow_atomic"][0]["marker"],
+        )
+        self.assertIn("only_vanilla_crafting_recipes_are_exposed", fixture)
+        self.assertIn(
+            "Hostile Neural Networks exposed a non-vanilla recipe class",
+            fixture,
+        )
+        self.assertIn(
+            "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6",
+            contract,
+        )
+        self.assertIn("Descriptor matrix coexistence", contract)
+        self.assertNotIn(
+            "Hostile Neural Networks fail-closed boundary changed",
+            contract,
+        )
+
     def test_productivemetalworks_registry_checks_cover_namespace_and_path(self):
         fixture = self.read_required(
             "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/"

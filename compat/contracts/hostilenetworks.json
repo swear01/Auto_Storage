@@ -1,0 +1,152 @@
+{
+  "families": [],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "hostilenetworks"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "hostilenetworks"
+      ],
+      "sha256": "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6"
+    },
+    "rejectedDescriptors": [
+      "auto_storage:hostilenetworks_sim_chamber",
+      "auto_storage:hostilenetworks_loot_fabricator",
+      "auto_storage:hostilenetworks_data_center"
+    ],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357",
+  "source_recipe_data_sha256": "76f6b23c508813dcf1453c4e4cf999ee623c8cfaeafec3670b975186b13b18c6",
+  "source_recipe_inventory_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+  "target": {
+    "dependency": "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+    "display_name": "Hostile Neural Networks",
+    "mod_id": "hostilenetworks",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:placebo:1Ypo4tf4"
+    ],
+    "version": "6.5.0"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Hostile Neural Networks living-matter vanilla crafting must stay supported",
+          "source": "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksIntegrationGameTests.java",
+          "task": "runHostilenetworksGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "One-item-short Storage capacity must reject the whole batch before mutation",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "No-energy smelting must not consume cobblestone",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Hostile Neural Networks unsafe recipe contract was registered",
+          "source": "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksIntegrationGameTests.java",
+          "task": "runHostilenetworksGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 4,
+    "fixture": "hostilenetworksFixture",
+    "game_test_task": "runHostilenetworksGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runHostilenetworksGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}
