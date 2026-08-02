@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "c9633ef924d8139315e64cfa2d3efc7c0512a889227571eabe7c9e34a10ba469",
+  "contract_sha256": "1ac1d6808a9dc5ac4e01ea81f25c6b8b0f75bedd66a294aaa3b4c7bb08758d35",
   "files": {
-    "src/compat/theurgy/compat-module.json": "26fb75aa4f6e2f311264edff551eaad45c19ed6e3e0e16f6e805c2afdb805555",
+    "src/compat/theurgy/compat-module.json": "9df27235dfe00a60e93175cc6d0b838afa2a1e0eca10249e91f924f6a2c78f00",
     "src/compat/theurgy/java/com/swear/autostorage/compat/theurgy/TheurgyCompat.java": "90e4251e6f4f040fcd07e6ec7db49bae5d7c8bd554725999e3ed30c70b13cc01",
     "src/compat/theurgy/java/com/swear/autostorage/compat/theurgy/TheurgyCompatModule.java": "54e3cd722c0e2cd48c05c7e707b59a9307bc07537d7966e0af5d3335382322db",
     "src/theurgyFixture/java/com/swear/autostorage/fixture/theurgy/TheurgyFixtureMod.java": "c78dbcc2a001f7e5d82f12edae204a1fba36d5d72ab578b33381cdedd29d6452",

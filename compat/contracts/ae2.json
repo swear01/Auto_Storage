@@ -292,6 +292,26 @@
     ],
     "version": "19.2.17"
   },
+  "matrix": {
+    "acceptedRecipes": [
+      "ae2:inscriber/logic_processor"
+    ],
+    "descriptors": [
+      "auto_storage:ae2_inscriber"
+    ],
+    "mods": [
+      "ae2"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "ae2"
+      ],
+      "sha256": "160a63ae8c4a1fb1d9324888985841d3f32a1e8abdb9caeae9c36ff3b5524363"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "verification": {
     "checks": [
       "absent_target_no_classload",
@@ -317,7 +337,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Iron Furnaces variant did not coexist with the shared Furnace descriptor",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }

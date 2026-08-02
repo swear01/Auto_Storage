@@ -1552,6 +1552,28 @@
       "status": "rejected"
     }
   ],
+  "matrix": {
+    "acceptedRecipes": [
+      "theurgy:distillation/bread"
+    ],
+    "descriptors": [
+      "auto_storage:theurgy_calcination_oven",
+      "auto_storage:theurgy_distiller",
+      "auto_storage:theurgy_liquefaction_cauldron"
+    ],
+    "mods": [
+      "theurgy"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "theurgy"
+      ],
+      "sha256": "9a91bd4dd49a7a25a9cb7aed9d97b70f8403f61b2e9bad833898c600f996cd31"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "verification": {
     "checks": [
       "absent_target_no_classload",
@@ -1577,7 +1599,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Iron Furnaces variant did not coexist with the shared Furnace descriptor",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }

@@ -1,5 +1,65 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+
+class CompatWorldCleaner {
+    static void deleteTree(java.nio.file.Path root) {
+        if (!Files.exists(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return
+        }
+        if (Files.isSymbolicLink(root)) {
+            throw new GradleException("Compatibility GameTest path is a symlink: ${root}")
+        }
+        Files.walkFileTree(root, new SimpleFileVisitor<java.nio.file.Path>() {
+            @Override
+            FileVisitResult preVisitDirectory(
+                    java.nio.file.Path directory,
+                    BasicFileAttributes attributes) {
+                if (Files.isSymbolicLink(directory)) {
+                    throw new GradleException(
+                            "Compatibility GameTest tree contains a symlink: ${directory}")
+                }
+                return FileVisitResult.CONTINUE
+            }
+
+            @Override
+            FileVisitResult visitFile(
+                    java.nio.file.Path file,
+                    BasicFileAttributes attributes) {
+                if (Files.isSymbolicLink(file)) {
+                    throw new GradleException(
+                            "Compatibility GameTest tree contains a symlink: ${file}")
+                }
+                Files.delete(file)
+                return FileVisitResult.CONTINUE
+            }
+
+            @Override
+            FileVisitResult visitFileFailed(
+                    java.nio.file.Path file,
+                    IOException failure) {
+                throw new GradleException(
+                        "Cannot inspect compatibility GameTest path: ${file}", failure)
+            }
+
+            @Override
+            FileVisitResult postVisitDirectory(
+                    java.nio.file.Path directory,
+                    IOException failure) {
+                if (failure != null) {
+                    throw new GradleException(
+                            "Cannot inspect compatibility GameTest directory: ${directory}",
+                            failure)
+                }
+                Files.delete(directory)
+                return FileVisitResult.CONTINUE
+            }
+        })
+    }
+}
 
 plugins {
     id 'java-library'
@@ -1340,7 +1400,67 @@ tasks.named('runCompatibilityMatrixGameTestServer').configure {
 }
 
 def compatFixtureRunTasks = []
+def compatVerificationRoot = layout.projectDirectory.asFile.toPath().toRealPath()
+def compatGameTestRunDir = layout.projectDirectory.dir('run').asFile
 def compatGameTestWorldDir = layout.projectDirectory.dir('run/world').asFile
+def clearCompatGameTestWorld = {
+    for (candidate in [compatGameTestRunDir, compatGameTestWorldDir]) {
+        def candidatePath = candidate.toPath().toAbsolutePath().normalize()
+        if (Files.isSymbolicLink(candidatePath)) {
+            throw new GradleException(
+                    "Compatibility GameTest path is a symlink: ${candidate}")
+        }
+        if (!candidatePath.startsWith(compatVerificationRoot)) {
+            throw new GradleException(
+                    "Compatibility GameTest path escapes project root: ${candidate}")
+        }
+        if (Files.exists(candidatePath)
+                && !candidatePath.toRealPath().startsWith(compatVerificationRoot)) {
+            throw new GradleException(
+                    "Compatibility GameTest path resolves outside project root: ${candidate}")
+        }
+    }
+    CompatWorldCleaner.deleteTree(compatGameTestWorldDir.toPath())
+}
+def compatCleanupTestRootParent = layout.buildDirectory.dir('tmp').get().asFile.toPath()
+def verifyCompatGameTestWorldCleanupSafety = tasks.register(
+        'verifyCompatGameTestWorldCleanupSafety') {
+    group = 'verification'
+    description = 'Reject nested symlinks without deleting their external target'
+    doLast {
+        Files.createDirectories(compatCleanupTestRootParent)
+        def fixtureRoot = Files.createTempDirectory(
+                compatCleanupTestRootParent,
+                'compat-world-cleanup-')
+        def externalRoot = Files.createTempDirectory('auto-storage-cleanup-sentinel-')
+        def world = fixtureRoot.resolve('world')
+        def nested = world.resolve('nested')
+        def link = nested.resolve('external')
+        def sentinel = externalRoot.resolve('keep.txt')
+        try {
+            Files.createDirectories(nested)
+            Files.writeString(sentinel, 'keep')
+            Files.createSymbolicLink(link, externalRoot)
+            try {
+                CompatWorldCleaner.deleteTree(world)
+                throw new GradleException(
+                        'Compatibility GameTest cleanup accepted a nested symlink')
+            } catch (GradleException expected) {
+                if (!expected.message.contains('contains a symlink')) {
+                    throw expected
+                }
+            }
+            if (!Files.isRegularFile(sentinel)) {
+                throw new GradleException(
+                        'Compatibility GameTest cleanup deleted an external sentinel')
+            }
+        } finally {
+            Files.deleteIfExists(link)
+            CompatWorldCleaner.deleteTree(fixtureRoot)
+            CompatWorldCleaner.deleteTree(externalRoot)
+        }
+    }
+}
 compatModules.each { spec ->
     def fixtureTask = tasks.named(spec.runTask)
     def previousCompatFixture = compatFixtureRunTasks.isEmpty()
@@ -1348,9 +1468,7 @@ compatModules.each { spec ->
             : compatFixtureRunTasks.last()
     fixtureTask.configure {
         doFirst {
-            if (compatGameTestWorldDir.exists()) {
-                compatGameTestWorldDir.deleteDir()
-            }
+            clearCompatGameTestWorld()
         }
         if (previousCompatFixture != null) {
             mustRunAfter previousCompatFixture
@@ -1362,6 +1480,9 @@ tasks.register('runCompatFixtureGameTestServers') {
     group = 'verification'
     description = 'Run every descriptor-owned compatibility fixture GameTest server'
     dependsOn compatFixtureRunTasks
+}
+tasks.named('check').configure {
+    dependsOn verifyCompatGameTestWorldCleanupSafety
 }
 
 idea {

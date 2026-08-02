@@ -322,10 +322,11 @@ fixed repositories are filtered to their Auto Storage or Patchouli artifacts.
 Reviewed repository, dependency, and group values are emitted as escaped
 literal Groovy strings; dependency coordinates must use exact
 `group:name:version` structure and cannot contain control characters.
-Verification regenerates the expected bundled descriptor or external
-`build.gradle`, `settings.gradle`, `gradle.properties`, launchers, and wrapper
-artifacts from the reviewed contract and current generator, then checks every
-byte and manifest entry. Replacing the launcher or SHA gate and self-attesting
+Verification regenerates the expected bundled descriptor, including the
+contract-owned matrix assertions and exact per-module recipe-inventory digest,
+or external `build.gradle`, `settings.gradle`, `gradle.properties`, launchers,
+and wrapper artifacts from the reviewed contract and current generator, then
+checks every byte and manifest entry. Replacing the launcher or SHA gate and self-attesting
 a new manifest hash is therefore explicit drift rather than a pass.
 
 Use `scaffold --bundled contract.json --audit audit.json --jar target.jar --classpath ancestry.jar` and

@@ -12,6 +12,11 @@ import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
+import com.google.gson.JsonParser;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+
 @GameTestHolder(CompatibilityMatrixFixtureMod.MODID)
 @PrefixGameTestTemplate(false)
 public final class CompatibilityMatrixGameTests {
@@ -22,8 +27,17 @@ public final class CompatibilityMatrixGameTests {
     public static void optional_compatibility_registrations_coexist(
             GameTestHelper helper
     ) {
+        if (!CompatibilityMatrixManifest.recipeInventorySha256(List.of()).equals(
+                "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570")) {
+            helper.fail("Empty recipe inventory canonicalization disagreed with the generator");
+            return;
+        }
+        if (!missingRecipeInventoryFailsClearly()) {
+            helper.fail("Missing recipeInventory did not fail with a descriptive error");
+            return;
+        }
         CompatibilityMatrixManifest manifest = CompatibilityMatrixManifest.load();
-        if (!manifest.assertCoexistence(helper)) {
+        if (!manifest.assertCoexistence(helper, "Descriptor matrix coexistence")) {
             return;
         }
         var furnace = MachineEnergyTable.get(MachineEnergyTable.FURNACE_ID);
@@ -50,6 +64,29 @@ public final class CompatibilityMatrixGameTests {
             return;
         }
         helper.succeed();
+    }
+
+    private static boolean missingRecipeInventoryFailsClearly() {
+        try {
+            Method parseGroup = CompatibilityMatrixManifest.class.getDeclaredMethod(
+                    "parseGroup", com.google.gson.JsonObject.class, boolean.class);
+            parseGroup.setAccessible(true);
+            parseGroup.invoke(
+                    null,
+                    JsonParser.parseString("{\"id\":\"sample\",\"mods\":[],"
+                            + "\"descriptors\":[],\"resourceKinds\":[],"
+                            + "\"acceptedRecipes\":[],\"rejectedDescriptors\":[],"
+                            + "\"rejectedResourceKinds\":[]}").getAsJsonObject(),
+                    true);
+            return false;
+        } catch (InvocationTargetException exception) {
+            Throwable cause = exception.getCause();
+            return cause instanceof IllegalStateException
+                    && cause.getMessage() != null
+                    && cause.getMessage().contains("missing recipeInventory");
+        } catch (ReflectiveOperationException exception) {
+            return false;
+        }
     }
 
     @GameTest(template = "craftingtests.platform")

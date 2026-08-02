@@ -90,39 +90,40 @@ final class CompatibilityMatrixManifest {
                 unclaimed.get("sha256").getAsString());
     }
 
-    boolean assertCoexistence(GameTestHelper helper) {
+    boolean assertCoexistence(GameTestHelper helper, String evidence) {
+        Objects.requireNonNull(evidence, "evidence");
         for (AssertionGroup group : allGroups()) {
             for (String modId : group.mods()) {
                 if (!ModList.get().isLoaded(modId)) {
-                    helper.fail("Compatibility matrix did not load " + modId);
+                    helper.fail(evidence + ": did not load " + modId);
                     return false;
                 }
             }
             for (ResourceLocation id : group.descriptors()) {
                 if (!AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.containsKey(id)
                         || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(id)) {
-                    helper.fail("Combined compatibility registry is missing " + id);
+                    helper.fail(evidence + ": registry is missing " + id);
                     return false;
                 }
             }
             for (ResourceLocation kindId : group.resourceKinds()) {
                 if (AutoStorage.RESOURCE_KIND_REGISTRY.get(kindId) == null) {
-                    helper.fail(
-                            "Combined compatibility registry is missing resource kind "
-                                    + kindId);
+                    helper.fail(evidence + ": registry is missing resource kind " + kindId);
                     return false;
                 }
             }
             for (ResourceLocation id : group.rejectedDescriptors()) {
                 if (AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(id)
                         || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.containsKey(id)) {
-                    helper.fail("Fail-closed boundary changed for " + id);
+                    helper.fail(evidence + ": fail-closed boundary changed for " + id);
                     return false;
                 }
             }
             for (ResourceLocation kindId : group.rejectedResourceKinds()) {
                 if (AutoStorage.RESOURCE_KIND_REGISTRY.containsKey(kindId)) {
-                    helper.fail("Fail-closed boundary changed for resource kind " + kindId);
+                    helper.fail(
+                            evidence + ": fail-closed boundary changed for resource kind "
+                                    + kindId);
                     return false;
                 }
             }
@@ -232,6 +233,10 @@ final class CompatibilityMatrixManifest {
 
     private static AssertionGroup parseGroup(JsonObject object, boolean requireId) {
         String id = requiredString(object, "id");
+        JsonObject recipeInventory = object.getAsJsonObject("recipeInventory");
+        if (recipeInventory == null) {
+            throw new IllegalStateException("missing recipeInventory in group " + id);
+        }
         return new AssertionGroup(
                 id,
                 stringList(object, "mods"),
@@ -240,8 +245,8 @@ final class CompatibilityMatrixManifest {
                 resourceList(object, "acceptedRecipes"),
                 resourceList(object, "rejectedDescriptors"),
                 resourceList(object, "rejectedResourceKinds"),
-                stringList(object.getAsJsonObject("recipeInventory"), "namespaces"),
-                requiredString(object.getAsJsonObject("recipeInventory"), "sha256"));
+                stringList(recipeInventory, "namespaces"),
+                requiredString(recipeInventory, "sha256"));
     }
 
     private static List<String> stringList(JsonObject object, String key) {
@@ -291,6 +296,9 @@ final class CompatibilityMatrixManifest {
     }
 
     private static String canonicalJsonStringArray(List<String> values) {
+        if (values.isEmpty()) {
+            return "[]\n";
+        }
         StringBuilder builder = new StringBuilder();
         builder.append("[\n");
         for (int index = 0; index < values.size(); index++) {

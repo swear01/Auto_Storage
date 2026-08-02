@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = Path(__file__).resolve().parent
@@ -56,6 +57,98 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
                     }
                 }
             )
+
+    def test_descriptor_matrix_mods_match_runtime_requirements(self):
+        from compatibility_matrix_manifest import validate_descriptor_matrix
+
+        descriptor = {
+            "requires": ["sample", "required_api"],
+            "matrix": {
+                "mods": ["required_api", "sample"],
+                "descriptors": [],
+                "resourceKinds": [],
+                "acceptedRecipes": [],
+                "rejectedDescriptors": [],
+                "rejectedResourceKinds": [],
+                "recipeInventory": {
+                    "namespaces": ["sample"],
+                    "sha256": "0" * 64,
+                },
+            },
+        }
+        validate_descriptor_matrix(descriptor)
+        descriptor["matrix"]["mods"] = ["sample", "stale_api"]
+        with self.assertRaisesRegex(ValueError, "mods.*requires"):
+            validate_descriptor_matrix(descriptor)
+
+    def test_manifest_file_io_is_explicit_utf8(self):
+        from compatibility_matrix_manifest import (
+            load_companions,
+            load_descriptors,
+            validate_descriptor_matrix,
+            write_manifest,
+        )
+
+        companions = {
+            "schema": 1,
+            "companions": [],
+            "unclaimedRecipeInventory": {"sha256": "0" * 64},
+        }
+        descriptor = {
+            "schema": 1,
+            "id": "auto_storage:sample",
+            "requires": ["sample"],
+            "matrix": {
+                "mods": ["sample"],
+                "descriptors": [],
+                "resourceKinds": [],
+                "acceptedRecipes": [],
+                "rejectedDescriptors": [],
+                "rejectedResourceKinds": [],
+                "recipeInventory": {
+                    "namespaces": ["sample"],
+                    "sha256": "1" * 64,
+                },
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            compat = root / "src/compat/sample"
+            compat.mkdir(parents=True)
+            descriptor_path = compat / "compat-module.json"
+            descriptor_path.write_text(json.dumps(descriptor), encoding="utf-8")
+            companions_path = (
+                root
+                / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+                "compatibility-matrix-companions.json"
+            )
+            companions_path.parent.mkdir(parents=True)
+            companions_path.write_text(json.dumps(companions), encoding="utf-8")
+
+            original_read_text = Path.read_text
+            read_encodings = []
+
+            def recording_read_text(path, *args, **kwargs):
+                read_encodings.append(kwargs.get("encoding"))
+                return original_read_text(path, *args, **kwargs)
+
+            with mock.patch.object(Path, "read_text", recording_read_text):
+                load_companions(companions_path)
+                load_descriptors(root / "src/compat")
+            self.assertTrue(read_encodings)
+            self.assertEqual({"utf-8"}, set(read_encodings))
+
+            original_write_text = Path.write_text
+            write_encodings = []
+
+            def recording_write_text(path, data, *args, **kwargs):
+                write_encodings.append(kwargs.get("encoding"))
+                return original_write_text(path, data, *args, **kwargs)
+
+            output = root / "manifest.json"
+            with mock.patch.object(Path, "write_text", recording_write_text):
+                write_manifest(root, output)
+            self.assertEqual(["utf-8"], write_encodings)
 
         with self.assertRaisesRegex(ValueError, "sha256"):
             validate_descriptor_matrix(
@@ -212,7 +305,11 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
             "doFirst must not call Project.delete under configuration cache",
         )
         self.assertIn("compatGameTestWorldDir", build)
-        self.assertIn("deleteDir()", build)
+        self.assertIn("Files.walkFileTree", build)
+        self.assertIn("verifyCompatGameTestWorldCleanupSafety", build)
+        self.assertNotIn("compatGameTestWorldDir.deleteDir()", build)
+        self.assertIn("Files.isSymbolicLink", build)
+        self.assertIn("startsWith(compatVerificationRoot)", build)
         self.assertNotIn("EXPECTED_RECIPE_COUNT", performance)
         self.assertNotIn('"ae2"', matrix)
         self.assertNotIn('"theurgy"', matrix)
@@ -222,6 +319,29 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
         self.assertIn("runCompatFixtureGameTestServers", workflow_test)
         self.assertNotIn("Run AE2 GameTest server", workflow_test)
         self.assertNotIn("Run Theurgy GameTest server", workflow_test)
+        notes = (ROOT / "docs/notes.md").read_text()
+        recipe_family = (ROOT / "docs/recipe-family-api.md").read_text()
+        readme = (ROOT / "README.md").read_text()
+        self.assertIn("runCompatFixtureGameTestServers", notes)
+        self.assertNotIn("GameTest tasks must be separate and sequential Gradle invocations", notes)
+        self.assertIn("per-module", recipe_family)
+        self.assertIn("recipe-inventory", recipe_family)
+        self.assertIn("runCompatFixtureGameTestServers", readme)
+        self.assertNotIn("./gradlew runAe2GameTestServer", readme)
+        self.assertNotIn("locks and benchmarks 12,736 recipes", readme)
+
+        coexistence_marker = (
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")'
+        )
+        self.assertIn(coexistence_marker, matrix)
+        for mod_id in ("ae2", "theurgy"):
+            contract = json.loads(
+                (ROOT / f"compat/contracts/{mod_id}.json").read_text()
+            )
+            evidence = contract["verification"]["evidence"][
+                "all_mod_coexistence"
+            ]
+            self.assertEqual(coexistence_marker, evidence[0]["marker"])
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

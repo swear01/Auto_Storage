@@ -91,6 +91,13 @@ def validate_descriptor_matrix(descriptor: dict[str, Any]) -> dict[str, Any]:
     validated["mods"] = _require_mod_ids(validated["mods"], "mods")
     if not validated["mods"]:
         raise ValueError("matrix mods must not be empty")
+    if "requires" in descriptor:
+        requires = _require_mod_ids(
+            _require_string_list(descriptor["requires"], "requires"),
+            "requires",
+        )
+        if set(validated["mods"]) != set(requires):
+            raise ValueError("matrix mods must match descriptor requires")
     validated["descriptors"] = _require_resource_ids(
         validated["descriptors"], "descriptors"
     )
@@ -208,13 +215,13 @@ def validate_manifest(
 def load_companions(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise ValueError(f"missing companions file: {path}")
-    return json.loads(path.read_text())
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_descriptors(compat_root: Path) -> list[dict[str, Any]]:
     descriptors = []
     for path in sorted(compat_root.glob("*/compat-module.json")):
-        descriptors.append(json.loads(path.read_text()))
+        descriptors.append(json.loads(path.read_text(encoding="utf-8")))
     if not descriptors:
         raise ValueError("No compatibility module descriptors found")
     return descriptors
@@ -233,7 +240,7 @@ def build_manifest_from_roots(root: Path) -> dict[str, Any]:
 def write_manifest(root: Path, output: Path) -> None:
     manifest = build_manifest_from_roots(root)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(canonical_json(manifest))
+    output.write_text(canonical_json(manifest), encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -255,7 +262,7 @@ def main(argv: list[str] | None = None) -> int:
     root = args.root.resolve()
     manifest = build_manifest_from_roots(root)
     if args.check is not None:
-        actual = json.loads(args.check.read_text())
+        actual = json.loads(args.check.read_text(encoding="utf-8"))
         validate_manifest(
             actual,
             load_descriptors(root / "src/compat"),
@@ -267,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(canonical_json(manifest))
+        args.output.write_text(canonical_json(manifest), encoding="utf-8")
     elif args.check is None:
         sys.stdout.write(canonical_json(manifest))
     return 0
