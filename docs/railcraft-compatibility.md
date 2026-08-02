@@ -114,9 +114,10 @@ three-test all-mod matrix verifies descriptor-owned registrations, exact recipe
 inventories, generic coexistence, and the shared Craftable performance/heap
 gates.
 
-The local exact-target Compat Kit report passed all 12 required checks across
-five commands (`build`, base 405, recipe-addon 17, Railcraft 8, matrix 3):
-`build/compat-kit/railcraft-current-report.json`.
+`build/compat-kit/railcraft-current-report.json` is historical local evidence
+from an earlier branch head. It is not current-head verification and must not be
+used in place of the PR's exact-head GitHub CI, including the Railcraft fixture
+and combined matrix gates above.
 
 ## Future acceptance boundary
 

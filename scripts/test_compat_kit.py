@@ -2267,6 +2267,7 @@ class CompatKitAuditTests(unittest.TestCase):
             "reserved package source_class",
         )
         for class_name, source_class in (
+            ("samplemod.class.Valid", "samplemod.class.Valid"),
             ("samplemod.recipe.class", "samplemod.recipe.class"),
             ("samplemod.recipe.Outer$class", "samplemod.recipe.Outer.class"),
         ):
