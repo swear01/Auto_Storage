@@ -372,6 +372,10 @@ it must match the task derived from the fixture's preserved camel case
 same-count fixture from supplying another integration's runtime result.
 The target mod ID must produce a valid, non-reserved Java package segment;
 identifiers such as `class`, `true`, or `null` fail before files are written.
+Audited candidate `source_class` values are different: they validate only the
+Java type shape, so already-shipped bytecode under reserved package segments
+(for example Railcraft `mods.railcraft.world.module.*`) remains inspectable.
+Generated Auto Storage identifiers still reject reserved words.
 
 Commit the reviewed result as `compat/contracts/<mod-id>.json`.
 

@@ -2259,6 +2259,14 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "source_class does not match class"):
             self.compat_kit._validate_audit(source_drift)
 
+        # Existing upstream packages may legally contain reserved segments such as
+        # `module`; audited source_class validation must not reject them.
+        self.compat_kit._validate_candidate_source_class(
+            "samplemod.world.module.SteamBoilerModule",
+            "samplemod.world.module.SteamBoilerModule",
+            "reserved package source_class",
+        )
+
     def test_audit_validation_requires_canonical_source_evidence(self):
         audit = self.source_audit()
         audit["source"] = {

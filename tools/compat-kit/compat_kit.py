@@ -1468,7 +1468,10 @@ def _validate_candidate_source_class(
     source_class: object,
     location: str,
 ):
-    if not _is_java_type(source_class):
+    # Audited bytecode may already live under reserved package segments such as
+    # `module` (e.g. mods.railcraft.world.module.*). Reject only malformed type
+    # shapes here; generated Auto Storage identifiers still use _is_java_type.
+    if not isinstance(source_class, str) or JAVA_TYPE.fullmatch(source_class) is None:
         raise ValueError(f"{location} has invalid source_class")
     package, separator, binary_simple_name = class_name.rpartition(".")
     expected_prefix = package + "." if separator else ""

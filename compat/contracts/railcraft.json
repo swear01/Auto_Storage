@@ -1,0 +1,390 @@
+{
+  "families": [
+    {
+      "class": "mods.railcraft.world.item.crafting.BlastFurnaceRecipe",
+      "costs": [],
+      "decision": "Blast Furnace runs inside a formed furnace multiblock with live burnTime/fuel load via ItemStack.getBurnTime and slag output; payload alone has no complete simulate-then-commit Core transaction.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.BlastFurnaceRecipe#public_signature"
+      ],
+      "id": "blast_furnace_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.ChestMinecartDisassemblyRecipe",
+      "costs": [],
+      "decision": "Special crafting CustomRecipe subclass with minecart remainder semantics; not an independent Auto Storage station family.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.ChestMinecartDisassemblyRecipe#public_signature"
+      ],
+      "id": "chest_minecart_disassembly_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.CokeOvenRecipe",
+      "costs": [],
+      "decision": "Coke Oven runs inside a formed furnace multiblock with live creosote tank fill, fluid-container processing state, and optional multiplier; payload alone has no complete simulate-then-commit Core transaction.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.CokeOvenRecipe#public_signature"
+      ],
+      "id": "coke_oven_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.CrusherRecipe",
+      "costs": [],
+      "decision": "CrusherModule.pollOutputs uses RandomSource against per-output probability; chance outputs have no exact deterministic Core transaction.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.CrusherRecipe#public_signature"
+      ],
+      "id": "crusher_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.LocomotivePaintingRecipe",
+      "costs": [],
+      "decision": "Special crafting CustomRecipe that mutates locomotive dye components from live grid contents; not an independent Auto Storage station family.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.LocomotivePaintingRecipe#public_signature"
+      ],
+      "id": "locomotive_painting_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.PatchouliBookCrafting",
+      "costs": [],
+      "decision": "Shapeless Patchouli book helper recipe; not an independent Auto Storage station family and outside deterministic machine contracts.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.PatchouliBookCrafting#public_signature"
+      ],
+      "id": "patchouli_book_crafting",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.RollingRecipe",
+      "costs": [],
+      "decision": "ManualRollingMachine uses a live craft matrix with balanceSlots/progress state; PoweredRollingMachine additionally drains world Charge.distribution at the block position. Neither exposes a complete FE/station-work simulate-then-commit contract for a plain station item.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.RollingRecipe#public_signature"
+      ],
+      "id": "rolling_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.RotorRepairRecipe",
+      "costs": [],
+      "decision": "Special crafting CustomRecipe whose output damage depends on live rotor durability and blade count; not an independent Auto Storage station family.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.RotorRepairRecipe#public_signature"
+      ],
+      "id": "rotor_repair_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.StoneTieRecipe",
+      "costs": [],
+      "decision": "Special crafting TieRecipe subclass that drains 1000 mB creosote from a live fluid-handler item capability; capability mutation plus fluid remainder has no complete Core transaction.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.StoneTieRecipe#public_signature"
+      ],
+      "id": "stone_tie_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "live_machine_state",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.TicketDuplicateRecipe",
+      "costs": [],
+      "decision": "Special crafting CustomRecipe that copies live ticket components; not an independent Auto Storage station family.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.TicketDuplicateRecipe#public_signature"
+      ],
+      "id": "ticket_duplicate_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.VoidChestMinecartDisassemblyRecipe",
+      "costs": [],
+      "decision": "Special crafting CustomRecipe subclass; not an independent Auto Storage station family.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.VoidChestMinecartDisassemblyRecipe#public_signature"
+      ],
+      "id": "void_chest_minecart_disassembly_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.WoodenTieRecipe",
+      "costs": [],
+      "decision": "Special crafting TieRecipe subclass that drains 1000 mB creosote from a live fluid-handler item capability; capability mutation plus fluid remainder has no complete Core transaction.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.WoodenTieRecipe#public_signature"
+      ],
+      "id": "wooden_tie_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "live_machine_state",
+        "simulation_required",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "mods.railcraft.world.item.crafting.WorldSpikeMinecartDisassemblyRecipe",
+      "costs": [],
+      "decision": "Special crafting CustomRecipe subclass; not an independent Auto Storage station family.",
+      "evidence": [
+        "mods.railcraft.world.item.crafting.WorldSpikeMinecartDisassemblyRecipe#public_signature"
+      ],
+      "id": "world_spike_minecart_disassembly_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "mods": [
+      "railcraft"
+    ],
+    "descriptors": [],
+    "resourceKinds": [],
+    "acceptedRecipes": [],
+    "rejectedDescriptors": [
+      "auto_storage:railcraft_crusher",
+      "auto_storage:railcraft_blast_furnace",
+      "auto_storage:railcraft_coke_oven",
+      "auto_storage:railcraft_rolling"
+    ],
+    "rejectedResourceKinds": [],
+    "recipeInventory": {
+      "namespaces": [
+        "railcraft"
+      ],
+      "sha256": "b3f0a1186f22b445613be6d05a4cb01559885faba1937d2df178c3ed7c42706d"
+    }
+  },
+  "schema": 1,
+  "source_audit_sha256": "7de3dfeac277da57f9897822824332c99e53b9d36956143b38c0966f39144328",
+  "source_recipe_data_sha256": "a982f1cb9a9cb03ea3c35b302fa0075d009e71c15073733246f0333da432390d",
+  "source_recipe_inventory_sha256": "f7a1837c4c6a0351fbf260595e4a6af586cbcea62dd6f9eb72b99c5110751f9c",
+  "target": {
+    "display_name": "Railcraft Reborn",
+    "mod_id": "railcraft",
+    "version": "1.2.10",
+    "dependency": "maven.modrinth:railcraft-reborn:BrIwB6GH",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": []
+  },
+  "verification": {
+    "fixture": "railcraftFixture",
+    "expected_game_tests": 8,
+    "game_test_task": "runRailcraftGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runRailcraftGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ],
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Railcraft Reborn unsafe contract was registered",
+          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
+          "task": "runRailcraftGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Unsafe Railcraft Reborn recipe was accepted",
+          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
+          "task": "runRailcraftGameTestServer"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Unsafe Railcraft Reborn recipe type accepted",
+          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
+          "task": "runRailcraftGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Missing audited Railcraft Reborn recipe",
+          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
+          "task": "runRailcraftGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Unsafe Railcraft Reborn recipe was accepted",
+          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
+          "task": "runRailcraftGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:railcraft-reborn:BrIwB6GH",
+    "sha256": "7de3dfeac277da57f9897822824332c99e53b9d36956143b38c0966f39144328"
+  },
+  "dependencies": [
+    "maven.modrinth:railcraft-reborn:BrIwB6GH"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.railcraft.RailcraftCompatModule",
+  "expectedTests": 8,
+  "fixture": "railcraftFixture",
+  "id": "auto_storage:railcraft",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "railcraft"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "railcraft"
+      ],
+      "sha256": "b3f0a1186f22b445613be6d05a4cb01559885faba1937d2df178c3ed7c42706d"
+    },
+    "rejectedDescriptors": [
+      "auto_storage:railcraft_crusher",
+      "auto_storage:railcraft_blast_furnace",
+      "auto_storage:railcraft_coke_oven",
+      "auto_storage:railcraft_rolling"
+    ],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "railcraft"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:railcraft-reborn:BrIwB6GH"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatRailcraft"
+}
