@@ -1,15 +1,44 @@
 {
-  "schema": 1,
-  "id": "auto_storage:ars_nouveau",
-  "entrypoint": "com.swear.autostorage.compat.arsnouveau.ArsNouveauCompatModule",
-  "requires": ["ars_nouveau"],
-  "side": "both",
-  "sourceSet": "compatArsNouveau",
-  "fixture": "arsNouveauFixture",
-  "expectedTests": 11,
   "dependencies": [
     "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}",
     "maven.modrinth:geckolib:${geckolib_ci_version}",
     "maven.modrinth:curios:${ars_curios_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.arsnouveau.ArsNouveauCompatModule",
+  "expectedTests": 11,
+  "fixture": "arsNouveauFixture",
+  "id": "auto_storage:ars_nouveau",
+  "matrix": {
+    "acceptedRecipes": [
+      "ars_nouveau:imbuement_amethyst"
+    ],
+    "descriptors": [
+      "auto_storage:ars_nouveau_imbuement_chamber"
+    ],
+    "mods": [
+      "ars_nouveau"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "ars_nouveau"
+      ],
+      "sha256": "2cd6e234e432ff895faa5d6647e89adb794960ad73a02819cd70e01ffe577322"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": [
+      "ars_nouveau:source"
+    ]
+  },
+  "requires": [
+    "ars_nouveau"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}",
+    "maven.modrinth:geckolib:${geckolib_ci_version}",
+    "maven.modrinth:curios:${ars_curios_ci_version}"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatArsNouveau"
 }

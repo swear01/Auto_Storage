@@ -1,0 +1,29 @@
+{
+  "companions": [
+    {
+      "acceptedRecipes": [],
+      "descriptors": [],
+      "id": "pneumaticcraft",
+      "mods": [
+        "pneumaticcraft"
+      ],
+      "recipeInventory": {
+        "namespaces": [
+          "pneumaticcraft"
+        ],
+        "sha256": "32d0c4ed1050b00a5ff36bf85c199d2008f666592a8885066803dc9a95f192a8"
+      },
+      "rejectedDescriptors": [
+        "auto_storage:pneumaticcraft_pressure_chamber"
+      ],
+      "rejectedResourceKinds": [
+        "pneumaticcraft:air"
+      ],
+      "resourceKinds": []
+    }
+  ],
+  "schema": 1,
+  "unclaimedRecipeInventory": {
+    "sha256": "d70e544afd62ae167189a66e42e402a77ac0522a22f24fa99dab5d071e010143"
+  }
+}

@@ -1,13 +1,36 @@
 {
-  "schema": 1,
-  "id": "auto_storage:farmers_delight",
-  "entrypoint": "com.swear.autostorage.compat.farmersdelight.FarmersDelightCompatModule",
-  "requires": ["farmersdelight"],
-  "side": "both",
-  "sourceSet": "compatFarmersDelight",
-  "fixture": "farmersDelightFixture",
-  "expectedTests": 7,
   "dependencies": [
     "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.farmersdelight.FarmersDelightCompatModule",
+  "expectedTests": 7,
+  "fixture": "farmersDelightFixture",
+  "id": "auto_storage:farmers_delight",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [
+      "auto_storage:farmers_delight_cooking_pot"
+    ],
+    "mods": [
+      "farmersdelight"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "farmersdelight"
+      ],
+      "sha256": "0c5a79076bbf22ed45fafa8f6a8ecb58286c279378a36a22425c245cf5e12a23"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "requires": [
+    "farmersdelight"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatFarmersDelight"
 }

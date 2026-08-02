@@ -25,7 +25,16 @@ class ModularCompatSdkTests(unittest.TestCase):
             self.assertEqual("both", module["side"])
             self.assertTrue(module["requires"])
             self.assertTrue(module["dependencies"])
+            self.assertTrue(module["runtimeDependencies"])
+            self.assertIn(
+                module["dependencies"][0],
+                module["runtimeDependencies"],
+            )
             self.assertGreater(module["expectedTests"], 0)
+            self.assertIn("matrix", module)
+            self.assertTrue(module["matrix"]["mods"])
+            self.assertIn("recipeInventory", module["matrix"])
+            self.assertRegex(module["matrix"]["recipeInventory"]["sha256"], r"^[0-9a-f]{64}$")
             class_path = Path(
                 "src/compat",
                 module["id"].split(":", 1)[1],
@@ -80,6 +89,18 @@ class ModularCompatSdkTests(unittest.TestCase):
         )
         self.assertIn(
             "!descriptor.runtimeDependencies.contains(auditArtifact.dependency)",
+            build,
+        )
+        self.assertIn(
+            "!(descriptor.runtimeDependencies instanceof List)",
+            build,
+        )
+        self.assertIn(
+            "descriptor.runtimeDependencies.isEmpty()",
+            build,
+        )
+        self.assertIn(
+            "!descriptor.runtimeDependencies.contains(descriptor.dependencies[0])",
             build,
         )
         self.assertIn("descriptor.repositories", build)

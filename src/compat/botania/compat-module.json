@@ -1,14 +1,42 @@
 {
-  "schema": 1,
-  "id": "auto_storage:botania",
-  "entrypoint": "com.swear.autostorage.compat.botania.BotaniaCompatModule",
-  "requires": ["botania"],
-  "side": "both",
-  "sourceSet": "compatBotania",
-  "fixture": "botaniaFixture",
-  "expectedTests": 14,
   "dependencies": [
     "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}",
     "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.botania.BotaniaCompatModule",
+  "expectedTests": 14,
+  "fixture": "botaniaFixture",
+  "id": "auto_storage:botania",
+  "matrix": {
+    "acceptedRecipes": [
+      "botania:mana_infusion/biscuit_of_totality"
+    ],
+    "descriptors": [
+      "auto_storage:botania_mana_pool"
+    ],
+    "mods": [
+      "botania"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "botania"
+      ],
+      "sha256": "03910e2d1bba999e507a4d733bb9562d9a5ca83225fb844ce9c1301d6193516b"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": [
+      "botania:mana"
+    ]
+  },
+  "requires": [
+    "botania"
+  ],
+  "runtimeDependencies": [
+    "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}",
+    "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatBotania"
 }

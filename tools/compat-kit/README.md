@@ -130,6 +130,8 @@ paired with an actual format-7 old audit, accepts that legacy contract's absent
 recipe-data and ancestry evidence cannot preserve a decision. The normal
 contract validator remains strict, later audit formats cannot omit the field,
 and a format-7 contract claiming an unverifiable recipe-data digest is rejected.
+Legacy format-7 contracts may omit `matrix`; a reviewed matrix already present
+is validated and preserved by migration.
 
 Review every candidate and record exact ingredients, catalysts, remainders,
 outputs, typed units, station rates, costs, bounds, target HTTPS Maven
@@ -153,6 +155,9 @@ contract-only inventory digest cannot hide an omitted recipe family or risk.
 The contract separately binds the effective recipe-data/data-pack digest, so a
 changed override invalidates a previously complete contract even when the
 target jar and recipe classes are unchanged.
+New contracts use 64 zeroes as the pending matrix recipe-inventory sentinel.
+When all family decisions are complete, both the published schema and complete
+CLI validation reject that sentinel until review supplies the exact digest.
 Each candidate must remain in the bucket computed by the scanner; moving a
 recipe record into a station/resource list is rejected.
 Process station rates must be positive and Instant station rates must be zero;
@@ -322,10 +327,11 @@ fixed repositories are filtered to their Auto Storage or Patchouli artifacts.
 Reviewed repository, dependency, and group values are emitted as escaped
 literal Groovy strings; dependency coordinates must use exact
 `group:name:version` structure and cannot contain control characters.
-Verification regenerates the expected bundled descriptor or external
-`build.gradle`, `settings.gradle`, `gradle.properties`, launchers, and wrapper
-artifacts from the reviewed contract and current generator, then checks every
-byte and manifest entry. Replacing the launcher or SHA gate and self-attesting
+Verification regenerates the expected bundled descriptor, including the
+contract-owned matrix assertions and exact per-module recipe-inventory digest,
+or external `build.gradle`, `settings.gradle`, `gradle.properties`, launchers,
+and wrapper artifacts from the reviewed contract and current generator, then
+checks every byte and manifest entry. Replacing the launcher or SHA gate and self-attesting
 a new manifest hash is therefore explicit drift rather than a pass.
 
 Use `scaffold --bundled contract.json --audit audit.json --jar target.jar --classpath ancestry.jar` and
@@ -358,7 +364,10 @@ task is derived from the same fixture name (`evilCraftFixture` becomes
 `runEvilCraftGameTestServer`) and mismatches fail before materialization. The
 target mod ID must also produce a non-reserved Java package segment. An audited
 descriptor must use the audited target coordinate as its primary compile
-dependency and include that exact coordinate in runtime dependencies. GameTest
+dependency and include that exact coordinate in runtime dependencies. Every
+bundled descriptor, audited or not, must declare a non-empty
+`runtimeDependencies` list containing its primary compile dependency so isolated
+and aggregate fixtures cannot run without their target mod. GameTest
 evidence markers must occur between the annotated method's braces; a marker
 that appears only in its declaration is not execution evidence. The published
 archive includes its own Gradle wrapper template, so an extracted copy can

@@ -1,13 +1,34 @@
 {
-  "schema": 1,
-  "id": "auto_storage:iron_furnaces",
-  "entrypoint": "com.swear.autostorage.compat.ironfurnaces.IronFurnacesCompatModule",
-  "requires": ["ironfurnaces"],
-  "side": "both",
-  "sourceSet": "compatIronFurnaces",
-  "fixture": "ironFurnacesFixture",
-  "expectedTests": 3,
   "dependencies": [
     "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.ironfurnaces.IronFurnacesCompatModule",
+  "expectedTests": 3,
+  "fixture": "ironFurnacesFixture",
+  "id": "auto_storage:iron_furnaces",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "ironfurnaces"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "ironfurnaces"
+      ],
+      "sha256": "438b674e512fc6e7f65c74acaf8b7b2cd717891b7334622921aca42417d52317"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "requires": [
+    "ironfurnaces"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatIronFurnaces"
 }

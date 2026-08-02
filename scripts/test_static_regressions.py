@@ -1125,18 +1125,35 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("SelfTest: 204927 passed, 0 failed, 204927 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
-    def test_compatibility_matrix_locks_the_fourteen_mod_recipe_workload(self):
+    def test_compatibility_matrix_uses_descriptor_owned_recipe_inventories(self):
         matrix = self.read_required(
             "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
             "compatibilitymatrix/CraftablePerformanceGameTests.java"
         )
-        self.assertIn("EXPECTED_RECIPE_COUNT = 12_736", matrix)
+        coexistence = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CompatibilityMatrixGameTests.java"
+        )
+        self.assertNotIn("EXPECTED_RECIPE_COUNT", matrix)
         self.assertIn(
             "MAX_BASELINE_INDEX_RETAINED_BYTES = 9L * 1024L * 1024L",
             matrix,
         )
-        self.assertIn("recipeCount != EXPECTED_RECIPE_COUNT", matrix)
-        self.assertIn("Compatibility recipe workload drifted", matrix)
+        self.assertIn("assertRecipeInventories", matrix)
+        self.assertIn("CompatibilityMatrixManifest", matrix)
+        self.assertIn("CompatibilityMatrixManifest", coexistence)
+        self.assertNotIn('"ae2"', coexistence)
+        self.assertNotIn("ae2_inscriber", coexistence)
+        companions = self.read_required(
+            "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+            "compatibility-matrix-companions.json"
+        )
+        self.assertIn("unclaimedRecipeInventory", companions)
+        self.assertIn("pneumaticcraft", companions)
+        build = self.read_required("build.gradle")
+        self.assertIn("generateCompatibilityMatrixManifest", build)
+        self.assertIn("runCompatFixtureGameTestServers", build)
+        self.assertIn("compatibility-matrix-manifest.json", build)
 
     def test_mekanism_chemical_compat_is_optional_and_ci_exercised(self):
         build = self.read_required("build.gradle")
@@ -1163,7 +1180,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotRegex(build, r'(?m)^\s*runtimeOnly\s+"[^"]*mekanism')
         self.assertRegex(properties, r"(?m)^mekanism_ci_version=[A-Za-z0-9]+$")
         self.assertNotIn('modId="mekanism"', metadata)
-        self.assertIn('"requires": ["mekanism"]', module_index)
+        self.assertEqual(["mekanism"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn(".capabilities(MekanismChemicalCompat::register)", module)
         self.assertNotIn("import mekanism.", module)
@@ -1262,7 +1279,7 @@ class StaticRegressionTests(unittest.TestCase):
             build, "botania", "botaniaFixture", 14
         )
         self.assertNotIn('modId="botania"', metadata)
-        self.assertIn('"requires": ["botania"]', module_index)
+        self.assertEqual(["botania"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn("BotaniaCompat.register(MACHINES, RECIPES)", module)
         self.assertIn(".containerStrategies(CONTAINERS)", module)
@@ -1323,9 +1340,9 @@ class StaticRegressionTests(unittest.TestCase):
             7,
         )
         self.assertNotIn('modId="modern_industrialization"', metadata)
-        self.assertIn(
-            '"requires": ["modern_industrialization"]',
-            module_index,
+        self.assertEqual(
+            ["modern_industrialization"],
+            json.loads(module_index)["requires"],
         )
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn(
@@ -1393,7 +1410,7 @@ class StaticRegressionTests(unittest.TestCase):
             build, "ars_nouveau", "arsNouveauFixture", 11
         )
         self.assertNotIn('modId="ars_nouveau"', metadata)
-        self.assertIn('"requires": ["ars_nouveau"]', module_index)
+        self.assertEqual(["ars_nouveau"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn("ArsNouveauCompat.register(MACHINES, RECIPES)", module)
         self.assertIn(".blockStrategies(BLOCKS)", module)
@@ -1454,7 +1471,7 @@ class StaticRegressionTests(unittest.TestCase):
             build, "evilcraft", "evilCraftFixture", 10
         )
         self.assertNotIn('modId="evilcraft"', metadata)
-        self.assertIn('"requires": ["evilcraft"]', module_index)
+        self.assertEqual(["evilcraft"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn("EvilCraftCompat.register(MACHINES, RECIPES)", module)
         self.assertNotIn("import org.cyclops.", module)
@@ -1518,7 +1535,7 @@ class StaticRegressionTests(unittest.TestCase):
             build, "powah", "powahFixture", 11
         )
         self.assertNotIn('modId="powah"', metadata)
-        self.assertIn('"requires": ["powah"]', module_index)
+        self.assertEqual(["powah"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn(
             "PowahCompat.register(MACHINES, RECIPES, TRANSFORMS)",
@@ -1589,7 +1606,7 @@ class StaticRegressionTests(unittest.TestCase):
             9,
         )
         self.assertNotIn('modId="industrialforegoing"', metadata)
-        self.assertIn('"requires": ["industrialforegoing"]', module_index)
+        self.assertEqual(["industrialforegoing"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn(
             "IndustrialForegoingCompat.register(MACHINES, RECIPES)",
@@ -1645,7 +1662,7 @@ class StaticRegressionTests(unittest.TestCase):
             build, "create", "createFixture", 13
         )
         self.assertNotIn('modId="create"', metadata)
-        self.assertIn('"requires": ["create"]', module_index)
+        self.assertEqual(["create"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn("CreateCompat.register(MACHINES, RECIPES)", module)
         self.assertNotIn("import com.simibubi.create.", module)

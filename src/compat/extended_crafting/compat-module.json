@@ -1,14 +1,38 @@
 {
-  "schema": 1,
-  "id": "auto_storage:extended_crafting",
-  "entrypoint": "com.swear.autostorage.compat.extendedcrafting.ExtendedCraftingCompatModule",
-  "requires": ["extendedcrafting"],
-  "side": "both",
-  "sourceSet": "compatExtendedCrafting",
-  "fixture": "extendedCraftingFixture",
-  "expectedTests": 4,
   "dependencies": [
     "maven.modrinth:extended-crafting:${extended_crafting_ci_version}",
     "maven.modrinth:cucumber:${cucumber_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.extendedcrafting.ExtendedCraftingCompatModule",
+  "expectedTests": 4,
+  "fixture": "extendedCraftingFixture",
+  "id": "auto_storage:extended_crafting",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [
+      "auto_storage:extended_crafting_table"
+    ],
+    "mods": [
+      "extendedcrafting"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "extendedcrafting"
+      ],
+      "sha256": "8da360cf8e332acc4cbf07eda4ba8fcd5906e31705a4d313b18b2cbbe0c246de"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "requires": [
+    "extendedcrafting"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:extended-crafting:${extended_crafting_ci_version}",
+    "maven.modrinth:cucumber:${cucumber_ci_version}"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatExtendedCrafting"
 }

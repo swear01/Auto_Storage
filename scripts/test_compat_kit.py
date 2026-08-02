@@ -4712,6 +4712,7 @@ displayName="Sample Machines"
         }
         legacy_contract = self.accepted_contract()
         legacy_contract.pop("source_recipe_data_sha256")
+        legacy_contract.pop("matrix")
 
         with self.assertRaisesRegex(ValueError, "source_recipe_data_sha256"):
             self.compat_kit.validate_contract(
@@ -4751,6 +4752,42 @@ displayName="Sample Machines"
                 current_audit,
                 current_audit,
             )
+
+    def test_migrate_contract_preserves_reviewed_matrix_from_format_7_contract(self):
+        current_audit = self.source_audit()
+        legacy_audit = copy.deepcopy(current_audit)
+        legacy_audit["scanner_format"] = 7
+        self.downgrade_audit_artifact(legacy_audit)
+        legacy_audit.pop("ancestry_classpath")
+        legacy_audit.pop("recipe_data")
+        legacy_audit.pop("structural_class_graph")
+        legacy_audit.pop("structural_hierarchy")
+        legacy_audit.pop("structural_candidate_inventory_sha256")
+        legacy_audit["candidates"] = {
+            bucket: [
+                {
+                    "class": candidate["class"],
+                    "public_signature": candidate["public_signature"],
+                }
+                for candidate in legacy_audit["candidates"][bucket]
+            ]
+            for bucket in (
+                "recipe_classes",
+                "resource_apis",
+                "station_classes",
+            )
+        }
+        legacy_contract = self.accepted_contract()
+        legacy_contract.pop("source_recipe_data_sha256")
+        reviewed_matrix = copy.deepcopy(legacy_contract["matrix"])
+
+        migrated, _ = self.compat_kit.migrate_contract(
+            legacy_contract,
+            legacy_audit,
+            current_audit,
+        )
+
+        self.assertEqual(reviewed_matrix, migrated["matrix"])
 
     def test_migrate_contract_reopens_changed_evidence_and_rejects_removed_acceptance(self):
         old_audit = self.source_audit()
@@ -4948,6 +4985,7 @@ displayName="Sample Machines"
         contract["verification"] = copy.deepcopy(
             template_contract["verification"]
         )
+        contract["matrix"] = copy.deepcopy(template_contract["matrix"])
         self.compat_kit.validate_contract(
             contract,
             require_complete=True,
@@ -6032,6 +6070,9 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
     def rebind_contract_source(contract: dict, audit: dict):
         contract["source_audit_sha256"] = audit["artifact"]["sha256"]
         contract["source_recipe_data_sha256"] = audit["recipe_data"]["digest"]
+        mod_id = contract["target"]["mod_id"]
+        contract["matrix"]["mods"] = [mod_id]
+        contract["matrix"]["recipeInventory"]["namespaces"] = [mod_id]
 
     def committed_ae2_jar(self) -> Path:
         audit = json.loads(
@@ -6191,6 +6232,9 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "https://repo.example.com/releases"
         ]
         contract["target"]["runtime_dependencies"] = []
+        contract["matrix"]["recipeInventory"]["sha256"] = contract[
+            "source_recipe_inventory_sha256"
+        ]
         for family in contract["families"]:
             if family["class"] == "samplemod.recipe.ChanceRecipe":
                 family["status"] = "rejected"
@@ -6288,6 +6332,66 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             source_artifact=self.jar,
         )
         return contract
+
+    def test_bundled_descriptor_preserves_reviewed_matrix_contract(self):
+        contract = self.accepted_contract()
+        reviewed_matrix = {
+            "mods": ["samplemod"],
+            "descriptors": ["auto_storage:samplemod_crusher"],
+            "resourceKinds": [],
+            "acceptedRecipes": ["samplemod:crushing"],
+            "rejectedDescriptors": ["auto_storage:samplemod_random"],
+            "rejectedResourceKinds": [],
+            "recipeInventory": {
+                "namespaces": ["samplemod"],
+                "sha256": "a" * 64,
+            },
+        }
+        contract["matrix"] = reviewed_matrix
+
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=True,
+            source_audit=self.source_audit(),
+            source_artifact=self.jar,
+        )
+        descriptor = json.loads(
+            self.compat_kit._bundled_files(contract)[
+                "src/compat/samplemod/compat-module.json"
+            ]
+        )
+
+        self.assertEqual(reviewed_matrix, descriptor["matrix"])
+
+    def test_complete_contract_rejects_pending_matrix_inventory(self):
+        contract = self.accepted_contract()
+        contract["matrix"] = self.compat_kit._pending_contract_matrix(
+            contract["target"]["mod_id"]
+        )
+
+        with self.assertRaisesRegex(ValueError, "pending matrix recipe inventory"):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
+    def test_pending_matrix_uses_schema_rejectable_zero_digest(self):
+        pending = self.compat_kit._pending_contract_matrix("samplemod")
+        self.assertEqual(
+            "0" * 64,
+            pending["recipeInventory"]["sha256"],
+        )
+
+        schema = json.loads(
+            (ROOT / "tools/compat-kit/schema/compat-contract.schema.json").read_text()
+        )
+        completion_rule = schema["allOf"][0]["else"]
+        complete_digest = completion_rule["properties"]["matrix"]["properties"][
+            "recipeInventory"
+        ]["properties"]["sha256"]
+        self.assertEqual({"not": {"const": "0" * 64}}, complete_digest)
 
     def test_bundled_scaffold_is_descriptor_owned_fail_closed_and_drift_checked(self):
         contract = self.accepted_contract()
@@ -7990,12 +8094,13 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn("compatKitGeneratedFixture", build)
         self.assertIn("compileCompatKitGeneratedFixtureJava", build)
 
-    def test_recipe_family_verification_commands_include_ae2_fixture(self):
+    def test_recipe_family_verification_commands_use_descriptor_aggregate(self):
         guide = (ROOT / "docs/recipe-family-api.md").read_text()
         fixture_section = guide.split("## Repository verification fixture", 1)[1]
         commands = fixture_section.split("```bash", 1)[1].split("```", 1)[0]
 
-        self.assertIn("./gradlew runAe2GameTestServer", commands)
+        self.assertIn("./gradlew runCompatFixtureGameTestServers", commands)
+        self.assertNotIn("./gradlew runAe2GameTestServer", commands)
 
     def test_verify_runs_declared_commands_and_emits_complete_report(self):
         contract = self.accepted_contract()

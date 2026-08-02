@@ -218,6 +218,7 @@ CONTRACT_TOP_KEYS = {
     "source_recipe_inventory_sha256",
     "source_recipe_data_sha256",
     "families",
+    "matrix",
     "verification",
 }
 FAMILY_KEYS = {
@@ -255,6 +256,15 @@ VERIFICATION_KEYS = {
     "evidence",
 }
 VERIFICATION_EVIDENCE_KEYS = {"task", "source", "marker"}
+MATRIX_LIST_KEYS = (
+    "mods",
+    "descriptors",
+    "resourceKinds",
+    "acceptedRecipes",
+    "rejectedDescriptors",
+    "rejectedResourceKinds",
+)
+MATRIX_KEYS = set(MATRIX_LIST_KEYS) | {"recipeInventory"}
 JAVA_RESERVED_IDENTIFIERS = frozenset(
     """
     abstract assert boolean break byte case catch char class const continue
@@ -3790,6 +3800,7 @@ def decide_audit(audit: dict) -> tuple[dict, str]:
         ),
         "source_recipe_data_sha256": audit["recipe_data"]["digest"],
         "families": families,
+        "matrix": _pending_contract_matrix(audit["target"]["mod_id"]),
         "verification": {
             "fixture": None,
             "expected_game_tests": None,
@@ -3821,15 +3832,22 @@ def _validate_migration_source_contract(
         raise ValueError(
             "format 7 contract must not bind unverifiable recipe data"
         )
-    expected_keys = CONTRACT_TOP_KEYS - {"source_recipe_data_sha256"}
-    _unknown_keys(contract, expected_keys, "format 7 contract")
-    missing = sorted(expected_keys - set(contract))
+    allowed_keys = CONTRACT_TOP_KEYS - {"source_recipe_data_sha256"}
+    required_keys = allowed_keys - {"matrix"}
+    _unknown_keys(contract, allowed_keys, "format 7 contract")
+    missing = sorted(required_keys - set(contract))
     if missing:
         raise ValueError(
             "format 7 contract is missing keys: " + ", ".join(missing)
         )
     normalized = copy.deepcopy(contract)
     normalized["source_recipe_data_sha256"] = "0" * 64
+    normalized["matrix"] = copy.deepcopy(
+        contract.get(
+            "matrix",
+            _pending_contract_matrix(normalized["target"]["mod_id"]),
+        )
+    )
     validate_contract(normalized, require_complete=False)
 
     target = contract["target"]
@@ -3880,6 +3898,12 @@ def migrate_contract(
 
     migrated, _ = decide_audit(new_audit)
     migrated["target"] = copy.deepcopy(old_contract["target"])
+    migrated["matrix"] = copy.deepcopy(
+        old_contract.get(
+            "matrix",
+            _pending_contract_matrix(old_contract["target"]["mod_id"]),
+        )
+    )
     migrated["verification"] = copy.deepcopy(old_contract["verification"])
     old_by_class = {
         family["class"]: family
@@ -4036,6 +4060,62 @@ def _validate_unique_strings(value, location: str, *, allow_empty: bool):
         _validate_nonempty_string(entry, f"{location} {index}")
     if len(set(value)) != len(value):
         raise ValueError(f"{location} must not contain duplicates")
+
+
+def _pending_contract_matrix(mod_id: str) -> dict:
+    return {
+        "mods": [mod_id],
+        "descriptors": [],
+        "resourceKinds": [],
+        "acceptedRecipes": [],
+        "rejectedDescriptors": [],
+        "rejectedResourceKinds": [],
+        "recipeInventory": {
+            "namespaces": [mod_id],
+            "sha256": "0" * 64,
+        },
+    }
+
+
+def _validate_contract_matrix(matrix, mod_id: str):
+    if not isinstance(matrix, dict) or set(matrix) != MATRIX_KEYS:
+        raise ValueError(
+            "contract matrix must declare mods, descriptors, resourceKinds, "
+            "acceptedRecipes, rejectedDescriptors, rejectedResourceKinds, "
+            "and recipeInventory"
+        )
+    for key in MATRIX_LIST_KEYS:
+        _validate_unique_strings(
+            matrix[key], f"contract matrix {key}", allow_empty=key != "mods"
+        )
+    if mod_id not in matrix["mods"]:
+        raise ValueError("contract matrix mods must include target mod_id")
+    for matrix_mod_id in matrix["mods"]:
+        if not re.fullmatch(r"[a-z0-9_]+", matrix_mod_id):
+            raise ValueError("contract matrix mods contains invalid mod id")
+    for key in MATRIX_LIST_KEYS[1:]:
+        for value in matrix[key]:
+            if RESOURCE_LOCATION.fullmatch(value) is None:
+                raise ValueError(f"contract matrix {key} contains invalid resource id")
+    inventory = matrix["recipeInventory"]
+    if not isinstance(inventory, dict) or set(inventory) != {"namespaces", "sha256"}:
+        raise ValueError(
+            "contract matrix recipeInventory must declare namespaces and sha256"
+        )
+    _validate_unique_strings(
+        inventory["namespaces"],
+        "contract matrix recipeInventory namespaces",
+        allow_empty=False,
+    )
+    for namespace in inventory["namespaces"]:
+        if not re.fullmatch(r"[a-z0-9_]+", namespace):
+            raise ValueError(
+                "contract matrix recipeInventory namespaces contains invalid namespace"
+            )
+    if not isinstance(inventory["sha256"], str) or not re.fullmatch(
+        r"[0-9a-f]{64}", inventory["sha256"]
+    ):
+        raise ValueError("contract matrix recipeInventory sha256 must be a SHA-256 digest")
 
 
 def _validate_terms(value, location: str):
@@ -4233,6 +4313,7 @@ def validate_contract(
             raise ValueError(f"contract target requires {key}")
     if not re.fullmatch(r"[a-z0-9_-]+", target["mod_id"]):
         raise ValueError("contract target has invalid mod_id")
+    _validate_contract_matrix(contract.get("matrix"), target["mod_id"])
     if "dependency" in target:
         _validate_dependency_coordinate(
             target["dependency"],
@@ -4371,6 +4452,13 @@ def validate_contract(
     if require_complete and unresolved:
         raise ValueError("contract has unresolved families: " + ", ".join(unresolved))
     if require_complete:
+        if (
+            contract["matrix"]["recipeInventory"]["sha256"]
+            == _pending_contract_matrix(target["mod_id"])["recipeInventory"]["sha256"]
+        ):
+            raise ValueError(
+                "complete contract must replace the pending matrix recipe inventory digest"
+            )
         if not isinstance(target.get("dependency"), str) or not target["dependency"].strip():
             raise ValueError("complete contract target requires dependency")
         if not isinstance(target.get("repositories"), list):
@@ -4546,7 +4634,7 @@ def _bundled_files(contract: dict) -> dict[str, bytes]:
         "schema": 1,
         "id": f"auto_storage:{mod_id}",
         "entrypoint": f"{module_package}.{class_prefix}CompatModule",
-        "requires": [mod_id],
+        "requires": list(contract["matrix"]["mods"]),
         "side": "both",
         "sourceSet": source_set,
         "fixture": fixture,
@@ -4561,6 +4649,7 @@ def _bundled_files(contract: dict) -> dict[str, bytes]:
             "dependency": target["dependency"],
             "sha256": contract["source_audit_sha256"],
         },
+        "matrix": copy.deepcopy(contract["matrix"]),
     }
     module = f"""package {module_package};
 

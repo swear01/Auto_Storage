@@ -4,7 +4,7 @@
   "title": "Auto Storage compatibility contract",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "kind", "target", "source_audit_sha256", "source_recipe_inventory_sha256", "source_recipe_data_sha256", "families", "verification"],
+  "required": ["schema", "kind", "target", "source_audit_sha256", "source_recipe_inventory_sha256", "source_recipe_data_sha256", "families", "matrix", "verification"],
   "properties": {
     "schema": {"const": 1},
     "kind": {"const": "auto_storage_compat_contract"},
@@ -196,6 +196,7 @@
         ]
       }
     },
+    "matrix": {"$ref": "#/$defs/matrix"},
     "verification": {
       "type": "object",
       "additionalProperties": false,
@@ -280,6 +281,19 @@
               "runtime_dependencies"
             ]
           },
+          "matrix": {
+            "properties": {
+              "recipeInventory": {
+                "properties": {
+                  "sha256": {
+                    "not": {
+                      "const": "0000000000000000000000000000000000000000000000000000000000000000"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "verification": {
             "properties": {
               "fixture": {"type": "string", "minLength": 1},
@@ -362,6 +376,54 @@
     }
   ],
   "$defs": {
+    "matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mods",
+        "descriptors",
+        "resourceKinds",
+        "acceptedRecipes",
+        "rejectedDescriptors",
+        "rejectedResourceKinds",
+        "recipeInventory"
+      ],
+      "properties": {
+        "mods": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z0-9_]+$"}
+        },
+        "descriptors": {"$ref": "#/$defs/resourceIds"},
+        "resourceKinds": {"$ref": "#/$defs/resourceIds"},
+        "acceptedRecipes": {"$ref": "#/$defs/resourceIds"},
+        "rejectedDescriptors": {"$ref": "#/$defs/resourceIds"},
+        "rejectedResourceKinds": {"$ref": "#/$defs/resourceIds"},
+        "recipeInventory": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["namespaces", "sha256"],
+          "properties": {
+            "namespaces": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "pattern": "^[a-z0-9_]+$"}
+            },
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        }
+      }
+    },
+    "resourceIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+      }
+    },
     "terms": {
       "type": "array",
       "items": {

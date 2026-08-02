@@ -1,5 +1,65 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
+
+class CompatWorldCleaner {
+    static void deleteTree(java.nio.file.Path root) {
+        if (!Files.exists(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return
+        }
+        if (Files.isSymbolicLink(root)) {
+            throw new GradleException("Compatibility GameTest path is a symlink: ${root}")
+        }
+        Files.walkFileTree(root, new SimpleFileVisitor<java.nio.file.Path>() {
+            @Override
+            FileVisitResult preVisitDirectory(
+                    java.nio.file.Path directory,
+                    BasicFileAttributes attributes) {
+                if (Files.isSymbolicLink(directory)) {
+                    throw new GradleException(
+                            "Compatibility GameTest tree contains a symlink: ${directory}")
+                }
+                return FileVisitResult.CONTINUE
+            }
+
+            @Override
+            FileVisitResult visitFile(
+                    java.nio.file.Path file,
+                    BasicFileAttributes attributes) {
+                if (Files.isSymbolicLink(file)) {
+                    throw new GradleException(
+                            "Compatibility GameTest tree contains a symlink: ${file}")
+                }
+                Files.delete(file)
+                return FileVisitResult.CONTINUE
+            }
+
+            @Override
+            FileVisitResult visitFileFailed(
+                    java.nio.file.Path file,
+                    IOException failure) {
+                throw new GradleException(
+                        "Cannot inspect compatibility GameTest path: ${file}", failure)
+            }
+
+            @Override
+            FileVisitResult postVisitDirectory(
+                    java.nio.file.Path directory,
+                    IOException failure) {
+                if (failure != null) {
+                    throw new GradleException(
+                            "Cannot inspect compatibility GameTest directory: ${directory}",
+                            failure)
+                }
+                Files.delete(directory)
+                return FileVisitResult.CONTINUE
+            }
+        })
+    }
+}
 
 plugins {
     id 'java-library'
@@ -54,8 +114,9 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
                 !(it instanceof String) || !(it ==~ /https:\/\/\S+/)
             }
             || descriptorRepositories.toSet().size() != descriptorRepositories.size()
-            || (descriptor.runtimeDependencies != null
-            && !(descriptor.runtimeDependencies instanceof List))
+            || !(descriptor.runtimeDependencies instanceof List)
+            || descriptor.runtimeDependencies.isEmpty()
+            || !descriptor.runtimeDependencies.contains(descriptor.dependencies[0])
             || (auditArtifact != null
             && (!(auditArtifact instanceof Map)
             || auditArtifact.keySet() != ['dependency', 'sha256'] as Set
@@ -65,7 +126,18 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             || !(auditArtifact.sha256 ==~ /[0-9a-f]{64}/)
             || descriptor.dependencies[0] != auditArtifact.dependency
             || !(descriptor.runtimeDependencies instanceof List)
-            || !descriptor.runtimeDependencies.contains(auditArtifact.dependency)))) {
+            || !descriptor.runtimeDependencies.contains(auditArtifact.dependency)))
+            || !(descriptor.matrix instanceof Map)
+            || descriptor.matrix.mods == null
+            || descriptor.matrix.descriptors == null
+            || descriptor.matrix.resourceKinds == null
+            || descriptor.matrix.acceptedRecipes == null
+            || descriptor.matrix.rejectedDescriptors == null
+            || descriptor.matrix.rejectedResourceKinds == null
+            || !(descriptor.matrix.recipeInventory instanceof Map)
+            || !(descriptor.matrix.recipeInventory.namespaces instanceof List)
+            || !(descriptor.matrix.recipeInventory.sha256 instanceof String)
+            || !(descriptor.matrix.recipeInventory.sha256 ==~ /[0-9a-f]{64}/)) {
         throw new GradleException(
                 "Invalid compatibility module descriptor: ${descriptorFile}")
     }
@@ -94,7 +166,7 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             repositories: descriptorRepositories.collect {
                 it.toString()
             },
-            runtimeDependencies: (descriptor.runtimeDependencies ?: []).collect {
+            runtimeDependencies: descriptor.runtimeDependencies.collect {
                 expandCompatDependency(it.toString())
             },
             auditArtifact: auditArtifact == null ? null : [
@@ -135,6 +207,28 @@ def generateCompatModuleIndex = tasks.register('generateCompatModuleIndex') {
     }
 }
 
+def compatibilityMatrixCompanionsFile = layout.projectDirectory.file(
+        'src/compatibilityMatrixFixture/resources/META-INF/auto_storage/compatibility-matrix-companions.json')
+def generatedCompatibilityMatrixManifestDir =
+        layout.buildDirectory.dir('generated/resources/compatibilityMatrix')
+def generateCompatibilityMatrixManifest = tasks.register(
+        'generateCompatibilityMatrixManifest', Exec) {
+    inputs.files(compatModuleFiles)
+    inputs.file(compatibilityMatrixCompanionsFile)
+    inputs.file('scripts/compatibility_matrix_manifest.py')
+    def manifestFile = generatedCompatibilityMatrixManifestDir.map {
+        it.file('META-INF/auto_storage/compatibility-matrix-manifest.json')
+    }
+    outputs.file(manifestFile)
+    workingDir = layout.projectDirectory.asFile
+    doFirst {
+        manifestFile.get().asFile.parentFile.mkdirs()
+    }
+    commandLine 'python3', 'scripts/compatibility_matrix_manifest.py',
+            '--root', layout.projectDirectory.asFile.absolutePath,
+            '--output', manifestFile.get().asFile.absolutePath
+}
+
 sourceSets.main.resources {
     srcDir('src/generated/resources')
     srcDir(generatedCompatModuleIndexDir)
@@ -160,7 +254,11 @@ sourceSets {
     compatibilityMatrixFixture {
         compileClasspath += sourceSets.main.output + configurations.compileClasspath
         runtimeClasspath += output + sourceSets.main.runtimeClasspath
+        resources.srcDir(generatedCompatibilityMatrixManifestDir)
     }
+}
+tasks.named('processCompatibilityMatrixFixtureResources').configure {
+    dependsOn generateCompatibilityMatrixManifest
 }
 def apiSourceSet = sourceSets.create('api') {
     java.setSrcDirs(['src/api/java'])
@@ -1279,6 +1377,7 @@ def compatibilityMatrixLatestLog =
 tasks.named('runCompatibilityMatrixGameTestServer').configure {
     dependsOn compatArtifactVerificationTasks
     dependsOn tasks.named('verifyBotaniaFixtureArtifact')
+    dependsOn generateCompatibilityMatrixManifest
     doLast {
         if (!compatibilityMatrixLatestLog.exists()) {
             throw new GradleException(
@@ -1299,6 +1398,92 @@ tasks.named('runCompatibilityMatrixGameTestServer').configure {
                     'Compatibility matrix GameTest or SelfTest did not pass; inspect run/logs/latest.log')
         }
     }
+}
+
+def compatFixtureRunTasks = []
+def compatVerificationRoot = layout.projectDirectory.asFile.toPath().toRealPath()
+def compatGameTestRunDir = layout.projectDirectory.dir('run').asFile
+def compatGameTestWorldDir = layout.projectDirectory.dir('run/world').asFile
+def clearCompatGameTestWorld = {
+    for (candidate in [compatGameTestRunDir, compatGameTestWorldDir]) {
+        def candidatePath = candidate.toPath().toAbsolutePath().normalize()
+        if (Files.isSymbolicLink(candidatePath)) {
+            throw new GradleException(
+                    "Compatibility GameTest path is a symlink: ${candidate}")
+        }
+        if (!candidatePath.startsWith(compatVerificationRoot)) {
+            throw new GradleException(
+                    "Compatibility GameTest path escapes project root: ${candidate}")
+        }
+        if (Files.exists(candidatePath)
+                && !candidatePath.toRealPath().startsWith(compatVerificationRoot)) {
+            throw new GradleException(
+                    "Compatibility GameTest path resolves outside project root: ${candidate}")
+        }
+    }
+    CompatWorldCleaner.deleteTree(compatGameTestWorldDir.toPath())
+}
+def compatCleanupTestRootParent = layout.buildDirectory.dir('tmp').get().asFile.toPath()
+def verifyCompatGameTestWorldCleanupSafety = tasks.register(
+        'verifyCompatGameTestWorldCleanupSafety') {
+    group = 'verification'
+    description = 'Reject nested symlinks without deleting their external target'
+    doLast {
+        Files.createDirectories(compatCleanupTestRootParent)
+        def fixtureRoot = Files.createTempDirectory(
+                compatCleanupTestRootParent,
+                'compat-world-cleanup-')
+        def externalRoot = Files.createTempDirectory('auto-storage-cleanup-sentinel-')
+        def world = fixtureRoot.resolve('world')
+        def nested = world.resolve('nested')
+        def link = nested.resolve('external')
+        def sentinel = externalRoot.resolve('keep.txt')
+        try {
+            Files.createDirectories(nested)
+            Files.writeString(sentinel, 'keep')
+            Files.createSymbolicLink(link, externalRoot)
+            try {
+                CompatWorldCleaner.deleteTree(world)
+                throw new GradleException(
+                        'Compatibility GameTest cleanup accepted a nested symlink')
+            } catch (GradleException expected) {
+                if (!expected.message.contains('contains a symlink')) {
+                    throw expected
+                }
+            }
+            if (!Files.isRegularFile(sentinel)) {
+                throw new GradleException(
+                        'Compatibility GameTest cleanup deleted an external sentinel')
+            }
+        } finally {
+            Files.deleteIfExists(link)
+            CompatWorldCleaner.deleteTree(fixtureRoot)
+            CompatWorldCleaner.deleteTree(externalRoot)
+        }
+    }
+}
+compatModules.each { spec ->
+    def fixtureTask = tasks.named(spec.runTask)
+    def previousCompatFixture = compatFixtureRunTasks.isEmpty()
+            ? null
+            : compatFixtureRunTasks.last()
+    fixtureTask.configure {
+        doFirst {
+            clearCompatGameTestWorld()
+        }
+        if (previousCompatFixture != null) {
+            mustRunAfter previousCompatFixture
+        }
+    }
+    compatFixtureRunTasks << fixtureTask
+}
+tasks.register('runCompatFixtureGameTestServers') {
+    group = 'verification'
+    description = 'Run every descriptor-owned compatibility fixture GameTest server'
+    dependsOn compatFixtureRunTasks
+}
+tasks.named('check').configure {
+    dependsOn verifyCompatGameTestWorldCleanupSafety
 }
 
 idea {

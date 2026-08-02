@@ -1,14 +1,40 @@
 {
-  "schema": 1,
-  "id": "auto_storage:modern_industrialization",
-  "entrypoint": "com.swear.autostorage.compat.modernindustrialization.ModernIndustrializationCompatModule",
-  "requires": ["modern_industrialization"],
-  "side": "both",
-  "sourceSet": "compatModernIndustrialization",
-  "fixture": "modernIndustrializationFixture",
-  "expectedTests": 7,
   "dependencies": [
     "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}",
     "maven.modrinth:guideme:${guideme_ci_version}"
-  ]
+  ],
+  "entrypoint": "com.swear.autostorage.compat.modernindustrialization.ModernIndustrializationCompatModule",
+  "expectedTests": 7,
+  "fixture": "modernIndustrializationFixture",
+  "id": "auto_storage:modern_industrialization",
+  "matrix": {
+    "acceptedRecipes": [
+      "modern_industrialization:materials/aluminum/macerator/blade"
+    ],
+    "descriptors": [
+      "auto_storage:modern_industrialization_macerator"
+    ],
+    "mods": [
+      "modern_industrialization"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "modern_industrialization"
+      ],
+      "sha256": "781fde12ef6fa588806f27cc07569678421c4c6516573919d3232b3e75dd073e"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "requires": [
+    "modern_industrialization"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}",
+    "maven.modrinth:guideme:${guideme_ci_version}"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatModernIndustrialization"
 }
