@@ -1,0 +1,424 @@
+{
+  "families": [
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.AdvancedBeehiveRecipe",
+      "costs": [],
+      "decision": "Advanced beehive production uses BeeIngredient identity plus ChancedOutput results and live hive upgrade modifiers; no exact simulate-then-commit contract without bee/entity state.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.AdvancedBeehiveRecipe#public_signature"
+      ],
+      "id": "advanced_beehive_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeBombBeeCageRecipe",
+      "costs": [],
+      "decision": "Special crafting that embeds live cage bee NBT into bee bombs; world/generic-ingredient surface, not a station transaction family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeBombBeeCageRecipe#public_signature"
+      ],
+      "id": "bee_bomb_bee_cage_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeBreedingRecipe",
+      "costs": [],
+      "decision": "Bee breeding depends on live bee entities/cages in a breeding chamber with world mutation; not a bounded item/fluid transaction.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeBreedingRecipe#public_signature"
+      ],
+      "id": "bee_breeding_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeConversionRecipe",
+      "costs": [],
+      "decision": "Bee conversion uses chance plus live bee identity/item interaction in the world; fail closed without guaranteed deterministic subset.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeConversionRecipe#public_signature"
+      ],
+      "id": "bee_conversion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeFishingRecipe",
+      "costs": [],
+      "decision": "Bee fishing is chance-gated biome/world fishing behavior; not a deterministic station family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeFishingRecipe#public_signature"
+      ],
+      "id": "bee_fishing_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeNBTChangerRecipe",
+      "costs": [],
+      "decision": "Mutates live bee NBT/components in the world; entity/world mutation without a simulate-then-commit plan.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeNBTChangerRecipe#public_signature"
+      ],
+      "id": "bee_n_b_t_changer_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BeeSpawningRecipe",
+      "costs": [],
+      "decision": "Nest/world bee spawning depends on block and entity state; not a deterministic storage transaction.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BeeSpawningRecipe#public_signature"
+      ],
+      "id": "bee_spawning_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BlockConversionRecipe",
+      "costs": [],
+      "decision": "Block conversion is chance-gated bee pollination that mutates world BlockStates; fail closed.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BlockConversionRecipe#public_signature"
+      ],
+      "id": "block_conversion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.BottlerRecipe",
+      "costs": [],
+      "decision": "Bottler fluid fill is entangled with live BottlerBlockEntity world paths (piston+bee kill for gene bottles, FluidUtil capability fill fallback, HAS_BOTTLE block-state mutation) and has no recipe-declared work/energy cost; reject until an isolated exact fluid/item contract exists without those live side paths.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.BottlerRecipe#public_signature"
+      ],
+      "id": "bottler_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe",
+      "costs": [],
+      "decision": "Centrifuge outputs are ChancedOutput lists rolled with RandomSource; heated/powered variants also apply upgrade productivity/stability and energy drain. Chance outputs lack a guaranteed deterministic subset usable as an Auto Storage transaction.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe#public_signature"
+      ],
+      "id": "centrifuge_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.CombineGeneRecipe",
+      "costs": [],
+      "decision": "Special crafting that merges gene NBT/purity stacks; generic-ingredient special recipe outside installed-station transaction contract.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.CombineGeneRecipe#public_signature"
+      ],
+      "id": "combine_gene_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ConfigurableCombBlockRecipe",
+      "costs": [],
+      "decision": "Special crafting that packs configurable comb blocks from bee_type components; not an installed-station family and not a vanilla shaped/shapeless class.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ConfigurableCombBlockRecipe#public_signature"
+      ],
+      "id": "configurable_comb_block_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ConfigurableHoneycombRecipe",
+      "costs": [],
+      "decision": "Special crafting that packs configurable honeycombs by bee_type component; not an installed-station family and not a vanilla shaped/shapeless class.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ConfigurableHoneycombRecipe#public_signature"
+      ],
+      "id": "configurable_honeycomb_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.HoneyTreatGeneRecipe",
+      "costs": [],
+      "decision": "Special crafting that applies gene NBT onto honey treats; not a deterministic station family.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.HoneyTreatGeneRecipe#public_signature"
+      ],
+      "id": "honey_treat_gene_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.IncubationRecipe",
+      "costs": [],
+      "decision": "Incubator runtime completes via IncubatorBlockEntity hard-coded egg/cage/gene paths with RandomSource purity rolls, energy, upgrades, and live BeeCage entity capture; IncubationRecipe is not a complete simulate-then-commit contract.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.IncubationRecipe#public_signature"
+      ],
+      "id": "incubation_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.common.recipe.ItemConversionRecipe",
+      "costs": [],
+      "decision": "Item conversion is chance-gated bee pollination of items in the world; fail closed.",
+      "evidence": [
+        "cy.jdkdigital.productivebees.common.recipe.ItemConversionRecipe#public_signature"
+      ],
+      "id": "item_conversion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "productivebees"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "productivebees"
+      ],
+      "sha256": "7531084b4c3b85d9ba3ec3e6514a08ac99a4bc5396e6e1182260e273fea5ac01"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "9d48d198bc6eacf3b7729f4d60b91e661cfa15d105264ba225dee87b1d547ba1",
+  "source_recipe_data_sha256": "22b4ffb8f346abbddb694c431a664eae055670cb64467ec2b86a8ea31bbc87db",
+  "source_recipe_inventory_sha256": "ebcabfe628b605b1afb945d19c174542f195b8d28fe882bbdf02a2a9cbb037c0",
+  "target": {
+    "dependency": "curse.maven:productivebees-377897:8022994",
+    "display_name": "Productive Bees",
+    "mod_id": "productivebees",
+    "repositories": [
+      "https://www.cursemaven.com/"
+    ],
+    "runtime_dependencies": [],
+    "version": "1.21.1-13.13.5"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Missing representative Productive Bees recipe bottler/honey_bottle",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Audited Productive Bees recipe type is empty",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Unsafe Productive Bees recipe type accepted",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Unsafe Productive Bees recipe was accepted: centrifuge/honeycomb_breeze",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Productive Bees unsafe machine contract was registered",
+          "source": "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java",
+          "task": "runProductivebeesGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 8,
+    "fixture": "productivebeesFixture",
+    "game_test_task": "runProductivebeesGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runProductivebeesGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

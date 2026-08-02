@@ -23,6 +23,142 @@ class ModularCompatSdkTests(unittest.TestCase):
                 relative_path,
             )
 
+    def test_productivebees_outcome_c_metadata_is_current_and_declarative(self):
+        module_root = ROOT / "src/compat/productivebees"
+        descriptor = json.loads((module_root / "compat-module.json").read_text())
+        contract_path = ROOT / "compat/contracts/productivebees.json"
+        contract = json.loads(contract_path.read_text())
+        audit = json.loads(
+            (ROOT / "compat/audits/productivebees/13.13.5.json").read_text()
+        )
+        manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
+
+        self.assertEqual(16, audit["scanner_format"])
+        self.assertEqual(
+            "9d48d198bc6eacf3b7729f4d60b91e661cfa15d105264ba225dee87b1d547ba1",
+            audit["artifact"]["sha256"],
+        )
+        self.assertEqual(
+            "3c818315d67abc16801626ce292bb207a7383f06",
+            audit["source"]["revision"],
+        )
+        self.assertEqual(
+            [
+                ("01c29b65c7014db0f9d5e3a9c5e65b9fbc3d1e9179c5b014cb12c6c4408c0d7f", 131329),
+                ("1fafb07b9d13c66d4435b0db38860d15607d9c5834d5aadeb89ce1bb3d16543d", 116961),
+                ("2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f", 56279815),
+                ("6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7", 154249),
+                ("a45df2125c26219974aba7507ffc9afe7b83acc941a386af3faacb1cc0056fde", 410690),
+                ("a55ae60894a9681ca0c5d5ef0ab295bdca591dbee58c56438fbe07eba63c13e4", 570291),
+                ("b9b261f4ca3589077cd363fc37047557142a199b0298921ebc392c9d5b1fa754", 644189),
+            ],
+            [
+                (entry["sha256"], entry["size"])
+                for entry in audit["ancestry_classpath"]
+            ],
+        )
+        self.assertEqual(
+            [
+                "curse.maven:curios-309927:6529130",
+                "curse.maven:jade-324717:5444008",
+                "dev.emi:emi-neoforge:1.1.22+1.21.1:api",
+                "maven.modrinth:geckolib:qj2pTqCr",
+                "mezz.jei:jei-1.21.1-common-api:19.25.0.322",
+            ],
+            [entry["dependency"] for entry in audit["ancestry_dependencies"]],
+        )
+        expected_recipe_classes = [
+            "cy.jdkdigital.productivebees.common.recipe.AdvancedBeehiveRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BeeBombBeeCageRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BeeBreedingRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BeeConversionRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BeeFishingRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BeeNBTChangerRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BeeSpawningRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BlockConversionRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.BottlerRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.CentrifugeRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.CombineGeneRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.ConfigurableCombBlockRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.ConfigurableHoneycombRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.HoneyTreatGeneRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.IncubationRecipe",
+            "cy.jdkdigital.productivebees.common.recipe.ItemConversionRecipe",
+        ]
+        self.assertEqual(
+            expected_recipe_classes,
+            [
+                candidate["class"]
+                for candidate in audit["candidates"]["recipe_classes"]
+            ],
+        )
+        self.assertEqual(
+            expected_recipe_classes,
+            sorted(family["class"] for family in contract["families"]),
+        )
+        self.assertTrue(all(family["status"] == "rejected" for family in contract["families"]))
+        self.assertEqual(
+            audit["recipe_data"]["digest"],
+            contract["source_recipe_data_sha256"],
+        )
+        self.assertEqual(
+            "curse.maven:productivebees-377897:8022994",
+            contract["target"]["dependency"],
+        )
+        self.assertEqual(
+            contract["target"]["dependency"],
+            descriptor["auditArtifact"]["dependency"],
+        )
+        self.assertEqual(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            contract["verification"]["evidence"]["all_mod_coexistence"][0]["marker"],
+        )
+        matrix = descriptor["matrix"]
+        self.assertEqual(contract["matrix"], matrix)
+        self.assertEqual(["productivebees"], matrix["mods"])
+        self.assertEqual([], matrix["descriptors"])
+        self.assertEqual([], matrix["resourceKinds"])
+        self.assertEqual([], matrix["acceptedRecipes"])
+        self.assertEqual([], matrix["rejectedDescriptors"])
+        self.assertEqual([], matrix["rejectedResourceKinds"])
+        self.assertEqual(
+            ["productivebees"],
+            matrix["recipeInventory"]["namespaces"],
+        )
+        self.assertEqual(
+            "7531084b4c3b85d9ba3ec3e6514a08ac99a4bc5396e6e1182260e273fea5ac01",
+            matrix["recipeInventory"]["sha256"],
+        )
+        modern_industrialization_descriptor = json.loads(
+            (
+                ROOT / "src/compat/modern_industrialization/compat-module.json"
+            ).read_text()
+        )
+        self.assertEqual(
+            "c4155661f3e187d12177f181b30b915d01adf9e4af33ba5945ec16d3f565e24f",
+            modern_industrialization_descriptor["matrix"]["recipeInventory"]["sha256"],
+        )
+        companions = json.loads(
+            (
+                ROOT
+                / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/compatibility-matrix-companions.json"
+            ).read_text()
+        )
+        self.assertEqual(
+            "652a71d0c9e69f1be44c08ac5814df4ee8e12127d6736d99f0bee0f92e1659c0",
+            companions["unclaimedRecipeInventory"]["sha256"],
+        )
+        self.assertEqual(
+            hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            manifest["contract_sha256"],
+        )
+        for relative_path, expected_sha256 in manifest["files"].items():
+            self.assertEqual(
+                expected_sha256,
+                hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                relative_path,
+            )
+
     def test_create_aquatic_ambitions_outcome_c_metadata_is_declarative(self):
         module_root = ROOT / "src/compat/create_aquatic_ambitions"
         descriptor = json.loads((module_root / "compat-module.json").read_text())

@@ -1,0 +1,41 @@
+{
+  "auditArtifact": {
+    "dependency": "curse.maven:productivebees-377897:8022994",
+    "sha256": "9d48d198bc6eacf3b7729f4d60b91e661cfa15d105264ba225dee87b1d547ba1"
+  },
+  "dependencies": [
+    "curse.maven:productivebees-377897:8022994"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.productivebees.ProductivebeesCompatModule",
+  "expectedTests": 8,
+  "fixture": "productivebeesFixture",
+  "id": "auto_storage:productivebees",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "productivebees"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "productivebees"
+      ],
+      "sha256": "7531084b4c3b85d9ba3ec3e6514a08ac99a4bc5396e6e1182260e273fea5ac01"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://www.cursemaven.com/"
+  ],
+  "requires": [
+    "productivebees"
+  ],
+  "runtimeDependencies": [
+    "curse.maven:productivebees-377897:8022994"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatProductivebees"
+}
