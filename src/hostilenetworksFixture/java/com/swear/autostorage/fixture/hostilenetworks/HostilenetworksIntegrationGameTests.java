@@ -6,6 +6,8 @@ import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -72,14 +74,25 @@ public final class HostilenetworksIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void overflow_and_shortage_checks_stay_fail_closed(
+    public static void only_vanilla_crafting_recipes_are_exposed(
             GameTestHelper helper
     ) {
-        if (AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
-                .anyMatch(id -> id.getNamespace().equals("auto_storage")
-                        && id.getPath().contains("hostilenetworks"))) {
-            helper.fail(
-                    "Hostile Neural Networks simulation and loot fabricator must remain fail closed");
+        var recipes = helper.getLevel().getRecipeManager().getRecipes().stream()
+                .filter(holder -> holder.id().getNamespace().equals("hostilenetworks"))
+                .toList();
+        if (recipes.size() != 30) {
+            helper.fail("Expected 30 loaded Hostile Neural Networks vanilla recipes, got "
+                    + recipes.size());
+            return;
+        }
+        var unsafe = recipes.stream()
+                .filter(holder -> !(holder.value() instanceof ShapedRecipe)
+                        && !(holder.value() instanceof ShapelessRecipe))
+                .findFirst()
+                .orElse(null);
+        if (unsafe != null) {
+            helper.fail("Hostile Neural Networks exposed a non-vanilla recipe class: "
+                    + unsafe.id() + " -> " + unsafe.value().getClass().getName());
             return;
         }
         helper.succeed();

@@ -13,7 +13,11 @@
       ],
       "sha256": "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6"
     },
-    "rejectedDescriptors": [],
+    "rejectedDescriptors": [
+      "auto_storage:hostilenetworks_sim_chamber",
+      "auto_storage:hostilenetworks_loot_fabricator",
+      "auto_storage:hostilenetworks_data_center"
+    ],
     "rejectedResourceKinds": [],
     "resourceKinds": []
   },
@@ -79,9 +83,9 @@
       ],
       "checked_overflow_atomic": [
         {
-          "marker": "Hostile Neural Networks simulation and loot fabricator must remain fail closed",
-          "source": "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksIntegrationGameTests.java",
-          "task": "runHostilenetworksGameTestServer"
+          "marker": "One-item-short Storage capacity must reject the whole batch before mutation",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
         }
       ],
       "dedicated_server_client_isolation": [
@@ -93,16 +97,16 @@
       ],
       "destination_capacity_atomic": [
         {
-          "marker": "Hostile Neural Networks simulation and loot fabricator must remain fail closed",
-          "source": "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksIntegrationGameTests.java",
-          "task": "runHostilenetworksGameTestServer"
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
         }
       ],
       "ingredient_shortage_atomic": [
         {
-          "marker": "Hostile Neural Networks simulation and loot fabricator must remain fail closed",
-          "source": "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksIntegrationGameTests.java",
-          "task": "runHostilenetworksGameTestServer"
+          "marker": "No-energy smelting must not consume cobblestone",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
         }
       ],
       "mixed_resource_rollback_atomic": [

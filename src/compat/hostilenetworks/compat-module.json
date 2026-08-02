@@ -4,7 +4,10 @@
     "sha256": "1fbe3fe6136fdd7938e176814c5d205f2d1c119743807b331e2f436513def357"
   },
   "dependencies": [
-    "maven.modrinth:hostile-neural-networks:ZbsbtrNE"
+    "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+    "curse.maven:jade-324717:5884231",
+    "maven.modrinth:placebo:1Ypo4tf4",
+    "mezz.jei:jei-1.21.1-common-api:19.27.0.340"
   ],
   "entrypoint": "com.swear.autostorage.compat.hostilenetworks.HostilenetworksCompatModule",
   "expectedTests": 4,
@@ -22,7 +25,11 @@
       ],
       "sha256": "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6"
     },
-    "rejectedDescriptors": [],
+    "rejectedDescriptors": [
+      "auto_storage:hostilenetworks_sim_chamber",
+      "auto_storage:hostilenetworks_loot_fabricator",
+      "auto_storage:hostilenetworks_data_center"
+    ],
     "rejectedResourceKinds": [],
     "resourceKinds": []
   },

@@ -1,11 +1,11 @@
 {
-  "contract_sha256": "53aca00fb910371583a4d617b6eb5415f4f605b6ccb61e8ae38fbaddd1dc7a85",
+  "contract_sha256": "5b0a6a1078bd0ee8db451212b363465469d15d6fd01de28020c731acdfb9ed80",
   "files": {
-    "src/compat/hostilenetworks/compat-module.json": "24792cb2804ba8e46581acabcbe23d1e3f3aab2a077a14af5477c952e446366d",
+    "src/compat/hostilenetworks/compat-module.json": "35fa12926d19e249cf938587635a1fb8e9a03cbc621775eb3af8c20bbe728208",
     "src/compat/hostilenetworks/java/com/swear/autostorage/compat/hostilenetworks/HostilenetworksCompat.java": "44eddf48ab2f4cc683b1c41d4917d38d332d46b546f8e6d43867cb34d6cde0ae",
     "src/compat/hostilenetworks/java/com/swear/autostorage/compat/hostilenetworks/HostilenetworksCompatModule.java": "d4af87e07f3aedca980a9284c8ee803fa0eb8c76b037e86ba2bc0405b628c442",
     "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksFixtureMod.java": "6257cc6d45a0034b16ce3324019a5d71fe456fdfcfa4f790b88fdc5b14f9ac92",
-    "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksIntegrationGameTests.java": "038942aa104151d9f84b129956c18e59146a28794222df6788d619e7eb3f5ab4",
+    "src/hostilenetworksFixture/java/com/swear/autostorage/fixture/hostilenetworks/HostilenetworksIntegrationGameTests.java": "0c97b1a36c0c740862a7bdd7273d86d5e451bab9c4aef0d9f424c7d308c15838",
     "src/hostilenetworksFixture/resources/META-INF/neoforge.mods.toml": "d7cc66f901b74d85ce37bf596d5653cc6a3c9902723a6d75e97973519167a253",
     "src/hostilenetworksFixture/resources/data/auto_storage_hostilenetworks_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

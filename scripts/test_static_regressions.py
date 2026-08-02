@@ -1906,6 +1906,55 @@ class StaticRegressionTests(unittest.TestCase):
             "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6",
             descriptor,
         )
+        descriptor_data = json.loads(descriptor)
+        self.assertEqual(
+            [
+                "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+                "curse.maven:jade-324717:5884231",
+                "maven.modrinth:placebo:1Ypo4tf4",
+                "mezz.jei:jei-1.21.1-common-api:19.27.0.340",
+            ],
+            descriptor_data["dependencies"],
+        )
+        self.assertEqual(
+            [
+                "maven.modrinth:hostile-neural-networks:ZbsbtrNE",
+                "maven.modrinth:placebo:1Ypo4tf4",
+            ],
+            descriptor_data["runtimeDependencies"],
+        )
+        rejected_descriptors = [
+            "auto_storage:hostilenetworks_sim_chamber",
+            "auto_storage:hostilenetworks_loot_fabricator",
+            "auto_storage:hostilenetworks_data_center",
+        ]
+        self.assertEqual(
+            rejected_descriptors,
+            descriptor_data["matrix"]["rejectedDescriptors"],
+        )
+        contract_data = json.loads(contract)
+        self.assertEqual(
+            rejected_descriptors,
+            contract_data["matrix"]["rejectedDescriptors"],
+        )
+        evidence = contract_data["verification"]["evidence"]
+        self.assertEqual(
+            "No-energy smelting must not consume cobblestone",
+            evidence["ingredient_shortage_atomic"][0]["marker"],
+        )
+        self.assertEqual(
+            "Failed typed family commit partially mutated resources",
+            evidence["destination_capacity_atomic"][0]["marker"],
+        )
+        self.assertEqual(
+            "One-item-short Storage capacity must reject the whole batch before mutation",
+            evidence["checked_overflow_atomic"][0]["marker"],
+        )
+        self.assertIn("only_vanilla_crafting_recipes_are_exposed", fixture)
+        self.assertIn(
+            "Hostile Neural Networks exposed a non-vanilla recipe class",
+            fixture,
+        )
         self.assertIn(
             "ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6",
             contract,

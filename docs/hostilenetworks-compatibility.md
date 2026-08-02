@@ -29,6 +29,12 @@ Auto Storage's built-in exact crafting families without a custom module.
 - reachable ancestry retained by the audit: Placebo, Jade, and JEI common API
   plus the shared NeoForge/Minecraft binary-pipeline platform jar.
 
+The bundled module descriptor places the exact target plus all three reachable
+coordinate-backed ancestry artifacts (Jade, Placebo, and JEI common API) on its
+non-transitive compile classpath. Its runtime list remains narrower: only the
+target and reviewed Placebo companion are installed. Compile evidence is not a
+claim that Jade or JEI is required in a player's instance.
+
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Hostile Neural Networks version on players and does not claim a
 multi-version matrix.
@@ -61,10 +67,12 @@ crafting family.
 ## Declarative matrix evidence
 
 The module descriptor and reviewed contract both declare the target mod present
-with zero descriptors, resource kinds, accepted recipes, rejected registry IDs,
-or Hostile Neural Networks-owned recipe families. Loaded `hostilenetworks:*`
-recipes remain in `RecipeManager` for vanilla-class coverage and fail-closed
-assertions; the isolated fixture loads 30 unconditional
+with zero registered descriptors, resource kinds, accepted recipes, or Hostile
+Neural Networks-owned recipe families. Their rejected-descriptor list explicitly
+locks Simulation Chamber, Loot Fabricator, and Data Center IDs out of the
+combined matrix. Loaded `hostilenetworks:*` recipes remain in `RecipeManager`
+for vanilla-class coverage and fail-closed assertions; the isolated fixture
+loads 30 unconditional
 `hostilenetworks:*` recipes (7 Twilight Forest-conditioned recipes stay absent
 without that mod), locked by SHA-256
 `ca855354ff4d4e15f035911436d46a21721df92510463798ed6c5aef6a3038c6`. Combined
@@ -88,7 +96,11 @@ block-entity or config state away.
 Four present-mod GameTests prove the module registers no Hostile Neural Networks
 stations/families (namespace and path), representative living-matter vanilla
 crafting stays supported, Simulation Chamber and Loot Fabricator stay absent as
-custom families, and the isolated recipe-inventory digest matches the
-descriptor. The compatibility matrix loads the representative artifact plus
-Placebo through the generated descriptor manifest and locks the same
-zero-family boundary without editing shared matrix Java sources.
+custom families, all 30 loaded HNN recipes use exact vanilla shaped/shapeless
+classes, and the isolated recipe-inventory digest matches the descriptor. The
+contract binds shortage, destination-capacity rollback, and checked-overflow
+checks to existing behavioral GameTests rather than treating absence of an HNN
+family as transaction evidence. The compatibility matrix loads the
+representative artifact plus Placebo through the generated descriptor manifest
+and locks the three rejected descriptor IDs without editing shared matrix Java
+sources.
