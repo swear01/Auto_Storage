@@ -1,0 +1,185 @@
+{
+  "families": [
+    {
+      "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+      "costs": [],
+      "decision": "Channeling is a runtime Create fan recipe, but execution requires live conduit, block, or fluid world catalysts and inherits generic ingredient plus random output behavior from Create ProcessingRecipe. Auto Storage cannot represent that world-dependent probabilistic operation atomically, so it remains fail closed.",
+      "evidence": [
+        "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe#public_signature"
+      ],
+      "id": "channeling_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+      "costs": [],
+      "decision": "Private datagen-only wrapper: every runtime recipe operation throws AssertionError and its serializer temporarily injects into BuiltInRegistries only to encode another mod cooking output. It is never a loadable runtime recipe family and remains rejected.",
+      "evidence": [
+        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim#public_signature"
+      ],
+      "id": "c_a_a_standard_recipe_gen__modded_cooking_recipe_output_shim",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "create_aquatic_ambitions"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "create_aquatic_ambitions"
+      ],
+      "sha256": "5084d1ab9696fd443d49d14fe855d936451b5f8895f5ae1760fb7b636650d189"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44",
+  "source_recipe_data_sha256": "ba4f866612b23b5d5bd4c34558ac65bf32007bd18ca404508e9d5bb67956e12c",
+  "source_recipe_inventory_sha256": "73c9bb73ae556c0896ba486cf30052aa21ecfc0e004390bf5e0cb7fe5adbf749",
+  "target": {
+    "dependency": "maven.modrinth:create-aquatic-ambitions:DoI3PpXj",
+    "display_name": "Create Aquatic Ambitions",
+    "mod_id": "create_aquatic_ambitions",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:create:${create_ci_version}"
+    ],
+    "version": "2.0.4"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Missing representative Create Aquatic Ambitions recipe channeling/brain_coral_fan_revival",
+          "source": "src/createAquaticAmbitionsFixture/java/com/swear/autostorage/fixture/createaquaticambitions/CreateAquaticAmbitionsIntegrationGameTests.java",
+          "task": "runCreateAquaticAmbitionsGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Audited Create Aquatic Ambitions recipe type is empty",
+          "source": "src/createAquaticAmbitionsFixture/java/com/swear/autostorage/fixture/createaquaticambitions/CreateAquaticAmbitionsIntegrationGameTests.java",
+          "task": "runCreateAquaticAmbitionsGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Unsafe Create Aquatic Ambitions recipe type accepted",
+          "source": "src/createAquaticAmbitionsFixture/java/com/swear/autostorage/fixture/createaquaticambitions/CreateAquaticAmbitionsIntegrationGameTests.java",
+          "task": "runCreateAquaticAmbitionsGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Unsafe Create Aquatic Ambitions recipe was accepted: channeling/brain_coral_block",
+          "source": "src/createAquaticAmbitionsFixture/java/com/swear/autostorage/fixture/createaquaticambitions/CreateAquaticAmbitionsIntegrationGameTests.java",
+          "task": "runCreateAquaticAmbitionsGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Create Aquatic Ambitions unsafe machine contract was registered",
+          "source": "src/createAquaticAmbitionsFixture/java/com/swear/autostorage/fixture/createaquaticambitions/CreateAquaticAmbitionsIntegrationGameTests.java",
+          "task": "runCreateAquaticAmbitionsGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 4,
+    "fixture": "createAquaticAmbitionsFixture",
+    "game_test_task": "runCreateAquaticAmbitionsGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runCreateAquaticAmbitionsGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

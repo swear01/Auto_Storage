@@ -1,4 +1,5 @@
 import json
+import hashlib
 import re
 import unittest
 from pathlib import Path
@@ -8,6 +9,67 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ModularCompatSdkTests(unittest.TestCase):
+    def test_create_aquatic_ambitions_outcome_c_metadata_is_declarative(self):
+        module_root = ROOT / "src/compat/create_aquatic_ambitions"
+        descriptor = json.loads((module_root / "compat-module.json").read_text())
+        contract_path = ROOT / "compat/contracts/create_aquatic_ambitions.json"
+        contract = json.loads(contract_path.read_text())
+        audit = json.loads(
+            (
+                ROOT
+                / "compat/audits/create_aquatic_ambitions/2.0.4.json"
+            ).read_text()
+        )
+        manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
+
+        self.assertEqual(16, audit["scanner_format"])
+        self.assertTrue(audit["ancestry_classpath"])
+        self.assertEqual(
+            sorted(candidate["class"] for candidate in audit["candidates"]["recipe_classes"]),
+            sorted(family["class"] for family in contract["families"]),
+        )
+        self.assertEqual(
+            audit["recipe_data"]["digest"],
+            contract["source_recipe_data_sha256"],
+        )
+        self.assertEqual(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            contract["verification"]["evidence"]["all_mod_coexistence"][0]["marker"],
+        )
+        matrix = descriptor["matrix"]
+        self.assertEqual(contract["matrix"], matrix)
+        self.assertEqual(["create_aquatic_ambitions"], matrix["mods"])
+        self.assertEqual([], matrix["descriptors"])
+        self.assertEqual([], matrix["resourceKinds"])
+        self.assertEqual([], matrix["acceptedRecipes"])
+        self.assertEqual([], matrix["rejectedDescriptors"])
+        self.assertEqual([], matrix["rejectedResourceKinds"])
+        self.assertEqual(
+            ["create_aquatic_ambitions"],
+            matrix["recipeInventory"]["namespaces"],
+        )
+        self.assertEqual(
+            "5084d1ab9696fd443d49d14fe855d936451b5f8895f5ae1760fb7b636650d189",
+            matrix["recipeInventory"]["sha256"],
+        )
+        create_descriptor = json.loads(
+            (ROOT / "src/compat/create/compat-module.json").read_text()
+        )
+        self.assertEqual(
+            "0d71e759fc4741b6af4f47fc5a8a1d83403f7e3907d08ad747756096fc5db99d",
+            create_descriptor["matrix"]["recipeInventory"]["sha256"],
+        )
+        self.assertEqual(
+            hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            manifest["contract_sha256"],
+        )
+        for relative_path, expected_sha256 in manifest["files"].items():
+            self.assertEqual(
+                expected_sha256,
+                hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                relative_path,
+            )
+
     def test_bundled_modules_are_metadata_owned_and_complete(self):
         compat_root = ROOT / "src/compat"
         descriptors = sorted(compat_root.glob("*/compat-module.json"))

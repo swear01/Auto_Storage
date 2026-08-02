@@ -1,0 +1,13 @@
+{
+  "contract_sha256": "2652769e1ebd945147851952d4ecbbcbde1537178996f017633affebf3ce62f9",
+  "files": {
+    "src/compat/create_aquatic_ambitions/compat-module.json": "46d578f0a2ea0a0358cd5de2ea9752f5feaef826856104c1b068ed98873e956c",
+    "src/compat/create_aquatic_ambitions/java/com/swear/autostorage/compat/createaquaticambitions/CreateAquaticAmbitionsCompatModule.java": "947eade7b374188bdb4e870a98327bae9661b96f0213b01bf678ab661b4a6659",
+    "src/createAquaticAmbitionsFixture/java/com/swear/autostorage/fixture/createaquaticambitions/CreateAquaticAmbitionsFixtureMod.java": "19336c9d942c7ec5ea94be94e7c9d5f7e695ea0c1e76097bcaa18036fb1bb881",
+    "src/createAquaticAmbitionsFixture/java/com/swear/autostorage/fixture/createaquaticambitions/CreateAquaticAmbitionsIntegrationGameTests.java": "54bd9fcca49a6940f94c9e8b526ef6836620de61b71e6a3c19f0f0ec4807df1e",
+    "src/createAquaticAmbitionsFixture/resources/META-INF/neoforge.mods.toml": "92db6ecf89f29714a6e3339e4fdc82eeb4cc9a7e3adaec27d5bc8a2bb8f51614",
+    "src/createAquaticAmbitionsFixture/resources/data/auto_storage_create_aquatic_ambitions_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
+}
