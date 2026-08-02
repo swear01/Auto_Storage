@@ -45,9 +45,9 @@ delta.
 - rate: `TileEntityCrusher.ENERGY_USE` (40) work per tick;
 - FE and station work: `ENERGY_USE × 100` = `4000`;
 - consume one simple exact item input;
-- primary: non-empty `getOutputOne()`;
+- primary: non-empty `getOutputOne()` with `getFirstChance() == 1.0F`;
 - secondary: only when empty, or when exact and `getSecondChance() == 1.0F`
-  (fractional chance recipes such as iron ore stay unavailable);
+  (fractional primary or secondary chance recipes stay unavailable);
 - guaranteed secondary outputs join the same atomic transaction as the primary;
   insufficient capacity for either output leaves every input, FE, work, and
   output unchanged;
@@ -94,13 +94,17 @@ Storage does not register Actually Additions workstations into EMI.
 ./gradlew runActuallyadditionsGameTestServer
 ```
 
-Thirteen real GameTests cover registration and Empowerer/Laser exclusion,
+Fourteen real GameTests cover registration and Empowerer/Laser exclusion,
 blaze-rod crushing with exact powder output, guaranteed two-output crushing and
-secondary-capacity rollback, pressing canola oil, fermenting refined canola,
-bucketless-fluid and fractional-chance rejection, missing-ingredient /
+secondary-capacity rollback, fractional-primary and fractional-secondary
+rejection, pressing canola oil, fermenting refined canola, bucketless-fluid
+rejection, missing-ingredient /
 insufficient FE / insufficient work atomic no-ops, destination-capacity and
 long-overflow rollback. The isolated fixture also asserts the descriptor-owned
 `actuallyadditions` recipe-inventory digest. Compat Kit verify writes
 `build/compat-kit/actuallyadditions-report.json`. The all-mod compatibility
 matrix structurally validates coexistence claims and records actual
 coexistence/unclaimed digests only in `build/reports/terminal-scale-*.json`.
+
+Processing labels use the logical recipe-family names Crushing, Pressing, and
+Fermenting; installed station item tooltips retain the concrete machine names.

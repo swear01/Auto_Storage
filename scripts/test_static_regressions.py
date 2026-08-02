@@ -1701,9 +1701,18 @@ class StaticRegressionTests(unittest.TestCase):
         )
         compatibility_doc = self.read_required("docs/actuallyadditions-compatibility.md")
         build = self.read_required("build.gradle")
+        contract = json.loads(
+            self.read_required("compat/contracts/actuallyadditions.json")
+        )
+        en_us = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/en_us.json")
+        )
+        zh_tw = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/zh_tw.json")
+        )
 
         self.assert_descriptor_driven_fixture(
-            build, "actuallyadditions", "actuallyadditionsFixture", 13
+            build, "actuallyadditions", "actuallyadditionsFixture", 14
         )
         self.assertNotIn('modId="actuallyadditions"', metadata)
         self.assertIn('"actuallyadditions"', module_index)
@@ -1726,7 +1735,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("EmpowererRecipe.class", compat)
         self.assertNotIn("LaserRecipe.class", compat)
         self.assertNotIn("keysWithoutRegistries", compat)
+        self.assertIn("recipe.getFirstChance() != 1.0F", compat)
         self.assertIn("presentableFluid(recipe.getOutput())", compat)
+        self.assertIn("crushing_fractional_primary_stays_unsupported", fixture)
         self.assertIn("bucketless_fluid_recipe_stays_unsupported", fixture)
         self.assertIn("crushing_guaranteed_secondary_emits_both_outputs", fixture)
         self.assertIn("crushing_guaranteed_secondary_capacity_is_atomic_noop", fixture)
@@ -1751,6 +1762,28 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("Fermenting", compatibility_doc)
         self.assertNotIn("peer digest sync", compatibility_doc)
         self.assertIn("isolated recipe-inventory digest", compatibility_doc)
+        self.assertEqual(
+            "Crushing", en_us["gui.auto_storage.station.actuallyadditions_crushing"]
+        )
+        self.assertEqual(
+            "Pressing", en_us["gui.auto_storage.station.actuallyadditions_pressing"]
+        )
+        self.assertEqual(
+            "Fermenting", en_us["gui.auto_storage.station.actuallyadditions_fermenting"]
+        )
+        self.assertEqual(
+            "粉碎", zh_tw["gui.auto_storage.station.actuallyadditions_crushing"]
+        )
+        self.assertEqual(
+            "壓榨", zh_tw["gui.auto_storage.station.actuallyadditions_pressing"]
+        )
+        self.assertEqual(
+            "發酵", zh_tw["gui.auto_storage.station.actuallyadditions_fermenting"]
+        )
+        self.assertEqual(
+            "Guaranteed Crushing secondary did not emit both exact outputs",
+            contract["verification"]["evidence"]["catalyst_tool_remainder_exact"][0]["marker"],
+        )
 
     def test_theurgy_compat_is_optional_and_isolated(self):
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")

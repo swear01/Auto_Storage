@@ -13,6 +13,7 @@ import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import de.ellpeck.actuallyadditions.mod.crafting.CrushingRecipe;
 import de.ellpeck.actuallyadditions.mod.crafting.PressingRecipe;
 import de.ellpeck.actuallyadditions.mod.tile.TileEntityCanolaPress;
 import de.ellpeck.actuallyadditions.mod.tile.TileEntityCrusher;
@@ -134,6 +135,21 @@ public final class ActuallyadditionsIntegrationGameTests {
     public static void crushing_chance_secondary_stays_unsupported(GameTestHelper helper) {
         if (supports(helper, IRON_ORE)) {
             helper.fail("Chance Crushing recipe was accepted: crushing/iron_ore");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void crushing_fractional_primary_stays_unsupported(GameTestHelper helper) {
+        CrushingRecipe recipe = new CrushingRecipe(
+                Ingredient.of(Items.STONE),
+                new ItemStack(Items.DIAMOND),
+                0.5F,
+                ItemStack.EMPTY,
+                0.0F);
+        if (CraftingTerminalMenu.supportsRecipeContract(recipe)) {
+            helper.fail("Fractional primary Crushing recipe was accepted");
             return;
         }
         helper.succeed();

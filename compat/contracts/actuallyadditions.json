@@ -61,7 +61,7 @@
           "resource_kind": "neoforge_energy"
         }
       ],
-      "decision": "Accept CrushingRecipe only when the input Ingredient is simple/non-empty, primary output is non-empty with positive count, and the secondary output is either empty or guaranteed (chance == 1.0). Fractional secondary chance stays fail-closed. Single crusher only: ENERGY_USE 40 FE/tick for 100 ticks (4000 FE and 4000 station work); crusher_double uses a different 150-tick/6000 FE contract and is not inferred from the plain crusher item. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
+      "decision": "Accept CrushingRecipe only when the input Ingredient is simple/non-empty, the primary output is non-empty with positive count and guaranteed (first chance == 1.0), and the secondary output is either empty or guaranteed (second chance == 1.0). Fractional primary or secondary chance stays fail-closed. Single crusher only: ENERGY_USE 40 FE/tick for 100 ticks (4000 FE and 4000 station work); crusher_double uses a different 150-tick/6000 FE contract and is not inferred from the plain crusher item. Scanner format 16 flags Recipe Level/world API surfaces; the Auto Storage adapter uses only public deterministic getters and never calls world-mutating Recipe methods.",
       "evidence": [
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getInput",
         "src/main/java/de/ellpeck/actuallyadditions/mod/crafting/CrushingRecipe.java#getOutputOne",
@@ -409,7 +409,7 @@
       ],
       "catalyst_tool_remainder_exact": [
         {
-          "marker": "Actually Additions pressing did not emit exact canola oil",
+          "marker": "Guaranteed Crushing secondary did not emit both exact outputs",
           "source": "src/actuallyadditionsFixture/java/com/swear/autostorage/fixture/actuallyadditions/ActuallyadditionsIntegrationGameTests.java",
           "task": "runActuallyadditionsGameTestServer"
         }
@@ -471,7 +471,7 @@
         }
       ]
     },
-    "expected_game_tests": 13,
+    "expected_game_tests": 14,
     "fixture": "actuallyadditionsFixture",
     "game_test_task": "runActuallyadditionsGameTestServer",
     "gradle_tasks": [

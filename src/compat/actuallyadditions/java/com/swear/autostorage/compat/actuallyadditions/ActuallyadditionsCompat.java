@@ -144,7 +144,8 @@ public final class ActuallyadditionsCompat {
     private static boolean supportsCrushing(CrushingRecipe recipe) {
         if (recipe == null
                 || !exact(recipe.getInput())
-                || !exactOutput(recipe.getOutputOne())) {
+                || !exactOutput(recipe.getOutputOne())
+                || recipe.getFirstChance() != 1.0F) {
             return false;
         }
         ItemStack secondary = recipe.getOutputTwo();
