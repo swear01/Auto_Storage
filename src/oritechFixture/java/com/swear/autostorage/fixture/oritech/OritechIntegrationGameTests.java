@@ -6,6 +6,7 @@ import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.ItemKey;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
@@ -67,6 +68,9 @@ public final class OritechIntegrationGameTests {
     public static void pulverizer_registers_exact_rate_and_non_pulverizer_stays_excluded(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                OritechIntegrationGameTests.class);
         MachineDescriptor descriptor = MachineEnergyTable.get(PULVERIZER);
         ItemStack pulverizer = new ItemStack(oritechItem("pulverizer_block"));
         if (descriptor == null

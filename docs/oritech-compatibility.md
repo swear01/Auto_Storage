@@ -15,9 +15,10 @@ Architectury API and GeckoLib remain required companions of that optional target
   `RVIo5f6E` (`4.8.2`);
 - audit: `compat/audits/oritech/1.2.9.json` (scanner format 16);
 - reviewed contract: `compat/contracts/oritech.json`;
-- matrix recipe-inventory SHA-256 for namespace `oritech`:
-  `edeaf16cc17b7aff8c4b5cd51ea539eb47902bc0b3a44e2b7afca037e7444ee3`
-  (802 loaded recipes).
+- isolated-fixture recipe-inventory SHA-256 for namespace `oritech`:
+  `abc0f6addf6b1f9922e7d05a2ca57b8c210071692030dfaa083b578a59a221f8`
+  (613 loaded recipes). Cross-module additions are observed only in the
+  generated compatibility-matrix report and never rewrite peer descriptors.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Oritech version on players and does not claim a multi-version matrix.
@@ -88,8 +89,8 @@ correctly failed the unchanged 9 MiB shared-index gate at 9,532,520 bytes.
 Catalog entries now reuse the holder's recipe ID and do not retain fixed
 variant lists between invalidated rebuilds; the server-owned shared result
 cache still keeps ordinary page switches from rebuilding variants. The same
-15,822-recipe matrix now passes with 9,250,824 retained bytes, 0.872 ms first
-switch, 0.381 ms switch p95, and 114,827 bytes per menu.
+15,822-recipe matrix now passes with 9,250,072 retained bytes, 0.421 ms first
+switch, 0.177 ms switch p95, and 114,986 bytes per menu.
 
 ## Verification
 
