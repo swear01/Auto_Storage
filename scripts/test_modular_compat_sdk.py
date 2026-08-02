@@ -39,6 +39,26 @@ class ModularCompatSdkTests(unittest.TestCase):
                 relative_path,
             )
 
+    def test_every_compat_kit_manifest_file_hash_matches_disk(self):
+        manifests = sorted((ROOT / "src/compat").glob("*/.compat-kit-manifest.json"))
+        self.assertTrue(manifests)
+        for manifest_path in manifests:
+            manifest = json.loads(manifest_path.read_text())
+            module_id = manifest_path.parent.name
+            contract_path = ROOT / "compat" / "contracts" / f"{module_id}.json"
+            if contract_path.is_file():
+                self.assertEqual(
+                    hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+                    manifest["contract_sha256"],
+                    f"{module_id} contract_sha256",
+                )
+            for relative_path, expected_sha256 in manifest["files"].items():
+                self.assertEqual(
+                    expected_sha256,
+                    hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                    f"{module_id}:{relative_path}",
+                )
+
     def test_productivebees_outcome_c_metadata_is_current_and_declarative(self):
         module_root = ROOT / "src/compat/productivebees"
         descriptor = json.loads((module_root / "compat-module.json").read_text())
