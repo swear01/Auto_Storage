@@ -3,65 +3,11 @@
     {
       "class": "com.brandon3055.draconicevolution.api.crafting.FusionRecipe",
       "costs": [],
-      "decision": "Fusion crafting requires a live Fusion Crafting Core multiblock with tiered Crafting Injectors, injector-local energy charging via DEConfig.fusionChargeTime, config-dependent craft duration (DEConfig.fusionCraftTime keyed by minimum injector tier), and world-side state-machine ticks. Ingredients are generic Ingredient values (including tags and custom StackIngredient catalyst counts); assemble may transfer live inventory data through IFusionDataTransfer. No complete simulate-then-commit Auto Storage transaction can express retained multiblock/injector/energy/config state without approximating those conditions away.",
+      "decision": "Format-16 structural and matching-source review confirms this is the sole runtime fusion recipe family, but it executes through the live Fusion Crafting Core/injector state machine. It distributes energy into injector-local storage, gates tier and output on live inventory/world state, derives charging and craft timing from DEConfig, supports consumed or retained FusionIngredient values and StackIngredient catalyst counts, and assemble may invoke IFusionDataTransfer against the live inventory. That contract cannot be represented as one deterministic Auto Storage simulate-then-commit transaction without approximating multiblock/world state.",
       "evidence": [
-        "src/main/java/com/brandon3055/draconicevolution/api/crafting/FusionRecipe.java#assemble",
-        "src/main/java/com/brandon3055/draconicevolution/api/crafting/FusionRecipe.java#getEnergyCost",
-        "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionRecipe.java#tickFusionState",
-        "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionRecipe.java#completeCraft",
-        "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionRecipe.java#canStartCraft",
         "com.brandon3055.draconicevolution.api.crafting.FusionRecipe#public_signature"
       ],
       "id": "fusion_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "generic_ingredients"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.api.crafting.FusionRecipe$FusionIngredient",
-      "costs": [],
-      "decision": "Nested consume/retain ingredient value object owned by FusionRecipe; the parent fusion family remains rejected.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.api.crafting.FusionRecipe$FusionIngredient#public_signature"
-      ],
-      "id": "fusion_recipe__fusion_ingredient",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.api.crafting.FusionRecipe$Serializer",
-      "costs": [],
-      "decision": "Recipe serializer/codec only; not an independent runtime recipe family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.api.crafting.FusionRecipe$Serializer#public_signature"
-      ],
-      "id": "fusion_recipe__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe",
-      "costs": [],
-      "decision": "Fusion recipe API interface whose default tickFusionState mutates world/multiblock injector energy and depends on DEConfig craft/charge times plus live injector tiers. Not a registerable production family; implementations share the same unsafe contract as FusionRecipe.",
-      "evidence": [
-        "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionRecipe.java#tickFusionState",
-        "src/main/java/com/brandon3055/draconicevolution/api/crafting/IFusionRecipe.java#matches",
-        "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe#public_signature"
-      ],
-      "id": "i_fusion_recipe",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
@@ -71,168 +17,9 @@
       ],
       "station": null,
       "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe$IFusionIngredient",
-      "costs": [],
-      "decision": "Nested fusion ingredient API; not an independent recipe family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.api.crafting.IFusionRecipe$IFusionIngredient#public_signature"
-      ],
-      "id": "i_fusion_recipe__i_fusion_ingredient",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.datagen.FusionRecipeBuilder",
-      "costs": [],
-      "decision": "Datagen builder only; not a runtime recipe family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.datagen.FusionRecipeBuilder#public_signature"
-      ],
-      "id": "fusion_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.datagen.RecipeGenerator",
-      "costs": [],
-      "decision": "Datagen RecipeProvider only; emits fusion plus vanilla shaped/shapeless/smelting recipes under the draconicevolution namespace. Vanilla class/type recipes remain covered by Auto Storage built-ins without a custom family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.datagen.RecipeGenerator#public_signature"
-      ],
-      "id": "recipe_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.integration.jei.FusionRecipeCategory",
-      "costs": [],
-      "decision": "Client JEI category only; Auto Storage never uses JEI/EMI as recipe authority.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.integration.jei.FusionRecipeCategory#public_signature"
-      ],
-      "id": "fusion_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "generic_ingredients"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.integration.jei.FusionRecipeTransferHelper",
-      "costs": [],
-      "decision": "Client JEI transfer helper that mutates player/entity inventories and inspects live machine state; not a server recipe family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.integration.jei.FusionRecipeTransferHelper#public_signature"
-      ],
-      "id": "fusion_recipe_transfer_helper",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "entity_mutation",
-        "live_machine_state",
-        "simulation_required"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.integration.jei.IRecipeRenderer",
-      "costs": [],
-      "decision": "Client JEI rendering helper; not a server recipe family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.integration.jei.IRecipeRenderer#public_signature"
-      ],
-      "id": "i_recipe_renderer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.integration.jei.RecipeCategoryUids",
-      "costs": [],
-      "decision": "Client JEI category UID constants; not a server recipe family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.integration.jei.RecipeCategoryUids#public_signature"
-      ],
-      "id": "recipe_category_uids",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.inventory.ContainerRecipeBuilder",
-      "costs": [],
-      "decision": "Player container/menu for an in-game recipe builder UI; not a Recipe/RecipeType family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.inventory.ContainerRecipeBuilder#public_signature"
-      ],
-      "id": "container_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "entity_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.brandon3055.draconicevolution.lib.Serializers",
-      "costs": [],
-      "decision": "Network/codec serializer registry helper; not a recipe family.",
-      "evidence": [
-        "com.brandon3055.draconicevolution.lib.Serializers#public_signature"
-      ],
-      "id": "serializers",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
     }
   ],
   "kind": "auto_storage_compat_contract",
-  "schema": 1,
-  "source_audit_sha256": "623d7d58e58428a206015b56bf67387c79ff6d97f7221cff23b1dad0bed9544e",
-  "source_recipe_inventory_sha256": "b5e3e955027595b9c638ad1fc076409ba7b95629f3451f63054b5199a78b8582",
-  "target": {
-    "dependency": "maven.modrinth:draconic-evolution:lBMsiWyw",
-    "display_name": "Draconic Evolution",
-    "mod_id": "draconicevolution",
-    "repositories": [
-      "https://api.modrinth.com/maven"
-    ],
-    "runtime_dependencies": [
-      "maven.modrinth:brandons-core:56nwe5IX",
-      "maven.modrinth:codechicken-lib:gQ1srSKh"
-    ],
-    "version": "3.1.4.632"
-  },
   "matrix": {
     "acceptedRecipes": [],
     "descriptors": [],
@@ -248,6 +35,23 @@
     "rejectedDescriptors": [],
     "rejectedResourceKinds": [],
     "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "623d7d58e58428a206015b56bf67387c79ff6d97f7221cff23b1dad0bed9544e",
+  "source_recipe_data_sha256": "676847ff272082c64068d965b69169ce1e08bc58438e8961fad87799c0d985ab",
+  "source_recipe_inventory_sha256": "c5660e7bbb332061ed4dbc58581eec7800e00813db0c9a4a221c71716ef4e450",
+  "target": {
+    "dependency": "maven.modrinth:draconic-evolution:lBMsiWyw",
+    "display_name": "Draconic Evolution",
+    "mod_id": "draconicevolution",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:brandons-core:56nwe5IX",
+      "maven.modrinth:codechicken-lib:gQ1srSKh"
+    ],
+    "version": "3.1.4.632"
   },
   "verification": {
     "checks": [
@@ -274,7 +78,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Draconic Evolution fail-closed boundary changed",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }

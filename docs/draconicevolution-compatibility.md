@@ -35,30 +35,32 @@ covered by Auto Storage's built-in exact families without a custom module.
 - audit: `compat/audits/draconicevolution/3.1.4.632.json`;
 - reviewed contract: `compat/contracts/draconicevolution.json`.
 
+The committed audit uses scanner format 16. It binds 619 target classes and
+226 matching-source files, records all 179 effective recipe JSONs across four
+serializers, and keeps only the eight exact artifacts reachable from the
+structural class graph. Five of those artifacts have exact Maven coordinates;
+the normalized NeoForge/Minecraft binary is the same cross-host artifact used
+by the canonical AE2 audit rather than a host-local recompilation.
+
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Draconic Evolution version on players and does not claim a
 multi-version matrix.
 
 ## Audited recipe candidates
 
-Compat Kit enumerated 13 recipe-class candidates. All are rejected in the
-committed contract:
+The format-16 structural scan identifies one actual runtime recipe class. It is
+rejected in the committed contract:
 
 | Candidate | Result | Reason |
 |---|---|---|
 | `FusionRecipe` | rejected | live Fusion Crafting Core multiblock, tiered injectors, injector-local energy charging, `DEConfig` craft/charge times, generic `Ingredient`/`StackIngredient` payloads, optional `IFusionDataTransfer` assemble |
-| `FusionRecipe$FusionIngredient` | rejected | nested consume/retain value owned by rejected fusion family |
-| `FusionRecipe$Serializer` | rejected | serializer/codec only |
-| `IFusionRecipe` | rejected | API whose default `tickFusionState` mutates world/injector energy |
-| `IFusionRecipe$IFusionIngredient` | rejected | nested API, not a family |
-| `FusionRecipeBuilder` | rejected | datagen builder |
-| `RecipeGenerator` | rejected | datagen provider; vanilla-class outputs stay on built-ins |
-| `FusionRecipeCategory` | rejected | client JEI category |
-| `FusionRecipeTransferHelper` | rejected | client JEI transfer / live machine mutation |
-| `IRecipeRenderer` | rejected | client JEI helper |
-| `RecipeCategoryUids` | rejected | client JEI constants |
-| `ContainerRecipeBuilder` | rejected | player recipe-builder menu |
-| `Serializers` | rejected | network/codec helper |
+
+The legacy format-7 audit had treated 12 additional name-shaped classes as
+recipe candidates. Format 16 classifies them in their actual structural
+buckets instead: nested values and APIs, serializer/codec surfaces, datagen
+builders/providers, client JEI surfaces, a player menu helper, and constants.
+They are not recipe families and therefore do not appear in the reviewed
+contract.
 
 Representative datapack inventory in the audited jar: 39
 `draconicevolution:fusion_crafting` recipes plus 140 vanilla

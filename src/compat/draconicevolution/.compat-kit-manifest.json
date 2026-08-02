@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "2451f54735b77dcd1637acf588839a07556fa2a40728211c50842c42b9d19765",
+  "contract_sha256": "dba4a8726d47d077ee945ee3fe7e13cb0ada9a9382209140584378c560453c0a",
   "files": {
     "src/compat/draconicevolution/compat-module.json": "7983a455e0025e41c22ec1077cac3be77a9fa8451b5613b7a714b27abae87340",
     "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompat.java": "00de89970453b06468e00968d79e5f77bcbf916a9dad65b52dd2faaa4d42077f",
