@@ -28,6 +28,10 @@
   "requires": [
     "extendedcrafting"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:extended-crafting:${extended_crafting_ci_version}",
+    "maven.modrinth:cucumber:${cucumber_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatExtendedCrafting"

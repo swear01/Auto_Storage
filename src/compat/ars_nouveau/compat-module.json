@@ -33,6 +33,11 @@
   "requires": [
     "ars_nouveau"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:ars-nouveau:${ars_nouveau_ci_version}",
+    "maven.modrinth:geckolib:${geckolib_ci_version}",
+    "maven.modrinth:curios:${ars_curios_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatArsNouveau"

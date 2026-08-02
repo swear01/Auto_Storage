@@ -357,6 +357,7 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
                 "fixture": "newModFixture",
                 "expectedTests": 1,
                 "dependencies": ["maven.modrinth:new-mod:1"],
+                "runtimeDependencies": ["maven.modrinth:new-mod:1"],
                 "matrix": {
                     "mods": ["new_mod"],
                     "descriptors": ["auto_storage:new_mod_station"],

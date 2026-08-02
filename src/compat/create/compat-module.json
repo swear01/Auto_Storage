@@ -29,6 +29,9 @@
   "requires": [
     "create"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:create:${create_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatCreate"

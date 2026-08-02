@@ -30,6 +30,10 @@
   "requires": [
     "industrialforegoing"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:industrial-foregoing:${industrial_foregoing_ci_version}",
+    "maven.modrinth:titanium:${titanium_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatIndustrialForegoing"

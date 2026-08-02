@@ -30,6 +30,10 @@
   "requires": [
     "mekanism"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:mekanism:${mekanism_ci_version}",
+    "maven.modrinth:emi:${emi_runtime_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatMekanism"

@@ -341,6 +341,10 @@ recipe inventory; deleting a family, graph record, recipe record, or risk and
 recomputing JSON fields still fails. The target JAR may not contain duplicate
 recipe ZIP entry names; inventory rejects them before reading payloads so ZIP
 name lookup cannot silently select one duplicate.
+New contracts use 64 zeroes as the pending matrix recipe-inventory sentinel.
+Once no family remains `needs_decision`, the published schema and complete CLI
+validation both reject that sentinel; review must replace it with the exact
+inventory digest before scaffold or verification.
 
 An accepted family records:
 
@@ -397,7 +401,9 @@ audits predate recipe-data evidence. This omission is accepted only by
 then reopen as `needs_decision` because neither recipe-data nor ancestry
 evidence can be proven unchanged. Public/current contract validation remains
 strict, formats 8 and later may not omit the digest, and a format-7 contract
-that supplies an unverifiable digest is rejected rather than trusted.
+that supplies an unverifiable digest is rejected rather than trusted. A legacy
+format-7 contract may omit `matrix`; if it already contains a reviewed matrix,
+migration validates and preserves it instead of replacing or rejecting it.
 
 For a one-issue/one-worktree worker, generate the compact handoff package:
 
@@ -573,7 +579,10 @@ target-side runtime artifacts belong in `target.runtime_dependencies`; bundled
 descriptors and external addon builds copy the exact reviewed list instead of
 depending on transitive metadata or hand edits. Target and explicit runtime
 dependencies are non-transitive; every required companion must therefore appear
-in the contract. Repository URLs, dependency coordinates, and derived group
+in the contract. Every bundled descriptor has a non-empty
+`runtimeDependencies` list containing its primary compile dependency, so
+descriptor-derived isolated and aggregate GameTests cannot schedule a target
+mod that is absent at runtime. Repository URLs, dependency coordinates, and derived group
 filters are serialized as escaped Groovy literals, so `$`, quotes, and
 backslashes cannot alter the reviewed build input. Target and runtime
 dependencies must use exact `group:name:version` Maven coordinates; malformed

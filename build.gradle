@@ -114,8 +114,9 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
                 !(it instanceof String) || !(it ==~ /https:\/\/\S+/)
             }
             || descriptorRepositories.toSet().size() != descriptorRepositories.size()
-            || (descriptor.runtimeDependencies != null
-            && !(descriptor.runtimeDependencies instanceof List))
+            || !(descriptor.runtimeDependencies instanceof List)
+            || descriptor.runtimeDependencies.isEmpty()
+            || !descriptor.runtimeDependencies.contains(descriptor.dependencies[0])
             || (auditArtifact != null
             && (!(auditArtifact instanceof Map)
             || auditArtifact.keySet() != ['dependency', 'sha256'] as Set
@@ -165,7 +166,7 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             repositories: descriptorRepositories.collect {
                 it.toString()
             },
-            runtimeDependencies: (descriptor.runtimeDependencies ?: []).collect {
+            runtimeDependencies: descriptor.runtimeDependencies.collect {
                 expandCompatDependency(it.toString())
             },
             auditArtifact: auditArtifact == null ? null : [

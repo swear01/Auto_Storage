@@ -25,6 +25,9 @@
   "requires": [
     "ironfurnaces"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatIronFurnaces"

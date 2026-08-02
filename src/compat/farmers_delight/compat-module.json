@@ -27,6 +27,9 @@
   "requires": [
     "farmersdelight"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatFarmersDelight"

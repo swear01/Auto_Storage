@@ -281,6 +281,19 @@
               "runtime_dependencies"
             ]
           },
+          "matrix": {
+            "properties": {
+              "recipeInventory": {
+                "properties": {
+                  "sha256": {
+                    "not": {
+                      "const": "0000000000000000000000000000000000000000000000000000000000000000"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "verification": {
             "properties": {
               "fixture": {"type": "string", "minLength": 1},

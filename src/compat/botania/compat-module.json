@@ -32,6 +32,10 @@
   "requires": [
     "botania"
   ],
+  "runtimeDependencies": [
+    "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}",
+    "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatBotania"

@@ -31,6 +31,11 @@
   "requires": [
     "powah"
   ],
+  "runtimeDependencies": [
+    "maven.modrinth:powah:${powah_ci_version}",
+    "maven.modrinth:cloth-config:${powah_cloth_config_ci_version}",
+    "maven.modrinth:guideme:${guideme_ci_version}"
+  ],
   "schema": 1,
   "side": "both",
   "sourceSet": "compatPowah"
