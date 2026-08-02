@@ -162,6 +162,10 @@ are all randomness evidence. Without `--source`, scans are
 cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
+Named nested classes remain inspectable only when their complete owner chain is
+present in the same archive; a missing owner fails closed rather than allowing
+a descendant of an excluded anonymous, local, or synthetic owner through a
+split classpath.
 Data-root scans bind the ordered layer digests into their cache identity;
 ancestry classpaths bind their exact artifact set. Cache metadata also records
 the selected JDK 21 installation, release version, module-file identity, and

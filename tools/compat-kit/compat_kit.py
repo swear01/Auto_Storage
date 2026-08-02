@@ -868,9 +868,11 @@ def _is_inspectable_class(
         outer_entry = outer_class.replace(".", "/") + ".class"
         try:
             archive.getinfo(outer_entry)
-        except KeyError:
-            cache[current_entry] = True
-            break
+        except KeyError as error:
+            raise ValueError(
+                "nested class owner is missing from its archive: "
+                f"{outer_entry} for {current_entry}"
+            ) from error
         if len(pending) >= MAX_NESTED_CLASS_OWNER_DEPTH:
             raise ValueError(
                 "nested class ownership exceeds "

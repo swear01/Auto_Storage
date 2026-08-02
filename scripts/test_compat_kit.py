@@ -2942,6 +2942,50 @@ class CompatKitAuditTests(unittest.TestCase):
             {record["class"] for record in audit["structural_class_graph"]},
         )
 
+    def test_classpath_rejects_nested_owner_split_across_archives(self):
+        child_jar = self.root / "split-nested-child.jar"
+        owner_jar = self.root / "split-nested-owner.jar"
+        child_entry = "samplemod/Outer$1$Key.class"
+        owner_entry = "samplemod/Outer$1.class"
+        with zipfile.ZipFile(child_jar, "w") as archive:
+            archive.writestr(child_entry, b"child")
+        with zipfile.ZipFile(owner_jar, "w") as archive:
+            archive.writestr(owner_entry, b"owner")
+
+        def metadata(_payload: bytes, entry_name: str):
+            if entry_name == child_entry:
+                return {
+                    "access_flags": 0,
+                    "super_class": None,
+                    "interfaces": [],
+                    "inner_class_entry": True,
+                    "inner_name": "Key",
+                    "outer_class": "samplemod.Outer$1",
+                    "enclosing_method": False,
+                    "source_file": "Outer.java",
+                }
+            return {
+                "access_flags": 0,
+                "super_class": None,
+                "interfaces": [],
+                "inner_class_entry": True,
+                "inner_name": None,
+                "outer_class": "samplemod.Outer",
+                "enclosing_method": True,
+                "source_file": "Outer.java",
+            }
+
+        with mock.patch.object(
+            self.compat_kit,
+            "_class_metadata",
+            side_effect=metadata,
+        ):
+            with self.assertRaisesRegex(
+                ValueError,
+                "nested class owner is missing from its archive",
+            ):
+                self.compat_kit._classpath_metadata([child_jar, owner_jar])
+
     def test_nested_owner_depth_fails_with_bounded_validation_error(self):
         target_jar = self.root / "deep-nested-owner.jar"
         entries = [f"samplemod/Owner{index}.class" for index in range(1026)]

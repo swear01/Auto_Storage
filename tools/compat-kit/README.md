@@ -63,7 +63,7 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 16 structurally classifies concrete `Recipe` and
+Scanner format 17 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
@@ -98,7 +98,7 @@ are inventoried again after source evidence is built and immediately before a
 scan can cache or return, so a persistent in-flight change fails instead of
 producing mixed evidence. Legacy
 formats 7 through 16 remain readable for explicit migration, but current-only
-commands reject them. Format 16 stores each candidate's binary and source-level
+commands reject them. Format 17 stores each candidate's binary and source-level
 Java names, structural classification, a separate sorted top-level
 `structural_hierarchy` inventory, and an artifact/classpath-bound structural
 candidate digest. Its `structural_class_graph` starts from every target class
@@ -179,7 +179,9 @@ configured limit plus one byte and terminate `javap` on overflow.
 `RandomGenerator` are recognized.
 Named nested classes are included and mapped to their top-level source even
 when the Java identifier contains `$`; `InnerClasses`/`EnclosingMethod`
-metadata excludes anonymous/local classes. Class files carrying
+metadata excludes anonymous/local classes and every named descendant under an
+excluded owner. A nested owner missing from the same archive fails closed
+instead of accepting an incomplete ownership chain. Class files carrying
 `ACC_SYNTHETIC` and `META-INF/versions/` aliases are also excluded; the root
 binary name is scanned once. Scan and audit validation apply the same current
 name-bucket priority.
