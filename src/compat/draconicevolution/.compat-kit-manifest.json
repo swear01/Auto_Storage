@@ -5,10 +5,9 @@
     "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompat.java": "6e7dcbd43fb52fc84ae86edfd54f5002a861363d480dd48df8f539cf0c993b70",
     "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompatModule.java": "ede0f2b8e43de19b0c89d228c9f8680fe26cebd4fc35cdd777317cb97fe6d43d",
     "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionFixtureMod.java": "408f1c093272944773c73bad26fd90c243f6452acde389ff7e10a022040a40e3",
-    "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionIntegrationGameTests.java": "30abc6e9508c87feff7f58c3afb0c25d9abbb45ff47c3472c342fd2603b63294",
+    "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionIntegrationGameTests.java": "8aac395fe191a77632a374986e3ef6741532c7b297aff18c9342dd80e2541675",
     "src/draconicevolutionFixture/resources/META-INF/neoforge.mods.toml": "7bc9701f0f31701f5a4e666d1923148ee465b12650183c135d3b376e99ef2f34",
     "src/draconicevolutionFixture/resources/data/auto_storage_draconicevolution_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
-  "schema": 1,
-  "tool_version": "0.3.0"
+  "schema": 1
 }

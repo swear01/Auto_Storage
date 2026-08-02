@@ -2,6 +2,7 @@ package com.swear.autostorage.fixture.pneumaticcraft;
 
 import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.AutoStorage;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import me.desht.pneumaticcraft.common.capabilities.BasicAirHandler;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -23,6 +24,7 @@ public final class PneumaticCraftIntegrationGameTests {
     public static void unsafe_air_and_machine_contracts_are_not_registered(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), PneumaticCraftIntegrationGameTests.class);
         if (!ModList.get().isLoaded("pneumaticcraft")
                 || AutoStorage.RESOURCE_KIND_REGISTRY.containsKey(pnc("air"))
                 || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.containsKey(

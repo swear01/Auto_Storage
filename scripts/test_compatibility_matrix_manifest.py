@@ -1,5 +1,7 @@
 import hashlib
 import json
+import re
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -92,7 +94,6 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
         companions = {
             "schema": 1,
             "companions": [],
-            "unclaimedRecipeInventory": {"sha256": "0" * 64},
         }
         descriptor = {
             "schema": 1,
@@ -190,7 +191,6 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
         companions = {
             "schema": 1,
             "companions": [],
-            "unclaimedRecipeInventory": {"sha256": "b" * 64},
         }
         with self.assertRaisesRegex(ValueError, "Duplicate compatibility module"):
             build_manifest([descriptor, dict(descriptor)], companions)
@@ -250,7 +250,6 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
                     },
                 }
             ],
-            "unclaimedRecipeInventory": {"sha256": "b" * 64},
         }
         manifest = build_manifest([descriptor], companions)
         validate_manifest(manifest, [descriptor], companions)
@@ -420,6 +419,453 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
                 shared_before["workflow_test"],
                 hashlib.sha256(workflow_test.encode()).hexdigest(),
             )
+
+    def test_global_recipe_digests_are_not_committed_baselines(self):
+        from compatibility_matrix_manifest import (
+            COMPATIBILITY_SUMMARY_RELATIVE_PATH,
+            SHARED_AGGREGATE_PATHS,
+            build_manifest,
+            validate_companions,
+            validate_descriptor_matrix,
+        )
+
+        self.assertEqual(
+            COMPATIBILITY_SUMMARY_RELATIVE_PATH,
+            "build/reports/compatibility-modules.md",
+        )
+        self.assertIn(
+            "docs/generated/compatibility-modules.md",
+            SHARED_AGGREGATE_PATHS,
+        )
+        self.assertIn(
+            "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+            "compatibility-matrix-companions.json",
+            SHARED_AGGREGATE_PATHS,
+        )
+
+        isolated = {
+            "mods": ["sample"],
+            "descriptors": [],
+            "resourceKinds": [],
+            "acceptedRecipes": [],
+            "rejectedDescriptors": [],
+            "rejectedResourceKinds": [],
+            "recipeInventory": {
+                "namespaces": ["sample"],
+                "sha256": "a" * 64,
+            },
+        }
+        validate_descriptor_matrix({"matrix": isolated})
+        with self.assertRaisesRegex(
+            ValueError, "coexistence|cross-owned|isolated|must declare|unclaimed"
+        ):
+            validate_descriptor_matrix(
+                {
+                    "matrix": {
+                        **isolated,
+                        "coexistenceRecipeInventory": {"sha256": "b" * 64},
+                    }
+                }
+            )
+
+        companions = {"schema": 1, "companions": []}
+        validate_companions(companions)
+        for forbidden in (
+            "coexistenceRecipeInventory",
+            "unclaimedRecipeInventory",
+        ):
+            with self.assertRaisesRegex(ValueError, forbidden):
+                validate_companions(
+                    {
+                        "schema": 1,
+                        "companions": [],
+                        forbidden: {"sha256": "c" * 64},
+                    }
+                )
+
+        descriptor = {
+            "schema": 1,
+            "id": "auto_storage:sample",
+            "matrix": isolated,
+        }
+        manifest = build_manifest([descriptor], companions)
+        self.assertNotIn("coexistenceRecipeInventory", manifest)
+        self.assertNotIn("unclaimedRecipeInventory", manifest)
+        self.assertNotIn("coexistenceRecipeInventory", manifest["modules"][0])
+
+    def test_peer_descriptor_digest_stays_isolated_when_module_added(self):
+        from compatibility_matrix_manifest import build_manifest, recipe_inventory_sha256
+
+        peer = {
+            "schema": 1,
+            "id": "auto_storage:peer",
+            "matrix": {
+                "mods": ["peer"],
+                "descriptors": [],
+                "resourceKinds": [],
+                "acceptedRecipes": [],
+                "rejectedDescriptors": [],
+                "rejectedResourceKinds": [],
+                "recipeInventory": {
+                    "namespaces": ["peer"],
+                    "sha256": recipe_inventory_sha256(["peer:base"]),
+                },
+            },
+        }
+        new_module = {
+            "schema": 1,
+            "id": "auto_storage:intruder",
+            "matrix": {
+                "mods": ["intruder"],
+                "descriptors": [],
+                "resourceKinds": [],
+                "acceptedRecipes": [],
+                "rejectedDescriptors": [],
+                "rejectedResourceKinds": [],
+                "recipeInventory": {
+                    "namespaces": ["intruder"],
+                    "sha256": recipe_inventory_sha256(["intruder:one"]),
+                },
+            },
+        }
+        companions = {"schema": 1, "companions": []}
+        before = build_manifest([peer], companions)
+        after = build_manifest([peer, new_module], companions)
+        peer_before = next(
+            module for module in before["modules"] if module["id"] == peer["id"]
+        )
+        peer_after = next(
+            module for module in after["modules"] if module["id"] == peer["id"]
+        )
+        self.assertEqual(peer_before["recipeInventory"], peer_after["recipeInventory"])
+        self.assertEqual(before.keys(), after.keys())
+        self.assertNotIn("coexistenceRecipeInventory", before)
+        self.assertNotIn("unclaimedRecipeInventory", after)
+
+    def test_two_independent_module_additions_merge_without_shared_conflicts(self):
+        from compatibility_matrix_manifest import (
+            SHARED_AGGREGATE_PATHS,
+            recipe_inventory_sha256,
+        )
+
+        def write_descriptor(root: Path, descriptor: dict) -> Path:
+            module_dir = root / "src/compat" / descriptor["id"].split(":", 1)[1]
+            module_dir.mkdir(parents=True, exist_ok=True)
+            path = module_dir / "compat-module.json"
+            path.write_text(
+                json.dumps(descriptor, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            return path
+
+        def git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
+                ["git", "-C", str(root), *args],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+        def changed_paths(root: Path, base: str, tip: str) -> set[str]:
+            result = git(root, "diff", "--name-only", f"{base}..{tip}")
+            return {line for line in result.stdout.splitlines() if line}
+
+        base_peer = {
+            "schema": 1,
+            "id": "auto_storage:shared_peer",
+            "entrypoint": "com.swear.autostorage.compat.sharedpeer.SharedPeerCompatModule",
+            "requires": ["shared_peer"],
+            "side": "both",
+            "sourceSet": "compatSharedPeer",
+            "fixture": "sharedPeerFixture",
+            "expectedTests": 1,
+            "dependencies": ["maven.modrinth:shared-peer:1"],
+            "runtimeDependencies": ["maven.modrinth:shared-peer:1"],
+            "matrix": {
+                "mods": ["shared_peer"],
+                "descriptors": [],
+                "resourceKinds": [],
+                "acceptedRecipes": [],
+                "rejectedDescriptors": [],
+                "rejectedResourceKinds": [],
+                "recipeInventory": {
+                    "namespaces": ["shared_peer"],
+                    "sha256": recipe_inventory_sha256(["shared_peer:one"]),
+                },
+            },
+        }
+        module_a = {
+            "schema": 1,
+            "id": "auto_storage:synth_a",
+            "entrypoint": "com.swear.autostorage.compat.syntha.SynthACompatModule",
+            "requires": ["synth_a"],
+            "side": "both",
+            "sourceSet": "compatSynthA",
+            "fixture": "synthAFixture",
+            "expectedTests": 2,
+            "dependencies": ["maven.modrinth:synth-a:1"],
+            "runtimeDependencies": ["maven.modrinth:synth-a:1"],
+            "matrix": {
+                "mods": ["synth_a"],
+                "descriptors": [],
+                "resourceKinds": [],
+                "acceptedRecipes": [],
+                "rejectedDescriptors": [],
+                "rejectedResourceKinds": [],
+                "recipeInventory": {
+                    "namespaces": ["synth_a"],
+                    "sha256": recipe_inventory_sha256(["synth_a:one"]),
+                },
+            },
+        }
+        module_b = {
+            "schema": 1,
+            "id": "auto_storage:synth_b",
+            "entrypoint": "com.swear.autostorage.compat.synthb.SynthBCompatModule",
+            "requires": ["synth_b"],
+            "side": "both",
+            "sourceSet": "compatSynthB",
+            "fixture": "synthBFixture",
+            "expectedTests": 3,
+            "dependencies": ["maven.modrinth:synth-b:1"],
+            "runtimeDependencies": ["maven.modrinth:synth-b:1"],
+            "matrix": {
+                "mods": ["synth_b"],
+                "descriptors": [],
+                "resourceKinds": [],
+                "acceptedRecipes": [],
+                "rejectedDescriptors": [],
+                "rejectedResourceKinds": [],
+                "recipeInventory": {
+                    "namespaces": ["synth_b"],
+                    "sha256": recipe_inventory_sha256(["synth_b:one"]),
+                },
+            },
+        }
+        companions = {"schema": 1, "companions": []}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_descriptor(root, base_peer)
+            companions_path = (
+                root
+                / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+                "compatibility-matrix-companions.json"
+            )
+            companions_path.parent.mkdir(parents=True)
+            companions_path.write_text(
+                json.dumps(companions, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            (root / "README.md").write_text(
+                "Compatibility summary: build/reports/compatibility-modules.md\n",
+                encoding="utf-8",
+            )
+            git(root, "init")
+            git(root, "config", "user.email", "issue77@example.com")
+            git(root, "config", "user.name", "issue77")
+            git(root, "add", ".")
+            git(root, "commit", "-m", "base")
+            base = git(root, "rev-parse", "HEAD").stdout.strip()
+            peer_before = (
+                root / "src/compat/shared_peer/compat-module.json"
+            ).read_bytes()
+
+            git(root, "checkout", "-b", "add-synth-a")
+            write_descriptor(root, module_a)
+            docs_a = root / "docs/synth-a-compatibility.md"
+            docs_a.parent.mkdir(parents=True, exist_ok=True)
+            docs_a.write_text("# Synth A\n", encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-m", "add synth_a")
+            tip_a = git(root, "rev-parse", "HEAD").stdout.strip()
+            paths_a = changed_paths(root, base, tip_a)
+
+            git(root, "checkout", base)
+            git(root, "checkout", "-b", "add-synth-b")
+            write_descriptor(root, module_b)
+            docs_b = root / "docs/synth-b-compatibility.md"
+            docs_b.parent.mkdir(parents=True, exist_ok=True)
+            docs_b.write_text("# Synth B\n", encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-m", "add synth_b")
+            tip_b = git(root, "rev-parse", "HEAD").stdout.strip()
+            paths_b = changed_paths(root, base, tip_b)
+
+            self.assertTrue(paths_a)
+            self.assertTrue(paths_b)
+            self.assertFalse(paths_a & paths_b)
+            for paths in (paths_a, paths_b):
+                shared = paths & SHARED_AGGREGATE_PATHS
+                self.assertFalse(
+                    shared,
+                    f"module PR must not edit shared aggregate paths: {sorted(shared)}",
+                )
+                self.assertNotIn(
+                    "src/compat/shared_peer/compat-module.json",
+                    paths,
+                )
+            self.assertEqual(
+                peer_before,
+                (root / "src/compat/shared_peer/compat-module.json").read_bytes(),
+            )
+
+            merge = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "merge-tree",
+                    base,
+                    tip_a,
+                    tip_b,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotIn("changed in both", merge.stdout)
+            self.assertNotRegex(merge.stdout, r"^<<<<<<<", re.M)
+
+            git(root, "checkout", "add-synth-a")
+            conflict_summary = (
+                root / "docs/generated/compatibility-modules.md"
+            )
+            conflict_summary.parent.mkdir(parents=True, exist_ok=True)
+            conflict_summary.write_text("# A summary\n", encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-m", "regen shared summary on A")
+            tip_a_conflict = git(root, "rev-parse", "HEAD").stdout.strip()
+            git(root, "checkout", "add-synth-b")
+            conflict_summary.parent.mkdir(parents=True, exist_ok=True)
+            conflict_summary.write_text("# B summary\n", encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-m", "regen shared summary on B")
+            tip_b_conflict = git(root, "rev-parse", "HEAD").stdout.strip()
+            conflict_paths_a = changed_paths(root, base, tip_a_conflict)
+            conflict_paths_b = changed_paths(root, base, tip_b_conflict)
+            self.assertTrue(conflict_paths_a & conflict_paths_b & SHARED_AGGREGATE_PATHS)
+            conflict_merge = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "merge-tree",
+                    base,
+                    tip_a_conflict,
+                    tip_b_conflict,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertTrue(
+                "changed in both" in conflict_merge.stdout
+                or "<<<<<<<" in conflict_merge.stdout,
+                conflict_merge.stdout,
+            )
+
+    def test_compatibility_summary_is_build_report_artifact(self):
+        from compatibility_matrix_manifest import (
+            COMPATIBILITY_SUMMARY_RELATIVE_PATH,
+            build_compatibility_summary,
+            load_descriptors,
+            render_compatibility_summary,
+            validate_compatibility_summary,
+            write_compatibility_summary,
+        )
+
+        build = (ROOT / "build.gradle").read_text(encoding="utf-8")
+        self.assertIn(COMPATIBILITY_SUMMARY_RELATIVE_PATH, build)
+        self.assertNotIn("docs/generated/compatibility-modules.md", build)
+        self.assertFalse((ROOT / "docs/generated").exists())
+
+        descriptors = load_descriptors(ROOT / "src/compat")
+        with tempfile.TemporaryDirectory() as tmp:
+            summary_path = Path(tmp) / COMPATIBILITY_SUMMARY_RELATIVE_PATH
+            write_compatibility_summary(ROOT, summary_path)
+            expected = render_compatibility_summary(
+                build_compatibility_summary(descriptors, docs_root=ROOT / "docs")
+            )
+            self.assertEqual(expected, summary_path.read_text(encoding="utf-8"))
+            validate_compatibility_summary(
+                expected,
+                descriptors,
+                docs_root=ROOT / "docs",
+            )
+            with self.assertRaisesRegex(ValueError, "stale|drift|compatibility summary"):
+                validate_compatibility_summary(
+                    expected + "\n<!-- tampered -->\n",
+                    descriptors,
+                    docs_root=ROOT / "docs",
+                )
+            self.assertRegex(
+                expected,
+                re.compile(r"build/reports/compatibility-modules\.md"),
+            )
+
+    def test_repository_has_no_committed_global_recipe_digests(self):
+        from compatibility_matrix_manifest import (
+            build_manifest_from_roots,
+            load_companions,
+            load_descriptors,
+        )
+
+        companions = load_companions(
+            ROOT
+            / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+            / "compatibility-matrix-companions.json"
+        )
+        self.assertEqual({"schema", "companions"}, set(companions))
+        self.assertNotIn("coexistenceRecipeInventory", companions)
+        self.assertNotIn("unclaimedRecipeInventory", companions)
+        for descriptor in load_descriptors(ROOT / "src/compat"):
+            self.assertNotIn("coexistenceRecipeInventory", descriptor)
+            self.assertNotIn("coexistenceRecipeInventory", descriptor["matrix"])
+            self.assertNotIn("unclaimedRecipeInventory", descriptor)
+            self.assertNotIn("unclaimedRecipeInventory", descriptor["matrix"])
+        manifest = build_manifest_from_roots(ROOT)
+        self.assertEqual({"schema", "modules", "companions"}, set(manifest))
+        self.assertNotIn("coexistenceRecipeInventory", manifest)
+        self.assertNotIn("unclaimedRecipeInventory", manifest)
+
+    def test_isolated_fixtures_must_verify_descriptor_recipe_inventory(self):
+        build = (ROOT / "build.gradle").read_text(encoding="utf-8")
+        helper = ROOT / (
+            "src/main/java/com/swear/autostorage/IsolatedRecipeInventoryEvidence.java"
+        )
+        self.assertTrue(helper.is_file())
+        self.assertIn("isolated-recipe-inventory.json", build)
+        self.assertIn("generateIsolatedRecipeInventory_", build)
+
+        from compatibility_matrix_manifest import load_descriptors
+
+        def fixture_sources(fixture: str) -> list[Path]:
+            fixture_root = ROOT / "src" / fixture
+            return [
+                path
+                for path in fixture_root.rglob("*.java")
+                if "GameTest" in path.read_text(encoding="utf-8")
+                or "@GameTest" in path.read_text(encoding="utf-8")
+            ]
+
+        for descriptor in load_descriptors(ROOT / "src/compat"):
+            fixture = descriptor["fixture"]
+            sources = fixture_sources(fixture)
+            self.assertTrue(sources, f"missing GameTests for {fixture}")
+            joined = "\n".join(path.read_text(encoding="utf-8") for path in sources)
+            self.assertIn(
+                "IsolatedRecipeInventoryEvidence",
+                joined,
+                f"{fixture} must verify descriptor recipeInventory",
+            )
+        pneumatic = ROOT / (
+            "src/pneumaticCraftFixture/java/com/swear/autostorage/fixture/"
+            "pneumaticcraft/PneumaticCraftIntegrationGameTests.java"
+        )
+        self.assertIn(
+            "IsolatedRecipeInventoryEvidence",
+            pneumatic.read_text(encoding="utf-8"),
+        )
 
 
 if __name__ == "__main__":

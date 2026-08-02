@@ -2,6 +2,7 @@ package com.swear.autostorage.fixture.advancedae;
 
 import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.AutoStorage;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ public final class AdvancedAeIntegrationGameTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void unsafe_machine_contracts_are_not_registered(GameTestHelper helper) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), AdvancedAeIntegrationGameTests.class);
         if (!ModList.get().isLoaded("advanced_ae")) {
             helper.fail("Advanced AE mod is not loaded");
             return;

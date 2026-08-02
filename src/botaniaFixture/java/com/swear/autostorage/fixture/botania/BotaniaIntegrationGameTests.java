@@ -16,6 +16,7 @@ import com.swear.autostorage.StorageTerminalMenu;
 import com.swear.autostorage.TerminalContainerTransferDirection;
 import com.swear.autostorage.TerminalHeldContainerTransferPacket;
 import com.swear.autostorage.TerminalResourceView;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponents;
@@ -68,6 +69,7 @@ public final class BotaniaIntegrationGameTests {
     public static void mana_infusion_with_an_empty_output_fails_closed(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), BotaniaIntegrationGameTests.class);
         var recipe = new ManaInfusionRecipe(
                 ItemStack.EMPTY,
                 Ingredient.of(Items.DIAMOND),

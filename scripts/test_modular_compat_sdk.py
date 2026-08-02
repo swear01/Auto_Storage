@@ -160,7 +160,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             ).read_text()
         )
         self.assertEqual(
-            "c4155661f3e187d12177f181b30b915d01adf9e4af33ba5945ec16d3f565e24f",
+            "e988a742f688de35bc15bb861dccb516616b161e527a518f1485b61347e670da",
             modern_industrialization_descriptor["matrix"]["recipeInventory"]["sha256"],
         )
         companions = json.loads(
@@ -169,10 +169,9 @@ class ModularCompatSdkTests(unittest.TestCase):
                 / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/compatibility-matrix-companions.json"
             ).read_text()
         )
-        self.assertEqual(
-            "c5796e5c92a7ec1e51c9fe58397e8c0e1dc0743b7a587039631f231c294c1207",
-            companions["unclaimedRecipeInventory"]["sha256"],
-        )
+        self.assertEqual({"schema", "companions"}, set(companions))
+        self.assertNotIn("coexistenceRecipeInventory", companions)
+        self.assertNotIn("unclaimedRecipeInventory", companions)
         self.assertEqual(
             hashlib.sha256(contract_path.read_bytes()).hexdigest(),
             manifest["contract_sha256"],

@@ -12,6 +12,7 @@ import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -52,6 +53,7 @@ public final class TheurgyIntegrationGameTests {
     public static void registers_accepted_families_and_rejects_unsafe_slice(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), TheurgyIntegrationGameTests.class);
         for (var entry : STATIONS.entrySet()) {
             if (!validStation(autoStorage(entry.getKey()), entry.getValue())
                     || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(

@@ -10,6 +10,7 @@ import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.ItemKey;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.StorageCoreBlockEntity;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -49,6 +50,7 @@ public final class ExtendedCraftingGameTests {
     public static void full_9x9_recipe_requires_station_and_consumes_all_81_inputs(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), ExtendedCraftingGameTests.class);
         withFixture(helper, context -> {
             seedIngredients(context.core(), 10);
             if (context.menu().handleRecipeRequest(

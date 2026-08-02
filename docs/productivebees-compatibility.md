@@ -84,21 +84,11 @@ approximating source semantics away.
 
 ## Matrix isolation
 
-The Productive Bees descriptor owns only its `productivebees` namespace and
-locks the 617 recipes that enter the combined server `RecipeManager` at SHA-256
-`29eae13b02c34d2f44c4dd2bbc5aefe44e1dbf054c19c9c6e099f61e6b2367b9`.
-Merged Draconic Evolution plus the representative Railcraft and Productive Metalworks
-matrices satisfy additional Productive Bees data conditions, so the current combined
-inventory contains eight more recipes than the pre-Draconic 609-recipe inventory.
-
-Productive Bees also ships three recipes under the
-`modern_industrialization` namespace, so that existing descriptor remains their
-owner and its combined digest is
-`c4155661f3e187d12177f181b30b915d01adf9e4af33ba5945ec16d3f565e24f`
-for 2,992 recipes. The unclaimed inventory is independently locked at
-`c5796e5c92a7ec1e51c9fe58397e8c0e1dc0743b7a587039631f231c294c1207`
-for 1,354 recipes. No Productive-specific branch was added to shared matrix
-Java; coexistence remains the generic descriptor-manifest assertion.
+The Productive Bees descriptor owns only its isolated `productivebees`
+namespace recipe inventory for the module fixture. Cross-module coexistence and
+unclaimed recipe inventories are computed by the compatibility-matrix GameTest
+and recorded in `build/reports/terminal-scale-*.json`; they are not committed
+baselines and do not rewrite peer descriptors when this module is added.
 
 ## Future acceptance boundary
 
@@ -118,6 +108,6 @@ Eight isolated present-mod GameTests prove the module registers no Productive
 Bees stations/families, representative centrifuge/bottler/beehive/breeding/
 conversion/block-conversion recipes stay unsupported, and every loaded recipe
 in each audited custom recipe type remains fail closed. The descriptor-owned
-combined matrix loads the representative artifact, locks the cross-namespace
-recipe inventories above, and verifies the same zero-family boundary through
+combined matrix loads the representative artifact and verifies the same
+zero-family boundary through
 `manifest.assertCoexistence(helper, "Descriptor matrix coexistence")`.

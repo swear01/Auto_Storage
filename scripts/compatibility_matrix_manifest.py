@@ -25,6 +25,24 @@ MATRIX_LIST_KEYS = (
     "rejectedResourceKinds",
 )
 
+COMPATIBILITY_SUMMARY_RELATIVE_PATH = "build/reports/compatibility-modules.md"
+
+SHARED_AGGREGATE_PATHS = frozenset(
+    {
+        "docs/generated/compatibility-modules.md",
+        COMPATIBILITY_SUMMARY_RELATIVE_PATH,
+        "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+        "compatibility-matrix-companions.json",
+        "README.md",
+        "docs/overview.md",
+        "docs/plan.md",
+        "docs/roadmap.md",
+        "docs/structure.md",
+        "docs/notes.md",
+        "docs/addon-development.md",
+    }
+)
+
 
 def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
@@ -78,6 +96,13 @@ def validate_descriptor_matrix(descriptor: dict[str, Any]) -> dict[str, Any]:
     matrix = descriptor.get("matrix")
     if not isinstance(matrix, dict):
         raise ValueError("compatibility descriptor requires matrix object")
+    for forbidden in ("coexistenceRecipeInventory", "unclaimedRecipeInventory"):
+        if forbidden in matrix:
+            raise ValueError(
+                f"matrix must not declare {forbidden}; "
+                "cross-module inventory evidence is recorded by the matrix report, "
+                "not committed baselines"
+            )
     expected_keys = set(MATRIX_LIST_KEYS) | {"recipeInventory"}
     if matrix.keys() != expected_keys:
         raise ValueError(
@@ -122,9 +147,12 @@ def validate_descriptor_matrix(descriptor: dict[str, Any]) -> dict[str, Any]:
 def validate_companions(companions_doc: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(companions_doc, dict) or companions_doc.get("schema") != 1:
         raise ValueError("companions schema must be 1")
-    if companions_doc.keys() != {"schema", "companions", "unclaimedRecipeInventory"}:
+    expected = {"schema", "companions"}
+    if companions_doc.keys() != expected:
+        unexpected = sorted(set(companions_doc) - expected)
         raise ValueError(
-            "companions must declare schema, companions, and unclaimedRecipeInventory"
+            "companions must declare only schema and companions"
+            + (f"; unexpected {', '.join(unexpected)}" if unexpected else "")
         )
     companions = companions_doc["companions"]
     if not isinstance(companions, list):
@@ -138,22 +166,21 @@ def validate_companions(companions_doc: dict[str, Any]) -> dict[str, Any]:
         if companion_id in seen_ids:
             raise ValueError(f"Duplicate companion id: {companion_id}")
         seen_ids.add(companion_id)
+        for forbidden in ("coexistenceRecipeInventory", "unclaimedRecipeInventory"):
+            if forbidden in companion:
+                raise ValueError(
+                    f"companions entries must not declare {forbidden}; "
+                    "global inventory digests are matrix report evidence only"
+                )
         matrix_fields = {
             key: companion.get(key) for key in MATRIX_LIST_KEYS
         }
         matrix_fields["recipeInventory"] = companion.get("recipeInventory")
         validated = validate_descriptor_matrix({"matrix": matrix_fields})
         validated_companions.append({"id": companion_id, **validated})
-    unclaimed = companions_doc["unclaimedRecipeInventory"]
-    if not isinstance(unclaimed, dict) or unclaimed.keys() != {"sha256"}:
-        raise ValueError("unclaimedRecipeInventory must declare only sha256")
-    sha256 = unclaimed["sha256"]
-    if not isinstance(sha256, str) or not SHA256_RE.fullmatch(sha256):
-        raise ValueError("unclaimedRecipeInventory.sha256 must be a SHA-256 digest")
     return {
         "schema": 1,
         "companions": validated_companions,
-        "unclaimedRecipeInventory": {"sha256": sha256},
     }
 
 
@@ -191,8 +218,14 @@ def build_manifest(
         "schema": 1,
         "modules": modules,
         "companions": companions["companions"],
-        "unclaimedRecipeInventory": companions["unclaimedRecipeInventory"],
     }
+
+
+MANIFEST_KEYS = {
+    "schema",
+    "modules",
+    "companions",
+}
 
 
 def validate_manifest(
@@ -205,11 +238,99 @@ def validate_manifest(
         raise ValueError(
             "compatibility matrix manifest drift or tamper detected"
         )
-    unexpected = set(manifest) - {"schema", "modules", "companions", "unclaimedRecipeInventory"}
+    unexpected = set(manifest) - MANIFEST_KEYS
     if unexpected:
         raise ValueError(
             f"compatibility matrix manifest has unexpected keys: {sorted(unexpected)}"
         )
+
+
+def build_compatibility_summary(
+    descriptors: list[dict[str, Any]],
+    *,
+    docs_root: Path | None = None,
+) -> list[dict[str, Any]]:
+    rows = []
+    seen: set[str] = set()
+    for descriptor in descriptors:
+        module_id = descriptor.get("id")
+        if not isinstance(module_id, str) or not module_id.startswith("auto_storage:"):
+            raise ValueError("descriptor id must be auto_storage:<mod>")
+        if module_id in seen:
+            raise ValueError(f"Duplicate compatibility module ID: {module_id}")
+        seen.add(module_id)
+        directory_id = module_id.split(":", 1)[1]
+        fixture = descriptor.get("fixture")
+        expected_tests = descriptor.get("expectedTests")
+        if not isinstance(fixture, str) or not fixture:
+            raise ValueError(f"{module_id} requires fixture")
+        if not isinstance(expected_tests, int) or expected_tests <= 0:
+            raise ValueError(f"{module_id} requires positive expectedTests")
+        doc_name = f"{directory_id.replace('_', '-')}-compatibility.md"
+        has_doc = docs_root is not None and (docs_root / doc_name).is_file()
+        rows.append(
+            {
+                "id": module_id,
+                "directory": directory_id,
+                "fixture": fixture,
+                "expectedTests": expected_tests,
+                "doc": doc_name if has_doc else None,
+            }
+        )
+    rows.sort(key=lambda row: row["id"])
+    return rows
+
+
+def render_compatibility_summary(rows: list[dict[str, Any]]) -> str:
+    lines = [
+        "<!-- Generated by scripts/compatibility_matrix_manifest.py."
+        " Do not hand-edit. -->",
+        "",
+        "# Compatibility modules",
+        "",
+        "CI/release artifact written to"
+        f" `{COMPATIBILITY_SUMMARY_RELATIVE_PATH}`."
+        " Routine module PRs update only the owning descriptor and"
+        " module-owned compatibility doc; they do not commit this report.",
+        "",
+        "| Module | Fixture | Expected tests | Compatibility doc |",
+        "| --- | --- | ---: | --- |",
+    ]
+    for row in rows:
+        if row["doc"] is None:
+            doc_link = "—"
+        else:
+            doc_link = f"`docs/{row['doc']}`"
+        lines.append(
+            f"| `{row['id']}` | `{row['fixture']}` | {row['expectedTests']} "
+            f"| {doc_link} |"
+        )
+    lines.append("")
+    return "\n".join(lines)
+
+
+def validate_compatibility_summary(
+    text: str,
+    descriptors: list[dict[str, Any]],
+    *,
+    docs_root: Path | None = None,
+) -> None:
+    expected = render_compatibility_summary(
+        build_compatibility_summary(descriptors, docs_root=docs_root)
+    )
+    if text != expected:
+        raise ValueError("compatibility summary drift or tamper detected")
+
+
+def write_compatibility_summary(root: Path, output: Path) -> None:
+    descriptors = load_descriptors(root / "src/compat")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        render_compatibility_summary(
+            build_compatibility_summary(descriptors, docs_root=root / "docs")
+        ),
+        encoding="utf-8",
+    )
 
 
 def load_companions(path: Path) -> dict[str, Any]:
@@ -258,24 +379,45 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="Fail unless this manifest matches descriptors/companions",
     )
+    parser.add_argument(
+        "--summary-output",
+        type=Path,
+        help="Write the generated compatibility module summary markdown",
+    )
+    parser.add_argument(
+        "--check-summary",
+        type=Path,
+        help="Fail unless this summary matches descriptors",
+    )
     args = parser.parse_args(argv)
     root = args.root.resolve()
-    manifest = build_manifest_from_roots(root)
+    descriptors = load_descriptors(root / "src/compat")
+    companions = load_companions(
+        root
+        / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+        / "compatibility-matrix-companions.json"
+    )
+    manifest = build_manifest(descriptors, companions)
     if args.check is not None:
         actual = json.loads(args.check.read_text(encoding="utf-8"))
-        validate_manifest(
-            actual,
-            load_descriptors(root / "src/compat"),
-            load_companions(
-                root
-                / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
-                / "compatibility-matrix-companions.json"
-            ),
+        validate_manifest(actual, descriptors, companions)
+    if args.check_summary is not None:
+        validate_compatibility_summary(
+            args.check_summary.read_text(encoding="utf-8"),
+            descriptors,
+            docs_root=root / "docs",
         )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(canonical_json(manifest), encoding="utf-8")
-    elif args.check is None:
+    if args.summary_output is not None:
+        write_compatibility_summary(root, args.summary_output)
+    if (
+        args.output is None
+        and args.check is None
+        and args.summary_output is None
+        and args.check_summary is None
+    ):
         sys.stdout.write(canonical_json(manifest))
     return 0
 

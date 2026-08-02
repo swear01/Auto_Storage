@@ -20,6 +20,7 @@ import com.swear.autostorage.StorageResourceKindApi;
 import com.swear.autostorage.StorageTerminalMenu;
 import com.swear.autostorage.TerminalDisplayStack;
 import com.swear.autostorage.TerminalResourceView;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -64,6 +65,7 @@ public final class ArsNouveauIntegrationGameTests {
     public static void source_kind_and_timed_recipe_families_are_conditional(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), ArsNouveauIntegrationGameTests.class);
         StorageResourceKind sourceKind = AutoStorage.RESOURCE_KIND_REGISTRY.get(
                 StorageResourceKindApi.ARS_NOUVEAU_SOURCE_KIND);
         if (sourceKind == null

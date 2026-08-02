@@ -157,6 +157,7 @@ def compatModules = compatModuleFiles.collect { descriptorFile ->
             sourceSet   : descriptor.sourceSet,
             fixture     : descriptor.fixture,
             fixtureModId: "auto_storage_${directoryId}_fixture",
+            descriptorFile: descriptorFile,
             runName     : runName,
             runTask     : "run${runName.substring(0, 1).toUpperCase()}${runName.substring(1)}",
             expectedTests: descriptor.expectedTests,
@@ -229,6 +230,35 @@ def generateCompatibilityMatrixManifest = tasks.register(
             '--output', manifestFile.get().asFile.absolutePath
 }
 
+def compatibilitySummaryRelativePath = 'build/reports/compatibility-modules.md'
+def compatibilitySummaryFile = layout.projectDirectory.file(
+        compatibilitySummaryRelativePath)
+def generateCompatibilitySummary = tasks.register(
+        'generateCompatibilitySummary', Exec) {
+    inputs.files(compatModuleFiles)
+    inputs.file('scripts/compatibility_matrix_manifest.py')
+    outputs.file(compatibilitySummaryFile)
+    workingDir = layout.projectDirectory.asFile
+    doFirst {
+        compatibilitySummaryFile.asFile.parentFile.mkdirs()
+    }
+    commandLine 'python3', 'scripts/compatibility_matrix_manifest.py',
+            '--root', layout.projectDirectory.asFile.absolutePath,
+            '--summary-output', compatibilitySummaryFile.asFile.absolutePath
+}
+
+def checkCompatibilitySummary = tasks.register(
+        'checkCompatibilitySummary', Exec) {
+    dependsOn generateCompatibilitySummary
+    inputs.files(compatModuleFiles)
+    inputs.file(compatibilitySummaryFile)
+    inputs.file('scripts/compatibility_matrix_manifest.py')
+    workingDir = layout.projectDirectory.asFile
+    commandLine 'python3', 'scripts/compatibility_matrix_manifest.py',
+            '--root', layout.projectDirectory.asFile.absolutePath,
+            '--check-summary', compatibilitySummaryFile.asFile.absolutePath
+}
+
 sourceSets.main.resources {
     srcDir('src/generated/resources')
     srcDir(generatedCompatModuleIndexDir)
@@ -279,6 +309,58 @@ compatModules.each { spec ->
     fixture.runtimeClasspath += fixture.output + sourceSets.main.runtimeClasspath
     fixture.compileClasspath += compatSourceSets[spec.id].output
     fixture.runtimeClasspath += compatSourceSets[spec.id].output
+    def isolatedEvidenceDir = layout.buildDirectory.dir(
+            "generated/resources/isolatedRecipeInventory/${spec.fixture}")
+    def generateIsolatedEvidence = tasks.register(
+            "generateIsolatedRecipeInventory_${spec.fixture}") {
+        inputs.file(spec.descriptorFile)
+        def evidenceFile = isolatedEvidenceDir.map {
+            it.file('META-INF/auto_storage/isolated-recipe-inventory.json')
+        }
+        outputs.file(evidenceFile)
+        doLast {
+            def inventory = new groovy.json.JsonSlurper()
+                    .parse(spec.descriptorFile)
+                    .matrix
+                    .recipeInventory
+            def target = evidenceFile.get().asFile
+            target.parentFile.mkdirs()
+            target.text = groovy.json.JsonOutput.prettyPrint(
+                    groovy.json.JsonOutput.toJson(inventory)) + '\n'
+        }
+    }
+    fixture.resources.srcDir(isolatedEvidenceDir)
+    tasks.named(fixture.processResourcesTaskName).configure {
+        dependsOn generateIsolatedEvidence
+    }
+}
+
+def pneumaticIsolatedEvidenceDir = layout.buildDirectory.dir(
+        'generated/resources/isolatedRecipeInventory/pneumaticCraftFixture')
+def generatePneumaticIsolatedEvidence = tasks.register(
+        'generateIsolatedRecipeInventory_pneumaticCraftFixture') {
+    inputs.file(compatibilityMatrixCompanionsFile)
+    def evidenceFile = pneumaticIsolatedEvidenceDir.map {
+        it.file('META-INF/auto_storage/isolated-recipe-inventory.json')
+    }
+    outputs.file(evidenceFile)
+    doLast {
+        def companions = new groovy.json.JsonSlurper()
+                .parse(compatibilityMatrixCompanionsFile.asFile)
+        def companion = companions.companions.find { it.id == 'pneumaticcraft' }
+        if (companion == null || companion.recipeInventory == null) {
+            throw new GradleException(
+                    'pneumaticcraft companion recipeInventory is required for isolated evidence')
+        }
+        def target = evidenceFile.get().asFile
+        target.parentFile.mkdirs()
+        target.text = groovy.json.JsonOutput.prettyPrint(
+                groovy.json.JsonOutput.toJson(companion.recipeInventory)) + '\n'
+    }
+}
+sourceSets.pneumaticCraftFixture.resources.srcDir(pneumaticIsolatedEvidenceDir)
+tasks.named(sourceSets.pneumaticCraftFixture.processResourcesTaskName).configure {
+    dependsOn generatePneumaticIsolatedEvidence
 }
 
 def apiClassNames = [
@@ -1300,6 +1382,7 @@ tasks.named('check').configure {
     dependsOn tasks.named('compileCompatKitGeneratedFixtureJava')
     dependsOn tasks.named('verifyApiSurface')
     dependsOn tasks.named('verifyCompatIsolation')
+    dependsOn checkCompatibilitySummary
     dependsOn compatArtifactVerificationTasks
 }
 

@@ -14,6 +14,7 @@ import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -48,6 +49,7 @@ public final class Ae2IntegrationGameTests {
     public static void inscriber_registers_exact_rate_and_charger_stays_excluded(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), Ae2IntegrationGameTests.class);
         MachineDescriptor descriptor = MachineEnergyTable.get(INSCRIBER);
         ItemStack inscriber = new ItemStack(ae2Item("inscriber"));
         if (descriptor == null

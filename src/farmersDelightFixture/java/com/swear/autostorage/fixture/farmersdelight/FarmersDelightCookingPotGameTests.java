@@ -7,6 +7,7 @@ import com.swear.autostorage.ItemKey;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.compat.farmersdelight.FarmersDelightCookingPotCompat;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.gametest.framework.GameTest;
@@ -44,6 +45,7 @@ public final class FarmersDelightCookingPotGameTests {
     public static void cooking_pot_requires_every_ingredient_and_serving_container(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), FarmersDelightCookingPotGameTests.class);
         withFixture(helper, context -> {
             seed(context.core(), Items.CARROT, 1);
             seed(context.core(), Items.WATER_BUCKET, 1);

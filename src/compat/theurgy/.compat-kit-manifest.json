@@ -5,10 +5,9 @@
     "src/compat/theurgy/java/com/swear/autostorage/compat/theurgy/TheurgyCompat.java": "e32745afa39d957a2d9fdabd1cdab580812add602e6a7eee100559ec68fa86a0",
     "src/compat/theurgy/java/com/swear/autostorage/compat/theurgy/TheurgyCompatModule.java": "54e3cd722c0e2cd48c05c7e707b59a9307bc07537d7966e0af5d3335382322db",
     "src/theurgyFixture/java/com/swear/autostorage/fixture/theurgy/TheurgyFixtureMod.java": "c78dbcc2a001f7e5d82f12edae204a1fba36d5d72ab578b33381cdedd29d6452",
-    "src/theurgyFixture/java/com/swear/autostorage/fixture/theurgy/TheurgyIntegrationGameTests.java": "8fba9f57a7f56c78f0800777c32c78348b9ca90f7073122e4e89af3b2672afea",
+    "src/theurgyFixture/java/com/swear/autostorage/fixture/theurgy/TheurgyIntegrationGameTests.java": "d72bb15006fc6a90a67ea0702250b6d85982a064aaa37025b8d01c9de3a3a212",
     "src/theurgyFixture/resources/META-INF/neoforge.mods.toml": "9b554ef1eb0d2c1b1dc105d1b3dc543bd52292cc770bfc9d0fe7fc78509f751a",
     "src/theurgyFixture/resources/data/auto_storage_theurgy_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
-  "schema": 1,
-  "tool_version": "0.3.0"
+  "schema": 1
 }

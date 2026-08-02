@@ -323,10 +323,12 @@ public final class CraftablePerformanceGameTests {
             long warmP95Nanos = percentile95(warmNanos);
             int recipeCount =
                     helper.getLevel().getRecipeManager().getRecipes().size();
-            CompatibilityMatrixManifest.load().assertRecipeInventories(
-                    helper.getLevel().getRecipeManager());
+            CompatibilityMatrixManifest.RecipeInventoryEvidence recipeEvidence =
+                    CompatibilityMatrixManifest.load().assertRecipeInventories(
+                            helper.getLevel().getRecipeManager());
             writeReport(
                     recipeCount,
+                    recipeEvidence,
                     core.getTypeCount(),
                     first.outputCount(),
                     first.prefetchNanos(),
@@ -816,6 +818,7 @@ public final class CraftablePerformanceGameTests {
 
     private static void writeReport(
             int recipeCount,
+            CompatibilityMatrixManifest.RecipeInventoryEvidence recipeEvidence,
             int storedTypes,
             int outputCount,
             long firstPrefetchNanos,
@@ -845,6 +848,10 @@ public final class CraftablePerformanceGameTests {
                 {
                   "scale_types": %d,
                   "recipes": %d,
+                  "coexistence_recipe_inventory_sha256": %s,
+                  "coexistence_recipe_count": %d,
+                  "unclaimed_recipe_inventory_sha256": %s,
+                  "unclaimed_recipe_count": %d,
                   "stored_types": %d,
                   "craftable_outputs": %d,
                   "repository_load_ms": %.3f,
@@ -877,6 +884,10 @@ public final class CraftablePerformanceGameTests {
                 """,
                 STORED_TYPE_COUNT,
                 recipeCount,
+                jsonString(recipeEvidence.coexistenceSha256()),
+                recipeEvidence.coexistenceCount(),
+                jsonString(recipeEvidence.unclaimedSha256()),
+                recipeEvidence.unclaimedCount(),
                 storedTypes,
                 outputCount,
                 millis(persistence.loadNanos()),

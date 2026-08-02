@@ -2,6 +2,7 @@ package com.swear.autostorage.fixture.createaquaticambitions;
 
 import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.AutoStorage;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +18,7 @@ public final class CreateAquaticAmbitionsIntegrationGameTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void unsafe_machine_contracts_are_not_registered(GameTestHelper helper) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), CreateAquaticAmbitionsIntegrationGameTests.class);
         if (!ModList.get().isLoaded("create_aquatic_ambitions")) {
             helper.fail("Create Aquatic Ambitions mod is not loaded");
             return;

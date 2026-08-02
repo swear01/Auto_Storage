@@ -18,6 +18,7 @@ import com.swear.autostorage.TerminalDisplayStack;
 import com.swear.autostorage.TerminalResourceDisplay;
 import com.swear.autostorage.TerminalResourceView;
 import com.swear.autostorage.TransformProviderApi;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -61,6 +62,7 @@ public final class PowahIntegrationGameTests {
     public static void energizing_registers_live_rod_rates_and_safe_recipes(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), PowahIntegrationGameTests.class);
         MachineDescriptor descriptor = MachineEnergyTable.get(ENERGIZING);
         if (descriptor == null
                 || descriptor.category() != MachineCategory.PROCESS
