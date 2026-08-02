@@ -1,14 +1,14 @@
 {
-  "contract_sha256": "b345ad455d40bf00c2f437d947e1c80d4691830d31c0501415a57811be9fbd16",
+  "schema": 1,
+  "tool_version": "0.3.0",
+  "contract_sha256": "4a21b22ad3a059be829476a793d169358dd30585e1e7d3f36a36009c1dd785b5",
   "files": {
-    "src/compat/oritech/compat-module.json": "6e0e19f57bdaf0929d1fceb153ec5aa13c737e3a66f1ad646edb2bcaf9864302",
-    "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "6bbf59af56a7453614f0d93ffe9e308b1f985afbba4b0c4998342b91ddbd65fb",
+    "src/compat/oritech/compat-module.json": "20fa7ffb12c8d08b990d398ec161eea9f064e39f1026dff26101926262738a7e",
+    "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "77214765da961a68851807172d7120cfd8f8c8dd374be7efa35b7bcec40c1f63",
     "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompatModule.java": "5d6bb71971ce83f6e717256b4a759765dc8afd5b1907c355cdae8bb87882c8d4",
     "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechFixtureMod.java": "3749b869c9b8a7a01117b1210464f53c914338c8f8773d5dea053fa0e0f60904",
-    "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java": "127313d95343cf2825ab72e79fbee3bcbb344081f934a1df3dd2927d6f9bdada",
-    "src/oritechFixture/resources/META-INF/neoforge.mods.toml": "b4d2e8a6cbcb13d31257b3ba3e2371f35ae70bf320f48a0229cfc1ed5307838c",
+    "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java": "e717869ee0b9657d3a712d6a30a45ce0e885d7f963d6a6f01f2d4ec44bab864e",
+    "src/oritechFixture/resources/META-INF/neoforge.mods.toml": "bec8e0c7b8b5a7f09648101173af309090cebc1f34e0a4f8e781979c45ed25fa",
     "src/oritechFixture/resources/data/auto_storage_oritech_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
-  },
-  "schema": 1,
-  "tool_version": "0.3.0"
+  }
 }

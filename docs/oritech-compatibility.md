@@ -13,8 +13,11 @@ Architectury API and GeckoLib remain required companions of that optional target
 - dependency coordinate: `maven.modrinth:oritech:gMBPdWrE`;
 - runtime companions: Architectury API `ZxYGwlk0` (`13.0.8`), GeckoLib
   `qj2pTqCr` (`4.6.6`);
-- audit: `compat/audits/oritech/1.2.9.json`;
-- reviewed contract: `compat/contracts/oritech.json`.
+- audit: `compat/audits/oritech/1.2.9.json` (scanner format 16);
+- reviewed contract: `compat/contracts/oritech.json`;
+- matrix recipe-inventory SHA-256 for namespace `oritech`:
+  `e7094c8e7af268116532561f71932690066fc7cf8b4fe98f01dcc472a4b45beb`
+  (736 loaded recipes).
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Oritech version on players and does not claim a multi-version matrix.
@@ -40,16 +43,21 @@ Logical station:
 Transaction:
 
 - every simple non-empty item ingredient is consumed once;
-- empty/zero `fluidInput` only; fluid pulverizer holders stay unsupported;
+- empty/zero `fluidInput` only; nonempty `fluidOutputs` stay unsupported
+  because the pulverizer plan does not emit fluids;
+- at most eight item ingredients so `ingredients + FE` stays within the
+  3×3 presentation layout (`RecipePresentation.MAX_INPUTS`);
 - `results[0]` is the primary item output;
-- further `results[i]` are deterministic item remainders;
+- further `results[i]` are deterministic item remainders; identical
+  component-exact keys merge amounts before the plan is built;
 - FE and station work each equal `energyPerTick × recipe.time` at base addon
   multipliers (`1`).
 
 `OritechRecipe.isSpecial()` is true, so the family uses the public
 `deterministicResources` eligibility overload. Eligibility never calls
 `Recipe#getIngredients()` for inference; it reads Oritech's public
-`getInputs()` / `getResults()` / `getFluidInput()` / `getTime()` surfaces.
+`getInputs()` / `getResults()` / `getFluidInput()` / `getFluidOutputs()` /
+`getTime()` surfaces.
 
 ## Explicit exclusions
 
@@ -77,5 +85,7 @@ register Oritech workstations into EMI.
 Eight real GameTests cover pulverizer registration and grinder exclusion,
 adamant FE/work craft, raw-iron multi-output remainder, missing ingredient,
 insufficient FE, insufficient work, destination overflow/`Long.MAX_VALUE`
-rollback, and live energy-to-FE/work mapping. The all-mod compatibility matrix
-protects coexistence.
+rollback, and live energy-to-FE/work mapping. Three additional GameTests
+fail-close fluid-output holders, merge duplicate exact item results, and
+reject oversized ingredient+FE layouts that cannot build a legal
+`TypedRecipePlan`. The all-mod compatibility matrix protects coexistence.

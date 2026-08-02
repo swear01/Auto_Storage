@@ -1,0 +1,21 @@
+{
+  "type": "oritech:pulverizer",
+  "ingredients": [
+    { "item": "minecraft:cobblestone" },
+    { "item": "minecraft:dirt" },
+    { "item": "minecraft:sand" },
+    { "item": "minecraft:gravel" },
+    { "item": "minecraft:clay_ball" },
+    { "item": "minecraft:flint" },
+    { "item": "minecraft:stick" },
+    { "item": "minecraft:coal" },
+    { "item": "minecraft:charcoal" }
+  ],
+  "results": [
+    {
+      "count": 1,
+      "id": "minecraft:diamond"
+    }
+  ],
+  "time": 100
+}

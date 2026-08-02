@@ -38,6 +38,12 @@ public final class OritechIntegrationGameTests {
     private static final ResourceLocation ADAMANT = oritechRecipe("pulverizer/adamant");
     private static final ResourceLocation RAW_IRON = oritechRecipe("pulverizer/raw/iron");
     private static final ResourceLocation GRINDER_IRON = oritechRecipe("grinder/ore/iron");
+    private static final ResourceLocation FLUID_OUTPUT =
+            fixtureRecipe("pulverizer_fluid_output");
+    private static final ResourceLocation DUPLICATE_OUTPUTS =
+            fixtureRecipe("pulverizer_duplicate_outputs");
+    private static final ResourceLocation TOO_MANY_INPUTS =
+            fixtureRecipe("pulverizer_too_many_inputs");
 
     private OritechIntegrationGameTests() {
     }
@@ -226,6 +232,66 @@ public final class OritechIntegrationGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void fluid_output_pulverizer_fails_closed(GameTestHelper helper) {
+        var holder = helper.getLevel().getRecipeManager().byKey(FLUID_OUTPUT).orElse(null);
+        if (holder == null
+                || !(holder.value() instanceof rearth.oritech.init.recipes.OritechRecipe)) {
+            helper.fail("Fluid-output pulverizer fixture was not loaded");
+            return;
+        }
+        if (CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+            helper.fail("Pulverizer accepted a fluid-output recipe without a fluid plan");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void duplicate_exact_outputs_merge_into_one_key(GameTestHelper helper) {
+        withCore(helper, context -> {
+            long energy = expectedEnergy(DUPLICATE_OUTPUTS, helper);
+            seedItem(context.core(), Items.STONE, 1);
+            seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), energy);
+            installPulverizer(context);
+            tick(context.core(), recipeTime(DUPLICATE_OUTPUTS, helper));
+            if (!supports(helper, DUPLICATE_OUTPUTS)
+                    || !craft(context, DUPLICATE_OUTPUTS)
+                    || itemCount(context.core(), Items.STONE) != 0
+                    || itemCount(context.core(), Items.GRAVEL) != 5
+                    || context.core().getResourceAmount(
+                    StorageResourceKey.neoforgeEnergy()) != 0
+                    || context.core().getStationWork(PULVERIZER) != 0) {
+                helper.fail("Oritech pulverizer did not merge duplicate exact outputs");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void oversized_ingredient_plus_fe_layout_fails_closed(
+            GameTestHelper helper
+    ) {
+        var holder = helper.getLevel().getRecipeManager().byKey(TOO_MANY_INPUTS).orElse(null);
+        if (holder == null) {
+            helper.fail("Oversized pulverizer fixture was not loaded");
+            return;
+        }
+        if (!(holder.value() instanceof rearth.oritech.init.recipes.OritechRecipe recipe)
+                || recipe.getInputs() == null
+                || recipe.getInputs().size() < 9) {
+            helper.fail("Oversized pulverizer fixture did not expose nine item inputs");
+            return;
+        }
+        if (CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+            helper.fail(
+                    "Pulverizer accepted an oversized ingredient+FE layout that cannot plan");
+            return;
+        }
+        helper.succeed();
+    }
+
     private static boolean supports(GameTestHelper helper, ResourceLocation recipeId) {
         var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
         return CraftingTerminalMenu.supportsRecipeHolder(holder);
@@ -345,6 +411,10 @@ public final class OritechIntegrationGameTests {
 
     private static ResourceLocation oritechRecipe(String path) {
         return oritechId(path);
+    }
+
+    private static ResourceLocation fixtureRecipe(String path) {
+        return ResourceLocation.fromNamespaceAndPath(OritechFixtureMod.MODID, path);
     }
 
     private static ResourceLocation oritechId(String path) {

@@ -7,9 +7,29 @@
     "maven.modrinth:oritech:gMBPdWrE"
   ],
   "entrypoint": "com.swear.autostorage.compat.oritech.OritechCompatModule",
-  "expectedTests": 8,
+  "expectedTests": 11,
   "fixture": "oritechFixture",
   "id": "auto_storage:oritech",
+  "matrix": {
+    "acceptedRecipes": [
+      "oritech:pulverizer/adamant"
+    ],
+    "descriptors": [
+      "auto_storage:oritech_pulverizer"
+    ],
+    "mods": [
+      "oritech"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "oritech"
+      ],
+      "sha256": "e7094c8e7af268116532561f71932690066fc7cf8b4fe98f01dcc472a4b45beb"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
     "https://api.modrinth.com/maven"
   ],

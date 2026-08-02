@@ -30,12 +30,15 @@ import rearth.oritech.init.recipes.RecipeContent;
 import rearth.oritech.util.FluidIngredient;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class OritechCompat {
     private static final ResourceLocation PULVERIZER_ITEM =
             ResourceLocation.fromNamespaceAndPath("oritech", "pulverizer_block");
+    private static final int MAX_PLAN_INPUTS = 9;
 
     private OritechCompat() {
     }
@@ -87,9 +90,11 @@ public final class OritechCompat {
                 || recipe.getTime() <= 0
                 || recipe.getInputs() == null
                 || recipe.getInputs().isEmpty()
+                || recipe.getInputs().size() + 1 > MAX_PLAN_INPUTS
                 || recipe.getResults() == null
                 || recipe.getResults().isEmpty()
                 || !emptyFluid(recipe.getFluidInput())
+                || !emptyFluidOutputs(recipe)
                 || energyPerTick() <= 0) {
             return false;
         }
@@ -123,22 +128,27 @@ public final class OritechCompat {
         builder.input(TypedRecipeInput.consume(
                 StorageResourceKey.neoforgeEnergy(), energy));
 
-        List<ItemStack> results = recipe.getResults();
-        ItemStack primary = results.getFirst().copy();
-        builder.output(TypedRecipeOutput.primary(
-                StorageResourceKey.item(primary.copyWithCount(1), registries),
-                primary.getCount()));
-        for (int index = 1; index < results.size(); index++) {
-            ItemStack secondary = results.get(index).copy();
-            builder.output(TypedRecipeOutput.remainder(
-                    StorageResourceKey.item(secondary.copyWithCount(1), registries),
-                    secondary.getCount()));
+        LinkedHashMap<StorageResourceKey, Long> outputs = new LinkedHashMap<>();
+        ItemStack presentation = recipe.getResults().getFirst().copy();
+        for (ItemStack result : recipe.getResults()) {
+            ItemStack stack = result.copy();
+            outputs.merge(
+                    StorageResourceKey.item(stack.copyWithCount(1), registries),
+                    (long) stack.getCount(),
+                    Math::addExact);
+        }
+        boolean primary = true;
+        for (Map.Entry<StorageResourceKey, Long> output : outputs.entrySet()) {
+            builder.output(primary
+                    ? TypedRecipeOutput.primary(output.getKey(), output.getValue())
+                    : TypedRecipeOutput.remainder(output.getKey(), output.getValue()));
+            primary = false;
         }
 
         int inputCount = recipe.getInputs().size() + 1;
         int width = Math.min(3, inputCount);
         return builder
-                .presentationOutput(primary)
+                .presentationOutput(presentation)
                 .layout(width, (inputCount + width - 1) / width, true)
                 .build();
     }
@@ -156,6 +166,34 @@ public final class OritechCompat {
             return true;
         }
         return !fluidInput.hasTag() && fluidInput.getFluid() == Fluids.EMPTY;
+    }
+
+    private static boolean emptyFluidOutputs(OritechRecipe recipe) {
+        Object outputs;
+        try {
+            outputs = OritechRecipe.class.getMethod("getFluidOutputs").invoke(recipe);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException(
+                    "Oritech getFluidOutputs is not inspectable", exception);
+        }
+        if (!(outputs instanceof List<?> fluidOutputs) || fluidOutputs.isEmpty()) {
+            return true;
+        }
+        for (Object stack : fluidOutputs) {
+            if (stack == null) {
+                continue;
+            }
+            try {
+                Object empty = stack.getClass().getMethod("isEmpty").invoke(stack);
+                if (!(empty instanceof Boolean booleanEmpty) || !booleanEmpty) {
+                    return false;
+                }
+            } catch (ReflectiveOperationException exception) {
+                throw new IllegalStateException(
+                        "Oritech fluid output emptiness is not inspectable", exception);
+            }
+        }
+        return true;
     }
 
     private static boolean exact(Ingredient ingredient) {
