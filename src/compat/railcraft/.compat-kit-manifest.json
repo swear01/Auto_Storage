@@ -2,10 +2,10 @@
   "contract_sha256": "c39101c77f57ae23b9868dcc156c51f6e9e97644e3eafb8530922a616cd14a7f",
   "files": {
     "src/compat/railcraft/compat-module.json": "c511c7d119e1208749fe1b9b91a33849c67b37bd44274f527fc8db34c64b4886",
-    "src/compat/railcraft/java/com/swear/autostorage/compat/railcraft/RailcraftCompat.java": "6e5273ace971f0f8fc4ebc870d26cbf6798db1031833f2d84a04f327e9e1be80",
+    "src/compat/railcraft/java/com/swear/autostorage/compat/railcraft/RailcraftCompat.java": "5050634fb1d5318ddea6e96f0c0881804fe24368b8566f7d08076906ab50563e",
     "src/compat/railcraft/java/com/swear/autostorage/compat/railcraft/RailcraftCompatModule.java": "fbe49128f699190363d2055f3a72569b7b7212ac8cd1ed45286e0dad3e5ef17b",
     "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftFixtureMod.java": "fa70d52c139822a76e3cb5250e02237597d49203a897cfa3b0e3defac73fa6d5",
-    "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java": "103fef9587ff65b1067628f2c0ee6329d5be1d2005b71acbbc2e7f7da2240ed0",
+    "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java": "0a8585d6138af194e9cc0e5f84ae6b9f664de9e3d63e88810aea379e7c22ca14",
     "src/railcraftFixture/resources/META-INF/neoforge.mods.toml": "acc3f3beebb2540e87b79c5c39a2f77a10c2106795d39d8aa4b4560b7d7879d8",
     "src/railcraftFixture/resources/data/auto_storage_railcraft_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

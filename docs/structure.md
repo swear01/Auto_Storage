@@ -52,8 +52,8 @@
 | `src/createFixture/` | 代表性Create 6.0.10隔離GameTest fixture；13個tests驗五個deterministic families、item/fluid/remainder/work/reload與atomic rollback。 |
 | `docs/create-aquatic-ambitions-compatibility.md` | Create Aquatic Ambitions 2.0.4 scanner-format-16 audit：79個target classes、6個reachable ancestry、2個actual Recipe candidates重審拒絕、Channeling world/chance邊界與零production-family Outcome C。 |
 | `src/createAquaticAmbitionsFixture/` | 代表性Create Aquatic Ambitions 2.0.4 + Create隔離GameTest fixture；4個tests驗present target、零custom registration及全部Channeling recipes fail closed。 |
-| `docs/railcraft-compatibility.md` | Railcraft Reborn 1.2.10 scanner-format-16 audit與零production-family fail-closed判定。 |
-| `src/railcraftFixture/` | 代表性Railcraft Reborn 1.2.10 present-mod隔離fixture；8個tests鎖住Crusher/Blast/Coke/Rolling與special crafting不被不安全接受。 |
+| `docs/railcraft-compatibility.md` | Railcraft Reborn 1.2.10 exact target/source/6-artifact ancestry scanner-format-16 audit、52→13 candidate migration及零production-family fail-closed判定。 |
+| `src/railcraftFixture/` | 代表性Railcraft Reborn 1.2.10 present-mod隔離fixture；8個tests鎖住Crusher/Blast/Coke/Rolling、special crafting、descriptor ownership與all-candidate fail-closed。 |
 | `docs/pneumaticcraft-compatibility.md` | PneumaticCraft Air/pressure/heat/multiblock API審計與零production-family fail-closed判定。 |
 | `src/pneumaticCraftFixture/` | 代表性PneumaticCraft 8.2.22 present-mod隔離fixture；9個tests鎖住Air與七類machine recipes不被不安全接受。 |
 | `src/extendedCraftingFixture/` | 代表性Extended Crafting 7.0.8 + Cucumber 8.0.16隔離GameTest fixture；4個tests驗Ultimate Table gating、9×9/81-position exact commit、one-short no-op、full-destination rollback與真實Ultimate Singularity component identity。 |

@@ -241,12 +241,17 @@
   ],
   "kind": "auto_storage_compat_contract",
   "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
     "mods": [
       "railcraft"
     ],
-    "descriptors": [],
-    "resourceKinds": [],
-    "acceptedRecipes": [],
+    "recipeInventory": {
+      "namespaces": [
+        "railcraft"
+      ],
+      "sha256": "b3f0a1186f22b445613be6d05a4cb01559885faba1937d2df178c3ed7c42706d"
+    },
     "rejectedDescriptors": [
       "auto_storage:railcraft_crusher",
       "auto_storage:railcraft_blast_furnace",
@@ -254,38 +259,23 @@
       "auto_storage:railcraft_rolling"
     ],
     "rejectedResourceKinds": [],
-    "recipeInventory": {
-      "namespaces": [
-        "railcraft"
-      ],
-      "sha256": "b3f0a1186f22b445613be6d05a4cb01559885faba1937d2df178c3ed7c42706d"
-    }
+    "resourceKinds": []
   },
   "schema": 1,
   "source_audit_sha256": "7de3dfeac277da57f9897822824332c99e53b9d36956143b38c0966f39144328",
   "source_recipe_data_sha256": "a982f1cb9a9cb03ea3c35b302fa0075d009e71c15073733246f0333da432390d",
   "source_recipe_inventory_sha256": "f7a1837c4c6a0351fbf260595e4a6af586cbcea62dd6f9eb72b99c5110751f9c",
   "target": {
+    "dependency": "maven.modrinth:railcraft-reborn:BrIwB6GH",
     "display_name": "Railcraft Reborn",
     "mod_id": "railcraft",
-    "version": "1.2.10",
-    "dependency": "maven.modrinth:railcraft-reborn:BrIwB6GH",
     "repositories": [
       "https://api.modrinth.com/maven"
     ],
-    "runtime_dependencies": []
+    "runtime_dependencies": [],
+    "version": "1.2.10"
   },
   "verification": {
-    "fixture": "railcraftFixture",
-    "expected_game_tests": 8,
-    "game_test_task": "runRailcraftGameTestServer",
-    "gradle_tasks": [
-      "build",
-      "runGameTestServer",
-      "runRecipeAddonGameTestServer",
-      "runRailcraftGameTestServer",
-      "runCompatibilityMatrixGameTestServer"
-    ],
     "checks": [
       "absent_target_no_classload",
       "present_target_load_once",
@@ -308,23 +298,23 @@
           "task": "runGameTestServer"
         }
       ],
-      "present_target_load_once": [
+      "all_mod_coexistence": [
         {
-          "marker": "Railcraft Reborn unsafe contract was registered",
-          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
-          "task": "runRailcraftGameTestServer"
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
         }
       ],
-      "ingredient_shortage_atomic": [
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
         {
           "marker": "Unsafe Railcraft Reborn recipe was accepted",
-          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
-          "task": "runRailcraftGameTestServer"
-        }
-      ],
-      "destination_capacity_atomic": [
-        {
-          "marker": "Unsafe Railcraft Reborn recipe type accepted",
           "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
           "task": "runRailcraftGameTestServer"
         }
@@ -336,25 +326,25 @@
           "task": "runRailcraftGameTestServer"
         }
       ],
-      "stale_recipe_holder_atomic": [
+      "dedicated_server_client_isolation": [
         {
-          "marker": "Unknown recipe id must fail closed",
-          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
-          "task": "runGameTestServer"
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
         }
       ],
-      "catalyst_tool_remainder_exact": [
+      "destination_capacity_atomic": [
         {
-          "marker": "Unsafe Railcraft Reborn recipe was accepted",
+          "marker": "Unsafe Railcraft Reborn recipe type accepted",
           "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
           "task": "runRailcraftGameTestServer"
         }
       ],
-      "multi_output_merge_exact": [
+      "ingredient_shortage_atomic": [
         {
-          "marker": "Typed family changed the wrong exact resources or output amounts",
-          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
-          "task": "runRecipeAddonGameTestServer"
+          "marker": "Unsafe Railcraft Reborn recipe was accepted",
+          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
+          "task": "runRailcraftGameTestServer"
         }
       ],
       "mixed_resource_rollback_atomic": [
@@ -364,27 +354,37 @@
           "task": "runRecipeAddonGameTestServer"
         }
       ],
-      "dedicated_server_client_isolation": [
+      "multi_output_merge_exact": [
         {
-          "marker": "verifyCompatIsolation",
-          "source": "build.gradle",
-          "task": "build"
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
         }
       ],
-      "api_only_compilation": [
+      "present_target_load_once": [
         {
-          "marker": "compileAddonExampleJava",
-          "source": "build.gradle",
-          "task": "build"
+          "marker": "Railcraft Reborn unsafe contract was registered",
+          "source": "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/RailcraftIntegrationGameTests.java",
+          "task": "runRailcraftGameTestServer"
         }
       ],
-      "all_mod_coexistence": [
+      "stale_recipe_holder_atomic": [
         {
-          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
-          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
-          "task": "runCompatibilityMatrixGameTestServer"
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
         }
       ]
-    }
+    },
+    "expected_game_tests": 8,
+    "fixture": "railcraftFixture",
+    "game_test_task": "runRailcraftGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runRailcraftGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
   }
 }

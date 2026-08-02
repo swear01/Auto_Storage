@@ -98,6 +98,9 @@ public final class RailcraftIntegrationGameTests {
                 "Unsafe Railcraft Reborn recipe was accepted",
                 railcraft("ticket"),
                 railcraft("chest_minecart_disassembly"),
+                railcraft("void_chest_minecart_disassembly"),
+                railcraft("worldspike_minecart_disassembly"),
+                railcraft("locomotive_color_variant"),
                 railcraft("patchouli_book_crafting"));
     }
 

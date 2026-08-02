@@ -16,47 +16,108 @@ families when they are non-special and concrete.
 
 - target: Railcraft Reborn `1.2.10` (`railcraft`);
 - Modrinth version `BrIwB6GH` /
+  `maven.modrinth:railcraft-reborn:BrIwB6GH`;
+- download URL used for local SHA verification:
   `https://cdn.modrinth.com/data/rO6kKst6/versions/BrIwB6GH/railcraft-reborn-1.21.1-1.2.10.jar`;
-- Modrinth Maven coordinate `maven.modrinth:railcraft-reborn:BrIwB6GH`;
-- jar SHA-256:
+- exact target size / SHA-256: `5,290,986` bytes /
   `7de3dfeac277da57f9897822824332c99e53b9d36956143b38c0966f39144328`;
 - official source: https://github.com/railcraft-reborn/railcraft tag `1.2.10`
-  / commit `7b89837df369bb0552d81016c46840792bd13d23`;
-- scanner format 16 audit: `compat/audits/railcraft/1.2.10.json`;
+  / clean commit `7b89837df369bb0552d81016c46840792bd13d23`;
+- scanner format `16`: 1,013 target classes, 1,205 target/reachable
+  ancestry graph records, and 85 hierarchy records;
+- six reachable ancestry artifacts: the normalized NeoForge/Minecraft binary
+  plus five exact source compile coordinates:
+  `com.google.guava:guava:28.2-jre`,
+  `curse.maven:jade-api-324717:6853386`,
+  `dev.emi:emi-neoforge:1.1.22+1.21.1:api`,
+  `mezz.jei:jei-1.21.1-common-api:19.25.0.322`, and
+  `net.neoforged:bus:8.0.5`;
+- normalized NeoForge/Minecraft size / SHA-256: `56,279,815` bytes /
+  `2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f`;
+- exact target-jar recipe-data inventory: 701 declared/effective recipes,
+  SHA-256 `a982f1cb9a9cb03ea3c35b302fa0075d009e71c15073733246f0333da432390d`;
+- audit: `compat/audits/railcraft/1.2.10.json`;
 - reviewed contract: `compat/contracts/railcraft.json`.
 
-## Why every family is rejected
+Complete validation reopens the exact target jar and all six ancestry jars.
+The representative version records reproducible evidence; it does not claim a
+multi-version compatibility matrix.
 
-Compat Kit classified 13 concrete `Recipe` implementations. Every candidate is
-rejected:
+## Audited recipe candidates
 
-| Family / candidate group | Result | Reason |
+The legacy scanner-format-7 audit classified 52 name-shaped entries as recipe
+families. Exact format-16 structural scanning removed 39 builders, providers,
+serializers, viewer wrappers, and base helpers. `migrate-contract` reopened the
+13 actual `Recipe` implementations, and each was manually reviewed again
+against the exact official source before retaining its rejection:
+
+| Actual candidate | Result | Source-backed reason |
 |---|---|---|
-| Crusher | rejected | `CrusherModule.pollOutputs` uses `RandomSource` against per-output probability |
-| Blast Furnace | rejected | formed furnace multiblock plus live `burnTime` / `ItemStack.getBurnTime` fuel and slag output |
-| Coke Oven | rejected | formed furnace multiblock plus live creosote tank and fluid-container processing state |
-| Rolling | rejected | live craft-matrix progress/`balanceSlots`; powered variant drains world `Charge.distribution` |
-| Tie / rotor repair / ticket / painting / cart disassembly / Patchouli book | rejected | special crafting with live fluid-capability drain, damage, component copy, or helper book semantics; not independent station families |
+| `CrusherRecipe` | rejected | `CrusherModule.pollOutputs` rolls each probability with `RandomSource` and the real machine also consumes world Charge state |
+| `BlastFurnaceRecipe` | rejected | formed multiblock execution depends on live burn time, item fuel semantics, fuel remainders, and slag |
+| `CokeOvenRecipe` | rejected | formed multiblock execution depends on a live creosote tank, fluid-container processing, and machine multiplier state |
+| `RollingRecipe` | rejected | manual execution owns a persistent craft matrix, progress, slot balancing, and previous-recipe state; powered execution reads world Charge distribution |
+| `StoneTieRecipe`, `WoodenTieRecipe` | rejected | special crafting probes and executes item fluid-capability mutation for an exact 1,000 mB drain; the public item contract cannot model that mutation |
+| `RotorRepairRecipe` | rejected | output depends on the live rotor damage and blade count |
+| `TicketDuplicateRecipe` | rejected | special crafting copies the live ticket data component |
+| `LocomotivePaintingRecipe` | rejected | special crafting copies all live input components before mutating locomotive colors |
+| `ChestMinecartDisassemblyRecipe`, `VoidChestMinecartDisassemblyRecipe`, `WorldSpikeMinecartDisassemblyRecipe` | rejected | special crafting returns minecart remainders and has no truthful independent machine station |
+| `PatchouliBookCrafting` | rejected | special crafting delegates output construction to the loaded Patchouli API and has no independent station |
 
-Auto Storage does not register Railcraft workstations into EMI. Railcraft owns
-its own EMI/JEI categories.
+No exact source-backed deterministic semantics satisfy the public SDK, so no
+station, typed resource kind, or recipe family is registered. Auto Storage also
+does not register Railcraft workstations into EMI; Railcraft owns its viewer
+categories.
 
-## Accepted families
+## Declarative matrix and coexistence evidence
 
-None.
+The Railcraft descriptor and reviewed contract own the same matrix declaration:
+the `railcraft` mod is present; descriptors, resource kinds, and accepted
+recipes remain empty; `rejectedDescriptors` locks the four never-registered
+IDs `auto_storage:railcraft_crusher`, `auto_storage:railcraft_blast_furnace`,
+`auto_storage:railcraft_coke_oven`, and `auto_storage:railcraft_rolling`. The
+live server inventory of 668 `railcraft:*` recipes is locked by SHA-256
+`b3f0a1186f22b445613be6d05a4cb01559885faba1937d2df178c3ed7c42706d`.
+Generic coexistence evidence uses
+`manifest.assertCoexistence(helper, "Descriptor matrix coexistence")`; no
+Railcraft-specific shared Java list was added.
+
+Railcraft also changes the recipes visible in the combined mod environment.
+The generated matrix therefore owns the current Create namespace digest
+`4e6eb1aeba9334e92cec47000594a756989ebe1c2cdf91fda9a847d13caf13ae`
+instead of preserving a stale pre-Railcraft value.
+
+## Craftable catalog performance
+
+The current-main `CraftableRecipeCatalog` weak shared index, recipe-snapshot
+invalidation, ingredient index, and candidate bitsets remain necessary and
+current-main-safe. The Railcraft branch does not duplicate or replace those
+production changes. With all representative mods loaded, the current matrix
+passed with 13,590 recipes, a 9,015,168-byte shared index, 114,902 bytes per
+menu, and 0.444 ms switch p95, all inside the existing gates.
 
 ## Verification
 
 ```bash
 ./gradlew runRailcraftGameTestServer
+./gradlew runCompatibilityMatrixGameTestServer
 ```
 
 Eight present-mod GameTests cover registry absence, chance Crusher, Blast
 Furnace, Coke Oven, Rolling, fluid-tie/rotor-repair special crafting, ticket /
 minecart-disassembly / Patchouli-book special crafting, and an exhaustive scan
 that every loaded recipe in each audited machine type remains fail closed. The
-all-mod compatibility matrix asserts the Railcraft fail-closed boundary and the
-reviewed recipe-inventory digest under the shared Craftable `<9 MiB` index gate.
+three-test all-mod matrix verifies descriptor-owned registrations, exact recipe
+inventories, generic coexistence, and the shared Craftable performance/heap
+gates.
 
-Compat Kit passing report (local gate):
-`build/compat-kit/railcraft-report.json`.
+The local exact-target Compat Kit report passed all 12 required checks across
+five commands (`build`, base 405, recipe-addon 17, Railcraft 8, matrix 3):
+`build/compat-kit/railcraft-current-report.json`.
+
+## Future acceptance boundary
+
+Support can be reconsidered only when exact source-backed semantics fit the
+public simulate-then-commit SDK without relying on chance, multiblock/world
+state, live fuel or fluid capability mutation, mutable component-copy output,
+or special-crafting helpers. Until then, outcome C remains fail closed.

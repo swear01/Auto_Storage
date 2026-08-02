@@ -5,20 +5,20 @@
       "size": 131329
     },
     {
-      "sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6",
-      "size": 90248888
-    },
-    {
       "sha256": "1fafb07b9d13c66d4435b0db38860d15607d9c5834d5aadeb89ce1bb3d16543d",
       "size": 116961
+    },
+    {
+      "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+      "size": 56279815
     },
     {
       "sha256": "705e24f37752809499a5cd0c7dd31eaabf3d933c5d3b2060168e94e9ef62593a",
       "size": 30340
     },
     {
-      "sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44",
-      "size": 644158
+      "sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418",
+      "size": 725736
     },
     {
       "sha256": "fc3aa363ad87223d1fbea584eee015a862150f6d34c71f24dc74088a635f08ef",
@@ -27,9 +27,24 @@
   ],
   "ancestry_dependencies": [
     {
+      "dependency": "com.google.guava:guava:28.2-jre",
+      "sha256": "fc3aa363ad87223d1fbea584eee015a862150f6d34c71f24dc74088a635f08ef",
+      "size": 2788302
+    },
+    {
+      "dependency": "curse.maven:jade-api-324717:6853386",
+      "sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418",
+      "size": 725736
+    },
+    {
       "dependency": "dev.emi:emi-neoforge:1.1.22+1.21.1:api",
       "sha256": "1fafb07b9d13c66d4435b0db38860d15607d9c5834d5aadeb89ce1bb3d16543d",
       "size": 116961
+    },
+    {
+      "dependency": "mezz.jei:jei-1.21.1-common-api:19.25.0.322",
+      "sha256": "01c29b65c7014db0f9d5e3a9c5e65b9fbc3d1e9179c5b014cb12c6c4408c0d7f",
+      "size": 131329
     },
     {
       "dependency": "net.neoforged:bus:8.0.5",
@@ -6244,7 +6259,7 @@
     ],
     "revision": "7b89837df369bb0552d81016c46840792bd13d23"
   },
-  "structural_candidate_inventory_sha256": "83883a04b0ea6176f7800e3dd3f96a09fba28627ba3b6ba7246e226890acb02e",
+  "structural_candidate_inventory_sha256": "48b175ec13171170d0b39cfcf55a0dc33d4f71cdcd3905f75f0e5b2e3b08431f",
   "structural_class_graph": [
     {
       "class": "com.google.common.collect.ForwardingCollection",
@@ -16156,7 +16171,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.advancements.CriterionTriggerInstance",
@@ -16165,7 +16180,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.advancements.critereon.SimpleCriterionTrigger",
@@ -16176,7 +16191,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.advancements.critereon.SimpleCriterionTrigger$SimpleInstance",
@@ -16187,7 +16202,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.AbstractButton",
@@ -16196,7 +16211,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.gui.components.AbstractWidget"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.AbstractWidget",
@@ -16211,7 +16226,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.Button",
@@ -16220,7 +16235,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.gui.components.AbstractButton"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.Renderable",
@@ -16229,7 +16244,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.TabOrderedElement",
@@ -16238,7 +16253,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler",
@@ -16249,7 +16264,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.events.ContainerEventHandler",
@@ -16260,7 +16275,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.components.events.GuiEventListener",
@@ -16271,7 +16286,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.layouts.LayoutElement",
@@ -16280,7 +16295,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.narration.NarratableEntry",
@@ -16292,7 +16307,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.narration.NarrationSupplier",
@@ -16301,7 +16316,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.screens.Screen",
@@ -16312,7 +16327,7 @@
         ],
         "super_class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen",
@@ -16323,7 +16338,7 @@
         ],
         "super_class": "net.minecraft.client.gui.screens.Screen"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.screens.inventory.MenuAccess",
@@ -16332,7 +16347,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.gui.screens.inventory.PageButton",
@@ -16341,7 +16356,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.gui.components.Button"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.model.EntityModel",
@@ -16350,7 +16365,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.model.Model"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.model.HierarchicalModel",
@@ -16359,7 +16374,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.model.EntityModel"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.model.Model",
@@ -16368,7 +16383,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.particle.CampfireSmokeParticle",
@@ -16377,7 +16392,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.particle.TextureSheetParticle"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.particle.Particle",
@@ -16386,7 +16401,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.particle.ParticleProvider",
@@ -16395,7 +16410,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.particle.SingleQuadParticle",
@@ -16404,7 +16419,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.particle.Particle"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.particle.TextureSheetParticle",
@@ -16413,7 +16428,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.client.particle.SingleQuadParticle"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer",
@@ -16424,7 +16439,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.renderer.RenderStateShard",
@@ -16433,7 +16448,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.renderer.blockentity.BlockEntityRenderer",
@@ -16444,7 +16459,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.client.renderer.entity.EntityRenderer",
@@ -16453,7 +16468,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.commands.CommandSource",
@@ -16462,7 +16477,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.core.Holder",
@@ -16473,7 +16488,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.core.particles.ParticleOptions",
@@ -16482,7 +16497,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.DataProvider",
@@ -16491,7 +16506,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.advancements.AdvancementProvider",
@@ -16502,7 +16517,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.loot.BlockLootSubProvider",
@@ -16513,7 +16528,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.loot.LootTableProvider",
@@ -16524,7 +16539,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.loot.LootTableSubProvider",
@@ -16533,7 +16548,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.recipes.RecipeBuilder",
@@ -16542,7 +16557,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.recipes.RecipeProvider",
@@ -16553,7 +16568,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.recipes.SpecialRecipeBuilder",
@@ -16562,7 +16577,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.registries.RegistriesDatapackGenerator",
@@ -16573,7 +16588,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.tags.DamageTypeTagsProvider",
@@ -16582,7 +16597,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.tags.TagsProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.tags.FluidTagsProvider",
@@ -16591,7 +16606,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider",
@@ -16600,7 +16615,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.tags.TagsProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.tags.ItemTagsProvider",
@@ -16609,7 +16624,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.tags.PoiTypeTagsProvider",
@@ -16618,7 +16633,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.tags.TagsProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.data.tags.TagsProvider",
@@ -16629,7 +16644,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.network.protocol.common.custom.CustomPacketPayload",
@@ -16638,7 +16653,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.network.syncher.SyncedDataHolder",
@@ -16647,7 +16662,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.server.packs.resources.PreparableReloadListener",
@@ -16656,7 +16671,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.server.packs.resources.ResourceManagerReloadListener",
@@ -16667,7 +16682,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.util.StringRepresentable",
@@ -16676,7 +16691,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.Clearable",
@@ -16685,7 +16700,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.Container",
@@ -16696,7 +16711,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.ContainerListener",
@@ -16705,7 +16720,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.MenuProvider",
@@ -16717,7 +16732,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.Nameable",
@@ -16726,7 +16741,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.SimpleContainer",
@@ -16738,7 +16753,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.WorldlyContainer",
@@ -16749,7 +16764,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.damagesource.DamageSource",
@@ -16758,7 +16773,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.effect.MobEffect",
@@ -16770,7 +16785,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.Entity",
@@ -16786,7 +16801,7 @@
         ],
         "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.TraceableEntity",
@@ -16795,7 +16810,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.item.ItemEntity",
@@ -16806,7 +16821,7 @@
         ],
         "super_class": "net.minecraft.world.entity.Entity"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.npc.VillagerTrades$ItemListing",
@@ -16815,7 +16830,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.vehicle.AbstractMinecart",
@@ -16826,7 +16841,7 @@
         ],
         "super_class": "net.minecraft.world.entity.vehicle.VehicleEntity"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.vehicle.AbstractMinecartContainer",
@@ -16837,7 +16852,7 @@
         ],
         "super_class": "net.minecraft.world.entity.vehicle.AbstractMinecart"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.vehicle.ContainerEntity",
@@ -16849,7 +16864,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.entity.vehicle.VehicleEntity",
@@ -16858,7 +16873,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.entity.Entity"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.flag.FeatureElement",
@@ -16867,7 +16882,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.AbstractContainerMenu",
@@ -16876,7 +16891,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.CraftingContainer",
@@ -16888,7 +16903,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.DataSlot",
@@ -16897,7 +16912,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.MenuConstructor",
@@ -16906,7 +16921,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.ResultSlot",
@@ -16915,7 +16930,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.inventory.Slot"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.Slot",
@@ -16924,7 +16939,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.StackedContentsCompatible",
@@ -16933,7 +16948,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.inventory.TransientCraftingContainer",
@@ -16944,7 +16959,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.ArmorItem",
@@ -16955,7 +16970,7 @@
         ],
         "super_class": "net.minecraft.world.item.Item"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.BlockItem",
@@ -16964,7 +16979,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.item.Item"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.DiggerItem",
@@ -16973,7 +16988,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.item.TieredItem"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.Equipable",
@@ -16982,7 +16997,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.Item",
@@ -16995,7 +17010,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.Item$Properties",
@@ -17006,7 +17021,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.Tier",
@@ -17015,7 +17030,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.TieredItem",
@@ -17024,7 +17039,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.item.Item"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.component.TooltipProvider",
@@ -17033,7 +17048,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.crafting.AbstractCookingRecipe",
@@ -17044,7 +17059,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.crafting.CraftingRecipe",
@@ -17055,7 +17070,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.crafting.CustomRecipe",
@@ -17066,7 +17081,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.crafting.Recipe",
@@ -17075,7 +17090,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.crafting.RecipeSerializer",
@@ -17084,7 +17099,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.item.crafting.ShapelessRecipe",
@@ -17095,7 +17110,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.ItemLike",
@@ -17104,7 +17119,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.BaseEntityBlock",
@@ -17115,7 +17130,7 @@
         ],
         "super_class": "net.minecraft.world.level.block.Block"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.BaseRailBlock",
@@ -17127,7 +17142,7 @@
         ],
         "super_class": "net.minecraft.world.level.block.Block"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.Block",
@@ -17139,7 +17154,7 @@
         ],
         "super_class": "net.minecraft.world.level.block.state.BlockBehaviour"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.BucketPickup",
@@ -17150,7 +17165,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.CrossCollisionBlock",
@@ -17161,7 +17176,7 @@
         ],
         "super_class": "net.minecraft.world.level.block.Block"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.EntityBlock",
@@ -17170,7 +17185,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.HalfTransparentBlock",
@@ -17179,7 +17194,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.level.block.Block"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.HorizontalDirectionalBlock",
@@ -17188,7 +17203,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.level.block.Block"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.LiquidBlock",
@@ -17199,7 +17214,7 @@
         ],
         "super_class": "net.minecraft.world.level.block.Block"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.LiquidBlockContainer",
@@ -17208,7 +17223,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.SimpleWaterloggedBlock",
@@ -17220,7 +17235,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.TransparentBlock",
@@ -17229,7 +17244,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.level.block.HalfTransparentBlock"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.entity.BlockEntity",
@@ -17240,7 +17255,7 @@
         ],
         "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.entity.LidBlockEntity",
@@ -17249,7 +17264,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.block.state.BlockBehaviour",
@@ -17260,7 +17275,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.entity.EntityAccess",
@@ -17269,7 +17284,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.gameevent.GameEventListener",
@@ -17278,7 +17293,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.levelgen.feature.Feature",
@@ -17287,7 +17302,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration",
@@ -17296,7 +17311,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.levelgen.structure.Structure",
@@ -17305,7 +17320,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.levelgen.structure.StructurePiece",
@@ -17314,7 +17329,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.material.FlowingFluid",
@@ -17323,7 +17338,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.level.material.Fluid"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.material.Fluid",
@@ -17334,7 +17349,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.level.saveddata.SavedData",
@@ -17343,7 +17358,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.minecraft.world.scores.ScoreHolder",
@@ -17352,7 +17367,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.bus.api.Event",
@@ -17372,7 +17387,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.attachment.IAttachmentHolder",
@@ -17381,7 +17396,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.capabilities.IBlockCapabilityProvider",
@@ -17390,7 +17405,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.client.extensions.IAbstractWidgetExtension",
@@ -17399,7 +17414,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension",
@@ -17408,7 +17423,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.client.extensions.IMenuProviderExtension",
@@ -17417,7 +17432,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.client.model.generators.BlockStateProvider",
@@ -17428,7 +17443,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.client.model.generators.ItemModelProvider",
@@ -17437,7 +17452,7 @@
         "interfaces": [],
         "super_class": "net.neoforged.neoforge.client.model.generators.ModelProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.client.model.generators.ModelProvider",
@@ -17448,7 +17463,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.IMinecartCollisionHandler",
@@ -17457,7 +17472,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.brewing.IBrewingRecipe",
@@ -17466,7 +17481,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.conditions.IConditionBuilder",
@@ -17475,7 +17490,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.AdvancementProvider",
@@ -17484,7 +17499,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.advancements.AdvancementProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.AdvancementProvider$AdvancementGenerator",
@@ -17493,7 +17508,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.BlockTagsProvider",
@@ -17502,7 +17517,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.DataMapProvider",
@@ -17513,7 +17528,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider",
@@ -17522,7 +17537,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.data.registries.RegistriesDatapackGenerator"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.GlobalLootModifierProvider",
@@ -17533,7 +17548,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.JsonCodecProvider",
@@ -17544,7 +17559,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.LanguageProvider",
@@ -17555,7 +17570,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.ParticleDescriptionProvider",
@@ -17566,7 +17581,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.SoundDefinitionsProvider",
@@ -17577,7 +17592,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.data.SpriteSourceProvider",
@@ -17586,7 +17601,7 @@
         "interfaces": [],
         "super_class": "net.neoforged.neoforge.common.data.JsonCodecProvider"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IAbstractMinecartExtension",
@@ -17595,7 +17610,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IBaseRailBlockExtension",
@@ -17604,7 +17619,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IBlockEntityExtension",
@@ -17613,7 +17628,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IBlockExtension",
@@ -17622,7 +17637,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IBucketPickupExtension",
@@ -17631,7 +17646,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IEntityExtension",
@@ -17642,7 +17657,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IFluidExtension",
@@ -17651,7 +17666,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IHolderExtension",
@@ -17662,7 +17677,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IItemExtension",
@@ -17671,7 +17686,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IItemPropertiesExtensions",
@@ -17680,7 +17695,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.extensions.IMobEffectExtension",
@@ -17689,7 +17704,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.loot.IGlobalLootModifier",
@@ -17698,7 +17713,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.loot.LootModifier",
@@ -17709,7 +17724,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.util.INBTSerializable",
@@ -17718,7 +17733,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.common.world.chunk.LoadingValidationCallback",
@@ -17727,7 +17742,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.energy.EnergyStorage",
@@ -17739,7 +17754,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.energy.IEnergyStorage",
@@ -17748,7 +17763,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.entity.PartEntity",
@@ -17757,7 +17772,7 @@
         "interfaces": [],
         "super_class": "net.minecraft.world.entity.Entity"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.fluids.IFluidTank",
@@ -17766,7 +17781,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.fluids.capability.IFluidHandler",
@@ -17775,7 +17790,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.fluids.capability.templates.FluidTank",
@@ -17787,7 +17802,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.items.IItemHandler",
@@ -17796,7 +17811,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.items.IItemHandlerModifiable",
@@ -17807,7 +17822,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.registries.DeferredHolder",
@@ -17819,7 +17834,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.registries.DeferredRegister",
@@ -17828,7 +17843,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "net.neoforged.neoforge.registries.datamaps.IWithData",
@@ -17837,7 +17852,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "0ae735266269163168b8cbcb5dfd5bafa6b9b03623201b7fd97099a23b2548e6"
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
     },
     {
       "class": "snownee.jade.api.IBlockComponentProvider",
@@ -17848,7 +17863,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44"
+      "owner_sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418"
     },
     {
       "class": "snownee.jade.api.IComponentProvider",
@@ -17859,7 +17874,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44"
+      "owner_sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418"
     },
     {
       "class": "snownee.jade.api.IEntityComponentProvider",
@@ -17870,7 +17885,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44"
+      "owner_sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418"
     },
     {
       "class": "snownee.jade.api.IJadeProvider",
@@ -17879,7 +17894,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44"
+      "owner_sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418"
     },
     {
       "class": "snownee.jade.api.IServerDataProvider",
@@ -17890,7 +17905,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44"
+      "owner_sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418"
     },
     {
       "class": "snownee.jade.api.IToggleableProvider",
@@ -17901,7 +17916,7 @@
         ],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44"
+      "owner_sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418"
     },
     {
       "class": "snownee.jade.api.IWailaPlugin",
@@ -17910,7 +17925,7 @@
         "interfaces": [],
         "super_class": "java.lang.Object"
       },
-      "owner_sha256": "e69ed2cd9a9747e89ac5056c0847c844c2f835afdaeef01ad98a664930db0f44"
+      "owner_sha256": "7087a9672a208071e774571423793d499a56adc8dd09fabe36f8652a3bb9c418"
     }
   ],
   "structural_hierarchy": [
