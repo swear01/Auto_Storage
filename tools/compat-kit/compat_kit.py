@@ -22,7 +22,7 @@ from pathlib import Path
 
 SCHEMA_VERSION = 1
 SCAN_CACHE_VERSION = 16
-CANDIDATE_CLASSIFIER_VERSION = 2
+CANDIDATE_CLASSIFIER_VERSION = 3
 SCAN_CACHE_DIRECTORY = (
     f"v{SCAN_CACHE_VERSION}-classifier-{CANDIDATE_CLASSIFIER_VERSION}"
 )
@@ -816,6 +816,7 @@ def _class_access_flags(payload: bytes, entry_name: str) -> int:
 def _is_inspectable_class(
     archive: zipfile.ZipFile,
     entry_name: str,
+    ancestry: tuple[str, ...] = (),
 ) -> bool:
     if (
         entry_name.startswith("META-INF/versions/")
@@ -835,13 +836,29 @@ def _is_inspectable_class(
             re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", segment)
             for segment in nested_segments
         )
-    return not (
+    if (
         metadata["access_flags"] & 0x1000
         or metadata["enclosing_method"]
         or (
             metadata["inner_class_entry"]
             and metadata["inner_name"] is None
         )
+    ):
+        return False
+    outer_class = metadata.get("outer_class")
+    if not metadata["inner_class_entry"] or outer_class is None:
+        return True
+    outer_entry = outer_class.replace(".", "/") + ".class"
+    if outer_entry in ancestry:
+        raise ValueError("nested class ownership contains a cycle: " + entry_name)
+    try:
+        archive.getinfo(outer_entry)
+    except KeyError:
+        return True
+    return _is_inspectable_class(
+        archive,
+        outer_entry,
+        ancestry + (entry_name,),
     )
 
 

@@ -1875,7 +1875,10 @@ class CompatKitAuditTests(unittest.TestCase):
         stale = (
             cache
             / artifact_sha
-            / f"v{self.compat_kit.SCAN_CACHE_VERSION}"
+            / (
+                f"v{self.compat_kit.SCAN_CACHE_VERSION}-classifier-"
+                f"{self.compat_kit.CANDIDATE_CLASSIFIER_VERSION - 1}"
+            )
             / "audit.json"
         )
         stale.parent.mkdir(parents=True)
@@ -2861,6 +2864,60 @@ class CompatKitAuditTests(unittest.TestCase):
             recipes["samplemod.recipe.DollarRecipes$$Recipe"],
         )
         self.assertFalse(any("$1" in class_name for class_name in recipes))
+
+    def test_named_nested_class_under_anonymous_owner_is_handled_without_invented_source_name(self):
+        source = self.root / "anonymous-owner-source"
+        classes = self.root / "anonymous-owner-classes"
+        conveyor = source / "samplemod/client/ModelConveyor.java"
+        conveyor.parent.mkdir(parents=True)
+        conveyor.write_text(
+            "package samplemod.client; public final class ModelConveyor { "
+            "public static Object create() { return new Object() { "
+            "final class Key {} final Key key = new Key(); }; } }\n"
+        )
+        classes.mkdir()
+        subprocess.run(
+            ["javac", "-d", str(classes), str(conveyor)],
+            check=True,
+        )
+        nested_class = "samplemod.client.ModelConveyor$1$Key"
+        self.assertTrue(
+            (classes / "samplemod/client/ModelConveyor$1$Key.class").is_file()
+        )
+        target_jar = self.root / "samplemod-anonymous-owner.jar"
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            for class_file in sorted(classes.rglob("*.class")):
+                archive.write(
+                    class_file,
+                    class_file.relative_to(classes).as_posix(),
+                )
+
+        audit = self.compat_kit.scan_jar(target_jar)
+
+        source_classes = {
+            candidate["class"]: candidate["source_class"]
+            for records in audit["candidates"].values()
+            for candidate in records
+        }
+        self.assertEqual(
+            {
+                "samplemod.client.ModelConveyor": (
+                    "samplemod.client.ModelConveyor"
+                )
+            },
+            source_classes,
+        )
+        self.assertNotIn(nested_class, source_classes)
+        self.assertNotIn(
+            nested_class,
+            {record["class"] for record in audit["structural_class_graph"]},
+        )
 
     def test_scan_recognizes_jdk_module_ancestry_outside_java_prefixes(self):
         source = self.root / "jdk-ancestry-source"

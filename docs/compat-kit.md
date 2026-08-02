@@ -168,7 +168,8 @@ the selected JDK 21 installation, release version, module-file identity, and
 the resolved `javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `16`; formats `7` through `15` remain readable
+current scanner format is `16` with candidate classifier `3`; formats `7`
+through `15` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit plus the exact target jar; only explicit migration paths
@@ -212,7 +213,10 @@ including legal Java identifiers that themselves contain `$`. The scanner uses
 splitting the binary name on every `$`; a legal top-level `Recipe$1Variant`
 therefore maps to `Recipe$1Variant.java`, while anonymous/local classes and
 every class carrying the JVM
-`ACC_SYNTHETIC` access flag are excluded.
+`ACC_SYNTHETIC` access flag are excluded. A named class whose ownership chain
+passes through any of those excluded classes is also excluded: a binary name
+such as `Outer$1$Key` has no truthful source-level owner, so the scanner never
+reinterprets it as a top-level `$` identifier or invents a source name.
 If a classified class has no `SourceFile` attribute and `--source` was
 supplied, scanning fails with an unavailable source mapping; it never guesses
 that a package-private binary class lives in a same-named source file.
