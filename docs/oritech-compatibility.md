@@ -12,7 +12,7 @@ Architectury API and GeckoLib remain required companions of that optional target
   `fcb30b4f6ae89d115164b82f3c1f9938e9b8a80662047e204562361845764963`;
 - dependency coordinate: `maven.modrinth:oritech:gMBPdWrE`;
 - runtime companions: Architectury API `ZxYGwlk0` (`13.0.8`), GeckoLib
-  `qj2pTqCr` (`4.6.6`);
+  `RVIo5f6E` (`4.8.2`);
 - audit: `compat/audits/oritech/1.2.9.json` (scanner format 16);
 - reviewed contract: `compat/contracts/oritech.json`;
 - matrix recipe-inventory SHA-256 for namespace `oritech`:

@@ -39,7 +39,7 @@
   "runtimeDependencies": [
     "maven.modrinth:oritech:gMBPdWrE",
     "maven.modrinth:architectury-api:ZxYGwlk0",
-    "maven.modrinth:geckolib:qj2pTqCr"
+    "maven.modrinth:geckolib:RVIo5f6E"
   ],
   "schema": 1,
   "side": "both",

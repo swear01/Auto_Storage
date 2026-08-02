@@ -1,9 +1,9 @@
 {
   "schema": 1,
   "tool_version": "0.3.0",
-  "contract_sha256": "4a21b22ad3a059be829476a793d169358dd30585e1e7d3f36a36009c1dd785b5",
+  "contract_sha256": "ae37eb00e4a6b853d4d59b7bc5f11f7f66a3fe03d2555d1980ad233bc4c46ad4",
   "files": {
-    "src/compat/oritech/compat-module.json": "20fa7ffb12c8d08b990d398ec161eea9f064e39f1026dff26101926262738a7e",
+    "src/compat/oritech/compat-module.json": "9d6a9bf399855ac93f78268e125ce422a68f3b669ed144d71c5075afe8c14c24",
     "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "77214765da961a68851807172d7120cfd8f8c8dd374be7efa35b7bcec40c1f63",
     "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompatModule.java": "5d6bb71971ce83f6e717256b4a759765dc8afd5b1907c355cdae8bb87882c8d4",
     "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechFixtureMod.java": "3749b869c9b8a7a01117b1210464f53c914338c8f8773d5dea053fa0e0f60904",
