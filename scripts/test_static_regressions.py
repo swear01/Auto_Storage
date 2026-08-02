@@ -4859,10 +4859,15 @@ class StaticRegressionTests(unittest.TestCase):
             "production shared Craftable cache must release transient catalog/family graphs",
         )
         self.assertIn(
+            "server.tell(new net.minecraft.server.TickTask(server.getTickCount() + 1,",
+            shared_cache,
+            "transient release must run on the next server tick after selection and preview "
+            "follow-up work completes",
+        )
+        self.assertNotIn(
             "server.execute(CraftableRecipeCatalog::releaseTransientMatches)",
             shared_cache,
-            "transient release must run after prepare returns so craftable_prepare_ms "
-            "measures listing construction rather than cache teardown",
+            "same-thread execute may release before selection and preview repopulate caches",
         )
         self.assertNotIn(
             "if (usePlayerInventory) return;",

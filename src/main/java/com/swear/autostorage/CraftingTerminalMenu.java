@@ -3523,7 +3523,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
         var server = level == null ? null : level.getServer();
         if (server != null) {
-            server.execute(CraftableRecipeCatalog::releaseTransientMatches);
+            server.tell(new net.minecraft.server.TickTask(server.getTickCount() + 1,
+                    CraftableRecipeCatalog::releaseTransientMatches));
         } else {
             CraftableRecipeCatalog.releaseTransientMatches();
         }
