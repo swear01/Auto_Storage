@@ -9,6 +9,7 @@ import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -108,6 +109,7 @@ public final class ModernIndustrializationIntegrationTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void macerator_family_is_registered(GameTestHelper helper) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), ModernIndustrializationIntegrationTests.class);
         MachineDescriptor descriptor = AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.get(MACERATOR);
         if (descriptor == null || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(MACERATOR)) {
             helper.fail("Modern Industrialization Macerator compatibility was not registered");

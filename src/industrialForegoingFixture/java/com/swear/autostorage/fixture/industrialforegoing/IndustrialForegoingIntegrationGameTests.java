@@ -14,6 +14,7 @@ import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -56,6 +57,7 @@ public final class IndustrialForegoingIntegrationGameTests {
     public static void registers_only_audited_families_and_base_stations(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), IndustrialForegoingIntegrationGameTests.class);
         MachineDescriptor dissolution = MachineEnergyTable.get(DISSOLUTION);
         MachineDescriptor stonework = MachineEnergyTable.get(STONEWORK);
         if (!validStation(dissolution, "dissolution_chamber")

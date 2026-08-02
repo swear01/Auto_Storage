@@ -15,6 +15,7 @@ import com.swear.autostorage.StorageTerminalMenu;
 import com.swear.autostorage.TerminalDisplayStack;
 import com.swear.autostorage.TerminalResourceDisplay;
 import com.swear.autostorage.TerminalResourceView;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -51,6 +52,7 @@ public final class EvilCraftIntegrationGameTests {
     public static void blood_infuser_registers_only_exact_supported_recipes(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), EvilCraftIntegrationGameTests.class);
         MachineDescriptor descriptor = MachineEnergyTable.get(BLOOD_INFUSER);
         ItemStack station = new ItemStack(evilItem("blood_infuser"));
         if (descriptor == null

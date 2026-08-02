@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -16,13 +17,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,20 +30,19 @@ final class CompatibilityMatrixManifest {
     private static final String RESOURCE_PATH =
             "/META-INF/auto_storage/compatibility-matrix-manifest.json";
     private static final Set<String> ROOT_KEYS = Set.of(
-            "schema", "modules", "companions", "unclaimedRecipeInventory");
+            "schema",
+            "modules",
+            "companions");
 
     private final List<AssertionGroup> modules;
     private final List<AssertionGroup> companions;
-    private final String unclaimedRecipeInventorySha256;
 
     private CompatibilityMatrixManifest(
             List<AssertionGroup> modules,
-            List<AssertionGroup> companions,
-            String unclaimedRecipeInventorySha256
+            List<AssertionGroup> companions
     ) {
         this.modules = List.copyOf(modules);
         this.companions = List.copyOf(companions);
-        this.unclaimedRecipeInventorySha256 = unclaimedRecipeInventorySha256;
     }
 
     static CompatibilityMatrixManifest load() {
@@ -78,16 +75,7 @@ final class CompatibilityMatrixManifest {
         }
         List<AssertionGroup> modules = parseGroups(root.getAsJsonArray("modules"), true);
         List<AssertionGroup> companions = parseGroups(root.getAsJsonArray("companions"), true);
-        JsonObject unclaimed = root.getAsJsonObject("unclaimedRecipeInventory");
-        if (unclaimed == null || unclaimed.keySet().size() != 1
-                || !unclaimed.has("sha256")) {
-            throw new IllegalStateException(
-                    "unclaimedRecipeInventory must declare only sha256");
-        }
-        return new CompatibilityMatrixManifest(
-                modules,
-                companions,
-                unclaimed.get("sha256").getAsString());
+        return new CompatibilityMatrixManifest(modules, companions);
     }
 
     boolean assertCoexistence(GameTestHelper helper, String evidence) {
@@ -148,7 +136,20 @@ final class CompatibilityMatrixManifest {
         return true;
     }
 
-    void assertRecipeInventories(RecipeManager recipeManager) {
+    RecipeInventoryEvidence assertRecipeInventories(RecipeManager recipeManager) {
+        List<String> allIds = new ArrayList<>();
+        Set<String> claimed = new HashSet<>();
+        for (AssertionGroup group : allGroups()) {
+            for (String namespace : group.recipeNamespaces()) {
+                if (!claimed.add(namespace)) {
+                    throw new IllegalStateException(
+                            "Duplicate recipe namespace claim: " + namespace);
+                }
+            }
+        }
+        for (RecipeHolder<?> holder : recipeManager.getRecipes()) {
+            allIds.add(holder.id().toString());
+        }
         Map<String, List<String>> byNamespace = new HashMap<>();
         for (RecipeHolder<?> holder : recipeManager.getRecipes()) {
             ResourceLocation id = holder.id();
@@ -156,55 +157,17 @@ final class CompatibilityMatrixManifest {
                     .computeIfAbsent(id.getNamespace(), ignored -> new ArrayList<>())
                     .add(id.toString());
         }
-        Set<String> claimed = new HashSet<>();
-        List<String> mismatches = new ArrayList<>();
-        Map<String, String> actualDigests = new HashMap<>();
-        for (AssertionGroup group : allGroups()) {
-            List<String> ids = new ArrayList<>();
-            for (String namespace : group.recipeNamespaces()) {
-                if (!claimed.add(namespace)) {
-                    throw new IllegalStateException(
-                            "Duplicate recipe namespace claim: " + namespace);
-                }
-                ids.addAll(byNamespace.getOrDefault(namespace, List.of()));
-            }
-            String actual = recipeInventorySha256(ids);
-            actualDigests.put(group.id(), actual + " count=" + ids.size());
-            if (!actual.equals(group.recipeInventorySha256())) {
-                mismatches.add(
-                        group.id()
-                                + ": expected "
-                                + group.recipeInventorySha256()
-                                + ", got "
-                                + actual
-                                + " count="
-                                + ids.size());
-            }
-        }
         List<String> unclaimed = new ArrayList<>();
         for (Map.Entry<String, List<String>> entry : byNamespace.entrySet()) {
             if (!claimed.contains(entry.getKey())) {
                 unclaimed.addAll(entry.getValue());
             }
         }
-        String actualUnclaimed = recipeInventorySha256(unclaimed);
-        actualDigests.put("unclaimed", actualUnclaimed + " count=" + unclaimed.size());
-        if (!actualUnclaimed.equals(unclaimedRecipeInventorySha256)) {
-            mismatches.add(
-                    "unclaimed: expected "
-                            + unclaimedRecipeInventorySha256
-                            + ", got "
-                            + actualUnclaimed
-                            + " count="
-                            + unclaimed.size());
-        }
-        if (!mismatches.isEmpty()) {
-            throw new IllegalStateException(
-                    "Compatibility recipe inventory drifted: "
-                            + String.join("; ", mismatches)
-                            + " | actual="
-                            + actualDigests);
-        }
+        return new RecipeInventoryEvidence(
+                recipeInventorySha256(allIds),
+                allIds.size(),
+                recipeInventorySha256(unclaimed),
+                unclaimed.size());
     }
 
     private List<AssertionGroup> allGroups() {
@@ -283,58 +246,15 @@ final class CompatibilityMatrixManifest {
     }
 
     static String recipeInventorySha256(List<String> recipeIds) {
-        List<String> sorted = new ArrayList<>(recipeIds);
-        sorted.sort(Comparator.naturalOrder());
-        String canonical = canonicalJsonStringArray(sorted);
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(canonical.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new IllegalStateException("SHA-256 unavailable", exception);
-        }
+        return IsolatedRecipeInventoryEvidence.recipeInventorySha256(recipeIds);
     }
 
-    private static String canonicalJsonStringArray(List<String> values) {
-        if (values.isEmpty()) {
-            return "[]\n";
-        }
-        StringBuilder builder = new StringBuilder();
-        builder.append("[\n");
-        for (int index = 0; index < values.size(); index++) {
-            builder.append("  \"");
-            builder.append(escapeJson(values.get(index)));
-            builder.append('"');
-            if (index + 1 < values.size()) {
-                builder.append(',');
-            }
-            builder.append('\n');
-        }
-        builder.append("]\n");
-        return builder.toString();
-    }
-
-    private static String escapeJson(String value) {
-        StringBuilder builder = new StringBuilder(value.length() + 8);
-        for (int index = 0; index < value.length(); index++) {
-            char character = value.charAt(index);
-            switch (character) {
-                case '\\', '"' -> builder.append('\\').append(character);
-                case '\b' -> builder.append("\\b");
-                case '\f' -> builder.append("\\f");
-                case '\n' -> builder.append("\\n");
-                case '\r' -> builder.append("\\r");
-                case '\t' -> builder.append("\\t");
-                default -> {
-                    if (character < 0x20) {
-                        builder.append(String.format("\\u%04x", (int) character));
-                    } else {
-                        builder.append(character);
-                    }
-                }
-            }
-        }
-        return builder.toString();
+    record RecipeInventoryEvidence(
+            String coexistenceSha256,
+            int coexistenceCount,
+            String unclaimedSha256,
+            int unclaimedCount
+    ) {
     }
 
     private record AssertionGroup(

@@ -1148,7 +1148,8 @@ class StaticRegressionTests(unittest.TestCase):
             "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
             "compatibility-matrix-companions.json"
         )
-        self.assertIn("unclaimedRecipeInventory", companions)
+        self.assertNotIn("unclaimedRecipeInventory", companions)
+        self.assertNotIn("coexistenceRecipeInventory", companions)
         self.assertIn("pneumaticcraft", companions)
         build = self.read_required("build.gradle")
         self.assertIn("generateCompatibilityMatrixManifest", build)

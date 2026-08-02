@@ -66,8 +66,8 @@ The module descriptor and reviewed contract both declare the target mod present
 with zero descriptors, resource kinds, accepted recipes, rejected registry IDs,
 or Productive Metalworks-owned recipe families. Loaded `productivemetalworks:*`
 recipes remain in `RecipeManager` for vanilla-class coverage and fail-closed
-assertions; the combined runtime loads 583 `productivemetalworks:*` recipes, locked by
-SHA-256 `8519ac6300242a3bb29d02a53598c0b2ab979a05336ede8dec816faef443b8cb`. No shared workflow or matrix Java list is
+assertions; the isolated fixture loads 312 `productivemetalworks:*` recipes, locked by
+SHA-256 `a17a7208231825e5c0c9f0c801867dfbf09e0bbfbb228018562ae01460f1fee7`. Combined coexistence and unclaimed inventories are recorded only in the matrix report. No shared workflow or matrix Java list is
 extended for this module.
 
 ## Verification
@@ -85,6 +85,6 @@ compatibility matrix also loads the representative artifact and locks the same
 zero-family boundary plus the per-namespace recipe inventory digest. Loading the present-mod jar still contributes Foundry/casting datapack recipes to `RecipeManager`; those IDs are locked by the descriptor-owned digest rather than a single global recipe count.
 
 The current scanner-format-16 contract passed all 12 Compat Kit checks across
-its five declared Gradle commands. The same local gate passed all 547 Python
+its five declared Gradle commands. The same local gate passed all 554 Python
 tests, 8/8 isolated Productive Metalworks GameTests, 3/3 combined-matrix
 GameTests, the full build, and an idempotent `runData` with zero files written.

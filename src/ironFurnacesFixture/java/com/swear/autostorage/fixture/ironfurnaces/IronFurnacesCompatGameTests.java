@@ -7,6 +7,7 @@ import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.compat.ironfurnaces.IronFurnacesCompat;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import ironfurnaces.blocks.furnaces.BlockIronFurnaceBase;
 import ironfurnaces.tileentity.furnaces.BlockIronFurnaceTileBase;
 import net.minecraft.core.BlockPos;
@@ -39,6 +40,7 @@ public final class IronFurnacesCompatGameTests {
     public static void variants_are_complete_ordered_and_exclude_multi_output_furnaces(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), IronFurnacesCompatGameTests.class);
         List<ResourceLocation> actual = IronFurnacesCompat.furnaceVariants().stream()
                 .map(MachineVariant::stack)
                 .map(ItemStack::getItem)

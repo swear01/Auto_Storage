@@ -15,6 +15,7 @@ import com.swear.autostorage.StorageResourceKindApi;
 import com.swear.autostorage.TerminalDisplayStack;
 import com.swear.autostorage.TerminalResourceDisplay;
 import com.swear.autostorage.TerminalResourceView;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -141,6 +142,7 @@ public final class MekanismRecipeIntegrationTests {
     public static void item_resource_keys_round_trip_all_mekanism_default_components(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), MekanismRecipeIntegrationTests.class);
         for (Item item : BuiltInRegistries.ITEM) {
             ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
             if (itemId == null || !itemId.getNamespace().equals("mekanism")) continue;

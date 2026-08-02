@@ -76,16 +76,17 @@ the `railcraft` mod is present; descriptors, resource kinds, and accepted
 recipes remain empty; `rejectedDescriptors` locks the four never-registered
 IDs `auto_storage:railcraft_crusher`, `auto_storage:railcraft_blast_furnace`,
 `auto_storage:railcraft_coke_oven`, and `auto_storage:railcraft_rolling`. The
-live server inventory of 668 `railcraft:*` recipes is locked by SHA-256
-`b3f0a1186f22b445613be6d05a4cb01559885faba1937d2df178c3ed7c42706d`.
+isolated fixture inventory of 639 `railcraft:*` recipes is locked by SHA-256
+`5fa9e922337c24f2a2d4d86da0d68ebe8205a89dcd70ece1e952f75707107060`.
 Generic coexistence evidence uses
 `manifest.assertCoexistence(helper, "Descriptor matrix coexistence")`; no
 Railcraft-specific shared Java list was added.
 
-Railcraft also changes the recipes visible in the combined mod environment.
-The generated matrix therefore owns the current Create namespace digest
-`4e6eb1aeba9334e92cec47000594a756989ebe1c2cdf91fda9a847d13caf13ae`
-instead of preserving a stale pre-Railcraft value.
+Cross-namespace coexistence effects of loading Railcraft with peer modules are
+recorded only in the compatibility-matrix report
+(`build/reports/terminal-scale-*.json`). This module does not pin peer Create
+digests, rewrite peer descriptors, or commit global coexistence/unclaimed
+expected SHA values.
 
 ## Craftable catalog performance
 
@@ -110,9 +111,9 @@ Eight present-mod GameTests cover registry absence, chance Crusher, Blast
 Furnace, Coke Oven, Rolling, fluid-tie/rotor-repair special crafting, ticket /
 minecart-disassembly / Patchouli-book special crafting, and an exhaustive scan
 that every loaded recipe in each audited machine type remains fail closed. The
-three-test all-mod matrix verifies descriptor-owned registrations, exact recipe
-inventories, generic coexistence, and the shared Craftable performance/heap
-gates.
+three-test all-mod matrix verifies descriptor-owned registrations, namespace-claim
+structure, records actual coexistence/unclaimed digests in the matrix report,
+and runs the shared Craftable performance/heap gates.
 
 `build/compat-kit/railcraft-current-report.json` is historical local evidence
 from an earlier branch head. It is not current-head verification and must not be

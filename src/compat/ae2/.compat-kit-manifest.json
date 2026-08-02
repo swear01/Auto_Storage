@@ -1,11 +1,11 @@
 {
-  "contract_sha256": "573fd06fcbaa602927efc3598a57ccedbda24bb29810a7cc683002a7d915bf8c",
+  "contract_sha256": "846f86c211aec80ed9e740d5956a013173fa8b26785501cd027c6336e0db2aad",
   "files": {
     "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2FixtureMod.java": "cb2db888589a807aab1996b8f568eeb499693951e70fa0521e845e070d8b4822",
-    "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java": "37b492ca0cce4e887776607976cab9e25dd2d08fa2d00f2eeb013e7d1974676d",
+    "src/ae2Fixture/java/com/swear/autostorage/fixture/ae2/Ae2IntegrationGameTests.java": "137705e8ed49c4a1324cf308889c6d90d696325dad9d18ba47c6224b69e6144d",
     "src/ae2Fixture/resources/META-INF/neoforge.mods.toml": "1005c962860e026ecc311ce020e51e2491a2c27e4cd6625cbdb951783eaeb475",
     "src/ae2Fixture/resources/data/auto_storage_ae2_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc",
-    "src/compat/ae2/compat-module.json": "40df44f615ea73d8c59e8ecb13cb595a4890550ac624d9597894a1d78ec2ae5c",
+    "src/compat/ae2/compat-module.json": "d83ceee7fcaaca1a048b92bb11ad46feccf1c3e3d15772962cf905f041f913f4",
     "src/compat/ae2/java/com/swear/autostorage/compat/ae2/Ae2Compat.java": "19e49c26945fb382e6e2042a34e4bd54570a0d0d9b1392bf58b9da9e51dff44c",
     "src/compat/ae2/java/com/swear/autostorage/compat/ae2/Ae2CompatModule.java": "781c3e557069831d74a925aa1ee511d772518d07575f752ff038a0e7dcbe4039"
   },

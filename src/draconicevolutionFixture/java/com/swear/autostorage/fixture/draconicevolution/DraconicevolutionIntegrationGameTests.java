@@ -2,6 +2,7 @@ package com.swear.autostorage.fixture.draconicevolution;
 
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ public final class DraconicevolutionIntegrationGameTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void present_mod_registers_no_unsafe_families(GameTestHelper helper) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), DraconicevolutionIntegrationGameTests.class);
         if (!ModList.get().isLoaded("draconicevolution")
                 || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
                         .anyMatch(id -> id.getNamespace().equals("draconicevolution")

@@ -39,6 +39,24 @@ class ModularCompatSdkTests(unittest.TestCase):
                 relative_path,
             )
 
+    def test_every_compat_kit_manifest_file_hash_matches_disk(self):
+        manifests = sorted((ROOT / "src/compat").glob("*/.compat-kit-manifest.json"))
+        self.assertTrue(manifests)
+        for manifest_path in manifests:
+            manifest = json.loads(manifest_path.read_text())
+            module_id = manifest_path.parent.name
+            self.assertEqual(
+                {"schema", "tool_version", "contract_sha256", "files"},
+                set(manifest),
+                module_id,
+            )
+            for relative_path, expected_sha256 in manifest["files"].items():
+                self.assertEqual(
+                    expected_sha256,
+                    hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                    f"{module_id}:{relative_path}",
+                )
+
     def test_productivebees_outcome_c_metadata_is_current_and_declarative(self):
         module_root = ROOT / "src/compat/productivebees"
         descriptor = json.loads((module_root / "compat-module.json").read_text())
@@ -141,38 +159,15 @@ class ModularCompatSdkTests(unittest.TestCase):
             ["productivebees"],
             matrix["recipeInventory"]["namespaces"],
         )
-        self.assertEqual(
-            "29eae13b02c34d2f44c4dd2bbc5aefe44e1dbf054c19c9c6e099f61e6b2367b9",
-            matrix["recipeInventory"]["sha256"],
-        )
-        industrial_foregoing_descriptor = json.loads(
-            (
-                ROOT / "src/compat/industrial_foregoing/compat-module.json"
-            ).read_text()
-        )
-        self.assertEqual(
-            "e658bb0b40b91d2bc322cefacebd8cadd8f36afabbab76e47dc33ad200f17b4f",
-            industrial_foregoing_descriptor["matrix"]["recipeInventory"]["sha256"],
-        )
-        modern_industrialization_descriptor = json.loads(
-            (
-                ROOT / "src/compat/modern_industrialization/compat-module.json"
-            ).read_text()
-        )
-        self.assertEqual(
-            "c4155661f3e187d12177f181b30b915d01adf9e4af33ba5945ec16d3f565e24f",
-            modern_industrialization_descriptor["matrix"]["recipeInventory"]["sha256"],
-        )
         companions = json.loads(
             (
                 ROOT
                 / "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/compatibility-matrix-companions.json"
             ).read_text()
         )
-        self.assertEqual(
-            "c5796e5c92a7ec1e51c9fe58397e8c0e1dc0743b7a587039631f231c294c1207",
-            companions["unclaimedRecipeInventory"]["sha256"],
-        )
+        self.assertEqual({"schema", "companions"}, set(companions))
+        self.assertNotIn("coexistenceRecipeInventory", companions)
+        self.assertNotIn("unclaimedRecipeInventory", companions)
         self.assertEqual(
             hashlib.sha256(contract_path.read_bytes()).hexdigest(),
             manifest["contract_sha256"],
@@ -222,17 +217,6 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertEqual(
             ["create_aquatic_ambitions"],
             matrix["recipeInventory"]["namespaces"],
-        )
-        self.assertEqual(
-            "5084d1ab9696fd443d49d14fe855d936451b5f8895f5ae1760fb7b636650d189",
-            matrix["recipeInventory"]["sha256"],
-        )
-        create_descriptor = json.loads(
-            (ROOT / "src/compat/create/compat-module.json").read_text()
-        )
-        self.assertEqual(
-            "4e6eb1aeba9334e92cec47000594a756989ebe1c2cdf91fda9a847d13caf13ae",
-            create_descriptor["matrix"]["recipeInventory"]["sha256"],
         )
         self.assertEqual(
             hashlib.sha256(contract_path.read_bytes()).hexdigest(),

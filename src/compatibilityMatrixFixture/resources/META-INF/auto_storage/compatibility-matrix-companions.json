@@ -11,7 +11,7 @@
         "namespaces": [
           "pneumaticcraft"
         ],
-        "sha256": "32d0c4ed1050b00a5ff36bf85c199d2008f666592a8885066803dc9a95f192a8"
+        "sha256": "30922afe6e11c32cc3517c164ba7908f8c7ad5f7c86b6a03ea0e7491a21421af"
       },
       "rejectedDescriptors": [
         "auto_storage:pneumaticcraft_pressure_chamber"
@@ -22,8 +22,5 @@
       "resourceKinds": []
     }
   ],
-  "schema": 1,
-  "unclaimedRecipeInventory": {
-    "sha256": "c5796e5c92a7ec1e51c9fe58397e8c0e1dc0743b7a587039631f231c294c1207"
-  }
+  "schema": 1
 }

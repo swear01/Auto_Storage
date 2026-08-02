@@ -14,6 +14,7 @@ import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -49,6 +50,7 @@ public final class CreateIntegrationGameTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void registers_only_audited_families_and_stations(GameTestHelper helper) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(helper.getLevel().getRecipeManager(), CreateIntegrationGameTests.class);
         for (var entry : STATIONS.entrySet()) {
             if (!validStation(stationId(entry.getKey()), entry.getValue())
                     || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(
