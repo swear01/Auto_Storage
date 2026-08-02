@@ -9,6 +9,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ModularCompatSdkTests(unittest.TestCase):
+    def test_draconicevolution_manifest_hashes_every_generated_file(self):
+        manifest = json.loads(
+            (
+                ROOT
+                / "src/compat/draconicevolution/.compat-kit-manifest.json"
+            ).read_text()
+        )
+        for relative_path, expected_sha256 in manifest["files"].items():
+            self.assertEqual(
+                expected_sha256,
+                hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                relative_path,
+            )
+
     def test_create_aquatic_ambitions_outcome_c_metadata_is_declarative(self):
         module_root = ROOT / "src/compat/create_aquatic_ambitions"
         descriptor = json.loads((module_root / "compat-module.json").read_text())
