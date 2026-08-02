@@ -18,7 +18,7 @@
     }
   ],
   "schema": 1,
-  "source_contract_digest": "78145f6c098ac66e105bc1f184a19f23f11b3c0014c61c70c77957df745a18d5",
+  "source_contract_digest": "846f86c211aec80ed9e740d5956a013173fa8b26785501cd027c6336e0db2aad",
   "target": {
     "display_name": "Applied Energistics 2",
     "mod_id": "ae2",
