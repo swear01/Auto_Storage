@@ -513,7 +513,11 @@ def normalize_jar(source, output) -> Path:
     return output_path
 
 
-def _read_mod_metadata(archive: zipfile.ZipFile) -> dict:
+def _read_mod_metadata(
+    archive: zipfile.ZipFile,
+    *,
+    selected_mod_id: str | None = None,
+) -> dict:
     metadata_path = next(
         (candidate for candidate in MOD_METADATA_PATHS if candidate in archive.namelist()),
         None,
@@ -530,15 +534,36 @@ def _read_mod_metadata(archive: zipfile.ZipFile) -> dict:
     except (UnicodeDecodeError, tomllib.TOMLDecodeError) as error:
         raise ValueError(f"invalid NeoForge mod metadata: {error}") from error
     mods = metadata.get("mods")
-    if not isinstance(mods, list) or len(mods) != 1:
-        raise ValueError("compat-kit requires exactly one mod in NeoForge mod metadata")
-    mod = mods[0]
+    if not isinstance(mods, list) or not mods:
+        raise ValueError("compat-kit requires NeoForge mod metadata with mods")
     required = ("modId", "version", "displayName")
-    missing = [key for key in required if not isinstance(mod.get(key), str)]
-    if missing:
-        raise ValueError(
-            "NeoForge mod metadata is missing string fields: " + ", ".join(missing)
-        )
+    for mod in mods:
+        if not isinstance(mod, dict):
+            raise ValueError("NeoForge mod metadata mods entries must be tables")
+        missing = [key for key in required if not isinstance(mod.get(key), str)]
+        if missing:
+            raise ValueError(
+                "NeoForge mod metadata is missing string fields: " + ", ".join(missing)
+            )
+    if selected_mod_id is None:
+        if len(mods) != 1:
+            raise ValueError(
+                "compat-kit requires exactly one mod in NeoForge mod metadata; "
+                "use --mod-id for multi-mod jars"
+            )
+        mod = mods[0]
+    else:
+        selected = [
+            mod
+            for mod in mods
+            if isinstance(mod, dict) and mod.get("modId") == selected_mod_id
+        ]
+        if len(selected) != 1:
+            raise ValueError(
+                "NeoForge mod metadata does not contain exactly one selected "
+                f"mod ID: {selected_mod_id}"
+            )
+        mod = selected[0]
     return {
         "mod_id": mod["modId"],
         "display_name": mod["displayName"],
@@ -3233,7 +3258,15 @@ def _validate_audit_target_artifact(
     target = None
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
-        target = _read_mod_metadata(archive)
+        try:
+            target = _read_mod_metadata(
+                archive,
+                selected_mod_id=audit["target"]["mod_id"],
+            )
+        except ValueError as error:
+            raise ValueError(
+                "target metadata does not match exact artifact"
+            ) from error
         inspectable_cache = {}
         for entry_name in sorted(archive.namelist()):
             if not _is_inspectable_class(
@@ -3422,6 +3455,7 @@ def _validate_audit_target_artifact(
 def scan_jar(
     jar,
     *,
+    selected_mod_id=None,
     source=None,
     classpath=None,
     classpath_dependencies=None,
@@ -3469,7 +3503,10 @@ def scan_jar(
     )
     with zipfile.ZipFile(jar) as archive:
         _validate_archive(jar, archive)
-        target = _read_mod_metadata(archive)
+        target = _read_mod_metadata(
+            archive,
+            selected_mod_id=selected_mod_id,
+        )
         recipe_data = _recipe_data_inventory(
             archive,
             artifact_sha,
@@ -3479,6 +3516,14 @@ def scan_jar(
             base_cache_identity = (
                 recipe_data["digest"] if data_roots else artifact_sha
             )
+            if selected_mod_id is not None:
+                base_cache_identity = hashlib.sha256(
+                    (
+                        base_cache_identity
+                        + ":mod_id:"
+                        + target["mod_id"]
+                    ).encode("utf-8")
+                ).hexdigest()
             cache_identity = (
                 hashlib.sha256(
                     (base_cache_identity + ":" + classpath_digest).encode("utf-8")
@@ -3826,6 +3871,7 @@ def migrate_audit(
     )
     migrated = scan_jar(
         jar,
+        selected_mod_id=legacy_audit["target"]["mod_id"],
         source=source,
         classpath=classpath,
         classpath_dependencies=classpath_dependencies,
@@ -9454,6 +9500,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     scan = subparsers.add_parser("scan")
     scan.add_argument("--jar", required=True)
+    scan.add_argument("--mod-id")
     scan.add_argument("--source")
     scan.add_argument("--classpath", action="append", default=[])
     scan.add_argument("--classpath-dependency", action="append", default=[])
@@ -9573,6 +9620,7 @@ def main(argv=None) -> int:
         if args.command == "scan":
             audit = scan_jar(
                 args.jar,
+                selected_mod_id=args.mod_id,
                 source=args.source,
                 classpath=args.classpath,
                 classpath_dependencies=args.classpath_dependency,
@@ -9666,6 +9714,7 @@ def main(argv=None) -> int:
             else:
                 new = scan_jar(
                     new_path,
+                    selected_mod_id=old["target"]["mod_id"],
                     source=args.source,
                     classpath=args.classpath,
                     classpath_dependencies=args.classpath_dependency,
