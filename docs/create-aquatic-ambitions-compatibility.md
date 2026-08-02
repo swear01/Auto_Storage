@@ -25,7 +25,7 @@ contract.
   `create_aquatic_ambitions-1.21.1-2.0.4.jar`;
 - official source branch `neoforge-1.21.1`
   commit `c584e179ae64ce2373597899402bdd0cab9a22e7` (`mod_version=2.0.4`);
-- scanner format `16`: 79 target classes, 160 target/reachable ancestry graph
+- scanner format `17`: 79 target classes, 160 target/reachable ancestry graph
   records, and 29 classified candidates across all buckets;
 - six reachable ancestry artifacts: the normalized binary-pipeline
   NeoForge/Minecraft artifact plus five exact Maven coordinates:
@@ -52,7 +52,7 @@ multi-version matrix.
 ## Audited recipe candidates
 
 The legacy scanner-format-7 audit classified 22 name-shaped entries as recipe
-families. Exact format-16 structural scanning removed 20 non-recipe entries and
+families. Exact format-17 structural scanning removed 20 non-recipe entries and
 left exactly two actual `Recipe` candidates. Both were reopened by
 `migrate-contract`, reviewed again, and rejected in the committed contract:
 

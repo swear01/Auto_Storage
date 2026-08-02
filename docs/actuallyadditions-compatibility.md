@@ -22,7 +22,7 @@ Actually Additions.
   `cdf0b8250c2b1e92f8d0d09367ba7f525ea820e5cfc9ba2e2e69b57c09096d03`;
 - recipe-data digest:
   `1baa31128d8a7e6d5469b7266838e37de876e8e09aa7aaf4436594bef44680ea`;
-- scanner format: `16`;
+- scanner format: `17`;
 - isolated recipe-inventory digest (descriptor-owned; verified by isolated fixture):
   `ee098fe82eb718eaad44abd60312e2a7e34be6cadca12900aeab6719edefddc1`
   (509 runtime recipes in the isolated fixture; jar JSON count is 540 before

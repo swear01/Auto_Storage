@@ -11,7 +11,7 @@ present. Ender IO remains an optional player dependency.
 - Modrinth jar SHA-256:
   `e01af48907781f2d5ccdfa8d71975b611c33f295be11b7021cb91be06ce8070c`;
 - Maven coordinate: `maven.modrinth:enderio:Tfs8aJPH`;
-- audit: `compat/audits/enderio/8.2.11-beta.json` (scanner format 16; 13 structural recipe classes);
+- audit: `compat/audits/enderio/8.2.11-beta.json` (scanner format 17; 13 structural recipe classes);
 - reviewed contract: `compat/contracts/enderio.json`.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
