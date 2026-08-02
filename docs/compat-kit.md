@@ -525,6 +525,9 @@ and zero-valued resource keys are normalized before comparison. Dedicated-
 server isolation checks the physical NeoForge distribution instead of trusting
 an addon-supplied boolean. Every conformance plan declares the exact
 `game_test_namespace`; the generated class uses it in `@GameTestHolder`. Every
+conformance plan must cover at least one accepted contract family; an
+all-rejected contract cannot emit a successful scaffold with no `@GameTest`
+methods. Every
 family batch must be at least 2 and at most signed Java `long` maximum, so
 `happy_path_and_batching` always proves a repeated operation rather than
 duplicating a single-craft assertion. Every
@@ -547,7 +550,9 @@ snapshot, first assert that reset/seed produced that exact key and amount, then
 require `clear()` to remove that key before `load()` restores the exact saved
 snapshot. They also own the delta, rollback, and physical-side assertions;
 an addon provider exposes operations and bytes, not self-attested persistence
-or client-isolation booleans. Resource IDs may begin with digits; every
+or client-isolation booleans. Resource IDs may begin with digits or have a path
+made only of valid punctuation. Punctuation-only paths use a deterministic
+`Encoded` plus lower-case code-point-hex suffix; every
 constant, registration method, and generated GameTest identifier is derived by
 one collision-checked Java-identifier normalizer that prefixes `_` when needed.
 Registration, conformance, test, and bridge class names are also checked against
@@ -735,7 +740,8 @@ test counts. Literal holders and bounded
 `static final String` references are accepted, while missing, unresolved,
 ambiguous, or mismatched holders fail closed. Constants are keyed by their
 actual innermost declaring class and resolved through the annotation's lexical
-enclosing-class scope before package/global fallback, never the source file
+enclosing-class scope, explicit static imports, and then package/global
+fallback, never the source file
 stem. A check is marked passed only
 when all of its declared source markers
 exist in the correct execution boundary and the associated Gradle task

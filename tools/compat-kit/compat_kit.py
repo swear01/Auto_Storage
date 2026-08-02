@@ -4445,7 +4445,10 @@ def validate_contract(
 def _pascal(identifier: str) -> str:
     words = re.findall(r"[A-Za-z0-9]+", identifier)
     if not words:
-        raise ValueError(f"identifier has no Java-safe characters: {identifier}")
+        if not identifier:
+            raise ValueError("identifier has no Java-safe characters: ")
+        encoded = "".join(f"{ord(character):04x}" for character in identifier)
+        return "Encoded" + encoded
     return "".join(word[:1].upper() + word[1:].lower() for word in words)
 
 
@@ -5920,7 +5923,9 @@ class _JavaStringConstantExpressions(dict):
         self.contexts = {}
 
 
-def _java_compilation_context(text: str) -> tuple[str, dict[str, str]]:
+def _java_compilation_context(
+    text: str,
+) -> tuple[str, dict[str, str], dict[str, tuple[str, str]]]:
     code = _java_code_mask(text)
     package_match = re.search(
         r"\bpackage\s+([A-Za-z_$][A-Za-z0-9_$]*"
@@ -5943,17 +5948,34 @@ def _java_compilation_context(text: str) -> tuple[str, dict[str, str]]:
                 + simple_name
             )
         imports[simple_name] = qualified_name
-    return package_name, imports
+    static_imports = {}
+    for match in re.finditer(
+        r"\bimport\s+static\s+"
+        r"([A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)+)"
+        r"\.([A-Za-z_$][A-Za-z0-9_$]*)\s*;",
+        code,
+    ):
+        owner = match.group(1)
+        member = match.group(2)
+        imported = (owner, member)
+        previous = static_imports.get(member)
+        if previous is not None and previous != imported:
+            raise ValueError(
+                "ambiguous Java static import for GameTest holder namespace: "
+                + member
+            )
+        static_imports[member] = imported
+    return package_name, imports, static_imports
 
 
 def _qualified_java_constant_key(
     key: tuple[str, str],
     expressions: dict[tuple[str, str], str],
-    context: tuple[str, dict[str, str]],
+    context: tuple[str, dict[str, str], dict[str, tuple[str, str]]],
     lexical_owner: str | None = None,
 ) -> tuple[str, str]:
     owner, member = key
-    package_name, imports = context
+    package_name, imports, _ = context
     owner_parts = owner.split(".")
     candidates = []
 
@@ -6000,12 +6022,16 @@ def _qualified_java_constant_key(
 def _resolve_java_string_constant(
     key: tuple[str, str],
     expressions: dict[tuple[str, str], str],
-    context: tuple[str, dict[str, str]] | None = None,
+    context: tuple[
+        str,
+        dict[str, str],
+        dict[str, tuple[str, str]],
+    ] | None = None,
     resolving: set[tuple[str, str]] | None = None,
     lexical_owner: str | None = None,
 ) -> str:
     resolving = set() if resolving is None else resolving
-    context = ("", {}) if context is None else context
+    context = ("", {}, {}) if context is None else context
     qualified_key = _qualified_java_constant_key(
         key,
         expressions,
@@ -6086,9 +6112,14 @@ def _game_test_holder_annotations(
                 expression,
             )
             if constant is None:
-                raise ValueError(
-                    f"unresolved GameTest holder namespace: {expression}"
-                )
+                static_constant = context[2].get(expression)
+                if static_constant is None:
+                    raise ValueError(
+                        f"unresolved GameTest holder namespace: {expression}"
+                    )
+                constant_key = static_constant
+            else:
+                constant_key = (constant.group(1), constant.group(2))
             annotated_classes = [
                 span
                 for span in class_spans
@@ -6123,7 +6154,7 @@ def _game_test_holder_annotations(
                 else None
             )
             namespace = _resolve_java_string_constant(
-                (constant.group(1), constant.group(2)),
+                constant_key,
                 constant_expressions,
                 context,
                 lexical_owner=lexical_owner,
@@ -6171,7 +6202,7 @@ def _java_class_spans(text: str) -> list[dict]:
             "opening": opening,
             "closing": closing,
         })
-    package_name, _ = _java_compilation_context(text)
+    package_name, _, _ = _java_compilation_context(text)
     for span in sorted(spans, key=lambda value: value["opening"]):
         parents = [
             candidate
@@ -8348,6 +8379,10 @@ def _validate_conformance_plan(plan: dict, contract: dict):
         for family in contract["families"]
         if family["status"] == "accepted"
     }
+    if not accepted_ids:
+        raise ValueError(
+            "conformance plan requires at least one accepted contract family"
+        )
     families = plan["families"]
     if not isinstance(families, list):
         raise ValueError(

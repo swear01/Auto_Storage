@@ -5735,6 +5735,24 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             schema["$defs"]["family"]["properties"]["batch"]["minimum"],
         )
 
+    def test_conformance_scaffold_rejects_contract_without_accepted_families(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        for family in contract["families"]:
+            family["status"] = "rejected"
+            family["decision"] = "Not supported by this compatibility module."
+        plan = self.conformance_plan(contract)
+        plan["families"] = []
+
+        with self.assertRaisesRegex(ValueError, "accepted contract family"):
+            self.compat_kit.scaffold_conformance_tests(
+                contract,
+                audit,
+                plan,
+                self.root / "empty-conformance",
+                source_artifact=self.jar,
+            )
+
     def resource_scaffold_plan(self, contract: dict) -> dict:
         return {
             "schema": 1,
@@ -5979,6 +5997,30 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "public static void _1compat_1steam_persistence_round_trip",
             tests,
         )
+
+    def test_resource_scaffold_encodes_punctuation_only_resource_paths(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        plan = self.resource_scaffold_plan(contract)
+        plan["resources"][0]["id"] = "samplemod:_"
+        output = self.root / "punctuation-resource"
+
+        self.compat_kit.scaffold_resource_integration(
+            contract,
+            audit,
+            plan,
+            output,
+            source_artifact=self.jar,
+        )
+
+        registration = (
+            output
+            / "src/main/java/com/swear/autostorage/compat/samplemod/resource/"
+            "SamplemodSteamResource.java"
+        ).read_text()
+        self.assertIn("StorageResourceKind Encoded005fKind()", registration)
+        with self.assertRaisesRegex(ValueError, "no Java-safe characters"):
+            self.compat_kit._pascal("")
 
     def source_audit(self) -> dict:
         return self.compat_kit.scan_jar(
@@ -8220,6 +8262,33 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 namespace,
                 expressions,
             )
+
+    def test_gametest_holder_constants_resolve_explicit_static_imports(self):
+        source_root = self.root / "static-import-holder-constant"
+        identifiers = source_root / "fixture/FixtureIds.java"
+        identifiers.parent.mkdir(parents=True)
+        identifiers.write_text(
+            "package fixture; public final class FixtureIds { "
+            'public static final String MOD_ID = "static_namespace"; }\n'
+        )
+        source = source_root / "fixture/Tests.java"
+        source.write_text(
+            "package fixture; import static fixture.FixtureIds.MOD_ID; "
+            "@net.neoforged.neoforge.gametest.GameTestHolder(MOD_ID) "
+            "final class Tests { "
+            "@net.minecraft.gametest.framework.GameTest("
+            'template = "craftingtests.platform") static void check() {} }\n'
+        )
+
+        expressions = self.compat_kit._java_string_constant_expressions(
+            (source_root,)
+        )
+        self.compat_kit._validate_game_test_holder_namespace(
+            source,
+            source.read_text(),
+            "static_namespace",
+            expressions,
+        )
 
     def test_gametest_holder_constants_resolve_in_lexical_owner_scope(self):
         source_root = self.root / "lexical-holder-constants"
