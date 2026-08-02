@@ -9,6 +9,22 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ModularCompatSdkTests(unittest.TestCase):
+    def test_theurgy_manifest_tracks_rebased_matrix_evidence(self):
+        module_root = ROOT / "src/compat/theurgy"
+        contract_path = ROOT / "compat/contracts/theurgy.json"
+        manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
+
+        self.assertEqual(
+            hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            manifest["contract_sha256"],
+        )
+        for relative_path, expected_sha256 in manifest["files"].items():
+            self.assertEqual(
+                expected_sha256,
+                hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                relative_path,
+            )
+
     def test_draconicevolution_manifest_hashes_every_generated_file(self):
         manifest = json.loads(
             (
@@ -126,8 +142,17 @@ class ModularCompatSdkTests(unittest.TestCase):
             matrix["recipeInventory"]["namespaces"],
         )
         self.assertEqual(
-            "7531084b4c3b85d9ba3ec3e6514a08ac99a4bc5396e6e1182260e273fea5ac01",
+            "6638d8abfeaac5e9d5039883da68be091a5fa2d724b0419d3ce5423b277b8711",
             matrix["recipeInventory"]["sha256"],
+        )
+        industrial_foregoing_descriptor = json.loads(
+            (
+                ROOT / "src/compat/industrial_foregoing/compat-module.json"
+            ).read_text()
+        )
+        self.assertEqual(
+            "e658bb0b40b91d2bc322cefacebd8cadd8f36afabbab76e47dc33ad200f17b4f",
+            industrial_foregoing_descriptor["matrix"]["recipeInventory"]["sha256"],
         )
         modern_industrialization_descriptor = json.loads(
             (
@@ -145,7 +170,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             ).read_text()
         )
         self.assertEqual(
-            "652a71d0c9e69f1be44c08ac5814df4ee8e12127d6736d99f0bee0f92e1659c0",
+            "c5796e5c92a7ec1e51c9fe58397e8c0e1dc0743b7a587039631f231c294c1207",
             companions["unclaimedRecipeInventory"]["sha256"],
         )
         self.assertEqual(
@@ -206,9 +231,126 @@ class ModularCompatSdkTests(unittest.TestCase):
             (ROOT / "src/compat/create/compat-module.json").read_text()
         )
         self.assertEqual(
-            "0d71e759fc4741b6af4f47fc5a8a1d83403f7e3907d08ad747756096fc5db99d",
+            "4e6eb1aeba9334e92cec47000594a756989ebe1c2cdf91fda9a847d13caf13ae",
             create_descriptor["matrix"]["recipeInventory"]["sha256"],
         )
+        self.assertEqual(
+            hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            manifest["contract_sha256"],
+        )
+        for relative_path, expected_sha256 in manifest["files"].items():
+            self.assertEqual(
+                expected_sha256,
+                hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                relative_path,
+            )
+
+    def test_railcraft_outcome_c_uses_exact_current_audit_evidence(self):
+        module_root = ROOT / "src/compat/railcraft"
+        descriptor = json.loads((module_root / "compat-module.json").read_text())
+        contract_path = ROOT / "compat/contracts/railcraft.json"
+        contract = json.loads(contract_path.read_text())
+        audit = json.loads(
+            (ROOT / "compat/audits/railcraft/1.2.10.json").read_text()
+        )
+        manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
+
+        self.assertEqual(16, audit["scanner_format"])
+        self.assertEqual(
+            {
+                "class_count": 1013,
+                "class_inventory_sha256": "2432b6cdddc0268428e22f12c71fea9a1c93a80b80e59e11d3ffc02a2718b7a6",
+                "sha256": "7de3dfeac277da57f9897822824332c99e53b9d36956143b38c0966f39144328",
+                "size": 5290986,
+            },
+            audit["artifact"],
+        )
+        self.assertEqual(
+            "7b89837df369bb0552d81016c46840792bd13d23",
+            audit["source"]["revision"],
+        )
+        self.assertIn(
+            {
+                "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+                "size": 56279815,
+            },
+            audit["ancestry_classpath"],
+        )
+        self.assertEqual(
+            {
+                "com.google.guava:guava:28.2-jre",
+                "curse.maven:jade-api-324717:6853386",
+                "dev.emi:emi-neoforge:1.1.22+1.21.1:api",
+                "mezz.jei:jei-1.21.1-common-api:19.25.0.322",
+                "net.neoforged:bus:8.0.5",
+            },
+            {
+                dependency["dependency"]
+                for dependency in audit["ancestry_dependencies"]
+            },
+        )
+        actual_recipe_classes = {
+            "mods.railcraft.world.item.crafting.BlastFurnaceRecipe",
+            "mods.railcraft.world.item.crafting.ChestMinecartDisassemblyRecipe",
+            "mods.railcraft.world.item.crafting.CokeOvenRecipe",
+            "mods.railcraft.world.item.crafting.CrusherRecipe",
+            "mods.railcraft.world.item.crafting.LocomotivePaintingRecipe",
+            "mods.railcraft.world.item.crafting.PatchouliBookCrafting",
+            "mods.railcraft.world.item.crafting.RollingRecipe",
+            "mods.railcraft.world.item.crafting.RotorRepairRecipe",
+            "mods.railcraft.world.item.crafting.StoneTieRecipe",
+            "mods.railcraft.world.item.crafting.TicketDuplicateRecipe",
+            "mods.railcraft.world.item.crafting.VoidChestMinecartDisassemblyRecipe",
+            "mods.railcraft.world.item.crafting.WoodenTieRecipe",
+            "mods.railcraft.world.item.crafting.WorldSpikeMinecartDisassemblyRecipe",
+        }
+        self.assertEqual(
+            actual_recipe_classes,
+            {
+                candidate["class"]
+                for candidate in audit["candidates"]["recipe_classes"]
+            },
+        )
+        self.assertEqual(
+            actual_recipe_classes,
+            {family["class"] for family in contract["families"]},
+        )
+        self.assertTrue(
+            all(
+                family["status"] == "rejected"
+                for family in contract["families"]
+            )
+        )
+        self.assertEqual(
+            "maven.modrinth:railcraft-reborn:BrIwB6GH",
+            contract["target"]["dependency"],
+        )
+        self.assertEqual(
+            audit["recipe_data"]["digest"],
+            contract["source_recipe_data_sha256"],
+        )
+        self.assertEqual(contract["matrix"], descriptor["matrix"])
+        self.assertEqual(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            contract["verification"]["evidence"]["all_mod_coexistence"][0]["marker"],
+        )
+        fixture_source = (
+            ROOT
+            / "src/railcraftFixture/java/com/swear/autostorage/fixture/railcraft/"
+            "RailcraftIntegrationGameTests.java"
+        ).read_text()
+        for recipe_id in (
+            "chest_minecart_disassembly",
+            "locomotive_color_variant",
+            "patchouli_book_crafting",
+            "rotor_repair",
+            "stone_tie",
+            "ticket",
+            "void_chest_minecart_disassembly",
+            "wooden_tie",
+            "worldspike_minecart_disassembly",
+        ):
+            self.assertIn(f'railcraft("{recipe_id}")', fixture_source)
         self.assertEqual(
             hashlib.sha256(contract_path.read_bytes()).hexdigest(),
             manifest["contract_sha256"],

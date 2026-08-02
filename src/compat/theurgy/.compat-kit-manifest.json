@@ -1,12 +1,12 @@
 {
-  "contract_sha256": "1ac1d6808a9dc5ac4e01ea81f25c6b8b0f75bedd66a294aaa3b4c7bb08758d35",
+  "contract_sha256": "7a685f91137042dad42ec7561e5af00f51a31c3e6c27fcdae38a2e2cb9f86ad1",
   "files": {
-    "src/compat/theurgy/compat-module.json": "9df27235dfe00a60e93175cc6d0b838afa2a1e0eca10249e91f924f6a2c78f00",
-    "src/compat/theurgy/java/com/swear/autostorage/compat/theurgy/TheurgyCompat.java": "90e4251e6f4f040fcd07e6ec7db49bae5d7c8bd554725999e3ed30c70b13cc01",
+    "src/compat/theurgy/compat-module.json": "0d166bd0f39a001afb59e2a5f14be94c2aba099cd203584b30f3923d4fc8b0b7",
+    "src/compat/theurgy/java/com/swear/autostorage/compat/theurgy/TheurgyCompat.java": "e32745afa39d957a2d9fdabd1cdab580812add602e6a7eee100559ec68fa86a0",
     "src/compat/theurgy/java/com/swear/autostorage/compat/theurgy/TheurgyCompatModule.java": "54e3cd722c0e2cd48c05c7e707b59a9307bc07537d7966e0af5d3335382322db",
     "src/theurgyFixture/java/com/swear/autostorage/fixture/theurgy/TheurgyFixtureMod.java": "c78dbcc2a001f7e5d82f12edae204a1fba36d5d72ab578b33381cdedd29d6452",
-    "src/theurgyFixture/java/com/swear/autostorage/fixture/theurgy/TheurgyIntegrationGameTests.java": "691d70ac61ec99720d1d8fb73a4a35d54529f69cf6ad59ad4b346c9b326871d9",
-    "src/theurgyFixture/resources/META-INF/neoforge.mods.toml": "9b4b14c7bfbdf4e5590b14912a9c27a6abf04d7a08ddfbdb3e1cb6d74aad5193",
+    "src/theurgyFixture/java/com/swear/autostorage/fixture/theurgy/TheurgyIntegrationGameTests.java": "8fba9f57a7f56c78f0800777c32c78348b9ca90f7073122e4e89af3b2672afea",
+    "src/theurgyFixture/resources/META-INF/neoforge.mods.toml": "9b554ef1eb0d2c1b1dc105d1b3dc543bd52292cc770bfc9d0fe7fc78509f751a",
     "src/theurgyFixture/resources/data/auto_storage_theurgy_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
   "schema": 1,

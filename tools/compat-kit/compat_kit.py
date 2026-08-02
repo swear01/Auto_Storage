@@ -276,6 +276,15 @@ JAVA_RESERVED_IDENTIFIERS = frozenset(
     sealed to transitive uses var when with yield
     """.split()
 )
+JAVA_CONTEXTUAL_KEYWORDS = frozenset(
+    """
+    exports opens requires uses yield module permits sealed var non-sealed
+    provides to when open record transitive with
+    """.split()
+)
+JAVA_HARD_RESERVED_IDENTIFIERS = (
+    JAVA_RESERVED_IDENTIFIERS - JAVA_CONTEXTUAL_KEYWORDS
+)
 GENERATION_RENDERER_TYPES = frozenset({
     "BigDecimal",
     "Block",
@@ -1468,13 +1477,25 @@ def _validate_candidate_source_class(
     source_class: object,
     location: str,
 ):
-    if not _is_java_type(source_class):
+    # Audited bytecode may already live under contextual-keyword package segments
+    # such as `module` (e.g. mods.railcraft.world.module.*).
+    if not isinstance(source_class, str) or JAVA_TYPE.fullmatch(source_class) is None:
         raise ValueError(f"{location} has invalid source_class")
     package, separator, binary_simple_name = class_name.rpartition(".")
+    if any(
+        segment in JAVA_HARD_RESERVED_IDENTIFIERS
+        for segment in package.split(".")
+    ):
+        raise ValueError(f"{location} has invalid source_class")
     expected_prefix = package + "." if separator else ""
     if not source_class.startswith(expected_prefix):
         raise ValueError(f"{location} source_class does not match class")
     source_simple_name = source_class[len(expected_prefix):]
+    if any(
+        segment in JAVA_RESERVED_IDENTIFIERS
+        for segment in source_simple_name.split(".")
+    ):
+        raise ValueError(f"{location} has invalid source_class")
     if source_simple_name.replace(".", "$") != binary_simple_name:
         raise ValueError(f"{location} source_class does not match class")
 

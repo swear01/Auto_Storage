@@ -78,8 +78,9 @@ loaded `create_aquatic_ambitions:*` recipes, locked by SHA-256
 
 CAA also ships `create:milling/limestone`. Recipe inventory is grouped by the
 actual recipe namespace, so that entry remains in the existing Create-owned
-group; with CAA loaded, that group's exact digest is
-`0d71e759fc4741b6af4f47fc5a8a1d83403f7e3907d08ad747756096fc5db99d`.
+group. In the current all-mod matrix with CAA and Railcraft Reborn loaded, that
+group's exact digest is
+`4e6eb1aeba9334e92cec47000594a756989ebe1c2cdf91fda9a847d13caf13ae`.
 No shared workflow or matrix Java list is extended for this module.
 
 ## Future acceptance boundary
