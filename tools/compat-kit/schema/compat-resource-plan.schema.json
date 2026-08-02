@@ -93,7 +93,11 @@
           "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
         },
         "snapshot_key": { "type": "string", "minLength": 1 },
-        "sample_amount": { "type": "integer", "minimum": 1 },
+        "sample_amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
         "test_provider": { "$ref": "#/$defs/provider" }
       }
     }

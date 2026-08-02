@@ -52,10 +52,10 @@ definition. Each generated family also declares its runtime `registration_id`;
 the audit family key is evidence identity and is not assumed to be a registry
 path. Family-derived Java names use a collision-free `family$` prefix for
 digit-leading or reserved IDs and shared identifier validation. `conformance`
-requires a batch of at least 2, rejects happy-delta × batch signed-long overflow, and
+requires a batch in `2..Long.MAX_VALUE`, rejects happy-delta × batch signed-long overflow, and
 generates repeated snapshot/delta/rollback assertions
 around addon-supplied operations rather than trusting booleans returned by the
-addon. `resource-scaffold` generates only public-API custom-resource boundaries,
+addon. `resource-scaffold` requires a positive signed-long sample amount and generates only public-API custom-resource boundaries,
 sample-keyed persistence/transfer assertions, and rejects built-in Item, Fluid,
 and NeoForge Energy support. Valid digit-leading resource IDs are normalized
 through one collision-checked Java-name derivation that prefixes `_` where
@@ -92,7 +92,11 @@ NeoForge's additional runtime classpath, and the ModDev
 `createMinecraftArtifacts` outputs, normalizes their archive layout, then
 stages only SHA/size matches from the audit. The scaffold uses the same pinned
 Parchment mapping baseline as Auto Storage so the generated NeoForge/Minecraft
-development artifact reproduces the scanner's canonical archive. Scanner-format-16
+development artifact reproduces the scanner's canonical archive. Build that
+scanner input with `compat-kit normalize-jar <raw.jar> <canonical.jar>` because
+raw ModDev ZIP metadata is not cross-run stable; generated staging repeats the
+sorted, fixed-timestamp, stored-entry normalization only for ModDev outputs.
+Maven artifacts remain raw exact bytes. Scanner-format-16
 `ancestry_dependencies` are emitted
 automatically as non-transitive `compileOnly` and
 `compatKitAncestryArtifacts` declarations; hand-editing generated Gradle is not

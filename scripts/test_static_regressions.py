@@ -1039,9 +1039,23 @@ class StaticRegressionTests(unittest.TestCase):
         ]
         self.assertIn("audit.ancestry_classpath.collectEntries", stage_block)
         self.assertIn("configurations.additionalRuntimeClasspath", stage_block)
-        self.assertIn('tasks.named("createMinecraftArtifacts")', stage_block)
-        self.assertIn(".get().outputs.files", stage_block)
+        self.assertIn(
+            'tasks.named("createMinecraftArtifacts").get().outputs.files',
+            build,
+        )
+        self.assertIn("compatKitMinecraftArtifacts", stage_block)
         self.assertIn("normalize-jar", stage_block)
+        self.assertIn(
+            'new ProcessBuilder(\n                            '
+            '"python3",\n                            '
+            '"tools/compat-kit/compat_kit.py",',
+            stage_block,
+        )
+        self.assertNotIn(
+            '"python3",\n                            '
+            '"tools/compat-kit/compat-kit",',
+            stage_block,
+        )
         self.assertIn("ae2-audit-canonical", stage_block)
         self.assertIn(
             'digest.digest().encodeHex().toString()',

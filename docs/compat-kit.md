@@ -517,10 +517,12 @@ and zero-valued resource keys are normalized before comparison. Dedicated-
 server isolation checks the physical NeoForge distribution instead of trusting
 an addon-supplied boolean. Every conformance plan declares the exact
 `game_test_namespace`; the generated class uses it in `@GameTestHolder`. Every
-family batch must be at least 2, so `happy_path_and_batching` always proves a
-repeated operation rather than duplicating a single-craft assertion. Every
+family batch must be at least 2 and at most signed Java `long` maximum, so
+`happy_path_and_batching` always proves a repeated operation rather than
+duplicating a single-craft assertion. Every
 happy-path expected delta multiplied by that batch must fit a signed Java
-`long`; an overflowing plan fails before source generation.
+`long`; the published schema applies the same bounds and an overflowing plan
+fails before source generation.
 
 `resource-scaffold` emits API-only kind/container/block/renderer boundaries and
 real persistence, transfer, rollback, and dedicated-server test scenarios for
@@ -529,7 +531,8 @@ Work,
 which must reuse Auto Storage's built-in support. Generated common source may
 not import Core internals or client classes; the renderer bridge remains
 generic and client registration stays isolated. Each resource plan binds a
-sample amount, unique snapshot key, and exact `game_test_namespace`; the
+positive signed-`long` sample amount, unique snapshot key, and exact
+`game_test_namespace`; the published schema applies the same amount maximum and the
 generated test class uses that namespace in `@GameTestHolder`. The tests own the before/after
 snapshot, first assert that reset/seed produced that exact key and amount, then
 require `clear()` to remove that key before `load()` restores the exact saved
@@ -690,7 +693,12 @@ NeoForge additional runtime classpath, and ModDev
 `createMinecraftArtifacts` outputs, normalizes their archive layout, and copies
 only exact SHA/size matches. The scaffold pins Auto Storage's Parchment baseline
 so the generated NeoForge/Minecraft development artifact reproduces the
-scanner's canonical archive.
+scanner's canonical archive. Before scanning a raw ModDev platform jar, run
+`tools/compat-kit/compat-kit normalize-jar <raw.jar> <canonical.jar>` and pass
+the canonical jar through `--classpath`; raw ZIP metadata is not cross-run
+stable. The command fixes entry order, timestamps, storage mode, and permissions.
+Only ModDev outputs are canonicalized automatically; Maven artifacts remain raw
+exact bytes.
 Scanner-format-16 audits persist exact coordinates for reachable compile APIs
 under `ancestry_dependencies`; generated addons emit each as non-transitive
 `compileOnly` and `compatKitAncestryArtifacts` dependencies. No post-scaffold

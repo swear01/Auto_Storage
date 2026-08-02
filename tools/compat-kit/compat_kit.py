@@ -421,15 +421,20 @@ def normalize_jar(source, output) -> Path:
             names = [entry.filename for entry in entries]
             if len(set(names)) != len(names):
                 raise ValueError("source jar repeats an archive entry")
-            if any(
-                not name
-                or name.startswith("/")
-                or "\\" in name
-                or any(part in ("", ".", "..") for part in name.split("/"))
-                for name in names
-                if not name.endswith("/")
-            ):
-                raise ValueError("source jar has a non-canonical entry path")
+            for name in names:
+                logical_name = name[:-1] if name.endswith("/") else name
+                if (
+                    not logical_name
+                    or logical_name.startswith("/")
+                    or "\\" in logical_name
+                    or any(
+                        part in ("", ".", "..")
+                        for part in logical_name.split("/")
+                    )
+                ):
+                    raise ValueError(
+                        "source jar has a non-canonical entry path"
+                    )
             with zipfile.ZipFile(
                 temporary,
                 "w",
@@ -4888,19 +4893,22 @@ def compatKitNormalizeJar = {{ File artifact, File output ->
     output.parentFile.mkdirs()
     def command = [
         "python3",
-        "tools/compat-kit/compat-kit",
+        "tools/compat-kit/compat_kit.py",
         "normalize-jar",
         artifact.absolutePath,
         output.absolutePath,
     ]
     def process = new ProcessBuilder(command)
             .directory(compatKitProjectDir)
-            .inheritIO()
+            .redirectErrorStream(true)
             .start()
+    def processOutput = process.inputStream.getText("UTF-8").trim()
     def exitCode = process.waitFor()
     if (exitCode != 0) {{
         throw new GradleException(
-                "Compat Kit jar normalization failed for " + artifact)
+                "Compat Kit jar normalization failed for " + artifact
+                + " (exit " + exitCode + ")"
+                + (processOutput ? ": " + processOutput : ""))
     }}
     output
 }}

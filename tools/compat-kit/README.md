@@ -239,11 +239,11 @@ as direct bindings, so names such as `class` cannot produce uncompilable Java;
 `registry_block_method` requires an explicit block ID separate from its station
 item. Generated registration, conformance, resource, and bridge class names
 must not shadow the simple names imported by their renderer. `conformance`
-requires every family batch to be at least 2, rejects any
+requires every family batch to be in `2..Long.MAX_VALUE`, rejects any
 happy expected-delta × batch product outside signed-long range, and emits the
 shared real transaction assertion harness with separate happy,
 catalyst/tool/remainder, and multi-output deltas while the integration supplies
-scenarios. `resource-scaffold` emits API-only
+scenarios. `resource-scaffold` requires a positive signed-long sample amount and emits API-only
 custom-kind/container/block/renderer and operation-based snapshot tests and
 rejects the built-in Item, Fluid, NeoForge Energy, and Work kinds. Both plans require
 an exact `game_test_namespace`, and generated test classes emit the matching
@@ -291,7 +291,11 @@ additional runtime classpath, and ModDev `createMinecraftArtifacts` outputs,
 normalizes their archive layout, stages only exact SHA/size matches, and reports
 missing hashes. The generated project pins the same Parchment baseline as Auto
 Storage so its transformed NeoForge/Minecraft development artifact reproduces
-the scanner's canonical input.
+the scanner's canonical input. Build that input with `./compat-kit normalize-jar
+raw.jar canonical.jar`; raw ModDev ZIP metadata is not cross-run stable. Root
+and generated staging repeat the sorted, fixed-timestamp, stored-entry
+normalization only for ModDev outputs. Maven dependencies remain raw exact
+artifacts.
 Add non-transitively published optional compile APIs as reviewed
 `compatKitAncestryArtifacts` dependencies; never remove the exact gate. Complete
 consumers reopen the target and ancestry jars, rebuild NeoForge target metadata,

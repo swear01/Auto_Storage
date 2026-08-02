@@ -1684,6 +1684,17 @@ class CompatKitAuditTests(unittest.TestCase):
         ])
         self.assertEqual("normalize-jar", args.command)
 
+    def test_normalize_jar_rejects_traversal_directory_entry(self):
+        source = self.root / "traversal.jar"
+        with zipfile.ZipFile(source, "w") as archive:
+            archive.writestr("../", b"")
+
+        with self.assertRaisesRegex(ValueError, "non-canonical entry path"):
+            self.compat_kit.normalize_jar(
+                source,
+                self.root / "normalized-traversal.jar",
+            )
+
     def test_scan_allows_bounded_large_private_bytecode(self):
         large_private_bytecode = (
             "private void generated() { "
@@ -6365,6 +6376,15 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertIn("compatKitNormalizeJar", build)
         self.assertIn('"normalize-jar"', build)
         self.assertIn(
+            'def command = [\n        "python3",\n'
+            '        "tools/compat-kit/compat_kit.py",',
+            build,
+        )
+        self.assertNotIn(
+            '"python3",\n        "tools/compat-kit/compat-kit",',
+            build,
+        )
+        self.assertIn(
             'tasks.named("createMinecraftArtifacts").get().outputs.files',
             build,
         )
@@ -7377,6 +7397,32 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertTrue(
             {"snapshot_key", "sample_amount"}
             <= set(resource_schema["$defs"]["resource"]["required"])
+        )
+
+    def test_conformance_schema_caps_batch_at_signed_long(self):
+        schema = json.loads(
+            (
+                ROOT
+                / "tools/compat-kit/schema/compat-conformance-plan.schema.json"
+            ).read_text()
+        )
+        self.assertEqual(
+            9223372036854775807,
+            schema["$defs"]["family"]["properties"]["batch"]["maximum"],
+        )
+
+    def test_resource_schema_caps_sample_amount_at_signed_long(self):
+        schema = json.loads(
+            (
+                ROOT
+                / "tools/compat-kit/schema/compat-resource-plan.schema.json"
+            ).read_text()
+        )
+        self.assertEqual(
+            9223372036854775807,
+            schema["$defs"]["resource"]["properties"]["sample_amount"][
+                "maximum"
+            ],
         )
 
     def test_contract_schema_requires_scaffold_inputs_after_family_decisions(self):

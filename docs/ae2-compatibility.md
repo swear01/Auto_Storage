@@ -31,7 +31,11 @@ classpath is supplied to scanning, but the audit retains only the 13 artifacts
 actually reachable from AE2's structural class graph. Six non-transitive compile
 APIs also carry exact resolvable coordinates: WTHIT API, The One Probe, GuideME,
 REI, EMI API, and Jade. Generated addons emit those coordinates automatically
-instead of requiring an unverifiable Gradle edit. Every candidate retains its
+instead of requiring an unverifiable Gradle edit. One retained platform artifact
+is the deterministic normalization of ModDev's project-transformed
+NeoForge/Minecraft jar (SHA-256 `044e177eaf5327587352121ffda188dfbb8ab57b425e28fd674da787249c256f`);
+root and generated-addon staging reproduce that archive before exact matching,
+while Maven artifacts remain raw exact bytes. Every candidate retains its
 binary identity, source-level Java type, and structural classification
 independently from the matching top-level hierarchy inventory. The audit
 preserves a compact direct class-file graph for all 1,689 target classes plus
@@ -46,11 +50,14 @@ Class-file hierarchy inspection finds exactly twelve concrete `Recipe`
 implementations:
 
 Complete generation and verification also reopen the exact AE2 19.2.17 jar,
-check its committed SHA/size, rebuild all 1,689 sorted target class metadata
-records plus the complete 556-recipe target-jar inventory, derive nested source
+check its committed SHA/size and NeoForge metadata, rebuild all 1,689 sorted
+target class records, every candidate public signature with pinned JDK 21
+`javap`, plus the complete 556-recipe target-jar inventory, derive nested source
 names from exact `InnerClasses` metadata, and recompute private-bytecode risk
-evidence from the exact target/ancestry jars. The JSON count/digest alone cannot
-authorize a reduced graph, rewritten source type, or deleted risk.
+evidence from the exact target/ancestry jars. Validation enumerates the complete
+supplied ancestry first, so even an unreachable duplicate inspectable class is
+rejected. The JSON count/digest alone cannot authorize a reduced graph, rewritten
+target, public signature, source type, or risk list.
 
 - `appeng.recipes.entropy.EntropyRecipe`;
 - `appeng.recipes.game.AddItemUpgradeRecipe`;

@@ -793,17 +793,20 @@ tasks.register("stageAe2CompatAuditAncestry") {
                     def canonical = new File(canonicalRoot, "${index}.jar")
                     def process = new ProcessBuilder(
                             "python3",
-                            "tools/compat-kit/compat-kit",
+                            "tools/compat-kit/compat_kit.py",
                             "normalize-jar",
                             artifact.absolutePath,
                             canonical.absolutePath)
                             .directory(compatKitProjectDir)
-                            .inheritIO()
+                            .redirectErrorStream(true)
                             .start()
-                    if (process.waitFor() != 0) {
+                    def processOutput = process.inputStream.getText("UTF-8").trim()
+                    def exitCode = process.waitFor()
+                    if (exitCode != 0) {
                         throw new GradleException(
                                 "AE2 audit ancestry normalization failed: "
-                                        + artifact)
+                                        + artifact + " (exit " + exitCode + ")"
+                                        + (processOutput ? ": " + processOutput : ""))
                     }
                     def digest = java.security.MessageDigest.getInstance("SHA-256")
                     canonical.withInputStream { input ->
