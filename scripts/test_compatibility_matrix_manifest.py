@@ -169,6 +169,13 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
                 write_manifest(root, output)
             self.assertEqual(["utf-8"], write_encodings)
 
+        build = (ROOT / "build.gradle").read_text(encoding="utf-8")
+        isolated_tasks = build.split(
+            "def generateIsolatedEvidence = tasks.register(", 1
+        )[1].split("def apiClassNames = [", 1)[0]
+        self.assertEqual(2, isolated_tasks.count(".withReader('UTF-8')"))
+        self.assertEqual(2, isolated_tasks.count(", 'UTF-8')"))
+
         with self.assertRaisesRegex(ValueError, "sha256"):
             validate_descriptor_matrix(
                 {

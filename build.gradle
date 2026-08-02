@@ -319,14 +319,13 @@ compatModules.each { spec ->
         }
         outputs.file(evidenceFile)
         doLast {
-            def inventory = new groovy.json.JsonSlurper()
-                    .parse(spec.descriptorFile)
-                    .matrix
-                    .recipeInventory
+            def inventory = spec.descriptorFile.withReader('UTF-8') { reader ->
+                new groovy.json.JsonSlurper().parse(reader)
+            }.matrix.recipeInventory
             def target = evidenceFile.get().asFile
             target.parentFile.mkdirs()
-            target.text = groovy.json.JsonOutput.prettyPrint(
-                    groovy.json.JsonOutput.toJson(inventory)) + '\n'
+            target.setText(groovy.json.JsonOutput.prettyPrint(
+                    groovy.json.JsonOutput.toJson(inventory)) + '\n', 'UTF-8')
         }
     }
     fixture.resources.srcDir(isolatedEvidenceDir)
@@ -345,8 +344,10 @@ def generatePneumaticIsolatedEvidence = tasks.register(
     }
     outputs.file(evidenceFile)
     doLast {
-        def companions = new groovy.json.JsonSlurper()
-                .parse(compatibilityMatrixCompanionsFile.asFile)
+        def companions = compatibilityMatrixCompanionsFile.asFile
+                .withReader('UTF-8') { reader ->
+                    new groovy.json.JsonSlurper().parse(reader)
+                }
         def companion = companions.companions.find { it.id == 'pneumaticcraft' }
         if (companion == null || companion.recipeInventory == null) {
             throw new GradleException(
@@ -354,8 +355,8 @@ def generatePneumaticIsolatedEvidence = tasks.register(
         }
         def target = evidenceFile.get().asFile
         target.parentFile.mkdirs()
-        target.text = groovy.json.JsonOutput.prettyPrint(
-                groovy.json.JsonOutput.toJson(companion.recipeInventory)) + '\n'
+        target.setText(groovy.json.JsonOutput.prettyPrint(
+                groovy.json.JsonOutput.toJson(companion.recipeInventory)) + '\n', 'UTF-8')
     }
 }
 sourceSets.pneumaticCraftFixture.resources.srcDir(pneumaticIsolatedEvidenceDir)
