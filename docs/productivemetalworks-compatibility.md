@@ -85,6 +85,6 @@ compatibility matrix also loads the representative artifact and locks the same
 zero-family boundary plus the per-namespace recipe inventory digest. Loading the present-mod jar still contributes Foundry/casting datapack recipes to `RecipeManager`; those IDs are locked by the descriptor-owned digest rather than a single global recipe count.
 
 The current scanner-format-16 contract passed all 12 Compat Kit checks across
-its five declared Gradle commands. The same local gate passed all 546 Python
+its five declared Gradle commands. The same local gate passed all 547 Python
 tests, 8/8 isolated Productive Metalworks GameTests, 3/3 combined-matrix
 GameTests, the full build, and an idempotent `runData` with zero files written.

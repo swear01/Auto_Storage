@@ -1939,6 +1939,18 @@ class StaticRegressionTests(unittest.TestCase):
             docs,
         )
 
+    def test_active_roadmap_does_not_keep_superseded_merge_statuses(self):
+        roadmap = self.read_required("docs/roadmap.md")
+        self.assertEqual(
+            1,
+            roadmap.count("GitHub #68 Create Aquatic Ambitions Compat Kit"),
+        )
+        self.assertEqual(
+            1,
+            roadmap.count("GitHub #65／PR #73 Advanced AE Compat Kit"),
+        )
+        self.assertNotIn("GitHub review, remote CI, and merge remain", roadmap)
+
     def test_items_share_the_universal_live_transaction_ledger(self):
         record = self.read_required(
             "src/main/java/com/swear/autostorage/CoreStorageRecord.java"
