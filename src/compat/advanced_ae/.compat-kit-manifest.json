@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "3a5cebd0c934bc59b09eaac98696fe0e8d128abf31c669ecbec4fc08049201e5",
+  "contract_sha256": "a6d87daa9da0a45a037d79244d0a58612999ad436ef7834147abd17c8aa56ede",
   "files": {
     "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeFixtureMod.java": "6862a940ebdd06b2c579d8b29bd75a56a78ce324f0cfc5c2f78ce204e6215238",
     "src/advancedAeFixture/java/com/swear/autostorage/fixture/advancedae/AdvancedAeIntegrationGameTests.java": "f6cdaf3c7baebcde174488b02c2496db78a828ee877c2e7e449077119d3056ad",

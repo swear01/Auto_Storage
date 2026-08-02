@@ -34,14 +34,26 @@ Advanced AE module. AE2 Inscriber coverage stays in the existing AE2 module.
 - audit: `compat/audits/advanced_ae/1.6.11.json`;
 - reviewed contract: `compat/contracts/advanced_ae.json`.
 
+The committed audit uses current scanner format 16. It binds the complete
+target class inventory, 104 jar recipe JSON files and their serializer/data
+digest, the exact public signature and private-bytecode risks of the runtime
+recipe candidate, and ten reachable ancestry artifacts. Nine non-platform
+ancestry artifacts also carry exact dependency coordinates; the Minecraft /
+NeoForge binary is the same normalized cross-host artifact used by the AE2
+audit gate. Complete verification reopens the exact target jar and all ten
+ancestry jars instead of trusting self-consistent JSON alone.
+
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Advanced AE version on players and does not claim a multi-version
 matrix.
 
-## Audited recipe candidates
+## Audited recipe candidate and rejected surfaces
 
-Compat Kit enumerated 12 recipe-class candidates. Every candidate is rejected
-in the committed contract.
+The legacy format-7 scan classified 12 name-shaped candidates. Current
+format-16 structural and recipe-data evidence identifies only
+`ReactionChamberRecipe` as an actual recipe candidate; it is rejected in the
+committed contract. The other eleven entries are preserved below as reviewed
+non-recipe surfaces, but are no longer contract families.
 
 | Family | Result | Reason |
 |---|---|---|

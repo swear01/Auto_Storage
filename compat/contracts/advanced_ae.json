@@ -1,74 +1,11 @@
 {
   "families": [
     {
-      "class": "net.pedroksl.advanced_ae.datagen.AAERecipeProvider",
-      "costs": [],
-      "decision": "Datagen provider only; not a runtime recipe family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.datagen.AAERecipeProvider#public_signature"
-      ],
-      "id": "a_a_e_recipe_provider",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.recipes.InitRecipeSerializers",
-      "costs": [],
-      "decision": "Serializer registry bootstrap only; not an independent recipe family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.recipes.InitRecipeSerializers#public_signature"
-      ],
-      "id": "init_recipe_serializers",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.recipes.InitRecipeTypes",
-      "costs": [],
-      "decision": "RecipeType registry bootstrap only; not an independent recipe family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.recipes.InitRecipeTypes#public_signature"
-      ],
-      "id": "init_recipe_types",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.recipes.InitRecipeTypes$ToRegister",
-      "costs": [],
-      "decision": "Nested RecipeType registration record; not an independent recipe family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.recipes.InitRecipeTypes$ToRegister#public_signature"
-      ],
-      "id": "init_recipe_types__to_register",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
       "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe",
       "costs": [],
       "decision": "Reaction Chamber (advanced_ae:reaction) is a live AE-network machine contract, not a simulate-then-commit Auto Storage family. Runtime progress spends recipe energy across ticks with floor/ceil floating-point power ratios, optional Applied Flux recharge, and grid idle-power partial progress; speed cards change requiredTicks from an unconfigured station ItemStack; recipes declare IngredientStack item/fluid inputs that may be tags; GenericStack output may be item or fluid; isSpecial() is true. No exact integer FE/work transaction was established without approximating network/live-machine state.",
       "evidence": [
-        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe#public_signature",
-        "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipe.java",
-        "src/main/java/net/pedroksl/advanced_ae/common/entities/ReactionChamberEntity.java",
-        "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipeBuilder.java"
+        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipe#public_signature"
       ],
       "id": "reaction_chamber_recipe",
       "inputs": [],
@@ -79,134 +16,9 @@
       ],
       "station": null,
       "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder",
-      "costs": [],
-      "decision": "Datagen builder for rejected ReactionChamberRecipe; not an independent family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeBuilder#public_signature"
-      ],
-      "id": "reaction_chamber_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeSerializer",
-      "costs": [],
-      "decision": "Serializer for rejected ReactionChamberRecipe; not an independent family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipeSerializer#public_signature"
-      ],
-      "id": "reaction_chamber_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipes",
-      "costs": [],
-      "decision": "Live Level/RecipeManager lookup helper over ReactionChamberRecipe that mutates temporary ItemStack aggregates while matching; not a deterministic Auto Storage recipe family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.recipes.ReactionChamberRecipes#public_signature",
-        "src/main/java/net/pedroksl/advanced_ae/recipes/ReactionChamberRecipes.java"
-      ],
-      "id": "reaction_chamber_recipes",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.xmod.emi.recipes.AAERecipeCategory",
-      "costs": [],
-      "decision": "Client EMI category helper; not a server recipe family. Auto Storage never registers third-party EMI workstations.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.xmod.emi.recipes.AAERecipeCategory#public_signature"
-      ],
-      "id": "a_a_e_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.xmod.emi.recipes.EMIReactionChamberRecipe",
-      "costs": [],
-      "decision": "Client EMI display wrapper; viewer authority is excluded.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.xmod.emi.recipes.EMIReactionChamberRecipe#public_signature"
-      ],
-      "id": "e_m_i_reaction_chamber_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberCategory",
-      "costs": [],
-      "decision": "Client REI category helper; not a server recipe family.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberCategory#public_signature"
-      ],
-      "id": "r_e_i_reaction_chamber_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay",
-      "costs": [],
-      "decision": "Client REI display wrapper; viewer authority is excluded.",
-      "evidence": [
-        "net.pedroksl.advanced_ae.xmod.rei.recipes.REIReactionChamberDisplay#public_signature"
-      ],
-      "id": "r_e_i_reaction_chamber_display",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
     }
   ],
   "kind": "auto_storage_compat_contract",
-  "schema": 1,
-  "source_audit_sha256": "891e1f8ee0f3ac1bbce03fc2848b761f9c52bea4533eb3419ae849582e15ced7",
-  "source_recipe_inventory_sha256": "268937aae1f3fbe8c4775a3461f9095dbc697143fcb32b9fd746c8cfae377345",
-  "target": {
-    "dependency": "maven.modrinth:advancedae:lHSZ2gYI",
-    "display_name": "Advanced AE",
-    "mod_id": "advanced_ae",
-    "repositories": [
-      "https://api.modrinth.com/maven"
-    ],
-    "runtime_dependencies": [
-      "org.appliedenergistics:appliedenergistics2:19.2.17",
-      "maven.modrinth:guideme:rduAfwb7",
-      "maven.modrinth:geckolib:RVIo5f6E"
-    ],
-    "version": "1.6.11-1.21.1"
-  },
   "matrix": {
     "acceptedRecipes": [],
     "descriptors": [],
@@ -222,6 +34,24 @@
     "rejectedDescriptors": [],
     "rejectedResourceKinds": [],
     "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "891e1f8ee0f3ac1bbce03fc2848b761f9c52bea4533eb3419ae849582e15ced7",
+  "source_recipe_data_sha256": "3d3845933a72f4350deb9705e6134e9d5fc45b0ff8b68571abaca3c0ed50de09",
+  "source_recipe_inventory_sha256": "ec3796afdd173bb717d488211fa9cb9a78215cc6c09eec376e952e0895465ead",
+  "target": {
+    "dependency": "maven.modrinth:advancedae:lHSZ2gYI",
+    "display_name": "Advanced AE",
+    "mod_id": "advanced_ae",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_dependencies": [
+      "org.appliedenergistics:appliedenergistics2:19.2.17",
+      "maven.modrinth:guideme:rduAfwb7",
+      "maven.modrinth:geckolib:RVIo5f6E"
+    ],
+    "version": "1.6.11-1.21.1"
   },
   "verification": {
     "checks": [
@@ -248,7 +78,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Advanced AE fail-closed boundary changed",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }
