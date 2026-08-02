@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "afc289619ba4eae05e57190c24dfee2da999ce415e4e2b8a80bdfc248d385b52",
+  "contract_sha256": "7bc109fc964a261e397fe350441c4ef6a8df6150b09767696b7448ffd663ff0f",
   "files": {
     "src/compat/productivemetalworks/compat-module.json": "873854340552a0073a481ba688456db6330fdfac97f1e8a53b6f226007755124",
     "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompatModule.java": "03a9f30f2e9b926ae83fdcf9639ec1039759d55630a3692454440b6c833b4f10",
