@@ -142,7 +142,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             matrix["recipeInventory"]["namespaces"],
         )
         self.assertEqual(
-            "6638d8abfeaac5e9d5039883da68be091a5fa2d724b0419d3ce5423b277b8711",
+            "29eae13b02c34d2f44c4dd2bbc5aefe44e1dbf054c19c9c6e099f61e6b2367b9",
             matrix["recipeInventory"]["sha256"],
         )
         industrial_foregoing_descriptor = json.loads(
@@ -351,6 +351,97 @@ class ModularCompatSdkTests(unittest.TestCase):
             "worldspike_minecart_disassembly",
         ):
             self.assertIn(f'railcraft("{recipe_id}")', fixture_source)
+        self.assertEqual(
+            hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            manifest["contract_sha256"],
+        )
+        for relative_path, expected_sha256 in manifest["files"].items():
+            self.assertEqual(
+                expected_sha256,
+                hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                relative_path,
+            )
+
+    def test_productivemetalworks_outcome_c_uses_exact_current_audit_evidence(self):
+        module_root = ROOT / "src/compat/productivemetalworks"
+        descriptor = json.loads((module_root / "compat-module.json").read_text())
+        contract_path = ROOT / "compat/contracts/productivemetalworks.json"
+        contract = json.loads(contract_path.read_text())
+        audit = json.loads(
+            (ROOT / "compat/audits/productivemetalworks/1.15.0.json").read_text()
+        )
+        manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
+
+        self.assertEqual(16, audit["scanner_format"])
+        self.assertEqual(
+            {
+                "class_count": 103,
+                "class_inventory_sha256": "d791fe6217a452ebc476cc7f0602ac911b9f1f2ee51d54f9839bb58a29a8a1f8",
+                "sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124",
+                "size": 3042019,
+            },
+            audit["artifact"],
+        )
+        self.assertEqual(
+            "7c6483c51e1a9def633a939ea75e0018dd079ffa",
+            audit["source"]["revision"],
+        )
+        self.assertEqual(9, len(audit["ancestry_classpath"]))
+        self.assertIn(
+            {
+                "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+                "size": 56279815,
+            },
+            audit["ancestry_classpath"],
+        )
+        self.assertEqual(
+            {
+                "curse.maven:jade-324717:5884231",
+                "cy.jdkdigital.productivelib:productivelib:1.21.1-0.2.0",
+                "maven.modrinth:fusion-connected-textures:h2GrA0Ku",
+                "mezz.jei:jei-1.21.1-common-api:19.27.0.340",
+                "net.createmod.ponder:ponder-neoforge:1.0.81+mc1.21.1",
+                "net.neoforged.fancymodloader:loader:4.0.42",
+                "net.neoforged:bus:8.0.5",
+                "xyz.brassgoggledcoders:PatchouliProvider:1.21.1-1.0.11-Snapshot.4",
+            },
+            {
+                dependency["dependency"]
+                for dependency in audit["ancestry_dependencies"]
+            },
+        )
+        self.assertEqual(1118, audit["recipe_data"]["declared_recipes"])
+        self.assertEqual(1118, audit["recipe_data"]["effective_recipes"])
+        actual_recipe_classes = {
+            "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+            "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+        }
+        self.assertEqual(
+            actual_recipe_classes,
+            {
+                candidate["class"]
+                for candidate in audit["candidates"]["recipe_classes"]
+            },
+        )
+        self.assertEqual(
+            actual_recipe_classes,
+            {family["class"] for family in contract["families"]},
+        )
+        self.assertTrue(
+            all(family["status"] == "rejected" for family in contract["families"])
+        )
+        self.assertEqual(
+            audit["recipe_data"]["digest"],
+            contract["source_recipe_data_sha256"],
+        )
+        self.assertEqual(contract["matrix"], descriptor["matrix"])
+        self.assertEqual(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            contract["verification"]["evidence"]["all_mod_coexistence"][0]["marker"],
+        )
         self.assertEqual(
             hashlib.sha256(contract_path.read_bytes()).hexdigest(),
             manifest["contract_sha256"],

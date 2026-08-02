@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "7bc109fc964a261e397fe350441c4ef6a8df6150b09767696b7448ffd663ff0f",
+  "contract_sha256": "c80960f039bc0bab0373fcd64e3b573e68e8e79728232f8e634397aca67a0592",
   "files": {
-    "src/compat/productivemetalworks/compat-module.json": "873854340552a0073a481ba688456db6330fdfac97f1e8a53b6f226007755124",
+    "src/compat/productivemetalworks/compat-module.json": "b4e64eaf5a171c4345d455bd0d81dd51afa19fddb964d89aa33ebe85f055dd52",
     "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompatModule.java": "03a9f30f2e9b926ae83fdcf9639ec1039759d55630a3692454440b6c833b4f10",
     "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksFixtureMod.java": "de0407a0f8c25bc49c659bd49c4b7d61a74c9a36e3290d9cc19d9619b095a85b",
     "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java": "1573633682d3d8a47d9764920c7662a7083d168417d2be81ea1c7a079632cdd2",
