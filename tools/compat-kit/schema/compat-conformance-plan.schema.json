@@ -22,14 +22,8 @@
       "pattern": "^[0-9a-f]{64}$"
     },
     "target": { "$ref": "#/$defs/target" },
-    "package": {
-      "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
-    },
-    "class_name": {
-      "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-    },
+    "package": { "$ref": "#/$defs/java_type" },
+    "class_name": { "$ref": "#/$defs/java_member" },
     "game_test_namespace": {
       "type": "string",
       "pattern": "^[a-z0-9_.-]+$"
@@ -51,19 +45,27 @@
         "version": { "type": "string", "minLength": 1 }
       }
     },
+    "java_reserved_identifier": {
+      "type": "string",
+      "pattern": "(?:^|\\.)(?:_|abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|exports|extends|false|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|module|native|new|non-sealed|null|open|opens|package|permits|private|protected|provides|public|record|requires|return|sealed|short|static|strictfp|super|switch|synchronized|this|throw|throws|to|transient|transitive|true|try|uses|var|void|volatile|when|while|with|yield)(?:\\.|$)"
+    },
+    "java_type": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$",
+      "not": { "$ref": "#/$defs/java_reserved_identifier" }
+    },
+    "java_member": {
+      "type": "string",
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
+      "not": { "$ref": "#/$defs/java_reserved_identifier" }
+    },
     "provider": {
       "type": "object",
       "additionalProperties": false,
       "required": ["owner", "factory_member"],
       "properties": {
-        "owner": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
-        },
-        "factory_member": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-        }
+        "owner": { "$ref": "#/$defs/java_type" },
+        "factory_member": { "$ref": "#/$defs/java_member" }
       }
     },
     "family": {
@@ -109,6 +111,8 @@
       "minProperties": 1,
       "additionalProperties": {
         "type": "integer",
+        "minimum": -9223372036854775807,
+        "maximum": 9223372036854775807,
         "not": { "const": 0 }
       }
     }

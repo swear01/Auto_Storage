@@ -22,14 +22,8 @@
       "pattern": "^[0-9a-f]{64}$"
     },
     "target": { "$ref": "#/$defs/target" },
-    "package": {
-      "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
-    },
-    "class_name": {
-      "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-    },
+    "package": { "$ref": "#/$defs/java_type" },
+    "class_name": { "$ref": "#/$defs/java_member" },
     "families": {
       "type": "array",
       "items": {
@@ -55,29 +49,38 @@
         "version": { "type": "string", "minLength": 1 }
       }
     },
+    "java_reserved_identifier": {
+      "type": "string",
+      "pattern": "(?:^|\\.)(?:_|abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|exports|extends|false|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|module|native|new|non-sealed|null|open|opens|package|permits|private|protected|provides|public|record|requires|return|sealed|short|static|strictfp|super|switch|synchronized|this|throw|throws|to|transient|transitive|true|try|uses|var|void|volatile|when|while|with|yield)(?:\\.|$)"
+    },
     "java_type": {
       "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$",
+      "not": { "$ref": "#/$defs/java_reserved_identifier" }
     },
     "java_member": {
       "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
+      "not": { "$ref": "#/$defs/java_reserved_identifier" }
     },
-    "recipe_binding": {
+    "ingredient_recipe_binding": {
       "type": "object",
       "additionalProperties": false,
       "required": ["kind", "member", "arguments"],
       "properties": {
-        "kind": {
-          "enum": ["ingredient_method", "item_stack_method", "numeric_method"]
-        },
-        "member": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-        },
-        "arguments": {
-          "enum": ["none", "registries"]
-        }
+        "kind": { "const": "ingredient_method" },
+        "member": { "$ref": "#/$defs/java_member" },
+        "arguments": { "const": "none" }
+      }
+    },
+    "item_stack_recipe_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "member", "arguments"],
+      "properties": {
+        "kind": { "const": "item_stack_method" },
+        "member": { "$ref": "#/$defs/java_member" },
+        "arguments": { "enum": ["none", "registries"] }
       }
     },
     "numeric_recipe_binding": {
@@ -86,10 +89,7 @@
       "required": ["kind", "member", "arguments"],
       "properties": {
         "kind": { "const": "numeric_method" },
-        "member": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-        },
+        "member": { "$ref": "#/$defs/java_member" },
         "arguments": { "const": "none" }
       }
     },
@@ -238,14 +238,8 @@
       "required": ["kind", "owner", "member"],
       "properties": {
         "kind": { "const": "static_typed_plan_method" },
-        "owner": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
-        },
-        "member": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-        }
+        "owner": { "$ref": "#/$defs/java_type" },
+        "member": { "$ref": "#/$defs/java_member" }
       }
     },
     "recipe_predicate_binding": {
@@ -254,14 +248,8 @@
       "required": ["kind", "owner", "member"],
       "properties": {
         "kind": { "const": "static_recipe_predicate_method" },
-        "owner": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
-        },
-        "member": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-        }
+        "owner": { "$ref": "#/$defs/java_type" },
+        "member": { "$ref": "#/$defs/java_member" }
       }
     },
     "recipe_family_cost_binding": {
@@ -270,14 +258,8 @@
       "required": ["kind", "owner", "member"],
       "properties": {
         "kind": { "const": "static_recipe_family_cost_method" },
-        "owner": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
-        },
-        "member": {
-          "type": "string",
-          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
-        }
+        "owner": { "$ref": "#/$defs/java_type" },
+        "member": { "$ref": "#/$defs/java_member" }
       }
     },
     "generated_family": {
@@ -297,8 +279,8 @@
               "additionalProperties": false,
               "required": ["input", "output", "cost"],
               "properties": {
-                "input": { "$ref": "#/$defs/recipe_binding" },
-                "output": { "$ref": "#/$defs/recipe_binding" },
+                "input": { "$ref": "#/$defs/ingredient_recipe_binding" },
+                "output": { "$ref": "#/$defs/item_stack_recipe_binding" },
                 "cost": {
                   "oneOf": [
                     { "$ref": "#/$defs/numeric_recipe_binding" },

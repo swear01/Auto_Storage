@@ -69,13 +69,23 @@
       "type": "string",
       "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
     },
+    "java_reserved_identifier": {
+      "type": "string",
+      "pattern": "(?:^|\\.)(?:_|abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|exports|extends|false|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|module|native|new|non-sealed|null|open|opens|package|permits|private|protected|provides|public|record|requires|return|sealed|short|static|strictfp|super|switch|synchronized|this|throw|throws|to|transient|transitive|true|try|uses|var|void|volatile|when|while|with|yield)(?:\\.|$)"
+    },
     "java_type": {
       "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$",
+      "not": {
+        "$ref": "#/$defs/java_reserved_identifier"
+      }
     },
     "java_member": {
       "type": "string",
-      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+      "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$",
+      "not": {
+        "$ref": "#/$defs/java_reserved_identifier"
+      }
     },
     "config_value": {
       "type": "object",

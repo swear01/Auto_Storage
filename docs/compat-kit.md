@@ -338,7 +338,9 @@ source audit and exact target jar. Validation compares the contract's exact fami
 per-family scanner risk set, target identity, artifact SHA, and inventory digest
 with that separate audit, then reconstructs the jar's class and applicable
 recipe inventory; deleting a family, graph record, recipe record, or risk and
-recomputing JSON fields still fails.
+recomputing JSON fields still fails. The target JAR may not contain duplicate
+recipe ZIP entry names; inventory rejects them before reading payloads so ZIP
+name lookup cannot silently select one duplicate.
 
 An accepted family records:
 
@@ -472,9 +474,15 @@ The built-in `single_item_to_item` template accepts only its canonical contract
 shape: one consumed Item selected by `recipe.input` with amount `1`, one primary
 Item selected by `recipe.output` with amount `recipe.output.count`, and either
 no cost or the single `auto_storage:station_work` cost selected by
-`recipe.processing_time`. Input/output/cost method members use the shared
-Java-keyword-aware validator, so a member such as `class` fails before source
-generation. Any changed amount, selector, extra input/output, or
+`recipe.processing_time`. Its published schema fixes the input binding to an
+`ingredient_method` with no arguments, the output binding to an
+`item_stack_method` with either no arguments or registries, and the optional
+cost binding to a no-argument numeric method. Input/output/cost method members
+use the shared Java-keyword-aware validator, so a member such as `class` fails
+before source generation. Generation, conformance, resource, and runtime-probe
+plan schemas apply the same reserved-identifier rejection to every Java type,
+package, class, accessor, provider, and bridge name as their runtime validators.
+Any changed amount, selector, extra input/output, or
 different cost remains a handwritten/RED boundary rather than being silently
 compiled with different semantics.
 
@@ -521,8 +529,9 @@ family batch must be at least 2 and at most signed Java `long` maximum, so
 `happy_path_and_batching` always proves a repeated operation rather than
 duplicating a single-craft assertion. Every
 happy-path expected delta multiplied by that batch must fit a signed Java
-`long`; the published schema applies the same bounds and an overflowing plan
-fails before source generation.
+`long`; every nonzero expected delta itself is schema-bounded to
+`[-Long.MAX_VALUE, Long.MAX_VALUE]`, and an overflowing plan fails before source
+generation.
 
 `resource-scaffold` emits API-only kind/container/block/renderer boundaries and
 real persistence, transfer, rollback, and dedicated-server test scenarios for

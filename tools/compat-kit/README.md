@@ -234,13 +234,18 @@ family key. Family-derived Java variables and conformance methods use a
 collision-free `family$` prefix for digit-leading or reserved IDs plus the shared
 identifier validator. The `single_item_to_item` template requires the canonical
 `recipe.input`/`recipe.output` selectors and exact amount expressions;
-its input/output/cost method members use the same Java-keyword-aware validator
-as direct bindings, so names such as `class` cannot produce uncompilable Java;
+its schema fixes input to a no-argument ingredient method, output to an item
+stack method with either no arguments or registries, and optional cost to a
+no-argument numeric method. These members and every Java identifier published
+by generation, conformance, resource, and runtime-probe plan schemas use the
+same Java-keyword-aware rejection as runtime validation, so names such as
+`class` cannot produce uncompilable Java;
 `registry_block_method` requires an explicit block ID separate from its station
 item. Generated registration, conformance, resource, and bridge class names
 must not shadow the simple names imported by their renderer. `conformance`
 requires every family batch to be in `2..Long.MAX_VALUE`, rejects any
-happy expected-delta × batch product outside signed-long range, and emits the
+nonzero expected delta outside `[-Long.MAX_VALUE, Long.MAX_VALUE]` or any happy
+expected-delta × batch product outside signed-long range, and emits the
 shared real transaction assertion harness with separate happy,
 catalyst/tool/remainder, and multi-output deltas while the integration supplies
 scenarios. `resource-scaffold` requires a positive signed-long sample amount and emits API-only
@@ -256,7 +261,8 @@ constants and methods. The committed
 against the public API so generated scaffold Java cannot drift silently.
 Recipe types, descriptor IDs, station item IDs, and explicit block IDs must be
 lowercase resource locations; duplicate descriptor variant items and duplicate
-generation-plan rate bindings are rejected.
+generation-plan rate bindings are rejected. Target JAR recipe inventory also
+rejects duplicate recipe ZIP entry names before reading either payload.
 
 ```bash
 ./compat-kit scaffold --addon contract.json --audit audit.json --jar target.jar --classpath ancestry.jar \

@@ -1077,6 +1077,17 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertLess(workflow.index(stage), workflow.index("./gradlew runGameTestServer"))
         self.assertLess(workflow.index(stage), workflow.index(tests))
 
+    def test_release_stages_exact_ae2_ancestry_before_gametests(self):
+        workflow = self.read_required(".github/workflows/release.yml")
+        stage = "./gradlew stageAe2CompatAuditAncestry"
+
+        self.assertEqual(1, workflow.count(stage))
+        self.assertLess(
+            workflow.index(stage),
+            workflow.index("./gradlew runGameTestServer"),
+        )
+        self.assertIn("build/ci-logs/ae2-audit-ancestry.log", workflow)
+
     def test_build_script_uses_gradle_10_safe_repository_url_assignment(self):
         build = self.read_required("build.gradle")
         self.assertNotRegex(build, r'(?m)^\s*url\s+"')

@@ -1713,15 +1713,28 @@ def _recipe_data_inventory(
     layers: list[tuple[str, str, list[tuple[str, bytes]]]] = []
     external_evidence_files = 0
     jar_entries = []
-    for name in sorted(archive.namelist()):
-        if RECIPE_PATH.fullmatch(name) is None:
-            continue
-        entry = archive.getinfo(name)
+    recipe_entries = sorted(
+        (
+            entry
+            for entry in archive.infolist()
+            if RECIPE_PATH.fullmatch(entry.filename) is not None
+        ),
+        key=lambda entry: entry.filename,
+    )
+    seen_recipe_entries = set()
+    for entry in recipe_entries:
+        if entry.filename in seen_recipe_entries:
+            raise ValueError(
+                f"duplicate recipe ZIP entry: {entry.filename}"
+            )
+        seen_recipe_entries.add(entry.filename)
+    for entry in recipe_entries:
+        name = entry.filename
         if entry.file_size > MAX_RECIPE_JSON_BYTES:
             raise ValueError(
                 f"recipe JSON exceeds {MAX_RECIPE_JSON_BYTES} bytes: {name}"
             )
-        jar_entries.append((name, archive.read(name)))
+        jar_entries.append((name, archive.read(entry)))
     layers.append(("target_jar", artifact_sha, jar_entries))
 
     for index, raw_root in enumerate(data_roots or (), start=1):

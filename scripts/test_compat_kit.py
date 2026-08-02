@@ -9,6 +9,7 @@ import subprocess
 import tempfile
 import tomllib
 import unittest
+import warnings
 import weakref
 import zipfile
 from pathlib import Path
@@ -795,6 +796,33 @@ class CompatKitAuditTests(unittest.TestCase):
             serializer["condition_types"],
         )
         self.assertNotIn("modid", json.dumps(first["recipe_data"]))
+
+    def test_recipe_inventory_rejects_duplicate_target_entries_before_reading(self):
+        recipe_jar = self.root / "duplicate-recipe-entry.jar"
+        write_fixture_jar(recipe_jar)
+        recipe_name = "data/samplemod/recipe/crushed_iron.json"
+        payload = json.dumps({"type": "samplemod:crushing"})
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            with zipfile.ZipFile(recipe_jar, "a") as archive:
+                archive.writestr(recipe_name, payload)
+                archive.writestr(recipe_name, payload)
+
+        with zipfile.ZipFile(recipe_jar) as archive, mock.patch.object(
+            archive,
+            "read",
+            wraps=archive.read,
+        ) as read:
+            with self.assertRaisesRegex(
+                ValueError,
+                "duplicate recipe ZIP entry",
+            ):
+                self.compat_kit._recipe_data_inventory(
+                    archive,
+                    self.compat_kit._sha256_file(recipe_jar),
+                    (),
+                )
+            read.assert_not_called()
 
     def test_scan_rejects_symlinked_or_malformed_datapack_recipe_evidence(self):
         data_root = self.root / "unsafe-data"
@@ -7440,6 +7468,115 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertEqual(
             9223372036854775807,
             schema["$defs"]["family"]["properties"]["batch"]["maximum"],
+        )
+
+    def test_generation_schema_enforces_single_item_binding_shapes(self):
+        schema = json.loads(
+            (
+                ROOT
+                / "tools/compat-kit/schema/compat-generation-plan.schema.json"
+            ).read_text()
+        )
+        family = next(
+            variant
+            for variant in schema["$defs"]["generated_family"]["oneOf"]
+            if variant["properties"]["shape"]["const"] == "single_item_to_item"
+        )
+        bindings = family["properties"]["bindings"]["properties"]
+
+        self.assertEqual(
+            {"$ref": "#/$defs/ingredient_recipe_binding"},
+            bindings["input"],
+        )
+        self.assertEqual(
+            {"$ref": "#/$defs/item_stack_recipe_binding"},
+            bindings["output"],
+        )
+        self.assertEqual(
+            {
+                "kind": {"const": "ingredient_method"},
+                "member": {"$ref": "#/$defs/java_member"},
+                "arguments": {"const": "none"},
+            },
+            schema["$defs"]["ingredient_recipe_binding"]["properties"],
+        )
+        self.assertEqual(
+            {
+                "kind": {"const": "item_stack_method"},
+                "member": {"$ref": "#/$defs/java_member"},
+                "arguments": {"enum": ["none", "registries"]},
+            },
+            schema["$defs"]["item_stack_recipe_binding"]["properties"],
+        )
+
+    def test_plan_schemas_exclude_java_reserved_identifiers(self):
+        schema_root = ROOT / "tools/compat-kit/schema"
+        schema_names = (
+            "compat-generation-plan.schema.json",
+            "compat-conformance-plan.schema.json",
+            "compat-resource-plan.schema.json",
+            "compat-runtime-probe-plan.schema.json",
+        )
+        java_type_pattern = (
+            "^[A-Za-z_$][A-Za-z0-9_$]*"
+            "(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$"
+        )
+        java_member_pattern = "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        reserved = sorted(self.compat_kit.JAVA_RESERVED_IDENTIFIERS)
+        reserved_segment_pattern = (
+            "(?:^|\\.)(?:"
+            + "|".join(reserved)
+            + ")(?:\\.|$)"
+        )
+
+        def objects(value):
+            if isinstance(value, dict):
+                yield value
+                for child in value.values():
+                    yield from objects(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from objects(child)
+
+        for schema_name in schema_names:
+            with self.subTest(schema=schema_name):
+                schema = json.loads((schema_root / schema_name).read_text())
+                identifier_definitions = [
+                    candidate
+                    for candidate in objects(schema)
+                    if candidate.get("pattern")
+                    in {java_type_pattern, java_member_pattern}
+                ]
+                self.assertTrue(identifier_definitions)
+                self.assertEqual(
+                    {
+                        "type": "string",
+                        "pattern": reserved_segment_pattern,
+                    },
+                    schema["$defs"].get("java_reserved_identifier"),
+                )
+                for definition in identifier_definitions:
+                    self.assertEqual(
+                        {"$ref": "#/$defs/java_reserved_identifier"},
+                        definition.get("not"),
+                    )
+
+    def test_conformance_schema_bounds_nonzero_expected_deltas_to_signed_long(self):
+        schema = json.loads(
+            (
+                ROOT
+                / "tools/compat-kit/schema/compat-conformance-plan.schema.json"
+            ).read_text()
+        )
+
+        self.assertEqual(
+            {
+                "type": "integer",
+                "minimum": -self.compat_kit.JAVA_LONG_MAX,
+                "maximum": self.compat_kit.JAVA_LONG_MAX,
+                "not": {"const": 0},
+            },
+            schema["$defs"]["delta"]["additionalProperties"],
         )
 
     def test_resource_schema_caps_sample_amount_at_signed_long(self):
