@@ -141,28 +141,6 @@ class ModularCompatSdkTests(unittest.TestCase):
             ["productivebees"],
             matrix["recipeInventory"]["namespaces"],
         )
-        self.assertEqual(
-            "29eae13b02c34d2f44c4dd2bbc5aefe44e1dbf054c19c9c6e099f61e6b2367b9",
-            matrix["recipeInventory"]["sha256"],
-        )
-        industrial_foregoing_descriptor = json.loads(
-            (
-                ROOT / "src/compat/industrial_foregoing/compat-module.json"
-            ).read_text()
-        )
-        self.assertEqual(
-            "e658bb0b40b91d2bc322cefacebd8cadd8f36afabbab76e47dc33ad200f17b4f",
-            industrial_foregoing_descriptor["matrix"]["recipeInventory"]["sha256"],
-        )
-        modern_industrialization_descriptor = json.loads(
-            (
-                ROOT / "src/compat/modern_industrialization/compat-module.json"
-            ).read_text()
-        )
-        self.assertEqual(
-            "e988a742f688de35bc15bb861dccb516616b161e527a518f1485b61347e670da",
-            modern_industrialization_descriptor["matrix"]["recipeInventory"]["sha256"],
-        )
         companions = json.loads(
             (
                 ROOT
@@ -221,17 +199,6 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertEqual(
             ["create_aquatic_ambitions"],
             matrix["recipeInventory"]["namespaces"],
-        )
-        self.assertEqual(
-            "5084d1ab9696fd443d49d14fe855d936451b5f8895f5ae1760fb7b636650d189",
-            matrix["recipeInventory"]["sha256"],
-        )
-        create_descriptor = json.loads(
-            (ROOT / "src/compat/create/compat-module.json").read_text()
-        )
-        self.assertEqual(
-            "4e6eb1aeba9334e92cec47000594a756989ebe1c2cdf91fda9a847d13caf13ae",
-            create_descriptor["matrix"]["recipeInventory"]["sha256"],
         )
         self.assertEqual(
             hashlib.sha256(contract_path.read_bytes()).hexdigest(),

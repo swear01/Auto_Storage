@@ -13,6 +13,24 @@ SCRIPTS = Path(__file__).resolve().parent
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
+from compatibility_matrix_manifest import COMPATIBILITY_SUMMARY_RELATIVE_PATH
+
+SHARED_AGGREGATE_PATHS = frozenset(
+    {
+        "docs/generated/compatibility-modules.md",
+        COMPATIBILITY_SUMMARY_RELATIVE_PATH,
+        "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
+        "compatibility-matrix-companions.json",
+        "README.md",
+        "docs/overview.md",
+        "docs/plan.md",
+        "docs/roadmap.md",
+        "docs/structure.md",
+        "docs/notes.md",
+        "docs/addon-development.md",
+    }
+)
+
 
 class CompatibilityMatrixManifestTests(unittest.TestCase):
     def test_generator_module_is_importable(self):
@@ -423,7 +441,6 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
     def test_global_recipe_digests_are_not_committed_baselines(self):
         from compatibility_matrix_manifest import (
             COMPATIBILITY_SUMMARY_RELATIVE_PATH,
-            SHARED_AGGREGATE_PATHS,
             build_manifest,
             validate_companions,
             validate_descriptor_matrix,
@@ -544,7 +561,6 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
 
     def test_two_independent_module_additions_merge_without_shared_conflicts(self):
         from compatibility_matrix_manifest import (
-            SHARED_AGGREGATE_PATHS,
             recipe_inventory_sha256,
         )
 

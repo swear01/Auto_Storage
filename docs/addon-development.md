@@ -457,7 +457,7 @@ unclaimed inventories are computed by the matrix GameTest and recorded in
 `build/reports/terminal-scale-*.json`; they are not committed expected digests.
 Gradle validates every descriptor and deterministically generates the runtime
 index, matrix assertion manifest, and CI/release
-[`build/reports/compatibility-modules.md`](../build/reports/compatibility-modules.md).
+`build/reports/compatibility-modules.md`.
 Descriptor `expectedTests` is a positive JSON integer;
 fractional or wider numeric values fail instead of being truncated.
 The generated `META-INF/auto_storage/compat-modules.json` has no second

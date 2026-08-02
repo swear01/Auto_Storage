@@ -38,7 +38,7 @@
   "package": "com.swear.autostorage.compat.ae2",
   "resource_kinds": [],
   "schema": 1,
-  "source_contract_digest": "573fd06fcbaa602927efc3598a57ccedbda24bb29810a7cc683002a7d915bf8c",
+  "source_contract_digest": "78145f6c098ac66e105bc1f184a19f23f11b3c0014c61c70c77957df745a18d5",
   "target": {
     "display_name": "Applied Energistics 2",
     "mod_id": "ae2",

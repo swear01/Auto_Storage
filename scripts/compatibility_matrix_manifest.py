@@ -27,22 +27,6 @@ MATRIX_LIST_KEYS = (
 
 COMPATIBILITY_SUMMARY_RELATIVE_PATH = "build/reports/compatibility-modules.md"
 
-SHARED_AGGREGATE_PATHS = frozenset(
-    {
-        "docs/generated/compatibility-modules.md",
-        COMPATIBILITY_SUMMARY_RELATIVE_PATH,
-        "src/compatibilityMatrixFixture/resources/META-INF/auto_storage/"
-        "compatibility-matrix-companions.json",
-        "README.md",
-        "docs/overview.md",
-        "docs/plan.md",
-        "docs/roadmap.md",
-        "docs/structure.md",
-        "docs/notes.md",
-        "docs/addon-development.md",
-    }
-)
-
 
 def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n"

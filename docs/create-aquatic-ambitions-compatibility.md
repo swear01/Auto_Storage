@@ -72,16 +72,15 @@ buckets rather than contract recipe families.
 
 The module descriptor and reviewed contract both declare the target mod present
 with zero descriptors, resource kinds, accepted recipes, rejected registry IDs,
-or CAA-owned recipe families. The combined runtime contains 65 successfully
-loaded `create_aquatic_ambitions:*` recipes, locked by SHA-256
+or CAA-owned recipe families. The isolated CAA fixture locks the 65 successfully
+loaded `create_aquatic_ambitions:*` recipes by SHA-256
 `5084d1ab9696fd443d49d14fe855d936451b5f8895f5ae1760fb7b636650d189`.
 
-CAA also ships `create:milling/limestone`. Recipe inventory is grouped by the
-actual recipe namespace, so that entry remains in the existing Create-owned
-group. In the current all-mod matrix with CAA and Railcraft Reborn loaded, that
-group's exact digest is
-`4e6eb1aeba9334e92cec47000594a756989ebe1c2cdf91fda9a847d13caf13ae`.
-No shared workflow or matrix Java list is extended for this module.
+CAA also ships `create:milling/limestone`. That cross-namespace coexistence is
+recorded only in the compatibility-matrix report
+(`build/reports/terminal-scale-*.json`); this module does not name or pin the
+Create descriptor digest. No shared workflow or matrix Java list is extended
+for this module.
 
 ## Future acceptance boundary
 
@@ -100,4 +99,6 @@ Four present-mod GameTests prove the module registers no CAA stations/families,
 representative deterministic-looking and chanced Channeling recipes stay
 unsupported, and every loaded recipe in the Channeling type remains fail closed.
 The all-mod compatibility matrix also loads the representative artifact and
-locks the same zero-family boundary plus both namespace-owned recipe inventories.
+structurally validates the zero-family boundary plus namespace claims; actual
+coexistence digests are recorded in the matrix report without committed
+expected SHA values.
