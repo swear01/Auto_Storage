@@ -79,7 +79,7 @@ public final class OritechIntegrationGameTests {
                 || descriptor.variants().size() != 1
                 || !descriptor.accepts(pulverizer)
                 || !descriptor.rateFor(pulverizer).orElseThrow().equals(
-                MachineWorkRate.of(energyPerTick(), 1))
+                MachineWorkRate.of(1, 1))
                 || !AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(PULVERIZER)
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(GRINDER)
                 || !supports(helper, ADAMANT)
@@ -139,7 +139,7 @@ public final class OritechIntegrationGameTests {
     public static void insufficient_fe_is_atomic(GameTestHelper helper) {
         withCore(helper, context -> {
             long energy = expectedEnergy(ADAMANT, helper) - 1;
-            long work = expectedEnergy(ADAMANT, helper);
+            long work = recipeTime(ADAMANT, helper);
             seedItem(context.core(), oritechItem("adamant_ingot"), 1);
             seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), energy);
             installPulverizer(context);
@@ -169,7 +169,8 @@ public final class OritechIntegrationGameTests {
                     || itemCount(context.core(), oritechItem("adamant_dust")) != 0
                     || context.core().getResourceAmount(
                     StorageResourceKey.neoforgeEnergy()) != energy
-                    || context.core().getStationWork(PULVERIZER) != energy) {
+                    || context.core().getStationWork(PULVERIZER)
+                    != recipeTime(ADAMANT, helper)) {
                 helper.fail("Oritech missing-ingredient transaction was not an atomic no-op");
                 return;
             }
@@ -191,8 +192,7 @@ public final class OritechIntegrationGameTests {
                     || itemCount(context.core(), oritechItem("adamant_dust")) != 0
                     || context.core().getResourceAmount(
                     StorageResourceKey.neoforgeEnergy()) != energy
-                    || context.core().getStationWork(PULVERIZER)
-                    != (long) energyPerTick() * ticks) {
+                    || context.core().getStationWork(PULVERIZER) != ticks) {
                 helper.fail("Oritech insufficient-work transaction was not an atomic no-op");
                 return;
             }
@@ -219,7 +219,8 @@ public final class OritechIntegrationGameTests {
                     || itemCount(context.core(), oritechItem("adamant_dust")) != Long.MAX_VALUE
                     || context.core().getResourceAmount(
                     StorageResourceKey.neoforgeEnergy()) != energy
-                    || context.core().getStationWork(PULVERIZER) != energy) {
+                    || context.core().getStationWork(PULVERIZER)
+                    != recipeTime(ADAMANT, helper)) {
                 helper.fail("Oritech full destination transaction was not an atomic no-op");
                 return;
             }
@@ -332,7 +333,8 @@ public final class OritechIntegrationGameTests {
                     || itemCount(context.core(), oritechItem("adamant_dust")) != 0
                     || context.core().getResourceAmount(
                     StorageResourceKey.neoforgeEnergy()) != energy
-                    || context.core().getStationWork(PULVERIZER) != energy - 1
+                    || context.core().getStationWork(PULVERIZER)
+                    != recipeTime(ADAMANT, helper) - 1
                     || inventoryCount(
                     context.player().getInventory(), oritechItem("adamant_dust")) != 0) {
                 helper.fail(
@@ -362,8 +364,8 @@ public final class OritechIntegrationGameTests {
                 MachineDescriptor descriptor = MachineEnergyTable.get(PULVERIZER);
                 ItemStack station = new ItemStack(oritechItem("pulverizer_block"));
                 if (descriptor == null || !descriptor.rateFor(station).orElseThrow().equals(
-                        MachineWorkRate.of(7, 1))) {
-                    helper.fail("Oritech pulverizer did not reload its configured rate");
+                        MachineWorkRate.of(1, 1))) {
+                    helper.fail("Oritech pulverizer work rate followed FE/t instead of recipe ticks");
                     return;
                 }
                 seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), 1_050);
@@ -390,6 +392,82 @@ public final class OritechIntegrationGameTests {
                         StorageResourceKey.neoforgeEnergy()) != 0
                         || context.core().getStationWork(PULVERIZER) != 0) {
                     helper.fail("Oritech zero-FE pulverizer did not use exact recipe-time work");
+                    return;
+                }
+                helper.succeed();
+            } finally {
+                setEnergyPerTick(original);
+            }
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform", batch = "oritech_work_reload")
+    public static void config_reload_preserves_accrued_recipe_ticks(
+            GameTestHelper helper
+    ) {
+        int original = energyPerTick();
+        withCore(helper, context -> {
+            try {
+                seedItem(context.core(), oritechItem("deepslate_platinum_ore"), 1);
+                installPulverizer(context);
+                setEnergyPerTick(7);
+                tick(context.core(), 75);
+                if (context.core().getStationWork(PULVERIZER) != 75) {
+                    helper.fail("Oritech accrued work was revalued as FE/t");
+                    return;
+                }
+                setEnergyPerTick(0);
+                tick(context.core(), 75);
+                if (!craft(context, PLATINUM)
+                        || itemCount(context.core(), oritechItem("raw_platinum")) != 2
+                        || context.core().getStationWork(PULVERIZER) != 0) {
+                    helper.fail("Oritech config reload did not preserve accrued recipe ticks");
+                    return;
+                }
+                helper.succeed();
+            } finally {
+                setEnergyPerTick(original);
+            }
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform", batch = "oritech_cache_reload")
+    public static void config_reload_invalidates_shared_craftable_output_cache(
+            GameTestHelper helper
+    ) {
+        int original = energyPerTick();
+        withCore(helper, context -> {
+            try {
+                setEnergyPerTick(0);
+                seedItem(context.core(), oritechItem("deepslate_platinum_ore"), 1);
+                installPulverizer(context);
+                tick(context.core(), recipeTime(PLATINUM, helper));
+
+                var menu = new CraftingTerminalMenu(
+                        934, context.player().getInventory(), context.core());
+                menu.clickMenuButton(context.player(), CRAFTABLE_PAGE_BUTTON);
+                if (findDisplaySlot(menu, oritechItem("raw_platinum")) < 0) {
+                    helper.fail("Zero-FE Oritech recipe was not initially Craftable");
+                    return;
+                }
+                setEnergyPerTick(7);
+                menu.broadcastChanges();
+                if (findDisplaySlot(menu, oritechItem("raw_platinum")) >= 0) {
+                    helper.fail("Open Craftable page ignored Oritech config revision");
+                    return;
+                }
+                menu.clickMenuButton(context.player(), STORAGE_PAGE_BUTTON);
+                setEnergyPerTick(0);
+                menu.clickMenuButton(context.player(), CRAFTABLE_PAGE_BUTTON);
+                if (findDisplaySlot(menu, oritechItem("raw_platinum")) < 0) {
+                    helper.fail("Shared Craftable cache did not rebuild zero-FE Oritech output");
+                    return;
+                }
+                menu.clickMenuButton(context.player(), STORAGE_PAGE_BUTTON);
+                setEnergyPerTick(7);
+                menu.clickMenuButton(context.player(), CRAFTABLE_PAGE_BUTTON);
+                if (findDisplaySlot(menu, oritechItem("raw_platinum")) >= 0) {
+                    helper.fail("Shared Craftable cache ignored Oritech config revision");
                     return;
                 }
                 helper.succeed();

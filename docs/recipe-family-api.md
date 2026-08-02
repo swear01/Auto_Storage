@@ -101,7 +101,15 @@ holder still has one deterministic plan, but server configuration can change
 its typed amounts or cost after registration. The family keeps its exact item
 candidate index, but does not retain the per-recipe plan or final contract;
 preview and commit therefore resolve the current server values and compare
-them normally. This is not a replacement for `deterministicResourceVariants`:
+them normally. The required `LongSupplier dynamicStateToken` must return the
+current complete identity of every server value that can affect the plan or
+cost. Equal behavior may reuse a token; changed behavior must not. Family
+eligibility and candidate-index shape must remain stable across token changes;
+use a recipe-manager reload rather than this factory when membership changes.
+Shared Craftable result caches compare the token map before reuse, so a config
+reload cannot restore outputs built from stale amounts. The supplier runs on
+the authoritative server thread and must be deterministic, side-effect free,
+and available after config loading. This is not a replacement for `deterministicResourceVariants`:
 it receives no available-stack snapshot and cannot choose among several plans.
 Oritech Pulverizer uses it so config reload and the legal zero-FE mode cannot
 leave stale FE/work costs.
@@ -120,7 +128,7 @@ leave stale FE/work costs.
 - **Create Aquatic Ambitions:** the present-mod module registers no station, resource kind, or recipe family. Channeling remains fail closed because its Encased Fan catalyst is selected from live Conduit/block/fluid world state, mutates entity Conduit Power, and may emit chance outputs. Exact vanilla/Create-class datapack recipes remain owned by the corresponding built-in/Create contracts rather than a CAA-specific approximation.
 - **Extended Crafting:** exact shaped-table recipes from 3×3 through 9×9 and the real `UltimateSingularityRecipe` require one installed Ultimate Crafting Table. Up to 81 exact groups preserve alternatives, remainders, components, and atomic rollback; custom transformers fail closed; see [`extended-crafting-compatibility.md`](extended-crafting-compatibility.md).
 - **Advanced AE:** the reviewed `1.6.11-1.21.1` target intentionally registers no custom station or recipe family. Reaction Chamber recipes depend on live AE-network power, speed-card state, and generic item/fluid stacks, so the present-mod fixture keeps them fail closed while exact vanilla-class recipes under the Advanced AE namespace remain covered by built-in families; see [`advanced-ae-compatibility.md`](advanced-ae-compatibility.md).
-- **Oritech:** exact `OritechRecipe` holders of type `oritech:pulverizer` consume simple item inputs plus live `energyPerTick × time` FE, consume `max(1, energyPerTick) × time` station work, emit `results[0]` as primary and further results as deterministic remainders (identical component-exact keys merge), and re-resolve loaded Oritech config after reload. At zero FE the machine still advances one work/tick. Other shared-class RecipeContent types, invalid fluid data, oversized ingredient+FE layouts, and addon machine state fail closed; see [`oritech-compatibility.md`](oritech-compatibility.md).
+- **Oritech:** exact `OritechRecipe` holders of type `oritech:pulverizer` consume simple item inputs plus live `energyPerTick × time` FE, consume stable `recipe.time` station work, emit `results[0]` as primary and further results as deterministic remainders (identical component-exact keys merge), and re-resolve loaded Oritech config after reload. The plain station always advances one work/tick; its dynamic token invalidates open and shared Craftable results when FE/t changes without revaluing accrued work. Other shared-class RecipeContent types, invalid fluid data, oversized ingredient+FE layouts, and addon machine state fail closed; see [`oritech-compatibility.md`](oritech-compatibility.md).
 - **PneumaticCraft:** present-mod CI intentionally registers no family. Pressure Chamber, Thermo Plant, Fluid Mixer, Assembly, Refinery, Heat Frame, and Explosion payloads depend on retained pressure/heat/multiblock/world state or non-simulatable Air mutation that the current exact transaction contract cannot represent.
 - **Draconic Evolution:** present-mod CI intentionally registers no family. Fusion Crafting depends on live Fusion Crafting Core multiblock injectors, injector-local energy charging, `DEConfig` craft/charge times, generic ingredients, and optional live `IFusionDataTransfer` assemble; see [`draconicevolution-compatibility.md`](draconicevolution-compatibility.md).
 - **Productive Bees:** present-mod CI intentionally registers no station, resource kind, or family. Format-16 review rejects all 16 actual recipe classes because chance, live bee/entity/world mutation, dynamic gene/bee components, or live machine paths prevent exact public-SDK simulate-then-commit semantics; see [`productivebees-compatibility.md`](productivebees-compatibility.md).

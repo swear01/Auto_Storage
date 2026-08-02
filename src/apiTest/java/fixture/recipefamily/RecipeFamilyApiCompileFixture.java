@@ -128,6 +128,7 @@ public final class RecipeFamilyApiCompileFixture {
                         .layout(1, 1, false)
                         .build(),
                 recipe -> RecipeFamilyCost.free(),
+                () -> 1L,
                 RecipePresentationKind.STONECUTTING);
     }
 

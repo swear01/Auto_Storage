@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.WeakHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -32,6 +34,7 @@ public final class RecipeFamily {
     private final Predicate<Recipe<?>> eligibility;
     private final boolean allowSpecial;
     private final boolean cacheTypedPlan;
+    private final LongSupplier dynamicStateToken;
     private final Function<Recipe<?>, RecipeFamilyCost> cost;
     private final RecipePresentationKind presentationKind;
     private final Map<Recipe<?>, TypedRecipePlan> typedPlanCache =
@@ -58,6 +61,7 @@ public final class RecipeFamily {
         this.eligibility = recipe -> true;
         this.allowSpecial = false;
         this.cacheTypedPlan = false;
+        this.dynamicStateToken = null;
         this.cost = Objects.requireNonNull(cost, "cost");
         this.presentationKind = Objects.requireNonNull(presentationKind, "presentationKind");
     }
@@ -71,7 +75,8 @@ public final class RecipeFamily {
             Function<Recipe<?>, RecipeFamilyCost> cost,
             RecipePresentationKind presentationKind,
             boolean allowSpecial,
-            boolean cacheTypedPlan
+            boolean cacheTypedPlan,
+            LongSupplier dynamicStateToken
     ) {
         this.exactRecipeClass = Objects.requireNonNull(exactRecipeClass, "exactRecipeClass");
         this.recipeType = Objects.requireNonNull(recipeType, "recipeType");
@@ -81,6 +86,7 @@ public final class RecipeFamily {
         this.eligibility = Objects.requireNonNull(eligibility, "eligibility");
         this.allowSpecial = allowSpecial;
         this.cacheTypedPlan = cacheTypedPlan;
+        this.dynamicStateToken = dynamicStateToken;
         this.typedPlan = Objects.requireNonNull(typedPlan, "typedPlan");
         this.typedPlanVariants = null;
         this.cost = Objects.requireNonNull(cost, "cost");
@@ -105,6 +111,7 @@ public final class RecipeFamily {
         this.eligibility = Objects.requireNonNull(eligibility, "eligibility");
         this.allowSpecial = allowSpecial;
         this.cacheTypedPlan = false;
+        this.dynamicStateToken = null;
         this.typedPlan = null;
         this.typedPlanVariants = Objects.requireNonNull(
                 typedPlanVariants, "typedPlanVariants");
@@ -341,6 +348,13 @@ public final class RecipeFamily {
         @Override
         public boolean requiresAvailableStacksForVariants() {
             return typedPlanVariants != null;
+        }
+
+        @Override
+        public OptionalLong dynamicStateToken() {
+            return dynamicStateToken == null
+                    ? OptionalLong.empty()
+                    : OptionalLong.of(dynamicStateToken.getAsLong());
         }
 
         @Override

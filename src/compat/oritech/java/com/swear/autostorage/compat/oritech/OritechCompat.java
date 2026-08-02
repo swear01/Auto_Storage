@@ -14,6 +14,7 @@ import com.swear.autostorage.StorageResourceKey;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
+import dev.architectury.fluid.FluidStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -70,7 +71,7 @@ public final class OritechCompat {
                         Component.translatable("gui.auto_storage.station.oritech_pulverizer"),
                         () -> List.of(MachineVariant.derived(
                                 new ItemStack(requiredItem(PULVERIZER_ITEM)),
-                                () -> MachineWorkRate.of(workPerTick(), 1))),
+                                () -> MachineWorkRate.of(1, 1))),
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
@@ -82,6 +83,7 @@ public final class OritechCompat {
                         OritechCompat::supports,
                         OritechCompat::plan,
                         recipe -> RecipeFamilyCost.stationWork(requiredWork(recipe)),
+                        OritechCompat::energyPerTick,
                         RecipePresentationKind.CRAFTING));
     }
 
@@ -155,15 +157,11 @@ public final class OritechCompat {
     }
 
     private static long requiredWork(OritechRecipe recipe) {
-        return Math.multiplyExact((long) workPerTick(), recipe.getTime());
+        return recipe.getTime();
     }
 
     private static long requiredEnergy(OritechRecipe recipe) {
         return Math.multiplyExact((long) energyPerTick(), recipe.getTime());
-    }
-
-    private static int workPerTick() {
-        return Math.max(1, energyPerTick());
     }
 
     private static int energyInputCount() {
@@ -182,32 +180,10 @@ public final class OritechCompat {
     }
 
     private static boolean emptyFluidOutputs(OritechRecipe recipe) {
-        Object outputs;
-        try {
-            outputs = OritechRecipe.class.getMethod("getFluidOutputs").invoke(recipe);
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException(
-                    "Oritech getFluidOutputs is not inspectable", exception);
-        }
-        if (!(outputs instanceof List<?> fluidOutputs)) {
-            return false;
-        }
-        if (fluidOutputs.isEmpty()) {
-            return true;
-        }
-        for (Object stack : fluidOutputs) {
-            if (stack == null) {
-                return false;
-            }
-            try {
-                Object empty = stack.getClass().getMethod("isEmpty").invoke(stack);
-                if (!(empty instanceof Boolean booleanEmpty) || !booleanEmpty) {
-                    return false;
-                }
-            } catch (ReflectiveOperationException exception) {
-                throw new IllegalStateException(
-                        "Oritech fluid output emptiness is not inspectable", exception);
-            }
+        List<FluidStack> outputs = recipe.getFluidOutputs();
+        if (outputs == null) return false;
+        for (FluidStack stack : outputs) {
+            if (stack == null || !stack.isEmpty()) return false;
         }
         return true;
     }

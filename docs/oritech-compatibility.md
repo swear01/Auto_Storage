@@ -36,11 +36,9 @@ Logical station:
 - descriptor `auto_storage:oritech_pulverizer`;
 - station item `oritech:pulverizer_block`;
 - Processing category;
-- live work rate from
-  `OritechConfig.processingMachines.pulverizerData.energyPerTick`
-  (default `32` work/tick), deferred until config load via
-  `MachineVariant.derived`; the legal zero-energy configuration remains one
-  work/tick, matching Oritech's own progress behavior.
+- stable rate of one recipe-work unit per server tick. Oritech increments the
+  plain Pulverizer's progress once per eligible tick and accounts configured
+  FE/t separately; changing FE/t therefore does not revalue accrued work.
 
 Transaction:
 
@@ -55,15 +53,17 @@ Transaction:
 - further `results[i]` are deterministic item remainders; identical
   component-exact keys merge amounts before the plan is built;
 - FE equals `energyPerTick × recipe.time` and is omitted when the loaded value
-  is zero; station work equals `max(1, energyPerTick) × recipe.time`.
+  is zero; station work equals `recipe.time`.
 
 `OritechRecipe.isSpecial()` is true, so the family uses the public
-`dynamicDeterministicResources` eligibility overload. Its plan and cost are
-re-resolved from the current config after reload while its exact item
-candidates remain indexed. Eligibility never calls
+`dynamicDeterministicResources` eligibility overload. It supplies the current
+`energyPerTick` as the required dynamic-state token: its plan and cost are
+re-resolved after reload, shared Craftable output caches are invalidated when
+that token changes, and exact item candidates remain indexed. Eligibility never calls
 `Recipe#getIngredients()` for inference; it reads Oritech's public
 `getInputs()` / `getResults()` / `getFluidInput()` / `getFluidOutputs()` /
-`getTime()` surfaces.
+`getTime()` surfaces. Fluid outputs use Architectury's public typed
+`FluidStack` API directly; reflection is not used.
 
 ## Explicit exclusions
 
@@ -89,8 +89,8 @@ correctly failed the unchanged 9 MiB shared-index gate at 9,532,520 bytes.
 Catalog entries now reuse the holder's recipe ID and do not retain fixed
 variant lists between invalidated rebuilds; the server-owned shared result
 cache still keeps ordinary page switches from rebuilding variants. The same
-15,822-recipe matrix now passes with 9,250,072 retained bytes, 0.421 ms first
-switch, 0.177 ms switch p95, and 114,986 bytes per menu.
+15,822-recipe matrix now passes with 9,250,944 retained bytes, 0.918 ms first
+switch, 0.458 ms prefetched-switch p95, and 114,859 bytes per menu.
 
 ## Verification
 
@@ -99,12 +99,13 @@ switch, 0.177 ms switch p95, and 114,986 bytes per menu.
 ./gradlew runCompatibilityMatrixGameTestServer
 ```
 
-Eighteen real GameTests cover pulverizer registration and grinder exclusion,
+Twenty real GameTests cover pulverizer registration and grinder exclusion,
 adamant FE/work craft, raw-iron multi-output remainder, missing ingredient,
 insufficient FE/work, destination overflow, a true post-commit mixed Item+FE
 rollback, config reload at 7 FE/t, legal zero-FE progress, and the 150-tick
-platinum duration. The same config boundary also proves that crossing zero FE
-does not change oversized-family eligibility or leave a stale Craftable catalog
-entry. Fail-closed checks cover nonempty and null fluid data, non-simple
+platinum duration, stable accrued recipe ticks across a config reload, and
+shared Craftable result invalidation when FE/t changes. The same config boundary
+also proves that crossing zero FE does not change oversized-family eligibility.
+Fail-closed checks cover nonempty and null fluid data, non-simple
 ingredients, oversized ingredient+FE layouts, while another test merges
 duplicate exact item outputs. The all-mod compatibility matrix protects coexistence.

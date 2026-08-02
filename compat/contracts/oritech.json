@@ -21,7 +21,7 @@
       "class": "rearth.oritech.init.recipes.OritechRecipe",
       "costs": [
         {
-          "amount": "max(1, OritechConfig.processingMachines.pulverizerData.energyPerTick) * recipe.time",
+          "amount": "recipe.time",
           "resource_kind": "auto_storage:station_work"
         },
         {
@@ -29,7 +29,7 @@
           "resource_kind": "neoforge_energy"
         }
       ],
-      "decision": "Accept exact oritech:pulverizer holders of the shared OritechRecipe class when every ingredient is simple and non-empty, fluidInput is empty/zero, fluidOutputs is a non-null list containing only empty stacks, results are one or more non-empty deterministic item stacks, time is positive, and item inputs plus one reserved possible FE input fit the nine-input plan bound. The reserved bound keeps family eligibility stable when config crosses zero. Costs are resolved from the current loaded pulverizer energyPerTick on every plan: FE equals energyPerTick * time and is omitted at zero, while station work equals max(1, energyPerTick) * time so Oritech's legal zero-energy mode still advances one recipe tick per server tick. Combine-small-dusts post-craft inventory compaction, speed/efficiency/burst/yield addons, and every other RecipeContent type that reuses OritechRecipe (grinder/assembler/foundry/atomic_forge/centrifuge/cooler/refinery/generators/deep_drill/laser/particle_collision/reactor/steam_engine) remain unsupported because Compat Kit binds one audited class to one recipe_type/station and those types need distinct fluid, generator, multiblock, or live-addon contracts.",
+      "decision": "Accept exact oritech:pulverizer holders of the shared OritechRecipe class when every ingredient is simple and non-empty, fluidInput is empty/zero, fluidOutputs is a non-null list containing only empty stacks, results are one or more non-empty deterministic item stacks, time is positive, and item inputs plus one reserved possible FE input fit the nine-input plan bound. The reserved bound keeps family eligibility stable when config crosses zero. Oritech's plain Pulverizer increments progress once per eligible server tick and separately spends its configured energyPerTick, so station work is the stable recipe time while FE is energyPerTick * time and is omitted at zero. The dynamic family publishes the current energyPerTick as its cache identity so a config reload invalidates shared Craftable results without revaluing accrued station work. Combine-small-dusts post-craft inventory compaction, speed/efficiency/burst/yield addons, and every other RecipeContent type that reuses OritechRecipe (grinder/assembler/foundry/atomic_forge/centrifuge/cooler/refinery/generators/deep_drill/laser/particle_collision/reactor/steam_engine) remain unsupported because Compat Kit binds one audited class to one recipe_type/station and those types need distinct fluid, generator, multiblock, or live-addon contracts.",
       "evidence": [
         "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#getInputs",
         "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#getResults",
@@ -38,6 +38,7 @@
         "common/src/main/java/rearth/oritech/init/recipes/OritechRecipe.java#isSpecial",
         "common/src/main/java/rearth/oritech/init/recipes/RecipeContent.java#PULVERIZER",
         "common/src/main/java/rearth/oritech/block/entity/processing/PulverizerBlockEntity.java#getOwnRecipeType",
+        "common/src/main/java/rearth/oritech/block/base/entity/MachineBlockEntity.java#tick",
         "common/src/main/java/rearth/oritech/block/base/entity/MachineBlockEntity.java#calculateEnergyUsage",
         "common/src/main/java/rearth/oritech/block/base/entity/MachineBlockEntity.java#checkCraftingFinished",
         "common/src/main/java/rearth/oritech/init/OritechConfig.java#pulverizerData",
@@ -86,7 +87,7 @@
             "item": "oritech:pulverizer_block",
             "rate": {
               "denominator": 1,
-              "numerator": 32
+              "numerator": 1
             }
           }
         ]
@@ -233,7 +234,7 @@
         }
       ]
     },
-    "expected_game_tests": 18,
+    "expected_game_tests": 20,
     "fixture": "oritechFixture",
     "game_test_task": "runOritechGameTestServer",
     "gradle_tasks": [

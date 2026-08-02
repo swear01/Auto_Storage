@@ -833,6 +833,9 @@ dependencies {
             }
         }
     }
+    compatOritechCompileOnly("maven.modrinth:architectury-api:ZxYGwlk0") {
+        transitive = false
+    }
     pneumaticCraftFixtureCompileOnly(
             "maven.modrinth:pneumaticcraft-repressurized:${pneumaticcraft_ci_version}") {
         transitive = false

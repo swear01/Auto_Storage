@@ -1870,6 +1870,18 @@ class StaticRegressionTests(unittest.TestCase):
             fixture,
         )
 
+    def test_oritech_fluid_outputs_use_typed_architectury_api(self):
+        compat = self.read_required(
+            "src/compat/oritech/java/com/swear/autostorage/compat/"
+            "oritech/OritechCompat.java"
+        )
+
+        self.assertIn("import dev.architectury.fluid.FluidStack;", compat)
+        self.assertIn("List<FluidStack> outputs = recipe.getFluidOutputs();", compat)
+        self.assertIn("stack == null || !stack.isEmpty()", compat)
+        self.assertNotIn("getMethod(\"getFluidOutputs\")", compat)
+        self.assertNotIn(".invoke(recipe)", compat)
+
     def test_prism_gui_support_pack_stages_macfix_and_optional_mods_without_player_dependency_pins(self):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")

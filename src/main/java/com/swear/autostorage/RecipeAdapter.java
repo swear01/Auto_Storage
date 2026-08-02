@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 interface RecipeAdapter {
     ResourceLocation id();
@@ -43,6 +44,10 @@ interface RecipeAdapter {
 
     default Optional<RecipeFamilyKey> exactFamilyKey() {
         return Optional.empty();
+    }
+
+    default OptionalLong dynamicStateToken() {
+        return OptionalLong.empty();
     }
 
 }
