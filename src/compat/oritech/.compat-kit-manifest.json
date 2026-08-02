@@ -1,13 +1,13 @@
 {
   "schema": 1,
   "tool_version": "0.3.0",
-  "contract_sha256": "ae37eb00e4a6b853d4d59b7bc5f11f7f66a3fe03d2555d1980ad233bc4c46ad4",
+  "contract_sha256": "b04ee24886ff20853d845854f23bbc91495d119d7a6e48a714fa7ac455d3f75d",
   "files": {
-    "src/compat/oritech/compat-module.json": "9d6a9bf399855ac93f78268e125ce422a68f3b669ed144d71c5075afe8c14c24",
-    "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "77214765da961a68851807172d7120cfd8f8c8dd374be7efa35b7bcec40c1f63",
+    "src/compat/oritech/compat-module.json": "20516ce3dce7ede260fa68fe07e74dc0cfb9a3a26ae026b9f2d29b849f2fe58a",
+    "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "722ce058372af607d24627e07ecb4ff225f4556eef6ac98b2a9516ed5feae935",
     "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompatModule.java": "5d6bb71971ce83f6e717256b4a759765dc8afd5b1907c355cdae8bb87882c8d4",
     "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechFixtureMod.java": "3749b869c9b8a7a01117b1210464f53c914338c8f8773d5dea053fa0e0f60904",
-    "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java": "e717869ee0b9657d3a712d6a30a45ce0e885d7f963d6a6f01f2d4ec44bab864e",
+    "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java": "682de7d77605fb9d273d8faa10a89ef2125a169453a5a21b7ab87391ca425ea0",
     "src/oritechFixture/resources/META-INF/neoforge.mods.toml": "bec8e0c7b8b5a7f09648101173af309090cebc1f34e0a4f8e781979c45ed25fa",
     "src/oritechFixture/resources/data/auto_storage_oritech_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   }

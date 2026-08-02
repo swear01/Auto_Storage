@@ -1,6 +1,7 @@
 package com.swear.autostorage.fixture.oritech;
 
 import com.swear.autostorage.Action;
+import com.swear.autostorage.Actor;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
@@ -12,23 +13,36 @@ import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceTransaction;
+import com.swear.autostorage.StorageTerminalMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import rearth.oritech.init.OritechConfig;
+import rearth.oritech.init.recipes.OritechRecipe;
+import rearth.oritech.init.recipes.RecipeContent;
+import rearth.oritech.util.FluidIngredient;
+
+import java.util.List;
 
 @GameTestHolder(OritechFixtureMod.MODID)
 @PrefixGameTestTemplate(false)
 public final class OritechIntegrationGameTests {
+    private static final int CRAFTABLE_PAGE_BUTTON = 6;
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final int STATIONS_PAGE_BUTTON = 29;
     private static final ResourceLocation PULVERIZER =
@@ -37,6 +51,7 @@ public final class OritechIntegrationGameTests {
             ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, "oritech_grinder");
     private static final ResourceLocation ADAMANT = oritechRecipe("pulverizer/adamant");
     private static final ResourceLocation RAW_IRON = oritechRecipe("pulverizer/raw/iron");
+    private static final ResourceLocation PLATINUM = oritechRecipe("pulverizer/ore/platinum");
     private static final ResourceLocation GRINDER_IRON = oritechRecipe("grinder/ore/iron");
     private static final ResourceLocation FLUID_OUTPUT =
             fixtureRecipe("pulverizer_fluid_output");
@@ -292,9 +307,254 @@ public final class OritechIntegrationGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void mixed_item_fe_post_commit_failure_rolls_back_core_deltas(
+            GameTestHelper helper
+    ) {
+        withCore(helper, originalContext -> {
+            RollbackStorageCoreBlockEntity rollbackCore = replaceWithRollbackCore(
+                    originalContext);
+            FixtureContext context = new FixtureContext(
+                    originalContext.level(), rollbackCore, originalContext.player());
+            long energy = expectedEnergy(ADAMANT, helper);
+            seedItem(context.core(), oritechItem("adamant_ingot"), 1);
+            seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), energy);
+            installPulverizer(context);
+            tick(context.core(), recipeTime(ADAMANT, helper));
+            rollbackCore.armMixedCommitFailure();
+            if (craft(context, ADAMANT)
+                    || !rollbackCore.mixedCommitObserved()
+                    || itemCount(context.core(), oritechItem("adamant_ingot")) != 1
+                    || itemCount(context.core(), oritechItem("adamant_dust")) != 0
+                    || context.core().getResourceAmount(
+                    StorageResourceKey.neoforgeEnergy()) != energy
+                    || context.core().getStationWork(PULVERIZER) != energy - 1
+                    || inventoryCount(
+                    context.player().getInventory(), oritechItem("adamant_dust")) != 0) {
+                helper.fail(
+                        "Oritech post-extraction cost failure did not roll back mixed item/FE deltas");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform", batch = "oritech_config")
+    public static void config_reload_and_zero_fe_mode_use_current_exact_costs(
+            GameTestHelper helper
+    ) {
+        int original = energyPerTick();
+        withCore(helper, context -> {
+            try {
+                if (recipeTime(PLATINUM, helper) != 150) {
+                    helper.fail("Oritech platinum fixture did not retain its 150-tick duration");
+                    return;
+                }
+                seedItem(context.core(), oritechItem("deepslate_platinum_ore"), 2);
+                installPulverizer(context);
+                selectPreview(context, PLATINUM);
+
+                setEnergyPerTick(7);
+                MachineDescriptor descriptor = MachineEnergyTable.get(PULVERIZER);
+                ItemStack station = new ItemStack(oritechItem("pulverizer_block"));
+                if (descriptor == null || !descriptor.rateFor(station).orElseThrow().equals(
+                        MachineWorkRate.of(7, 1))) {
+                    helper.fail("Oritech pulverizer did not reload its configured rate");
+                    return;
+                }
+                seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), 1_050);
+                tick(context.core(), 150);
+                if (!craft(context, PLATINUM)
+                        || itemCount(context.core(), oritechItem("raw_platinum")) != 2
+                        || context.core().getResourceAmount(
+                        StorageResourceKey.neoforgeEnergy()) != 0
+                        || context.core().getStationWork(PULVERIZER) != 0) {
+                    helper.fail("Oritech cached stale 7 FE/t pulverizer costs");
+                    return;
+                }
+
+                setEnergyPerTick(0);
+                if (!descriptor.rateFor(station).orElseThrow().equals(
+                        MachineWorkRate.of(1, 1))) {
+                    helper.fail("Oritech zero-FE pulverizer did not retain one work per tick");
+                    return;
+                }
+                tick(context.core(), 150);
+                if (!craft(context, PLATINUM)
+                        || itemCount(context.core(), oritechItem("raw_platinum")) != 4
+                        || context.core().getResourceAmount(
+                        StorageResourceKey.neoforgeEnergy()) != 0
+                        || context.core().getStationWork(PULVERIZER) != 0) {
+                    helper.fail("Oritech zero-FE pulverizer did not use exact recipe-time work");
+                    return;
+                }
+                helper.succeed();
+            } finally {
+                setEnergyPerTick(original);
+            }
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform", batch = "oritech_catalog_config")
+    public static void zero_fe_transition_keeps_oversized_recipe_out_of_craftable_catalog(
+            GameTestHelper helper
+    ) {
+        int originalEnergy = energyPerTick();
+        withCore(helper, context -> {
+            var manager = context.level().getRecipeManager();
+            var originalRecipes = List.copyOf(manager.getRecipes());
+            try {
+                setEnergyPerTick(0);
+                for (Item item : List.of(
+                        Items.COBBLESTONE,
+                        Items.DIRT,
+                        Items.SAND,
+                        Items.GRAVEL,
+                        Items.CLAY_BALL,
+                        Items.FLINT,
+                        Items.STICK,
+                        Items.COAL,
+                        Items.CHARCOAL)) {
+                    seedItem(context.core(), item, 1);
+                }
+                installPulverizer(context);
+                tick(context.core(), 100);
+                manager.replaceRecipes(originalRecipes);
+
+                var menu = new CraftingTerminalMenu(
+                        933, context.player().getInventory(), context.core());
+                menu.clickMenuButton(context.player(), CRAFTABLE_PAGE_BUTTON);
+                menu.refreshDisplayItems(context.core());
+                boolean visibleAtZero = findDisplaySlot(menu, Items.DIAMOND) >= 0;
+
+                setEnergyPerTick(7);
+                boolean transitionFailed = false;
+                boolean visibleAtSeven = false;
+                try {
+                    menu.refreshDisplayItems(context.core());
+                    visibleAtSeven = findDisplaySlot(menu, Items.DIAMOND) >= 0;
+                } catch (IllegalArgumentException exception) {
+                    transitionFailed = true;
+                }
+                if (visibleAtZero || visibleAtSeven || transitionFailed) {
+                    helper.fail(
+                            "Oritech config transition changed oversized Craftable eligibility");
+                    return;
+                }
+                helper.succeed();
+            } finally {
+                setEnergyPerTick(originalEnergy);
+                manager.replaceRecipes(originalRecipes);
+            }
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void null_fluid_outputs_fail_closed(GameTestHelper helper) {
+        OritechRecipe recipe = syntheticRecipe(
+                100,
+                List.of(Ingredient.of(Items.STONE)),
+                List.of(new ItemStack(Items.GRAVEL)),
+                FluidIngredient.EMPTY,
+                null);
+        if (CraftingTerminalMenu.supportsRecipeHolder(
+                new RecipeHolder<>(fixtureRecipe("null_fluid_outputs"), recipe))) {
+            helper.fail("Oritech pulverizer accepted null fluid outputs");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void null_fluid_output_element_fails_closed(GameTestHelper helper) {
+        OritechRecipe recipe = syntheticRecipe(
+                100,
+                List.of(Ingredient.of(Items.STONE)),
+                List.of(new ItemStack(Items.GRAVEL)),
+                FluidIngredient.EMPTY,
+                java.util.Collections.singletonList(null));
+        if (CraftingTerminalMenu.supportsRecipeHolder(
+                new RecipeHolder<>(fixtureRecipe("null_fluid_output_element"), recipe))) {
+            helper.fail("Oritech pulverizer accepted a null fluid output element");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void non_simple_ingredient_fails_closed(GameTestHelper helper) {
+        Ingredient ingredient = DataComponentIngredient.of(
+                true, new ItemStack(Items.STONE));
+        if (ingredient.isSimple()) {
+            helper.fail("Oritech non-simple ingredient fixture unexpectedly became simple");
+            return;
+        }
+        OritechRecipe recipe = syntheticRecipe(ingredient, FluidIngredient.EMPTY);
+        if (CraftingTerminalMenu.supportsRecipeHolder(
+                new RecipeHolder<>(fixtureRecipe("non_simple_ingredient"), recipe))) {
+            helper.fail("Oritech pulverizer accepted a non-simple ingredient");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void nonempty_fluid_input_fails_closed(GameTestHelper helper) {
+        FluidIngredient water = new FluidIngredient()
+                .withContent(Fluids.WATER)
+                .withAmount(1_000);
+        OritechRecipe recipe = syntheticRecipe(Ingredient.of(Items.STONE), water);
+        if (CraftingTerminalMenu.supportsRecipeHolder(
+                new RecipeHolder<>(fixtureRecipe("nonempty_fluid_input"), recipe))) {
+            helper.fail("Oritech pulverizer accepted a nonempty fluid input");
+            return;
+        }
+        helper.succeed();
+    }
+
     private static boolean supports(GameTestHelper helper, ResourceLocation recipeId) {
         var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
         return CraftingTerminalMenu.supportsRecipeHolder(holder);
+    }
+
+    private static OritechRecipe syntheticRecipe(
+            Ingredient ingredient,
+            FluidIngredient fluidInput
+    ) {
+        return syntheticRecipe(
+                100,
+                List.of(ingredient),
+                List.of(new ItemStack(Items.GRAVEL)),
+                fluidInput,
+                List.of());
+    }
+
+    private static OritechRecipe syntheticRecipe(
+            int time,
+            List<Ingredient> inputs,
+            List<ItemStack> results,
+            FluidIngredient fluidInput,
+            List<?> fluidOutputs
+    ) {
+        try {
+            for (var constructor : OritechRecipe.class.getConstructors()) {
+                Class<?>[] parameters = constructor.getParameterTypes();
+                if (parameters.length == 6
+                        && parameters[0] == int.class
+                        && parameters[1] == List.class
+                        && parameters[2] == List.class
+                        && parameters[3] == rearth.oritech.init.recipes.OritechRecipeType.class
+                        && parameters[4] == FluidIngredient.class
+                        && parameters[5] == List.class) {
+                    return (OritechRecipe) constructor.newInstance(
+                            time, inputs, results, RecipeContent.PULVERIZER,
+                            fluidInput, fluidOutputs);
+                }
+            }
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Could not build synthetic Oritech recipe", exception);
+        }
+        throw new IllegalStateException("Oritech list-output constructor was not found");
     }
 
     private static long expectedEnergy(ResourceLocation recipeId, GameTestHelper helper) {
@@ -313,6 +573,10 @@ public final class OritechIntegrationGameTests {
 
     private static int energyPerTick() {
         return OritechConfig.processingMachines.pulverizerData.energyPerTick.get();
+    }
+
+    private static void setEnergyPerTick(int value) {
+        OritechConfig.processingMachines.pulverizerData.energyPerTick.set(value);
     }
 
     private static void withCore(GameTestHelper helper, FixtureAssertion assertion) {
@@ -339,6 +603,25 @@ public final class OritechIntegrationGameTests {
                     corePos.getZ() + 0.5);
             assertion.run(new FixtureContext(level, core, player));
         });
+    }
+
+    private static RollbackStorageCoreBlockEntity replaceWithRollbackCore(
+            FixtureContext context
+    ) {
+        CompoundTag saved = context.core().saveWithoutMetadata(
+                context.level().registryAccess());
+        BlockPos pos = context.core().getBlockPos();
+        context.level().removeBlockEntity(pos);
+        RollbackStorageCoreBlockEntity replacement = new RollbackStorageCoreBlockEntity(
+                pos, context.level().getBlockState(pos));
+        replacement.loadWithComponents(saved, context.level().registryAccess());
+        context.level().setBlockEntity(replacement);
+        replacement.onLoad();
+        replacement.rebuildNetwork(context.level());
+        if (!replacement.isStorageAvailable()) {
+            throw new IllegalStateException("Rollback Core test fixture did not attach storage");
+        }
+        return replacement;
     }
 
     private static void installPulverizer(FixtureContext context) {
@@ -376,6 +659,20 @@ public final class OritechIntegrationGameTests {
                 CraftingDestination.STORAGE, context.player());
     }
 
+    private static void selectPreview(
+            FixtureContext context,
+            ResourceLocation recipeId
+    ) {
+        var menu = new CraftingTerminalMenu(
+                932, context.player().getInventory(), context.core());
+        if (!menu.handleRecipeRequest(
+                context.level(), recipeId, 1,
+                CraftingDestination.NONE, context.player())) {
+            throw new IllegalStateException("Could not select Oritech recipe " + recipeId);
+        }
+        menu.computeCraftPreview(context.core(), context.player());
+    }
+
     private static void seedItem(StorageCoreBlockEntity core, Item item, int amount) {
         ItemStack stack = new ItemStack(item, amount);
         if (core.insertItem(stack) != amount) {
@@ -395,6 +692,25 @@ public final class OritechIntegrationGameTests {
 
     private static long itemCount(StorageCoreBlockEntity core, Item item) {
         return core.getItemCount(ItemKey.of(new ItemStack(item)));
+    }
+
+    private static int findDisplaySlot(CraftingTerminalMenu menu, Item item) {
+        for (int slot = 0; slot < StorageTerminalMenu.DISPLAY_SLOTS; slot++) {
+            if (menu.getSlot(slot).getItem().is(item)) return slot;
+        }
+        return -1;
+    }
+
+    private static long inventoryCount(
+            net.minecraft.world.entity.player.Inventory inventory,
+            Item item
+    ) {
+        long count = 0;
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (stack.is(item)) count += stack.getCount();
+        }
+        return count;
     }
 
     private static void tick(StorageCoreBlockEntity core, int ticks) {
@@ -426,6 +742,65 @@ public final class OritechIntegrationGameTests {
             StorageCoreBlockEntity core,
             net.minecraft.world.entity.player.Player player
     ) {
+    }
+
+    private static final class RollbackStorageCoreBlockEntity
+            extends StorageCoreBlockEntity {
+        private boolean armed;
+        private boolean mixedCommitObserved;
+
+        private RollbackStorageCoreBlockEntity(
+                BlockPos pos,
+                net.minecraft.world.level.block.state.BlockState state
+        ) {
+            super(pos, state);
+        }
+
+        private void armMixedCommitFailure() {
+            armed = true;
+        }
+
+        private boolean mixedCommitObserved() {
+            return mixedCommitObserved;
+        }
+
+        @Override
+        public boolean applyResourceTransaction(
+                StorageResourceTransaction transaction,
+                Action action,
+                Actor actor
+        ) {
+            boolean applied = super.applyResourceTransaction(transaction, action, actor);
+            if (!applied || !armed || action != Action.EXECUTE
+                    || !actor.name().equals("auto_storage_crafting")
+                    || !isMixedOritechCommit(transaction)) {
+                return applied;
+            }
+            armed = false;
+            mixedCommitObserved = true;
+            if (!consumeStationWork(PULVERIZER, 1)) {
+                throw new IllegalStateException(
+                        "Could not inject Oritech post-extraction cost failure");
+            }
+            return true;
+        }
+
+        private boolean isMixedOritechCommit(StorageResourceTransaction transaction) {
+            if (getLevel() == null) return false;
+            StorageResourceKey input = StorageResourceKey.item(
+                    new ItemStack(oritechItem("adamant_ingot")),
+                    getLevel().registryAccess());
+            StorageResourceKey output = StorageResourceKey.item(
+                    new ItemStack(oritechItem("adamant_dust")),
+                    getLevel().registryAccess());
+            Long inputDelta = transaction.deltas().get(input);
+            Long outputDelta = transaction.deltas().get(output);
+            Long energyDelta = transaction.deltas().get(
+                    StorageResourceKey.neoforgeEnergy());
+            return inputDelta != null && inputDelta == -1
+                    && outputDelta != null && outputDelta == 1
+                    && energyDelta != null && energyDelta < 0;
+        }
     }
 
     @FunctionalInterface

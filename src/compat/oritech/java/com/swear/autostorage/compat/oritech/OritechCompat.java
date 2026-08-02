@@ -70,12 +70,12 @@ public final class OritechCompat {
                         Component.translatable("gui.auto_storage.station.oritech_pulverizer"),
                         () -> List.of(MachineVariant.derived(
                                 new ItemStack(requiredItem(PULVERIZER_ITEM)),
-                                () -> MachineWorkRate.of(energyPerTick(), 1))),
+                                () -> MachineWorkRate.of(workPerTick(), 1))),
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
         recipeFamilies.register(descriptorId.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
+                RecipeFamilyFactories.dynamicDeterministicResources(
                         OritechRecipe.class,
                         () -> RecipeContent.PULVERIZER,
                         descriptorId,
@@ -94,8 +94,7 @@ public final class OritechCompat {
                 || recipe.getResults() == null
                 || recipe.getResults().isEmpty()
                 || !emptyFluid(recipe.getFluidInput())
-                || !emptyFluidOutputs(recipe)
-                || energyPerTick() <= 0) {
+                || !emptyFluidOutputs(recipe)) {
             return false;
         }
         for (Ingredient ingredient : recipe.getInputs()) {
@@ -120,13 +119,15 @@ public final class OritechCompat {
             OritechRecipe recipe,
             HolderLookup.Provider registries
     ) {
-        long energy = requiredWork(recipe);
+        long energy = requiredEnergy(recipe);
         TypedRecipePlan.Builder builder = TypedRecipePlan.builder();
         for (Ingredient ingredient : recipe.getInputs()) {
             builder.input(TypedRecipeInput.consumeAny(keys(ingredient, registries), 1));
         }
-        builder.input(TypedRecipeInput.consume(
-                StorageResourceKey.neoforgeEnergy(), energy));
+        if (energy > 0) {
+            builder.input(TypedRecipeInput.consume(
+                    StorageResourceKey.neoforgeEnergy(), energy));
+        }
 
         LinkedHashMap<StorageResourceKey, Long> outputs = new LinkedHashMap<>();
         ItemStack presentation = recipe.getResults().getFirst().copy();
@@ -145,7 +146,7 @@ public final class OritechCompat {
             primary = false;
         }
 
-        int inputCount = recipe.getInputs().size() + 1;
+        int inputCount = recipe.getInputs().size() + energyInputCount();
         int width = Math.min(3, inputCount);
         return builder
                 .presentationOutput(presentation)
@@ -154,7 +155,19 @@ public final class OritechCompat {
     }
 
     private static long requiredWork(OritechRecipe recipe) {
+        return Math.multiplyExact((long) workPerTick(), recipe.getTime());
+    }
+
+    private static long requiredEnergy(OritechRecipe recipe) {
         return Math.multiplyExact((long) energyPerTick(), recipe.getTime());
+    }
+
+    private static int workPerTick() {
+        return Math.max(1, energyPerTick());
+    }
+
+    private static int energyInputCount() {
+        return energyPerTick() > 0 ? 1 : 0;
     }
 
     private static int energyPerTick() {
@@ -176,12 +189,15 @@ public final class OritechCompat {
             throw new IllegalStateException(
                     "Oritech getFluidOutputs is not inspectable", exception);
         }
-        if (!(outputs instanceof List<?> fluidOutputs) || fluidOutputs.isEmpty()) {
+        if (!(outputs instanceof List<?> fluidOutputs)) {
+            return false;
+        }
+        if (fluidOutputs.isEmpty()) {
             return true;
         }
         for (Object stack : fluidOutputs) {
             if (stack == null) {
-                continue;
+                return false;
             }
             try {
                 Object empty = stack.getClass().getMethod("isEmpty").invoke(stack);

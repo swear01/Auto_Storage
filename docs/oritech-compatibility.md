@@ -16,8 +16,8 @@ Architectury API and GeckoLib remain required companions of that optional target
 - audit: `compat/audits/oritech/1.2.9.json` (scanner format 16);
 - reviewed contract: `compat/contracts/oritech.json`;
 - matrix recipe-inventory SHA-256 for namespace `oritech`:
-  `e7094c8e7af268116532561f71932690066fc7cf8b4fe98f01dcc472a4b45beb`
-  (736 loaded recipes).
+  `edeaf16cc17b7aff8c4b5cd51ea539eb47902bc0b3a44e2b7afca037e7444ee3`
+  (802 loaded recipes).
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Oritech version on players and does not claim a multi-version matrix.
@@ -38,23 +38,28 @@ Logical station:
 - live work rate from
   `OritechConfig.processingMachines.pulverizerData.energyPerTick`
   (default `32` work/tick), deferred until config load via
-  `MachineVariant.derived`.
+  `MachineVariant.derived`; the legal zero-energy configuration remains one
+  work/tick, matching Oritech's own progress behavior.
 
 Transaction:
 
 - every simple non-empty item ingredient is consumed once;
-- empty/zero `fluidInput` only; nonempty `fluidOutputs` stay unsupported
-  because the pulverizer plan does not emit fluids;
-- at most eight item ingredients so `ingredients + FE` stays within the
-  3×3 presentation layout (`RecipePresentation.MAX_INPUTS`);
+- empty/zero `fluidInput` only; `fluidOutputs` must be a non-null list of empty
+  stacks, while null or nonempty output data fails closed because the
+  pulverizer plan does not emit fluids;
+- at most eight item ingredients; eligibility always reserves one possible FE
+  input against the 3×3 plan bound so crossing zero cannot change whether the
+  recipe belongs to the shared Craftable catalog;
 - `results[0]` is the primary item output;
 - further `results[i]` are deterministic item remainders; identical
   component-exact keys merge amounts before the plan is built;
-- FE and station work each equal `energyPerTick × recipe.time` at base addon
-  multipliers (`1`).
+- FE equals `energyPerTick × recipe.time` and is omitted when the loaded value
+  is zero; station work equals `max(1, energyPerTick) × recipe.time`.
 
 `OritechRecipe.isSpecial()` is true, so the family uses the public
-`deterministicResources` eligibility overload. Eligibility never calls
+`dynamicDeterministicResources` eligibility overload. Its plan and cost are
+re-resolved from the current config after reload while its exact item
+candidates remain indexed. Eligibility never calls
 `Recipe#getIngredients()` for inference; it reads Oritech's public
 `getInputs()` / `getResults()` / `getFluidInput()` / `getFluidOutputs()` /
 `getTime()` surfaces.
@@ -76,16 +81,29 @@ not modeled.
 Oritech owns its EMI category and workstation metadata. Auto Storage does not
 register Oritech workstations into EMI.
 
+## Craftable catalog performance
+
+The post-rebase matrix contains 15,822 recipes. Its first current-head run
+correctly failed the unchanged 9 MiB shared-index gate at 9,532,520 bytes.
+Catalog entries now reuse the holder's recipe ID and do not retain fixed
+variant lists between invalidated rebuilds; the server-owned shared result
+cache still keeps ordinary page switches from rebuilding variants. The same
+15,822-recipe matrix now passes with 9,250,824 retained bytes, 0.872 ms first
+switch, 0.381 ms switch p95, and 114,827 bytes per menu.
+
 ## Verification
 
 ```bash
 ./gradlew runOritechGameTestServer
+./gradlew runCompatibilityMatrixGameTestServer
 ```
 
-Eight real GameTests cover pulverizer registration and grinder exclusion,
+Eighteen real GameTests cover pulverizer registration and grinder exclusion,
 adamant FE/work craft, raw-iron multi-output remainder, missing ingredient,
-insufficient FE, insufficient work, destination overflow/`Long.MAX_VALUE`
-rollback, and live energy-to-FE/work mapping. Three additional GameTests
-fail-close fluid-output holders, merge duplicate exact item results, and
-reject oversized ingredient+FE layouts that cannot build a legal
-`TypedRecipePlan`. The all-mod compatibility matrix protects coexistence.
+insufficient FE/work, destination overflow, a true post-commit mixed Item+FE
+rollback, config reload at 7 FE/t, legal zero-FE progress, and the 150-tick
+platinum duration. The same config boundary also proves that crossing zero FE
+does not change oversized-family eligibility or leave a stale Craftable catalog
+entry. Fail-closed checks cover nonempty and null fluid data, non-simple
+ingredients, oversized ingredient+FE layouts, while another test merges
+duplicate exact item outputs. The all-mod compatibility matrix protects coexistence.

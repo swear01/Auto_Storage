@@ -61,9 +61,9 @@
 | `src/pneumaticCraftFixture/` | 代表性PneumaticCraft 8.2.22 present-mod隔離fixture；9個tests鎖住Air與七類machine recipes不被不安全接受。 |
 | `src/extendedCraftingFixture/` | 代表性Extended Crafting 7.0.8 + Cucumber 8.0.16隔離GameTest fixture；4個tests驗Ultimate Table gating、9×9/81-position exact commit、one-short no-op、full-destination rollback與真實Ultimate Singularity component identity。 |
 | `docs/extended-crafting-compatibility.md` | Extended Crafting shaped-table/Ultimate Singularity支持、81-input boundary、representative fixture政策與fail-closed transformer邊界。 |
-| `src/compat/oritech/` | Oritech 1.2.9 Compat Kit dogfood：exact pulverizer family、live energyPerTick rate/FE/work、deterministic multi-output remainder。 |
-| `docs/oritech-compatibility.md` | Oritech pulverizer contract、source/SHA evidence、明確排除其他 RecipeContent 與11個isolated GameTests。 |
-| `src/oritechFixture/` | 隔離載入代表性Oritech 1.2.9、Architectury、GeckoLib；11個GameTests驗pulverizer註冊、adamant/raw-iron craft、FE/work shortage/capacity rollback、fluid-output/duplicate-merge/oversized-layout fail-closed。 |
+| `src/compat/oritech/` | Oritech 1.2.9 Compat Kit dogfood：exact pulverizer family、config-reloaded energyPerTick rate/FE/work、zero-FE progress、deterministic multi-output remainder。 |
+| `docs/oritech-compatibility.md` | Oritech pulverizer contract、source/SHA evidence、明確排除其他 RecipeContent 與18個isolated GameTests。 |
+| `src/oritechFixture/` | 隔離載入代表性Oritech 1.2.9、Architectury、GeckoLib；18個GameTests驗pulverizer註冊、adamant/raw-iron/platinum craft、live/zero FE、config-crossing catalog stability、post-commit mixed rollback、fluid/ingredient/layout fail-closed與duplicate merge。 |
 | `docs/theurgy-compatibility.md` | Theurgy optional Calcination/Distillation/Liquefaction exact contract、solvent fluid、heat abstraction與代表性1.73.1 fixture政策。 |
 | `src/theurgyFixture/` | 代表性Theurgy 1.73.1 + Modonomicon + GeckoLib隔離GameTest fixture；9個tests驗三個deterministic families、item/solvent/work、rejected families與atomic rollback。 |
 | `docs/advanced-ae-compatibility.md` | Advanced AE 1.6.11 evidence-backed outcome C；Reaction Chamber live-network語意與零production-family邊界。 |

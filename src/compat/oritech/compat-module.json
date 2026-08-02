@@ -7,7 +7,7 @@
     "maven.modrinth:oritech:gMBPdWrE"
   ],
   "entrypoint": "com.swear.autostorage.compat.oritech.OritechCompatModule",
-  "expectedTests": 11,
+  "expectedTests": 18,
   "fixture": "oritechFixture",
   "id": "auto_storage:oritech",
   "matrix": {
@@ -24,7 +24,7 @@
       "namespaces": [
         "oritech"
       ],
-      "sha256": "e7094c8e7af268116532561f71932690066fc7cf8b4fe98f01dcc472a4b45beb"
+      "sha256": "edeaf16cc17b7aff8c4b5cd51ea539eb47902bc0b3a44e2b7afca037e7444ee3"
     },
     "rejectedDescriptors": [],
     "rejectedResourceKinds": [],

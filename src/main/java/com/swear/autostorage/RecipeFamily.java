@@ -31,6 +31,7 @@ public final class RecipeFamily {
     private final TypedPlanVariants typedPlanVariants;
     private final Predicate<Recipe<?>> eligibility;
     private final boolean allowSpecial;
+    private final boolean cacheTypedPlan;
     private final Function<Recipe<?>, RecipeFamilyCost> cost;
     private final RecipePresentationKind presentationKind;
     private final Map<Recipe<?>, TypedRecipePlan> typedPlanCache =
@@ -56,6 +57,7 @@ public final class RecipeFamily {
         this.typedPlanVariants = null;
         this.eligibility = recipe -> true;
         this.allowSpecial = false;
+        this.cacheTypedPlan = false;
         this.cost = Objects.requireNonNull(cost, "cost");
         this.presentationKind = Objects.requireNonNull(presentationKind, "presentationKind");
     }
@@ -68,7 +70,8 @@ public final class RecipeFamily {
             BiFunction<Recipe<?>, HolderLookup.Provider, TypedRecipePlan> typedPlan,
             Function<Recipe<?>, RecipeFamilyCost> cost,
             RecipePresentationKind presentationKind,
-            boolean allowSpecial
+            boolean allowSpecial,
+            boolean cacheTypedPlan
     ) {
         this.exactRecipeClass = Objects.requireNonNull(exactRecipeClass, "exactRecipeClass");
         this.recipeType = Objects.requireNonNull(recipeType, "recipeType");
@@ -77,6 +80,7 @@ public final class RecipeFamily {
         this.output = null;
         this.eligibility = Objects.requireNonNull(eligibility, "eligibility");
         this.allowSpecial = allowSpecial;
+        this.cacheTypedPlan = cacheTypedPlan;
         this.typedPlan = Objects.requireNonNull(typedPlan, "typedPlan");
         this.typedPlanVariants = null;
         this.cost = Objects.requireNonNull(cost, "cost");
@@ -100,6 +104,7 @@ public final class RecipeFamily {
         this.output = null;
         this.eligibility = Objects.requireNonNull(eligibility, "eligibility");
         this.allowSpecial = allowSpecial;
+        this.cacheTypedPlan = false;
         this.typedPlan = null;
         this.typedPlanVariants = Objects.requireNonNull(
                 typedPlanVariants, "typedPlanVariants");
@@ -144,6 +149,9 @@ public final class RecipeFamily {
             HolderLookup.Provider registries
     ) {
         if (typedPlan == null) throw new IllegalStateException("Legacy recipe family has no typed plan");
+        if (!cacheTypedPlan) {
+            return Objects.requireNonNull(typedPlan.apply(recipe, registries), "typed recipe plan");
+        }
         return typedPlanCache.computeIfAbsent(recipe, ignored ->
                 Objects.requireNonNull(typedPlan.apply(recipe, registries), "typed recipe plan"));
     }
@@ -218,7 +226,9 @@ public final class RecipeFamily {
             Recipe<?> recipe = checkedRecipe(holder);
             if (typedPlan == null || level == null) return candidateIndex(holder);
             TypedRecipePlan plan = typedPlanFor(recipe, level.registryAccess());
-            typedContractCache.computeIfAbsent(recipe, ignored -> typedContract(recipe, plan));
+            if (cacheTypedPlan) {
+                typedContractCache.computeIfAbsent(recipe, ignored -> typedContract(recipe, plan));
+            }
             return typedCandidateIndex(plan, level.registryAccess());
         }
 
@@ -250,7 +260,9 @@ public final class RecipeFamily {
         public RecipeAdapterMatch.Contract contract(RecipeHolder<?> holder) {
             Recipe<?> recipe = checkedRecipe(holder);
             if (isTyped()) {
-                RecipeAdapterMatch.Contract cached = typedContractCache.get(recipe);
+                RecipeAdapterMatch.Contract cached = cacheTypedPlan
+                        ? typedContractCache.get(recipe)
+                        : null;
                 if (cached != null) return cached;
                 RecipeAdapterMatch.Presentation presentation = new RecipeAdapterMatch.Presentation(
                         presentationKind,
@@ -312,7 +324,9 @@ public final class RecipeFamily {
             if (isTyped()) {
                 if (level == null) return List.of();
                 if (typedPlan != null) {
-                    if (baseContract.typedRecipePlan() != null) return List.of(baseContract);
+                    if (cacheTypedPlan && baseContract.typedRecipePlan() != null) {
+                        return List.of(baseContract);
+                    }
                     return List.of(typedContract(
                             recipe, typedPlanFor(recipe, level.registryAccess())));
                 }

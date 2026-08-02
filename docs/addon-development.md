@@ -332,6 +332,9 @@ recipe class plus exact `RecipeType`, not individual recipe IDs.
 - `singleItemToItem` covers one consumed item and one deterministic item output.
 - `deterministicResources` covers bounded exact item/fluid/energy/chemical/addon
   inputs, catalysts, tools, remainders, multiple outputs, and station costs.
+- `dynamicDeterministicResources` covers the same one-plan contract when loaded
+  server configuration can change its exact plan or cost after registration;
+  it re-resolves those values without dropping the exact candidate index.
 - `deterministicResourceVariants` covers a bounded set of complete deterministic
   plans selected from exact available stacks.
 
