@@ -92,5 +92,5 @@ tools/compat-kit/compat-kit verify \
 
 Passing report path: `build/compat-kit/immersiveengineering-report.json`.
 
-The committed audit/contract currently remain scanner format 7, matching the merged Theurgy dogfood on main. Compat Kit v2 complete verify requires a format-16 audit; upgrading is blocked until the optional ComputerCraft peripheral ancestry used by IE's embedded CC compat classes is supplied as exact classpath evidence.
+The committed audit/contract currently remain scanner format 7, matching the merged Theurgy dogfood on main. Compat Kit v2 complete verify requires a format-16 audit; upgrading is blocked by scanner failure on `ModelConveyor$1$Key` after IE's compileOnly ancestry jars are supplied.
 
