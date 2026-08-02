@@ -34,6 +34,19 @@ final class CraftableRecipeCatalog {
         }
     }
 
+    static void releaseTransientMatches() {
+        synchronized (CACHE) {
+            for (CatalogIndex cached : CACHE.values()) {
+                for (CatalogEntry entry : cached.entries()) {
+                    entry.releaseTransientMatches();
+                }
+            }
+        }
+        for (RecipeFamily family : AutoStorage.RECIPE_FAMILY_REGISTRY) {
+            family.clearRuntimeCaches();
+        }
+    }
+
     List<Candidate> getCandidates(
             Level level,
             Collection<Item> availableItems
@@ -270,6 +283,11 @@ final class CraftableRecipeCatalog {
                         RecipeCandidateIndex.exhaustive(List.of()));
             }
             return match;
+        }
+
+        private void releaseTransientMatches() {
+            match = null;
+            fixedVariants = null;
         }
 
         private List<RecipeAdapterMatch> resolveVariants(

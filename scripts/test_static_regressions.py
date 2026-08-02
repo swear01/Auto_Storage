@@ -4793,6 +4793,107 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("candidateIndex(RecipeHolder<?> holder, Level level)", adapter)
         self.assertIn("typedCandidateIndex", family)
 
+    def test_craftable_retained_state_releases_transient_classification_graphs(self):
+        family = self.read_required(
+            "src/main/java/com/swear/autostorage/RecipeFamily.java"
+        )
+        catalog = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftableRecipeCatalog.java"
+        )
+        menu = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
+        )
+        matrix = self.read_required(
+            "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/"
+            "compatibilitymatrix/CraftablePerformanceGameTests.java"
+        )
+        self.assertIn(
+            "void clearRuntimeCaches()",
+            family,
+            "RecipeFamily must expose production cache release for typed plan/contract maps",
+        )
+        release = self.java_block(
+            catalog,
+            r"\bstatic\s+void\s+releaseTransientMatches\s*\(",
+            "CraftableRecipeCatalog.releaseTransientMatches",
+        )
+        self.assertIn(
+            "RECIPE_FAMILY_REGISTRY",
+            release,
+            "transient release must clear optional RecipeFamily plan/contract caches",
+        )
+        self.assertIn(
+            "clearRuntimeCaches()",
+            release,
+            "transient release must clear RecipeFamily runtime caches",
+        )
+        entry = self.java_block(
+            catalog,
+            r"\bprivate\s+static\s+final\s+class\s+CatalogEntry\b",
+            "CraftableRecipeCatalog.CatalogEntry",
+        )
+        self.assertIn(
+            "releaseTransientMatches",
+            entry,
+            "CatalogEntry must drop classify-time match/fixedVariants after shared listing exists",
+        )
+        self.assertIn(
+            "fixedVariants = null",
+            entry,
+            "CatalogEntry release must drop retained fixedVariants",
+        )
+        self.assertIn(
+            "match = null",
+            entry,
+            "CatalogEntry release must drop retained RecipeAdapterMatch graphs",
+        )
+        shared_cache = self.java_block(
+            menu,
+            r"\bprivate\s+void\s+cacheSharedCraftable\s*\(",
+            "CraftingTerminalMenu.cacheSharedCraftable",
+        )
+        self.assertIn(
+            "CraftableRecipeCatalog.releaseTransientMatches()",
+            shared_cache,
+            "production shared Craftable cache must release transient catalog/family graphs",
+        )
+        self.assertIn(
+            "server.execute(CraftableRecipeCatalog::releaseTransientMatches)",
+            shared_cache,
+            "transient release must run after prepare returns so craftable_prepare_ms "
+            "measures listing construction rather than cache teardown",
+        )
+        has_potential = self.java_block(
+            menu,
+            r"\bprivate\s+boolean\s+hasPotentialRecipeInputs\s*\(",
+            "CraftingTerminalMenu.hasPotentialRecipeInputs",
+        )
+        self.assertIn(
+            "representativeItemsExhaustive()",
+            has_potential,
+            "hasPotentialRecipeInputs must use exhaustive representative ItemKey totals "
+            "instead of scanning every stored component variant",
+        )
+        measure = self.java_block(
+            matrix,
+            r"\bprivate\s+void\s+measureSharedIndex\s*\(",
+            "CraftablePerformanceGameTests.measureSharedIndex",
+        )
+        self.assertNotIn(
+            "releaseTransientMatches",
+            measure,
+            "shared-index measurement must not call catalog release itself",
+        )
+        self.assertNotIn(
+            "clearRecipeFamilyCaches()",
+            measure,
+            "shared-index measurement must not clear family caches after production steady state",
+        )
+        self.assertIn(
+            "MAX_BASELINE_INDEX_RETAINED_BYTES = 9L * 1024L * 1024L",
+            matrix,
+        )
+
     def test_processing_cells_keep_fixed_status_panel_free_of_duplicate_details(self):
         layout = self.read_required(
             "src/main/java/com/swear/autostorage/TerminalLayout.java"

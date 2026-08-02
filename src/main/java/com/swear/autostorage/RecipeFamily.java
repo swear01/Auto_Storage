@@ -182,6 +182,11 @@ public final class RecipeFamily {
         return Objects.requireNonNull(cost.apply(recipe), "recipe family cost");
     }
 
+    void clearRuntimeCaches() {
+        typedPlanCache.clear();
+        typedContractCache.clear();
+    }
+
     private final class FamilyAdapter implements RecipeAdapter {
         private final ResourceLocation id;
         private final int priority;

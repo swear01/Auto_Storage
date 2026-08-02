@@ -3521,6 +3521,12 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 stacks,
                 nextCraftableEnergyThreshold,
                 nextCraftableStationThreshold));
+        var server = level.getServer();
+        if (server != null) {
+            server.execute(CraftableRecipeCatalog::releaseTransientMatches);
+        } else {
+            CraftableRecipeCatalog.releaseTransientMatches();
+        }
     }
 
     private boolean restoreSharedCraftableCache(StorageCoreBlockEntity core) {
@@ -3823,6 +3829,15 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                         < need.count()) return false;
                 continue;
             }
+            if (need.ingredient().representativeItemsExhaustive()) {
+                long exact = 0;
+                for (ItemStack representative : need.ingredient().representatives()) {
+                    if (representative.isEmpty()) continue;
+                    exact = saturatingAdd(
+                            exact, availability.amount(ItemKey.of(representative)));
+                }
+                if (exact >= need.count()) continue;
+            }
             long available = 0;
             for (IngredientSource source : availability.matching(need.ingredient())) {
                 if (need.ingredient().test(source.stack())) {
@@ -3858,11 +3873,30 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {
         Map<IngredientSource, Integer> sourceMatches = new IdentityHashMap<>();
         List<IngredientSource> relevantSources = new ArrayList<>();
+        Map<ItemKey, Integer> exactKeyMatches = new HashMap<>();
         for (IngredientNeed need : needs) {
             if (need.ingredient().matchesAllItemVariants()) {
                 if (availability.matchingAllItemVariants(need.ingredient())
                         < need.count()) return false;
                 continue;
+            }
+            if (need.ingredient().representativeItemsExhaustive()) {
+                long exact = 0;
+                List<ItemKey> matchedKeys = new ArrayList<>();
+                for (ItemStack representative : need.ingredient().representatives()) {
+                    if (representative.isEmpty()) continue;
+                    ItemKey key = ItemKey.of(representative);
+                    long amount = availability.amount(key);
+                    if (amount <= 0) continue;
+                    exact = saturatingAdd(exact, amount);
+                    matchedKeys.add(key);
+                }
+                if (exact >= need.count()) {
+                    for (ItemKey key : matchedKeys) {
+                        exactKeyMatches.merge(key, 1, Integer::sum);
+                    }
+                    continue;
+                }
             }
             long available = 0;
             for (IngredientSource source : availability.matching(need.ingredient())) {
@@ -3874,7 +3908,25 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             }
             if (available < need.count()) return false;
         }
-        if (sourceMatches.values().stream().anyMatch(matches -> matches > 1)) {
+        if (!sourceMatches.isEmpty()) {
+            if (sourceMatches.values().stream().anyMatch(matches -> matches > 1)) {
+                return planIngredients(ingredients, 1, relevantSources) != null;
+            }
+            return true;
+        }
+        if (exactKeyMatches.values().stream().anyMatch(matches -> matches > 1)) {
+            for (IngredientNeed need : needs) {
+                if (need.ingredient().matchesAllItemVariants()
+                        || !need.ingredient().representativeItemsExhaustive()) {
+                    continue;
+                }
+                for (IngredientSource source : availability.matching(need.ingredient())) {
+                    if (!need.ingredient().test(source.stack())) continue;
+                    if (sourceMatches.merge(source, 1, Integer::sum) == 1) {
+                        relevantSources.add(source);
+                    }
+                }
+            }
             return planIngredients(ingredients, 1, relevantSources) != null;
         }
         return true;
