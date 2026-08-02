@@ -9,6 +9,22 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ModularCompatSdkTests(unittest.TestCase):
+    def test_theurgy_manifest_tracks_rebased_matrix_evidence(self):
+        module_root = ROOT / "src/compat/theurgy"
+        contract_path = ROOT / "compat/contracts/theurgy.json"
+        manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
+
+        self.assertEqual(
+            hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            manifest["contract_sha256"],
+        )
+        for relative_path, expected_sha256 in manifest["files"].items():
+            self.assertEqual(
+                expected_sha256,
+                hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest(),
+                relative_path,
+            )
+
     def test_draconicevolution_manifest_hashes_every_generated_file(self):
         manifest = json.loads(
             (

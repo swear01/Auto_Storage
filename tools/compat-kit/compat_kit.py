@@ -1468,9 +1468,8 @@ def _validate_candidate_source_class(
     source_class: object,
     location: str,
 ):
-    # Audited bytecode may already live under reserved package segments such as
-    # `module` (e.g. mods.railcraft.world.module.*). Reject only malformed type
-    # shapes here; generated Auto Storage identifiers still use _is_java_type.
+    # Audited bytecode may already live under contextual-keyword package segments
+    # such as `module` (e.g. mods.railcraft.world.module.*).
     if not isinstance(source_class, str) or JAVA_TYPE.fullmatch(source_class) is None:
         raise ValueError(f"{location} has invalid source_class")
     package, separator, binary_simple_name = class_name.rpartition(".")
@@ -1478,6 +1477,11 @@ def _validate_candidate_source_class(
     if not source_class.startswith(expected_prefix):
         raise ValueError(f"{location} source_class does not match class")
     source_simple_name = source_class[len(expected_prefix):]
+    if any(
+        segment in JAVA_RESERVED_IDENTIFIERS
+        for segment in source_simple_name.split(".")
+    ):
+        raise ValueError(f"{location} has invalid source_class")
     if source_simple_name.replace(".", "$") != binary_simple_name:
         raise ValueError(f"{location} source_class does not match class")
 

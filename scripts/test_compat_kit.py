@@ -2266,6 +2266,17 @@ class CompatKitAuditTests(unittest.TestCase):
             "samplemod.world.module.SteamBoilerModule",
             "reserved package source_class",
         )
+        for class_name, source_class in (
+            ("samplemod.recipe.class", "samplemod.recipe.class"),
+            ("samplemod.recipe.Outer$class", "samplemod.recipe.Outer.class"),
+        ):
+            with self.subTest(source_class=source_class):
+                with self.assertRaisesRegex(ValueError, "invalid source_class"):
+                    self.compat_kit._validate_candidate_source_class(
+                        class_name,
+                        source_class,
+                        "reserved type source_class",
+                    )
 
     def test_audit_validation_requires_canonical_source_evidence(self):
         audit = self.source_audit()
