@@ -92,9 +92,12 @@ instead of preserving a stale pre-Railcraft value.
 The current-main `CraftableRecipeCatalog` weak shared index, recipe-snapshot
 invalidation, ingredient index, and candidate bitsets remain necessary and
 current-main-safe. The Railcraft branch does not duplicate or replace those
-production changes. With all representative mods loaded, the current matrix
-passed with 13,590 recipes, a 9,015,168-byte shared index, 114,902 bytes per
-menu, and 0.444 ms switch p95, all inside the existing gates.
+production changes. With Productive Bees and every earlier representative module loaded, the current
+combined inventory contains 14,408 recipes. A contended local run still measured
+3.809 ms first prefetch, 0.547 ms switch p95, a 9,155,000-byte shared index, and
+114,906 bytes per menu, but its 111.297 ms prepare time correctly failed the 50 ms
+gate while the host load exceeded 90. Clean current-head CI, not the contended run
+or a pre-Productive number, is the authoritative performance gate.
 
 ## Verification
 

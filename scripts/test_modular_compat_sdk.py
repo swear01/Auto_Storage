@@ -126,8 +126,17 @@ class ModularCompatSdkTests(unittest.TestCase):
             matrix["recipeInventory"]["namespaces"],
         )
         self.assertEqual(
-            "7531084b4c3b85d9ba3ec3e6514a08ac99a4bc5396e6e1182260e273fea5ac01",
+            "6638d8abfeaac5e9d5039883da68be091a5fa2d724b0419d3ce5423b277b8711",
             matrix["recipeInventory"]["sha256"],
+        )
+        industrial_foregoing_descriptor = json.loads(
+            (
+                ROOT / "src/compat/industrial_foregoing/compat-module.json"
+            ).read_text()
+        )
+        self.assertEqual(
+            "e658bb0b40b91d2bc322cefacebd8cadd8f36afabbab76e47dc33ad200f17b4f",
+            industrial_foregoing_descriptor["matrix"]["recipeInventory"]["sha256"],
         )
         modern_industrialization_descriptor = json.loads(
             (
@@ -145,7 +154,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             ).read_text()
         )
         self.assertEqual(
-            "652a71d0c9e69f1be44c08ac5814df4ee8e12127d6736d99f0bee0f92e1659c0",
+            "c5796e5c92a7ec1e51c9fe58397e8c0e1dc0743b7a587039631f231c294c1207",
             companions["unclaimedRecipeInventory"]["sha256"],
         )
         self.assertEqual(

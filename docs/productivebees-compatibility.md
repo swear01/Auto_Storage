@@ -85,19 +85,19 @@ approximating source semantics away.
 ## Matrix isolation
 
 The Productive Bees descriptor owns only its `productivebees` namespace and
-locks the 618 recipes that enter the combined server `RecipeManager` at SHA-256
-`7531084b4c3b85d9ba3ec3e6514a08ac99a4bc5396e6e1182260e273fea5ac01`.
-Because merged Draconic Evolution satisfies additional Productive Bees data
-conditions, this current-main matrix includes nine more Productive Bees recipes
-than the pre-Draconic 609-recipe inventory.
+locks the 619 recipes that enter the combined server `RecipeManager` at SHA-256
+`6638d8abfeaac5e9d5039883da68be091a5fa2d724b0419d3ce5423b277b8711`.
+Merged Draconic Evolution and the representative Railcraft matrix satisfy additional
+Productive Bees data conditions, so the current combined inventory contains ten more
+recipes than the pre-Draconic 609-recipe inventory.
 
 Productive Bees also ships three recipes under the
 `modern_industrialization` namespace, so that existing descriptor remains their
 owner and its combined digest is
 `c4155661f3e187d12177f181b30b915d01adf9e4af33ba5945ec16d3f565e24f`
 for 2,992 recipes. The unclaimed inventory is independently locked at
-`652a71d0c9e69f1be44c08ac5814df4ee8e12127d6736d99f0bee0f92e1659c0`
-for 1,323 recipes. No Productive-specific branch was added to shared matrix
+`c5796e5c92a7ec1e51c9fe58397e8c0e1dc0743b7a587039631f231c294c1207`
+for 1,354 recipes. No Productive-specific branch was added to shared matrix
 Java; coexistence remains the generic descriptor-manifest assertion.
 
 ## Future acceptance boundary
