@@ -2,6 +2,7 @@ package com.swear.autostorage.fixture.railcraft;
 
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +23,9 @@ public final class RailcraftIntegrationGameTests {
     public static void unsafe_railcraft_contracts_are_not_registered(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                RailcraftIntegrationGameTests.class);
         if (!ModList.get().isLoaded("railcraft")) {
             helper.fail("Railcraft Reborn mod is not loaded");
             return;
