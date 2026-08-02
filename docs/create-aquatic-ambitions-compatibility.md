@@ -25,6 +25,21 @@ contract.
   `create_aquatic_ambitions-1.21.1-2.0.4.jar`;
 - official source branch `neoforge-1.21.1`
   commit `c584e179ae64ce2373597899402bdd0cab9a22e7` (`mod_version=2.0.4`);
+- scanner format `16`: 79 target classes, 160 target/reachable ancestry graph
+  records, and 29 classified candidates across all buckets;
+- six reachable ancestry artifacts: the normalized binary-pipeline
+  NeoForge/Minecraft artifact plus five exact Maven coordinates:
+  `com.simibubi.create:create-1.21.1:6.0.10-281:slim`,
+  `dev.engine-room.flywheel:flywheel-neoforge-api-1.21.1:1.0.6`,
+  `dev.latvian.mods:kubejs-neoforge:2101.7.2-build.371`,
+  `mezz.jei:jei-1.21.1-common-api:19.38.0.366`, and
+  `net.createmod.ponder:ponder-neoforge:1.0.87+mc1.21.1`;
+- normalized NeoForge/Minecraft SHA-256/size:
+  `2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f`
+  / `56,279,815` bytes, matching the cross-host binary pattern used by the
+  current AE2 audit rather than a host-recompiled jar;
+- exact target-jar recipe-data inventory: 96 declared/effective recipes,
+  SHA-256 `ba4f866612b23b5d5bd4c34558ac65bf32007bd18ca404508e9d5bb67956e12c`;
 - required Create runtime companion uses the existing Create CI fixture
   `maven.modrinth:create:${create_ci_version}` (`UjX6dr61`);
 - audit: `compat/audits/create_aquatic_ambitions/2.0.4.json`;
@@ -36,21 +51,22 @@ multi-version matrix.
 
 ## Audited recipe candidates
 
-Compat Kit enumerated 22 recipe-class candidates. Every candidate is rejected
-in the committed contract. The runtime surfaces behind that inventory are:
+The legacy scanner-format-7 audit classified 22 name-shaped entries as recipe
+families. Exact format-16 structural scanning removed 20 non-recipe entries and
+left exactly two actual `Recipe` candidates. Both were reopened by
+`migrate-contract`, reviewed again, and rejected in the committed contract:
 
 | Family / surface | Result | Reason |
 |---|---|---|
 | `ChannelingRecipe` / `create_aquatic_ambitions:channeling` | rejected | Encased Fan processing gated by world catalysts: active Conduit neighborhood, awakened Mechanical Conduit, or channeling block/fluid tags; entity Conduit Power side effect; many recipes include chance outputs |
-| Channeling / Create processing datagen | rejected | Datagen providers, not runtime families |
-| KubeJS Channeling schema / ProcessingOutput component | rejected | Script/viewer helpers; chance-aware component |
-| `CAARecipeTypes` registry | rejected | Type/serializer registration only; Channeling remains rejected |
-| Synthetic cooking shim nested classes | rejected | Datagen-only shims, not registered runtime families |
+| `CAAStandardRecipeGen.ModdedCookingRecipeOutputShim` | rejected | Private datagen-only wrapper; runtime recipe methods throw `AssertionError`, while its serializer temporarily injects registry identity only to encode another mod's cooking output |
 | Resource API false positives (`ConduitPowerLevel`, fluid tags) | not accepted | Live conduit power / world fluid tags; no typed resource kind introduced |
 
 Typed resources were not introduced. Channeling cannot be reduced to a
 simulate-then-commit plan without approximating fan/world/kinetic catalysts
-away, which is the same fail-closed class as Create Splashing/Haunting.
+away, which is the same fail-closed class as Create Splashing/Haunting. Datagen,
+builder, viewer, registry, serializer, and resource-name matches remain audit
+buckets rather than contract recipe families.
 
 ## Declarative matrix evidence
 

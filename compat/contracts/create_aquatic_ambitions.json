@@ -1,258 +1,28 @@
 {
   "families": [
     {
-      "class": "net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen",
-      "costs": [],
-      "decision": "Datagen API for Channeling recipes; not a runtime Auto Storage recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen#public_signature"
-      ],
-      "id": "channeling_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent",
-      "costs": [],
-      "decision": "KubeJS recipe-component helper over Create ProcessingOutput chance surfaces; not a server recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent#public_signature"
-      ],
-      "id": "processing_output_recipe_component",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "chance_output"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.compat.KubeJS.schemas.ChannelingRecipeSchema",
-      "costs": [],
-      "decision": "KubeJS schema for Channeling recipes; viewer/script surface, not a deterministic Auto Storage family.",
-      "evidence": [
-        "net.davio.aquaticambitions.compat.KubeJS.schemas.ChannelingRecipeSchema#public_signature"
-      ],
-      "id": "channeling_recipe_schema",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
       "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
       "costs": [],
-      "decision": "Channeling is Create Encased Fan processing gated by world catalysts: active Conduit in a 3x3 neighborhood, awakened Mechanical Conduit, or FAN_PROCESSING_CATALYSTS_CHANNELING block/fluid tags. Execution also applies Conduit Power to nearby players and many datapack recipes include chance<1.0 ProcessingOutput results. Same fail-closed class as Create Splashing/Haunting; no installed-station simulate-then-commit contract without approximating world/kinetic state.",
+      "decision": "Channeling is a runtime Create fan recipe, but execution requires live conduit, block, or fluid world catalysts and inherits generic ingredient plus random output behavior from Create ProcessingRecipe. Auto Storage cannot represent that world-dependent probabilistic operation atomically, so it remains fail closed.",
       "evidence": [
-        "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe#public_signature",
-        "src/main/java/net/davio/aquaticambitions/content/kinetics/fan/processing/ChannelingRecipe.java",
-        "src/main/java/net/davio/aquaticambitions/content/kinetics/fan/processing/ChannelingFanProcessingType.java#isValidAt",
-        "src/main/java/net/davio/aquaticambitions/content/kinetics/fan/processing/ChannelingFanProcessingType.java#process",
-        "src/main/java/net/davio/aquaticambitions/content/kinetics/fan/processing/ChannelingFanProcessingType.java#affectEntity",
-        "src/main/java/net/davio/aquaticambitions/content/kinetics/fan/processing/ChannelingFanProcessingType.java#checkForActiveConduit"
+        "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe#public_signature"
       ],
       "id": "channeling_recipe",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
       "risks": [
+        "generic_ingredients",
+        "randomness",
         "world_mutation"
       ],
       "station": null,
       "status": "rejected"
     },
     {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider for Channeling recipes; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen#public_signature"
-      ],
-      "id": "c_a_a_channeling_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen",
-      "costs": [],
-      "decision": "Datagen for Create Compacting recipes under CAA namespace; Compacting remains rejected by Create compatibility (basin/heat/multi-station). Not an independent CAA family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen#public_signature"
-      ],
-      "id": "c_a_a_compacting_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen",
-      "costs": [],
-      "decision": "Datagen for Create Crushing recipes; runtime Crushing is owned by Create compatibility when deterministic. Not an independent CAA family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen#public_signature"
-      ],
-      "id": "c_a_a_crushing_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen",
-      "costs": [],
-      "decision": "Datagen for Create Milling recipes; runtime Milling is owned by Create compatibility when deterministic. Not an independent CAA family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen#public_signature"
-      ],
-      "id": "c_a_a_milling_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen",
-      "costs": [],
-      "decision": "Datagen for Create Mixing recipes; Mixing remains rejected by Create compatibility (basin/heat/multi-station). Not an independent CAA family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen#public_signature"
-      ],
-      "id": "c_a_a_mixing_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider",
-      "costs": [],
-      "decision": "Top-level datagen registrar; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider#public_signature"
-      ],
-      "id": "c_a_a_recipe_provider",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I",
-      "costs": [],
-      "decision": "Nested datagen helper; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I#public_signature"
-      ],
-      "id": "c_a_a_recipe_provider__i",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen",
-      "costs": [],
-      "decision": "Datagen for vanilla crafting/smelting under CAA namespace; vanilla exact classes already covered without this module.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen#public_signature"
-      ],
-      "id": "c_a_a_standard_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder",
-      "costs": [],
-      "decision": "Datagen builder helper; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder#public_signature"
-      ],
-      "id": "c_a_a_standard_recipe_gen__generated_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder",
-      "costs": [],
-      "decision": "Datagen cooking-builder helper; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder#public_signature"
-      ],
-      "id": "c_a_a_standard_recipe_gen__generated_recipe_builder__generated_cooking_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker",
-      "costs": [],
-      "decision": "Datagen marker type; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker#public_signature"
-      ],
-      "id": "c_a_a_standard_recipe_gen__marker",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput",
-      "costs": [],
-      "decision": "Datagen RecipeOutput wrapper; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput#public_signature"
-      ],
-      "id": "c_a_a_standard_recipe_gen__modded_cooking_recipe_output",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
       "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
       "costs": [],
-      "decision": "Synthetic datagen Recipe shim for modded cooking outputs; not a registered runtime family.",
+      "decision": "Private datagen-only wrapper: every runtime recipe operation throws AssertionError and its serializer temporarily injects into BuiltInRegistries only to encode another mod cooking output. It is never a loadable runtime recipe family and remains rejected.",
       "evidence": [
         "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim#public_signature"
       ],
@@ -263,83 +33,6 @@
       "risks": [
         "world_mutation"
       ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack",
-      "costs": [],
-      "decision": "Synthetic datagen FakeItemStack value; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack#public_signature"
-      ],
-      "id": "c_a_a_standard_recipe_gen__modded_cooking_recipe_output_shim__fake_item_stack",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
-      "costs": [],
-      "decision": "Synthetic datagen serializer for cooking shim; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer#public_signature"
-      ],
-      "id": "c_a_a_standard_recipe_gen__modded_cooking_recipe_output_shim__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen",
-      "costs": [],
-      "decision": "Datagen for Create Splashing/washing recipes; Splashing remains rejected by Create compatibility (world catalysts). Not an independent CAA family.",
-      "evidence": [
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen#public_signature"
-      ],
-      "id": "c_a_a_washing_data_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.registry.CAARecipeTypes",
-      "costs": [],
-      "decision": "Recipe type/serializer registry enum for CHANNELING; not itself a deterministic Auto Storage family. Channeling remains rejected.",
-      "evidence": [
-        "net.davio.aquaticambitions.registry.CAARecipeTypes#public_signature"
-      ],
-      "id": "c_a_a_recipe_types",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "net.davio.aquaticambitions.registry.CAARecipeTypes$Registers",
-      "costs": [],
-      "decision": "DeferredRegister holder nested class; not a runtime recipe family.",
-      "evidence": [
-        "net.davio.aquaticambitions.registry.CAARecipeTypes$Registers#public_signature"
-      ],
-      "id": "c_a_a_recipe_types__registers",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
       "station": null,
       "status": "rejected"
     }
@@ -363,7 +56,8 @@
   },
   "schema": 1,
   "source_audit_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44",
-  "source_recipe_inventory_sha256": "0363f943a03ac66f146f5d156d7227dca6a8858c18306638c6d13cc7310e335e",
+  "source_recipe_data_sha256": "ba4f866612b23b5d5bd4c34558ac65bf32007bd18ca404508e9d5bb67956e12c",
+  "source_recipe_inventory_sha256": "73c9bb73ae556c0896ba486cf30052aa21ecfc0e004390bf5e0cb7fe5adbf749",
   "target": {
     "dependency": "maven.modrinth:create-aquatic-ambitions:DoI3PpXj",
     "display_name": "Create Aquatic Ambitions",
@@ -401,7 +95,7 @@
       ],
       "all_mod_coexistence": [
         {
-          "marker": "Create Aquatic Ambitions fail-closed boundary changed",
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
           "task": "runCompatibilityMatrixGameTestServer"
         }

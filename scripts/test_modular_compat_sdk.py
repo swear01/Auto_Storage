@@ -14,8 +14,28 @@ class ModularCompatSdkTests(unittest.TestCase):
         descriptor = json.loads((module_root / "compat-module.json").read_text())
         contract_path = ROOT / "compat/contracts/create_aquatic_ambitions.json"
         contract = json.loads(contract_path.read_text())
+        audit = json.loads(
+            (
+                ROOT
+                / "compat/audits/create_aquatic_ambitions/2.0.4.json"
+            ).read_text()
+        )
         manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
 
+        self.assertEqual(16, audit["scanner_format"])
+        self.assertTrue(audit["ancestry_classpath"])
+        self.assertEqual(
+            sorted(candidate["class"] for candidate in audit["candidates"]["recipe_classes"]),
+            sorted(family["class"] for family in contract["families"]),
+        )
+        self.assertEqual(
+            audit["recipe_data"]["digest"],
+            contract["source_recipe_data_sha256"],
+        )
+        self.assertEqual(
+            'manifest.assertCoexistence(helper, "Descriptor matrix coexistence")',
+            contract["verification"]["evidence"]["all_mod_coexistence"][0]["marker"],
+        )
         matrix = descriptor["matrix"]
         self.assertEqual(contract["matrix"], matrix)
         self.assertEqual(["create_aquatic_ambitions"], matrix["mods"])

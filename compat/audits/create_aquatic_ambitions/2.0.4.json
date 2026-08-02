@@ -1,118 +1,705 @@
 {
+  "ancestry_classpath": [
+    {
+      "sha256": "06898ecdcfaed1037a5d9c96421708fa4b408139ae4df28cee9b0ce7e7c4baa7",
+      "size": 2292215
+    },
+    {
+      "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+      "size": 56279815
+    },
+    {
+      "sha256": "2a9343b1f621e3de91600fb7c19f737dfd8372c3d00e81376f77c4ba624ff362",
+      "size": 137076
+    },
+    {
+      "sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f",
+      "size": 17452011
+    },
+    {
+      "sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308",
+      "size": 279363
+    },
+    {
+      "sha256": "d6b7fdf94359f73dc1fee730eded898d51b3bf0d626710753253becd8e4e6bef",
+      "size": 822408
+    }
+  ],
+  "ancestry_dependencies": [
+    {
+      "dependency": "com.simibubi.create:create-1.21.1:6.0.10-281:slim",
+      "sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f",
+      "size": 17452011
+    },
+    {
+      "dependency": "dev.engine-room.flywheel:flywheel-neoforge-api-1.21.1:1.0.6",
+      "sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308",
+      "size": 279363
+    },
+    {
+      "dependency": "dev.latvian.mods:kubejs-neoforge:2101.7.2-build.371",
+      "sha256": "06898ecdcfaed1037a5d9c96421708fa4b408139ae4df28cee9b0ce7e7c4baa7",
+      "size": 2292215
+    },
+    {
+      "dependency": "mezz.jei:jei-1.21.1-common-api:19.38.0.366",
+      "sha256": "2a9343b1f621e3de91600fb7c19f737dfd8372c3d00e81376f77c4ba624ff362",
+      "size": 137076
+    },
+    {
+      "dependency": "net.createmod.ponder:ponder-neoforge:1.0.87+mc1.21.1",
+      "sha256": "d6b7fdf94359f73dc1fee730eded898d51b3bf0d626710753253becd8e4e6bef",
+      "size": 822408
+    }
+  ],
   "artifact": {
+    "class_count": 79,
+    "class_inventory_sha256": "30f8f3a33f9c6782f5362fb4762d4376d5213dade3b423aa305b19d507041501",
     "sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44",
     "size": 1074131
   },
   "candidates": {
-    "recipe_classes": [
+    "block_entity_classes": [
+      {
+        "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity",
+        "classification": {
+          "evidence": [
+            "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SmartBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SmartBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"MechanicalConduitBlockEntity.java\"\npublic class net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity extends com.simibubi.create.foundation.blockEntity.SmartBlockEntity implements com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation {\n  public net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void addBehaviours(java.util.List<com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour>);\n  public static void registerCapabilities(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent);\n  public void invalidate();\n  public void tick();\n  public void lazyTick();\n  public void write(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, boolean);\n  public net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel getConduitLevelFromBlock();\n  public void updateBlockState();\n  public void setConduitLevelOfBlock(net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel);\n  public void tickAnimation();\n  public java.util.List<net.minecraft.world.entity.LivingEntity> getLivingEntities(int);\n  public float getConversionRate(net.neoforged.neoforge.fluids.FluidStack);\n  public static boolean entityMatchesSelector(net.minecraft.world.entity.LivingEntity, net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity$EntitySelectionMode);\n  public boolean addToGoggleTooltip(java.util.List<net.minecraft.network.chat.Component>, boolean);\n  public java.lang.String tickToDuration(int);\n}",
+        "source_class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity"
+      },
+      {
+        "class": "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity",
+        "classification": {
+          "evidence": [
+            "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SmartBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SmartBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity",
+            "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FakeActiveConduitBlockEntity.java\"\npublic class net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity extends com.simibubi.create.foundation.blockEntity.SmartBlockEntity {\n  public net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void addBehaviours(java.util.List<com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour>);\n  public void tick();\n  public void lazyTick();\n}",
+        "source_class": "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity"
+      }
+    ],
+    "client_viewer_classes": [
+      {
+        "class": "net.davio.aquaticambitions.compat.JEI.CAAJEI",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAJEI.java\"\npublic class net.davio.aquaticambitions.compat.JEI.CAAJEI implements mezz.jei.api.IModPlugin {\n  public net.davio.aquaticambitions.compat.JEI.CAAJEI();\n  public net.minecraft.resources.ResourceLocation getPluginUid();\n  public void registerCategories(mezz.jei.api.registration.IRecipeCategoryRegistration);\n  public void registerRecipes(mezz.jei.api.registration.IRecipeRegistration);\n  public void registerRecipeCatalysts(mezz.jei.api.registration.IRecipeCatalystRegistration);\n  public static net.minecraft.world.level.Level getLevel();\n  public static net.minecraft.world.item.crafting.RecipeManager getRecipeManager();\n}",
+        "source_class": "net.davio.aquaticambitions.compat.JEI.CAAJEI"
+      },
+      {
+        "class": "net.davio.aquaticambitions.compat.JEI.category.FanChannelingCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FanChannelingCategory.java\"\npublic class net.davio.aquaticambitions.compat.JEI.category.FanChannelingCategory extends com.simibubi.create.compat.jei.category.ProcessingViaFanCategory$MultiOutput<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe> {\n  public static final mezz.jei.api.recipe.RecipeType<net.minecraft.world.item.crafting.RecipeHolder<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe>> TYPE;\n  public static net.davio.aquaticambitions.compat.JEI.category.FanChannelingCategory create();\n  public net.davio.aquaticambitions.compat.JEI.category.FanChannelingCategory(com.simibubi.create.compat.jei.category.CreateRecipeCategory$Info<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe>);\n}",
+        "source_class": "net.davio.aquaticambitions.compat.JEI.category.FanChannelingCategory"
+      },
+      {
+        "class": "net.davio.aquaticambitions.compat.JEI.category.animations.AnimatedConduit",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"AnimatedConduit.java\"\npublic class net.davio.aquaticambitions.compat.JEI.category.animations.AnimatedConduit extends com.simibubi.create.compat.jei.category.animations.AnimatedKinetics {\n  public net.davio.aquaticambitions.compat.JEI.category.animations.AnimatedConduit();\n  public static float getConduitAngle(boolean);\n  public static float getConduitHeight();\n  public void draw(net.minecraft.client.gui.GuiGraphics, int, int);\n}",
+        "source_class": "net.davio.aquaticambitions.compat.JEI.category.animations.AnimatedConduit"
+      }
+    ],
+    "datagen_classes": [
       {
         "class": "net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen",
-        "public_signature": "Compiled from \"ChannelingRecipeGen.java\"\npublic abstract class net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen extends com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe> {\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe convert(net.minecraft.world.level.ItemLike, net.minecraft.world.level.ItemLike);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe convert(java.util.function.Supplier<net.minecraft.world.item.crafting.Ingredient>, java.util.function.Supplier<net.minecraft.world.level.ItemLike>);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe coralRevival(net.minecraft.world.item.Item, java.util.function.Supplier<net.minecraft.world.level.ItemLike>);\n  public net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ChannelingRecipeGen.java\"\npublic abstract class net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen extends com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe> {\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe convert(net.minecraft.world.level.ItemLike, net.minecraft.world.level.ItemLike);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe convert(java.util.function.Supplier<net.minecraft.world.item.crafting.Ingredient>, java.util.function.Supplier<net.minecraft.world.level.ItemLike>);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe coralRevival(net.minecraft.world.item.Item, java.util.function.Supplier<net.minecraft.world.level.ItemLike>);\n  public net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}",
+        "source_class": "net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen"
       },
       {
-        "class": "net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent",
-        "public_signature": "Compiled from \"ProcessingOutputRecipeComponent.java\"\npublic class net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent extends dev.latvian.mods.kubejs.recipe.component.SimpleRecipeComponent<com.simibubi.create.content.processing.recipe.ProcessingOutput> {\n  public static final dev.latvian.mods.rhino.type.TypeInfo TYPE_INFO;\n  public static final dev.latvian.mods.kubejs.recipe.component.RecipeComponentType<com.simibubi.create.content.processing.recipe.ProcessingOutput> TYPE;\n  public net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent(dev.latvian.mods.kubejs.recipe.component.RecipeComponentType<?>);\n  public boolean hasPriority(dev.latvian.mods.kubejs.recipe.filter.RecipeMatchContext, java.lang.Object);\n  public boolean matches(dev.latvian.mods.kubejs.recipe.filter.RecipeMatchContext, com.simibubi.create.content.processing.recipe.ProcessingOutput, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo);\n  public com.simibubi.create.content.processing.recipe.ProcessingOutput replace(dev.latvian.mods.kubejs.recipe.RecipeScriptContext, com.simibubi.create.content.processing.recipe.ProcessingOutput, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo, java.lang.Object);\n  public boolean isEmpty(com.simibubi.create.content.processing.recipe.ProcessingOutput);\n  public void buildUniqueId(dev.latvian.mods.kubejs.recipe.component.UniqueIdBuilder, com.simibubi.create.content.processing.recipe.ProcessingOutput);\n  public void buildUniqueId(dev.latvian.mods.kubejs.recipe.component.UniqueIdBuilder, java.lang.Object);\n  public boolean isEmpty(java.lang.Object);\n  public java.lang.Object replace(dev.latvian.mods.kubejs.recipe.RecipeScriptContext, java.lang.Object, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo, java.lang.Object);\n  public boolean matches(dev.latvian.mods.kubejs.recipe.filter.RecipeMatchContext, java.lang.Object, dev.latvian.mods.kubejs.recipe.match.ReplacementMatchInfo);\n}"
+        "class": "net.davio.aquaticambitions.infrastructure.data.CAAConduitEffectsProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAConduitEffectsProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.CAAConduitEffectsProvider extends net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider {\n  public net.davio.aquaticambitions.infrastructure.data.CAAConduitEffectsProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.CAAConduitEffectsProvider"
       },
       {
-        "class": "net.davio.aquaticambitions.compat.KubeJS.schemas.ChannelingRecipeSchema",
-        "public_signature": "Compiled from \"ChannelingRecipeSchema.java\"\npublic interface net.davio.aquaticambitions.compat.KubeJS.schemas.ChannelingRecipeSchema {\n  public static final dev.latvian.mods.kubejs.recipe.RecipeKey<java.util.List<net.minecraft.world.item.crafting.Ingredient>> INGREDIENT;\n  public static final dev.latvian.mods.kubejs.recipe.RecipeKey<java.util.List<com.simibubi.create.content.processing.recipe.ProcessingOutput>> RESULTS;\n  public static final dev.latvian.mods.kubejs.recipe.schema.RecipeSchema SCHEMA;\n}"
+        "class": "net.davio.aquaticambitions.infrastructure.data.CAADatagen",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAADatagen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.CAADatagen {\n  public net.davio.aquaticambitions.infrastructure.data.CAADatagen();\n  public static void gatherDataHighPriority(net.neoforged.neoforge.data.event.GatherDataEvent);\n  public static void gatherData(net.neoforged.neoforge.data.event.GatherDataEvent);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.CAADatagen"
       },
       {
-        "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
-        "public_signature": "Compiled from \"ChannelingRecipe.java\"\npublic class net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe extends com.simibubi.create.content.processing.recipe.StandardProcessingRecipe<net.minecraft.world.item.crafting.SingleRecipeInput> {\n  public net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe(com.simibubi.create.content.processing.recipe.ProcessingRecipeParams);\n  public boolean matches(net.minecraft.world.item.crafting.SingleRecipeInput, net.minecraft.world.level.Level);\n  public static com.simibubi.create.content.processing.recipe.StandardProcessingRecipe$Builder<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe> builder(net.minecraft.resources.ResourceLocation);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}"
+        "class": "net.davio.aquaticambitions.infrastructure.data.loot.CAAGlobalLootModifierProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAGlobalLootModifierProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.loot.CAAGlobalLootModifierProvider extends net.neoforged.neoforge.common.data.GlobalLootModifierProvider {\n  public net.davio.aquaticambitions.infrastructure.data.loot.CAAGlobalLootModifierProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.loot.CAAGlobalLootModifierProvider"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen",
-        "public_signature": "Compiled from \"CAAChannelingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen extends net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe moddedConversion(com.simibubi.create.foundation.data.recipe.Mods, java.lang.String, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe moddedCoralRevival(com.simibubi.create.foundation.data.recipe.Mods, java.lang.String);\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAChannelingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen extends net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe moddedConversion(com.simibubi.create.foundation.data.recipe.Mods, java.lang.String, java.lang.String);\n  public com.simibubi.create.api.data.recipe.BaseRecipeProvider$GeneratedRecipe moddedCoralRevival(com.simibubi.create.foundation.data.recipe.Mods, java.lang.String);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen",
-        "public_signature": "Compiled from \"CAACompactingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen extends com.simibubi.create.api.data.recipe.CompactingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAACompactingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen extends com.simibubi.create.api.data.recipe.CompactingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen",
-        "public_signature": "Compiled from \"CAACrushingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen extends com.simibubi.create.api.data.recipe.CrushingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAACrushingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen extends com.simibubi.create.api.data.recipe.CrushingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen",
-        "public_signature": "Compiled from \"CAAMillingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen extends com.simibubi.create.api.data.recipe.MillingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAMillingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen extends com.simibubi.create.api.data.recipe.MillingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen",
-        "public_signature": "Compiled from \"CAAMixingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen extends com.simibubi.create.api.data.recipe.MixingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAMixingRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen extends com.simibubi.create.api.data.recipe.MixingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider",
-        "public_signature": "Compiled from \"CAARecipeProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider extends net.minecraft.data.recipes.RecipeProvider {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public static void registerAllProcessing(net.minecraft.data.DataGenerator, net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAARecipeProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider extends net.minecraft.data.recipes.RecipeProvider {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public static void registerAllProcessing(net.minecraft.data.DataGenerator, net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I",
-        "public_signature": "Compiled from \"CAARecipeProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I {\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAARecipeProvider.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I {\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider.I"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen extends com.simibubi.create.api.data.recipe.BaseRecipeProvider {\n  public void buildRecipes(net.minecraft.data.recipes.RecipeOutput);\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}"
-      },
-      {
-        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder(java.lang.String, com.google.common.base.Supplier<? extends net.minecraft.world.level.ItemLike>);\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder(net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen, java.lang.String, net.minecraft.resources.ResourceLocation);\n}"
-      },
-      {
-        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder {\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen extends com.simibubi.create.api.data.recipe.BaseRecipeProvider {\n  public void buildRecipes(net.minecraft.data.recipes.RecipeOutput);\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker {\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker {\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen.Marker"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput extends java.lang.Record implements net.minecraft.data.recipes.RecipeOutput {\n  public net.minecraft.advancements.Advancement$Builder advancement();\n  public void accept(net.minecraft.resources.ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>, net.minecraft.advancements.AdvancementHolder, net.neoforged.neoforge.common.conditions.ICondition...);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.data.recipes.RecipeOutput wrapped();\n  public net.minecraft.resources.ResourceLocation outputOverride();\n}"
-      },
-      {
-        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput extends java.lang.Record implements net.minecraft.data.recipes.RecipeOutput {\n  public net.minecraft.advancements.Advancement$Builder advancement();\n  public void accept(net.minecraft.resources.ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>, net.minecraft.advancements.AdvancementHolder, net.neoforged.neoforge.common.conditions.ICondition...);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.data.recipes.RecipeOutput wrapped();\n  public net.minecraft.resources.ResourceLocation outputOverride();\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen.ModdedCookingRecipeOutput"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack extends java.lang.Record {\n  public static com.mojang.serialization.Codec<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack> CODEC;\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.resources.ResourceLocation id();\n}"
-      },
-      {
-        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
-        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer extends java.lang.Record implements net.minecraft.world.item.crafting.RecipeSerializer<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> {\n  public com.mojang.serialization.MapCodec<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> streamCodec();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public com.mojang.serialization.MapCodec<net.minecraft.world.item.crafting.Recipe<?>> wrappedCodec();\n}"
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack extends java.lang.Record {\n  public static com.mojang.serialization.Codec<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack> CODEC;\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.resources.ResourceLocation id();\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen.ModdedCookingRecipeOutputShim.FakeItemStack"
       },
       {
         "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen",
-        "public_signature": "Compiled from \"CAAWashingDataGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen extends com.simibubi.create.api.data.recipe.WashingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}"
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAWashingDataGen.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen extends com.simibubi.create.api.data.recipe.WashingRecipeGen {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.lang.String);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen"
       },
       {
-        "class": "net.davio.aquaticambitions.registry.CAARecipeTypes",
-        "public_signature": "Compiled from \"CAARecipeTypes.java\"\npublic final class net.davio.aquaticambitions.registry.CAARecipeTypes extends java.lang.Enum<net.davio.aquaticambitions.registry.CAARecipeTypes> implements com.simibubi.create.foundation.recipe.IRecipeTypeInfo, net.minecraft.util.StringRepresentable {\n  public static final net.davio.aquaticambitions.registry.CAARecipeTypes CHANNELING;\n  public static final java.util.function.Predicate<net.minecraft.world.item.crafting.RecipeHolder<?>> CAN_BE_AUTOMATED;\n  public final net.minecraft.resources.ResourceLocation id;\n  public final java.util.function.Supplier<net.minecraft.world.item.crafting.RecipeSerializer<?>> serializerSupplier;\n  public final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<?>> serializerObject;\n  public final java.util.function.Supplier<net.minecraft.world.item.crafting.RecipeType<?>> type;\n  public static final com.mojang.serialization.Codec<net.davio.aquaticambitions.registry.CAARecipeTypes> CODEC;\n  public static net.davio.aquaticambitions.registry.CAARecipeTypes[] values();\n  public static net.davio.aquaticambitions.registry.CAARecipeTypes valueOf(java.lang.String);\n  public static void register(net.neoforged.bus.api.IEventBus);\n  public net.minecraft.resources.ResourceLocation getId();\n  public <T extends net.minecraft.world.item.crafting.RecipeSerializer<?>> T getSerializer();\n  public <I extends net.minecraft.world.item.crafting.RecipeInput, R extends net.minecraft.world.item.crafting.Recipe<I>> net.minecraft.world.item.crafting.RecipeType<R> getType();\n  public <I extends net.minecraft.world.item.crafting.RecipeInput, R extends net.minecraft.world.item.crafting.Recipe<I>> java.util.Optional<net.minecraft.world.item.crafting.RecipeHolder<R>> find(I, net.minecraft.world.level.Level);\n  public static boolean shouldIgnoreInAutomation(net.minecraft.world.item.crafting.RecipeHolder<?>);\n  public java.lang.String getSerializedName();\n}"
-      },
-      {
-        "class": "net.davio.aquaticambitions.registry.CAARecipeTypes$Registers",
-        "public_signature": "Compiled from \"CAARecipeTypes.java\"\nclass net.davio.aquaticambitions.registry.CAARecipeTypes$Registers {\n}"
+        "class": "net.davio.aquaticambitions.infrastructure.data.tags.CAARegistrateTags",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAARegistrateTags.java\"\npublic class net.davio.aquaticambitions.infrastructure.data.tags.CAARegistrateTags {\n  public net.davio.aquaticambitions.infrastructure.data.tags.CAARegistrateTags();\n  public static void addGenerators();\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.tags.CAARegistrateTags"
       }
     ],
+    "recipe_builders": [
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder {\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder(java.lang.String, com.google.common.base.Supplier<? extends net.minecraft.world.level.ItemLike>);\n  public net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder(net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen, java.lang.String, net.minecraft.resources.ResourceLocation);\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen.GeneratedRecipeBuilder"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder {\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen.GeneratedRecipeBuilder.GeneratedCookingRecipeBuilder"
+      }
+    ],
+    "recipe_classes": [
+      {
+        "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+        "classification": {
+          "evidence": [
+            "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+            "com.simibubi.create.content.processing.recipe.StandardProcessingRecipe",
+            "com.simibubi.create.content.processing.recipe.ProcessingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+            "com.simibubi.create.content.processing.recipe.StandardProcessingRecipe",
+            "com.simibubi.create.content.processing.recipe.ProcessingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ChannelingRecipe.java\"\npublic class net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe extends com.simibubi.create.content.processing.recipe.StandardProcessingRecipe<net.minecraft.world.item.crafting.SingleRecipeInput> {\n  public net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe(com.simibubi.create.content.processing.recipe.ProcessingRecipeParams);\n  public boolean matches(net.minecraft.world.item.crafting.SingleRecipeInput, net.minecraft.world.level.Level);\n  public static com.simibubi.create.content.processing.recipe.StandardProcessingRecipe$Builder<net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe> builder(net.minecraft.resources.ResourceLocation);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}",
+        "source_class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe"
+      },
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+        "classification": {
+          "evidence": [
+            "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nclass net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen.ModdedCookingRecipeOutputShim"
+      }
+    ],
+    "recipe_serializers": [
+      {
+        "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
+        "classification": {
+          "evidence": [
+            "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"CAAStandardRecipeGen.java\"\nfinal class net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer extends java.lang.Record implements net.minecraft.world.item.crafting.RecipeSerializer<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> {\n  public com.mojang.serialization.MapCodec<net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim> streamCodec();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public com.mojang.serialization.MapCodec<net.minecraft.world.item.crafting.Recipe<?>> wrappedCodec();\n}",
+        "source_class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen.ModdedCookingRecipeOutputShim.Serializer"
+      }
+    ],
+    "recipe_types": [],
     "resource_apis": [
       {
         "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel",
-        "public_signature": "Compiled from \"MechanicalConduitBlock.java\"\npublic final class net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel extends java.lang.Enum<net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel> implements net.minecraft.util.StringRepresentable {\n  public static final net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel IDLE;\n  public static final net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel AWAKENED;\n  public static final com.mojang.serialization.Codec<net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel> CODEC;\n  public static net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel[] values();\n  public static net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel valueOf(java.lang.String);\n  public boolean isAwakened();\n  public java.lang.String getSerializedName();\n}"
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MechanicalConduitBlock.java\"\npublic final class net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel extends java.lang.Enum<net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel> implements net.minecraft.util.StringRepresentable {\n  public static final net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel IDLE;\n  public static final net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel AWAKENED;\n  public static final com.mojang.serialization.Codec<net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel> CODEC;\n  public static net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel[] values();\n  public static net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel valueOf(java.lang.String);\n  public boolean isAwakened();\n  public java.lang.String getSerializedName();\n}",
+        "source_class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock.ConduitPowerLevel"
       },
       {
         "class": "net.davio.aquaticambitions.registry.CAATags$CAAFluidTags",
-        "public_signature": "Compiled from \"CAATags.java\"\npublic final class net.davio.aquaticambitions.registry.CAATags$CAAFluidTags extends java.lang.Enum<net.davio.aquaticambitions.registry.CAATags$CAAFluidTags> {\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags CONDUIT_FUEL;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags CLEARS_EFFECTS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_FIRE_RES;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_HASTE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_INFESTED;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_INVIS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_JUMP;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_LUCK;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_NIGHT_VISION;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_OOZING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_POISON;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_REGEN;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_RESISTANCE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SLOW_FALL;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SLOWNESS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SPEED;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_STRENGTH;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WATER_BREATHING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WEAKNESS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WEAVING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WIND;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WITHER;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SATURATION;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags SETS_ON_FIRE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags FAN_PROCESSING_CATALYSTS_CHANNELING;\n  public final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> tag;\n  public final boolean alwaysDatagen;\n  public static net.davio.aquaticambitions.registry.CAATags$CAAFluidTags[] values();\n  public static net.davio.aquaticambitions.registry.CAATags$CAAFluidTags valueOf(java.lang.String);\n  public boolean matches(net.minecraft.world.level.material.Fluid);\n  public boolean matches(net.minecraft.world.level.material.FluidState);\n}"
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CAATags.java\"\npublic final class net.davio.aquaticambitions.registry.CAATags$CAAFluidTags extends java.lang.Enum<net.davio.aquaticambitions.registry.CAATags$CAAFluidTags> {\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags CONDUIT_FUEL;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags CLEARS_EFFECTS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_FIRE_RES;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_HASTE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_INFESTED;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_INVIS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_JUMP;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_LUCK;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_NIGHT_VISION;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_OOZING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_POISON;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_REGEN;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_RESISTANCE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SLOW_FALL;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SLOWNESS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SPEED;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_STRENGTH;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WATER_BREATHING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WEAKNESS;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WEAVING;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WIND;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_WITHER;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags GIVES_SATURATION;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags SETS_ON_FIRE;\n  public static final net.davio.aquaticambitions.registry.CAATags$CAAFluidTags FAN_PROCESSING_CATALYSTS_CHANNELING;\n  public final net.minecraft.tags.TagKey<net.minecraft.world.level.material.Fluid> tag;\n  public final boolean alwaysDatagen;\n  public static net.davio.aquaticambitions.registry.CAATags$CAAFluidTags[] values();\n  public static net.davio.aquaticambitions.registry.CAATags$CAAFluidTags valueOf(java.lang.String);\n  public boolean matches(net.minecraft.world.level.material.Fluid);\n  public boolean matches(net.minecraft.world.level.material.FluidState);\n}",
+        "source_class": "net.davio.aquaticambitions.registry.CAATags.CAAFluidTags"
       }
     ],
     "station_classes": []
   },
   "kind": "auto_storage_compat_audit",
+  "recipe_data": {
+    "declared_recipes": 96,
+    "digest": "ba4f866612b23b5d5bd4c34558ac65bf32007bd18ca404508e9d5bb67956e12c",
+    "effective_recipes": 96,
+    "format": 1,
+    "overrides": [],
+    "serializers": [
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "ingredients",
+          "results",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 3,
+          "results": 1
+        },
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:compacting/calcite"
+        ],
+        "serializer_id": "create:compacting"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "ingredients",
+          "processing_time",
+          "results",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 1,
+          "results": 5
+        },
+        "recipe_count": 3,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:crushing/nautilus_shards",
+          "create_aquatic_ambitions:crushing/prismarine_bricks_to_lapis_and_copper",
+          "create_aquatic_ambitions:crushing/prismarine_to_lapis"
+        ],
+        "serializer_id": "create:crushing"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "ingredients",
+          "processing_time",
+          "results",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 1,
+          "results": 3
+        },
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "create:milling/limestone"
+        ],
+        "serializer_id": "create:milling"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "ingredients",
+          "results",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 2,
+          "results": 1
+        },
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:mixing/prismarine_alloy"
+        ],
+        "serializer_id": "create:mixing"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "ingredients",
+          "results",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 1,
+          "results": 3
+        },
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:splashing/suspicious_rock"
+        ],
+        "serializer_id": "create:splashing"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 30,
+        "fields": [
+          "ingredients",
+          "neoforge:conditions",
+          "results",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 1,
+          "neoforge:conditions": 1,
+          "results": 2
+        },
+        "recipe_count": 77,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:channeling/brain_coral_block",
+          "create_aquatic_ambitions:channeling/brain_coral_fan_revival",
+          "create_aquatic_ambitions:channeling/brain_coral_revival",
+          "create_aquatic_ambitions:channeling/bubble_coral_block",
+          "create_aquatic_ambitions:channeling/bubble_coral_fan_revival",
+          "create_aquatic_ambitions:channeling/bubble_coral_revival",
+          "create_aquatic_ambitions:channeling/exposed_chiseled_copper",
+          "create_aquatic_ambitions:channeling/exposed_copper",
+          "create_aquatic_ambitions:channeling/exposed_copper_bulb",
+          "create_aquatic_ambitions:channeling/exposed_copper_door",
+          "create_aquatic_ambitions:channeling/exposed_copper_grate",
+          "create_aquatic_ambitions:channeling/exposed_copper_trapdoor",
+          "create_aquatic_ambitions:channeling/exposed_cut_copper",
+          "create_aquatic_ambitions:channeling/exposed_cut_copper_slab",
+          "create_aquatic_ambitions:channeling/exposed_cut_copper_stairs",
+          "create_aquatic_ambitions:channeling/fire_coral_block"
+        ],
+        "serializer_id": "create_aquatic_ambitions:channeling"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "key",
+          "pattern",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "pattern": 3
+        },
+        "recipe_count": 10,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:crafting/materials/brain_coral_block",
+          "create_aquatic_ambitions:crafting/materials/bubble_coral_block",
+          "create_aquatic_ambitions:crafting/materials/fire_coral_block",
+          "create_aquatic_ambitions:crafting/materials/horn_coral_block",
+          "create_aquatic_ambitions:crafting/materials/mechanical_conduit",
+          "create_aquatic_ambitions:crafting/materials/prismarine_alloy",
+          "create_aquatic_ambitions:crafting/materials/prismarine_alloy_block",
+          "create_aquatic_ambitions:crafting/materials/prismarine_alloy_rod",
+          "create_aquatic_ambitions:crafting/materials/trident",
+          "create_aquatic_ambitions:crafting/materials/tube_coral_block"
+        ],
+        "serializer_id": "minecraft:crafting_shaped"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "ingredients",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 1
+        },
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:crafting/materials/prismarine_alloy_from_block"
+        ],
+        "serializer_id": "minecraft:crafting_shapeless"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "cookingtime",
+          "experience",
+          "ingredient",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {},
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "create_aquatic_ambitions:smelting/veridium"
+        ],
+        "serializer_id": "minecraft:smelting"
+      }
+    ],
+    "sources": [
+      {
+        "declared_recipes": 96,
+        "id": "target_jar",
+        "sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+      }
+    ]
+  },
   "risks": [
     {
-      "code": "chance_output",
+      "code": "generic_ingredients",
       "disposition": "needs_decision",
       "evidence": [
-        "net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent#getChance"
+        "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe#getIngredients via com.simibubi.create.content.processing.recipe.ProcessingRecipe"
+      ]
+    },
+    {
+      "code": "randomness",
+      "disposition": "needs_decision",
+      "evidence": [
+        "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe: Random via com.simibubi.create.content.processing.recipe.ProcessingRecipe"
       ]
     },
     {
@@ -120,20 +707,24 @@
       "disposition": "needs_decision",
       "evidence": [
         "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe: world API",
-        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim: world API",
-        "net.davio.aquaticambitions.registry.CAARecipeTypes: world API"
+        "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim: world API"
       ]
     }
   ],
-  "scanner_format": 7,
+  "scanner_format": 16,
   "schema": 1,
   "source": {
     "files": [
       "src/main/java/net/davio/aquaticambitions/api/data/recipe/ChannelingRecipeGen.java",
-      "src/main/java/net/davio/aquaticambitions/compat/KubeJS/create/ProcessingOutputRecipeComponent.java",
-      "src/main/java/net/davio/aquaticambitions/compat/KubeJS/schemas/ChannelingRecipeSchema.java",
+      "src/main/java/net/davio/aquaticambitions/compat/JEI/CAAJEI.java",
+      "src/main/java/net/davio/aquaticambitions/compat/JEI/category/FanChannelingCategory.java",
+      "src/main/java/net/davio/aquaticambitions/compat/JEI/category/animations/AnimatedConduit.java",
       "src/main/java/net/davio/aquaticambitions/content/kinetics/fan/processing/ChannelingRecipe.java",
       "src/main/java/net/davio/aquaticambitions/content/processing/conduit/MechanicalConduitBlock.java",
+      "src/main/java/net/davio/aquaticambitions/content/processing/conduit/MechanicalConduitBlockEntity.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/CAAConduitEffectsProvider.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/CAADatagen.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/loot/CAAGlobalLootModifierProvider.java",
       "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAChannelingRecipeGen.java",
       "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAACompactingRecipeGen.java",
       "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAACrushingRecipeGen.java",
@@ -142,11 +733,1618 @@
       "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAARecipeProvider.java",
       "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAStandardRecipeGen.java",
       "src/main/java/net/davio/aquaticambitions/infrastructure/data/recipe/CAAWashingDataGen.java",
-      "src/main/java/net/davio/aquaticambitions/registry/CAARecipeTypes.java",
+      "src/main/java/net/davio/aquaticambitions/infrastructure/data/tags/CAARegistrateTags.java",
+      "src/main/java/net/davio/aquaticambitions/ponder/util/fakeConduitEntity/FakeActiveConduitBlockEntity.java",
       "src/main/java/net/davio/aquaticambitions/registry/CAATags.java"
     ],
     "revision": "c584e179ae64ce2373597899402bdd0cab9a22e7"
   },
+  "structural_candidate_inventory_sha256": "476c50f2a40de9cd24610faed6e7975026d3213c6281a36d2bf40b9c955239a1",
+  "structural_class_graph": [
+    {
+      "class": "com.simibubi.create.api.data.recipe.BaseRecipeProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.recipes.RecipeProvider"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.data.recipe.CompactingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.data.recipe.CrushingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.data.recipe.MillingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.data.recipe.MixingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.data.recipe.ProcessingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.BaseRecipeProvider"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.ProcessingRecipeGen"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.data.recipe.WashingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.equipment.goggles.IHaveCustomOverlayIcon",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "com.simibubi.create.api.equipment.goggles.IHaveCustomOverlayIcon"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.schematic.nbt.PartialSafeNBT",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.api.schematic.requirement.SpecialBlockEntityItemRequirement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.compat.jei.category.CreateRecipeCategory",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.compat.jei.category.ProcessingViaFanCategory",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.compat.jei.category.CreateRecipeCategory"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.compat.jei.category.ProcessingViaFanCategory$MultiOutput",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.compat.jei.category.ProcessingViaFanCategory"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.compat.jei.category.animations.AnimatedKinetics",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "mezz.jei.api.gui.drawable.IDrawable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.content.equipment.wrench.IWrenchable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.content.kinetics.fan.processing.FanProcessingType",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.content.processing.recipe.ProcessingRecipe",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.content.processing.recipe.StandardProcessingRecipe",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.content.processing.recipe.ProcessingRecipe"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.block.IBE",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.level.block.EntityBlock"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.block.ProperWaterloggedBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.level.block.SimpleWaterloggedBlock"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.blockEntity.SmartBlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "com.simibubi.create.api.schematic.nbt.PartialSafeNBT",
+          "com.simibubi.create.foundation.utility.IInteractionChecker",
+          "com.simibubi.create.api.schematic.requirement.SpecialBlockEntityItemRequirement",
+          "net.createmod.ponder.api.VirtualBlockEntity"
+        ],
+        "super_class": "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform$Sided",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.INamedIconOptions",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.gui.AllIcons",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.createmod.catnip.gui.element.ScreenElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.recipe.IRecipeTypeInfo",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "com.simibubi.create.foundation.utility.IInteractionChecker",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6c824088c447b559883a800b39c2bb5b7f127e2f854d11eb00d91b4866dfdd5f"
+    },
+    {
+      "class": "dev.engine_room.flywheel.api.visual.BlockEntityVisual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.Visual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.api.visual.DynamicVisual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.Visual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.api.visual.LightUpdatedVisual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.SectionTrackedVisual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.api.visual.SectionTrackedVisual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.Visual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.api.visual.TickableVisual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.Visual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.api.visual.Visual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.BlockEntityVisual",
+          "dev.engine_room.flywheel.api.visual.LightUpdatedVisual"
+        ],
+        "super_class": "dev.engine_room.flywheel.lib.visual.AbstractVisual"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.lib.visual.AbstractVisual",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.Visual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.DynamicVisual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.engine_room.flywheel.lib.visual.SimpleTickableVisual",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "dev.engine_room.flywheel.api.visual.TickableVisual"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "a79565dee7160fedd48de4899e0d21c845a8933b0413020e0a3ff65d0bec0308"
+    },
+    {
+      "class": "dev.latvian.mods.kubejs.plugin.KubeJSPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "06898ecdcfaed1037a5d9c96421708fa4b408139ae4df28cee9b0ce7e7c4baa7"
+    },
+    {
+      "class": "dev.latvian.mods.kubejs.recipe.component.RecipeComponent",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "06898ecdcfaed1037a5d9c96421708fa4b408139ae4df28cee9b0ce7e7c4baa7"
+    },
+    {
+      "class": "dev.latvian.mods.kubejs.recipe.component.SimpleRecipeComponent",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.latvian.mods.kubejs.recipe.component.RecipeComponent"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "06898ecdcfaed1037a5d9c96421708fa4b408139ae4df28cee9b0ce7e7c4baa7"
+    },
+    {
+      "class": "mezz.jei.api.IModPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2a9343b1f621e3de91600fb7c19f737dfd8372c3d00e81376f77c4ba624ff362"
+    },
+    {
+      "class": "mezz.jei.api.gui.drawable.IDrawable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2a9343b1f621e3de91600fb7c19f737dfd8372c3d00e81376f77c4ba624ff362"
+    },
+    {
+      "class": "mezz.jei.api.recipe.category.IRecipeCategory",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2a9343b1f621e3de91600fb7c19f737dfd8372c3d00e81376f77c4ba624ff362"
+    },
+    {
+      "class": "net.createmod.catnip.config.ConfigBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d6b7fdf94359f73dc1fee730eded898d51b3bf0d626710753253becd8e4e6bef"
+    },
+    {
+      "class": "net.createmod.catnip.gui.element.ScreenElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d6b7fdf94359f73dc1fee730eded898d51b3bf0d626710753253becd8e4e6bef"
+    },
+    {
+      "class": "net.createmod.catnip.lang.Lang",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d6b7fdf94359f73dc1fee730eded898d51b3bf0d626710753253becd8e4e6bef"
+    },
+    {
+      "class": "net.createmod.ponder.api.VirtualBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d6b7fdf94359f73dc1fee730eded898d51b3bf0d626710753253becd8e4e6bef"
+    },
+    {
+      "class": "net.createmod.ponder.api.registration.PonderPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d6b7fdf94359f73dc1fee730eded898d51b3bf0d626710753253becd8e4e6bef"
+    },
+    {
+      "class": "net.davio.aquaticambitions.CreateAquaticAmbitions",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.CreateAquaticAmbitionsClient",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.StandardProcessingRecipeGen"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.compat.JEI.CAAJEI",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.IModPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.compat.JEI.category.FanChannelingCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.compat.jei.category.ProcessingViaFanCategory$MultiOutput"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.compat.JEI.category.animations.AnimatedConduit",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.compat.jei.category.animations.AnimatedKinetics"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.compat.KubeJS.CAAKubeJSPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.latvian.mods.kubejs.plugin.KubeJSPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.compat.KubeJS.create.ProcessingOutputRecipeComponent",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.latvian.mods.kubejs.recipe.component.SimpleRecipeComponent"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.compat.KubeJS.schemas.ChannelingRecipeSchema",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.compat.KubeJS.wrapper.KubeCreateOutput",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingFanProcessingType",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "com.simibubi.create.content.kinetics.fan.processing.FanProcessingType"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.content.processing.recipe.StandardProcessingRecipe"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.logistics.CAAItemAttributes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.CAAConduitEffects",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "com.simibubi.create.foundation.block.IBE",
+          "com.simibubi.create.content.equipment.wrench.IWrenchable",
+          "com.simibubi.create.foundation.block.ProperWaterloggedBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlock$ConduitPowerLevel",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation"
+        ],
+        "super_class": "com.simibubi.create.foundation.blockEntity.SmartBlockEntity"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity$EntitySelectionMode",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.INamedIconOptions"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitEffect",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitEffectDefinition",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitEffectDefinition$Behavior",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitModeSlot",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform$Sided"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitVisual",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual",
+          "dev.engine_room.flywheel.lib.visual.SimpleTickableVisual"
+        ],
+        "super_class": "dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.events.CAACommonEvents",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.events.CAACommonEvents$ModBusEvents",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.BuiltInDatapackRegistrar",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.config.CAAConduitCageConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.createmod.catnip.config.ConfigBase"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.config.CAAConduitCageConfig$Comments",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.config.CAAConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.config.CAAServerConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.createmod.catnip.config.ConfigBase"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.config.CAAServerConfig$Comments",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.CAAConduitEffectsProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.CAADatagen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.loot.CAAGlobalLootModifierProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.GlobalLootModifierProvider"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAChannelingRecipeGen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.davio.aquaticambitions.api.data.recipe.ChannelingRecipeGen"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACompactingRecipeGen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.CompactingRecipeGen"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAACrushingRecipeGen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.CrushingRecipeGen"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMillingRecipeGen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.MillingRecipeGen"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAMixingRecipeGen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.MixingRecipeGen"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.recipes.RecipeProvider"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAARecipeProvider$I",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.BaseRecipeProvider"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$GeneratedRecipeBuilder$GeneratedCookingRecipeBuilder",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$Marker",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutput",
+      "metadata": {
+        "access_flags": 48,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeOutput"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$FakeItemStack",
+      "metadata": {
+        "access_flags": 48,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
+      "metadata": {
+        "access_flags": 48,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAWashingDataGen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.api.data.recipe.WashingRecipeGen"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.tags.CAARegistrateTags",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.loot.AddItemModifier",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.loot.LootModifier"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.loot.CAALootModifiers",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.CAAPonderPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.createmod.ponder.api.registration.PonderPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.CAAPonderScenes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.scenes.ConduitScenes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.scenes.MechanicalConduitScenes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "com.simibubi.create.foundation.block.IBE",
+          "com.simibubi.create.foundation.block.ProperWaterloggedBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.foundation.blockEntity.SmartBlockEntity"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeConduitRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAABlockEntityTypes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAABlocks",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAACreativeTab",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAAFanProcessingTypes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAAIcons",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "com.simibubi.create.foundation.gui.AllIcons"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAAItems",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAAPartials",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAARecipeTypes",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "com.simibubi.create.foundation.recipe.IRecipeTypeInfo",
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAARecipeTypes$Registers",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAARegistries",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAAShapes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAATags",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAATags$CAABlockTags",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAATags$CAAFluidTags",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAATags$CAAItemTags",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.registry.CAATags$NameSpace",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.util.CAALang",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.createmod.catnip.lang.Lang"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.davio.aquaticambitions.util.ErrorMessages",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "d50180fd30dc7f034ea4ad5185d18cfa652457be1d8e7a45f0b491d0e6642d44"
+    },
+    {
+      "class": "net.minecraft.client.renderer.blockentity.BlockEntityRenderer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.DataProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeOutput",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IRecipeOutputExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.registries.RegistriesDatapackGenerator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.util.StringRepresentable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.flag.FeatureElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.Recipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.RecipeSerializer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.ItemLike",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.Block",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IBlockExtension"
+        ],
+        "super_class": "net.minecraft.world.level.block.state.BlockBehaviour"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BucketPickup",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBucketPickupExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.EntityBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.LiquidBlockContainer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.SimpleWaterloggedBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.level.block.BucketPickup",
+          "net.minecraft.world.level.block.LiquidBlockContainer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.BlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBlockEntityExtension"
+        ],
+        "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.state.BlockBehaviour",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.AttachmentHolder",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.attachment.IAttachmentHolder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.IAttachmentHolder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.registries.RegistriesDatapackGenerator"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.GlobalLootModifierProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockEntityExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBucketPickupExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IRecipeOutputExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.loot.IGlobalLootModifier",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.loot.LootModifier",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.loot.IGlobalLootModifier"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    }
+  ],
+  "structural_hierarchy": [
+    {
+      "class": "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+      "classification": {
+        "evidence": [
+          "net.davio.aquaticambitions.content.kinetics.fan.processing.ChannelingRecipe",
+          "com.simibubi.create.content.processing.recipe.StandardProcessingRecipe",
+          "com.simibubi.create.content.processing.recipe.ProcessingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity",
+      "classification": {
+        "evidence": [
+          "net.davio.aquaticambitions.content.processing.conduit.MechanicalConduitBlockEntity",
+          "com.simibubi.create.foundation.blockEntity.SmartBlockEntity",
+          "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity",
+          "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+      "classification": {
+        "evidence": [
+          "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
+      "classification": {
+        "evidence": [
+          "net.davio.aquaticambitions.infrastructure.data.recipe.CAAStandardRecipeGen$ModdedCookingRecipeOutputShim$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity",
+      "classification": {
+        "evidence": [
+          "net.davio.aquaticambitions.ponder.util.fakeConduitEntity.FakeActiveConduitBlockEntity",
+          "com.simibubi.create.foundation.blockEntity.SmartBlockEntity",
+          "com.simibubi.create.foundation.blockEntity.CachedRenderBBBlockEntity",
+          "com.simibubi.create.foundation.blockEntity.SyncedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    }
+  ],
   "target": {
     "display_name": "Create Aquatic Ambitions",
     "mod_id": "create_aquatic_ambitions",

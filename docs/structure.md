@@ -50,7 +50,7 @@
 | `src/industrialForegoingFixture/` | 代表性Industrial Foregoing 1.21-3.6.39 + Titanium 4.0.45隔離GameTest fixture；驗證item/fluid/FE/work、persistence、rollback與fail-closed。 |
 | `docs/create-compatibility.md` | Create optional Milling/Crushing/Cutting/Filling/Emptying exact contract、normalized station work與RPM/chance/multi-station邊界。 |
 | `src/createFixture/` | 代表性Create 6.0.10隔離GameTest fixture；13個tests驗五個deterministic families、item/fluid/remainder/work/reload與atomic rollback。 |
-| `docs/create-aquatic-ambitions-compatibility.md` | Create Aquatic Ambitions 2.0.4 audit、22個rejected candidates、Channeling world/chance邊界與零production-family Outcome C。 |
+| `docs/create-aquatic-ambitions-compatibility.md` | Create Aquatic Ambitions 2.0.4 scanner-format-16 audit：79個target classes、6個reachable ancestry、2個actual Recipe candidates重審拒絕、Channeling world/chance邊界與零production-family Outcome C。 |
 | `src/createAquaticAmbitionsFixture/` | 代表性Create Aquatic Ambitions 2.0.4 + Create隔離GameTest fixture；4個tests驗present target、零custom registration及全部Channeling recipes fail closed。 |
 | `docs/pneumaticcraft-compatibility.md` | PneumaticCraft Air/pressure/heat/multiblock API審計與零production-family fail-closed判定。 |
 | `src/pneumaticCraftFixture/` | 代表性PneumaticCraft 8.2.22 present-mod隔離fixture；9個tests鎖住Air與七類machine recipes不被不安全接受。 |
