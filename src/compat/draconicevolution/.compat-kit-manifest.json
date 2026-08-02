@@ -9,5 +9,6 @@
     "src/draconicevolutionFixture/resources/META-INF/neoforge.mods.toml": "7bc9701f0f31701f5a4e666d1923148ee465b12650183c135d3b376e99ef2f34",
     "src/draconicevolutionFixture/resources/data/auto_storage_draconicevolution_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
-  "schema": 1
+  "schema": 1,
+  "tool_version": "0.3.0"
 }

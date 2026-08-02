@@ -8,5 +8,6 @@
     "src/productivebeesFixture/resources/META-INF/neoforge.mods.toml": "ac7aee8bb29e374b1d46ac145b6703feac971855a07d6339775020a8846733f7",
     "src/productivebeesFixture/resources/data/auto_storage_productivebees_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
-  "schema": 1
+  "schema": 1,
+  "tool_version": "0.3.0"
 }

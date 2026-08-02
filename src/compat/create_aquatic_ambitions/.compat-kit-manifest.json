@@ -8,5 +8,6 @@
     "src/createAquaticAmbitionsFixture/resources/META-INF/neoforge.mods.toml": "92db6ecf89f29714a6e3339e4fdc82eeb4cc9a7e3adaec27d5bc8a2bb8f51614",
     "src/createAquaticAmbitionsFixture/resources/data/auto_storage_create_aquatic_ambitions_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
-  "schema": 1
+  "schema": 1,
+  "tool_version": "0.3.0"
 }

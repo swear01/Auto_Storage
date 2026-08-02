@@ -9,5 +9,6 @@
     "src/theurgyFixture/resources/META-INF/neoforge.mods.toml": "9b554ef1eb0d2c1b1dc105d1b3dc543bd52292cc770bfc9d0fe7fc78509f751a",
     "src/theurgyFixture/resources/data/auto_storage_theurgy_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
-  "schema": 1
+  "schema": 1,
+  "tool_version": "0.3.0"
 }

@@ -8,5 +8,6 @@
     "src/compat/advanced_ae/compat-module.json": "275d42cdaa82d525cfe1c68710e459228bd0b4ace04617e4a774e464f60353b3",
     "src/compat/advanced_ae/java/com/swear/autostorage/compat/advancedae/AdvancedAeCompatModule.java": "bbd6c59fd8e96d7f7ba4db49c46798ddd091209db515e315b3327073c2a37491"
   },
-  "schema": 1
+  "schema": 1,
+  "tool_version": "0.3.0"
 }

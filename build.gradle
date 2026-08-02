@@ -233,9 +233,13 @@ def generateCompatibilityMatrixManifest = tasks.register(
 def compatibilitySummaryRelativePath = 'build/reports/compatibility-modules.md'
 def compatibilitySummaryFile = layout.projectDirectory.file(
         compatibilitySummaryRelativePath)
+def compatibilityModuleDocs = fileTree('docs') {
+    include '*-compatibility.md'
+}
 def generateCompatibilitySummary = tasks.register(
         'generateCompatibilitySummary', Exec) {
     inputs.files(compatModuleFiles)
+    inputs.files(compatibilityModuleDocs)
     inputs.file('scripts/compatibility_matrix_manifest.py')
     outputs.file(compatibilitySummaryFile)
     workingDir = layout.projectDirectory.asFile
@@ -251,6 +255,7 @@ def checkCompatibilitySummary = tasks.register(
         'checkCompatibilitySummary', Exec) {
     dependsOn generateCompatibilitySummary
     inputs.files(compatModuleFiles)
+    inputs.files(compatibilityModuleDocs)
     inputs.file(compatibilitySummaryFile)
     inputs.file('scripts/compatibility_matrix_manifest.py')
     workingDir = layout.projectDirectory.asFile

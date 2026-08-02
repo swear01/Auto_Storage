@@ -801,6 +801,14 @@ class CompatibilityMatrixManifestTests(unittest.TestCase):
         self.assertIn(COMPATIBILITY_SUMMARY_RELATIVE_PATH, build)
         self.assertNotIn("docs/generated/compatibility-modules.md", build)
         self.assertFalse((ROOT / "docs/generated").exists())
+        self.assertIn(
+            "def compatibilityModuleDocs = fileTree('docs')",
+            build,
+        )
+        self.assertGreaterEqual(
+            build.count("inputs.files(compatibilityModuleDocs)"),
+            2,
+        )
 
         descriptors = load_descriptors(ROOT / "src/compat")
         with tempfile.TemporaryDirectory() as tmp:

@@ -45,6 +45,11 @@ class ModularCompatSdkTests(unittest.TestCase):
         for manifest_path in manifests:
             manifest = json.loads(manifest_path.read_text())
             module_id = manifest_path.parent.name
+            self.assertEqual(
+                {"schema", "tool_version", "contract_sha256", "files"},
+                set(manifest),
+                module_id,
+            )
             for relative_path, expected_sha256 in manifest["files"].items():
                 self.assertEqual(
                     expected_sha256,

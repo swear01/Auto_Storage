@@ -9,5 +9,6 @@
     "src/compat/ae2/java/com/swear/autostorage/compat/ae2/Ae2Compat.java": "19e49c26945fb382e6e2042a34e4bd54570a0d0d9b1392bf58b9da9e51dff44c",
     "src/compat/ae2/java/com/swear/autostorage/compat/ae2/Ae2CompatModule.java": "781c3e557069831d74a925aa1ee511d772518d07575f752ff038a0e7dcbe4039"
   },
-  "schema": 1
+  "schema": 1,
+  "tool_version": "0.3.0"
 }
