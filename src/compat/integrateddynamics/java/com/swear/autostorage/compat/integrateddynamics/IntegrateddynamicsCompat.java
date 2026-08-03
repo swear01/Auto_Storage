@@ -414,7 +414,7 @@ public final class IntegrateddynamicsCompat {
     private static Item requiredItem(String path) {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
         Item item = BuiltInRegistries.ITEM.get(id);
-        if (item == null || item == Items.AIR) {
+        if (item == Items.AIR) {
             throw new IllegalStateException(
                     "Loaded Integrated Dynamics did not register station item " + id);
         }

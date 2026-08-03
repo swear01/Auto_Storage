@@ -25,9 +25,11 @@ public final class IntegratedcraftingIntegrationGameTests {
         if (!ModList.get().isLoaded("integratedcrafting")
                 || IntegratedcraftingCompat.registrationCount() != 1
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getPath().startsWith("integratedcrafting"))
+                        .anyMatch(id -> id.getNamespace().equals("auto_storage")
+                                && id.getPath().startsWith("integratedcrafting"))
                 || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getPath().startsWith("integratedcrafting"))) {
+                        .anyMatch(id -> id.getNamespace().equals("auto_storage")
+                                && id.getPath().startsWith("integratedcrafting"))) {
             helper.fail("Integrated Crafting unsafe recipe contract was registered");
             return;
         }

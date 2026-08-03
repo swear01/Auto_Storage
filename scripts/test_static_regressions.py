@@ -6313,9 +6313,27 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("IntegratedcraftingCompat.registrationCount() != 1", method)
         self.assertIn('ModList.get().isLoaded("integratedcrafting")', method)
         self.assertIn(
+            'id.getNamespace().equals("auto_storage")',
+            method,
+        )
+        self.assertIn(
+            'id.getPath().startsWith("integratedcrafting")',
+            method,
+        )
+        self.assertIn(
             "Integrated Crafting unsafe recipe contract was registered",
             method,
         )
+        required_item = self.java_block(
+            self.read_required(
+                "src/compat/integrateddynamics/java/com/swear/autostorage/compat/"
+                "integrateddynamics/IntegrateddynamicsCompat.java"
+            ),
+            r"\bprivate\s+static\s+Item\s+requiredItem\s*\(",
+            "Integrated Dynamics requiredItem",
+        )
+        self.assertIn("item == Items.AIR", required_item)
+        self.assertNotIn("item == null", required_item)
 
 
 if __name__ == "__main__":
