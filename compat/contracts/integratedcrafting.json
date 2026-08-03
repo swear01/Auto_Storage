@@ -1,0 +1,178 @@
+{
+  "families": [
+    {
+      "class": "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+      "costs": [],
+      "decision": "Special crafting recipe used for game tests; shears durability uses player/entity mutation and CommonHooks remainders, so it has no complete Auto Storage transaction contract.",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush#public_signature"
+      ],
+      "id": "recipe_dead_bush",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "entity_mutation",
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "integratedcrafting"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "integratedcrafting"
+      ],
+      "sha256": "3593986292d1f9d2cf093b3a9d16b0828c3410817eb57cb1d6b4b70b23719aa7"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec",
+  "source_recipe_data_sha256": "977b483e41451bf5f0e18c187ef6c1727117fc487955cf5c885c1a73ee28309e",
+  "source_recipe_inventory_sha256": "66423b1d79f8a00b24e458d48206f35efaeb5c75b738e7805d630256140a658a",
+  "target": {
+    "dependency": "maven.modrinth:integrated-crafting:se5g7ewq",
+    "display_name": "IntegratedCrafting",
+    "mod_id": "integratedcrafting",
+    "repositories": [
+      "https://api.modrinth.com/maven"
+    ],
+    "runtime_artifact_transforms": {
+      "maven.modrinth:integrated-dynamics:tG3ZKTep": {
+        "remove_entries": [
+          "org/cyclops/integrateddynamicscompat/modcompat/refinedstorage/gametest/GameTestsAspectsRefinedStorage.class"
+        ],
+        "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+      }
+    },
+    "runtime_dependencies": [
+      "maven.modrinth:integrated-dynamics:tG3ZKTep",
+      "maven.modrinth:cyclops-core:vEjxRv40",
+      "maven.modrinth:common-capabilities:c50bCinZ"
+    ],
+    "version": "1.4.6"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Integrated Crafting DeadBush special recipe must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Integrated Crafting recipes must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Integrated Crafting recipes must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Integrated Crafting recipes must remain fail closed",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Integrated Crafting unsafe recipe contract was registered",
+          "source": "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingIntegrationGameTests.java",
+          "task": "runIntegratedCraftingGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 4,
+    "fixture": "integratedCraftingFixture",
+    "game_test_task": "runIntegratedCraftingGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runIntegratedCraftingGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

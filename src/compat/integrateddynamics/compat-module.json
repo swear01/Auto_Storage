@@ -1,0 +1,62 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+  },
+  "dependencies": [
+    "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "maven.modrinth:common-capabilities:c50bCinZ",
+    "maven.modrinth:cyclops-core:vEjxRv40"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.integrateddynamics.IntegrateddynamicsCompatModule",
+  "expectedTests": 10,
+  "fixture": "integratedDynamicsFixture",
+  "id": "auto_storage:integrateddynamics",
+  "matrix": {
+    "acceptedRecipes": [
+      "integrateddynamics:drying_basin/base/crystalized_menril_block"
+    ],
+    "descriptors": [
+      "auto_storage:integrateddynamics_drying_basin",
+      "auto_storage:integrateddynamics_mechanical_drying_basin",
+      "auto_storage:integrateddynamics_mechanical_squeezer"
+    ],
+    "mods": [
+      "integrateddynamics"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "integrateddynamics"
+      ],
+      "sha256": "22990962ac2a4058027e307c1f38bace89abc07336b71b1a2ac812ab0789da9b"
+    },
+    "rejectedDescriptors": [
+      "auto_storage:integrateddynamics_squeezer"
+    ],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "integrateddynamics"
+  ],
+  "runtimeArtifactTransforms": [
+    {
+      "dependency": "maven.modrinth:integrated-dynamics:tG3ZKTep",
+      "remove_entries": [
+        "org/cyclops/integrateddynamicscompat/modcompat/refinedstorage/gametest/GameTestsAspectsRefinedStorage.class"
+      ],
+      "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    }
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "maven.modrinth:cyclops-core:vEjxRv40",
+    "maven.modrinth:common-capabilities:c50bCinZ"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatIntegrateddynamics"
+}

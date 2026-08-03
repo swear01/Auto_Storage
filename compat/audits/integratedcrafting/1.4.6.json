@@ -1,0 +1,1705 @@
+{
+  "ancestry_classpath": [
+    {
+      "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+      "size": 56279815
+    },
+    {
+      "sha256": "35b6ea1658894f21a07113d1ce9723582bb26cfb55bb978d1adf27658b660bcb",
+      "size": 283956
+    },
+    {
+      "sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166",
+      "size": 1158134
+    },
+    {
+      "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2",
+      "size": 4359971
+    }
+  ],
+  "ancestry_dependencies": [
+    {
+      "dependency": "maven.modrinth:common-capabilities:c50bCinZ",
+      "sha256": "35b6ea1658894f21a07113d1ce9723582bb26cfb55bb978d1adf27658b660bcb",
+      "size": 283956
+    },
+    {
+      "dependency": "maven.modrinth:cyclops-core:vEjxRv40",
+      "sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166",
+      "size": 1158134
+    },
+    {
+      "dependency": "maven.modrinth:integrated-dynamics:tG3ZKTep",
+      "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2",
+      "size": 4359971
+    }
+  ],
+  "artifact": {
+    "class_count": 80,
+    "class_inventory_sha256": "8ccc8ed28c3de63606fb842c163f4bcce024082d14605a1d870df5d2a1f5886f",
+    "sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec",
+    "size": 377545
+  },
+  "candidates": {
+    "block_entity_classes": [],
+    "client_viewer_classes": [
+      {
+        "class": "org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCrafting",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ContainerScreenPartInterfaceCrafting.java\"\npublic class org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCrafting extends org.cyclops.cyclopscore.client.gui.container.ContainerScreenExtended<org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCrafting> {\n  public org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCrafting(org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCrafting, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public void init();\n}",
+        "source_class": "org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCrafting"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCraftingSettings",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ContainerScreenPartInterfaceCraftingSettings.java\"\npublic class org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCraftingSettings extends org.cyclops.integrateddynamics.core.client.gui.container.ContainerScreenPartSettings<org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCraftingSettings> implements org.cyclops.cyclopscore.client.gui.component.input.IInputListener {\n  public org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCraftingSettings(org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCraftingSettings, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public void init();\n  public boolean charTyped(char, int);\n  public boolean keyPressed(int, int, int);\n  public boolean mouseClicked(double, double, int);\n  public void onUpdate(int, net.minecraft.nbt.CompoundTag);\n  public void onChanged();\n}",
+        "source_class": "org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCraftingSettings"
+      }
+    ],
+    "datagen_classes": [],
+    "recipe_builders": [],
+    "recipe_classes": [
+      {
+        "class": "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+        "classification": {
+          "evidence": [
+            "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+            "net.minecraft.world.item.crafting.CustomRecipe",
+            "net.minecraft.world.item.crafting.CraftingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"RecipeDeadBush.java\"\npublic class org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush extends net.minecraft.world.item.crafting.CustomRecipe {\n  public org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush(net.minecraft.world.item.crafting.CraftingBookCategory);\n  public boolean matches(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.CraftingInput, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> getRemainingItems(net.minecraft.world.item.crafting.CraftingInput);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.core.NonNullList getRemainingItems(net.minecraft.world.item.crafting.RecipeInput);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n}",
+        "source_class": "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush"
+      }
+    ],
+    "recipe_serializers": [],
+    "recipe_types": [],
+    "resource_apis": [
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders",
+        "classification": {
+          "evidence": [
+            "gas"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CraftingAspectReadBuilders.java\"\npublic class org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders {\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders();\n}",
+        "source_class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders$CraftingNetwork",
+        "classification": {
+          "evidence": [
+            "gas"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CraftingAspectReadBuilders.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders$CraftingNetwork {\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Pair<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties>, org.apache.commons.lang3.tuple.Pair<org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.util.Optional<org.cyclops.integratedcrafting.api.network.ICraftingNetwork>>> PROP_GET_CRAFTING_NETWORK;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList, org.apache.commons.lang3.tuple.Pair<org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.util.Optional<org.cyclops.integratedcrafting.api.network.ICraftingNetwork>>> BUILDER_LIST;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders$CraftingNetwork();\n}",
+        "source_class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders.CraftingNetwork"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders",
+        "classification": {
+          "evidence": [
+            "gas"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CraftingAspectWriteBuilders.java\"\npublic class org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders {\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger> PROP_CHANNEL;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean$ValueBoolean> PROP_IGNORE_STORAGE;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean$ValueBoolean> PROP_IGNORE_CRAFTING;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeBoolean$ValueBoolean> PROP_CRAFT_MISSING;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger> PROP_CRAFT_AMOUNT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectPropertyTypeInstance<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger> PROP_CRAFT_DELAY;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties PROPERTIES_CRAFTING_RECIPE;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties PROPERTIES_CRAFTING;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe$ValueRecipe, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition>> BUILDER_RECIPE;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack$ValueItemStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.minecraft.world.item.ItemStack>> BUILDER_ITEMSTACK;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack$ValueFluidStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.neoforged.neoforge.fluids.FluidStack>> BUILDER_FLUIDSTACK;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.AspectBuilder<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger, org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.lang.Integer>> BUILDER_INTEGER;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.minecraft.world.item.ItemStack>, org.cyclops.integratedcrafting.part.aspect.CraftingJobData<net.minecraft.world.item.ItemStack, java.lang.Integer>> PROP_ITEMSTACK_CRAFTINGDATA;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, net.neoforged.neoforge.fluids.FluidStack>, org.cyclops.integratedcrafting.part.aspect.CraftingJobData<net.neoforged.neoforge.fluids.FluidStack, java.lang.Integer>> PROP_FLUIDSTACK_CRAFTINGDATA;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, java.lang.Integer>, org.cyclops.integratedcrafting.part.aspect.CraftingJobData<java.lang.Long, java.lang.Boolean>> PROP_ENERGY_CRAFTINGDATA;\n  public static final org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.apache.commons.lang3.tuple.Triple<org.cyclops.integrateddynamics.api.part.PartTarget, org.cyclops.integrateddynamics.api.part.aspect.property.IAspectProperties, org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition>, java.lang.Void> PROP_CRAFT_RECIPE;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders();\n  public static <T, M> org.cyclops.integrateddynamics.core.part.aspect.build.IAspectValuePropagator<org.cyclops.integratedcrafting.part.aspect.CraftingJobData<T, M>, java.lang.Void> PROP_CRAFT();\n}",
+        "source_class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects",
+        "classification": {
+          "evidence": [
+            "gas"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic class org.cyclops.integratedcrafting.part.aspect.CraftingAspects {\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects();\n  public static void load();\n}",
+        "source_class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read",
+        "classification": {
+          "evidence": [
+            "gas"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read {\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read();\n}",
+        "source_class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects.Read"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read$Network",
+        "classification": {
+          "evidence": [
+            "gas"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read$Network {\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectRead<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList> CRAFTING_JOBS;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectRead<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList> CRAFTING_INGREDIENTS;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectRead<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList$ValueList, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeList> RECIPES;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read$Network();\n}",
+        "source_class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects.Read.Network"
+      },
+      {
+        "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Write",
+        "classification": {
+          "evidence": [
+            "gas"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CraftingAspects.java\"\npublic final class org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Write {\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe$ValueRecipe, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeRecipe> RECIPE_CRAFT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack$ValueItemStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeItemStack> ITEMSTACK_CRAFT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack$ValueFluidStack, org.cyclops.integrateddynamics.core.evaluate.variable.ValueObjectTypeFluidStack> FLUIDSTACK_CRAFT;\n  public static final org.cyclops.integrateddynamics.api.part.aspect.IAspectWrite<org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger$ValueInteger, org.cyclops.integrateddynamics.core.evaluate.variable.ValueTypeInteger> ENERGY_CRAFT;\n  public org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Write();\n}",
+        "source_class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects.Write"
+      }
+    ],
+    "station_classes": []
+  },
+  "kind": "auto_storage_compat_audit",
+  "recipe_data": {
+    "declared_recipes": 3,
+    "digest": "977b483e41451bf5f0e18c187ef6c1727117fc487955cf5c885c1a73ee28309e",
+    "effective_recipes": 3,
+    "format": 1,
+    "overrides": [],
+    "serializers": [
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "key",
+          "pattern",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "pattern": 3
+        },
+        "recipe_count": 3,
+        "sample_recipe_ids": [
+          "integratedcrafting:crafting/part_crafting_writer",
+          "integratedcrafting:crafting/part_interface_crafting",
+          "integratedcrafting:crafting/part_interface_crafting_attuned"
+        ],
+        "serializer_id": "minecraft:crafting_shaped"
+      }
+    ],
+    "sources": [
+      {
+        "declared_recipes": 3,
+        "id": "target_jar",
+        "sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+      }
+    ]
+  },
+  "risks": [
+    {
+      "code": "entity_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush: entity API"
+      ]
+    },
+    {
+      "code": "generic_ingredients",
+      "disposition": "needs_decision",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush#getIngredients"
+      ]
+    },
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush: world API"
+      ]
+    }
+  ],
+  "scanner_format": 17,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/org/cyclops/integratedcrafting/client/gui/ContainerScreenPartInterfaceCrafting.java",
+      "src/main/java/org/cyclops/integratedcrafting/client/gui/ContainerScreenPartInterfaceCraftingSettings.java",
+      "src/main/java/org/cyclops/integratedcrafting/part/aspect/CraftingAspectReadBuilders.java",
+      "src/main/java/org/cyclops/integratedcrafting/part/aspect/CraftingAspectWriteBuilders.java",
+      "src/main/java/org/cyclops/integratedcrafting/part/aspect/CraftingAspects.java",
+      "src/main/java/org/cyclops/integratedcrafting/recipe/type/RecipeDeadBush.java"
+    ],
+    "revision": "352bce1cfd1d57aef79aeb17b38895aaac0cac39"
+  },
+  "structural_candidate_inventory_sha256": "8a7dd50fdd925a09feff93de1316ed81d7a885913c075ef13b47c23c1091456d",
+  "structural_class_graph": [
+    {
+      "class": "net.minecraft.client.gui.components.Renderable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.TabOrderedElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.ContainerEventHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.ContainerEventHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.GuiEventListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.GuiEventListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.TabOrderedElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.Screen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.Renderable"
+        ],
+        "super_class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.MenuAccess"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.Screen"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.MenuAccess",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.Clearable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.Container",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.Clearable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.AbstractContainerMenu",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.CraftingContainer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.Container",
+          "net.minecraft.world.inventory.StackedContentsCompatible"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.StackedContentsCompatible",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.TransientCraftingContainer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.inventory.CraftingContainer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.CraftingRecipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.CustomRecipe",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.CraftingRecipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.Recipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "java.lang.Iterable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "35b6ea1658894f21a07113d1ce9723582bb26cfb55bb978d1adf27658b660bcb"
+    },
+    {
+      "class": "org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageSlotted",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "35b6ea1658894f21a07113d1ce9723582bb26cfb55bb978d1adf27658b660bcb"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.client.gui.component.input.IInputListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.client.gui.container.ContainerScreenExtended",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.inventory.IValueNotifiable"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.config.extendedconfig.DummyConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfig"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfig",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfigCommon"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfigCommon",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "java.lang.Comparable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfigForge",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfig"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.config.extendedconfig.GuiConfig",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfigForge"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.config.extendedconfig.RecipeConfig",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.ExtendedConfigForge"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.helper.ModBaseCommon",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.init.IModBase"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.init.IModBase",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.init.IRegistry",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.init.ModBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.helper.ModBaseCommon"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.init.ModBaseVersionable",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.tracking.IModVersion"
+        ],
+        "super_class": "org.cyclops.cyclopscore.init.ModBase"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.inventory.IValueNotifiable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.inventory.IValueNotifier",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.inventory.container.ContainerExtended",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.inventory.container.button.IContainerButtonClickAcceptorServer",
+          "org.cyclops.cyclopscore.inventory.IValueNotifier",
+          "org.cyclops.cyclopscore.inventory.IValueNotifiable"
+        ],
+        "super_class": "net.minecraft.world.inventory.AbstractContainerMenu"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.inventory.container.InventoryContainer",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.inventory.container.ContainerExtended"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.inventory.container.button.IContainerButtonClickAcceptorServer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.persist.IDirtyMarkListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.ClientProxyComponent",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.proxy.ICommonProxy",
+          "org.cyclops.cyclopscore.proxy.IClientProxy"
+        ],
+        "super_class": "org.cyclops.cyclopscore.proxy.ClientProxyComponentCommon"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.ClientProxyComponentCommon",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.proxy.ICommonProxyCommon",
+          "org.cyclops.cyclopscore.proxy.IClientProxyCommon"
+        ],
+        "super_class": "org.cyclops.cyclopscore.proxy.CommonProxyComponentCommon"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.CommonProxyComponent",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.proxy.ICommonProxy"
+        ],
+        "super_class": "org.cyclops.cyclopscore.proxy.CommonProxyComponentCommon"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.CommonProxyComponentCommon",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.proxy.ICommonProxyCommon"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.IClientProxy",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.cyclopscore.proxy.IClientProxyCommon",
+          "org.cyclops.cyclopscore.proxy.ICommonProxy"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.IClientProxyCommon",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.cyclopscore.proxy.ICommonProxyCommon"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.ICommonProxy",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.cyclopscore.proxy.ICommonProxyCommon"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.proxy.ICommonProxyCommon",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.cyclopscore.tracking.IModVersion",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "61bd0fcfdf16330d0b468765111666e8abcb029c172b2e6db314b37fb0206166"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.Capabilities",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.Capabilities$CraftingInterface",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.Capabilities$CraftingNetwork",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.GeneralConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.DummyConfig"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.IntegratedCrafting",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.init.ModBaseVersionable"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.Reference",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.RegistryEntries",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.CraftingJob",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.CraftingJobDependencyGraph",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.CraftingJobStatus",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.FailedCraftingRecipeException",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Exception"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.ICraftingInterface",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.ICraftingProcessOverride",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.ICraftingProcessOverrideRegistry",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.cyclopscore.init.IRegistry"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.ICraftingResultsSink",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.RecursiveCraftingRecipeException",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Exception"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.UnavailableCraftingInterfacesException",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Exception"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.crafting.UnknownCraftingRecipeException",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Exception"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.network.ICraftingNetwork",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndexModifiable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndex"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.IRecipeIndex",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.api.recipe.IRecipeIndexModifiable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.recipe.IRecipeIndex"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.capability.network.CraftingNetworkCapabilityConstructors",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.capability.network.NetworkCraftingHandlerCraftingNetwork",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.network.INetworkCraftingHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCrafting",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.client.gui.container.ContainerScreenExtended"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.client.gui.ContainerScreenPartInterfaceCraftingSettings",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.cyclopscore.client.gui.component.input.IInputListener"
+        ],
+        "super_class": "org.cyclops.integrateddynamics.core.client.gui.container.ContainerScreenPartSettings"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.CraftingHelpers",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.CraftingHelpers$IIdentifierGenerator",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.CraftingJobHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.CraftingJobIndexDefault",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.recipe.ICraftingJobIndexModifiable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.CraftingProcessOverrideRegistry",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.crafting.ICraftingProcessOverrideRegistry"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.CraftingProcessOverrides",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.MissingIngredients",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.MissingIngredients$Element",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.MissingIngredients$PrototypedWithRequested",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.PartialCraftingJobCalculation",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.PartialCraftingJobCalculationDependency",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.PendingCraftingJobResultIndexObserver",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.core.network.IIngredientChannelInsertPreConsumer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.RecipeIndexDefault",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.recipe.IRecipeIndexModifiable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.crafting.processoverride.CraftingGrid",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.inventory.TransientCraftingContainer"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.crafting.processoverride.CraftingProcessOverrideBrewingStand",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.crafting.ICraftingProcessOverride"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.crafting.processoverride.CraftingProcessOverrideCraftingTable",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.crafting.ICraftingProcessOverride"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.crafting.processoverride.CraftingProcessOverrideSmithingTable",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.crafting.ICraftingProcessOverride"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.crafting.processoverride.CraftingProcessOverrideStonecutter",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.crafting.ICraftingProcessOverride"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.network.CraftingNetwork",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.network.ICraftingNetwork"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.part.PartTypeCraftingBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.part.PartTypeBase"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.part.PartTypeInterfaceCraftingBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.integratedcrafting.core.part.PartTypeCraftingBase"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.core.part.PartTypeInterfaceCraftingBase$State",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.api.crafting.ICraftingInterface",
+          "org.cyclops.integratedcrafting.api.crafting.ICraftingResultsSink"
+        ],
+        "super_class": "org.cyclops.integrateddynamics.core.part.PartStateBase"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.gametest.GameTestHelpersIntegratedCrafting",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.gametest.GameTestHelpersIntegratedCrafting$INetworkPositions",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.gametest.GameTestHelpersIntegratedCrafting$NetworkPositions",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "org.cyclops.integratedcrafting.gametest.GameTestHelpersIntegratedCrafting$INetworkPositions"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.gametest.GameTestsAdvancements",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.gametest.GameTestsItemsCraft",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.gametest.GameTestsItemsSmithing",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.gametest.GameTestsItemsStonecutting",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.ingredient.storage.IngredientComponentStorageSlottedInsertProxy",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageSlotted"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCrafting",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.inventory.container.ContainerMultipart"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCraftingConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.GuiConfig"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCraftingSettings",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.inventory.container.ContainerPartSettings"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.inventory.container.ContainerPartInterfaceCraftingSettingsConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.GuiConfig"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.PartTypeCraftingWriter",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.part.write.PartTypeWriteBase"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.PartTypeCraftingWriter$State",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.part.write.PartStateWriterBase"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.PartTypeInterfaceCrafting",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integratedcrafting.core.part.PartTypeInterfaceCraftingBase"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.PartTypeInterfaceCrafting$State",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integratedcrafting.core.part.PartTypeInterfaceCraftingBase$State"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.PartTypeInterfaceCraftingAttuned",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integratedcrafting.core.part.PartTypeInterfaceCraftingBase"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.PartTypeInterfaceCraftingAttuned$State",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.integratedcrafting.core.part.PartTypeInterfaceCraftingBase$State"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.PartTypes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectReadBuilders$CraftingNetwork",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspectWriteBuilders",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Read$Network",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingAspects$Write",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.part.aspect.CraftingJobData",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.proxy.ClientProxy",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.proxy.ClientProxyComponent"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.proxy.CommonProxy",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.proxy.CommonProxyComponent"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.item.crafting.CustomRecipe"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integratedcrafting.recipe.type.RecipeSerializerDeadBushConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.config.extendedconfig.RecipeConfig"
+      },
+      "owner_sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.network.INetworkCraftingHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.network.INetworkEventListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.part.IPartState",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.part.IPartType",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.network.INetworkEventListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.part.IPartTypeActiveVariable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.part.IPartType"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.part.PartTypeAdapter",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.part.IPartType"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.part.write.IPartStateWriter",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.part.IPartState"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.api.part.write.IPartTypeWriter",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.part.IPartTypeActiveVariable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.client.gui.container.ContainerScreenPartSettings",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.client.gui.container.ContainerScreenExtended"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.inventory.container.ContainerMultipart",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.cyclopscore.persist.IDirtyMarkListener"
+        ],
+        "super_class": "org.cyclops.cyclopscore.inventory.container.InventoryContainer"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.inventory.container.ContainerPartSettings",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "org.cyclops.cyclopscore.inventory.container.InventoryContainer"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.network.IIngredientChannelInsertPreConsumer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.part.PartStateActiveVariableBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.part.PartStateBase"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.part.PartStateBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.part.IPartState",
+          "org.cyclops.cyclopscore.persist.IDirtyMarkListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.part.PartTypeAspects",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.part.PartTypeConfigurable"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.part.PartTypeBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.api.part.PartTypeAdapter"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.part.PartTypeConfigurable",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "org.cyclops.integrateddynamics.core.part.PartTypeBase"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.part.write.PartStateWriterBase",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.part.write.IPartStateWriter"
+        ],
+        "super_class": "org.cyclops.integrateddynamics.core.part.PartStateActiveVariableBase"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    },
+    {
+      "class": "org.cyclops.integrateddynamics.core.part.write.PartTypeWriteBase",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "org.cyclops.integrateddynamics.api.part.write.IPartTypeWriter"
+        ],
+        "super_class": "org.cyclops.integrateddynamics.core.part.PartTypeAspects"
+      },
+      "owner_sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    }
+  ],
+  "structural_hierarchy": [
+    {
+      "class": "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+      "classification": {
+        "evidence": [
+          "org.cyclops.integratedcrafting.recipe.type.RecipeDeadBush",
+          "net.minecraft.world.item.crafting.CustomRecipe",
+          "net.minecraft.world.item.crafting.CraftingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    }
+  ],
+  "target": {
+    "display_name": "IntegratedCrafting",
+    "mod_id": "integratedcrafting",
+    "version": "1.4.6"
+  }
+}

@@ -6067,6 +6067,274 @@ class StaticRegressionTests(unittest.TestCase):
             r'xycraft\("buildings/temp"\)',
         )
 
+    def test_integrated_fixtures_use_declarative_runtime_transform(self):
+        dependency = "maven.modrinth:integrated-dynamics:tG3ZKTep"
+        transform = {
+            "sha256": (
+                "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+            ),
+            "remove_entries": [
+                "org/cyclops/integrateddynamicscompat/modcompat/refinedstorage/"
+                "gametest/GameTestsAspectsRefinedStorage.class"
+            ],
+        }
+        for module_id in ("integrateddynamics", "integratedcrafting"):
+            contract = json.loads(
+                (ROOT / f"compat/contracts/{module_id}.json").read_text()
+            )
+            descriptor = json.loads(
+                (ROOT / f"src/compat/{module_id}/compat-module.json").read_text()
+            )
+            self.assertEqual(
+                {dependency: transform},
+                contract["target"]["runtime_artifact_transforms"],
+            )
+            self.assertEqual(
+                [{"dependency": dependency, **transform}],
+                descriptor["runtimeArtifactTransforms"],
+            )
+
+        build = (ROOT / "build.gradle").read_text()
+        for obsolete in (
+            "integratedDynamicsPristineArtifact",
+            "integratedDynamicsRsGameTestClass",
+            "strippedIntegratedDynamicsJar",
+            "stripIntegratedDynamicsRsGameTest",
+        ):
+            self.assertNotIn(obsolete, build)
+
+    def test_integrated_dynamics_overflow_fixture_exercises_fluid_destination(self):
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+checked_fluid_output_overflow_is_atomic\s*\(",
+            "Integrated Dynamics fluid-output overflow GameTest",
+        )
+
+        self.assertIn("Long.MAX_VALUE", method)
+        self.assertIn("StorageResourceKey.fluid(", method)
+        self.assertIn("if (craft(context, SQUEEZER_RECIPE)", method)
+        self.assertIn(
+            'fluidAmount(context, idFluid("menril_resin")) != Long.MAX_VALUE',
+            method,
+        )
+        self.assertIn(
+            "getStationWork(MECHANICAL_SQUEEZER) != 15",
+            method,
+        )
+        self.assertRegex(
+            method,
+            r"getResourceAmount\(\s*StorageResourceKey\.neoforgeEnergy\(\)\s*\)"
+            r"\s*!=\s*energy",
+        )
+
+    def test_integrated_dynamics_stations_use_localized_logical_family_labels(self):
+        compat = self.read_required(
+            "src/compat/integrateddynamics/java/com/swear/autostorage/compat/"
+            "integrateddynamics/IntegrateddynamicsCompat.java"
+        )
+        en_us = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/en_us.json")
+        )
+        zh_tw = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/zh_tw.json")
+        )
+        labels = {
+            "integrateddynamics_drying_basin": ("Drying Basin", "乾燥盆"),
+            "integrateddynamics_mechanical_drying_basin": (
+                "Mechanical Drying Basin",
+                "機械乾燥盆",
+            ),
+            "integrateddynamics_mechanical_squeezer": (
+                "Mechanical Squeezer",
+                "機械壓榨機",
+            ),
+        }
+
+        self.assertNotIn("getHoverName()", compat)
+        for path, (english, traditional_chinese) in labels.items():
+            key = f"gui.auto_storage.station.{path}"
+            self.assertRegex(
+                compat,
+                rf'Component\.translatable\(\s*"{re.escape(key)}"\s*\)',
+            )
+            self.assertEqual(english, en_us[key])
+            self.assertEqual(traditional_chinese, zh_tw[key])
+
+    def test_integrated_dynamics_contract_encodes_conditional_fluid_primary_roles(self):
+        contract = json.loads(
+            self.read_required("compat/contracts/integrateddynamics.json")
+        )
+        families = {family["id"]: family for family in contract["families"]}
+        expected = {
+            "recipe_drying_basin": "recipe.outputFluid.amount",
+            "recipe_mechanical_drying_basin": "recipe.outputFluid.amount",
+            "recipe_mechanical_squeezer": "recipe.outputFluid.amount",
+        }
+        for family_id, amount_fragment in expected.items():
+            fluid_outputs = [
+                output
+                for output in families[family_id]["outputs"]
+                if output["resource_kind"] == "fluid"
+                and output["selector"] == "recipe.outputFluid"
+            ]
+            self.assertEqual(
+                {"primary", "remainder"},
+                {output["role"] for output in fluid_outputs},
+                f"{family_id} must bind fluid-only primary and item-present remainder roles",
+            )
+            primary = next(
+                output for output in fluid_outputs if output["role"] == "primary"
+            )
+            remainder = next(
+                output for output in fluid_outputs if output["role"] == "remainder"
+            )
+            self.assertIn(amount_fragment, str(primary["amount"]))
+            self.assertIn("item", str(primary["amount"]).lower())
+            self.assertIn("absent", str(primary["amount"]).lower())
+            self.assertIn(amount_fragment, str(remainder["amount"]))
+            self.assertIn("item", str(remainder["amount"]).lower())
+            self.assertIn("present", str(remainder["amount"]).lower())
+
+    def test_integrated_dynamics_remainder_evidence_executes_exact_fluid_output(self):
+        contract = json.loads(
+            self.read_required("compat/contracts/integrateddynamics.json")
+        )
+        marker = contract["verification"]["evidence"][
+            "catalyst_tool_remainder_exact"
+        ][0]["marker"]
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+mechanical_squeezer_consumes_item_fe_and_duration\s*\(",
+            "Integrated Dynamics exact fluid remainder GameTest",
+        )
+        self.assertEqual(
+            "Integrated Dynamics mechanical squeezer transaction was wrong",
+            marker,
+        )
+        self.assertIn(marker, method)
+        self.assertIn("if (!craft(context, SQUEEZER_RECIPE)", method)
+        self.assertIn('fluidAmount(context, idFluid("menril_resin")) != 250', method)
+        self.assertIn('itemCount(context.core(), idItem("crystalized_menril_chunk")) != 1', method)
+
+    def test_integrated_dynamics_fixture_executes_mechanical_drying_basin_transaction(self):
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+mechanical_drying_basin_consumes_fluid_fe_and_duration\s*\(",
+            "Integrated Dynamics Mechanical Drying Basin GameTest",
+        )
+        self.assertIn("MECHANICAL_DRYING_RECIPE", method)
+        self.assertIn("long energy = expectedMechanicalDryingEnergy(15)", method)
+        self.assertIn('seedFluid(context, idFluid("menril_resin"), 1000)', method)
+        self.assertIn("StorageResourceKey.neoforgeEnergy()", method)
+        self.assertIn('installStation(context, "mechanical_drying_basin")', method)
+        self.assertIn("tick(context.core(), 15)", method)
+        self.assertIn('fluidAmount(context, idFluid("menril_resin")) != 0', method)
+        self.assertIn('itemCount(context.core(), idItem("crystalized_menril_block")) != 1', method)
+        self.assertIn("getStationWork(MECHANICAL_DRYING_BASIN) != 0", method)
+        self.assertRegex(
+            method,
+            r"getResourceAmount\(\s*StorageResourceKey\.neoforgeEnergy\(\)\s*\)"
+            r"\s*!=\s*0",
+        )
+        descriptor = json.loads(
+            self.read_required("src/compat/integrateddynamics/compat-module.json")
+        )
+        contract = json.loads(
+            self.read_required("compat/contracts/integrateddynamics.json")
+        )
+        self.assertEqual(10, descriptor["expectedTests"])
+        self.assertEqual(10, contract["verification"]["expected_game_tests"])
+
+    def test_integrated_dynamics_rejects_declared_derived_item_even_with_fluid(self):
+        compat = self.read_required(
+            "src/compat/integrateddynamics/java/com/swear/autostorage/compat/"
+            "integrateddynamics/IntegrateddynamicsCompat.java"
+        )
+        exact_output = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+boolean\s+exactDryingOutput\s*\(",
+            "Integrated Dynamics exact drying-output predicate",
+        )
+        self.assertIn("recipe.getOutputItem()", exact_output)
+        self.assertRegex(
+            exact_output,
+            r"declaredItem\.isPresent\(\)\s*&&\s*item\.isEmpty\(\)",
+        )
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+derived_item_outputs_with_fluid_remain_fail_closed\s*\(",
+            "Integrated Dynamics derived-item output GameTest",
+        )
+        self.assertIn("new RecipeDryingBasin(", method)
+        self.assertIn("new RecipeMechanicalDryingBasin(", method)
+        self.assertIn("Optional.of(Either.right(derived))", method)
+        self.assertIn("Optional.of(fluid)", method)
+        self.assertIn("supportsRecipeHolder(manual)", method)
+        self.assertIn("supportsRecipeHolder(mechanical)", method)
+
+    def test_integrated_crafting_load_once_observes_module_registration_count(self):
+        compat = self.read_required(
+            "src/compat/integratedcrafting/java/com/swear/autostorage/compat/"
+            "integratedcrafting/IntegratedcraftingCompat.java"
+        )
+        self.assertRegex(
+            compat,
+            r"\bpublic\s+static\s+int\s+registrationCount\s*\(\s*\)",
+        )
+        self.assertRegex(
+            compat,
+            r"registrations\s*\+\+",
+        )
+        fixture = self.read_required(
+            "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/"
+            "integratedcrafting/IntegratedcraftingIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+present_mod_registers_no_unsafe_families\s*\(",
+            "Integrated Crafting present-target load-once GameTest",
+        )
+        self.assertIn("IntegratedcraftingCompat.registrationCount() != 1", method)
+        self.assertIn('ModList.get().isLoaded("integratedcrafting")', method)
+        self.assertIn(
+            'id.getNamespace().equals("auto_storage")',
+            method,
+        )
+        self.assertIn(
+            'id.getPath().startsWith("integratedcrafting")',
+            method,
+        )
+        self.assertIn(
+            "Integrated Crafting unsafe recipe contract was registered",
+            method,
+        )
+        required_item = self.java_block(
+            self.read_required(
+                "src/compat/integrateddynamics/java/com/swear/autostorage/compat/"
+                "integrateddynamics/IntegrateddynamicsCompat.java"
+            ),
+            r"\bprivate\s+static\s+Item\s+requiredItem\s*\(",
+            "Integrated Dynamics requiredItem",
+        )
+        self.assertIn("item == Items.AIR", required_item)
+        self.assertNotIn("item == null", required_item)
+
 
 if __name__ == "__main__":
     unittest.main()

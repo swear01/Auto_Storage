@@ -1072,6 +1072,35 @@ repositories {
     compatModules.collectMany { it.repositories }.unique(false).each { repository ->
         maven {
             url = uri(repository)
+            // Module JSON may re-list the same hosts as the filtered audit
+            // repositories above. Keep those hosts group-scoped so a 502/timeout
+            // from an unrelated probe cannot fail Create/CEI resolution.
+            def host = uri(repository).host
+            if (host == "api.modrinth.com") {
+                content {
+                    includeGroup "maven.modrinth"
+                }
+            } else if (host == "maven.shedaniel.me") {
+                content {
+                    includeGroup "me.shedaniel"
+                }
+            } else if (host == "maven2.bai.lol") {
+                content {
+                    includeGroup "mcp.mobius.waila"
+                }
+            } else if (host == "maven.terraformersmc.com") {
+                content {
+                    includeGroup "dev.emi"
+                }
+            } else if (host == "www.cursemaven.com") {
+                content {
+                    includeGroup "curse.maven"
+                }
+            } else if (host == "maven.k-4u.nl") {
+                content {
+                    includeGroup "mcjty.theoneprobe"
+                }
+            }
         }
     }
 }
@@ -1484,7 +1513,6 @@ tasks.register("stageAe2CompatAuditAncestry") {
         manifest.text = staged.join("\n") + "\n"
     }
 }
-
 def compatArtifactVerificationTasks = []
 compatModules.findAll { it.auditArtifact != null }.each { spec ->
     def configurationName = "${spec.sourceSet}AuditArtifact"
