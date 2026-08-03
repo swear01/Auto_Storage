@@ -416,7 +416,8 @@ outputs are excluded.
   --output delta.json
 ```
 
-Jar-backed `diff` scans select the old audit's target mod ID.
+Jar-backed `diff` validates the old audit first, then selects that audit's
+target mod ID for the rescan.
 
 The audit, contract, conformance-plan, delta, generation-plan, proposals,
 report, resource-plan, runtime-probe-plan, and runtime-probe schemas are under

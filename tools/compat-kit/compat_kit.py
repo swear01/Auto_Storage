@@ -9711,6 +9711,7 @@ def main(argv=None) -> int:
             if new_path.suffix == ".json":
                 new = _read_json(new_path)
             else:
+                _validate_audit(old)
                 new = scan_jar(
                     new_path,
                     selected_mod_id=old["target"]["mod_id"],

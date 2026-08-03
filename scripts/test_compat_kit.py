@@ -1,7 +1,9 @@
+import contextlib
 import hashlib
 import importlib.util
 import inspect
 import copy
+import io
 import json
 import os
 import selectors
@@ -4746,6 +4748,36 @@ displayName="Sample Machines"
             "integrateddynamics",
             scan.call_args.kwargs["selected_mod_id"],
         )
+
+    def test_jar_backed_diff_rejects_malformed_old_audit_before_scan(self):
+        old_path = self.root / "malformed-old-audit.json"
+        output = self.root / "delta.json"
+        old_path.write_text(
+            json.dumps(
+                {
+                    "schema": self.compat_kit.SCHEMA_VERSION,
+                    "scanner_format": self.compat_kit.SCAN_CACHE_VERSION,
+                    "structural_candidate_inventory_sha256": "a" * 64,
+                    "kind": "auto_storage_compat_audit",
+                }
+            )
+        )
+        stderr = io.StringIO()
+
+        with mock.patch.object(self.compat_kit, "scan_jar") as scan:
+            with contextlib.redirect_stderr(stderr):
+                result = self.compat_kit.main([
+                    "diff",
+                    str(old_path),
+                    str(self.jar),
+                    "--output",
+                    str(output),
+                ])
+
+        self.assertEqual(2, result)
+        self.assertIn("compat-kit: audit is missing target", stderr.getvalue())
+        scan.assert_not_called()
+        self.assertFalse(output.exists())
 
     def test_scan_cli_passes_selected_mod_id(self):
         output = self.root / "selected-audit.json"

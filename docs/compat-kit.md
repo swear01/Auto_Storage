@@ -165,9 +165,10 @@ limit plus one byte and terminate `javap` immediately on overflow, so neither
 one process nor all classes can bypass the memory bound. `RandomSource`,
 `ThreadLocalRandom`, `SplittableRandom`, `SecureRandom`, and `RandomGenerator`
 are all randomness evidence. Without `--source`, scans are
-cached by jar SHA under `build/compat-kit/cache/`;
-repeating the same SHA and scanner format needs no network access. A scanner
-format change uses a new cache namespace instead of trusting stale evidence.
+cached under `build/compat-kit/cache/` by jar SHA, scanner format, and the
+resolved target mod ID; repeating the same identity needs no network access. A
+scanner format change uses a new cache namespace instead of trusting stale
+evidence.
 Every repository-owned audit that backs a complete committed contract is
 migrated in the same change; the committed-audit regression rejects legacy
 records instead of skipping modules whose scaffold or verification would then
@@ -854,7 +855,8 @@ recipe/resource/station signatures and risk evidence. Any target jar SHA change
 sets `contract_affected=true`, including private implementation-only changes
 whose public signatures happen to be stable. The compact surface delta narrows
 the review, but it never waives contract review for different artifact bytes.
-When the new target is a jar, `diff` selects the old audit's target mod ID.
+When the new target is a jar, `diff` validates the old audit first, then selects
+that audit's target mod ID for the rescan.
 
 ## Distribution
 
