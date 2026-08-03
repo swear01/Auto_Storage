@@ -297,7 +297,12 @@ public final class IntegrateddynamicsCompat {
     }
 
     private static boolean exactDryingOutput(RecipeDryingBasin recipe) {
+        Optional<Either<ItemStack, ItemStackFromIngredient>> declaredItem =
+                recipe.getOutputItem();
         Optional<ItemStack> item = dryingItemOutput(recipe);
+        if (declaredItem.isPresent() && item.isEmpty()) {
+            return false;
+        }
         Optional<FluidStack> fluid = recipe.getOutputFluid().filter(IntegrateddynamicsCompat::exact);
         return item.isPresent() || fluid.isPresent();
     }

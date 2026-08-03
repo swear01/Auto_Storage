@@ -9,7 +9,7 @@
     "maven.modrinth:cyclops-core:vEjxRv40"
   ],
   "entrypoint": "com.swear.autostorage.compat.integrateddynamics.IntegrateddynamicsCompatModule",
-  "expectedTests": 9,
+  "expectedTests": 10,
   "fixture": "integratedDynamicsFixture",
   "id": "auto_storage:integrateddynamics",
   "matrix": {

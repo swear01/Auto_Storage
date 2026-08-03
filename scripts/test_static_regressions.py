@@ -6220,6 +6220,7 @@ class StaticRegressionTests(unittest.TestCase):
             marker,
         )
         self.assertIn(marker, method)
+        self.assertIn("if (!craft(context, SQUEEZER_RECIPE)", method)
         self.assertIn('fluidAmount(context, idFluid("menril_resin")) != 250', method)
         self.assertIn('itemCount(context.core(), idItem("crystalized_menril_chunk")) != 1', method)
 
@@ -6234,20 +6235,58 @@ class StaticRegressionTests(unittest.TestCase):
             "Integrated Dynamics Mechanical Drying Basin GameTest",
         )
         self.assertIn("MECHANICAL_DRYING_RECIPE", method)
+        self.assertIn("long energy = expectedMechanicalDryingEnergy(15)", method)
         self.assertIn('seedFluid(context, idFluid("menril_resin"), 1000)', method)
         self.assertIn("StorageResourceKey.neoforgeEnergy()", method)
         self.assertIn('installStation(context, "mechanical_drying_basin")', method)
         self.assertIn("tick(context.core(), 15)", method)
+        self.assertIn('fluidAmount(context, idFluid("menril_resin")) != 0', method)
         self.assertIn('itemCount(context.core(), idItem("crystalized_menril_block")) != 1', method)
         self.assertIn("getStationWork(MECHANICAL_DRYING_BASIN) != 0", method)
+        self.assertRegex(
+            method,
+            r"getResourceAmount\(\s*StorageResourceKey\.neoforgeEnergy\(\)\s*\)"
+            r"\s*!=\s*0",
+        )
         descriptor = json.loads(
             self.read_required("src/compat/integrateddynamics/compat-module.json")
         )
         contract = json.loads(
             self.read_required("compat/contracts/integrateddynamics.json")
         )
-        self.assertEqual(9, descriptor["expectedTests"])
-        self.assertEqual(9, contract["verification"]["expected_game_tests"])
+        self.assertEqual(10, descriptor["expectedTests"])
+        self.assertEqual(10, contract["verification"]["expected_game_tests"])
+
+    def test_integrated_dynamics_rejects_declared_derived_item_even_with_fluid(self):
+        compat = self.read_required(
+            "src/compat/integrateddynamics/java/com/swear/autostorage/compat/"
+            "integrateddynamics/IntegrateddynamicsCompat.java"
+        )
+        exact_output = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+boolean\s+exactDryingOutput\s*\(",
+            "Integrated Dynamics exact drying-output predicate",
+        )
+        self.assertIn("recipe.getOutputItem()", exact_output)
+        self.assertRegex(
+            exact_output,
+            r"declaredItem\.isPresent\(\)\s*&&\s*item\.isEmpty\(\)",
+        )
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+derived_item_outputs_with_fluid_remain_fail_closed\s*\(",
+            "Integrated Dynamics derived-item output GameTest",
+        )
+        self.assertIn("new RecipeDryingBasin(", method)
+        self.assertIn("new RecipeMechanicalDryingBasin(", method)
+        self.assertIn("Optional.of(Either.right(derived))", method)
+        self.assertIn("Optional.of(fluid)", method)
+        self.assertIn("supportsRecipeHolder(manual)", method)
+        self.assertIn("supportsRecipeHolder(mechanical)", method)
 
 
 if __name__ == "__main__":

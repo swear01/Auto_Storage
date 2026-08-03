@@ -1,5 +1,6 @@
 package com.swear.autostorage.fixture.integrateddynamics;
 
+import com.mojang.datafixers.util.Either;
 import com.swear.autostorage.Action;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
@@ -21,6 +22,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
@@ -29,6 +32,12 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import org.cyclops.integrateddynamics.block.BlockMechanicalDryingBasinConfig;
 import org.cyclops.integrateddynamics.block.BlockMechanicalSqueezerConfig;
+import org.cyclops.cyclopscore.recipe.ItemStackFromIngredient;
+import org.cyclops.integrateddynamics.core.recipe.type.RecipeDryingBasin;
+import org.cyclops.integrateddynamics.core.recipe.type.RecipeMechanicalDryingBasin;
+
+import java.util.List;
+import java.util.Optional;
 
 @GameTestHolder(IntegrateddynamicsFixtureMod.MODID)
 @PrefixGameTestTemplate(false)
@@ -232,6 +241,38 @@ public final class IntegrateddynamicsIntegrationGameTests {
                 || supports(helper, idRecipe("squeezer/convenience/minecraft_string"))) {
             helper.fail(
                     "Integrated Dynamics chance-output recipes must remain fail closed");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void derived_item_outputs_with_fluid_remain_fail_closed(
+            GameTestHelper helper
+    ) {
+        ItemStackFromIngredient derived = new ItemStackFromIngredient(
+                List.of(), "c:stones", Ingredient.of(Items.STONE), 1);
+        FluidStack fluid = new FluidStack(idFluid("menril_resin"), 250);
+        RecipeHolder<RecipeDryingBasin> manual = new RecipeHolder<>(
+                idRecipe("fixture/derived_item_with_fluid_manual"),
+                new RecipeDryingBasin(
+                        Optional.of(Ingredient.of(Items.STONE)),
+                        Optional.empty(),
+                        Optional.of(Either.right(derived)),
+                        Optional.of(fluid),
+                        15));
+        RecipeHolder<RecipeMechanicalDryingBasin> mechanical = new RecipeHolder<>(
+                idRecipe("fixture/derived_item_with_fluid_mechanical"),
+                new RecipeMechanicalDryingBasin(
+                        Optional.of(Ingredient.of(Items.STONE)),
+                        Optional.empty(),
+                        Optional.of(Either.right(derived)),
+                        Optional.of(fluid),
+                        15));
+        if (CraftingTerminalMenu.supportsRecipeHolder(manual)
+                || CraftingTerminalMenu.supportsRecipeHolder(mechanical)) {
+            helper.fail(
+                    "Integrated Dynamics derived item outputs with fluid must remain fail closed");
             return;
         }
         helper.succeed();

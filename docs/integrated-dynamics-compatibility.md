@@ -60,7 +60,9 @@ the family.
 
 Tag-derived `ItemStackFromIngredient` outputs, non-simple ingredients, empty
 plans, non-positive duration, and non-positive FE totals fail closed. Chance
-item outputs below `1.0F` fail closed.
+item outputs below `1.0F` fail closed. A declared `ItemStackFromIngredient`
+output never becomes "absent" merely because an exact fluid output is also
+present; both Drying Basin families reject that whole recipe.
 
 ## Explicit exclusions
 
@@ -90,12 +92,12 @@ peer Create digests or commit global coexistence/unclaimed expected SHA values.
 ./gradlew runIntegratedDynamicsGameTestServer
 ```
 
-Nine GameTests cover registration/manual-Squeezer exclusion, Drying Basin
+Ten GameTests cover registration/manual-Squeezer exclusion, Drying Basin
 fluid/duration commit, Mechanical Drying Basin fluid/FE/work commit,
 Mechanical Squeezer item/fluid/FE/work commit and exact fluid remainder,
 missing-ingredient and full item-destination atomic no-ops, `Long.MAX_VALUE`
-fluid-output overflow rollback, chance-output rejection, and loaded mechanical
-energy config.
+fluid-output overflow rollback, chance-output and derived-item-plus-fluid
+rejection, and loaded mechanical energy config.
 
 Full Compat Kit CLI `verify` for this module must also pass with the committed
 format-17 audit, exact jar, and staged ancestry classpath.

@@ -512,7 +512,7 @@
         }
       ]
     },
-    "expected_game_tests": 9,
+    "expected_game_tests": 10,
     "fixture": "integratedDynamicsFixture",
     "game_test_task": "runIntegratedDynamicsGameTestServer",
     "gradle_tasks": [
