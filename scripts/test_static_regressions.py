@@ -5324,6 +5324,39 @@ class StaticRegressionTests(unittest.TestCase):
             matrix,
         )
 
+    def test_craftable_catalog_reuses_resolved_stack_independent_match_without_retention(self):
+        catalog = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftableRecipeCatalog.java"
+        )
+        entry = self.java_block(
+            catalog,
+            r"\bprivate\s+static\s+final\s+class\s+CatalogEntry\b",
+            "CraftableRecipeCatalog.CatalogEntry",
+        )
+        resolve = self.java_block(
+            entry,
+            r"\bprivate\s+List<RecipeAdapterMatch>\s+resolveVariants\s*\(",
+            "CraftableRecipeCatalog.CatalogEntry.resolveVariants",
+        )
+        self.assertRegex(
+            resolve,
+            r"if\s*\(\s*!adapter\.requiresAvailableStacksForVariants\(\)\s*"
+            r"&&\s*!baseMatch\.contract\(\)\.pendingTypedPlan\(\)\s*\)\s*\{\s*"
+            r"return\s+List\.of\(baseMatch\);",
+            "an already-resolved stack-independent match must not rerun adapter variant "
+            "resolution during Craftable preparation",
+        )
+        self.assertLess(
+            resolve.index("return List.of(baseMatch)"),
+            resolve.index("resolveVariantsFromSnapshot"),
+            "the resolved-match fast path must run before adapter variant resolution",
+        )
+        self.assertNotIn(
+            "fixedVariants",
+            entry,
+            "the fast path must not restore the recipe-keyed fixed-variant retention removed by #79",
+        )
+
     def test_processing_cells_keep_fixed_status_panel_free_of_duplicate_details(self):
         layout = self.read_required(
             "src/main/java/com/swear/autostorage/TerminalLayout.java"
