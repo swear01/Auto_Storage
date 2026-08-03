@@ -645,6 +645,28 @@ class ModularCompatSdkTests(unittest.TestCase):
             r"validateCompatRuntimeDependencyNotations",
         )
 
+    def test_runtime_transform_planner_validates_resolved_runtime_classpaths(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("class CompatRuntimeClasspathValidator", build)
+        self.assertIn("Pristine compatibility runtime artifact is present", build)
+        self.assertIn("Transformed compatibility runtime artifact is missing", build)
+        self.assertRegex(
+            build,
+            r"(?s)registerCompatRuntimeIsolationVerification.*?"
+            r"inputs\.files\(fixtureSourceSet\.runtimeClasspath\).*?"
+            r"CompatRuntimeClasspathValidator\.validate",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\(spec\.runTask\).*?dependsOn runtimeIsolationTask",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)verifyCompatRuntimeTransformPlanning.*?"
+            r"CompatRuntimeClasspathValidator\.validate",
+        )
+
     def test_runtime_transform_entry_character_validation_uses_character_code(self):
         build = (ROOT / "build.gradle").read_text()
 

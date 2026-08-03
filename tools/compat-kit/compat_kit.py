@@ -4711,6 +4711,10 @@ def validate_contract(
                 dependency,
                 f"contract target runtime_dependencies {index}",
             )
+        if target.get("dependency") in target["runtime_dependencies"]:
+            raise ValueError(
+                "contract target runtime_dependencies must not repeat target dependency"
+            )
     if "runtime_artifact_transforms" in target:
         _validate_runtime_artifact_transforms(
             target["runtime_artifact_transforms"],

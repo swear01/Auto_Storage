@@ -227,7 +227,8 @@ build also copies every explicit `target.runtime_dependencies` entry, so
 required libraries such as GuideME do not depend on transitive metadata or an
 undocumented post-scaffold edit. Target and explicit runtime dependencies are
 non-transitive on both target compile and runtime classpaths, so every required
-companion must be listed. The generated build resolves the reviewed
+companion must be listed exactly once; this additional list must not repeat the
+primary `target.dependency`. The generated build resolves the reviewed
 target dependency separately and checks its exact
 jar SHA against `source_audit_sha256` during both `build` and
 `runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
@@ -497,8 +498,10 @@ When present, descriptor `runtimeArtifactTransforms` is generated from the
 reviewed contract. Exact dependency/SHA/entry validation happens before Gradle
 wires a transformed jar, and the pristine jar never shares an isolated or matrix
 runtime classpath with that output. Global SHA ownership includes every audited
-artifact as well as every transform, and all fixture runtime configurations are
-checked for direct pristine module declarations after dependency setup.
+artifact as well as every transform. Direct runtime-only declarations are
+checked after dependency setup, and each affected run verifies the complete
+resolved source-set runtime classpath by artifact SHA, including implementation,
+inherited, transitive, and file dependencies, before Minecraft starts.
 Before scaffold writes, the generated module ID, entrypoint, source set, and
 fixture are compared with all existing descriptors so normalized Java/Gradle
 identifier collisions fail closed.

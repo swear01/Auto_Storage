@@ -61,6 +61,49 @@ class CompatWorldCleaner {
     }
 }
 
+class CompatRuntimeClasspathValidator {
+    static String sha256(File file) {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        file.withInputStream { input ->
+            byte[] buffer = new byte[8192]
+            for (int read = input.read(buffer); read != -1; read = input.read(buffer)) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        digest.digest().encodeHex().toString()
+    }
+
+    static void validate(
+            Collection<File> runtimeFiles,
+            Collection<Map<String, String>> transforms,
+            Map<String, File> transformedOutputs) {
+        def records = runtimeFiles.findAll { it.isFile() }.collect { file ->
+            [file: file.canonicalFile, sha256: sha256(file)]
+        }
+        transforms.each { transform ->
+            if (records.any { it.sha256 == transform.sha256 }) {
+                throw new GradleException(
+                        "Pristine compatibility runtime artifact is present: ${transform.dependency}")
+            }
+            def expectedOutput = transformedOutputs[transform.dependency]
+            if (expectedOutput == null || !expectedOutput.isFile()) {
+                throw new GradleException(
+                        "Transformed compatibility runtime artifact is missing: ${transform.dependency}")
+            }
+            def expectedPath = expectedOutput.canonicalFile
+            if (records.count { it.file == expectedPath } != 1) {
+                throw new GradleException(
+                        "Transformed compatibility runtime artifact is missing: ${transform.dependency}")
+            }
+            def transformedSha256 = sha256(expectedOutput)
+            if (records.count { it.sha256 == transformedSha256 } != 1) {
+                throw new GradleException(
+                        "Transformed compatibility runtime artifact is duplicated: ${transform.dependency}")
+            }
+        }
+    }
+}
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -303,6 +346,8 @@ def validateCompatRuntimeDependencyNotations = { shared, notations ->
         }
     }
 }
+def compatRuntimePlanningTestDirectory =
+        layout.buildDirectory.dir('tmp/verifyCompatRuntimeTransformPlanning').get().asFile
 def verifyCompatRuntimeTransformPlanning = tasks.register(
         'verifyCompatRuntimeTransformPlanning') {
     group = 'verification'
@@ -367,6 +412,46 @@ def verifyCompatRuntimeTransformPlanning = tasks.register(
             if (!expected.message.startsWith(
                     'Direct compatibility runtime dependency must use its shared exact transform')) {
                 throw expected
+            }
+        }
+        compatRuntimePlanningTestDirectory.mkdirs()
+        def pristineArtifact = new File(
+                compatRuntimePlanningTestDirectory,
+                'pristine-runtime.jar')
+        def transformedArtifact = new File(
+                compatRuntimePlanningTestDirectory,
+                'transformed-runtime.jar')
+        def duplicateTransformedArtifact = new File(
+                compatRuntimePlanningTestDirectory,
+                'duplicate-transformed-runtime.jar')
+        pristineArtifact.setText('pristine-runtime', 'UTF-8')
+        transformedArtifact.setText('transformed-runtime', 'UTF-8')
+        duplicateTransformedArtifact.setText('transformed-runtime', 'UTF-8')
+        def runtimeTransform = [[
+                dependency: dependency,
+                sha256   : CompatRuntimeClasspathValidator.sha256(pristineArtifact),
+        ]]
+        def transformedOutputs = [(dependency): transformedArtifact]
+        CompatRuntimeClasspathValidator.validate(
+                [transformedArtifact],
+                runtimeTransform,
+                transformedOutputs)
+        for (invalidRuntime in [
+                [pristineArtifact, transformedArtifact],
+                [transformedArtifact, duplicateTransformedArtifact],
+        ]) {
+            try {
+                CompatRuntimeClasspathValidator.validate(
+                        invalidRuntime,
+                        runtimeTransform,
+                        transformedOutputs)
+                throw new GradleException(
+                        'Invalid compatibility runtime classpath was accepted')
+            } catch (GradleException expected) {
+                if (!expected.message.startsWith('Pristine compatibility runtime artifact')
+                        && !expected.message.startsWith('Transformed compatibility runtime artifact is duplicated')) {
+                    throw expected
+                }
             }
         }
     }
@@ -1222,6 +1307,61 @@ validateCompatRuntimeDependencyNotations(
         sharedCompatRuntimeTransforms,
         compatFixtureDirectRuntimeDependencies)
 
+def registerCompatRuntimeIsolationVerification = {
+    fixtureSourceSet, transforms, taskName ->
+        if (transforms.isEmpty()) {
+            return null
+        }
+        def transformRecords = transforms.collect { transform ->
+            [
+                    dependency: transform.dependency.toString(),
+                    sha256   : transform.sha256.toString(),
+            ]
+        }
+        def transformedOutputs = transforms.collectEntries { transform ->
+            [
+                    (transform.dependency.toString()):
+                            runtimeTransformOutputs[transform.dependency].get().asFile,
+            ]
+        }
+        tasks.register(taskName) {
+            group = 'verification'
+            description = 'Rejects pristine or duplicate artifacts on a transformed fixture runtime classpath'
+            inputs.files(fixtureSourceSet.runtimeClasspath)
+            dependsOn transforms.collect { transform ->
+                runtimeTransformTasks[transform.dependency]
+            }
+            doLast {
+                CompatRuntimeClasspathValidator.validate(
+                        inputs.files.files,
+                        transformRecords,
+                        transformedOutputs)
+            }
+        }
+}
+def compatRuntimeIsolationTasks = []
+compatModules.each { spec ->
+    def fixtureSourceSet = sourceSets[spec.fixture]
+    def runtimeIsolationTask = registerCompatRuntimeIsolationVerification(
+            fixtureSourceSet,
+            spec.runtimeArtifactTransforms,
+            "verify${spec.fixture.substring(0, 1).toUpperCase()}${spec.fixture.substring(1)}RuntimeTransformIsolation")
+    if (runtimeIsolationTask != null) {
+        tasks.named(spec.runTask).configure {
+            dependsOn runtimeIsolationTask
+        }
+        compatRuntimeIsolationTasks << runtimeIsolationTask
+    }
+}
+def compatibilityMatrixRuntimeIsolationTask =
+        registerCompatRuntimeIsolationVerification(
+                sourceSets.compatibilityMatrixFixture,
+                sharedCompatRuntimeTransforms.values().toList(),
+                'verifyCompatibilityMatrixRuntimeTransformIsolation')
+if (compatibilityMatrixRuntimeIsolationTask != null) {
+    compatRuntimeIsolationTasks << compatibilityMatrixRuntimeIsolationTask
+}
+
 def ae2CompatAuditAncestryDir =
         layout.buildDirectory.dir("compat-kit/ae2-audit-optional-ancestry")
 def ae2CompatAuditAncestryManifest =
@@ -1768,6 +1908,9 @@ def compatibilityMatrixLatestLog =
 tasks.named('runCompatibilityMatrixGameTestServer').configure {
     dependsOn compatArtifactVerificationTasks
     dependsOn runtimeTransformTasks.values()
+    if (compatibilityMatrixRuntimeIsolationTask != null) {
+        dependsOn compatibilityMatrixRuntimeIsolationTask
+    }
     dependsOn tasks.named('verifyBotaniaFixtureArtifact')
     dependsOn generateCompatibilityMatrixManifest
     doLast {

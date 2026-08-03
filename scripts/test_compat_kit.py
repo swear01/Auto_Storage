@@ -7368,6 +7368,23 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 source_artifact=self.jar,
             )
 
+    def test_contract_runtime_dependencies_reject_primary_dependency(self):
+        contract = self.accepted_contract()
+        contract["target"]["runtime_dependencies"] = [
+            contract["target"]["dependency"]
+        ]
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "runtime_dependencies must not repeat target dependency",
+        ):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
     def test_bundled_descriptor_includes_all_audited_compile_ancestry(self):
         contract = self.accepted_contract()
         contract["target"]["runtime_dependencies"] = [
