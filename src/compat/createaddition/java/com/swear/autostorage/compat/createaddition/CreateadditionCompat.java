@@ -115,8 +115,7 @@ public final class CreateadditionCompat {
     }
 
     private static boolean supportsRolling(RollingRecipe recipe) {
-        return rollingDuration() > 0
-                && recipe.getIngredients().size() == 1
+        return recipe.getIngredients().size() == 1
                 && exact(recipe.getIngredients().getFirst())
                 && recipe.getFluidIngredients().isEmpty()
                 && recipe.getFluidResults().isEmpty()
@@ -141,7 +140,6 @@ public final class CreateadditionCompat {
     private static boolean supportsCharging(ChargingRecipe recipe) {
         return recipe.getEnergy() > 0
                 && recipe.getMaxChargeRate() > 0
-                && chargeRate(recipe) > 0
                 && recipe.getIngredients().size() == 1
                 && exact(recipe.getIngredients().getFirst())
                 && recipe.getFluidIngredients().isEmpty()

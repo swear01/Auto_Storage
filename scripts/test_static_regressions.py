@@ -2408,7 +2408,45 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("Math.max(1L, rate", body)
 
 
-    def test_immersiveengineering_compat_is_optional_fail_closed(self):
+    def test_createaddition_reloadable_rates_do_not_change_candidate_eligibility(self):
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        rolling = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+boolean\s+supportsRolling\s*\(",
+            "Createaddition rolling eligibility",
+        )
+        charging = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+boolean\s+supportsCharging\s*\(",
+            "Createaddition charging eligibility",
+        )
+
+        self.assertNotIn("rollingDuration()", rolling)
+        self.assertNotIn("chargeRate(recipe)", charging)
+        self.assertIn("RecipeFamilyCost.stationWork(rollingDuration())", compat)
+        self.assertIn("RecipeFamilyCost.stationWork(chargingWork(recipe))", compat)
+
+    def test_createaddition_checked_overflow_fixture_asserts_complete_atomic_no_op(self):
+        fixture = self.read_required(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+checked_overflow_rejects_long_max_seed\s*\(",
+            "Createaddition checked-overflow GameTest",
+        )
+
+        self.assertIn('itemCount(context.core(), Items.IRON_INGOT) != 1', method)
+        self.assertIn(
+            "context.core().getStationWork(ROLLING_MILL) != work",
+            method,
+        )
+
+def test_immersiveengineering_compat_is_optional_fail_closed(self):
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
         module_index = self.read_compat_module("immersiveengineering")
         module = self.read_required(

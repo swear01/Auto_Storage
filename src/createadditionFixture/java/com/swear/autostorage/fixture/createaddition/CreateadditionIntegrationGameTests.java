@@ -256,7 +256,9 @@ public final class CreateadditionIntegrationGameTests {
             installStation(context, "rolling_mill", ROLLING_MILL);
             tick(context.core(), (int) work);
             if (craft(context, IRON_ROD)
-                    || itemCount(context.core(), createadditionItem("iron_rod")) != Long.MAX_VALUE) {
+                    || itemCount(context.core(), Items.IRON_INGOT) != 1
+                    || itemCount(context.core(), createadditionItem("iron_rod")) != Long.MAX_VALUE
+                    || context.core().getStationWork(ROLLING_MILL) != work) {
                 helper.fail("Create Crafts & Additions Long.MAX_VALUE overflow was not rejected");
                 return;
             }

@@ -69,7 +69,8 @@ Transaction:
 - station work and Craftable cache identity follow
   `CommonConfig.ROLLING_MILL_PROCESSING_DURATION` through
   `dynamicDeterministicResources`, so a live config reload cannot leave a
-  stale work cost.
+  stale work cost. Recipe eligibility remains independent of that reloadable
+  value; a non-positive current duration fails closed during cost evaluation.
 
 ### Charging
 
@@ -86,8 +87,8 @@ Logical station:
 - FE cost equals `recipe.energy`;
 - station work equals
   `ceil(energy / min(CommonConfig.TESLA_COIL_RECIPE_CHARGE_RATE, recipe.maxChargeRate))`.
-  Eligibility already requires a positive evaluated charge rate; if a live config
-  reload makes the rate non-positive, cost evaluation fail-closes with
+  Eligibility depends only on invariant recipe fields. If a live config reload
+  makes the evaluated rate non-positive, cost evaluation fail-closes with
   `IllegalArgumentException` instead of dividing by zero or inventing a rate.
 
 Transaction:
@@ -148,6 +149,8 @@ five commands (`build`, base GameTests, recipe-addon, createaddition, matrix).
 `multi_output_merge_exact` binds the generic public-SDK typed-family multi-output
 evidence because accepted Rolling/Charging families are single-output only.
 Processing labels use the JEI family names Rolling / Charging.
+Both overflow cases assert the input stack, full output destination, and
+accumulated station work remain unchanged.
 Latest local matrix evidence after rebase onto main `a1582ad` (CEI #72 plus
 fixture runtime transforms #87): **18,765** recipes, Craftable prepare
 **17.321 ms**, first/shared p95/warm switch **0.884 / 0.430 / 0.344 ms**,
