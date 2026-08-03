@@ -5341,10 +5341,15 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertRegex(
             resolve,
             r"if\s*\(\s*!adapter\.requiresAvailableStacksForVariants\(\)\s*"
-            r"&&\s*!baseMatch\.contract\(\)\.pendingTypedPlan\(\)\s*\)\s*\{\s*"
+            r"&&\s*baseMatch\.typedRecipePlan\(\)\.isPresent\(\)\s*\)\s*\{\s*"
             r"return\s+List\.of\(baseMatch\);",
-            "an already-resolved stack-independent match must not rerun adapter variant "
-            "resolution during Craftable preparation",
+            "an already-resolved stack-independent typed match must not rerun adapter "
+            "variant resolution during Craftable preparation",
+        )
+        self.assertNotIn(
+            "pendingTypedPlan",
+            resolve,
+            "legacy and built-in contracts still need adapter-level output validation",
         )
         self.assertLess(
             resolve.index("return List.of(baseMatch)"),

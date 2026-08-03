@@ -295,7 +295,7 @@ final class CraftableRecipeCatalog {
                 Level level
         ) {
             if (!adapter.requiresAvailableStacksForVariants()
-                    && !baseMatch.contract().pendingTypedPlan()) {
+                    && baseMatch.typedRecipePlan().isPresent()) {
                 return List.of(baseMatch);
             }
             if (adapter.requiresAvailableStacksForVariants()) {

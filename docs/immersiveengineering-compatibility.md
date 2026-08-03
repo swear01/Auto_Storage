@@ -113,12 +113,13 @@ failing the same unchanged gate twice at 52.990 and 68.603 ms. The latter run
 had 20,012 recipes, 453 candidates, 98 variants, and 86 outputs; 44 ms was in
 variant resolution rather than a full scan of IE's ~1,100 unclaimed recipes.
 
-The root cause was stack-independent, already-resolved catalog matches still
+The root cause was stack-independent, already-resolved typed catalog matches still
 calling `RecipeAdapterMatch.resolveVariantsFromSnapshot`, which repeated
 adapter resolution. `CatalogEntry.resolveVariants` now uses that listing-local
-base match directly when its contract is not pending and the adapter reports
-that variants do not require available stacks. Pending typed plans and
-stack-dependent smithing/dynamic variants retain the existing resolution path.
+base match directly when it already contains a typed plan and the adapter reports
+that variants do not require available stacks. Built-in and legacy item adapters
+still run their level/output validation; pending typed plans and stack-dependent
+smithing/dynamic variants retain the existing resolution path.
 This does not restore `fixedVariants` or any recipe-keyed retained cache; the
 next-tick `releaseTransientMatches()` lifetime from #79 remains unchanged.
 
