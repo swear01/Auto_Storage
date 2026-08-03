@@ -2025,6 +2025,19 @@ def verifyCompatGameTestWorldCleanupSafety = tasks.register(
         }
     }
 }
+def workflowGameTestRunTasks = [
+        tasks.named('runGameTestServer'),
+        tasks.named('runRecipeAddonGameTestServer'),
+        tasks.named('runPneumaticCraftGameTestServer'),
+        tasks.named('runCompatibilityMatrixGameTestServer'),
+]
+workflowGameTestRunTasks.each { gameTestTask ->
+    gameTestTask.configure {
+        doFirst {
+            clearCompatGameTestWorld()
+        }
+    }
+}
 compatModules.each { spec ->
     def fixtureTask = tasks.named(spec.runTask)
     def previousCompatFixture = compatFixtureRunTasks.isEmpty()

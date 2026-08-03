@@ -10541,6 +10541,33 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
         self.assertEqual("keep", sentinel.read_text())
 
+    def test_gametest_cleanup_rejects_symlinked_run_and_world_escape(self):
+        for symlink_name in ("run", "world"):
+            with self.subTest(symlink=symlink_name):
+                project = self.root / f"{symlink_name}-project"
+                external = self.root / f"{symlink_name}-external"
+                external_world = external / "world"
+                external_world.mkdir(parents=True)
+                sentinel = external_world / "sentinel"
+                sentinel.write_text("keep")
+                if symlink_name == "run":
+                    project.mkdir()
+                    (project / "run").symlink_to(external, target_is_directory=True)
+                else:
+                    (project / "run").mkdir(parents=True)
+                    (project / "run/world").symlink_to(
+                        external_world,
+                        target_is_directory=True,
+                    )
+
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "GameTest world path has symlinked ancestor",
+                ):
+                    self.compat_kit._clear_game_test_world(project)
+
+                self.assertEqual("keep", sentinel.read_text())
+
     def test_publish_archive_is_reproducible_and_self_contained(self):
         first = self.root / "compat-kit-first.zip"
         second = self.root / "compat-kit-second.zip"

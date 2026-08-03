@@ -28,8 +28,14 @@ class GitHubWorkflowTests(unittest.TestCase):
             "./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/compatibility-matrix-gametest.log",
         ),
     )
-    CLEAR_GAME_TEST_WORLD = (
-        "python3 -c 'import shutil; shutil.rmtree(\"run/world\", ignore_errors=True)'"
+    UNSAFE_GAME_TEST_WORLD_CLEANUP = (
+        r"shutil\.rmtree\s*\([^)]*ignore_errors\s*=\s*True"
+    )
+    WORKFLOW_GAME_TEST_TASKS = (
+        "runGameTestServer",
+        "runRecipeAddonGameTestServer",
+        "runPneumaticCraftGameTestServer",
+        "runCompatibilityMatrixGameTestServer",
     )
 
     def read_required(self, relative_path: str) -> str:
@@ -49,9 +55,9 @@ class GitHubWorkflowTests(unittest.TestCase):
                 body_end = len(text)
             body = [line.strip() for line in text[body_start:body_end].splitlines()]
             self.assertEqual(
-                ["set -o pipefail", self.CLEAR_GAME_TEST_WORLD, command],
+                ["set -o pipefail", command],
                 body,
-                f"{name} must be an isolated step that clears only run/world first",
+                f"{name} must be an isolated Gradle-owned GameTest step",
             )
             previous_end = body_end
 
@@ -61,6 +67,32 @@ class GitHubWorkflowTests(unittest.TestCase):
                 self.assert_isolated_sequential_game_test_steps(
                     self.read_required(relative_path)
                 )
+
+    def test_ci_and_release_reject_unsafe_game_test_world_cleanup(self):
+        for relative_path in (".github/workflows/ci.yml", ".github/workflows/release.yml"):
+            with self.subTest(workflow=relative_path):
+                self.assertNotRegex(
+                    self.read_required(relative_path),
+                    self.UNSAFE_GAME_TEST_WORLD_CLEANUP,
+                )
+
+    def test_workflow_gametest_tasks_use_gradle_owned_cleanup(self):
+        build = self.read_required("build.gradle")
+        for task_name in self.WORKFLOW_GAME_TEST_TASKS:
+            with self.subTest(task=task_name):
+                self.assertIn(
+                    f"        tasks.named('{task_name}'),",
+                    build,
+                )
+        self.assertIn("workflowGameTestRunTasks.each { gameTestTask ->", build)
+        self.assertIn(
+            "gameTestTask.configure {\n"
+            "        doFirst {\n"
+            "            clearCompatGameTestWorld()\n"
+            "        }\n"
+            "    }",
+            build,
+        )
 
     def test_ci_workflow_runs_full_project_verification_and_uploads_jar(self):
         text = self.read_required(".github/workflows/ci.yml")

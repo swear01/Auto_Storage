@@ -51,9 +51,10 @@ and reset damage to zero.
 
 ```bash
 export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
-python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
 ./gradlew runArsNouveauGameTestServer --console=plain --no-daemon
 ```
+
+The Gradle task performs root-bounded fresh-world cleanup before Minecraft starts.
 
 The isolated run requires the current SelfTest summary and
 `All 11 required tests passed`. It covers conditional registration, exact
