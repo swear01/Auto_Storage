@@ -3158,6 +3158,57 @@ class CompatKitAuditTests(unittest.TestCase):
                         entries[-1],
                     )
 
+    def test_candidate_source_class_maps_deep_owner_chain_iteratively(self):
+        depth = 1000
+        metadata_by_class = {
+            "samplemod.Owner0": {
+                "inner_class_entry": False,
+                "inner_name": None,
+                "outer_class": None,
+            }
+        }
+        for index in range(1, depth + 1):
+            metadata_by_class[f"samplemod.Owner{index}"] = {
+                "inner_class_entry": True,
+                "inner_name": f"Owner{index}",
+                "outer_class": f"samplemod.Owner{index - 1}",
+            }
+        expected = "samplemod.Owner0." + ".".join(
+            f"Owner{index}" for index in range(1, depth + 1)
+        )
+        self.assertEqual(
+            expected,
+            self.compat_kit._candidate_source_class(
+                f"samplemod.Owner{depth}",
+                metadata_by_class,
+            ),
+        )
+
+    def test_candidate_source_class_rejects_owner_chain_past_depth_limit(self):
+        depth = self.compat_kit.MAX_NESTED_CLASS_OWNER_DEPTH + 1
+        metadata_by_class = {
+            "samplemod.Owner0": {
+                "inner_class_entry": False,
+                "inner_name": None,
+                "outer_class": None,
+            }
+        }
+        for index in range(1, depth + 1):
+            metadata_by_class[f"samplemod.Owner{index}"] = {
+                "inner_class_entry": True,
+                "inner_name": f"Owner{index}",
+                "outer_class": f"samplemod.Owner{index - 1}",
+            }
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "nested class ownership exceeds 1024 levels",
+        ):
+            self.compat_kit._candidate_source_class(
+                f"samplemod.Owner{depth}",
+                metadata_by_class,
+            )
+
     def test_nested_owner_inspection_memoizes_each_class(self):
         target_jar = self.root / "memoized-nested-owner.jar"
         entries = [f"samplemod/Owner{index}.class" for index in range(64)]

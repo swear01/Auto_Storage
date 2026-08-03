@@ -226,7 +226,8 @@ every class carrying the JVM
 passes through any of those excluded classes is also excluded: a binary name
 such as `Outer$1$Key` has no truthful source-level owner, so the scanner never
 reinterprets it as a top-level `$` identifier or invents a source name. Owner
-inspection is iterative, memoized once per archive, and fails if a chain exceeds
+inspection and named nested `source_class` derivation are both iterative,
+memoized once per archive for inspectability, and fail if a chain exceeds
 1,024 levels instead of relying on Python recursion or reparsing every ancestor.
 If a classified class has no `SourceFile` attribute and `--source` was
 supplied, scanning fails with an unavailable source mapping; it never guesses

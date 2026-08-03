@@ -193,7 +193,9 @@ Named nested classes are included and mapped to their top-level source even
 when the Java identifier contains `$`; `InnerClasses`/`EnclosingMethod`
 metadata excludes anonymous/local classes and every named descendant under an
 excluded owner. A nested owner missing from the same archive fails closed
-instead of accepting an incomplete ownership chain. Class files carrying
+instead of accepting an incomplete ownership chain. Owner-chain inspectability
+and named nested `source_class` derivation are both iterative and limited to
+1,024 levels. Class files carrying
 `ACC_SYNTHETIC` and `META-INF/versions/` aliases are also excluded; the root
 binary name is scanned once. Scan and audit validation apply the same current
 name-bucket priority.

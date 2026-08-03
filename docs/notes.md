@@ -1,5 +1,7 @@
 # Notes
 
+2026-08-03 Compat Kit nested `source_class` recursion gotcha：`_is_inspectable_class`改成iterative／1,024-bound後，`_candidate_source_class`若仍遞迴走同一條admitted owner chain，約1,000層named nested會在Python預設recursion limit撞上`RecursionError`，而不是受控的1,024層驗證錯誤。source-level type導出必須同樣iterative並重用`MAX_NESTED_CLASS_OWNER_DEPTH`；不可只修inspectability。
+
 2026-08-02 Compat Kit legacy classifier migration gotcha：`migrate-audit`或其後的`migrate-contract --old-audit`若先用current classifier重建legacy format-14至16的candidate buckets，任何正當的classifier修正都會讓舊audit在exact rescan／contract comparison前先以`audit candidates do not match independent structural evidence`失敗，等於沒有可用migration path。兩條explicit migration只可放寬「用current classifier重判舊bucket」這一項；舊format schema、structural/target digests、target identity、artifact SHA/size及舊contract bindings仍要完整驗證，fresh `--new-audit`也維持current strict validation；之後只可從exact jar/source/ancestry全量current rescan及逐family evidence comparison取得新證據，legacy bucket絕不作新語意授權。
 
 2026-08-02 Theurgy format-7 migration gotcha：正式format-17 rescan把91個name-shaped recipe候選縮成10個actual `Recipe` classes，另保存603個target classes、6份reachable ancestry與5筆exact external coordinates。`migrate-contract`會因新增structural/risk evidence把10個family全部重開；不可直接把舊contract整份蓋回去。只能在exact artifact/source revision、逐class public signature與source語意重新核對後，保留舊的decision/input/output/station evidence，同時保留新audit導出的完整risk set與recipe-data/inventory digests。完成後必須由current scaffold重新產生descriptor所需的audited compile ancestry，再以實際GREEN implementation/fixture bytes重建manifest；不可提交generator的intentionally-RED placeholder。

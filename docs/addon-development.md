@@ -124,7 +124,8 @@ classes. Thus a top-level or source-addressable named class whose identifier
 contains `$` remains auditable while local, anonymous, and synthetic classes
 stay excluded. A named class under an excluded owner is also excluded rather
 than assigned a source-level owner derived from its binary name. Owner-chain
-inspection is iterative, archive-memoized, and limited to 1,024 levels; a
+inspection and named nested `source_class` derivation are both iterative,
+archive-memoized for inspectability, and limited to 1,024 levels; a
 nested owner missing from the same archive fails closed. When
 `SourceFile` is absent, a supplied source checkout fails as unavailable rather
 than guessing a same-named compilation unit. Format 15 stores binary and

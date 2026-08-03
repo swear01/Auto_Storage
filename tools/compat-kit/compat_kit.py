@@ -1508,26 +1508,38 @@ def _candidate_source_class(
     metadata_by_class: dict[str, dict | None],
     ancestry: tuple[str, ...] = (),
 ) -> str:
-    if class_name in ancestry:
-        raise ValueError("nested class ownership contains a cycle: " + class_name)
-    metadata = metadata_by_class.get(class_name)
-    if metadata is None or not metadata.get("inner_class_entry"):
-        return class_name
-    inner_name = metadata.get("inner_name")
-    outer_class = metadata.get("outer_class")
-    if not inner_name or not outer_class:
-        raise ValueError("named nested class has unresolved owner: " + class_name)
-    if outer_class not in metadata_by_class:
-        raise ValueError("named nested class owner is unresolved: " + class_name)
-    return (
-        _candidate_source_class(
-            outer_class,
-            metadata_by_class,
-            ancestry + (class_name,),
-        )
-        + "."
-        + inner_name
-    )
+    seen = set(ancestry)
+    inner_names = []
+    current_class = class_name
+    while True:
+        if current_class in seen:
+            raise ValueError(
+                "nested class ownership contains a cycle: " + current_class
+            )
+        seen.add(current_class)
+        metadata = metadata_by_class.get(current_class)
+        if metadata is None or not metadata.get("inner_class_entry"):
+            return current_class + "".join(
+                "." + inner_name
+                for inner_name in reversed(inner_names)
+            )
+        inner_name = metadata.get("inner_name")
+        outer_class = metadata.get("outer_class")
+        if not inner_name or not outer_class:
+            raise ValueError(
+                "named nested class has unresolved owner: " + current_class
+            )
+        if outer_class not in metadata_by_class:
+            raise ValueError(
+                "named nested class owner is unresolved: " + current_class
+            )
+        if len(inner_names) >= MAX_NESTED_CLASS_OWNER_DEPTH:
+            raise ValueError(
+                "nested class ownership exceeds "
+                f"{MAX_NESTED_CLASS_OWNER_DEPTH} levels: {class_name}"
+            )
+        inner_names.append(inner_name)
+        current_class = outer_class
 
 
 def _validate_candidate_source_class(
