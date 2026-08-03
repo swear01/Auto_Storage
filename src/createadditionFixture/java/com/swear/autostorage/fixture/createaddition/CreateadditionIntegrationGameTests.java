@@ -2,6 +2,11 @@ package com.swear.autostorage.fixture.createaddition;
 
 import com.mrh0.createaddition.config.CommonConfig;
 import com.mrh0.createaddition.recipe.charging.ChargingRecipe;
+import com.mrh0.createaddition.recipe.charging.ChargingRecipeParams;
+import com.mrh0.createaddition.recipe.rolling.RollingRecipe;
+import com.simibubi.create.content.processing.recipe.ProcessingOutput;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipeParams;
 import com.swear.autostorage.Action;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
@@ -23,10 +28,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 
 @GameTestHolder(CreateadditionFixtureMod.MODID)
 @PrefixGameTestTemplate(false)
@@ -83,12 +93,20 @@ public final class CreateadditionIntegrationGameTests {
                 || supports(helper, PLANTOIL)
                 || !recipePresent(helper, fixtureRecipe("chance_rolling"))
                 || supports(helper, fixtureRecipe("chance_rolling"))
-                || supports(helper, fixtureRecipe("fluid_result_rolling"))
-                || supports(helper, fixtureRecipe("fluid_ingredient_rolling"))
                 || !recipePresent(helper, fixtureRecipe("chance_charging"))
                 || supports(helper, fixtureRecipe("chance_charging"))
-                || supports(helper, fixtureRecipe("fluid_result_charging"))
-                || supports(helper, fixtureRecipe("fluid_ingredient_charging"))) {
+                || !upstreamAndAutoStorageReject(
+                        fixtureRecipe("fluid_result_rolling"),
+                        new RollingRecipe(new SyntheticProcessingParams(false, true)))
+                || !upstreamAndAutoStorageReject(
+                        fixtureRecipe("fluid_ingredient_rolling"),
+                        new RollingRecipe(new SyntheticProcessingParams(true, false)))
+                || !upstreamAndAutoStorageReject(
+                        fixtureRecipe("fluid_result_charging"),
+                        new ChargingRecipe(new SyntheticChargingParams(false, true)))
+                || !upstreamAndAutoStorageReject(
+                        fixtureRecipe("fluid_ingredient_charging"),
+                        new ChargingRecipe(new SyntheticChargingParams(true, false)))) {
             helper.fail(
                     "Create Crafts & Additions rolling/charging registration was incorrect");
             return;
@@ -275,6 +293,15 @@ public final class CreateadditionIntegrationGameTests {
         return CraftingTerminalMenu.supportsRecipeHolder(holder);
     }
 
+    private static boolean upstreamAndAutoStorageReject(
+            ResourceLocation recipeId,
+            ProcessingRecipe<?, ?> recipe
+    ) {
+        return !recipe.validate().isEmpty()
+                && !CraftingTerminalMenu.supportsRecipeHolder(
+                        new RecipeHolder<>(recipeId, recipe));
+    }
+
     private static long rollingDuration() {
         return CommonConfig.ROLLING_MILL_PROCESSING_DURATION.get();
     }
@@ -420,6 +447,42 @@ public final class CreateadditionIntegrationGameTests {
 
     private static ResourceLocation createadditionId(String path) {
         return ResourceLocation.fromNamespaceAndPath("createaddition", path);
+    }
+
+    private static class SyntheticProcessingParams extends ProcessingRecipeParams {
+        private SyntheticProcessingParams(boolean fluidInput, boolean fluidOutput) {
+            ingredients.add(Ingredient.of(Items.IRON_INGOT));
+            results.add(new ProcessingOutput(new ItemStack(Items.IRON_NUGGET), 1.0F));
+            if (fluidInput) {
+                fluidIngredients.add(SizedFluidIngredient.of(Fluids.WATER, 250));
+            }
+            if (fluidOutput) {
+                fluidResults.add(new FluidStack(Fluids.WATER, 250));
+            }
+        }
+    }
+
+    private static final class SyntheticChargingParams extends ChargingRecipeParams {
+        private SyntheticChargingParams(boolean fluidInput, boolean fluidOutput) {
+            ingredients.add(Ingredient.of(Items.IRON_INGOT));
+            results.add(new ProcessingOutput(new ItemStack(Items.IRON_NUGGET), 1.0F));
+            if (fluidInput) {
+                fluidIngredients.add(SizedFluidIngredient.of(Fluids.WATER, 250));
+            }
+            if (fluidOutput) {
+                fluidResults.add(new FluidStack(Fluids.WATER, 250));
+            }
+        }
+
+        @Override
+        public int getEnergy() {
+            return 1_000;
+        }
+
+        @Override
+        public int getMaxChargeRate() {
+            return 360;
+        }
     }
 
     private record FixtureContext(

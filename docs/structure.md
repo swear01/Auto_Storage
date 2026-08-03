@@ -51,7 +51,7 @@
 | `docs/create-compatibility.md` | Create optional Milling/Crushing/Cutting/Filling/Emptying exact contract、normalized station work與RPM/chance/multi-station邊界。 |
 | `src/createFixture/` | 代表性Create 6.0.10隔離GameTest fixture；13個tests驗五個deterministic families、item/fluid/remainder/work/reload與atomic rollback。 |
 | `docs/createaddition-compatibility.md` | Create Crafts & Additions 1.6.0 scanner-format-17 Rolling/Charging contract、Liquid Burning fail-closed、isolated 110-recipe digest與Create companion ancestry。 |
-| `src/createadditionFixture/` | 代表性Create Crafts & Additions 1.6.0 + Create隔離GameTest fixture；9個tests驗Rolling/Charging registration、exact remainder、exact FE/work、chance/fluid shape fail-closed、shortage/overflow/stale-holder rollback與Liquid Burning fail-closed。 |
+| `src/createadditionFixture/` | 代表性Create Crafts & Additions 1.6.0 + Create隔離GameTest fixture；9個tests驗Rolling/Charging registration、exact remainder、exact FE/work、loaded chance recipe與程式建構fluid-shape雙重fail-closed、shortage/overflow/stale-holder rollback及Liquid Burning fail-closed。 |
 | `docs/create-aquatic-ambitions-compatibility.md` | Create Aquatic Ambitions 2.0.4 scanner-format-17 audit：79個target classes、6個reachable ancestry、2個actual Recipe candidates重審拒絕、Channeling world/chance邊界與零production-family Outcome C。 |
 | `src/createAquaticAmbitionsFixture/` | 代表性Create Aquatic Ambitions 2.0.4 + Create隔離GameTest fixture；4個tests驗present target、零custom registration及全部Channeling recipes fail closed。 |
 | `docs/create-enchantment-industry-compatibility.md` | Create Enchantment Industry `2.5.0-preview-alpha1` Compat Kit Outcome C：Grindstone/Printer/Enchanter/Forger fail-closed與零production-family邊界。 |

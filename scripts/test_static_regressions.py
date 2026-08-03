@@ -2287,6 +2287,21 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("recipePresent(helper, fixtureRecipe(\"chance_rolling\"))", fixture)
         self.assertIn("recipePresent(helper, fixtureRecipe(\"chance_charging\"))", fixture)
+        for recipe_name in (
+            "fluid_result_rolling",
+            "fluid_ingredient_rolling",
+            "fluid_result_charging",
+            "fluid_ingredient_charging",
+        ):
+            self.assertRegex(
+                fixture,
+                rf'upstreamAndAutoStorageReject\(\s*fixtureRecipe\("{recipe_name}"\)',
+            )
+            self.assertFalse(
+                (ROOT / "src/createadditionFixture/resources/data/"
+                 "auto_storage_createaddition_fixture/recipe/"
+                 f"{recipe_name}.json").exists()
+            )
         self.assertIn("chance_rolling", fixture)
         self.assertIn("fluid_result_rolling", fixture)
         self.assertIn("fluid_ingredient_rolling", fixture)

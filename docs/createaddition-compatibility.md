@@ -138,7 +138,8 @@ tools/compat-kit/compat-kit verify compat/contracts/createaddition.json \
 ```
 
 Nine real GameTests cover rolling/charging registration and liquid-burning
-exclusion plus chance/fluid shape fail-closed, exact rolling remainder,
+exclusion plus loaded chance-recipe presence and programmatic fluid-shape
+fail-closed at both Create validation and Auto Storage classification, exact rolling remainder,
 exact rolling output, exact charging FE/work, missing ingredient,
 insufficient FE, destination overflow, `Long.MAX_VALUE` overflow, and stale
 holder rollback. Bundled Compat Kit verify reports twelve exact checks across
