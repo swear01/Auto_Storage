@@ -147,7 +147,9 @@ five commands (`build`, base GameTests, recipe-addon, createaddition, matrix).
 `multi_output_merge_exact` binds the generic public-SDK typed-family multi-output
 evidence because accepted Rolling/Charging families are single-output only.
 Processing labels use the JEI family names Rolling / Charging.
-Latest local matrix evidence: **18,503** recipes, Craftable prepare
-**19.933 ms**, first/shared p95/warm switch **0.873 / 0.361 / 0.304 ms**,
-storage interaction p95 **16.918 ms**, per-menu **116,600** bytes, and report
+Latest local matrix evidence after rebase onto main `a1582ad` (CEI #72 plus
+fixture runtime transforms #87): **18,765** recipes, Craftable prepare
+**17.321 ms**, first/shared p95/warm switch **0.884 / 0.430 / 0.344 ms**,
+storage interaction p95 **11.948 ms**, shared index **3,716,144** bytes
+(≈ 3.544 MiB), per-menu **117,223** bytes, and report
 `build/reports/terminal-scale-10000.json`.
