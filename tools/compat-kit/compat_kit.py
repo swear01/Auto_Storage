@@ -248,7 +248,7 @@ TARGET_KEYS = {
     "runtime_dependencies",
     "runtime_artifact_transforms",
 }
-RUNTIME_ARTIFACT_TRANSFORM_KEYS = {"dependency", "sha256", "remove_entries"}
+RUNTIME_ARTIFACT_TRANSFORM_KEYS = {"sha256", "remove_entries"}
 STATION_KEYS = {"descriptor_id", "category", "variants"}
 VARIANT_KEYS = {"item", "rate", "bounds"}
 RATE_KEYS = {"numerator", "denominator"}
@@ -4430,36 +4430,29 @@ def _validate_runtime_artifact_transforms(
     target: dict,
     source_audit_sha256: str,
 ):
-    if not isinstance(value, list) or not value:
+    if not isinstance(value, dict) or not value:
         raise ValueError(
-            "contract target runtime_artifact_transforms must be a non-empty list"
+            "contract target runtime_artifact_transforms must be a non-empty object"
         )
     runtime_dependencies = {
         target.get("dependency"),
         *target.get("runtime_dependencies", []),
     }
-    seen_dependencies = set()
     seen_artifacts = set()
-    for index, transform in enumerate(value):
-        location = f"contract target runtime_artifact_transforms {index}"
+    for dependency, transform in sorted(value.items()):
+        location = f"contract target runtime_artifact_transforms {dependency!r}"
+        _validate_dependency_coordinate(dependency, f"{location} dependency")
         if not isinstance(transform, dict):
             raise ValueError(f"{location} must be an object")
         _unknown_keys(transform, RUNTIME_ARTIFACT_TRANSFORM_KEYS, location)
         if set(transform) != RUNTIME_ARTIFACT_TRANSFORM_KEYS:
             raise ValueError(
-                f"{location} requires dependency, sha256, and remove_entries"
+                f"{location} requires sha256 and remove_entries"
             )
-        dependency = transform["dependency"]
-        _validate_dependency_coordinate(dependency, f"{location} dependency")
         if dependency not in runtime_dependencies:
             raise ValueError(
                 f"{location} dependency must be an exact runtime dependency"
             )
-        if dependency in seen_dependencies:
-            raise ValueError(
-                "contract target runtime_artifact_transforms repeat a dependency"
-            )
-        seen_dependencies.add(dependency)
         sha256 = transform["sha256"]
         if not isinstance(sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", sha256):
             raise ValueError(f"{location} sha256 must be a SHA-256 digest")
@@ -5037,9 +5030,15 @@ def _bundled_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
         "matrix": copy.deepcopy(contract["matrix"]),
     }
     if "runtime_artifact_transforms" in target:
-        descriptor["runtimeArtifactTransforms"] = copy.deepcopy(
-            target["runtime_artifact_transforms"]
-        )
+        descriptor["runtimeArtifactTransforms"] = [
+            {
+                "dependency": dependency,
+                **copy.deepcopy(transform),
+            }
+            for dependency, transform in sorted(
+                target["runtime_artifact_transforms"].items()
+            )
+        ]
     module = f"""package {module_package};
 
 import com.swear.autostorage.MachineDescriptor;

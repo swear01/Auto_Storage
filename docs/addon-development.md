@@ -238,7 +238,9 @@ coordinates must use exact `group:name:version` structure and cannot contain
 control characters.
 Repository-owned bundled fixtures may additionally declare exact
 `target.runtime_artifact_transforms` for reviewed removal of unrelated test-only
-ZIP entries. The pristine coordinate and SHA remain the audit, compile, and
+ZIP entries. This contract field is an object keyed by exact runtime dependency,
+which makes duplicate dependency plans unrepresentable to schema-only consumers.
+The pristine coordinate and SHA remain the audit, compile, and
 artifact-gate input; only isolated/matrix test runtimes receive the deterministic
 transformed output. Identical transforms shared by multiple bundled descriptors
 deduplicate to one artifact, and conflicting declarations fail closed. Independent
@@ -495,7 +497,8 @@ non-central Maven target resolves through contract-owned configuration rather
 than a root-build guess. Compat Kit rejects target IDs that would become Java
 reserved package segments instead of emitting uncompilable source.
 When present, descriptor `runtimeArtifactTransforms` is generated from the
-reviewed contract. Exact dependency/SHA/entry validation happens before Gradle
+reviewed dependency-keyed contract object as a sorted descriptor record list.
+Exact dependency/SHA/entry validation happens before Gradle
 wires a transformed jar, and the pristine jar never shares an isolated or matrix
 runtime classpath with that output. Global SHA ownership includes every audited
 artifact as well as every transform. Direct runtime-only declarations are

@@ -636,9 +636,11 @@ or control-character-bearing values are rejected before scaffolding.
 
 A bundled fixture may declare `target.runtime_artifact_transforms` only when an
 exact reviewed runtime artifact embeds unrelated test-only ZIP entries that the
-loader classloads before fixture namespace filtering. Each declaration binds one
-existing runtime dependency, its pristine SHA-256, and a non-empty unique list of
-literal `remove_entries`. Absolute/traversal/directory paths, wildcards, control
+loader classloads before fixture namespace filtering. The field is an object
+keyed by existing runtime dependency; each value binds its pristine SHA-256 and
+a non-empty unique list of literal `remove_entries`. Dependency-keyed object
+shape prevents two plans for one coordinate from passing the published schema.
+Absolute/traversal/directory paths, wildcards, control
 characters, absent entries, duplicate ZIP entries, unexpected artifacts, and SHA
 drift fail closed. Audit, compile, and artifact verification continue to use the
 pristine jar; only the descriptor-owned isolated fixture and aggregate matrix use

@@ -7275,12 +7275,14 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_bundled_descriptor_preserves_reviewed_runtime_artifact_transforms(self):
         contract = self.accepted_contract()
+        dependency = contract["target"]["dependency"]
         transform = {
-            "dependency": contract["target"]["dependency"],
             "sha256": contract["source_audit_sha256"],
             "remove_entries": ["samplemod/gametest/ForeignGameTests.class"],
         }
-        contract["target"]["runtime_artifact_transforms"] = [transform]
+        contract["target"]["runtime_artifact_transforms"] = {
+            dependency: transform,
+        }
 
         self.compat_kit.validate_contract(
             contract,
@@ -7294,7 +7296,10 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             ]
         )
 
-        self.assertEqual([transform], descriptor["runtimeArtifactTransforms"])
+        self.assertEqual(
+            [{"dependency": dependency, **transform}],
+            descriptor["runtimeArtifactTransforms"],
+        )
 
     def test_contract_runtime_artifact_transforms_fail_closed(self):
         base = self.accepted_contract()
@@ -7302,39 +7307,43 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         digest = base["source_audit_sha256"]
         cases = (
             (
-                [{"dependency": dependency, "sha256": digest, "remove_entries": []}],
+                {dependency: {"sha256": digest, "remove_entries": []}},
                 "non-empty list",
             ),
             (
-                [{
-                    "dependency": dependency,
-                    "sha256": digest,
-                    "remove_entries": ["../ForeignGameTests.class"],
-                }],
+                {
+                    dependency: {
+                        "sha256": digest,
+                        "remove_entries": ["../ForeignGameTests.class"],
+                    }
+                },
                 "safe exact ZIP entry path",
             ),
             (
-                [{
-                    "dependency": dependency,
-                    "sha256": digest,
-                    "remove_entries": ["samplemod/*.class"],
-                }],
+                {
+                    dependency: {
+                        "sha256": digest,
+                        "remove_entries": ["samplemod/*.class"],
+                    }
+                },
                 "safe exact ZIP entry path",
             ),
             (
-                [{
-                    "dependency": dependency,
-                    "sha256": "0" * 64,
-                    "remove_entries": ["samplemod/ForeignGameTests.class"],
-                }],
+                {
+                    dependency: {
+                        "sha256": "0" * 64,
+                        "remove_entries": ["samplemod/ForeignGameTests.class"],
+                    }
+                },
                 "target SHA must match",
             ),
             (
-                [{
-                    "dependency": "com.example:missing-runtime:1.0.0",
-                    "sha256": digest,
-                    "remove_entries": ["samplemod/ForeignGameTests.class"],
-                }],
+                {
+                    "com.example:missing-runtime:1.0.0": {
+                        "sha256": digest,
+                        "remove_entries": ["samplemod/ForeignGameTests.class"],
+                    }
+                },
                 "exact runtime dependency",
             ),
         )
@@ -7355,11 +7364,12 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         duplicate_artifact["target"]["runtime_dependencies"] = [
             "com.example:aliased-runtime:1.0.0"
         ]
-        duplicate_artifact["target"]["runtime_artifact_transforms"] = [{
-            "dependency": "com.example:aliased-runtime:1.0.0",
-            "sha256": digest,
-            "remove_entries": ["samplemod/ForeignGameTests.class"],
-        }]
+        duplicate_artifact["target"]["runtime_artifact_transforms"] = {
+            "com.example:aliased-runtime:1.0.0": {
+                "sha256": digest,
+                "remove_entries": ["samplemod/ForeignGameTests.class"],
+            }
+        }
         with self.assertRaisesRegex(ValueError, "repeats the pristine target artifact"):
             self.compat_kit.validate_contract(
                 duplicate_artifact,
@@ -7368,19 +7378,15 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 source_artifact=self.jar,
             )
 
-        duplicate_transform = copy.deepcopy(base)
-        transform = {
+        legacy_array = copy.deepcopy(base)
+        legacy_array["target"]["runtime_artifact_transforms"] = [{
             "dependency": dependency,
             "sha256": digest,
             "remove_entries": ["samplemod/ForeignGameTests.class"],
-        }
-        duplicate_transform["target"]["runtime_artifact_transforms"] = [
-            transform,
-            copy.deepcopy(transform),
-        ]
-        with self.assertRaisesRegex(ValueError, "repeat a dependency"):
+        }]
+        with self.assertRaisesRegex(ValueError, "non-empty object"):
             self.compat_kit.validate_contract(
-                duplicate_transform,
+                legacy_array,
                 require_complete=True,
                 source_audit=self.source_audit(),
                 source_artifact=self.jar,
@@ -7909,11 +7915,12 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
     def test_external_scaffold_rejects_descriptor_only_runtime_artifact_transform(self):
         contract = self.addon_contract()
-        contract["target"]["runtime_artifact_transforms"] = [{
-            "dependency": contract["target"]["dependency"],
-            "sha256": contract["source_audit_sha256"],
-            "remove_entries": ["samplemod/gametest/ForeignGameTests.class"],
-        }]
+        contract["target"]["runtime_artifact_transforms"] = {
+            contract["target"]["dependency"]: {
+                "sha256": contract["source_audit_sha256"],
+                "remove_entries": ["samplemod/gametest/ForeignGameTests.class"],
+            }
+        }
 
         with self.assertRaisesRegex(ValueError, "bundled descriptor fixtures"):
             self.compat_kit.scaffold_addon(
@@ -8876,16 +8883,20 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             target["runtime_dependencies"]["items"]["pattern"],
         )
         transforms = target["runtime_artifact_transforms"]
-        self.assertEqual(1, transforms["minItems"])
-        self.assertTrue(transforms["uniqueItems"])
+        self.assertEqual("object", transforms["type"])
+        self.assertEqual(1, transforms["minProperties"])
+        self.assertEqual(
+            target["dependency"]["pattern"],
+            transforms["propertyNames"]["pattern"],
+        )
         self.assertEqual(
             {"$ref": "#/$defs/runtimeArtifactTransform"},
-            transforms["items"],
+            transforms["additionalProperties"],
         )
         transform = schema["$defs"]["runtimeArtifactTransform"]
         self.assertFalse(transform["additionalProperties"])
         self.assertEqual(
-            {"dependency", "sha256", "remove_entries"},
+            {"sha256", "remove_entries"},
             set(transform["required"]),
         )
         self.assertEqual(1, transform["properties"]["remove_entries"]["minItems"])

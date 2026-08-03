@@ -402,9 +402,10 @@ that appears only in its declaration is not execution evidence. The published
 archive includes its own Gradle wrapper template, so an extracted copy can
 scaffold an addon without an Auto Storage checkout.
 Bundled contracts may own exact `runtime_artifact_transforms`; generated
-descriptors copy them as `runtimeArtifactTransforms`. Each record binds one
-declared runtime dependency, pristine SHA-256, and literal non-empty unique ZIP
-entry list. `transform-runtime-artifact` verifies the pristine bytes and every
+descriptors copy them as `runtimeArtifactTransforms`. The contract field is an
+object keyed by declared runtime dependency, so duplicate coordinates are not a
+representable schema value; each value binds the pristine SHA-256 and a literal
+non-empty unique ZIP entry list. `transform-runtime-artifact` verifies the pristine bytes and every
 entry, then writes a sorted fixed-timestamp stored-entry jar atomically. Pristine
 bytes remain on audit/compile/SHA gates, while only isolated and matrix runtimes
 receive the transformed output. Identical declarations across descriptors share
