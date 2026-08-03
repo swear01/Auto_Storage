@@ -14,6 +14,15 @@ present. Ender IO remains an optional player dependency.
 - audit: `compat/audits/enderio/8.2.11-beta.json` (scanner format 17; 13 structural recipe classes);
 - reviewed contract: `compat/contracts/enderio.json`.
 
+The classifier-4 format-17 audit binds 918 target classes, 413
+matching-source files, and 46 `BlockEntity` candidates, with
+structural-candidate inventory digest
+`63b55298259aae720ad1b58d49b46c6686199aece2b9a164aa603b874988f85a`.
+Seven abstract `BlockEntity` descendants move from resource/station name
+buckets to their structural bucket. The 13 recipe candidates, recipe-owned
+risk evidence, exact ten-artifact ancestry, recipe-data digest, and reviewed
+recipe decisions are unchanged.
+
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Ender IO version on players and does not claim a multi-version matrix.
 Changes outside this fixture are handled from concrete reports and a new delta.

@@ -35,12 +35,20 @@ covered by Auto Storage's built-in exact families without a custom module.
 - audit: `compat/audits/draconicevolution/3.1.4.632.json`;
 - reviewed contract: `compat/contracts/draconicevolution.json`.
 
-The committed audit uses scanner format 17. It binds 619 target classes and
-227 matching-source files, records all 179 effective recipe JSONs across four
-serializers, and keeps only the eight exact artifacts reachable from the
-structural class graph. Five of those artifacts have exact Maven coordinates;
+The committed classifier-4 audit uses scanner format 17. It binds 619 target
+classes and 229 matching-source files, records all 179 effective recipe JSONs
+across four serializers, and keeps only the eight exact artifacts reachable
+from the structural class graph. Five of those artifacts have exact Maven
+coordinates;
 the normalized NeoForge/Minecraft binary is the same cross-host artifact used
 by the canonical AE2 audit rather than a host-local recompilation.
+It records 34 `BlockEntity` candidates and structural-candidate inventory
+digest
+`94a6cb99983ce2f5e0fc7285b5ebff266de5cc2fb3754fbd2b43b76c252ef609`.
+Classifier 4 moves abstract `TileCrystalBase` from the resource-name bucket
+and adds abstract `TileReactorComponent` and `TileFlowGate`; the two recipe
+candidates, recipe-owned risks, ancestry, recipe data, and outcome-C decisions
+are unchanged.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Draconic Evolution version on players and does not claim a

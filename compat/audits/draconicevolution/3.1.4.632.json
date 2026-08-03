@@ -90,6 +90,27 @@
         "source_class": "com.brandon3055.draconicevolution.blocks.CometSpawner.TileCometSpawner"
       },
       {
+        "class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase",
+        "classification": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase",
+            "com.brandon3055.brandonscore.blocks.TileBCore",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase",
+            "com.brandon3055.brandonscore.blocks.TileBCore",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TileCrystalBase.java\"\npublic abstract class com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase extends com.brandon3055.brandonscore.blocks.TileBCore implements com.brandon3055.brandonscore.lib.ITilePlaceListener,com.brandon3055.draconicevolution.api.energy.ICrystalLink,com.brandon3055.brandonscore.lib.IInteractTile,com.brandon3055.draconicevolution.api.energy.IENetEffectTile {\n  public static final java.util.UUID MSG_ID;\n  public java.util.LinkedList<int[]> transferRatesArrays;\n  public java.util.LinkedList<java.lang.Byte> flowRates;\n  public java.util.Map<java.lang.Integer, java.lang.Integer> containerEnergyFlow;\n  public com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase(net.minecraft.world.level.block.entity.BlockEntityType<?>, com.brandon3055.brandonscore.api.TechLevel, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tick();\n  public void balanceLinkedDevices();\n  public void rebuildTransferList();\n  public java.util.List<net.minecraft.core.BlockPos> getLinks();\n  public boolean binderUsed(net.minecraft.world.entity.player.Player, net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public boolean createLink(com.brandon3055.draconicevolution.api.energy.ICrystalLink);\n  public void breakLink(net.minecraft.core.BlockPos);\n  public int maxLinks();\n  public int maxLinkRange();\n  public int balanceMode();\n  public long getEnergyStored();\n  public long getMaxEnergyStored();\n  public void modifyEnergyStored(long);\n  public int getTier();\n  public abstract com.brandon3055.draconicevolution.blocks.energynet.EnergyCrystal$CrystalType getCrystalType();\n  public com.brandon3055.brandonscore.lib.Vec3B getOffset(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos fromOffset(com.brandon3055.brandonscore.lib.Vec3B);\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler getFxHandler();\n  public byte calculateFlow(int);\n  public void getLinkData(java.util.List<com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase$LinkData>);\n  public java.lang.String getUnlocalizedName();\n  public abstract com.brandon3055.draconicevolution.client.render.effect.CrystalFXBase createStaticFX();\n  public void addDisplayData(java.util.List<net.minecraft.network.chat.Component>);\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler createServerFXHandler();\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler createClientFXHandler();\n  public void writeExtraNBT(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public void readExtraNBT(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public void onTilePlaced(net.minecraft.world.item.context.BlockPlaceContext, net.minecraft.world.level.block.state.BlockState);\n  public int getIDHash();\n  public void onLoad();\n  public void onChunkUnloaded();\n  public void receiveBatchedUpdate(com.brandon3055.draconicevolution.network.CrystalUpdateBatcher$BatchedCrystalUpdate);\n  public void detectAndSendContainerChanges(java.util.List<net.minecraft.world.inventory.ContainerListener>);\n  public void sendUpdateToListeners(java.util.List<net.minecraft.world.inventory.ContainerListener>, codechicken.lib.packet.PacketCustom);\n  public void receivePacketFromServer(codechicken.lib.data.MCDataInput, int);\n  public void receivePacketFromClient(codechicken.lib.data.MCDataInput, net.minecraft.server.level.ServerPlayer, int);\n  public int getLinkFlow(int);\n  public java.util.LinkedList<java.lang.Byte> getFlowRates();\n}",
+        "source_class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase"
+      },
+      {
         "class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalDirectIO",
         "classification": {
           "evidence": [
@@ -157,6 +178,27 @@
         },
         "public_signature": "Compiled from \"TileCrystalWirelessIO.java\"\npublic class com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalWirelessIO extends com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase {\n  public java.util.LinkedList<int[]> receiverTransferRates;\n  public java.util.LinkedList<java.lang.Byte> receiverFlowRates;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedBool useUpdateOptimisation;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedBool inputMode;\n  public java.util.Map<java.lang.Integer, java.lang.Integer> containerReceiverFlow;\n  public com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalWirelessIO(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalWirelessIO(com.brandon3055.brandonscore.api.TechLevel, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void register(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent);\n  public void tick();\n  public net.minecraft.world.InteractionResult useWithoutItem(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.entity.player.Player, net.minecraft.world.phys.BlockHitResult);\n  public void rebuildReceiverTransferList();\n  public int getMaxWirelessTransfer();\n  public int receiverTransfer(int);\n  public byte flowConversion(int);\n  public boolean binderUsed(net.minecraft.world.entity.player.Player, net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public java.util.List<net.minecraft.core.BlockPos> getReceivers();\n  public java.util.Map<net.minecraft.core.BlockPos, net.minecraft.core.Direction> getReceiversFaces();\n  public int getMaxReceivers();\n  public com.brandon3055.draconicevolution.blocks.energynet.EnergyCrystal$CrystalType getCrystalType();\n  public com.brandon3055.draconicevolution.client.render.effect.CrystalFXBase createStaticFX();\n  public com.brandon3055.brandonscore.lib.Vec3D getBeamLinkPos(net.minecraft.core.BlockPos);\n  public boolean renderBeamTermination();\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler createServerFXHandler();\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler createClientFXHandler();\n  public void addDisplayData(java.util.List<net.minecraft.network.chat.Component>);\n  public void addReceiver(net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public void removeReceiver(net.minecraft.core.BlockPos);\n  public void writeExtraNBT(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public void readExtraNBT(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public void detectAndSendContainerChanges(java.util.List<net.minecraft.world.inventory.ContainerListener>);\n  public void receivePacketFromServer(codechicken.lib.data.MCDataInput, int);\n  public void receivePacketFromClient(codechicken.lib.data.MCDataInput, net.minecraft.server.level.ServerPlayer, int);\n}",
         "source_class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalWirelessIO"
+      },
+      {
+        "class": "com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent",
+        "classification": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent",
+            "com.brandon3055.brandonscore.blocks.TileBCore",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent",
+            "com.brandon3055.brandonscore.blocks.TileBCore",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TileReactorComponent.java\"\npublic abstract class com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent extends com.brandon3055.brandonscore.blocks.TileBCore {\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedEnum<net.minecraft.core.Direction> facing;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedBool isBound;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedEnum<com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent$RSMode> rsMode;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedInt rsPower;\n  public float animRotation;\n  public float animRotationSpeed;\n  public boolean coreFalureIminent;\n  public com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public int getAccessDistanceSq();\n  public void tick();\n  public void bindToCore(com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorCore);\n  public void pokeCore();\n  public void invalidateComponent();\n  public void onPlaced();\n  public void onBroken();\n  public void onActivated(net.minecraft.world.entity.player.Player);\n  public void setRSMode(net.minecraft.world.entity.player.Player, com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent$RSMode);\n  public void receivePacketFromClient(codechicken.lib.data.MCDataInput, net.minecraft.server.level.ServerPlayer, int);\n  public com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorCore tryGetCore();\n  public com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorCore getCachedCore();\n}",
+        "source_class": "com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent"
       },
       {
         "class": "com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorCore",
@@ -686,6 +728,27 @@
         },
         "public_signature": "Compiled from \"TileDraconiumChest.java\"\npublic class com.brandon3055.draconicevolution.blocks.tileentity.chest.TileDraconiumChest extends com.brandon3055.brandonscore.blocks.TileBCore implements com.brandon3055.brandonscore.lib.IRSSwitchable,net.minecraft.world.MenuProvider,com.brandon3055.brandonscore.lib.IInteractTile {\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedInt colour;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedShort numPlayersUsing;\n  public float prevLidAngle;\n  public float lidAngle;\n  public com.brandon3055.brandonscore.inventory.TileItemStackHandler mainInventory;\n  public com.brandon3055.brandonscore.inventory.TileItemStackHandler craftingItems;\n  public com.brandon3055.brandonscore.inventory.TileItemStackHandler furnaceItems;\n  public com.brandon3055.brandonscore.inventory.TileItemStackHandler capacitorInv;\n  public com.brandon3055.brandonscore.api.power.OPStorage opStorage;\n  public com.brandon3055.draconicevolution.blocks.tileentity.chest.SmeltingLogic smeltingLogic;\n  public com.brandon3055.draconicevolution.blocks.tileentity.chest.TileDraconiumChest(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void register(net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent);\n  public void tick();\n  public net.minecraft.world.InteractionResult useWithoutItem(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.entity.player.Player, net.minecraft.world.phys.BlockHitResult);\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public void writeExtraTileAndStack(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public void readExtraTileAndStack(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n}",
         "source_class": "com.brandon3055.draconicevolution.blocks.tileentity.chest.TileDraconiumChest"
+      },
+      {
+        "class": "com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate",
+        "classification": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate",
+            "com.brandon3055.brandonscore.blocks.TileBCore",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate",
+            "com.brandon3055.brandonscore.blocks.TileBCore",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TileFlowGate.java\"\npublic abstract class com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate extends com.brandon3055.brandonscore.blocks.TileBCore implements com.brandon3055.brandonscore.lib.IChangeListener,net.minecraft.world.MenuProvider,com.brandon3055.brandonscore.lib.IInteractTile {\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedLong minFlow;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedLong maxFlow;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedLong flowOverride;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedBool flowOverridden;\n  public final com.brandon3055.brandonscore.lib.datamanager.ManagedByte rsSignal;\n  public com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tick();\n  public abstract java.lang.String getUnits();\n  public void setMin(java.lang.String);\n  public void setMax(java.lang.String);\n  public long getFlow();\n  public void receivePacketFromClient(codechicken.lib.data.MCDataInput, net.minecraft.server.level.ServerPlayer, int);\n  public net.minecraft.world.level.block.entity.BlockEntity getTarget();\n  public net.minecraft.world.level.block.entity.BlockEntity getSource();\n  public void setBlockState(net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.core.Direction getDirection();\n  public void onNeighborChange(net.minecraft.core.BlockPos);\n}",
+        "source_class": "com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate"
       },
       {
         "class": "com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFluidGate",
@@ -4094,18 +4157,6 @@
         "source_class": "com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandlerServerWireless"
       },
       {
-        "class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase",
-        "classification": {
-          "evidence": [
-            "energy"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"TileCrystalBase.java\"\npublic abstract class com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase extends com.brandon3055.brandonscore.blocks.TileBCore implements com.brandon3055.brandonscore.lib.ITilePlaceListener,com.brandon3055.draconicevolution.api.energy.ICrystalLink,com.brandon3055.brandonscore.lib.IInteractTile,com.brandon3055.draconicevolution.api.energy.IENetEffectTile {\n  public static final java.util.UUID MSG_ID;\n  public java.util.LinkedList<int[]> transferRatesArrays;\n  public java.util.LinkedList<java.lang.Byte> flowRates;\n  public java.util.Map<java.lang.Integer, java.lang.Integer> containerEnergyFlow;\n  public com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase(net.minecraft.world.level.block.entity.BlockEntityType<?>, com.brandon3055.brandonscore.api.TechLevel, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tick();\n  public void balanceLinkedDevices();\n  public void rebuildTransferList();\n  public java.util.List<net.minecraft.core.BlockPos> getLinks();\n  public boolean binderUsed(net.minecraft.world.entity.player.Player, net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public boolean createLink(com.brandon3055.draconicevolution.api.energy.ICrystalLink);\n  public void breakLink(net.minecraft.core.BlockPos);\n  public int maxLinks();\n  public int maxLinkRange();\n  public int balanceMode();\n  public long getEnergyStored();\n  public long getMaxEnergyStored();\n  public void modifyEnergyStored(long);\n  public int getTier();\n  public abstract com.brandon3055.draconicevolution.blocks.energynet.EnergyCrystal$CrystalType getCrystalType();\n  public com.brandon3055.brandonscore.lib.Vec3B getOffset(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos fromOffset(com.brandon3055.brandonscore.lib.Vec3B);\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler getFxHandler();\n  public byte calculateFlow(int);\n  public void getLinkData(java.util.List<com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase$LinkData>);\n  public java.lang.String getUnlocalizedName();\n  public abstract com.brandon3055.draconicevolution.client.render.effect.CrystalFXBase createStaticFX();\n  public void addDisplayData(java.util.List<net.minecraft.network.chat.Component>);\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler createServerFXHandler();\n  public com.brandon3055.draconicevolution.blocks.energynet.rendering.ENetFXHandler createClientFXHandler();\n  public void writeExtraNBT(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public void readExtraNBT(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public void onTilePlaced(net.minecraft.world.item.context.BlockPlaceContext, net.minecraft.world.level.block.state.BlockState);\n  public int getIDHash();\n  public void onLoad();\n  public void onChunkUnloaded();\n  public void receiveBatchedUpdate(com.brandon3055.draconicevolution.network.CrystalUpdateBatcher$BatchedCrystalUpdate);\n  public void detectAndSendContainerChanges(java.util.List<net.minecraft.world.inventory.ContainerListener>);\n  public void sendUpdateToListeners(java.util.List<net.minecraft.world.inventory.ContainerListener>, codechicken.lib.packet.PacketCustom);\n  public void receivePacketFromServer(codechicken.lib.data.MCDataInput, int);\n  public void receivePacketFromClient(codechicken.lib.data.MCDataInput, net.minecraft.server.level.ServerPlayer, int);\n  public int getLinkFlow(int);\n  public java.util.LinkedList<java.lang.Byte> getFlowRates();\n}",
-        "source_class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase"
-      },
-      {
         "class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase$LinkData",
         "classification": {
           "evidence": [
@@ -4697,6 +4748,7 @@
       "src/main/java/com/brandon3055/draconicevolution/blocks/machines/Generator.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/machines/Grinder.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/machines/StabilizedSpawner.java",
+      "src/main/java/com/brandon3055/draconicevolution/blocks/reactor/tileentity/TileReactorComponent.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/reactor/tileentity/TileReactorCore.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/reactor/tileentity/TileReactorInjector.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/reactor/tileentity/TileReactorStabilizer.java",
@@ -4722,6 +4774,7 @@
       "src/main/java/com/brandon3055/draconicevolution/blocks/tileentity/TileStabilizedSpawner.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/tileentity/TileStructureBlock.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/tileentity/chest/TileDraconiumChest.java",
+      "src/main/java/com/brandon3055/draconicevolution/blocks/tileentity/flowgate/TileFlowGate.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/tileentity/flowgate/TileFluidGate.java",
       "src/main/java/com/brandon3055/draconicevolution/blocks/tileentity/flowgate/TileFluxGate.java",
       "src/main/java/com/brandon3055/draconicevolution/client/AtlasTextureHelper.java",
@@ -4873,7 +4926,7 @@
     ],
     "revision": "d297c2657cefa6ac2af19a96ee12a51ab07d36f5"
   },
-  "structural_candidate_inventory_sha256": "d80cf8ee614ec83b30ca17d21afd0dc90707fa82c23e2379f6c2389787d27e0c",
+  "structural_candidate_inventory_sha256": "94a6cb99983ce2f5e0fc7285b5ebff266de5cc2fb3754fbd2b43b76c252ef609",
   "structural_class_graph": [
     {
       "class": "codechicken.lib.datagen.DynamicTextureProvider",
@@ -12948,6 +13001,17 @@
       }
     },
     {
+      "class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase",
+      "classification": {
+        "evidence": [
+          "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase",
+          "com.brandon3055.brandonscore.blocks.TileBCore",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalDirectIO",
       "classification": {
         "evidence": [
@@ -12977,6 +13041,17 @@
         "evidence": [
           "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalWirelessIO",
           "com.brandon3055.draconicevolution.blocks.energynet.tileentity.TileCrystalBase",
+          "com.brandon3055.brandonscore.blocks.TileBCore",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent",
+      "classification": {
+        "evidence": [
+          "com.brandon3055.draconicevolution.blocks.reactor.tileentity.TileReactorComponent",
           "com.brandon3055.brandonscore.blocks.TileBCore",
           "net.minecraft.world.level.block.entity.BlockEntity"
         ],
@@ -13254,6 +13329,17 @@
       "classification": {
         "evidence": [
           "com.brandon3055.draconicevolution.blocks.tileentity.chest.TileDraconiumChest",
+          "com.brandon3055.brandonscore.blocks.TileBCore",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate",
+      "classification": {
+        "evidence": [
+          "com.brandon3055.draconicevolution.blocks.tileentity.flowgate.TileFlowGate",
           "com.brandon3055.brandonscore.blocks.TileBCore",
           "net.minecraft.world.level.block.entity.BlockEntity"
         ],

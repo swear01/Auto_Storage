@@ -18,6 +18,10 @@ Actually Additions.
 - source commit: `cd9d9c63254f471f966ee51b078afdf47af5f852`;
 - audit: `compat/audits/actuallyadditions/1.3.26.json`;
 - reviewed contract: `compat/contracts/actuallyadditions.json`;
+- classifier-4 format-17 evidence: 513 target classes, 135 matching-source
+  files, 162 classified candidates, including 50 `BlockEntity` candidates;
+- structural-candidate inventory digest:
+  `2c68aa8f4e857b6f5f2966ff29f617b6adc332fe9cc05a7d2146022527fd9f60`;
 - class inventory digest:
   `cdf0b8250c2b1e92f8d0d09367ba7f525ea820e5cfc9ba2e2e69b57c09096d03`;
 - recipe-data digest:
@@ -29,6 +33,12 @@ Actually Additions.
   conditions; coexistence counts belong only to the matrix report);
 - coexistence/unclaimed digests belong only to the compatibility-matrix
   build report, not peer descriptors or committed global baselines.
+
+Classifier 4 adds the four abstract `TileEntityBase`,
+`TileEntityInventoryBase`, `TileEntityLaserRelay`, and
+`TileEntityPhantomface` descendants that classifier 3 omitted. The 11 recipe
+candidates, recipe-owned risk evidence, exact ancestry, recipe-data digest,
+and reviewed recipe decisions are unchanged.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Actually Additions version on players and does not claim a multi-version
