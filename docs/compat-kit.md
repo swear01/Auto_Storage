@@ -364,6 +364,12 @@ drafts with unresolved families remain valid. The same completed-contract
 branch requires a non-null fixture, positive GameTest count, authoritative task,
 nonempty Gradle tasks, all twelve exact checks, and one evidence mapping for
 every check.
+Recipe JSON `type` values follow Minecraft `ResourceLocation.parse` /
+`bySeparator` rules: a namespaced id is kept as-is, while a path-only value such
+as `crafting_shaped` expands to `minecraft:crafting_shaped`. Invalid path
+characters still fail closed. Digests continue to hash the raw JSON payload
+bytes, not the expanded serializer id.
+
 `source_recipe_inventory_sha256` binds the sorted recipe-class inventory;
 `source_recipe_data_sha256` separately binds the effective recipe-data and
 data-pack override digest. Every complete `generate`/`conformance`/
