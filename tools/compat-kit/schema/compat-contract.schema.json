@@ -38,7 +38,8 @@
         "runtime_artifact_transforms": {
           "type": "array",
           "minItems": 1,
-          "items": {"$ref": "#/$defs/runtimeArtifactTransform"}
+          "items": {"$ref": "#/$defs/runtimeArtifactTransform"},
+          "uniqueItems": true
         }
       }
     },

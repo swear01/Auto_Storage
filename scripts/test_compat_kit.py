@@ -7368,6 +7368,24 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 source_artifact=self.jar,
             )
 
+        duplicate_transform = copy.deepcopy(base)
+        transform = {
+            "dependency": dependency,
+            "sha256": digest,
+            "remove_entries": ["samplemod/ForeignGameTests.class"],
+        }
+        duplicate_transform["target"]["runtime_artifact_transforms"] = [
+            transform,
+            copy.deepcopy(transform),
+        ]
+        with self.assertRaisesRegex(ValueError, "repeat a dependency"):
+            self.compat_kit.validate_contract(
+                duplicate_transform,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
     def test_contract_runtime_dependencies_reject_primary_dependency(self):
         contract = self.accepted_contract()
         contract["target"]["runtime_dependencies"] = [
@@ -8859,6 +8877,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         )
         transforms = target["runtime_artifact_transforms"]
         self.assertEqual(1, transforms["minItems"])
+        self.assertTrue(transforms["uniqueItems"])
         self.assertEqual(
             {"$ref": "#/$defs/runtimeArtifactTransform"},
             transforms["items"],
