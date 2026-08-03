@@ -1,12 +1,12 @@
 {
-  "contract_sha256": "8ee7cb9ca93602d9ff7c55cb672873f59b3fd03557cdf3c5b7acb544c10d22e5",
+  "contract_sha256": "2424bdcb270d15ffd564321b0bc31a55e4e3e420e127a4af38d42c52bd85e1b8",
   "files": {
-    "src/compat/mysticalagriculture/compat-module.json": "d4802aae91b378800b3f5ccc001705bc63f106c9e7f59f88850d3c12f00563ca",
-    "src/compat/mysticalagriculture/java/com/swear/autostorage/compat/mysticalagriculture/MysticalagricultureCompat.java": "5c924b39c4f5b924249449bd835d47570bb35c693563c62f792ae37008c2c7b0",
+    "src/compat/mysticalagriculture/compat-module.json": "c2464235207c36c9873deaf98591ece70acd875f529c83b37758a58e48d539ef",
+    "src/compat/mysticalagriculture/java/com/swear/autostorage/compat/mysticalagriculture/MysticalagricultureCompat.java": "c8923080597d8b52fd1a171f0a50e99f10816ac995fc97125ec26c3dabda0bb6",
     "src/compat/mysticalagriculture/java/com/swear/autostorage/compat/mysticalagriculture/MysticalagricultureCompatModule.java": "68554bbf6903aca0eba5df6bcda5955c5e84f1d44c8ad91db7a0bf286055fba2",
     "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureFixtureMod.java": "ee96055ef14ee283dd86ee5e5df2fd8dea147a0700bb58130390321d55afbc1b",
-    "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java": "c58da19bb201018c326bff42bb017b68d31ca39f236326b31e607a335606db10",
-    "src/mysticalagricultureFixture/resources/META-INF/neoforge.mods.toml": "623c1647a9e1904a8bce6cf39a9394d5edf516efbc488eca81ccd3b67124667d",
+    "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java": "9b4bae5d6dd1a1818278efe97d14f9c9d931bc1b44bdd214aecba262f6479664",
+    "src/mysticalagricultureFixture/resources/META-INF/neoforge.mods.toml": "bfe60902c6418fc5f23b661647e456d269938470c09e359caa1771436ca0b2b3",
     "src/mysticalagricultureFixture/resources/data/auto_storage_mysticalagriculture_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
   "schema": 1,

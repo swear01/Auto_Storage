@@ -4,6 +4,7 @@ import com.swear.autostorage.Action;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import com.swear.autostorage.ItemKey;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
@@ -62,6 +63,9 @@ public final class MysticalagricultureIntegrationGameTests {
             helper.fail("Mystical Agriculture mod is not loaded");
             return;
         }
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                MysticalagricultureIntegrationGameTests.class);
         MachineDescriptor descriptor = MachineEnergyTable.get(REPROCESSOR);
         ItemStack station = new ItemStack(maItem("seed_reprocessor"));
         if (descriptor == null

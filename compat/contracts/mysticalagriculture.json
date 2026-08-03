@@ -1,320 +1,168 @@
 {
-  "schema": 1,
-  "kind": "auto_storage_compat_contract",
-  "target": {
-    "mod_id": "mysticalagriculture",
-    "display_name": "Mystical Agriculture",
-    "version": "8.0.27",
-    "dependency": "maven.modrinth:mystical-agriculture:izIaJr8V",
-    "repositories": [
-      "https://api.modrinth.com/maven"
-    ],
-    "runtime_dependencies": [
-      "maven.modrinth:cucumber:8421rqFF"
-    ]
-  },
-  "source_audit_sha256": "d67bb701fbe4ade2efeb0aafd477f569b5e6a5a7c8ac696a8a1f658f8477eb99",
-  "source_recipe_inventory_sha256": "7e6b2f595e55e03ad8ead7bfa552e5ef89bc10634f7874f676cd52c6914dbb9d",
   "families": [
     {
-      "id": "i_awakening_recipe",
       "class": "com.blakebr0.mysticalagriculture.api.crafting.IAwakeningRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "API interface only; not an independent recipe family. Owned by rejected AwakeningRecipe multiblock contract.",
-      "inputs": [],
-      "outputs": [],
       "costs": [],
-      "station": null,
-      "risks": [],
+      "decision": "API interface only; not an independent recipe family. Owned by rejected AwakeningRecipe multiblock contract.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.api.crafting.IAwakeningRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "i_enchanter_recipe",
-      "class": "com.blakebr0.mysticalagriculture.api.crafting.IEnchanterRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "API interface only; not an independent recipe family. Owned by rejected EnchanterRecipe contract.",
+      ],
+      "id": "i_awakening_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
+      "recipe_type": null,
       "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.blakebr0.mysticalagriculture.api.crafting.IEnchanterRecipe",
+      "costs": [],
+      "decision": "API interface only; not an independent recipe family. Owned by rejected EnchanterRecipe contract.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.api.crafting.IEnchanterRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "i_infusion_recipe",
-      "class": "com.blakebr0.mysticalagriculture.api.crafting.IInfusionRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "API interface only; not an independent recipe family. Owned by rejected InfusionRecipe multiblock contract.",
+      ],
+      "id": "i_enchanter_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
+      "recipe_type": null,
       "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.blakebr0.mysticalagriculture.api.crafting.IInfusionRecipe",
+      "costs": [],
+      "decision": "API interface only; not an independent recipe family. Owned by rejected InfusionRecipe multiblock contract.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.api.crafting.IInfusionRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "i_reprocessor_recipe",
-      "class": "com.blakebr0.mysticalagriculture.api.crafting.IReprocessorRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "API interface only; the accepted ReprocessorRecipe contract owns the exact family semantics.",
+      ],
+      "id": "i_infusion_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
+      "recipe_type": null,
       "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.blakebr0.mysticalagriculture.api.crafting.IReprocessorRecipe",
+      "costs": [],
+      "decision": "API interface only; the accepted ReprocessorRecipe contract owns the exact family semantics.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.api.crafting.IReprocessorRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "i_soul_extraction_recipe",
-      "class": "com.blakebr0.mysticalagriculture.api.crafting.ISoulExtractionRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "API interface only; not an independent recipe family. Owned by rejected SoulExtractionRecipe contract.",
+      ],
+      "id": "i_reprocessor_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
+      "recipe_type": null,
       "risks": [],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.blakebr0.mysticalagriculture.api.crafting.ISoulExtractionRecipe",
+      "costs": [],
+      "decision": "API interface only; not an independent recipe family. Owned by rejected SoulExtractionRecipe contract.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.api.crafting.ISoulExtractionRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "i_soulium_spawner_recipe",
-      "class": "com.blakebr0.mysticalagriculture.api.crafting.ISouliumSpawnerRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "API interface only; not an independent recipe family. Owned by rejected SouliumSpawnerRecipe contract.",
+      ],
+      "id": "i_soul_extraction_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
+      "recipe_type": null,
+      "risks": [],
       "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.blakebr0.mysticalagriculture.api.crafting.ISouliumSpawnerRecipe",
+      "costs": [],
+      "decision": "API interface only; not an independent recipe family. Owned by rejected SouliumSpawnerRecipe contract.",
+      "evidence": [
+        "com.blakebr0.mysticalagriculture.api.crafting.ISouliumSpawnerRecipe#public_signature"
+      ],
+      "id": "i_soulium_spawner_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
       "risks": [
         "randomness"
       ],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.api.crafting.ISouliumSpawnerRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "crop_recipes",
-      "class": "com.blakebr0.mysticalagriculture.api.crop.CropRecipes",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Crop recipe-enablement helper for DynamicRecipeManager; not a server Recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
       "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.api.crop.CropRecipes#public_signature"
-      ]
+      "status": "rejected"
     },
     {
-      "id": "mod_recipe_book_categories",
-      "class": "com.blakebr0.mysticalagriculture.client.ModRecipeBookCategories",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Client-only recipe-book category finder; not a server recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.client.ModRecipeBookCategories#public_signature"
-      ]
-    },
-    {
-      "id": "crux_recipe",
-      "class": "com.blakebr0.mysticalagriculture.compat.jei.CruxRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "JEI/viewer synthetic crux display recipe; not a server RecipeManager family and not Auto Storage authority.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [
-        "generic_ingredients"
-      ],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.compat.jei.CruxRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "dynamic_recipe_manager",
-      "class": "com.blakebr0.mysticalagriculture.crafting.DynamicRecipeManager",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Runtime recipe injector for crop-derived Infusion/Reprocessor/vanilla shaped holders; not itself a Recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.DynamicRecipeManager#public_signature"
-      ]
-    },
-    {
-      "id": "seed_crafting_recipes_enabled_condition",
-      "class": "com.blakebr0.mysticalagriculture.crafting.condition.SeedCraftingRecipesEnabledCondition",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Datapack/config condition serializer; not a recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.condition.SeedCraftingRecipesEnabledCondition#public_signature"
-      ]
-    },
-    {
-      "id": "awakening_recipe",
       "class": "com.blakebr0.mysticalagriculture.crafting.recipe.AwakeningRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Awakening Altar requires live world multiblock pedestals plus essence vessels with partial vessel stack mutation; no complete simulate-then-commit station contract without world layout.",
-      "inputs": [],
-      "outputs": [],
       "costs": [],
-      "station": null,
-      "risks": [
-        "generic_ingredients",
-        "world_mutation"
-      ],
+      "decision": "Awakening Altar requires live world multiblock pedestals plus essence vessels with partial vessel stack mutation; no complete simulate-then-commit station contract without world layout.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.crafting.recipe.AwakeningRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "awakening_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.AwakeningRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for rejected AwakeningRecipe; not an independent family.",
+      ],
+      "id": "awakening_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.AwakeningRecipe$Serializer#public_signature"
-      ]
-    },
-    {
-      "id": "enchanter_recipe",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.EnchanterRecipe",
-      "status": "rejected",
       "recipe_type": null,
-      "decision": "Enchanter output level and enchantment compatibility depend on available ingredient counts and existing tool enchantments; getResultItem is empty and no fixed primary output exists.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
       "risks": [
         "generic_ingredients",
         "world_mutation"
       ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.EnchanterRecipe",
+      "costs": [],
+      "decision": "Enchanter output level and enchantment compatibility depend on available ingredient counts and existing tool enchantments; getResultItem is empty and no fixed primary output exists.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.crafting.recipe.EnchanterRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "enchanter_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.EnchanterRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for rejected EnchanterRecipe; not an independent family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.EnchanterRecipe$Serializer#public_signature"
-      ]
-    },
-    {
-      "id": "farmland_till_recipe",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.FarmlandTillRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Special shapeless crafting that damages HoeItem remainders; not an installed-station transaction family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.FarmlandTillRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "farmland_till_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.FarmlandTillRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for rejected FarmlandTillRecipe; not an independent family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [
-        "generic_ingredients"
       ],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.FarmlandTillRecipe$Serializer#public_signature"
-      ]
-    },
-    {
-      "id": "infusion_recipe",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.InfusionRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Infusion Altar requires live world multiblock pedestals, redstone/activation state, and pedestal inventory mutation; no complete deterministic station contract without world layout.",
+      "id": "enchanter_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
+      "recipe_type": null,
       "risks": [
         "generic_ingredients",
         "world_mutation"
       ],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.InfusionRecipe#public_signature"
-      ]
+      "station": null,
+      "status": "rejected"
     },
     {
-      "id": "infusion_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.InfusionRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for rejected InfusionRecipe; not an independent family.",
+      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.FarmlandTillRecipe",
+      "costs": [],
+      "decision": "Special shapeless crafting that damages HoeItem remainders; not an installed-station transaction family.",
+      "evidence": [
+        "com.blakebr0.mysticalagriculture.crafting.recipe.FarmlandTillRecipe#public_signature"
+      ],
+      "id": "farmland_till_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
       "station": null,
-      "risks": [],
+      "status": "rejected"
+    },
+    {
+      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.InfusionRecipe",
+      "costs": [],
+      "decision": "Infusion Altar requires live world multiblock pedestals, redstone/activation state, and pedestal inventory mutation; no complete deterministic station contract without world layout.",
       "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.InfusionRecipe$Serializer#public_signature"
-      ]
+        "com.blakebr0.mysticalagriculture.crafting.recipe.InfusionRecipe#public_signature"
+      ],
+      "id": "infusion_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
     },
     {
       "id": "reprocessor_recipe",
@@ -384,268 +232,102 @@
       ]
     },
     {
-      "id": "reprocessor_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.ReprocessorRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for accepted ReprocessorRecipe; not an independent family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.ReprocessorRecipe$Serializer#public_signature"
-      ]
-    },
-    {
-      "id": "soul_extraction_recipe",
       "class": "com.blakebr0.mysticalagriculture.crafting.recipe.SoulExtractionRecipe",
-      "status": "rejected",
-      "recipe_type": null,
+      "costs": [],
       "decision": "Soul Extractor mutates Soul Jar MobSoulType double amounts and requires a non-full jar in the output slot; no Auto Storage MobSoul typed resource or jar-mutation contract.",
+      "evidence": [
+        "com.blakebr0.mysticalagriculture.crafting.recipe.SoulExtractionRecipe#public_signature"
+      ],
+      "id": "soul_extraction_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
+      "recipe_type": null,
       "risks": [
         "generic_ingredients",
         "world_mutation"
       ],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.SoulExtractionRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "soul_extraction_recipe__result",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.SoulExtractionRecipe$Result",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Nested soul-result value object for rejected SoulExtractionRecipe; not an independent family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
       "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.SoulExtractionRecipe$Result#public_signature"
-      ]
+      "status": "rejected"
     },
     {
-      "id": "soul_extraction_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.SoulExtractionRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for rejected SoulExtractionRecipe; not an independent family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.SoulExtractionRecipe$Serializer#public_signature"
-      ]
-    },
-    {
-      "id": "soul_jar_empty_recipe",
       "class": "com.blakebr0.mysticalagriculture.crafting.recipe.SoulJarEmptyRecipe",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Special shapeless crafting that empties filled soul jars; not an installed-station transaction family.",
-      "inputs": [],
-      "outputs": [],
       "costs": [],
-      "station": null,
-      "risks": [
-        "world_mutation"
-      ],
+      "decision": "Special shapeless crafting that empties filled soul jars; not an installed-station transaction family.",
       "evidence": [
         "com.blakebr0.mysticalagriculture.crafting.recipe.SoulJarEmptyRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "soul_jar_empty_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.SoulJarEmptyRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for rejected SoulJarEmptyRecipe; not an independent family.",
+      ],
+      "id": "soul_jar_empty_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
       "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.SoulJarEmptyRecipe$Serializer#public_signature"
-      ]
+      "status": "rejected"
     },
     {
-      "id": "soulium_spawner_recipe",
       "class": "com.blakebr0.mysticalagriculture.crafting.recipe.SouliumSpawnerRecipe",
-      "status": "rejected",
-      "recipe_type": null,
+      "costs": [],
       "decision": "Soulium Spawner selects weighted EntityType via RandomSource and mutates the world by spawning entities; no deterministic item/resource transaction.",
+      "evidence": [
+        "com.blakebr0.mysticalagriculture.crafting.recipe.SouliumSpawnerRecipe#public_signature"
+      ],
+      "id": "soulium_spawner_recipe",
       "inputs": [],
       "outputs": [],
-      "costs": [],
-      "station": null,
+      "recipe_type": null,
       "risks": [
         "generic_ingredients",
         "randomness",
         "world_mutation"
       ],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.SouliumSpawnerRecipe#public_signature"
-      ]
-    },
-    {
-      "id": "soulium_spawner_recipe__serializer",
-      "class": "com.blakebr0.mysticalagriculture.crafting.recipe.SouliumSpawnerRecipe$Serializer",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Serializer for rejected SouliumSpawnerRecipe; not an independent family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
       "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.crafting.recipe.SouliumSpawnerRecipe$Serializer#public_signature"
-      ]
-    },
-    {
-      "id": "recipe_json_generator",
-      "class": "com.blakebr0.mysticalagriculture.data.generator.RecipeJsonGenerator",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Datagen generator only; not a runtime recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.data.generator.RecipeJsonGenerator#public_signature"
-      ]
-    },
-    {
-      "id": "crafting_recipe_builder",
-      "class": "com.blakebr0.mysticalagriculture.data.recipe.CraftingRecipeBuilder",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Datagen builder only; not a runtime recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.data.recipe.CraftingRecipeBuilder#public_signature"
-      ]
-    },
-    {
-      "id": "infusion_recipe_builder",
-      "class": "com.blakebr0.mysticalagriculture.data.recipe.InfusionRecipeBuilder",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Datagen builder only; not a runtime recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.data.recipe.InfusionRecipeBuilder#public_signature"
-      ]
-    },
-    {
-      "id": "reprocessor_recipe_builder",
-      "class": "com.blakebr0.mysticalagriculture.data.recipe.ReprocessorRecipeBuilder",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Datagen builder only; not a runtime recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.data.recipe.ReprocessorRecipeBuilder#public_signature"
-      ]
-    },
-    {
-      "id": "mod_condition_serializers",
-      "class": "com.blakebr0.mysticalagriculture.init.ModConditionSerializers",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Condition serializer registry only; not a recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.init.ModConditionSerializers#public_signature"
-      ]
-    },
-    {
-      "id": "mod_recipe_serializers",
-      "class": "com.blakebr0.mysticalagriculture.init.ModRecipeSerializers",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Recipe serializer registry only; not a recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.init.ModRecipeSerializers#public_signature"
-      ]
-    },
-    {
-      "id": "mod_recipe_types",
-      "class": "com.blakebr0.mysticalagriculture.init.ModRecipeTypes",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Recipe type registry only; not a recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.init.ModRecipeTypes#public_signature"
-      ]
-    },
-    {
-      "id": "recipe_ingredient_cache",
-      "class": "com.blakebr0.mysticalagriculture.util.RecipeIngredientCache",
-      "status": "rejected",
-      "recipe_type": null,
-      "decision": "Runtime ingredient validity cache helper; not a recipe family.",
-      "inputs": [],
-      "outputs": [],
-      "costs": [],
-      "station": null,
-      "risks": [
-        "generic_ingredients"
-      ],
-      "evidence": [
-        "com.blakebr0.mysticalagriculture.util.RecipeIngredientCache#public_signature"
-      ]
+      "status": "rejected"
     }
   ],
-  "verification": {
-    "fixture": "mysticalagricultureFixture",
-    "expected_game_tests": 8,
-    "game_test_task": "runMysticalagricultureGameTestServer",
-    "gradle_tasks": [
-      "build",
-      "runGameTestServer",
-      "runRecipeAddonGameTestServer",
-      "runMysticalagricultureGameTestServer",
-      "runCompatibilityMatrixGameTestServer"
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [
+      "mysticalagriculture:seed/reprocessor/inferium"
     ],
+    "descriptors": [
+      "auto_storage:mysticalagriculture_reprocessor"
+    ],
+    "mods": [
+      "mysticalagriculture"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "mysticalagriculture"
+      ],
+      "sha256": "c1879fd12cbfbc2fc9849ec9628be26b7c1c6f0f0d35c53dead1d09aa0601b8c"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "d67bb701fbe4ade2efeb0aafd477f569b5e6a5a7c8ac696a8a1f658f8477eb99",
+  "source_recipe_data_sha256": "4052b02175313fdd91a3f44bb2b96025c80755c028021c1ad65a2c7c9b368879",
+  "source_recipe_inventory_sha256": "e8ccfcbc5b0eb6e632bdeaed961eac556ebd573a0cad9888f0060711d0361fea",
+  "target": {
+    "dependency": "maven.modrinth:mystical-agriculture:izIaJr8V",
+    "display_name": "Mystical Agriculture",
+    "mod_id": "mysticalagriculture",
+    "repositories": [
+      "https://api.modrinth.com/maven",
+      "https://maven.blakesmods.com",
+      "https://maven.blamejared.com",
+      "https://www.cursemaven.com"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:cucumber:8421rqFF"
+    ],
+    "version": "8.0.27"
+  },
+  "verification": {
     "checks": [
       "absent_target_no_classload",
       "present_target_load_once",
@@ -663,88 +345,98 @@
     "evidence": {
       "absent_target_no_classload": [
         {
-          "task": "runGameTestServer",
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
           "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
-          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);"
-        }
-      ],
-      "present_target_load_once": [
-        {
-          "task": "runMysticalagricultureGameTestServer",
-          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
-          "marker": "COMPAT_KIT_PRESENT_TARGET_LOAD_ONCE"
-        }
-      ],
-      "ingredient_shortage_atomic": [
-        {
-          "task": "runMysticalagricultureGameTestServer",
-          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
-          "marker": "COMPAT_KIT_INGREDIENT_SHORTAGE_ATOMIC"
-        }
-      ],
-      "destination_capacity_atomic": [
-        {
-          "task": "runMysticalagricultureGameTestServer",
-          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
-          "marker": "COMPAT_KIT_DESTINATION_CAPACITY_ATOMIC"
-        }
-      ],
-      "checked_overflow_atomic": [
-        {
-          "task": "runMysticalagricultureGameTestServer",
-          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
-          "marker": "COMPAT_KIT_CHECKED_OVERFLOW_ATOMIC"
-        }
-      ],
-      "stale_recipe_holder_atomic": [
-        {
-          "task": "runGameTestServer",
-          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
-          "marker": "Unknown recipe id must fail closed"
-        }
-      ],
-      "catalyst_tool_remainder_exact": [
-        {
-          "task": "runMysticalagricultureGameTestServer",
-          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
-          "marker": "COMPAT_KIT_REJECTED_FAMILY_FAIL_CLOSED"
-        }
-      ],
-      "multi_output_merge_exact": [
-        {
-          "task": "runRecipeAddonGameTestServer",
-          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
-          "marker": "Typed family changed the wrong exact resources or output amounts"
-        }
-      ],
-      "mixed_resource_rollback_atomic": [
-        {
-          "task": "runRecipeAddonGameTestServer",
-          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
-          "marker": "Failed typed family commit partially mutated resources"
-        }
-      ],
-      "dedicated_server_client_isolation": [
-        {
-          "task": "build",
-          "source": "build.gradle",
-          "marker": "verifyCompatIsolation"
-        }
-      ],
-      "api_only_compilation": [
-        {
-          "task": "build",
-          "source": "build.gradle",
-          "marker": "compileAddonExampleJava"
+          "task": "runGameTestServer"
         }
       ],
       "all_mod_coexistence": [
         {
           "task": "runCompatibilityMatrixGameTestServer",
           "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
-          "marker": "COMPAT_KIT_ALL_MOD_COEXISTENCE"
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "COMPAT_KIT_REJECTED_FAMILY_FAIL_CLOSED",
+          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
+          "task": "runMysticalagricultureGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "COMPAT_KIT_CHECKED_OVERFLOW_ATOMIC",
+          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
+          "task": "runMysticalagricultureGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "COMPAT_KIT_DESTINATION_CAPACITY_ATOMIC",
+          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
+          "task": "runMysticalagricultureGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "COMPAT_KIT_INGREDIENT_SHORTAGE_ATOMIC",
+          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
+          "task": "runMysticalagricultureGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "COMPAT_KIT_PRESENT_TARGET_LOAD_ONCE",
+          "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
+          "task": "runMysticalagricultureGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
         }
       ]
-    }
+    },
+    "expected_game_tests": 8,
+    "fixture": "mysticalagricultureFixture",
+    "game_test_task": "runMysticalagricultureGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runMysticalagricultureGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
   }
 }
