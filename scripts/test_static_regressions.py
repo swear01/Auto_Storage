@@ -2361,27 +2361,6 @@ class StaticRegressionTests(unittest.TestCase):
             zh_tw["gui.auto_storage.station.createaddition_tesla_coil"],
         )
 
-    def test_createaddition_item_keys_preserve_representative_indexes(self):
-        compat = self.read_required(
-            "src/compat/createaddition/java/com/swear/autostorage/compat/"
-            "createaddition/CreateadditionCompat.java"
-        )
-        match = re.search(
-            r"private static List<StorageResourceKey> itemKeys\([^)]*\)\s*"
-            r"\{(?P<body>.*?)\n    \}",
-            compat,
-            re.S,
-        )
-        self.assertIsNotNone(match, "missing CreateadditionCompat.itemKeys")
-        body = match.group("body")
-        self.assertIn("StorageResourceKey.item(stack, registries)", body)
-        self.assertNotIn(
-            ".distinct()",
-            body,
-            "itemKeys must not re-deduplicate keys; "
-            "consumedWithRemainder indexes alternatives by representative",
-        )
-
     def test_createaddition_charging_work_rejects_non_positive_rate(self):
         compat = self.read_required(
             "src/compat/createaddition/java/com/swear/autostorage/compat/"
@@ -2446,7 +2425,82 @@ class StaticRegressionTests(unittest.TestCase):
             method,
         )
 
-def test_immersiveengineering_compat_is_optional_fail_closed(self):
+    def test_createaddition_stale_holder_fixture_selects_then_invalidates_real_recipe(self):
+        fixture = self.read_required(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+stale_holder_is_atomic\s*\(",
+            "Createaddition stale-holder GameTest",
+        )
+
+        self.assertNotIn("missing_stale_holder", method)
+        self.assertIn("IRON_ROD", method)
+        self.assertIn("replaceRecipes", method)
+        self.assertIn("CraftingDestination.NONE", method)
+        self.assertIn("CraftingDestination.STORAGE", method)
+
+    def test_createaddition_dedupes_ingredient_alternatives_by_canonical_key(self):
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        method = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+TypedRecipeInput\s+consumedWithRemainder\s*\(",
+            "Createaddition consumedWithRemainder",
+        )
+        representatives = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+List<ItemStack>\s+representatives\s*\(",
+            "Createaddition representatives",
+        )
+
+        self.assertIn("LinkedHashMap", method)
+        self.assertIn("StorageResourceKey.item", method)
+        self.assertIn("putIfAbsent", method)
+        self.assertNotRegex(
+            representatives,
+            r"\.map\(\s*stack\s*->\s*stack\.copyWithCount\(1\)\s*\)\s*\.distinct\(\)",
+            "ItemStack.distinct cannot normalize duplicate ingredient alternatives",
+        )
+
+    def test_createaddition_dynamic_cost_refresh_fails_closed_without_throwing(self):
+        family = self.read_required(
+            "src/main/java/com/swear/autostorage/RecipeFamily.java"
+        )
+        resolve = self.java_block(
+            family,
+            r"\bpublic\s+List<RecipeAdapterMatch\.Contract>\s+resolveVariants\s*\(",
+            "RecipeFamily.resolveVariants",
+        )
+        contract = self.java_block(
+            family,
+            r"\bpublic\s+RecipeAdapterMatch\.Contract\s+contract\s*\(",
+            "RecipeFamily.contract",
+        )
+
+        self.assertIn("IllegalArgumentException", resolve)
+        self.assertIn("return List.of()", resolve)
+        self.assertIn("cacheTypedPlan", contract)
+        self.assertIn("Cost.free()", contract)
+
+    def test_createaddition_notes_distinguish_eligibility_from_live_rate_cost(self):
+        notes = self.read_required("docs/notes.md")
+        compatibility = self.read_required("docs/createaddition-compatibility.md")
+
+        self.assertNotIn("正確作法是eligibility已要求正rate", notes)
+        self.assertIn("maxChargeRate", notes)
+        self.assertIn("cost", notes.lower())
+        self.assertNotIn(
+            "cost evaluation fail-closes with\n  `IllegalArgumentException`",
+            compatibility,
+        )
+        self.assertIn("no usable variant", compatibility)
+
+    def test_immersiveengineering_compat_is_optional_fail_closed(self):
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
         module_index = self.read_compat_module("immersiveengineering")
         module = self.read_required(

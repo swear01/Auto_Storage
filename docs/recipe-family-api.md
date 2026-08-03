@@ -117,6 +117,9 @@ current complete identity of every server value that can affect the plan or
 cost. Equal behavior may reuse a token; changed behavior must not. Family
 eligibility and candidate-index shape must remain stable across token changes;
 use a recipe-manager reload rather than this factory when membership changes.
+When a live token value makes cost or plan construction throw
+`IllegalArgumentException`, dynamic resolution yields no usable variant without
+propagating that exception through Craftable refresh or server tick.
 Shared Craftable result caches compare the token map before reuse, so a config
 reload cannot restore outputs built from stale amounts. The supplier runs on
 the authoritative server thread and must be deterministic, side-effect free,

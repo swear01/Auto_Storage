@@ -273,16 +273,35 @@ public final class CreateadditionIntegrationGameTests {
             seedItem(context.core(), Items.IRON_INGOT, 1);
             installStation(context, "rolling_mill", ROLLING_MILL);
             tick(context.core(), (int) work);
-            ResourceLocation missing = createadditionRecipe("rolling/missing_stale_holder");
-            if (craft(context, missing)
-                    || itemCount(context.core(), Items.IRON_INGOT) != 1
-                    || itemCount(context.core(), createadditionItem("iron_rod")) != 0
-                    || context.core().getStationWork(ROLLING_MILL) != work) {
-                helper.fail(
-                        "Create Crafts & Additions stale holder transaction was not an atomic no-op");
-                return;
+            var manager = context.level().getRecipeManager();
+            var originalRecipes = java.util.List.copyOf(manager.getRecipes());
+            var menu = new CraftingTerminalMenu(
+                    931, context.player().getInventory(), context.core());
+            try {
+                if (!menu.handleRecipeRequest(
+                        context.level(), IRON_ROD, 1,
+                        CraftingDestination.NONE, context.player())) {
+                    helper.fail(
+                            "Could not select Create Crafts & Additions iron rod recipe");
+                    return;
+                }
+                manager.replaceRecipes(originalRecipes.stream()
+                        .filter(holder -> !holder.id().equals(IRON_ROD))
+                        .toList());
+                if (menu.handleRecipeRequest(
+                                context.level(), IRON_ROD, 1,
+                                CraftingDestination.STORAGE, context.player())
+                        || itemCount(context.core(), Items.IRON_INGOT) != 1
+                        || itemCount(context.core(), createadditionItem("iron_rod")) != 0
+                        || context.core().getStationWork(ROLLING_MILL) != work) {
+                    helper.fail(
+                            "Create Crafts & Additions stale holder transaction was not an atomic no-op");
+                    return;
+                }
+                helper.succeed();
+            } finally {
+                manager.replaceRecipes(originalRecipes);
             }
-            helper.succeed();
         });
     }
 

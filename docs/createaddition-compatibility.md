@@ -70,7 +70,8 @@ Transaction:
   `CommonConfig.ROLLING_MILL_PROCESSING_DURATION` through
   `dynamicDeterministicResources`, so a live config reload cannot leave a
   stale work cost. Recipe eligibility remains independent of that reloadable
-  value; a non-positive current duration fails closed during cost evaluation.
+  value; a non-positive current duration yields no usable variant during
+  dynamic cost refresh without throwing through menu or server tick.
 
 ### Charging
 
@@ -88,8 +89,9 @@ Logical station:
 - station work equals
   `ceil(energy / min(CommonConfig.TESLA_COIL_RECIPE_CHARGE_RATE, recipe.maxChargeRate))`.
   Eligibility depends only on invariant recipe fields. If a live config reload
-  makes the evaluated rate non-positive, cost evaluation fail-closes with
-  `IllegalArgumentException` instead of dividing by zero or inventing a rate.
+  makes the evaluated rate non-positive, dynamic cost refresh yields no usable
+  variant without throwing through menu or server tick, instead of dividing by
+  zero or inventing a rate.
 
 Transaction:
 
@@ -151,9 +153,9 @@ evidence because accepted Rolling/Charging families are single-output only.
 Processing labels use the JEI family names Rolling / Charging.
 Both overflow cases assert the input stack, full output destination, and
 accumulated station work remain unchanged.
-Latest local matrix evidence after the eligibility／overflow review fix on
-`b4bef5e`: **19,772** recipes, Craftable prepare **22.819 ms**, first/shared
-p95/warm switch **1.092 / 3.816 / 0.435 ms**, storage interaction p95
-**28.735 ms**, shared index retained **0** bytes under the #79 steady-state
-contract, per-menu **116,626** bytes, and report
-`build/reports/terminal-scale-10000.json`.
+Latest local matrix evidence after the Codex review recovery onto Immersive
+Engineering `d8314fc`: **21,162** recipes, Craftable prepare **30.682 ms**,
+first/shared p95/warm switch **0.925 / 0.360 / 0.277 ms**, storage interaction
+p95 **13.128 ms**, shared index retained **4,113,648** bytes ≈ **3.922 MiB**,
+per-menu **116,952** bytes, and report
+`build/reports/terminal-scale-10000.json`. 9 MiB／50 ms／128 KiB gates unchanged.

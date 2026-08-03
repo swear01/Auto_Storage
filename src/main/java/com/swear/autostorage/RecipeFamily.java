@@ -250,16 +250,23 @@ public final class RecipeFamily {
             if (typedPlan == null || level == null) {
                 return RecipeAdapter.super.match(holder, level);
             }
-            TypedRecipePlan plan = typedPlanFor(recipe, level.registryAccess());
-            RecipeAdapterMatch.Contract contract = cacheTypedPlan
-                    ? typedContractCache.computeIfAbsent(
-                            recipe, ignored -> typedContract(recipe, plan))
-                    : typedContract(recipe, plan);
-            return new RecipeAdapterMatch(
-                    this,
-                    holder,
-                    typedCandidateIndex(plan, level.registryAccess()),
-                    contract);
+            try {
+                TypedRecipePlan plan = typedPlanFor(recipe, level.registryAccess());
+                RecipeAdapterMatch.Contract contract = cacheTypedPlan
+                        ? typedContractCache.computeIfAbsent(
+                                recipe, ignored -> typedContract(recipe, plan))
+                        : typedContract(recipe, plan);
+                return new RecipeAdapterMatch(
+                        this,
+                        holder,
+                        typedCandidateIndex(plan, level.registryAccess()),
+                        contract);
+            } catch (IllegalArgumentException exception) {
+                if (cacheTypedPlan) {
+                    throw exception;
+                }
+                return RecipeAdapter.super.match(holder, level);
+            }
         }
 
         private RecipeCandidateIndex typedCandidateIndex(
@@ -301,8 +308,11 @@ public final class RecipeFamily {
                         false,
                         (inputs, level) -> ItemStack.EMPTY);
                 RecipeAdapterMatch.HolderValidator validator = this::supports;
+                RecipeAdapterMatch.Cost pendingCost = cacheTypedPlan
+                        ? costFor(recipe).toInternal(stationDescriptorId)
+                        : RecipeAdapterMatch.Cost.free();
                 return RecipeAdapterMatch.Contract.pendingTyped(
-                        stationDescriptorId, costFor(recipe).toInternal(stationDescriptorId), presentation, validator);
+                        stationDescriptorId, pendingCost, presentation, validator);
             }
             Ingredient ingredient = inputFor(recipe);
             RecipeAdapterMatch.Input adapterInput = RecipeAdapterMatch.Input.of(
@@ -353,16 +363,20 @@ public final class RecipeFamily {
             Recipe<?> recipe = checkedRecipe(holder);
             if (isTyped()) {
                 if (level == null) return List.of();
-                if (typedPlan != null) {
-                    if (cacheTypedPlan && baseContract.typedRecipePlan() != null) {
-                        return List.of(baseContract);
+                try {
+                    if (typedPlan != null) {
+                        if (cacheTypedPlan && baseContract.typedRecipePlan() != null) {
+                            return List.of(baseContract);
+                        }
+                        return List.of(typedContract(
+                                recipe, typedPlanFor(recipe, level.registryAccess())));
                     }
-                    return List.of(typedContract(
-                            recipe, typedPlanFor(recipe, level.registryAccess())));
+                    return typedPlansFor(recipe, availableStacks, level.registryAccess()).stream()
+                            .map(plan -> typedContract(recipe, plan))
+                            .toList();
+                } catch (IllegalArgumentException exception) {
+                    return List.of();
                 }
-                return typedPlansFor(recipe, availableStacks, level.registryAccess()).stream()
-                        .map(plan -> typedContract(recipe, plan))
-                        .toList();
             }
             if (level == null || outputFor(recipe, level.registryAccess()).isEmpty()) return List.of();
             return List.of(baseContract);

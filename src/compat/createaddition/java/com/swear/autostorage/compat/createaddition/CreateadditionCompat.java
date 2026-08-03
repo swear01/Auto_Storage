@@ -170,11 +170,20 @@ public final class CreateadditionCompat {
             Ingredient ingredient,
             HolderLookup.Provider registries
     ) {
-        List<ItemStack> representatives = representatives(ingredient);
-        List<StorageResourceKey> alternatives = itemKeys(representatives, registries);
+        LinkedHashMap<StorageResourceKey, ItemStack> unique = new LinkedHashMap<>();
+        for (ItemStack stack : ingredient.getItems()) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            ItemStack representative = stack.copyWithCount(1);
+            unique.putIfAbsent(
+                    StorageResourceKey.item(representative, registries),
+                    representative);
+        }
+        List<StorageResourceKey> alternatives = List.copyOf(unique.keySet());
         Map<StorageResourceKey, TypedRecipeOutput> remainders = new LinkedHashMap<>();
-        for (int index = 0; index < representatives.size(); index++) {
-            ItemStack stack = representatives.get(index);
+        for (Map.Entry<StorageResourceKey, ItemStack> entry : unique.entrySet()) {
+            ItemStack stack = entry.getValue();
             if (!stack.hasCraftingRemainingItem()) {
                 continue;
             }
@@ -183,7 +192,7 @@ public final class CreateadditionCompat {
                 continue;
             }
             remainders.put(
-                    alternatives.get(index),
+                    entry.getKey(),
                     TypedRecipeOutput.remainder(
                             StorageResourceKey.item(remainder, registries),
                             remainder.getCount()));
@@ -235,16 +244,6 @@ public final class CreateadditionCompat {
         return Arrays.stream(ingredient.getItems())
                 .filter(stack -> !stack.isEmpty())
                 .map(stack -> stack.copyWithCount(1))
-                .distinct()
-                .toList();
-    }
-
-    private static List<StorageResourceKey> itemKeys(
-            List<ItemStack> representatives,
-            HolderLookup.Provider registries
-    ) {
-        return representatives.stream()
-                .map(stack -> StorageResourceKey.item(stack, registries))
                 .toList();
     }
 
