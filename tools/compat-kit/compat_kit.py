@@ -3927,37 +3927,47 @@ def _validate_migration_source_contract(
     contract: dict,
     source_audit: dict,
 ):
-    _validate_audit(source_audit)
+    scanner_format = source_audit.get("scanner_format")
+    _validate_audit(
+        source_audit,
+        allow_legacy_classifier_drift=(
+            scanner_format in LEGACY_SCAN_CACHE_VERSIONS
+        ),
+    )
     if not isinstance(contract, dict):
         raise ValueError("contract must be a JSON object")
-    if source_audit["scanner_format"] != 7:
+    if scanner_format != 7:
         validate_contract(
             contract,
             require_complete=False,
-            source_audit=source_audit,
         )
-        return
-    if "source_recipe_data_sha256" in contract:
-        raise ValueError(
-            "format 7 contract must not bind unverifiable recipe data"
+        if (
+            source_audit["recipe_data"]["digest"]
+            != contract["source_recipe_data_sha256"]
+        ):
+            raise ValueError("contract recipe data does not match source audit")
+    else:
+        if "source_recipe_data_sha256" in contract:
+            raise ValueError(
+                "format 7 contract must not bind unverifiable recipe data"
+            )
+        allowed_keys = CONTRACT_TOP_KEYS - {"source_recipe_data_sha256"}
+        required_keys = allowed_keys - {"matrix"}
+        _unknown_keys(contract, allowed_keys, "format 7 contract")
+        missing = sorted(required_keys - set(contract))
+        if missing:
+            raise ValueError(
+                "format 7 contract is missing keys: " + ", ".join(missing)
+            )
+        normalized = copy.deepcopy(contract)
+        normalized["source_recipe_data_sha256"] = "0" * 64
+        normalized["matrix"] = copy.deepcopy(
+            contract.get(
+                "matrix",
+                _pending_contract_matrix(normalized["target"]["mod_id"]),
+            )
         )
-    allowed_keys = CONTRACT_TOP_KEYS - {"source_recipe_data_sha256"}
-    required_keys = allowed_keys - {"matrix"}
-    _unknown_keys(contract, allowed_keys, "format 7 contract")
-    missing = sorted(required_keys - set(contract))
-    if missing:
-        raise ValueError(
-            "format 7 contract is missing keys: " + ", ".join(missing)
-        )
-    normalized = copy.deepcopy(contract)
-    normalized["source_recipe_data_sha256"] = "0" * 64
-    normalized["matrix"] = copy.deepcopy(
-        contract.get(
-            "matrix",
-            _pending_contract_matrix(normalized["target"]["mod_id"]),
-        )
-    )
-    validate_contract(normalized, require_complete=False)
+        validate_contract(normalized, require_complete=False)
 
     target = contract["target"]
     audit_target = source_audit["target"]

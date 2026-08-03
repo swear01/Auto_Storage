@@ -132,7 +132,10 @@ decisions only when class identity, public signature, class-owned risk evidence,
 ancestry artifact SHA/size inventory, exact ancestry dependency coordinates,
 and recipe-data inventory are unchanged after that rescan. New or changed
 classes remain unresolved; removing an accepted family fails, while removed
-rejected false positives are reported.
+rejected false positives are reported. This explicit contract migration applies
+the same bounded legacy-classifier exception to `--old-audit`; its schema,
+digests, target/artifact identity, contract bindings, and the current
+`--new-audit` remain strictly validated.
 Format-7 contracts predate recipe-data evidence. Only `migrate-contract`, when
 paired with an actual format-7 old audit, accepts that legacy contract's absent
 `source_recipe_data_sha256`; every common family reopens because the missing

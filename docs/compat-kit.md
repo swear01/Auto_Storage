@@ -423,7 +423,11 @@ exact ancestry dependency-coordinate mapping, and the recipe-data inventory
 digest are all unchanged. New or changed classes
 reopen as `needs_decision`. Removing
 an accepted family fails; removed rejected legacy false positives are reported.
-Target or artifact-SHA drift is rejected.
+Target or artifact-SHA drift is rejected. Because this is the explicit companion
+to `migrate-audit`, `--old-audit` may retain a legacy classifier's buckets;
+migration still validates its versioned schema, persisted structural/target
+digests, contract bindings, and exact artifact identity, while `--new-audit`
+must pass the current classifier without exceptions.
 Format-7 contracts do not contain `source_recipe_data_sha256`, because their
 audits predate recipe-data evidence. This omission is accepted only by
 `migrate-contract` when `--old-audit` is actually format 7. All common families

@@ -1,6 +1,6 @@
 # Notes
 
-2026-08-02 Compat Kit legacy classifier migration gotcha：`migrate-audit`若先用current classifier重建legacy format-14至16的candidate buckets，任何正當的classifier修正都會讓舊audit在exact rescan前先以`audit candidates do not match independent structural evidence`失敗，等於沒有可用migration path。Explicit migration只可放寬「用current classifier重判舊bucket」這一項；舊format schema、structural/target digests、target identity及artifact SHA/size仍要完整驗證，之後必須從exact jar/source/ancestry全量current rescan，legacy bucket絕不作新語意授權。
+2026-08-02 Compat Kit legacy classifier migration gotcha：`migrate-audit`或其後的`migrate-contract --old-audit`若先用current classifier重建legacy format-14至16的candidate buckets，任何正當的classifier修正都會讓舊audit在exact rescan／contract comparison前先以`audit candidates do not match independent structural evidence`失敗，等於沒有可用migration path。兩條explicit migration只可放寬「用current classifier重判舊bucket」這一項；舊format schema、structural/target digests、target identity、artifact SHA/size及舊contract bindings仍要完整驗證，fresh `--new-audit`也維持current strict validation；之後只可從exact jar/source/ancestry全量current rescan及逐family evidence comparison取得新證據，legacy bucket絕不作新語意授權。
 
 2026-08-02 Compat Kit abstract BlockEntity classifier gotcha：hierarchy優先序不能只在`concrete` branch處理BlockEntity；abstract `BlockEntity`若名稱含`fluid`等resource term，scanner會先誤列`resource_apis`，而validator由exact public signature重建direct parent後才報`candidate bucket mismatch`。BlockEntity hierarchy必須對所有non-interface class先於name terms分類，且任何classifier語意修正都要提升獨立classifier cache namespace；format-17本次由classifier 3升到4，避免重用修正前的local cache。
 

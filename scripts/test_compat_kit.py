@@ -5162,6 +5162,33 @@ displayName="Sample Machines"
         ])
         self.assertEqual("migrate-contract", args.command)
 
+    def test_migrate_contract_accepts_legacy_candidate_classifier_drift(self):
+        current_audit = self.source_audit()
+        legacy_audit = copy.deepcopy(current_audit)
+        legacy_audit["scanner_format"] = 16
+        fluid_class = "samplemod.api.FluidHandler"
+        fluid_graph = next(
+            entry
+            for entry in legacy_audit["structural_class_graph"]
+            if entry["class"] == fluid_class
+        )
+        fluid_graph["metadata"] = {
+            "access_flags": 0x0400,
+            "super_class": "net.minecraft.world.level.block.entity.BlockEntity",
+            "interfaces": [],
+        }
+        self.refresh_audit_target_class_inventory(legacy_audit)
+        old_contract = self.accepted_contract()
+
+        migrated, actions = self.compat_kit.migrate_contract(
+            old_contract,
+            legacy_audit,
+            current_audit,
+        )
+
+        self.assertEqual(old_contract, migrated)
+        self.assertIn("No unresolved recipe families", actions)
+
     def test_migrate_contract_accepts_format_7_contract_and_reopens_missing_evidence(self):
         current_audit = self.source_audit()
         legacy_audit = copy.deepcopy(current_audit)
