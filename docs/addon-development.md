@@ -496,7 +496,9 @@ reserved package segments instead of emitting uncompilable source.
 When present, descriptor `runtimeArtifactTransforms` is generated from the
 reviewed contract. Exact dependency/SHA/entry validation happens before Gradle
 wires a transformed jar, and the pristine jar never shares an isolated or matrix
-runtime classpath with that output.
+runtime classpath with that output. Global SHA ownership includes every audited
+artifact as well as every transform, and all fixture runtime configurations are
+checked for direct pristine module declarations after dependency setup.
 Before scaffold writes, the generated module ID, entrypoint, source set, and
 fixture are compared with all existing descriptors so normalized Java/Gradle
 identifier collisions fail closed.

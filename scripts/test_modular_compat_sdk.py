@@ -607,6 +607,44 @@ class ModularCompatSdkTests(unittest.TestCase):
         self.assertNotIn("integratedDynamicsRsGameTestClass", build)
         self.assertNotIn("GameTestsAspectsRefinedStorage", build)
 
+    def test_runtime_transform_sha_ownership_includes_audit_artifacts(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("def claimCompatRuntimeArtifactSha =", build)
+        self.assertRegex(
+            build,
+            r"(?s)compatModules\.findAll \{ it\.auditArtifact != null \}\.each"
+            r".*?claimCompatRuntimeArtifactSha\("
+            r".*?spec\.auditArtifact\.sha256"
+            r".*?spec\.auditArtifact\.dependency",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)verifyCompatRuntimeTransformPlanning.*?"
+            r"claimCompatRuntimeArtifactSha.*?mergeCompatRuntimeTransform",
+        )
+
+    def test_runtime_transform_planner_rejects_direct_pristine_dependency(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("def validateCompatRuntimeDependencyNotations =", build)
+        self.assertIn(
+            "Direct compatibility runtime dependency must use its shared exact transform",
+            build,
+        )
+        self.assertRegex(
+            build,
+            r"(?s)sourceSets\.findAll\s*\{\s*"
+            r"it\.name\.endsWith\('Fixture'\)\s*\}"
+            r".*?runtimeOnlyConfigurationName"
+            r".*?validateCompatRuntimeDependencyNotations",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)verifyCompatRuntimeTransformPlanning.*?"
+            r"validateCompatRuntimeDependencyNotations",
+        )
+
     def test_registration_and_reload_lifecycle_are_fail_closed_and_ordered(self):
         addon = (
             ROOT

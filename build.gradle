@@ -248,6 +248,14 @@ compatModules.each { spec ->
 }
 def sharedCompatRuntimeTransforms = [:]
 def sharedCompatRuntimeTransformDependenciesBySha = [:]
+def claimCompatRuntimeArtifactSha = { dependenciesBySha, sha256, dependency ->
+    def existingDependency = dependenciesBySha[sha256]
+    if (existingDependency != null && existingDependency != dependency) {
+        throw new GradleException(
+                'Compatibility runtime artifact SHA is declared by multiple dependencies')
+    }
+    dependenciesBySha[sha256] = dependency
+}
 def mergeCompatRuntimeTransform = { shared, dependenciesBySha, transform ->
     def existing = shared[transform.dependency]
     if (existing != null
@@ -256,14 +264,17 @@ def mergeCompatRuntimeTransform = { shared, dependenciesBySha, transform ->
         throw new GradleException(
                 "Conflicting compatibility runtime artifact transform for ${transform.dependency}")
     }
-    def existingDependency = dependenciesBySha[transform.sha256]
-    if (existingDependency != null
-            && existingDependency != transform.dependency) {
-        throw new GradleException(
-                'Compatibility runtime artifact SHA is declared by multiple dependencies')
-    }
+    claimCompatRuntimeArtifactSha(
+            dependenciesBySha,
+            transform.sha256,
+            transform.dependency)
     shared[transform.dependency] = transform
-    dependenciesBySha[transform.sha256] = transform.dependency
+}
+compatModules.findAll { it.auditArtifact != null }.each { spec ->
+    claimCompatRuntimeArtifactSha(
+            sharedCompatRuntimeTransformDependenciesBySha,
+            spec.auditArtifact.sha256,
+            spec.auditArtifact.dependency)
 }
 compatModules.each { spec ->
     spec.runtimeArtifactTransforms.each { transform ->
@@ -280,6 +291,14 @@ compatModules.each { spec ->
                 dependency)) {
             throw new GradleException(
                     "Compatibility runtime dependency ${dependency} must use its shared exact transform")
+        }
+    }
+}
+def validateCompatRuntimeDependencyNotations = { shared, notations ->
+    notations.toSet().each { notation ->
+        if (shared.containsKey(notation)) {
+            throw new GradleException(
+                    "Direct compatibility runtime dependency must use its shared exact transform: ${notation}")
         }
     }
 }
@@ -316,6 +335,37 @@ def verifyCompatRuntimeTransformPlanning = tasks.register(
                         'Conflicting compatibility runtime artifact transform')) {
                     throw expected
                 }
+            }
+        }
+        def auditDependenciesBySha = [:]
+        claimCompatRuntimeArtifactSha(
+                auditDependenciesBySha,
+                '3' * 64,
+                'example.group:audited-runtime:1.0.0')
+        try {
+            mergeCompatRuntimeTransform(
+                    [:],
+                    auditDependenciesBySha,
+                    exact + [
+                            dependency: 'example.group:aliased-runtime:1.0.0',
+                            sha256   : '3' * 64,
+                    ])
+            throw new GradleException(
+                    'Compatibility runtime transform reused an audited artifact SHA')
+        } catch (GradleException expected) {
+            if (!expected.message.startsWith(
+                    'Compatibility runtime artifact SHA is declared by multiple dependencies')) {
+                throw expected
+            }
+        }
+        try {
+            validateCompatRuntimeDependencyNotations(shared, [dependency])
+            throw new GradleException(
+                    'Direct pristine compatibility runtime dependency was accepted')
+        } catch (GradleException expected) {
+            if (!expected.message.startsWith(
+                    'Direct compatibility runtime dependency must use its shared exact transform')) {
+                throw expected
             }
         }
     }
@@ -1155,6 +1205,21 @@ dependencies {
     prismGuiExtendedCrafting "maven.modrinth:extended-crafting:${extended_crafting_ci_version}"
     prismGuiCucumber "maven.modrinth:cucumber:${cucumber_ci_version}"
 }
+
+def compatFixtureDirectRuntimeDependencies = sourceSets.findAll {
+    it.name.endsWith('Fixture')
+}.collectMany { fixtureSourceSet ->
+    configurations.getByName(
+            fixtureSourceSet.runtimeOnlyConfigurationName)
+            .dependencies
+            .withType(org.gradle.api.artifacts.ExternalModuleDependency)
+            .collect { dependency ->
+                "${dependency.group}:${dependency.name}:${dependency.version}"
+            }
+}
+validateCompatRuntimeDependencyNotations(
+        sharedCompatRuntimeTransforms,
+        compatFixtureDirectRuntimeDependencies)
 
 def ae2CompatAuditAncestryDir =
         layout.buildDirectory.dir("compat-kit/ae2-audit-optional-ancestry")

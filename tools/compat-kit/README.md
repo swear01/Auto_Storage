@@ -407,8 +407,11 @@ entry, then writes a sorted fixed-timestamp stored-entry jar atomically. Pristin
 bytes remain on audit/compile/SHA gates, while only isolated and matrix runtimes
 receive the transformed output. Identical declarations across descriptors share
 one cacheable artifact; conflicting declarations, unsafe/absent paths, duplicate
-artifacts, or pristine + transformed runtime copies fail closed. Independent
-addon scaffolds reject this descriptor-only feature.
+artifacts, or pristine + transformed runtime copies fail closed. SHA ownership is
+seeded from all descriptor audit artifacts before transform planning, and every
+fixture runtime configuration rejects direct module declarations that would
+bypass the shared transformed output. Independent addon scaffolds reject this
+descriptor-only feature.
 Bundled scaffolding also compares derived module IDs and entrypoints with
 existing descriptors before writing. Generated compatibility source sets and
 fixtures share one Gradle namespace, so they must also avoid each other, every

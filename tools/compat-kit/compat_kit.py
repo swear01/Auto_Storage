@@ -246,7 +246,9 @@ TARGET_KEYS = {
     "dependency",
     "repositories",
     "runtime_dependencies",
+    "runtime_artifact_transforms",
 }
+RUNTIME_ARTIFACT_TRANSFORM_KEYS = {"dependency", "sha256", "remove_entries"}
 STATION_KEYS = {"descriptor_id", "category", "variants"}
 VARIANT_KEYS = {"item", "rate", "bounds"}
 RATE_KEYS = {"numerator", "denominator"}
@@ -4423,6 +4425,68 @@ def _validate_contract_matrix(matrix, mod_id: str):
         raise ValueError("contract matrix recipeInventory sha256 must be a SHA-256 digest")
 
 
+def _validate_runtime_artifact_transforms(
+    value,
+    target: dict,
+    source_audit_sha256: str,
+):
+    if not isinstance(value, list) or not value:
+        raise ValueError(
+            "contract target runtime_artifact_transforms must be a non-empty list"
+        )
+    runtime_dependencies = {
+        target.get("dependency"),
+        *target.get("runtime_dependencies", []),
+    }
+    seen_dependencies = set()
+    seen_artifacts = set()
+    for index, transform in enumerate(value):
+        location = f"contract target runtime_artifact_transforms {index}"
+        if not isinstance(transform, dict):
+            raise ValueError(f"{location} must be an object")
+        _unknown_keys(transform, RUNTIME_ARTIFACT_TRANSFORM_KEYS, location)
+        if set(transform) != RUNTIME_ARTIFACT_TRANSFORM_KEYS:
+            raise ValueError(
+                f"{location} requires dependency, sha256, and remove_entries"
+            )
+        dependency = transform["dependency"]
+        _validate_dependency_coordinate(dependency, f"{location} dependency")
+        if dependency not in runtime_dependencies:
+            raise ValueError(
+                f"{location} dependency must be an exact runtime dependency"
+            )
+        if dependency in seen_dependencies:
+            raise ValueError(
+                "contract target runtime_artifact_transforms repeat a dependency"
+            )
+        seen_dependencies.add(dependency)
+        sha256 = transform["sha256"]
+        if not isinstance(sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", sha256):
+            raise ValueError(f"{location} sha256 must be a SHA-256 digest")
+        if sha256 in seen_artifacts:
+            raise ValueError(
+                "contract target runtime_artifact_transforms repeat an artifact"
+            )
+        seen_artifacts.add(sha256)
+        if dependency == target.get("dependency") and sha256 != source_audit_sha256:
+            raise ValueError(f"{location} target SHA must match the source audit")
+        if dependency != target.get("dependency") and sha256 == source_audit_sha256:
+            raise ValueError(
+                f"{location} repeats the pristine target artifact under another dependency"
+            )
+        entries = transform["remove_entries"]
+        _validate_unique_strings(
+            entries,
+            f"{location} remove_entries",
+            allow_empty=False,
+        )
+        for entry_index, entry in enumerate(entries):
+            _validate_exact_zip_entry_path(
+                entry,
+                f"{location} remove_entries {entry_index}",
+            )
+
+
 def _validate_terms(value, location: str):
     if not isinstance(value, list):
         raise ValueError(f"{location} must be a list")
@@ -4647,6 +4711,12 @@ def validate_contract(
                 dependency,
                 f"contract target runtime_dependencies {index}",
             )
+    if "runtime_artifact_transforms" in target:
+        _validate_runtime_artifact_transforms(
+            target["runtime_artifact_transforms"],
+            target,
+            source_audit_sha256,
+        )
     unresolved = []
     seen_ids = set()
     seen_classes = set()
@@ -4962,6 +5032,10 @@ def _bundled_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
         },
         "matrix": copy.deepcopy(contract["matrix"]),
     }
+    if "runtime_artifact_transforms" in target:
+        descriptor["runtimeArtifactTransforms"] = copy.deepcopy(
+            target["runtime_artifact_transforms"]
+        )
     module = f"""package {module_package};
 
 import com.swear.autostorage.MachineDescriptor;
@@ -5837,6 +5911,10 @@ def _validate_bundled_verification(contract: dict):
 
 def _validate_addon_verification(contract: dict):
     verification = contract["verification"]
+    if contract["target"].get("runtime_artifact_transforms"):
+        raise ValueError(
+            "runtime_artifact_transforms are supported only by bundled descriptor fixtures"
+        )
     if (
         verification["fixture"] != "main"
         or verification["game_test_task"] != "runGameTestServer"
@@ -9738,6 +9816,11 @@ def _build_parser() -> argparse.ArgumentParser:
     normalize = subparsers.add_parser("normalize-jar")
     normalize.add_argument("source")
     normalize.add_argument("output")
+    transform_runtime = subparsers.add_parser("transform-runtime-artifact")
+    transform_runtime.add_argument("source")
+    transform_runtime.add_argument("output")
+    transform_runtime.add_argument("--expected-sha256", required=True)
+    transform_runtime.add_argument("--remove-entry", action="append", required=True)
     return parser
 
 
@@ -9889,6 +9972,13 @@ def main(argv=None) -> int:
             publish_archive(args.output, args.version)
         elif args.command == "normalize-jar":
             normalize_jar(args.source, args.output)
+        elif args.command == "transform-runtime-artifact":
+            transform_runtime_artifact(
+                args.source,
+                args.output,
+                expected_sha256=args.expected_sha256,
+                remove_entries=args.remove_entry,
+            )
         else:
             parser.error(f"unsupported command: {args.command}")
     except (OSError, RuntimeError, ValueError, zipfile.BadZipFile) as error:

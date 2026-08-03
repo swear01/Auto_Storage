@@ -707,7 +707,13 @@ non-transitively, runs `transform-runtime-artifact` with the reviewed SHA and
 entries, and wires the single shared output only into the affected fixture and
 matrix runtime classpaths. The task has declared inputs/outputs, deterministic
 stored-entry ZIP bytes, and Gradle output caching; repeated unchanged runs are
-up-to-date rather than rewriting the jar.
+up-to-date rather than rewriting the jar. Global runtime-artifact SHA ownership
+is seeded from every descriptor `auditArtifact` before transforms are merged, so
+another coordinate cannot claim the same pristine bytes. After dependency
+declarations, every fixture runtime configuration is also checked for a direct
+external-module declaration of a transformed coordinate; fixed
+`*FixtureRuntimeOnly` entries cannot bypass the shared planner and reintroduce
+the pristine jar.
 
 External output is an ordinary NeoForge project with the Gradle wrapper,
 compile-only Auto Storage API dependency, reviewed target repositories and
