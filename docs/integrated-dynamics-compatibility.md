@@ -12,12 +12,21 @@ Integrated Dynamics, Cyclops Core, and Common Capabilities.
 - source commit: `b232bc068c31b7ad98e437775e15b76b98dda6f7`;
 - jar SHA-256:
   `7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2`;
-- audit: `compat/audits/integrateddynamics/1.33.3.json`;
+- audit: `compat/audits/integrateddynamics/1.33.3.json` (scanner format 17;
+  1,475 target classes; 157 matched source files; 10 structural recipe classes;
+  18 reachable ancestry artifacts; 2 exact ancestry coordinates);
 - reviewed contract: `compat/contracts/integrateddynamics.json`.
 
+The committed audit uses the same normalized NeoForge/Minecraft binary-pipeline
+platform jar as AE2 (`2382ea29…eb5f`). Exact Modrinth companions Cyclops Core
+`vEjxRv40` and Common Capabilities `c50bCinZ` are the audited compile/runtime
+coordinates. Complete Compat Kit verification reopens the exact target jar and
+all eighteen ancestry jars.
+
 The published jar embeds shadowed `integrateddynamicscompat` as a second
-NeoForge `[[mods]]` entry. Compat Kit scan therefore requires
-`--mod-id integrateddynamics` while still hashing the full representative jar.
+NeoForge `[[mods]]` entry. Compat Kit scan / migration therefore selects
+`--mod-id integrateddynamics` (or the legacy audit target mod ID) while still
+hashing the full representative jar.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Integrated Dynamics version on players.
@@ -55,6 +64,10 @@ item outputs below `1.0F` fail closed.
 - Logic-programmer recipe value types, operators, JEI/REI helpers, and network
   recipe-handler operators.
 
+Format-17 keeps ten structural recipe classes. The seven non-accepted classes
+above remain rejected in the reviewed contract; legacy format-7 name-shaped
+helpers are no longer contract families.
+
 ## Declarative matrix and isolated evidence
 
 The Integrated Dynamics descriptor owns the isolated `integrateddynamics`
@@ -74,3 +87,6 @@ Eight GameTests cover registration/manual-Squeezer exclusion, Drying Basin
 fluid/duration commit, Mechanical Squeezer item/fluid/FE/work commit,
 missing-ingredient and full-destination atomic no-ops, `Long.MAX_VALUE` energy,
 chance-output rejection, and loaded mechanical energy config.
+
+Full Compat Kit CLI `verify` for this module must also pass with the committed
+format-17 audit, exact jar, and staged ancestry classpath.
