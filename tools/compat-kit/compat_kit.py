@@ -246,7 +246,9 @@ TARGET_KEYS = {
     "dependency",
     "repositories",
     "runtime_dependencies",
+    "runtime_artifact_transforms",
 }
+RUNTIME_ARTIFACT_TRANSFORM_KEYS = {"sha256", "remove_entries"}
 STATION_KEYS = {"descriptor_id", "category", "variants"}
 VARIANT_KEYS = {"item", "rate", "bounds"}
 RATE_KEYS = {"numerator", "denominator"}
@@ -506,6 +508,135 @@ def normalize_jar(source, output) -> Path:
             source_sha256,
             source_size,
             "source jar",
+        )
+        os.replace(temporary, output_path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return output_path
+
+
+def _validate_exact_zip_entry_path(entry: str, location: str):
+    if not isinstance(entry, str) or not entry:
+        raise ValueError(f"{location} must be a non-empty exact ZIP entry path")
+    if (
+        entry.startswith("/")
+        or entry.endswith("/")
+        or "\\" in entry
+        or re.search(r"[\x00-\x1f\x7f]", entry) is not None
+        or any(part in ("", ".", "..") for part in entry.split("/"))
+        or any(character in entry for character in "*?[]")
+    ):
+        raise ValueError(f"{location} must be a safe exact ZIP entry path")
+
+
+def transform_runtime_artifact(
+    source,
+    output,
+    *,
+    expected_sha256: str,
+    remove_entries,
+) -> Path:
+    if not isinstance(expected_sha256, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", expected_sha256
+    ):
+        raise ValueError("runtime artifact expected SHA must be a SHA-256 digest")
+    if not isinstance(remove_entries, list) or not remove_entries:
+        raise ValueError("runtime artifact remove entries must be a non-empty list")
+    if len(set(remove_entries)) != len(remove_entries):
+        raise ValueError("runtime artifact remove entries must be unique")
+    for index, entry in enumerate(remove_entries):
+        _validate_exact_zip_entry_path(
+            entry,
+            f"runtime artifact remove entry {index}",
+        )
+
+    unresolved_source = Path(source)
+    if unresolved_source.is_symlink():
+        raise ValueError(f"runtime artifact source is a symlink: {source}")
+    source_path = unresolved_source.resolve()
+    if not source_path.is_file():
+        raise ValueError(f"runtime artifact source does not exist: {source}")
+    source_size = source_path.stat().st_size
+    source_sha256 = _sha256_file(source_path)
+    if source_sha256 != expected_sha256:
+        raise ValueError(
+            "runtime artifact SHA-256 mismatch: expected "
+            f"{expected_sha256}, got {source_sha256}"
+        )
+
+    output_path = Path(output).absolute()
+    if output_path.is_symlink():
+        raise ValueError(f"runtime artifact output is a symlink: {output}")
+    if output_path.resolve() == source_path:
+        raise ValueError("runtime artifact output must differ from source")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_name(f".{output_path.name}.tmp-{os.getpid()}")
+    temporary.unlink(missing_ok=True)
+    try:
+        with zipfile.ZipFile(source_path) as source_archive:
+            _validate_archive(source_path, source_archive)
+            entries = source_archive.infolist()
+            names = [entry.filename for entry in entries]
+            if len(set(names)) != len(names):
+                raise ValueError("runtime artifact repeats a ZIP entry")
+            for name in names:
+                logical_name = name[:-1] if name.endswith("/") else name
+                if (
+                    not logical_name
+                    or logical_name.startswith("/")
+                    or "\\" in logical_name
+                    or any(
+                        part in ("", ".", "..")
+                        for part in logical_name.split("/")
+                    )
+                ):
+                    raise ValueError(
+                        "runtime artifact has a non-canonical ZIP entry path"
+                    )
+            missing = sorted(set(remove_entries) - set(names))
+            if missing:
+                raise ValueError(
+                    "runtime artifact is missing exact ZIP entries: "
+                    + ", ".join(missing)
+                )
+            removed = set(remove_entries)
+            with zipfile.ZipFile(
+                temporary,
+                "w",
+                compression=zipfile.ZIP_STORED,
+                allowZip64=True,
+            ) as transformed_archive:
+                for entry in sorted(entries, key=lambda item: item.filename):
+                    if entry.filename in removed:
+                        continue
+                    info = zipfile.ZipInfo(
+                        entry.filename,
+                        (1980, 1, 1, 0, 0, 0),
+                    )
+                    info.compress_type = zipfile.ZIP_STORED
+                    info.create_system = 3
+                    info.external_attr = (
+                        (0o40755 if entry.is_dir() else 0o100644) << 16
+                    )
+                    if entry.is_dir():
+                        transformed_archive.writestr(info, b"")
+                        continue
+                    with source_archive.open(entry) as input_stream:
+                        with transformed_archive.open(
+                            info,
+                            "w",
+                            force_zip64=True,
+                        ) as output_stream:
+                            shutil.copyfileobj(
+                                input_stream,
+                                output_stream,
+                                length=64 * 1024,
+                            )
+        _require_unchanged_artifact(
+            source_path,
+            source_sha256,
+            source_size,
+            "runtime artifact",
         )
         os.replace(temporary, output_path)
     finally:
@@ -4294,6 +4425,59 @@ def _validate_contract_matrix(matrix, mod_id: str):
         raise ValueError("contract matrix recipeInventory sha256 must be a SHA-256 digest")
 
 
+def _validate_runtime_artifact_transforms(
+    value,
+    target: dict,
+    source_audit_sha256: str,
+):
+    if not isinstance(value, dict) or not value:
+        raise ValueError(
+            "contract target runtime_artifact_transforms must be a non-empty object"
+        )
+    if len(value) != 1:
+        raise ValueError(
+            "contract target runtime_artifact_transforms must own exactly one artifact"
+        )
+    runtime_dependencies = {
+        target.get("dependency"),
+        *target.get("runtime_dependencies", []),
+    }
+    for dependency, transform in sorted(value.items()):
+        location = f"contract target runtime_artifact_transforms {dependency!r}"
+        _validate_dependency_coordinate(dependency, f"{location} dependency")
+        if not isinstance(transform, dict):
+            raise ValueError(f"{location} must be an object")
+        _unknown_keys(transform, RUNTIME_ARTIFACT_TRANSFORM_KEYS, location)
+        if set(transform) != RUNTIME_ARTIFACT_TRANSFORM_KEYS:
+            raise ValueError(
+                f"{location} requires sha256 and remove_entries"
+            )
+        if dependency not in runtime_dependencies:
+            raise ValueError(
+                f"{location} dependency must be an exact runtime dependency"
+            )
+        sha256 = transform["sha256"]
+        if not isinstance(sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", sha256):
+            raise ValueError(f"{location} sha256 must be a SHA-256 digest")
+        if dependency == target.get("dependency") and sha256 != source_audit_sha256:
+            raise ValueError(f"{location} target SHA must match the source audit")
+        if dependency != target.get("dependency") and sha256 == source_audit_sha256:
+            raise ValueError(
+                f"{location} repeats the pristine target artifact under another dependency"
+            )
+        entries = transform["remove_entries"]
+        _validate_unique_strings(
+            entries,
+            f"{location} remove_entries",
+            allow_empty=False,
+        )
+        for entry_index, entry in enumerate(entries):
+            _validate_exact_zip_entry_path(
+                entry,
+                f"{location} remove_entries {entry_index}",
+            )
+
+
 def _validate_terms(value, location: str):
     if not isinstance(value, list):
         raise ValueError(f"{location} must be a list")
@@ -4518,6 +4702,16 @@ def validate_contract(
                 dependency,
                 f"contract target runtime_dependencies {index}",
             )
+        if target.get("dependency") in target["runtime_dependencies"]:
+            raise ValueError(
+                "contract target runtime_dependencies must not repeat target dependency"
+            )
+    if "runtime_artifact_transforms" in target:
+        _validate_runtime_artifact_transforms(
+            target["runtime_artifact_transforms"],
+            target,
+            source_audit_sha256,
+        )
     unresolved = []
     seen_ids = set()
     seen_classes = set()
@@ -4833,6 +5027,16 @@ def _bundled_files(contract: dict, source_audit: dict) -> dict[str, bytes]:
         },
         "matrix": copy.deepcopy(contract["matrix"]),
     }
+    if "runtime_artifact_transforms" in target:
+        descriptor["runtimeArtifactTransforms"] = [
+            {
+                "dependency": dependency,
+                **copy.deepcopy(transform),
+            }
+            for dependency, transform in sorted(
+                target["runtime_artifact_transforms"].items()
+            )
+        ]
     module = f"""package {module_package};
 
 import com.swear.autostorage.MachineDescriptor;
@@ -5708,6 +5912,10 @@ def _validate_bundled_verification(contract: dict):
 
 def _validate_addon_verification(contract: dict):
     verification = contract["verification"]
+    if contract["target"].get("runtime_artifact_transforms"):
+        raise ValueError(
+            "runtime_artifact_transforms are supported only by bundled descriptor fixtures"
+        )
     if (
         verification["fixture"] != "main"
         or verification["game_test_task"] != "runGameTestServer"
@@ -9609,6 +9817,11 @@ def _build_parser() -> argparse.ArgumentParser:
     normalize = subparsers.add_parser("normalize-jar")
     normalize.add_argument("source")
     normalize.add_argument("output")
+    transform_runtime = subparsers.add_parser("transform-runtime-artifact")
+    transform_runtime.add_argument("source")
+    transform_runtime.add_argument("output")
+    transform_runtime.add_argument("--expected-sha256", required=True)
+    transform_runtime.add_argument("--remove-entry", action="append", required=True)
     return parser
 
 
@@ -9760,6 +9973,13 @@ def main(argv=None) -> int:
             publish_archive(args.output, args.version)
         elif args.command == "normalize-jar":
             normalize_jar(args.source, args.output)
+        elif args.command == "transform-runtime-artifact":
+            transform_runtime_artifact(
+                args.source,
+                args.output,
+                expected_sha256=args.expected_sha256,
+                remove_entries=args.remove_entry,
+            )
         else:
             parser.error(f"unsupported command: {args.command}")
     except (OSError, RuntimeError, ValueError, zipfile.BadZipFile) as error:

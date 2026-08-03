@@ -391,7 +391,9 @@ task is derived from the same fixture name (`evilCraftFixture` becomes
 `runEvilCraftGameTestServer`) and mismatches fail before materialization. The
 target mod ID must also produce a non-reserved Java package segment. An audited
 descriptor must use the audited target coordinate as its primary compile
-dependency and include that exact coordinate in runtime dependencies. Every
+dependency and include that exact coordinate in runtime dependencies. Contract
+`runtime_dependencies` contains only additional artifacts and must not repeat
+that primary coordinate. Every
 bundled descriptor, audited or not, must declare a non-empty
 `runtimeDependencies` list containing its primary compile dependency so isolated
 and aggregate fixtures cannot run without their target mod. GameTest
@@ -399,6 +401,23 @@ evidence markers must occur between the annotated method's braces; a marker
 that appears only in its declaration is not execution evidence. The published
 archive includes its own Gradle wrapper template, so an extracted copy can
 scaffold an addon without an Auto Storage checkout.
+Bundled contracts may own exact `runtime_artifact_transforms`; generated
+descriptors copy them as `runtimeArtifactTransforms`. The contract field is an
+object keyed by declared runtime dependency, so duplicate coordinates are not a
+representable schema value. Each contract owns exactly one transform, which also
+makes artifact-SHA aliasing unrepresentable; its value binds the pristine SHA-256 and a literal
+non-empty unique ZIP entry list. `transform-runtime-artifact` verifies the pristine bytes and every
+entry, then writes a sorted fixed-timestamp stored-entry jar atomically. Pristine
+bytes remain on audit/compile/SHA gates, while only isolated and matrix runtimes
+receive the transformed output. Identical declarations across descriptors share
+one cacheable artifact; conflicting declarations, unsafe/absent paths, duplicate
+artifacts, or pristine + transformed runtime copies fail closed. SHA ownership is
+seeded from all descriptor audit artifacts before transform planning. Direct
+runtime-only declarations are checked early; before each affected run, the
+complete resolved source-set runtime classpath is hashed to reject pristine or
+duplicate transformed bytes regardless of implementation, inheritance,
+transitivity, or file-dependency origin. Independent addon scaffolds reject this
+descriptor-only feature.
 Bundled scaffolding also compares derived module IDs and entrypoints with
 existing descriptors before writing. Generated compatibility source sets and
 fixtures share one Gradle namespace, so they must also avoid each other, every

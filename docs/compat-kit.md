@@ -620,7 +620,8 @@ SHA gate. Fixed Maven Central, BlameJared,
 and release-Ivy filters reserve Patchouli and Auto Storage for their owning
 repositories. The generator never guesses, sorts, or otherwise changes target
 repository precedence from the dependency coordinate. Required
-target-side runtime artifacts belong in `target.runtime_dependencies`; bundled
+target-side runtime artifacts belong in `target.runtime_dependencies`; this
+additional list must not repeat the primary `target.dependency`. Bundled
 descriptors and external addon builds copy the exact reviewed list instead of
 depending on transitive metadata or hand edits. Target and explicit runtime
 dependencies are non-transitive; every required companion must therefore appear
@@ -632,6 +633,25 @@ filters are serialized as escaped Groovy literals, so `$`, quotes, and
 backslashes cannot alter the reviewed build input. Target and runtime
 dependencies must use exact `group:name:version` Maven coordinates; malformed
 or control-character-bearing values are rejected before scaffolding.
+
+A bundled fixture may declare `target.runtime_artifact_transforms` only when an
+exact reviewed runtime artifact embeds unrelated test-only ZIP entries that the
+loader classloads before fixture namespace filtering. The field is an object
+keyed by existing runtime dependency; each value binds its pristine SHA-256 and
+a non-empty unique list of literal `remove_entries`. Dependency-keyed object
+shape plus an exact one-property bound prevents duplicate coordinate or artifact
+plans from passing the published schema. Multiple bundled descriptors may still
+share one identical transformed artifact.
+Absolute/traversal/directory paths, wildcards, control
+characters, absent entries, duplicate ZIP entries, unexpected artifacts, and SHA
+drift fail closed. Audit, compile, and artifact verification continue to use the
+pristine jar; only the descriptor-owned isolated fixture and aggregate matrix use
+the deterministic transformed jar. Identical dependency + SHA + entry sets across
+multiple descriptors share one cacheable output, while a conflicting SHA or entry
+set for the same dependency is rejected before runtime resolution. A transformed
+dependency cannot also appear untransformed in another descriptor's matrix
+runtime. This field is intentionally rejected for independent-addon scaffolds,
+which do not consume the repository's bundled descriptor runtime.
 
 ### 4. Scaffold a RED integration
 
@@ -686,6 +706,21 @@ module GameTest resolve exactly one target jar and reject a SHA different from
 the reviewed audit. For an audited descriptor, that same coordinate must be the
 primary compile dependency and must also appear unchanged in the explicit
 runtime dependencies. No central compatibility switch is added.
+If the contract owns a runtime transform, the generated descriptor also owns the
+exact `runtimeArtifactTransforms` block. Gradle resolves the pristine artifact
+non-transitively, runs `transform-runtime-artifact` with the reviewed SHA and
+entries, and wires the single shared output only into the affected fixture and
+matrix runtime classpaths. The task has declared inputs/outputs, deterministic
+stored-entry ZIP bytes, and Gradle output caching; repeated unchanged runs are
+up-to-date rather than rewriting the jar. Global runtime-artifact SHA ownership
+is seeded from every descriptor `auditArtifact` before transforms are merged, so
+another coordinate cannot claim the same pristine bytes. After dependency
+declarations, every fixture runtime configuration is also checked for a direct
+external-module declaration of a transformed coordinate. Before each affected
+isolated or matrix run, Gradle then hashes the complete resolved source-set
+runtime classpath and requires exactly one transformed output with no pristine
+SHA. This includes implementation, inherited, transitive, and file dependencies,
+so fixed `*FixtureRuntimeOnly` entries are not the only guarded path.
 
 External output is an ordinary NeoForge project with the Gradle wrapper,
 compile-only Auto Storage API dependency, reviewed target repositories and

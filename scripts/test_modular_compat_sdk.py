@@ -572,6 +572,107 @@ class ModularCompatSdkTests(unittest.TestCase):
         ):
             self.assertNotIn(fixture_id, build)
 
+    def test_descriptor_runtime_transforms_are_shared_exact_and_runtime_only(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("descriptor.runtimeArtifactTransforms", build)
+        self.assertIn("sharedCompatRuntimeTransforms", build)
+        self.assertIn(
+            "Conflicting compatibility runtime artifact transform",
+            build,
+        )
+        self.assertIn(
+            "Compatibility runtime artifact SHA is declared by multiple dependencies",
+            build,
+        )
+        self.assertIn('"transform-runtime-artifact"', build)
+        self.assertIn('"--expected-sha256"', build)
+        self.assertIn('"--remove-entry"', build)
+        self.assertIn("outputs.cacheIf", build)
+        self.assertIn("runtimeTransformOutputs", build)
+        self.assertIn("builtBy(runtimeTransformTasks", build)
+        self.assertIn("mergeCompatRuntimeTransform", build)
+        self.assertIn("verifyCompatRuntimeTransformPlanning", build)
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\('check'\).*?"
+            r"dependsOn verifyCompatRuntimeTransformPlanning",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)spec\.runtimeDependencies\.each \{ notation ->.*?"
+            r"if \(spec\.runtimeArtifactTransformsByDependency\.containsKey\(notation\)\)"
+            r".*?return",
+        )
+        self.assertNotIn("integratedDynamicsRsGameTestClass", build)
+        self.assertNotIn("GameTestsAspectsRefinedStorage", build)
+
+    def test_runtime_transform_sha_ownership_includes_audit_artifacts(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("def claimCompatRuntimeArtifactSha =", build)
+        self.assertRegex(
+            build,
+            r"(?s)compatModules\.findAll \{ it\.auditArtifact != null \}\.each"
+            r".*?claimCompatRuntimeArtifactSha\("
+            r".*?spec\.auditArtifact\.sha256"
+            r".*?spec\.auditArtifact\.dependency",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)verifyCompatRuntimeTransformPlanning.*?"
+            r"claimCompatRuntimeArtifactSha.*?mergeCompatRuntimeTransform",
+        )
+
+    def test_runtime_transform_planner_rejects_direct_pristine_dependency(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("def validateCompatRuntimeDependencyNotations =", build)
+        self.assertIn(
+            "Direct compatibility runtime dependency must use its shared exact transform",
+            build,
+        )
+        self.assertRegex(
+            build,
+            r"(?s)sourceSets\.findAll\s*\{\s*"
+            r"it\.name\.endsWith\('Fixture'\)\s*\}"
+            r".*?runtimeOnlyConfigurationName"
+            r".*?validateCompatRuntimeDependencyNotations",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)verifyCompatRuntimeTransformPlanning.*?"
+            r"validateCompatRuntimeDependencyNotations",
+        )
+
+    def test_runtime_transform_planner_validates_resolved_runtime_classpaths(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("class CompatRuntimeClasspathValidator", build)
+        self.assertIn("Pristine compatibility runtime artifact is present", build)
+        self.assertIn("Transformed compatibility runtime artifact is missing", build)
+        self.assertRegex(
+            build,
+            r"(?s)registerCompatRuntimeIsolationVerification.*?"
+            r"inputs\.files\(fixtureSourceSet\.runtimeClasspath\).*?"
+            r"CompatRuntimeClasspathValidator\.validate",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)tasks\.named\(spec\.runTask\).*?dependsOn runtimeIsolationTask",
+        )
+        self.assertRegex(
+            build,
+            r"(?s)verifyCompatRuntimeTransformPlanning.*?"
+            r"CompatRuntimeClasspathValidator\.validate",
+        )
+
+    def test_runtime_transform_entry_character_validation_uses_character_code(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("character.charAt(0)", build)
+        self.assertNotIn("((int) character)", build)
+
     def test_registration_and_reload_lifecycle_are_fail_closed_and_ordered(self):
         addon = (
             ROOT

@@ -2035,6 +2035,104 @@ class CompatKitAuditTests(unittest.TestCase):
                 self.root / "normalized-traversal.jar",
             )
 
+    def test_transform_runtime_artifact_removes_exact_entries_deterministically(self):
+        retained = "samplemod/Runtime.class"
+        removed = "samplemod/gametest/ForeignGameTests.class"
+        sources = []
+        for index, names in enumerate(((retained, removed), (removed, retained))):
+            source = self.root / f"runtime-source-{index}.jar"
+            with zipfile.ZipFile(source, "w") as archive:
+                for name in names:
+                    info = zipfile.ZipInfo(name, (2020 + index, 1, 2, 3, 4, 6))
+                    info.compress_type = (
+                        zipfile.ZIP_DEFLATED if index == 0 else zipfile.ZIP_STORED
+                    )
+                    archive.writestr(info, name.encode())
+            sources.append(source)
+
+        outputs = [
+            self.root / "runtime-transformed-0.jar",
+            self.root / "runtime-transformed-1.jar",
+        ]
+        for source, output in zip(sources, outputs, strict=True):
+            self.compat_kit.transform_runtime_artifact(
+                source,
+                output,
+                expected_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+                remove_entries=[removed],
+            )
+
+        self.assertEqual(outputs[0].read_bytes(), outputs[1].read_bytes())
+        with zipfile.ZipFile(outputs[0]) as archive:
+            self.assertEqual([retained], archive.namelist())
+
+    def test_transform_runtime_artifact_fails_closed_on_sha_or_entry_drift(self):
+        source = self.root / "runtime-drift.jar"
+        with zipfile.ZipFile(source, "w") as archive:
+            archive.writestr("samplemod/Runtime.class", b"runtime")
+        output = self.root / "runtime-drift-output.jar"
+
+        with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+            self.compat_kit.transform_runtime_artifact(
+                source,
+                output,
+                expected_sha256="0" * 64,
+                remove_entries=["samplemod/Runtime.class"],
+            )
+        self.assertFalse(output.exists())
+
+        with self.assertRaisesRegex(ValueError, "missing exact ZIP entries"):
+            self.compat_kit.transform_runtime_artifact(
+                source,
+                output,
+                expected_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+                remove_entries=["samplemod/Missing.class"],
+            )
+        self.assertFalse(output.exists())
+
+    def test_transform_runtime_artifact_rejects_unsafe_or_duplicate_entries(self):
+        source = self.root / "runtime-paths.jar"
+        with zipfile.ZipFile(source, "w") as archive:
+            archive.writestr("samplemod/Runtime.class", b"runtime")
+        digest = hashlib.sha256(source.read_bytes()).hexdigest()
+        invalid = (
+            ["../Runtime.class"],
+            ["samplemod/*.class"],
+            ["samplemod/gametest/"],
+            ["samplemod/Foreign\nGameTests.class"],
+            ["samplemod/Runtime.class", "samplemod/Runtime.class"],
+        )
+
+        for entries in invalid:
+            with self.subTest(entries=entries):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "safe exact ZIP entry path|must be unique",
+                ):
+                    self.compat_kit.transform_runtime_artifact(
+                        source,
+                        self.root / "invalid-runtime-output.jar",
+                        expected_sha256=digest,
+                        remove_entries=entries,
+                    )
+
+    def test_transform_runtime_artifact_cli_requires_exact_transform_inputs(self):
+        args = self.compat_kit._build_parser().parse_args([
+            "transform-runtime-artifact",
+            "source.jar",
+            "output.jar",
+            "--expected-sha256",
+            "a" * 64,
+            "--remove-entry",
+            "samplemod/gametest/ForeignGameTests.class",
+        ])
+
+        self.assertEqual("transform-runtime-artifact", args.command)
+        self.assertEqual(
+            ["samplemod/gametest/ForeignGameTests.class"],
+            args.remove_entry,
+        )
+
     def test_scan_allows_bounded_large_private_bytecode(self):
         large_private_bytecode = (
             "private void generated() { "
@@ -7175,6 +7273,165 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
 
         self.assertEqual(reviewed_matrix, descriptor["matrix"])
 
+    def test_bundled_descriptor_preserves_reviewed_runtime_artifact_transforms(self):
+        contract = self.accepted_contract()
+        dependency = contract["target"]["dependency"]
+        transform = {
+            "sha256": contract["source_audit_sha256"],
+            "remove_entries": ["samplemod/gametest/ForeignGameTests.class"],
+        }
+        contract["target"]["runtime_artifact_transforms"] = {
+            dependency: transform,
+        }
+
+        self.compat_kit.validate_contract(
+            contract,
+            require_complete=True,
+            source_audit=self.source_audit(),
+            source_artifact=self.jar,
+        )
+        descriptor = json.loads(
+            self.compat_kit._bundled_files(contract, self.source_audit())[
+                "src/compat/samplemod/compat-module.json"
+            ]
+        )
+
+        self.assertEqual(
+            [{"dependency": dependency, **transform}],
+            descriptor["runtimeArtifactTransforms"],
+        )
+
+    def test_contract_runtime_artifact_transforms_fail_closed(self):
+        base = self.accepted_contract()
+        dependency = base["target"]["dependency"]
+        digest = base["source_audit_sha256"]
+        cases = (
+            (
+                {dependency: {"sha256": digest, "remove_entries": []}},
+                "non-empty list",
+            ),
+            (
+                {
+                    dependency: {
+                        "sha256": digest,
+                        "remove_entries": ["../ForeignGameTests.class"],
+                    }
+                },
+                "safe exact ZIP entry path",
+            ),
+            (
+                {
+                    dependency: {
+                        "sha256": digest,
+                        "remove_entries": ["samplemod/*.class"],
+                    }
+                },
+                "safe exact ZIP entry path",
+            ),
+            (
+                {
+                    dependency: {
+                        "sha256": "0" * 64,
+                        "remove_entries": ["samplemod/ForeignGameTests.class"],
+                    }
+                },
+                "target SHA must match",
+            ),
+            (
+                {
+                    "com.example:missing-runtime:1.0.0": {
+                        "sha256": digest,
+                        "remove_entries": ["samplemod/ForeignGameTests.class"],
+                    }
+                },
+                "exact runtime dependency",
+            ),
+        )
+
+        for transforms, message in cases:
+            with self.subTest(message=message):
+                contract = copy.deepcopy(base)
+                contract["target"]["runtime_artifact_transforms"] = transforms
+                with self.assertRaisesRegex(ValueError, message):
+                    self.compat_kit.validate_contract(
+                        contract,
+                        require_complete=True,
+                        source_audit=self.source_audit(),
+                        source_artifact=self.jar,
+                    )
+
+        duplicate_artifact = copy.deepcopy(base)
+        duplicate_artifact["target"]["runtime_dependencies"] = [
+            "com.example:aliased-runtime:1.0.0"
+        ]
+        duplicate_artifact["target"]["runtime_artifact_transforms"] = {
+            "com.example:aliased-runtime:1.0.0": {
+                "sha256": digest,
+                "remove_entries": ["samplemod/ForeignGameTests.class"],
+            }
+        }
+        with self.assertRaisesRegex(ValueError, "repeats the pristine target artifact"):
+            self.compat_kit.validate_contract(
+                duplicate_artifact,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
+        legacy_array = copy.deepcopy(base)
+        legacy_array["target"]["runtime_artifact_transforms"] = [{
+            "dependency": dependency,
+            "sha256": digest,
+            "remove_entries": ["samplemod/ForeignGameTests.class"],
+        }]
+        with self.assertRaisesRegex(ValueError, "non-empty object"):
+            self.compat_kit.validate_contract(
+                legacy_array,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
+        multiple_artifacts = copy.deepcopy(base)
+        multiple_artifacts["target"]["runtime_dependencies"] = [
+            "com.example:first-runtime:1.0.0",
+            "com.example:second-runtime:1.0.0",
+        ]
+        multiple_artifacts["target"]["runtime_artifact_transforms"] = {
+            "com.example:first-runtime:1.0.0": {
+                "sha256": "1" * 64,
+                "remove_entries": ["samplemod/FirstGameTests.class"],
+            },
+            "com.example:second-runtime:1.0.0": {
+                "sha256": "2" * 64,
+                "remove_entries": ["samplemod/SecondGameTests.class"],
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "exactly one artifact"):
+            self.compat_kit.validate_contract(
+                multiple_artifacts,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
+    def test_contract_runtime_dependencies_reject_primary_dependency(self):
+        contract = self.accepted_contract()
+        contract["target"]["runtime_dependencies"] = [
+            contract["target"]["dependency"]
+        ]
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "runtime_dependencies must not repeat target dependency",
+        ):
+            self.compat_kit.validate_contract(
+                contract,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
     def test_bundled_descriptor_includes_all_audited_compile_ancestry(self):
         contract = self.accepted_contract()
         contract["target"]["runtime_dependencies"] = [
@@ -7678,6 +7935,23 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         ).read_text()
         self.assertIn('versionRange="[0.3.0,0.4)"', metadata)
         self.assertNotIn('versionRange="[0.3.0,1)"', metadata)
+
+    def test_external_scaffold_rejects_descriptor_only_runtime_artifact_transform(self):
+        contract = self.addon_contract()
+        contract["target"]["runtime_artifact_transforms"] = {
+            contract["target"]["dependency"]: {
+                "sha256": contract["source_audit_sha256"],
+                "remove_entries": ["samplemod/gametest/ForeignGameTests.class"],
+            }
+        }
+
+        with self.assertRaisesRegex(ValueError, "bundled descriptor fixtures"):
+            self.compat_kit.scaffold_addon(
+                contract,
+                self.root / "external-transform-addon",
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
 
     def test_scaffolds_preserve_reviewed_target_runtime_dependencies(self):
         contract = self.addon_contract()
@@ -8630,6 +8904,28 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         self.assertEqual(
             target["dependency"]["pattern"],
             target["runtime_dependencies"]["items"]["pattern"],
+        )
+        transforms = target["runtime_artifact_transforms"]
+        self.assertEqual("object", transforms["type"])
+        self.assertEqual(1, transforms["minProperties"])
+        self.assertEqual(1, transforms["maxProperties"])
+        self.assertEqual(
+            target["dependency"]["pattern"],
+            transforms["propertyNames"]["pattern"],
+        )
+        self.assertEqual(
+            {"$ref": "#/$defs/runtimeArtifactTransform"},
+            transforms["additionalProperties"],
+        )
+        transform = schema["$defs"]["runtimeArtifactTransform"]
+        self.assertFalse(transform["additionalProperties"])
+        self.assertEqual(
+            {"sha256", "remove_entries"},
+            set(transform["required"]),
+        )
+        self.assertEqual(1, transform["properties"]["remove_entries"]["minItems"])
+        self.assertTrue(
+            transform["properties"]["remove_entries"]["uniqueItems"]
         )
         verification = completion_rule["else"]["properties"]["verification"]
         self.assertEqual(

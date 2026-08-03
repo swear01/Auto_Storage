@@ -227,7 +227,8 @@ build also copies every explicit `target.runtime_dependencies` entry, so
 required libraries such as GuideME do not depend on transitive metadata or an
 undocumented post-scaffold edit. Target and explicit runtime dependencies are
 non-transitive on both target compile and runtime classpaths, so every required
-companion must be listed. The generated build resolves the reviewed
+companion must be listed exactly once; this additional list must not repeat the
+primary `target.dependency`. The generated build resolves the reviewed
 target dependency separately and checks its exact
 jar SHA against `source_audit_sha256` during both `build` and
 `runGameTestServer`; it also copies the reviewed audit to `compat/audit.json`.
@@ -235,6 +236,19 @@ Reviewed repository URLs, dependency coordinates, and group filters are
 serialized as literal Groovy strings rather than interpolated text. Maven
 coordinates must use exact `group:name:version` structure and cannot contain
 control characters.
+Repository-owned bundled fixtures may additionally declare exact
+`target.runtime_artifact_transforms` for reviewed removal of unrelated test-only
+ZIP entries. This contract field is an object keyed by exact runtime dependency,
+which makes duplicate dependency plans unrepresentable to schema-only consumers.
+One bundled contract may own exactly one transform, so it also cannot alias one
+artifact SHA through multiple coordinates; separate descriptors may share the
+same identical plan.
+The pristine coordinate and SHA remain the audit, compile, and
+artifact-gate input; only isolated/matrix test runtimes receive the deterministic
+transformed output. Identical transforms shared by multiple bundled descriptors
+deduplicate to one artifact, and conflicting declarations fail closed. Independent
+addon scaffolds reject this bundled-descriptor-only field rather than silently
+running a different artifact contract.
 Because Auto Storage requires Patchouli on both sides, the generated
 GameTest runtime includes the matching Patchouli artifact and its repository.
 A different target artifact or source audit fails before compatibility
@@ -485,6 +499,15 @@ descriptors also carry the reviewed target repositories and artifact SHA, so a
 non-central Maven target resolves through contract-owned configuration rather
 than a root-build guess. Compat Kit rejects target IDs that would become Java
 reserved package segments instead of emitting uncompilable source.
+When present, descriptor `runtimeArtifactTransforms` is generated from the
+reviewed dependency-keyed contract object as a sorted descriptor record list.
+Exact dependency/SHA/entry validation happens before Gradle
+wires a transformed jar, and the pristine jar never shares an isolated or matrix
+runtime classpath with that output. Global SHA ownership includes every audited
+artifact as well as every transform. Direct runtime-only declarations are
+checked after dependency setup, and each affected run verifies the complete
+resolved source-set runtime classpath by artifact SHA, including implementation,
+inherited, transitive, and file dependencies, before Minecraft starts.
 Before scaffold writes, the generated module ID, entrypoint, source set, and
 fixture are compared with all existing descriptors so normalized Java/Gradle
 identifier collisions fail closed.

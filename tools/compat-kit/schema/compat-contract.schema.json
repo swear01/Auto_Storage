@@ -34,6 +34,15 @@
             "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
           },
           "uniqueItems": true
+        },
+        "runtime_artifact_transforms": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1,
+          "propertyNames": {
+            "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
+          },
+          "additionalProperties": {"$ref": "#/$defs/runtimeArtifactTransform"}
         }
       }
     },
@@ -422,6 +431,24 @@
       "items": {
         "type": "string",
         "pattern": "^[a-z0-9_.-]+:[a-z0-9_./-]+$"
+      }
+    },
+    "runtimeArtifactTransform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "remove_entries"],
+      "properties": {
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "remove_entries": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*[\\u0000-\\u001F\\u007F])(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)(?!.*[\\\\*?\\[\\]])(?!.*\\/$).+$"
+          }
+        }
       }
     },
     "terms": {
