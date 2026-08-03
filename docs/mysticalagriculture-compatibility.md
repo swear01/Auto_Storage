@@ -101,7 +101,8 @@ entity/world, and multiblock paths remain fail closed.
 ```
 
 Eight present-mod GameTests cover isolated recipe-inventory digest locking,
-Reprocessor registration/rate, exact seed/FE/work consumption, missing-seed /
+Reprocessor registration/rate, exact seed/FE/work consumption with retained
+installed station (no catalyst/tool/remainder side effects), missing-seed /
 insufficient-FE / insufficient-work atomic no-ops, destination overflow
 rollback, and fail-closed coverage for Infusion, Enchanter, Soul Extraction,
 Soulium Spawner, and Awakening recipe types. The descriptor-owned compatibility

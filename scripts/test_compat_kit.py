@@ -1206,6 +1206,34 @@ class CompatKitAuditTests(unittest.TestCase):
             record["recipe_id"],
         )
 
+    def test_recipe_record_expands_separator_prefixed_default_namespace_types(self):
+        payload = json.dumps({
+            "type": ":crafting_shaped",
+            "result": {"id": "mysticalagriculture:air_agglomeratio"},
+        }).encode()
+        record = self.compat_kit._recipe_record(
+            "artifact",
+            "data/mysticalagriculture/recipe/air_agglomeratio.json",
+            payload,
+        )
+        self.assertEqual("minecraft:crafting_shaped", record["serializer_id"])
+        self.assertEqual(
+            "mysticalagriculture:air_agglomeratio",
+            record["recipe_id"],
+        )
+
+    def test_recipe_record_rejects_invalid_separator_prefixed_types(self):
+        payload = json.dumps({
+            "type": ":Crafting_Shaped",
+            "result": {"id": "samplemod:bad"},
+        }).encode()
+        with self.assertRaisesRegex(ValueError, "invalid type"):
+            self.compat_kit._recipe_record(
+                "artifact",
+                "data/samplemod/recipe/bad.json",
+                payload,
+            )
+
     def test_recipe_record_rejects_invalid_unnamespaced_types(self):
         payload = json.dumps({
             "type": "Crafting_Shaped",

@@ -366,7 +366,7 @@
       ],
       "catalyst_tool_remainder_exact": [
         {
-          "marker": "COMPAT_KIT_REJECTED_FAMILY_FAIL_CLOSED",
+          "marker": "COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT",
           "source": "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java",
           "task": "runMysticalagricultureGameTestServer"
         }

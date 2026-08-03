@@ -1860,6 +1860,11 @@ def _minecraft_resource_location(value: str) -> str | None:
     """Match Minecraft ResourceLocation.parse / bySeparator default-namespace rules."""
     if RESOURCE_LOCATION.fullmatch(value):
         return value
+    if value.startswith(":"):
+        path = value[1:]
+        if RESOURCE_PATH.fullmatch(path):
+            return f"minecraft:{path}"
+        return None
     if RESOURCE_PATH.fullmatch(value):
         return f"minecraft:{value}"
     return None

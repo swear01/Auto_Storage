@@ -1932,7 +1932,27 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("COMPAT_KIT_INGREDIENT_SHORTAGE_ATOMIC", fixture_tests)
         self.assertIn("COMPAT_KIT_DESTINATION_CAPACITY_ATOMIC", fixture_tests)
         self.assertIn("COMPAT_KIT_REJECTED_FAMILY_FAIL_CLOSED", fixture_tests)
+        self.assertIn("COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT", fixture_tests)
         self.assertIn("seed/reprocessor/inferium", fixture_tests)
+        self.assertRegex(
+            fixture_tests,
+            r"reprocessor_consumes_seed_fe_and_work[\s\S]*?"
+            r"MachineEnergyTable\.isInstalled[\s\S]*?"
+            r"COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT",
+        )
+        self.assertNotRegex(
+            fixture_tests,
+            r"rejected_machine_families_fail_closed[\s\S]*?"
+            r"COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT",
+        )
+        contract_json = json.loads(contract)
+        self.assertEqual(
+            "COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT",
+            contract_json["verification"]["evidence"][
+                "catalyst_tool_remainder_exact"
+            ][0]["marker"],
+        )
+        self.assertIn("reprocessor_consumes_seed_fe_and_work", fixture_tests)
         self.assertIn('"status": "accepted"', contract)
         self.assertIn("ReprocessorRecipe", contract)
         self.assertIn(

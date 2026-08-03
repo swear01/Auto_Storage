@@ -96,13 +96,19 @@ public final class MysticalagricultureIntegrationGameTests {
             seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), FE_COST);
             installReprocessor(context);
             tick(context.core(), 200);
+            int stationSlot = MachineEnergyTable.findSlot(REPROCESSOR);
             if (!craft(context, REPROCESSOR_RECIPE)
                     || itemCount(context.core(), maItem("inferium_seeds")) != 0
                     || itemCount(context.core(), maItem("inferium_essence")) != 2
                     || context.core().getResourceAmount(
                     StorageResourceKey.neoforgeEnergy()) != 0
-                    || context.core().getStationWork(REPROCESSOR) != 0) {
-                helper.fail("Mystical Agriculture Reprocessor did not consume exact costs");
+                    || context.core().getStationWork(REPROCESSOR) != 0
+                    || stationSlot < 0
+                    || !MachineEnergyTable.isInstalled(context.core(), stationSlot)
+                    || !installedStation(context, stationSlot).is(maItem("seed_reprocessor"))
+                    || installedStation(context, stationSlot).getCount() != 1) {
+                helper.fail(
+                        "COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT Mystical Agriculture Reprocessor catalyst/tool/remainder behavior was incorrect");
                 return;
             }
             helper.succeed();
@@ -313,6 +319,13 @@ public final class MysticalagricultureIntegrationGameTests {
             return;
         }
         throw new IllegalStateException("Could not install Mystical Agriculture Reprocessor");
+    }
+
+    private static ItemStack installedStation(FixtureContext context, int stationSlot) {
+        var menu = new CraftingTerminalMenu(
+                942, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
+        return menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + stationSlot).getItem();
     }
 
     private static boolean craft(FixtureContext context, ResourceLocation recipeId) {
