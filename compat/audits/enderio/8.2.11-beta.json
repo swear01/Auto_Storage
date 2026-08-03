@@ -301,6 +301,33 @@
         "source_class": "com.enderio.enderio.content.machines.niard.NiardBlockEntity"
       },
       {
+        "class": "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity",
+        "classification": {
+          "evidence": [
+            "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ObeliskBlockEntity.java\"\npublic abstract class com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity<T extends com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity<T>> extends com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity implements com.enderio.enderio.foundation.attachment.RangedActor {\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FILTER;\n  public com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean, com.enderio.enderio.foundation.block.entity.flags.CapacitorSupport, com.enderio.enderio.api.io.energy.EnergyIOMode, com.enderio.enderio.api.capacitor.CapacitorScalable, com.enderio.enderio.api.capacitor.CapacitorScalable);\n  public void setLevel(net.minecraft.world.level.Level);\n  public void setRemoved();\n  public boolean isActive();\n  public com.enderio.enderio.foundation.attachment.ActionRange getActionRange();\n  public void setActionRange(com.enderio.enderio.foundation.attachment.ActionRange);\n  public int getMaxRange();\n  public void serverTick();\n  public int getPerTickEnergyCost();\n  public void clientTick();\n  public abstract java.lang.String getColor();\n  public net.minecraft.world.phys.AABB getAABB();\n  public boolean requiresFilter();\n  public void onLoad();\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
+        "source_class": "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity"
+      },
+      {
         "class": "com.enderio.enderio.content.machines.obelisks.attractor.AttractorObeliskBlockEntity",
         "classification": {
           "evidence": [
@@ -698,6 +725,31 @@
         "source_class": "com.enderio.enderio.content.machines.stirling_generator.StirlingGeneratorBlockEntity"
       },
       {
+        "class": "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity",
+        "classification": {
+          "evidence": [
+            "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"VacuumMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity<T extends net.minecraft.world.entity.Entity> extends com.enderio.enderio.foundation.block.entity.MachineBlockEntity implements com.enderio.enderio.foundation.attachment.RangedActor {\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FILTER;\n  public com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, java.lang.Class<T>);\n  public boolean isActive();\n  public abstract java.lang.String getColor();\n  public void serverTick();\n  public void clientTick();\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public java.util.function.Predicate<T> getFilter();\n  public abstract void handleEntity(T);\n  public com.enderio.enderio.foundation.attachment.ActionRange getActionRange();\n  public void setActionRange(com.enderio.enderio.foundation.attachment.ActionRange);\n  public int getMaxRange();\n  public void onLoad();\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
+        "source_class": "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity"
+      },
+      {
         "class": "com.enderio.enderio.content.machines.vacuum.chest.VacuumChestBlockEntity",
         "classification": {
           "evidence": [
@@ -898,6 +950,31 @@
         "source_class": "com.enderio.enderio.content.storage.crafter.CrafterBlockEntity"
       },
       {
+        "class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity",
+        "classification": {
+          "evidence": [
+            "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FluidTankBlockEntity.java\"\npublic abstract class com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity extends com.enderio.enderio.foundation.block.entity.MachineBlockEntity implements com.enderio.enderio.foundation.io.fluid.FluidItemInteractive,com.enderio.enderio.foundation.attachment.FluidTankUser {\n  public static final com.enderio.enderio.foundation.io.fluid.TankAccess TANK;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_FILL_INPUT;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_FILL_OUTPUT;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_DRAIN_INPUT;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_DRAIN_OUTPUT;\n  public com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public boolean isActive();\n  public void serverTick();\n  public boolean acceptItemFill(net.minecraft.world.item.ItemStack);\n  public boolean acceptItemDrain(net.minecraft.world.item.ItemStack);\n  public com.enderio.enderio.foundation.inventory.MachineInventoryLayout createInventoryLayout();\n  public com.enderio.enderio.foundation.io.fluid.MachineFluidHandler getFluidHandler();\n  public com.enderio.enderio.foundation.io.fluid.MachineFluidHandler createFluidHandler();\n  public com.enderio.enderio.foundation.io.fluid.MachineFluidTank getFluidTank();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity"
+      },
+      {
         "class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity$Enhanced",
         "classification": {
           "evidence": [
@@ -1042,6 +1119,98 @@
         },
         "public_signature": "Compiled from \"EnderSkullBlockEntity.java\"\npublic class com.enderio.enderio.foundation.block.entity.EnderSkullBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {\n  public com.enderio.enderio.foundation.block.entity.EnderSkullBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public float getAnimation(float);\n  public void setAnimation(float);\n  public static void animation(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, com.enderio.enderio.foundation.block.entity.EnderSkullBlockEntity);\n}",
         "source_class": "com.enderio.enderio.foundation.block.entity.EnderSkullBlockEntity"
+      },
+      {
+        "class": "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+        "classification": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"MachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.MachineBlockEntity extends com.enderio.enderio.foundation.block.EIOBlockEntity implements net.minecraft.world.MenuProvider,com.enderio.enderio.foundation.block.entity.Wrenchable,com.enderio.enderio.api.io.IOConfigurable,com.enderio.enderio.foundation.block.entity.MachineInventoryHolder {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.MachineBlockEntity, net.minecraft.core.Direction, com.enderio.enderio.api.io.SideConfig> SIDE_CONFIG_PROVIDER;\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.MachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.items.IItemHandler> ITEM_HANDLER_PROVIDER;\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<net.minecraft.world.level.block.entity.BlockEntity, java.lang.Void, com.enderio.enderio.api.soul.binding.SoulBindable> SOUL_BINDABLE;\n  public com.enderio.enderio.foundation.block.entity.MachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean);\n  public abstract boolean isActive();\n  public void serverTick();\n  public boolean canAct();\n  public boolean canAct(int);\n  public final com.enderio.enderio.foundation.inventory.MachineInventory getInventory();\n  public final boolean hasInventory();\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public final com.enderio.enderio.foundation.io.IOConfig getIOConfig();\n  public com.enderio.enderio.api.io.IOMode getIOMode(net.minecraft.core.Direction);\n  public final boolean isIOConfigMutable();\n  public boolean shouldRenderIOConfigOverlay();\n  public void setIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public net.neoforged.neoforge.client.model.data.ModelData getModelData();\n  public boolean supportsIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public void setMachineOwner(java.util.UUID);\n  public java.util.UUID getMachineOwner();\n  public java.util.UUID getMachineOwnerOrRandom();\n  public java.util.Set<com.enderio.enderio.foundation.state.MachineState> getMachineStates();\n  public void clientSetMachineStates(java.util.Set<com.enderio.enderio.foundation.state.MachineState>);\n  public boolean supportsRedstoneControl();\n  public final com.enderio.enderio.api.io.RedstoneControl getRedstoneControl();\n  public void setRedstoneControl(com.enderio.enderio.api.io.RedstoneControl);\n  public net.minecraft.world.ItemInteractionResult onWrenched(net.minecraft.world.item.context.UseOnContext);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket();\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
+        "source_class": "com.enderio.enderio.foundation.block.entity.MachineBlockEntity"
+      },
+      {
+        "class": "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+        "classification": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+            "com.enderio.enderio.foundation.block.EIOBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PoweredMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity extends com.enderio.enderio.foundation.block.entity.MachineBlockEntity implements com.enderio.enderio.foundation.block.entity.MachineInstallable {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.energy.IEnergyStorage> ENERGY_STORAGE_PROVIDER;\n  public com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean, com.enderio.enderio.foundation.block.entity.flags.CapacitorSupport, com.enderio.enderio.api.io.energy.EnergyIOMode, com.enderio.enderio.api.capacitor.CapacitorScalable, com.enderio.enderio.api.capacitor.CapacitorScalable);\n  public void onLoad();\n  public void setLevel(net.minecraft.world.level.Level);\n  public void setChanged();\n  public com.enderio.enderio.foundation.energy.PoweredMachineEnergyStorage getEnergyStorage();\n  public final void clientSetEnergyStored(int);\n  public final boolean hasEnergy();\n  public final int getMaxEnergyStored();\n  public final int getMaxEnergyUse();\n  public final com.enderio.enderio.api.io.energy.EnergyIOMode energyIOMode();\n  public final com.enderio.enderio.foundation.block.entity.flags.CapacitorSupport capacitorSupport();\n  public final boolean supportsCapacitor();\n  public final boolean requiresCapacitor();\n  public boolean isCapacitorInstalled();\n  public com.enderio.enderio.api.capacitor.CapacitorData getCapacitorData();\n  public final net.minecraft.world.item.ItemStack getCapacitorItem();\n  public final int getCapacitorSlotIndex();\n  public net.minecraft.world.InteractionResult tryItemInstall(net.minecraft.world.item.ItemStack, net.minecraft.world.item.context.UseOnContext);\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
+        "source_class": "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity"
+      },
+      {
+        "class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+        "classification": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"LegacyMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity extends com.enderio.core.common.blockentity.EnderBlockEntity implements net.minecraft.world.MenuProvider,com.enderio.enderio.foundation.block.entity.Wrenchable,com.enderio.enderio.api.io.IOConfigurable,com.enderio.enderio.foundation.block.entity.MachineInventoryHolder {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity, net.minecraft.core.Direction, com.enderio.enderio.api.io.SideConfig> SIDE_CONFIG_PROVIDER;\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.items.IItemHandler> ITEM_HANDLER_PROVIDER;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<com.enderio.enderio.api.io.IOConfigurable> IO_CONFIG_PROPERTY;\n  public static final com.enderio.core.common.network.NetworkDataSlot$CodecType<com.enderio.enderio.api.io.RedstoneControl> REDSTONE_CONTROL_DATA_SLOT_TYPE;\n  public com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public boolean isIOConfigMutable();\n  public boolean shouldRenderIOConfigOverlay();\n  public final com.enderio.enderio.api.io.IOMode getIOMode(net.minecraft.core.Direction);\n  public boolean supportsIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public final void setIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public net.neoforged.neoforge.client.model.data.ModelData getModelData();\n  public boolean supportsRedstoneControl();\n  public boolean isRedstoneBlocked();\n  public com.enderio.enderio.api.io.RedstoneControl getRedstoneControl();\n  public void setRedstoneControl(com.enderio.enderio.api.io.RedstoneControl);\n  public com.enderio.enderio.foundation.inventory.MachineInventoryLayout createInventoryLayout();\n  public com.enderio.enderio.foundation.inventory.MachineInventoryLayout getInventoryLayout();\n  public final com.enderio.enderio.foundation.inventory.MachineInventory getInventory();\n  public boolean hasInventory();\n  public void serverTick();\n  public boolean canAct();\n  public boolean canActSlow();\n  public void onLoad();\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.world.ItemInteractionResult onBlockEntityUsed(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);\n  public boolean stillValid(net.minecraft.world.entity.player.Player);\n  public net.minecraft.world.ItemInteractionResult onWrenched(net.minecraft.world.item.context.UseOnContext);\n  public boolean canOpenMenu();\n  public int getLightEmission();\n  public java.util.Set<com.enderio.enderio.foundation.state.MachineState> getMachineStates();\n  public void updateMachineState(com.enderio.enderio.foundation.state.MachineState, boolean);\n  public void neighborChanged(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);\n}",
+        "source_class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity"
+      },
+      {
+        "class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity",
+        "classification": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity",
+            "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+            "com.enderio.core.common.blockentity.EnderBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"LegacyPoweredMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity extends com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity implements com.enderio.enderio.foundation.block.entity.MachineInstallable {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.energy.IEnergyStorage> ENERGY_STORAGE_PROVIDER;\n  public com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity(com.enderio.enderio.api.io.energy.EnergyIOMode, com.enderio.enderio.api.capacitor.CapacitorScalable, com.enderio.enderio.api.capacitor.CapacitorScalable, net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public com.enderio.core.common.network.NetworkDataSlot<?> createEnergyDataSlot();\n  public void serverTick();\n  public final com.enderio.enderio.foundation.io.energy.IMachineEnergyStorage getEnergyStorage();\n  public final boolean hasEnergy();\n  public final com.enderio.enderio.foundation.io.energy.IMachineEnergyStorage getExposedEnergyStorage();\n  public com.enderio.enderio.foundation.io.energy.MachineEnergyStorage createExposedEnergyStorage();\n  public net.minecraft.world.InteractionResult tryItemInstall(net.minecraft.world.item.ItemStack, net.minecraft.world.item.context.UseOnContext);\n  public final boolean requiresCapacitor();\n  public final int getCapacitorSlot();\n  public boolean isCapacitorInstalled();\n  public net.minecraft.world.item.ItemStack getCapacitorItem();\n  public com.enderio.enderio.api.capacitor.CapacitorData getCapacitorData();\n  public boolean canAct();\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n  public void setLevel(net.minecraft.world.level.Level);\n}",
+        "source_class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity"
       }
     ],
     "client_viewer_classes": [
@@ -4608,18 +4777,6 @@
         "source_class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlock"
       },
       {
-        "class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity",
-        "classification": {
-          "evidence": [
-            "fluid"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"FluidTankBlockEntity.java\"\npublic abstract class com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity extends com.enderio.enderio.foundation.block.entity.MachineBlockEntity implements com.enderio.enderio.foundation.io.fluid.FluidItemInteractive,com.enderio.enderio.foundation.attachment.FluidTankUser {\n  public static final com.enderio.enderio.foundation.io.fluid.TankAccess TANK;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_FILL_INPUT;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_FILL_OUTPUT;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_DRAIN_INPUT;\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FLUID_DRAIN_OUTPUT;\n  public com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public boolean isActive();\n  public void serverTick();\n  public boolean acceptItemFill(net.minecraft.world.item.ItemStack);\n  public boolean acceptItemDrain(net.minecraft.world.item.ItemStack);\n  public com.enderio.enderio.foundation.inventory.MachineInventoryLayout createInventoryLayout();\n  public com.enderio.enderio.foundation.io.fluid.MachineFluidHandler getFluidHandler();\n  public com.enderio.enderio.foundation.io.fluid.MachineFluidHandler createFluidHandler();\n  public com.enderio.enderio.foundation.io.fluid.MachineFluidTank getFluidTank();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
-        "source_class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity"
-      },
-      {
         "class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockItem",
         "classification": {
           "evidence": [
@@ -4702,30 +4859,6 @@
         "hierarchy": null,
         "public_signature": "Compiled from \"FluidTankUser.java\"\npublic interface com.enderio.enderio.foundation.attachment.FluidTankUser {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<net.minecraft.world.level.block.entity.BlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.fluids.capability.IFluidHandler> FLUID_HANDLER_PROVIDER;\n  public abstract com.enderio.enderio.foundation.io.fluid.MachineTankLayout getTankLayout();\n  public abstract com.enderio.enderio.foundation.io.fluid.MachineFluidHandler getFluidHandler();\n  public abstract com.enderio.enderio.foundation.io.fluid.MachineFluidHandler createFluidHandler();\n  public default void saveTank(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n  public default void loadTank(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);\n}",
         "source_class": "com.enderio.enderio.foundation.attachment.FluidTankUser"
-      },
-      {
-        "class": "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
-        "classification": {
-          "evidence": [
-            "power"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"PoweredMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity extends com.enderio.enderio.foundation.block.entity.MachineBlockEntity implements com.enderio.enderio.foundation.block.entity.MachineInstallable {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.energy.IEnergyStorage> ENERGY_STORAGE_PROVIDER;\n  public com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean, com.enderio.enderio.foundation.block.entity.flags.CapacitorSupport, com.enderio.enderio.api.io.energy.EnergyIOMode, com.enderio.enderio.api.capacitor.CapacitorScalable, com.enderio.enderio.api.capacitor.CapacitorScalable);\n  public void onLoad();\n  public void setLevel(net.minecraft.world.level.Level);\n  public void setChanged();\n  public com.enderio.enderio.foundation.energy.PoweredMachineEnergyStorage getEnergyStorage();\n  public final void clientSetEnergyStored(int);\n  public final boolean hasEnergy();\n  public final int getMaxEnergyStored();\n  public final int getMaxEnergyUse();\n  public final com.enderio.enderio.api.io.energy.EnergyIOMode energyIOMode();\n  public final com.enderio.enderio.foundation.block.entity.flags.CapacitorSupport capacitorSupport();\n  public final boolean supportsCapacitor();\n  public final boolean requiresCapacitor();\n  public boolean isCapacitorInstalled();\n  public com.enderio.enderio.api.capacitor.CapacitorData getCapacitorData();\n  public final net.minecraft.world.item.ItemStack getCapacitorItem();\n  public final int getCapacitorSlotIndex();\n  public net.minecraft.world.InteractionResult tryItemInstall(net.minecraft.world.item.ItemStack, net.minecraft.world.item.context.UseOnContext);\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
-        "source_class": "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity"
-      },
-      {
-        "class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity",
-        "classification": {
-          "evidence": [
-            "power"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"LegacyPoweredMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity extends com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity implements com.enderio.enderio.foundation.block.entity.MachineInstallable {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.energy.IEnergyStorage> ENERGY_STORAGE_PROVIDER;\n  public com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity(com.enderio.enderio.api.io.energy.EnergyIOMode, com.enderio.enderio.api.capacitor.CapacitorScalable, com.enderio.enderio.api.capacitor.CapacitorScalable, net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public com.enderio.core.common.network.NetworkDataSlot<?> createEnergyDataSlot();\n  public void serverTick();\n  public final com.enderio.enderio.foundation.io.energy.IMachineEnergyStorage getEnergyStorage();\n  public final boolean hasEnergy();\n  public final com.enderio.enderio.foundation.io.energy.IMachineEnergyStorage getExposedEnergyStorage();\n  public com.enderio.enderio.foundation.io.energy.MachineEnergyStorage createExposedEnergyStorage();\n  public net.minecraft.world.InteractionResult tryItemInstall(net.minecraft.world.item.ItemStack, net.minecraft.world.item.context.UseOnContext);\n  public final boolean requiresCapacitor();\n  public final int getCapacitorSlot();\n  public boolean isCapacitorInstalled();\n  public net.minecraft.world.item.ItemStack getCapacitorItem();\n  public com.enderio.enderio.api.capacitor.CapacitorData getCapacitorData();\n  public boolean canAct();\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n  public void setLevel(net.minecraft.world.level.Level);\n}",
-        "source_class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity"
       },
       {
         "class": "com.enderio.enderio.foundation.block.entity.legacy.sync.EnergySyncData",
@@ -5774,18 +5907,6 @@
         "source_class": "com.enderio.enderio.content.machines.niard.NiardRangeIterator"
       },
       {
-        "class": "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity",
-        "classification": {
-          "evidence": [
-            "machine"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"ObeliskBlockEntity.java\"\npublic abstract class com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity<T extends com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity<T>> extends com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity implements com.enderio.enderio.foundation.attachment.RangedActor {\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FILTER;\n  public com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean, com.enderio.enderio.foundation.block.entity.flags.CapacitorSupport, com.enderio.enderio.api.io.energy.EnergyIOMode, com.enderio.enderio.api.capacitor.CapacitorScalable, com.enderio.enderio.api.capacitor.CapacitorScalable);\n  public void setLevel(net.minecraft.world.level.Level);\n  public void setRemoved();\n  public boolean isActive();\n  public com.enderio.enderio.foundation.attachment.ActionRange getActionRange();\n  public void setActionRange(com.enderio.enderio.foundation.attachment.ActionRange);\n  public int getMaxRange();\n  public void serverTick();\n  public int getPerTickEnergyCost();\n  public void clientTick();\n  public abstract java.lang.String getColor();\n  public net.minecraft.world.phys.AABB getAABB();\n  public boolean requiresFilter();\n  public void onLoad();\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
-        "source_class": "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity"
-      },
-      {
         "class": "com.enderio.enderio.content.machines.obelisks.ObeliskMenu",
         "classification": {
           "evidence": [
@@ -6134,18 +6255,6 @@
         "source_class": "com.enderio.enderio.content.machines.stirling_generator.StirlingGeneratorMenu"
       },
       {
-        "class": "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity",
-        "classification": {
-          "evidence": [
-            "machine"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"VacuumMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity<T extends net.minecraft.world.entity.Entity> extends com.enderio.enderio.foundation.block.entity.MachineBlockEntity implements com.enderio.enderio.foundation.attachment.RangedActor {\n  public static final com.enderio.enderio.foundation.inventory.SingleSlotAccess FILTER;\n  public com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, java.lang.Class<T>);\n  public boolean isActive();\n  public abstract java.lang.String getColor();\n  public void serverTick();\n  public void clientTick();\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public java.util.function.Predicate<T> getFilter();\n  public abstract void handleEntity(T);\n  public com.enderio.enderio.foundation.attachment.ActionRange getActionRange();\n  public void setActionRange(com.enderio.enderio.foundation.attachment.ActionRange);\n  public int getMaxRange();\n  public void onLoad();\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
-        "source_class": "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity"
-      },
-      {
         "class": "com.enderio.enderio.content.machines.vacuum.VacuumMenu",
         "classification": {
           "evidence": [
@@ -6302,18 +6411,6 @@
         "source_class": "com.enderio.enderio.foundation.block.ProgressMachineBlock"
       },
       {
-        "class": "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
-        "classification": {
-          "evidence": [
-            "machine"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"MachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.MachineBlockEntity extends com.enderio.enderio.foundation.block.EIOBlockEntity implements net.minecraft.world.MenuProvider,com.enderio.enderio.foundation.block.entity.Wrenchable,com.enderio.enderio.api.io.IOConfigurable,com.enderio.enderio.foundation.block.entity.MachineInventoryHolder {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.MachineBlockEntity, net.minecraft.core.Direction, com.enderio.enderio.api.io.SideConfig> SIDE_CONFIG_PROVIDER;\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.MachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.items.IItemHandler> ITEM_HANDLER_PROVIDER;\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<net.minecraft.world.level.block.entity.BlockEntity, java.lang.Void, com.enderio.enderio.api.soul.binding.SoulBindable> SOUL_BINDABLE;\n  public com.enderio.enderio.foundation.block.entity.MachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean);\n  public abstract boolean isActive();\n  public void serverTick();\n  public boolean canAct();\n  public boolean canAct(int);\n  public final com.enderio.enderio.foundation.inventory.MachineInventory getInventory();\n  public final boolean hasInventory();\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public final com.enderio.enderio.foundation.io.IOConfig getIOConfig();\n  public com.enderio.enderio.api.io.IOMode getIOMode(net.minecraft.core.Direction);\n  public final boolean isIOConfigMutable();\n  public boolean shouldRenderIOConfigOverlay();\n  public void setIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public net.neoforged.neoforge.client.model.data.ModelData getModelData();\n  public boolean supportsIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public void setMachineOwner(java.util.UUID);\n  public java.util.UUID getMachineOwner();\n  public java.util.UUID getMachineOwnerOrRandom();\n  public java.util.Set<com.enderio.enderio.foundation.state.MachineState> getMachineStates();\n  public void clientSetMachineStates(java.util.Set<com.enderio.enderio.foundation.state.MachineState>);\n  public boolean supportsRedstoneControl();\n  public final com.enderio.enderio.api.io.RedstoneControl getRedstoneControl();\n  public void setRedstoneControl(com.enderio.enderio.api.io.RedstoneControl);\n  public net.minecraft.world.ItemInteractionResult onWrenched(net.minecraft.world.item.context.UseOnContext);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getUpdatePacket();\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n}",
-        "source_class": "com.enderio.enderio.foundation.block.entity.MachineBlockEntity"
-      },
-      {
         "class": "com.enderio.enderio.foundation.block.entity.MachineInstallable",
         "classification": {
           "evidence": [
@@ -6336,18 +6433,6 @@
         "hierarchy": null,
         "public_signature": "Compiled from \"MachineInventoryHolder.java\"\npublic interface com.enderio.enderio.foundation.block.entity.MachineInventoryHolder {\n  public abstract boolean hasInventory();\n  public abstract com.enderio.enderio.foundation.inventory.MachineInventory getInventory();\n}",
         "source_class": "com.enderio.enderio.foundation.block.entity.MachineInventoryHolder"
-      },
-      {
-        "class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
-        "classification": {
-          "evidence": [
-            "machine"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"LegacyMachineBlockEntity.java\"\npublic abstract class com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity extends com.enderio.core.common.blockentity.EnderBlockEntity implements net.minecraft.world.MenuProvider,com.enderio.enderio.foundation.block.entity.Wrenchable,com.enderio.enderio.api.io.IOConfigurable,com.enderio.enderio.foundation.block.entity.MachineInventoryHolder {\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity, net.minecraft.core.Direction, com.enderio.enderio.api.io.SideConfig> SIDE_CONFIG_PROVIDER;\n  public static final net.neoforged.neoforge.capabilities.ICapabilityProvider<com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity, net.minecraft.core.Direction, net.neoforged.neoforge.items.IItemHandler> ITEM_HANDLER_PROVIDER;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<com.enderio.enderio.api.io.IOConfigurable> IO_CONFIG_PROPERTY;\n  public static final com.enderio.core.common.network.NetworkDataSlot$CodecType<com.enderio.enderio.api.io.RedstoneControl> REDSTONE_CONTROL_DATA_SLOT_TYPE;\n  public com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public com.enderio.enderio.foundation.io.IOConfig getDefaultIOConfig();\n  public boolean isIOConfigMutable();\n  public boolean shouldRenderIOConfigOverlay();\n  public final com.enderio.enderio.api.io.IOMode getIOMode(net.minecraft.core.Direction);\n  public boolean supportsIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public final void setIOMode(net.minecraft.core.Direction, com.enderio.enderio.api.io.IOMode);\n  public net.neoforged.neoforge.client.model.data.ModelData getModelData();\n  public boolean supportsRedstoneControl();\n  public boolean isRedstoneBlocked();\n  public com.enderio.enderio.api.io.RedstoneControl getRedstoneControl();\n  public void setRedstoneControl(com.enderio.enderio.api.io.RedstoneControl);\n  public com.enderio.enderio.foundation.inventory.MachineInventoryLayout createInventoryLayout();\n  public com.enderio.enderio.foundation.inventory.MachineInventoryLayout getInventoryLayout();\n  public final com.enderio.enderio.foundation.inventory.MachineInventory getInventory();\n  public boolean hasInventory();\n  public void serverTick();\n  public boolean canAct();\n  public boolean canActSlow();\n  public void onLoad();\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void removeComponentsFromTag(net.minecraft.nbt.CompoundTag);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.world.ItemInteractionResult onBlockEntityUsed(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);\n  public boolean stillValid(net.minecraft.world.entity.player.Player);\n  public net.minecraft.world.ItemInteractionResult onWrenched(net.minecraft.world.item.context.UseOnContext);\n  public boolean canOpenMenu();\n  public int getLightEmission();\n  public java.util.Set<com.enderio.enderio.foundation.state.MachineState> getMachineStates();\n  public void updateMachineState(com.enderio.enderio.foundation.state.MachineState, boolean);\n  public void neighborChanged(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelReader, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);\n}",
-        "source_class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity"
       },
       {
         "class": "com.enderio.enderio.foundation.block.legacy.LegacyMachineBlock",
@@ -7170,7 +7255,7 @@
       ]
     }
   ],
-  "scanner_format": 16,
+  "scanner_format": 17,
   "schema": 1,
   "source": {
     "files": [
@@ -7590,7 +7675,7 @@
     ],
     "revision": "fac4150bb6185566ff7159b0439452c515fb150d"
   },
-  "structural_candidate_inventory_sha256": "8bcac2d8aa4a4b3e298156bf0ebea9a35b15d907d2fedf46b2003a6eedb35c8d",
+  "structural_candidate_inventory_sha256": "63b55298259aae720ad1b58d49b46c6686199aece2b9a164aa603b874988f85a",
   "structural_class_graph": [
     {
       "class": "com.enderio.core.CoreNBTKeys",
@@ -19055,6 +19140,20 @@
       }
     },
     {
+      "class": "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity",
+      "classification": {
+        "evidence": [
+          "com.enderio.enderio.content.machines.obelisks.ObeliskBlockEntity",
+          "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+          "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+          "com.enderio.enderio.foundation.block.EIOBlockEntity",
+          "com.enderio.core.common.blockentity.EnderBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "com.enderio.enderio.content.machines.obelisks.attractor.AttractorObeliskBlockEntity",
       "classification": {
         "evidence": [
@@ -19366,6 +19465,19 @@
       }
     },
     {
+      "class": "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity",
+      "classification": {
+        "evidence": [
+          "com.enderio.enderio.content.machines.vacuum.VacuumMachineBlockEntity",
+          "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+          "com.enderio.enderio.foundation.block.EIOBlockEntity",
+          "com.enderio.core.common.blockentity.EnderBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "com.enderio.enderio.content.machines.vacuum.chest.VacuumChestBlockEntity",
       "classification": {
         "evidence": [
@@ -19491,6 +19603,19 @@
       }
     },
     {
+      "class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity",
+      "classification": {
+        "evidence": [
+          "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity",
+          "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+          "com.enderio.enderio.foundation.block.EIOBlockEntity",
+          "com.enderio.core.common.blockentity.EnderBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "com.enderio.enderio.content.storage.fluid_tank.FluidTankBlockEntity$Enhanced",
       "classification": {
         "evidence": [
@@ -19591,6 +19716,54 @@
       "classification": {
         "evidence": [
           "com.enderio.enderio.foundation.block.entity.EnderSkullBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+      "classification": {
+        "evidence": [
+          "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+          "com.enderio.enderio.foundation.block.EIOBlockEntity",
+          "com.enderio.core.common.blockentity.EnderBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+      "classification": {
+        "evidence": [
+          "com.enderio.enderio.foundation.block.entity.PoweredMachineBlockEntity",
+          "com.enderio.enderio.foundation.block.entity.MachineBlockEntity",
+          "com.enderio.enderio.foundation.block.EIOBlockEntity",
+          "com.enderio.core.common.blockentity.EnderBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+      "classification": {
+        "evidence": [
+          "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+          "com.enderio.core.common.blockentity.EnderBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity",
+      "classification": {
+        "evidence": [
+          "com.enderio.enderio.foundation.block.entity.legacy.LegacyPoweredMachineBlockEntity",
+          "com.enderio.enderio.foundation.block.entity.legacy.LegacyMachineBlockEntity",
+          "com.enderio.core.common.blockentity.EnderBlockEntity",
           "net.minecraft.world.level.block.entity.BlockEntity"
         ],
         "method": "class_hierarchy"

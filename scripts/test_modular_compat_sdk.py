@@ -67,7 +67,7 @@ class ModularCompatSdkTests(unittest.TestCase):
         )
         manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
 
-        self.assertEqual(16, audit["scanner_format"])
+        self.assertEqual(17, audit["scanner_format"])
         self.assertEqual(
             "9d48d198bc6eacf3b7729f4d60b91e661cfa15d105264ba225dee87b1d547ba1",
             audit["artifact"]["sha256"],
@@ -192,7 +192,7 @@ class ModularCompatSdkTests(unittest.TestCase):
         )
         manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
 
-        self.assertEqual(16, audit["scanner_format"])
+        self.assertEqual(17, audit["scanner_format"])
         self.assertTrue(audit["ancestry_classpath"])
         self.assertEqual(
             sorted(candidate["class"] for candidate in audit["candidates"]["recipe_classes"]),
@@ -239,7 +239,7 @@ class ModularCompatSdkTests(unittest.TestCase):
         )
         manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
 
-        self.assertEqual(16, audit["scanner_format"])
+        self.assertEqual(17, audit["scanner_format"])
         self.assertEqual(
             {
                 "class_count": 1013,
@@ -356,7 +356,7 @@ class ModularCompatSdkTests(unittest.TestCase):
         )
         manifest = json.loads((module_root / ".compat-kit-manifest.json").read_text())
 
-        self.assertEqual(16, audit["scanner_format"])
+        self.assertEqual(17, audit["scanner_format"])
         self.assertEqual(
             {
                 "class_count": 103,

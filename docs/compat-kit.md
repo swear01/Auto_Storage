@@ -139,7 +139,8 @@ therefore fails explicitly instead of mixing parsed bytes with a later digest.
 The deterministic audit
 contains NeoForge identity, artifact SHA/size, source revision and exact source
 paths, structurally classified concrete recipe and serializer classes,
-recipe types, builders, datagen classes, client/viewer wrappers, block entities,
+recipe types, builders, datagen classes, client/viewer wrappers, concrete or
+abstract block entities,
 resource/station candidates, per-serializer recipe counts, bounded sample IDs,
 top-level fields and array cardinalities, NeoForge condition types, override
 provenance, and explicit risk flags. Risk
@@ -162,13 +163,22 @@ are all randomness evidence. Without `--source`, scans are
 cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
+Every repository-owned audit that backs a complete committed contract is
+migrated in the same change; the committed-audit regression rejects legacy
+records instead of skipping modules whose scaffold or verification would then
+be unusable.
+Named nested classes remain inspectable only when their complete owner chain is
+present in the same archive; a missing owner fails closed rather than allowing
+a descendant of an excluded anonymous, local, or synthetic owner through a
+split classpath.
 Data-root scans bind the ordered layer digests into their cache identity;
 ancestry classpaths bind their exact artifact set. Cache metadata also records
 the selected JDK 21 installation, release version, module-file identity, and
 the resolved `javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `16`; formats `7` through `15` remain readable
+current scanner format is `17` with candidate classifier `4`; formats `7`
+through `16` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a
 current-format audit plus the exact target jar; only explicit migration paths
@@ -185,7 +195,7 @@ artifact bytes. The target jar's recipe source count is independently rebuilt on
 complete use; when `target_jar` is the audit's only recipe-data source, the
 entire effective recipe inventory, serializer summary, overrides, and digest
 must match the reopened jar exactly.
-Format 16 retains each candidate's structural classification and source-level
+Scanner format 16 and later retain each candidate's structural classification and source-level
 Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
 artifact/classpath-bound `structural_candidate_inventory_sha256`. Its
 `structural_class_graph` starts from every target class and includes reachable
@@ -212,7 +222,13 @@ including legal Java identifiers that themselves contain `$`. The scanner uses
 splitting the binary name on every `$`; a legal top-level `Recipe$1Variant`
 therefore maps to `Recipe$1Variant.java`, while anonymous/local classes and
 every class carrying the JVM
-`ACC_SYNTHETIC` access flag are excluded.
+`ACC_SYNTHETIC` access flag are excluded. A named class whose ownership chain
+passes through any of those excluded classes is also excluded: a binary name
+such as `Outer$1$Key` has no truthful source-level owner, so the scanner never
+reinterprets it as a top-level `$` identifier or invents a source name. Owner
+inspection and named nested `source_class` derivation are both iterative,
+memoized once per archive for inspectability, and fail if a chain exceeds
+1,024 levels instead of relying on Python recursion or reparsing every ancestor.
 If a classified class has no `SourceFile` attribute and `--source` was
 supplied, scanning fails with an unavailable source mapping; it never guesses
 that a package-private binary class lives in a same-named source file.
@@ -239,7 +255,7 @@ candidates, so risk cannot be detached from the class under review.
 
 Recipe interfaces that structurally extend `Recipe` classify as `recipe_classes` before station/resource name terms; abstract non-interface bases remain concrete-gated. Otherwise public-signature validation rejects the audit.
 
-Legacy format-7 through format-15 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
+Legacy format-7 through format-16 audits must be regenerated from the exact same reviewed artifact rather than edited in place:
 
 ```bash
 tools/compat-kit/compat-kit migrate-audit \
@@ -250,7 +266,12 @@ tools/compat-kit/compat-kit migrate-audit \
 ```
 
 Migration rejects a current audit, a different target identity, or different
-artifact bytes. It performs a full current scanner pass and therefore preserves no stale legacy classification.
+artifact bytes. Legacy validation still checks its versioned schema, structural
+digests, target identity, and artifact identity, but does not reapply the
+current candidate classifier to old buckets: classifier drift is the reason an
+explicit migration may be required. The exact artifact is then fully rescanned
+with the current classifier, so no stale legacy classification is preserved or
+used as semantic authorization.
 
 ### 2a. Generate unresolved machine and requirement proposals
 
@@ -403,7 +424,11 @@ exact ancestry dependency-coordinate mapping, and the recipe-data inventory
 digest are all unchanged. New or changed classes
 reopen as `needs_decision`. Removing
 an accepted family fails; removed rejected legacy false positives are reported.
-Target or artifact-SHA drift is rejected.
+Target or artifact-SHA drift is rejected. Because this is the explicit companion
+to `migrate-audit`, `--old-audit` may retain a legacy classifier's buckets;
+migration still validates its versioned schema, persisted structural/target
+digests, contract bindings, and exact artifact identity, while `--new-audit`
+must pass the current classifier without exceptions.
 Format-7 contracts do not contain `source_recipe_data_sha256`, because their
 audits predate recipe-data evidence. This omission is accepted only by
 `migrate-contract` when `--old-audit` is actually format 7. All common families
@@ -743,7 +768,7 @@ the canonical jar through `--classpath`; raw ZIP metadata is not cross-run
 stable. The command fixes entry order, timestamps, storage mode, and permissions.
 Only ModDev outputs are canonicalized automatically; Maven artifacts remain raw
 exact bytes.
-Scanner-format-16 audits persist exact coordinates for reachable compile APIs
+Scanner-format-16 and later audits persist exact coordinates for reachable compile APIs
 under `ancestry_dependencies`; generated addons emit each as non-transitive
 `compileOnly` and `compatKitAncestryArtifacts` dependencies. No post-scaffold
 edit is needed or allowed, and unresolved hashes remain a hard failure. Complete consumers independently rebuild the reachable
@@ -860,7 +885,7 @@ generator's Java/API surface.
 
 ## First dogfood: AE2 Inscriber
 
-The committed AE2 19.2.17 scanner-format-16 audit, migrated contract, generation
+The committed AE2 19.2.17 scanner-format-17 audit, migrated contract, generation
 plan, and generated registration prove this workflow against a real target.
 Structural classification retains 13 reachable ancestry jars and seven exact
 non-transitive compile coordinates, then finds twelve

@@ -26,7 +26,7 @@ but `contract_affected=true` because the target jar bytes differ. This validates
 the conservative delta workflow only; 19.2.16 is not a second CI fixture or a
 compatibility promise.
 
-The committed audit uses Scanner format v16. A complete 92-jar compile
+The committed audit uses Scanner format v17. A complete 92-jar compile
 classpath is supplied to scanning, but the audit retains only the 13 artifacts
 actually reachable from AE2's structural class graph. Seven non-transitive
 compile APIs also carry exact resolvable coordinates: WTHIT API, The One Probe,
@@ -44,7 +44,7 @@ target-class count and graph digest, and validation reconstructs the twelve
 candidate classifications from that complete graph rather than trusting the
 candidate list or two derived hierarchy copies. An artifact/classpath-bound
 structural-candidate digest still binds the structural class inventory. Scanner
-v16's executable JDK-21 verification and inherited implementation-risk pass
+v17's executable JDK-21 verification and inherited implementation-risk pass
 produce deterministic evidence for this exact artifact/classpath set.
 Class-file hierarchy inspection finds exactly twelve concrete `Recipe`
 implementations:

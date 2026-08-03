@@ -25,7 +25,7 @@ module.
 - audit: `compat/audits/productivemetalworks/1.15.0.json`;
 - reviewed contract: `compat/contracts/productivemetalworks.json`.
 
-The scanner-format-16 audit binds 103 target classes, the exact 1,118-recipe
+The scanner-format-17 audit binds 103 target classes, the exact 1,118-recipe
 data inventory, nine reachable non-JDK ancestry artifacts, and eight exact
 ancestry coordinates. The normalized NeoForge/Minecraft platform artifact is
 the ninth ancestry entry and intentionally has no Maven coordinate.
@@ -86,7 +86,7 @@ audited custom recipe type remains fail closed. The descriptor-owned
 compatibility matrix also loads the representative artifact and locks the same
 zero-family boundary plus the per-namespace recipe inventory digest. Loading the present-mod jar still contributes Foundry/casting datapack recipes to `RecipeManager`; those IDs are locked by the descriptor-owned digest rather than a single global recipe count.
 
-The current scanner-format-16 contract passed all 12 Compat Kit checks across
+The current scanner-format-17 contract passed all 12 Compat Kit checks across
 its five declared Gradle commands. The same local gate passed all 554 Python
 tests, 8/8 isolated Productive Metalworks GameTests, 3/3 combined-matrix
 GameTests, the full build, and an idempotent `runData` with zero files written.

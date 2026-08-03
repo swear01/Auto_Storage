@@ -152,7 +152,7 @@
       "const": 1
     },
     "scanner_format": {
-      "const": 16
+      "const": 17
     },
     "kind": {
       "const": "auto_storage_compat_audit"

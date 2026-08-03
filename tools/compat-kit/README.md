@@ -44,7 +44,7 @@ schema-validated before reuse. Complete consumers reject legacy scanner
 formats and require the exact target jar so they can rehash it, rebuild the
 complete sorted class/metadata inventory, derive nested source names from exact
 class metadata, and recompute private-bytecode risk evidence; only explicit migration commands may
-read formats 7 through 15. Complete consumers also rebuild the target jar's
+read formats 7 through 16. Complete consumers also rebuild the target jar's
 recipe source count; when it is the only recipe-data source, the complete
 effective inventory, serializer summary, overrides, and digest must match the
 reopened jar.
@@ -63,7 +63,7 @@ risk-evidence owner must be an audited recipe candidate.
 NeoForge metadata entries are limited to 1 MiB and class entries to 16 MiB
 before decompression. The target is rehashed after inspection so a path
 replacement cannot mix one artifact hash with another artifact's evidence.
-Scanner format 16 structurally classifies concrete `Recipe` and
+Scanner format 17 structurally classifies concrete `Recipe` and
 `RecipeSerializer` implementations. Repeatable `--classpath` jars supply the
 complete non-JDK ancestry of target classes; every unresolved external base
 fails before client/viewer/builder/datagen name classification instead of
@@ -97,8 +97,8 @@ the same bytes are used for validation, parsing, and hashing. Ordered roots
 are inventoried again after source evidence is built and immediately before a
 scan can cache or return, so a persistent in-flight change fails instead of
 producing mixed evidence. Legacy
-formats 7 through 15 remain readable for explicit migration, but current-only
-commands reject them. Format 16 stores each candidate's binary and source-level
+formats 7 through 16 remain readable for explicit migration, but current-only
+commands reject them. Format 17 stores each candidate's binary and source-level
 Java names, structural classification, a separate sorted top-level
 `structural_hierarchy` inventory, and an artifact/classpath-bound structural
 candidate digest. Its `structural_class_graph` starts from every target class
@@ -110,20 +110,32 @@ Java uses the source-level name for named nested classes without rewriting legal
 top-level `$` identifiers. Direct `extends`/`implements` parents
 in the public declaration are also cross-checked without treating generic type
 bounds as direct ancestry.
+Concrete and abstract `BlockEntity` descendants are classified structurally
+before resource or station name terms, so a name such as `FluidConnector` cannot
+override its actual hierarchy.
+Repository-owned complete contracts therefore keep their committed audits at
+the current format; the regression fails on legacy records rather than silently
+skipping modules that complete scaffold/generate/verify can no longer consume.
 Risk scanning separately traverses every reachable non-JDK superclass and
 interface implementation, rather than only the first path from a concrete
 recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
-explicitly rescan an exact format-7 through format-15 artifact;
-identity or SHA drift fails.
+explicitly rescan an exact format-7 through format-16 artifact;
+identity or SHA drift fails. The legacy record's versioned schema and bounded
+structural identities are validated without forcing its candidate buckets
+through the current classifier; only the fresh exact-artifact rescan becomes
+current evidence.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
 decisions only when class identity, public signature, class-owned risk evidence,
 ancestry artifact SHA/size inventory, exact ancestry dependency coordinates,
 and recipe-data inventory are unchanged after that rescan. New or changed
 classes remain unresolved; removing an accepted family fails, while removed
-rejected false positives are reported.
+rejected false positives are reported. This explicit contract migration applies
+the same bounded legacy-classifier exception to `--old-audit`; its schema,
+digests, target/artifact identity, contract bindings, and the current
+`--new-audit` remain strictly validated.
 Format-7 contracts predate recipe-data evidence. Only `migrate-contract`, when
 paired with an actual format-7 old audit, accepts that legacy contract's absent
 `source_recipe_data_sha256`; every common family reopens because the missing
@@ -179,7 +191,11 @@ configured limit plus one byte and terminate `javap` on overflow.
 `RandomGenerator` are recognized.
 Named nested classes are included and mapped to their top-level source even
 when the Java identifier contains `$`; `InnerClasses`/`EnclosingMethod`
-metadata excludes anonymous/local classes. Class files carrying
+metadata excludes anonymous/local classes and every named descendant under an
+excluded owner. A nested owner missing from the same archive fails closed
+instead of accepting an incomplete ownership chain. Owner-chain inspectability
+and named nested `source_class` derivation are both iterative and limited to
+1,024 levels. Class files carrying
 `ACC_SYNTHETIC` and `META-INF/versions/` aliases are also excluded; the root
 binary name is scanned once. Scan and audit validation apply the same current
 name-bucket priority.
@@ -298,7 +314,7 @@ dependencies are non-transitive, and evidence task names are never remapped.
 every audited ancestry jar. Generated and example GitHub Actions workflows pass
 both the target to `verify --jar` and every staged ancestry jar through
 repeatable `--classpath` rather than trusting only the committed audit.
-Scanner-format-16 `ancestry_dependencies` make the generated build emit exact
+Scanner-format-16 and later `ancestry_dependencies` make the generated build emit exact
 non-transitive `compileOnly` and `compatKitAncestryArtifacts` coordinates;
 bundled descriptors likewise include every reachable audited ancestry
 coordinate as a descriptor-owned compile dependency instead of relying on

@@ -30,7 +30,7 @@ is not an exact player dependency pin.
 
 ## Why every family is rejected
 
-Compat Kit scanner format 16 classifies 15 concrete recipe classes (legacy name-bucket audits listed 70 candidates). Every recipe class is rejected:
+Compat Kit scanner format 17 classifies 15 concrete recipe classes (legacy name-bucket audits listed 70 candidates). Every recipe class is rejected:
 
 | Family / candidate group | Result | Reason |
 |---|---|---|

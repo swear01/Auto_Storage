@@ -34,7 +34,7 @@ Advanced AE module. AE2 Inscriber coverage stays in the existing AE2 module.
 - audit: `compat/audits/advanced_ae/1.6.11.json`;
 - reviewed contract: `compat/contracts/advanced_ae.json`.
 
-The committed audit uses current scanner format 16. It binds the complete
+The committed audit uses current scanner format 17. It binds the complete
 target class inventory, 104 jar recipe JSON files and their serializer/data
 digest, the exact public signature and private-bytecode risks of the runtime
 recipe candidate, and ten reachable ancestry artifacts. Nine non-platform
@@ -50,7 +50,7 @@ matrix.
 ## Audited recipe candidate and rejected surfaces
 
 The legacy format-7 scan classified 12 name-shaped candidates. Current
-format-16 structural and recipe-data evidence identifies only
+format-17 structural and recipe-data evidence identifies only
 `ReactionChamberRecipe` as an actual recipe candidate; it is rejected in the
 committed contract. The other eleven entries are preserved below as reviewed
 non-recipe surfaces, but are no longer contract families.

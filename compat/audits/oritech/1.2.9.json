@@ -49,6 +49,307 @@
   "candidates": {
     "block_entity_classes": [
       {
+        "class": "rearth.oritech.api.networking.NetworkedBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"NetworkedBlockEntity.java\"\npublic abstract class rearth.oritech.api.networking.NetworkedBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements net.minecraft.world.level.block.entity.BlockEntityTicker<rearth.oritech.api.networking.NetworkedBlockEntity> {\n  public rearth.oritech.api.networking.NetworkedBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public abstract void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public void clientTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public int getSparseUpdateInterval();\n  public int getTickUpdateInterval();\n  public void setChanged();\n  public void setChanged(boolean);\n  public void preNetworkUpdate(rearth.oritech.api.networking.SyncType);\n  public void sendUpdate(rearth.oritech.api.networking.SyncType);\n  public void sendUpdate(rearth.oritech.api.networking.SyncType, net.minecraft.server.level.ServerPlayer);\n  public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup$Provider);\n  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.entity.BlockEntity);\n}",
+        "source_class": "rearth.oritech.api.networking.NetworkedBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ExpandableEnergyStorageBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity extends rearth.oritech.api.networking.NetworkedBlockEntity implements rearth.oritech.api.energy.EnergyApi$BlockProvider,rearth.oritech.api.item.ItemApi$BlockProvider,rearth.oritech.util.MachineAddonController,rearth.oritech.util.ScreenProvider,dev.architectury.registry.menu.ExtendedMenuProvider {\n  public rearth.oritech.api.energy.containers.DynamicStatisticEnergyStorage$EnergyStatistics currentStats;\n  public final rearth.oritech.api.item.containers.SimpleInventoryStorage inventory;\n  public int rfOutputOverride;\n  public final rearth.oritech.api.energy.containers.DynamicStatisticEnergyStorage energyStorage;\n  public rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public static net.minecraft.util.Tuple<net.minecraft.core.Direction, net.minecraft.core.BlockPos> getOutputPosition(net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void preNetworkUpdate(rearth.oritech.api.networking.SyncType);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryStorage(net.minecraft.core.Direction);\n  public net.minecraft.core.Direction getFacing();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public java.util.List<net.minecraft.core.BlockPos> getConnectedAddons();\n  public java.util.List<net.minecraft.core.BlockPos> getOpenAddonSlots();\n  public net.minecraft.core.Direction getFacingForAddon();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getStorageForAddon();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForAddon();\n  public rearth.oritech.util.ScreenProvider getScreenProvider();\n  public rearth.oritech.util.MachineAddonController$BaseAddonData getBaseAddonData();\n  public void setBaseAddonData(rearth.oritech.util.MachineAddonController$BaseAddonData);\n  public void updateEnergyContainer();\n  public float getDisplayedEnergyTransfer();\n  public abstract long getDefaultExtractionRate();\n  public void saveExtraData(net.minecraft.network.FriendlyByteBuf);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public float getDisplayedEnergyUsage();\n  public float getProgress();\n  public net.minecraft.core.BlockPos getPosForAddon();\n  public net.minecraft.world.level.Level getWorldForAddon();\n  public rearth.oritech.util.InventoryInputMode getInventoryInputMode();\n  public boolean inputOptionsEnabled();\n  public net.minecraft.world.Container getDisplayedInventory();\n  public net.minecraft.world.inventory.MenuType<?> getScreenHandlerType();\n  public boolean showProgress();\n  public net.minecraft.world.level.block.state.properties.Property<net.minecraft.core.Direction> getBlockFacingProperty();\n  public void setRedstonePowered(boolean);\n  public boolean hasRedstoneControlAvailable();\n  public int receivedRedstoneSignal();\n  public java.lang.String currentRedstoneEffect();\n  public rearth.oritech.util.ScreenProvider$BarConfiguration getEnergyConfiguration();\n  public static void handleLimitPacket(rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity$StorageLimitPacket, net.minecraft.world.entity.player.Player, net.minecraft.core.RegistryAccess);\n}",
+        "source_class": "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity",
+            "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity",
+            "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ExpandableMultiblockEnergyStorageBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity extends rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity implements rearth.oritech.util.MultiblockMachineController {\n  public rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.Direction getFacingForMultiblock();\n  public java.util.ArrayList<net.minecraft.core.BlockPos> getConnectedCores();\n  public void setCoreQuality(float);\n  public float getCoreQuality();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForMultiblock();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorageForMultiblock(net.minecraft.core.Direction);\n  public net.minecraft.core.BlockPos getPosForMultiblock();\n  public net.minecraft.world.level.Level getWorldForMultiblock();\n  public void triggerSetupAnimation();\n}",
+        "source_class": "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FluidMultiblockGeneratorBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity extends rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity implements rearth.oritech.api.fluid.FluidApi$BlockProvider {\n  public final rearth.oritech.api.fluid.containers.SimpleFluidStorage fluidStorage;\n  public rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public static java.util.Optional<net.minecraft.world.item.crafting.RecipeHolder<rearth.oritech.init.recipes.OritechRecipe>> getRecipe(rearth.oritech.api.fluid.FluidApi$SingleSlotStorage, net.minecraft.world.level.Level, rearth.oritech.init.recipes.OritechRecipeType);\n  public boolean inputOptionsEnabled();\n  public java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public rearth.oritech.util.InventorySlotAssignment getSlotAssignments();\n  public boolean bucketInputAllowed();\n  public int getInventorySize();\n  public rearth.oritech.api.fluid.FluidApi$FluidStorage getFluidStorage(net.minecraft.core.Direction);\n}",
+        "source_class": "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FrameInteractionBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.FrameInteractionBlockEntity extends rearth.oritech.api.networking.NetworkedBlockEntity {\n  public boolean disabledViaRedstone;\n  public long lastWorkedAt;\n  public net.minecraft.world.phys.Vec3 lastRenderedPosition;\n  public rearth.oritech.block.base.entity.FrameInteractionBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public boolean tryFindFrame();\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public int getTickUpdateInterval();\n  public void cleanup();\n  public abstract void finishBlockWork(net.minecraft.core.BlockPos);\n  public abstract net.minecraft.world.level.block.state.BlockState getMachineHead();\n  public int getFrameOffset();\n  public float getSpeedMultiplier();\n  public net.minecraft.core.BlockPos getAreaMin();\n  public void setAreaMin(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getAreaMax();\n  public void setAreaMax(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getCurrentTarget();\n  public void setCurrentTarget(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getLastTarget();\n  public void setLastTarget(net.minecraft.core.BlockPos);\n  public int getCurrentProgress();\n  public void setCurrentProgress(int);\n  public boolean isActive(net.minecraft.world.level.block.state.BlockState);\n  public boolean isMoving();\n  public void setMoving(boolean);\n  public net.minecraft.core.Vec3i getCurrentDirection();\n  public void setCurrentDirection(net.minecraft.core.Vec3i);\n  public abstract float getMoveTime();\n  public abstract float getWorkTime();\n  public net.minecraft.world.item.ItemStack getToolheadAdditionalRender();\n  public void sendUpdate(rearth.oritech.api.networking.SyncType);\n}",
+        "source_class": "rearth.oritech.block.base.entity.FrameInteractionBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+            "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+            "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ItemEnergyFrameInteractionBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity extends rearth.oritech.block.base.entity.FrameInteractionBlockEntity implements rearth.oritech.api.item.ItemApi$BlockProvider,rearth.oritech.api.energy.EnergyApi$BlockProvider,dev.architectury.registry.menu.ExtendedMenuProvider,rearth.oritech.util.ScreenProvider,rearth.oritech.util.MachineAddonController,rearth.oritech.block.entity.addons.RedstoneAddonBlockEntity$RedstoneControllable {\n  public final rearth.oritech.api.energy.containers.DynamicEnergyStorage energyStorage;\n  public final rearth.oritech.api.item.containers.SimpleInventoryStorage inventory;\n  public rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public abstract int getMoveEnergyUsage();\n  public abstract int getOperationEnergyUsage();\n  public void finishBlockWork(net.minecraft.core.BlockPos);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryStorage(net.minecraft.core.Direction);\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public net.minecraft.core.BlockPos getPosForAddon();\n  public net.minecraft.world.level.Level getWorldForAddon();\n  public void saveExtraData(net.minecraft.network.FriendlyByteBuf);\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public int getInventorySize();\n  public float getProgress();\n  public boolean inputOptionsEnabled();\n  public rearth.oritech.util.InventoryInputMode getInventoryInputMode();\n  public float getDisplayedEnergyUsage();\n  public long getDefaultCapacity();\n  public long getDefaultInsertRate();\n  public net.minecraft.world.Container getDisplayedInventory();\n  public float getDisplayedEnergyTransfer();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForAddon();\n  public rearth.oritech.util.ScreenProvider getScreenProvider();\n  public float getSpeedMultiplier();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getEnergyStorage();\n  public java.util.List<net.minecraft.core.BlockPos> getConnectedAddons();\n  public java.util.List<net.minecraft.core.BlockPos> getOpenAddonSlots();\n  public net.minecraft.core.Direction getFacingForAddon();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getStorageForAddon();\n  public rearth.oritech.util.MachineAddonController$BaseAddonData getBaseAddonData();\n  public void setBaseAddonData(rearth.oritech.util.MachineAddonController$BaseAddonData);\n  public boolean isActivelyWorking();\n  public int getComparatorEnergyAmount();\n  public int getComparatorSlotAmount(int);\n  public int getComparatorProgress();\n  public int getComparatorActiveState();\n  public void onRedstoneEvent(boolean);\n  public int receivedRedstoneSignal();\n  public java.lang.String currentRedstoneEffect();\n}",
+        "source_class": "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.MachineBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"MachineBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.MachineBlockEntity extends rearth.oritech.api.networking.NetworkedBlockEntity implements dev.architectury.registry.menu.ExtendedMenuProvider,software.bernie.geckolib.animatable.GeoBlockEntity,rearth.oritech.api.energy.EnergyApi$BlockProvider,rearth.oritech.util.ScreenProvider,rearth.oritech.api.item.ItemApi$BlockProvider,rearth.oritech.block.entity.addons.RedstoneAddonBlockEntity$RedstoneControllable,rearth.oritech.util.ColorableMachine {\n  public static final software.bernie.geckolib.animation.RawAnimation PACKAGED;\n  public static final software.bernie.geckolib.animation.RawAnimation SETUP;\n  public static final software.bernie.geckolib.animation.RawAnimation IDLE;\n  public static final software.bernie.geckolib.animation.RawAnimation WORKING;\n  public int progress;\n  public long lastWorkedAt;\n  public rearth.oritech.util.ColorableMachine$ColorVariant currentColor;\n  public final rearth.oritech.block.base.entity.MachineBlockEntity$FilteringInventory inventory;\n  public final rearth.oritech.api.energy.containers.DynamicEnergyStorage energyStorage;\n  public rearth.oritech.block.base.entity.MachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public java.util.List<net.minecraft.world.item.ItemStack> getCraftingResults(rearth.oritech.init.recipes.OritechRecipe);\n  public boolean canOutputRecipe(rearth.oritech.init.recipes.OritechRecipe);\n  public abstract rearth.oritech.util.InventorySlotAssignment getSlotAssignments();\n  public void registerControllers(software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar);\n  public software.bernie.geckolib.animation.PlayState onAnimationUpdate(software.bernie.geckolib.animation.AnimationState<rearth.oritech.block.base.entity.MachineBlockEntity>);\n  public boolean isActivelyWorking();\n  public int getAnimationDuration();\n  public int getRecipeDuration();\n  public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache();\n  public void saveExtraData(net.minecraft.network.FriendlyByteBuf);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public abstract java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public float getProgress();\n  public void setProgress(int);\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getEnergyStorage();\n  public rearth.oritech.init.recipes.OritechRecipe getCurrentRecipe();\n  public void setCurrentRecipe(rearth.oritech.init.recipes.OritechRecipe);\n  public float getSpeedMultiplier();\n  public float getEfficiencyMultiplier();\n  public void cycleInputMode();\n  public rearth.oritech.util.InventoryInputMode getInventoryInputMode();\n  public abstract int getInventorySize();\n  public boolean isActive(net.minecraft.world.level.block.state.BlockState);\n  public void setEnergyStored(long);\n  public float getDisplayedEnergyUsage();\n  public long getDefaultCapacity();\n  public long getDefaultInsertRate();\n  public float getDisplayedEnergyTransfer();\n  public long getDefaultExtractionRate();\n  public int getEnergyPerTick();\n  public net.minecraft.world.Container getDisplayedInventory();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryStorage(net.minecraft.core.Direction);\n  public int getComparatorEnergyAmount();\n  public int getComparatorSlotAmount(int);\n  public int getComparatorProgress();\n  public int getComparatorActiveState();\n  public void onRedstoneEvent(boolean);\n  public boolean canEnergyStorageChangeWhileGUIOpen();\n  public rearth.oritech.util.ColorableMachine$ColorVariant getCurrentColor();\n  public void assignColor(rearth.oritech.util.ColorableMachine$ColorVariant);\n  public static void receiveCycleModePacket(rearth.oritech.block.base.entity.MachineBlockEntity$InventoryInputModeSelectorPacket, net.minecraft.world.entity.player.Player, net.minecraft.core.RegistryAccess);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getDirectedStorage(net.minecraft.core.Direction);\n}",
+        "source_class": "rearth.oritech.block.base.entity.MachineBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity",
+            "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+            "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity",
+            "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+            "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"MultiblockFrameInteractionEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity extends rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity implements rearth.oritech.util.MultiblockMachineController {\n  public rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public java.util.ArrayList<net.minecraft.core.BlockPos> getConnectedCores();\n  public net.minecraft.core.Direction getFacingForMultiblock();\n  public void setCoreQuality(float);\n  public float getCoreQuality();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForMultiblock();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorageForMultiblock(net.minecraft.core.Direction);\n  public net.minecraft.core.BlockPos getPosForMultiblock();\n  public net.minecraft.world.level.Level getWorldForMultiblock();\n  public boolean isActive(net.minecraft.world.level.block.state.BlockState);\n  public void triggerSetupAnimation();\n}",
+        "source_class": "rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"MultiblockGeneratorBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity extends rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity implements rearth.oritech.util.MultiblockMachineController {\n  public rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public java.util.ArrayList<net.minecraft.core.BlockPos> getConnectedCores();\n  public net.minecraft.core.Direction getFacingForMultiblock();\n  public void setCoreQuality(float);\n  public float getCoreQuality();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForMultiblock();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorageForMultiblock(net.minecraft.core.Direction);\n  public boolean isActive(net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.core.BlockPos getPosForMultiblock();\n  public net.minecraft.world.level.Level getWorldForMultiblock();\n  public void triggerSetupAnimation();\n}",
+        "source_class": "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.MultiblockMachineEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MultiblockMachineEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.MultiblockMachineEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"MultiblockMachineEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.MultiblockMachineEntity extends rearth.oritech.block.base.entity.UpgradableMachineBlockEntity implements rearth.oritech.util.MultiblockMachineController {\n  public rearth.oritech.block.base.entity.MultiblockMachineEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public java.util.ArrayList<net.minecraft.core.BlockPos> getConnectedCores();\n  public net.minecraft.core.Direction getFacingForMultiblock();\n  public void setCoreQuality(float);\n  public float getCoreQuality();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForMultiblock();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorageForMultiblock(net.minecraft.core.Direction);\n  public net.minecraft.core.BlockPos getPosForMultiblock();\n  public net.minecraft.world.level.Level getWorldForMultiblock();\n  public boolean isActive(net.minecraft.world.level.block.state.BlockState);\n  public static net.minecraft.core.Vec3i worldToRelativePos(net.minecraft.core.Vec3i, net.minecraft.core.Vec3i, net.minecraft.core.Direction);\n  public void triggerSetupAnimation();\n}",
+        "source_class": "rearth.oritech.block.base.entity.MultiblockMachineEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PassiveGeneratorBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements rearth.oritech.api.energy.EnergyApi$BlockProvider, net.minecraft.world.level.block.entity.BlockEntityTicker<rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity> {\n  public rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity);\n  public abstract int getProductionRate();\n  public abstract boolean isProducing();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.entity.BlockEntity);\n}",
+        "source_class": "rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"UpgradableGeneratorBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity extends rearth.oritech.block.base.entity.UpgradableMachineBlockEntity {\n  public int currentMaxBurnTime;\n  public boolean isProducingSteam;\n  public final rearth.oritech.api.fluid.containers.SimpleInOutFluidStorage boilerStorage;\n  public rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public void gatherAddonStats(java.util.List<rearth.oritech.util.MachineAddonController$AddonBlock>);\n  public void getAdditionalStatFromAddon(rearth.oritech.util.MachineAddonController$AddonBlock);\n  public void updateEnergyContainer();\n  public java.util.List<rearth.oritech.api.fluid.FluidApi$SingleSlotStorage> getInteractableFluidStorages();\n  public boolean boilerAcceptsInput(net.minecraft.world.level.material.Fluid);\n  public float getProgress();\n  public int getCurrentMaxBurnTime();\n  public void setCurrentMaxBurnTime(int);\n  public long getDefaultInsertRate();\n  public float getDisplayedEnergyTransfer();\n  public boolean showEnergy();\n}",
+        "source_class": "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+            "rearth.oritech.block.base.entity.MachineBlockEntity",
+            "rearth.oritech.api.networking.NetworkedBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"UpgradableMachineBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.UpgradableMachineBlockEntity extends rearth.oritech.block.base.entity.MachineBlockEntity implements rearth.oritech.util.MachineAddonController {\n  public int remainingBurstTicks;\n  public rearth.oritech.block.base.entity.UpgradableMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void consumeBurstTicks();\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public void addBurstTicks();\n  public boolean supportExtraChambersAuto();\n  public java.util.List<net.minecraft.core.BlockPos> getConnectedAddons();\n  public java.util.List<net.minecraft.core.BlockPos> getOpenAddonSlots();\n  public net.minecraft.core.Direction getFacingForAddon();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getStorageForAddon();\n  public rearth.oritech.util.MachineAddonController$BaseAddonData getBaseAddonData();\n  public net.minecraft.core.BlockPos getPosForAddon();\n  public net.minecraft.world.level.Level getWorldForAddon();\n  public void setBaseAddonData(rearth.oritech.util.MachineAddonController$BaseAddonData);\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForAddon();\n  public rearth.oritech.util.ScreenProvider getScreenProvider();\n  public boolean isBurstAvailable();\n  public boolean isBurstThrottled();\n  public float getBurstBonus();\n  public float getSpeedMultiplier();\n  public float getEfficiencyMultiplier();\n  public int receivedRedstoneSignal();\n  public java.lang.String currentRedstoneEffect();\n}",
+        "source_class": "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity"
+      },
+      {
         "class": "rearth.oritech.block.entity.MachineCoreEntity",
         "classification": {
           "evidence": [
@@ -287,6 +588,25 @@
         },
         "public_signature": "Compiled from \"SteamBoilerAddonBlockEntity.java\"\npublic class rearth.oritech.block.entity.addons.SteamBoilerAddonBlockEntity extends rearth.oritech.block.entity.addons.AddonBlockEntity implements rearth.oritech.api.fluid.FluidApi$BlockProvider {\n  public rearth.oritech.block.entity.addons.SteamBoilerAddonBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public rearth.oritech.api.fluid.FluidApi$FluidStorage getFluidStorage(net.minecraft.core.Direction);\n}",
         "source_class": "rearth.oritech.block.entity.addons.SteamBoilerAddonBlockEntity"
+      },
+      {
+        "class": "rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"BaseSoulCollectionEntity.java\"\npublic abstract class rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity extends net.minecraft.world.level.block.entity.BlockEntity implements net.minecraft.world.level.gameevent.GameEventListener$Provider<rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity$DeathListener> {\n  public rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity$DeathListener getListener();\n  public static float getSoulTravelDuration(float);\n  public abstract boolean canAcceptSoul();\n  public abstract void onSoulIncoming(net.minecraft.world.phys.Vec3);\n  public net.minecraft.world.level.gameevent.GameEventListener getListener();\n}",
+        "source_class": "rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity"
       },
       {
         "class": "rearth.oritech.block.entity.arcane.EnchanterBlockEntity",
@@ -883,6 +1203,27 @@
         "source_class": "rearth.oritech.block.entity.pipes.EnergyPipeInterfaceEntity"
       },
       {
+        "class": "rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity",
+            "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity",
+            "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ExtractablePipeInterfaceEntity.java\"\npublic abstract class rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity extends rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity {\n  public rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void invalidateTargetCache();\n}",
+        "source_class": "rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity"
+      },
+      {
         "class": "rearth.oritech.block.entity.pipes.FluidPipeInterfaceEntity",
         "classification": {
           "evidence": [
@@ -904,6 +1245,25 @@
         },
         "public_signature": "Compiled from \"FluidPipeInterfaceEntity.java\"\npublic class rearth.oritech.block.entity.pipes.FluidPipeInterfaceEntity extends rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity {\n  public static final int MAX_TRANSFER_RATE;\n  public rearth.oritech.block.entity.pipes.FluidPipeInterfaceEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity);\n  public void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.entity.BlockEntity);\n}",
         "source_class": "rearth.oritech.block.entity.pipes.FluidPipeInterfaceEntity"
+      },
+      {
+        "class": "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+        "classification": {
+          "evidence": [
+            "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"GenericPipeInterfaceEntity.java\"\npublic abstract class rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity extends net.minecraft.world.level.block.entity.BlockEntity implements net.minecraft.world.level.block.entity.BlockEntityTicker<rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity> {\n  public static final int MAX_SEARCH_COUNT;\n  public net.minecraft.core.BlockPos connectedBooster;\n  public rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public boolean isBoostAvailable();\n  public void onBoostUsed();\n  public static void addNode(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, boolean, net.minecraft.world.level.block.state.BlockState, rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity$PipeNetworkData);\n  public static void removeNode(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, boolean, net.minecraft.world.level.block.state.BlockState, rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity$PipeNetworkData);\n  public static java.util.Set<net.minecraft.util.Tuple<net.minecraft.core.BlockPos, net.minecraft.core.Direction>> findNetworkTargets(net.minecraft.core.BlockPos, rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity$PipeNetworkData);\n  public static void removeStaleMachinePipeNeighbors(net.minecraft.core.BlockPos, rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity$PipeNetworkData);\n}",
+        "source_class": "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity"
       },
       {
         "class": "rearth.oritech.block.entity.pipes.ItemFilterBlockEntity",
@@ -3842,18 +4202,6 @@
         "source_class": "rearth.oritech.api.networking.NetworkManager.MessagePayload"
       },
       {
-        "class": "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
-        "classification": {
-          "evidence": [
-            "energy"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"ExpandableEnergyStorageBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity extends rearth.oritech.api.networking.NetworkedBlockEntity implements rearth.oritech.api.energy.EnergyApi$BlockProvider,rearth.oritech.api.item.ItemApi$BlockProvider,rearth.oritech.util.MachineAddonController,rearth.oritech.util.ScreenProvider,dev.architectury.registry.menu.ExtendedMenuProvider {\n  public rearth.oritech.api.energy.containers.DynamicStatisticEnergyStorage$EnergyStatistics currentStats;\n  public final rearth.oritech.api.item.containers.SimpleInventoryStorage inventory;\n  public int rfOutputOverride;\n  public final rearth.oritech.api.energy.containers.DynamicStatisticEnergyStorage energyStorage;\n  public rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public static net.minecraft.util.Tuple<net.minecraft.core.Direction, net.minecraft.core.BlockPos> getOutputPosition(net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void preNetworkUpdate(rearth.oritech.api.networking.SyncType);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryStorage(net.minecraft.core.Direction);\n  public net.minecraft.core.Direction getFacing();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public java.util.List<net.minecraft.core.BlockPos> getConnectedAddons();\n  public java.util.List<net.minecraft.core.BlockPos> getOpenAddonSlots();\n  public net.minecraft.core.Direction getFacingForAddon();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getStorageForAddon();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForAddon();\n  public rearth.oritech.util.ScreenProvider getScreenProvider();\n  public rearth.oritech.util.MachineAddonController$BaseAddonData getBaseAddonData();\n  public void setBaseAddonData(rearth.oritech.util.MachineAddonController$BaseAddonData);\n  public void updateEnergyContainer();\n  public float getDisplayedEnergyTransfer();\n  public abstract long getDefaultExtractionRate();\n  public void saveExtraData(net.minecraft.network.FriendlyByteBuf);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public float getDisplayedEnergyUsage();\n  public float getProgress();\n  public net.minecraft.core.BlockPos getPosForAddon();\n  public net.minecraft.world.level.Level getWorldForAddon();\n  public rearth.oritech.util.InventoryInputMode getInventoryInputMode();\n  public boolean inputOptionsEnabled();\n  public net.minecraft.world.Container getDisplayedInventory();\n  public net.minecraft.world.inventory.MenuType<?> getScreenHandlerType();\n  public boolean showProgress();\n  public net.minecraft.world.level.block.state.properties.Property<net.minecraft.core.Direction> getBlockFacingProperty();\n  public void setRedstonePowered(boolean);\n  public boolean hasRedstoneControlAvailable();\n  public int receivedRedstoneSignal();\n  public java.lang.String currentRedstoneEffect();\n  public rearth.oritech.util.ScreenProvider$BarConfiguration getEnergyConfiguration();\n  public static void handleLimitPacket(rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity$StorageLimitPacket, net.minecraft.world.entity.player.Player, net.minecraft.core.RegistryAccess);\n}",
-        "source_class": "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity"
-      },
-      {
         "class": "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity$StorageLimitPacket",
         "classification": {
           "evidence": [
@@ -3864,42 +4212,6 @@
         "hierarchy": null,
         "public_signature": "Compiled from \"ExpandableEnergyStorageBlockEntity.java\"\npublic final class rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity$StorageLimitPacket extends java.lang.Record implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {\n  public static final net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity$StorageLimitPacket> PACKET_ID;\n  public rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity$StorageLimitPacket(net.minecraft.core.BlockPos, int);\n  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<? extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> type();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.core.BlockPos position();\n  public int limit();\n}",
         "source_class": "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity.StorageLimitPacket"
-      },
-      {
-        "class": "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity",
-        "classification": {
-          "evidence": [
-            "energy"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"ExpandableMultiblockEnergyStorageBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity extends rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity implements rearth.oritech.util.MultiblockMachineController {\n  public rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.core.Direction getFacingForMultiblock();\n  public java.util.ArrayList<net.minecraft.core.BlockPos> getConnectedCores();\n  public void setCoreQuality(float);\n  public float getCoreQuality();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForMultiblock();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorageForMultiblock(net.minecraft.core.Direction);\n  public net.minecraft.core.BlockPos getPosForMultiblock();\n  public net.minecraft.world.level.Level getWorldForMultiblock();\n  public void triggerSetupAnimation();\n}",
-        "source_class": "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity"
-      },
-      {
-        "class": "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity",
-        "classification": {
-          "evidence": [
-            "fluid"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"FluidMultiblockGeneratorBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity extends rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity implements rearth.oritech.api.fluid.FluidApi$BlockProvider {\n  public final rearth.oritech.api.fluid.containers.SimpleFluidStorage fluidStorage;\n  public rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public static java.util.Optional<net.minecraft.world.item.crafting.RecipeHolder<rearth.oritech.init.recipes.OritechRecipe>> getRecipe(rearth.oritech.api.fluid.FluidApi$SingleSlotStorage, net.minecraft.world.level.Level, rearth.oritech.init.recipes.OritechRecipeType);\n  public boolean inputOptionsEnabled();\n  public java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public rearth.oritech.util.InventorySlotAssignment getSlotAssignments();\n  public boolean bucketInputAllowed();\n  public int getInventorySize();\n  public rearth.oritech.api.fluid.FluidApi$FluidStorage getFluidStorage(net.minecraft.core.Direction);\n}",
-        "source_class": "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity"
-      },
-      {
-        "class": "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
-        "classification": {
-          "evidence": [
-            "energy"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"ItemEnergyFrameInteractionBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity extends rearth.oritech.block.base.entity.FrameInteractionBlockEntity implements rearth.oritech.api.item.ItemApi$BlockProvider,rearth.oritech.api.energy.EnergyApi$BlockProvider,dev.architectury.registry.menu.ExtendedMenuProvider,rearth.oritech.util.ScreenProvider,rearth.oritech.util.MachineAddonController,rearth.oritech.block.entity.addons.RedstoneAddonBlockEntity$RedstoneControllable {\n  public final rearth.oritech.api.energy.containers.DynamicEnergyStorage energyStorage;\n  public final rearth.oritech.api.item.containers.SimpleInventoryStorage inventory;\n  public rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public abstract int getMoveEnergyUsage();\n  public abstract int getOperationEnergyUsage();\n  public void finishBlockWork(net.minecraft.core.BlockPos);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryStorage(net.minecraft.core.Direction);\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public net.minecraft.core.BlockPos getPosForAddon();\n  public net.minecraft.world.level.Level getWorldForAddon();\n  public void saveExtraData(net.minecraft.network.FriendlyByteBuf);\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public int getInventorySize();\n  public float getProgress();\n  public boolean inputOptionsEnabled();\n  public rearth.oritech.util.InventoryInputMode getInventoryInputMode();\n  public float getDisplayedEnergyUsage();\n  public long getDefaultCapacity();\n  public long getDefaultInsertRate();\n  public net.minecraft.world.Container getDisplayedInventory();\n  public float getDisplayedEnergyTransfer();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForAddon();\n  public rearth.oritech.util.ScreenProvider getScreenProvider();\n  public float getSpeedMultiplier();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getEnergyStorage();\n  public java.util.List<net.minecraft.core.BlockPos> getConnectedAddons();\n  public java.util.List<net.minecraft.core.BlockPos> getOpenAddonSlots();\n  public net.minecraft.core.Direction getFacingForAddon();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getStorageForAddon();\n  public rearth.oritech.util.MachineAddonController$BaseAddonData getBaseAddonData();\n  public void setBaseAddonData(rearth.oritech.util.MachineAddonController$BaseAddonData);\n  public boolean isActivelyWorking();\n  public int getComparatorEnergyAmount();\n  public int getComparatorSlotAmount(int);\n  public int getComparatorProgress();\n  public int getComparatorActiveState();\n  public void onRedstoneEvent(boolean);\n  public int receivedRedstoneSignal();\n  public java.lang.String currentRedstoneEffect();\n}",
-        "source_class": "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity"
       },
       {
         "class": "rearth.oritech.block.blocks.interaction.PowerPoleBlock",
@@ -4492,18 +4804,6 @@
         "source_class": "rearth.oritech.block.base.block.UpgradableMachineBlock"
       },
       {
-        "class": "rearth.oritech.block.base.entity.MachineBlockEntity",
-        "classification": {
-          "evidence": [
-            "machine"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"MachineBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.MachineBlockEntity extends rearth.oritech.api.networking.NetworkedBlockEntity implements dev.architectury.registry.menu.ExtendedMenuProvider,software.bernie.geckolib.animatable.GeoBlockEntity,rearth.oritech.api.energy.EnergyApi$BlockProvider,rearth.oritech.util.ScreenProvider,rearth.oritech.api.item.ItemApi$BlockProvider,rearth.oritech.block.entity.addons.RedstoneAddonBlockEntity$RedstoneControllable,rearth.oritech.util.ColorableMachine {\n  public static final software.bernie.geckolib.animation.RawAnimation PACKAGED;\n  public static final software.bernie.geckolib.animation.RawAnimation SETUP;\n  public static final software.bernie.geckolib.animation.RawAnimation IDLE;\n  public static final software.bernie.geckolib.animation.RawAnimation WORKING;\n  public int progress;\n  public long lastWorkedAt;\n  public rearth.oritech.util.ColorableMachine$ColorVariant currentColor;\n  public final rearth.oritech.block.base.entity.MachineBlockEntity$FilteringInventory inventory;\n  public final rearth.oritech.api.energy.containers.DynamicEnergyStorage energyStorage;\n  public rearth.oritech.block.base.entity.MachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public java.util.List<net.minecraft.world.item.ItemStack> getCraftingResults(rearth.oritech.init.recipes.OritechRecipe);\n  public boolean canOutputRecipe(rearth.oritech.init.recipes.OritechRecipe);\n  public abstract rearth.oritech.util.InventorySlotAssignment getSlotAssignments();\n  public void registerControllers(software.bernie.geckolib.animation.AnimatableManager$ControllerRegistrar);\n  public software.bernie.geckolib.animation.PlayState onAnimationUpdate(software.bernie.geckolib.animation.AnimationState<rearth.oritech.block.base.entity.MachineBlockEntity>);\n  public boolean isActivelyWorking();\n  public int getAnimationDuration();\n  public int getRecipeDuration();\n  public software.bernie.geckolib.animatable.instance.AnimatableInstanceCache getAnimatableInstanceCache();\n  public void saveExtraData(net.minecraft.network.FriendlyByteBuf);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public abstract java.util.List<rearth.oritech.util.ScreenProvider$GuiSlot> getGuiSlots();\n  public float getProgress();\n  public void setProgress(int);\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getEnergyStorage();\n  public rearth.oritech.init.recipes.OritechRecipe getCurrentRecipe();\n  public void setCurrentRecipe(rearth.oritech.init.recipes.OritechRecipe);\n  public float getSpeedMultiplier();\n  public float getEfficiencyMultiplier();\n  public void cycleInputMode();\n  public rearth.oritech.util.InventoryInputMode getInventoryInputMode();\n  public abstract int getInventorySize();\n  public boolean isActive(net.minecraft.world.level.block.state.BlockState);\n  public void setEnergyStored(long);\n  public float getDisplayedEnergyUsage();\n  public long getDefaultCapacity();\n  public long getDefaultInsertRate();\n  public float getDisplayedEnergyTransfer();\n  public long getDefaultExtractionRate();\n  public int getEnergyPerTick();\n  public net.minecraft.world.Container getDisplayedInventory();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryStorage(net.minecraft.core.Direction);\n  public int getComparatorEnergyAmount();\n  public int getComparatorSlotAmount(int);\n  public int getComparatorProgress();\n  public int getComparatorActiveState();\n  public void onRedstoneEvent(boolean);\n  public boolean canEnergyStorageChangeWhileGUIOpen();\n  public rearth.oritech.util.ColorableMachine$ColorVariant getCurrentColor();\n  public void assignColor(rearth.oritech.util.ColorableMachine$ColorVariant);\n  public static void receiveCycleModePacket(rearth.oritech.block.base.entity.MachineBlockEntity$InventoryInputModeSelectorPacket, net.minecraft.world.entity.player.Player, net.minecraft.core.RegistryAccess);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getDirectedStorage(net.minecraft.core.Direction);\n}",
-        "source_class": "rearth.oritech.block.base.entity.MachineBlockEntity"
-      },
-      {
         "class": "rearth.oritech.block.base.entity.MachineBlockEntity$FilteringInventory",
         "classification": {
           "evidence": [
@@ -4526,30 +4826,6 @@
         "hierarchy": null,
         "public_signature": "Compiled from \"MachineBlockEntity.java\"\npublic final class rearth.oritech.block.base.entity.MachineBlockEntity$InventoryInputModeSelectorPacket extends java.lang.Record implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {\n  public static final net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<rearth.oritech.block.base.entity.MachineBlockEntity$InventoryInputModeSelectorPacket> PACKET_ID;\n  public rearth.oritech.block.base.entity.MachineBlockEntity$InventoryInputModeSelectorPacket(net.minecraft.core.BlockPos);\n  public net.minecraft.network.protocol.common.custom.CustomPacketPayload$Type<? extends net.minecraft.network.protocol.common.custom.CustomPacketPayload> type();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.core.BlockPos position();\n}",
         "source_class": "rearth.oritech.block.base.entity.MachineBlockEntity.InventoryInputModeSelectorPacket"
-      },
-      {
-        "class": "rearth.oritech.block.base.entity.MultiblockMachineEntity",
-        "classification": {
-          "evidence": [
-            "machine"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"MultiblockMachineEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.MultiblockMachineEntity extends rearth.oritech.block.base.entity.UpgradableMachineBlockEntity implements rearth.oritech.util.MultiblockMachineController {\n  public rearth.oritech.block.base.entity.MultiblockMachineEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public java.util.ArrayList<net.minecraft.core.BlockPos> getConnectedCores();\n  public net.minecraft.core.Direction getFacingForMultiblock();\n  public void setCoreQuality(float);\n  public float getCoreQuality();\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForMultiblock();\n  public rearth.oritech.api.energy.EnergyApi$EnergyStorage getEnergyStorageForMultiblock(net.minecraft.core.Direction);\n  public net.minecraft.core.BlockPos getPosForMultiblock();\n  public net.minecraft.world.level.Level getWorldForMultiblock();\n  public boolean isActive(net.minecraft.world.level.block.state.BlockState);\n  public static net.minecraft.core.Vec3i worldToRelativePos(net.minecraft.core.Vec3i, net.minecraft.core.Vec3i, net.minecraft.core.Direction);\n  public void triggerSetupAnimation();\n}",
-        "source_class": "rearth.oritech.block.base.entity.MultiblockMachineEntity"
-      },
-      {
-        "class": "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
-        "classification": {
-          "evidence": [
-            "machine"
-          ],
-          "method": "name_term"
-        },
-        "hierarchy": null,
-        "public_signature": "Compiled from \"UpgradableMachineBlockEntity.java\"\npublic abstract class rearth.oritech.block.base.entity.UpgradableMachineBlockEntity extends rearth.oritech.block.base.entity.MachineBlockEntity implements rearth.oritech.util.MachineAddonController {\n  public int remainingBurstTicks;\n  public rearth.oritech.block.base.entity.UpgradableMachineBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void consumeBurstTicks();\n  public void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, rearth.oritech.api.networking.NetworkedBlockEntity);\n  public void addBurstTicks();\n  public boolean supportExtraChambersAuto();\n  public java.util.List<net.minecraft.core.BlockPos> getConnectedAddons();\n  public java.util.List<net.minecraft.core.BlockPos> getOpenAddonSlots();\n  public net.minecraft.core.Direction getFacingForAddon();\n  public rearth.oritech.api.energy.containers.DynamicEnergyStorage getStorageForAddon();\n  public rearth.oritech.util.MachineAddonController$BaseAddonData getBaseAddonData();\n  public net.minecraft.core.BlockPos getPosForAddon();\n  public net.minecraft.world.level.Level getWorldForAddon();\n  public void setBaseAddonData(rearth.oritech.util.MachineAddonController$BaseAddonData);\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public rearth.oritech.api.item.ItemApi$InventoryStorage getInventoryForAddon();\n  public rearth.oritech.util.ScreenProvider getScreenProvider();\n  public boolean isBurstAvailable();\n  public boolean isBurstThrottled();\n  public float getBurstBonus();\n  public float getSpeedMultiplier();\n  public float getEfficiencyMultiplier();\n  public int receivedRedstoneSignal();\n  public java.lang.String currentRedstoneEffect();\n}",
-        "source_class": "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity"
       },
       {
         "class": "rearth.oritech.block.blocks.addons.MachineAddonBlock",
@@ -6142,7 +6418,7 @@
       ]
     }
   ],
-  "scanner_format": 16,
+  "scanner_format": 17,
   "schema": 1,
   "source": {
     "files": [
@@ -6162,6 +6438,7 @@
       "common/src/main/java/rearth/oritech/api/fluid/containers/SimpleInOutFluidStorage.java",
       "common/src/main/java/rearth/oritech/api/fluid/containers/SimpleItemFluidStorage.java",
       "common/src/main/java/rearth/oritech/api/networking/NetworkManager.java",
+      "common/src/main/java/rearth/oritech/api/networking/NetworkedBlockEntity.java",
       "common/src/main/java/rearth/oritech/api/recipe/AssemblerRecipeBuilder.java",
       "common/src/main/java/rearth/oritech/api/recipe/AtomicForgeRecipeBuilder.java",
       "common/src/main/java/rearth/oritech/api/recipe/AugmentRecipeBuilder.java",
@@ -6193,9 +6470,14 @@
       "common/src/main/java/rearth/oritech/block/base/entity/ExpandableEnergyStorageBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/base/entity/ExpandableMultiblockEnergyStorageBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/base/entity/FluidMultiblockGeneratorBlockEntity.java",
+      "common/src/main/java/rearth/oritech/block/base/entity/FrameInteractionBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/base/entity/ItemEnergyFrameInteractionBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/base/entity/MachineBlockEntity.java",
+      "common/src/main/java/rearth/oritech/block/base/entity/MultiblockFrameInteractionEntity.java",
+      "common/src/main/java/rearth/oritech/block/base/entity/MultiblockGeneratorBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/base/entity/MultiblockMachineEntity.java",
+      "common/src/main/java/rearth/oritech/block/base/entity/PassiveGeneratorBlockEntity.java",
+      "common/src/main/java/rearth/oritech/block/base/entity/UpgradableGeneratorBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/base/entity/UpgradableMachineBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/blocks/addons/MachineAddonBlock.java",
       "common/src/main/java/rearth/oritech/block/blocks/augmenter/AugmentResearchStationBlock.java",
@@ -6228,6 +6510,7 @@
       "common/src/main/java/rearth/oritech/block/entity/addons/InventoryProxyAddonBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/addons/RedstoneAddonBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/addons/SteamBoilerAddonBlockEntity.java",
+      "common/src/main/java/rearth/oritech/block/entity/arcane/BaseSoulCollectionEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/arcane/EnchanterBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/arcane/EnchantmentCatalystBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/arcane/SpawnerControllerBlockEntity.java",
@@ -6255,7 +6538,9 @@
       "common/src/main/java/rearth/oritech/block/entity/interaction/ShrinkerBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/interaction/TreefellerBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/pipes/EnergyPipeInterfaceEntity.java",
+      "common/src/main/java/rearth/oritech/block/entity/pipes/ExtractablePipeInterfaceEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/pipes/FluidPipeInterfaceEntity.java",
+      "common/src/main/java/rearth/oritech/block/entity/pipes/GenericPipeInterfaceEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/pipes/ItemFilterBlockEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/pipes/ItemPipeInterfaceEntity.java",
       "common/src/main/java/rearth/oritech/block/entity/processing/AssemblerBlockEntity.java",
@@ -6416,7 +6701,7 @@
     ],
     "revision": "fdbab1b00602a2d74bb94250bf0cec99baf54616"
   },
-  "structural_candidate_inventory_sha256": "8ed30e71072f3a64c95cefb84ea382ca6e0e0894afbd0d947f0aa1fc9271a285",
+  "structural_candidate_inventory_sha256": "144e74d0c6cfe2fe94be360ae648dd43a60efc583553eb10752215bc5e47da92",
   "structural_class_graph": [
     {
       "class": "dev.architectury.core.block.ArchitecturyLiquidBlock",
@@ -14309,6 +14594,163 @@
   ],
   "structural_hierarchy": [
     {
+      "class": "rearth.oritech.api.networking.NetworkedBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.ExpandableMultiblockEnergyStorageBlockEntity",
+          "rearth.oritech.block.base.entity.ExpandableEnergyStorageBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.FluidMultiblockGeneratorBlockEntity",
+          "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+          "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+          "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+          "rearth.oritech.block.base.entity.MachineBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+          "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.MachineBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.MachineBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.MultiblockFrameInteractionEntity",
+          "rearth.oritech.block.base.entity.ItemEnergyFrameInteractionBlockEntity",
+          "rearth.oritech.block.base.entity.FrameInteractionBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.MultiblockGeneratorBlockEntity",
+          "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+          "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+          "rearth.oritech.block.base.entity.MachineBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.MultiblockMachineEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.MultiblockMachineEntity",
+          "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+          "rearth.oritech.block.base.entity.MachineBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.PassiveGeneratorBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.UpgradableGeneratorBlockEntity",
+          "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+          "rearth.oritech.block.base.entity.MachineBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.base.entity.UpgradableMachineBlockEntity",
+          "rearth.oritech.block.base.entity.MachineBlockEntity",
+          "rearth.oritech.api.networking.NetworkedBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "rearth.oritech.block.entity.MachineCoreEntity",
       "classification": {
         "evidence": [
@@ -14429,6 +14871,16 @@
         "evidence": [
           "rearth.oritech.block.entity.addons.SteamBoilerAddonBlockEntity",
           "rearth.oritech.block.entity.addons.AddonBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.entity.arcane.BaseSoulCollectionEntity",
           "net.minecraft.world.level.block.entity.BlockEntity"
         ],
         "method": "class_hierarchy"
@@ -14745,11 +15197,32 @@
       }
     },
     {
+      "class": "rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity",
+      "classification": {
+        "evidence": [
+          "rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity",
+          "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "rearth.oritech.block.entity.pipes.FluidPipeInterfaceEntity",
       "classification": {
         "evidence": [
           "rearth.oritech.block.entity.pipes.FluidPipeInterfaceEntity",
           "rearth.oritech.block.entity.pipes.ExtractablePipeInterfaceEntity",
+          "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
+      "classification": {
+        "evidence": [
           "rearth.oritech.block.entity.pipes.GenericPipeInterfaceEntity",
           "net.minecraft.world.level.block.entity.BlockEntity"
         ],

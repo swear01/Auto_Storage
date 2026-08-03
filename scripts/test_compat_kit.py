@@ -269,6 +269,9 @@ class CompatKitAuditTests(unittest.TestCase):
         for audit_path in sorted((ROOT / "compat/audits").glob("*/*.json")):
             audit = json.loads(audit_path.read_text())
             if audit["scanner_format"] != self.compat_kit.SCAN_CACHE_VERSION:
+                failures.append(
+                    f"{audit_path.relative_to(ROOT)}: committed audit is not current"
+                )
                 continue
             try:
                 self.compat_kit._validate_audit(audit)
@@ -597,6 +600,139 @@ class CompatKitAuditTests(unittest.TestCase):
                     [class_name],
                     [entry["class"] for entry in audit["candidates"][bucket]],
                 )
+
+    def test_scan_classifies_abstract_block_entity_before_resource_name_terms(self):
+        structural_jar = self.root / "samplemod-abstract-block-entity.jar"
+        write_fixture_jar(structural_jar)
+        class_name = "samplemod.machine.LogisticsFluidConnectorBlockEntity"
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                class_name.replace(".", "/") + ".class",
+                b"abstract block entity with a resource-shaped name",
+            )
+
+        audit = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=lambda current: (
+                f"public abstract class {current} extends "
+                "net.minecraft.world.level.block.entity.BlockEntity { }"
+                if current == class_name
+                else f"public final class {current} {{ }}"
+            ),
+            risk_reader=lambda current: f"public class {current} {{ }}",
+            class_metadata_reader=lambda current: (
+                {
+                    "access_flags": 0x0400,
+                    "super_class": (
+                        "net.minecraft.world.level.block.entity.BlockEntity"
+                    ),
+                    "interfaces": [],
+                }
+                if current == class_name
+                else {
+                    "access_flags": 0,
+                    "super_class": "java.lang.Object",
+                    "interfaces": [],
+                }
+            ),
+        )
+
+        self.assertEqual(
+            [class_name],
+            [
+                entry["class"]
+                for entry in audit["candidates"]["block_entity_classes"]
+            ],
+        )
+        self.assertNotIn(
+            class_name,
+            [entry["class"] for entry in audit["candidates"]["resource_apis"]],
+        )
+
+    def test_migrate_audit_rescans_legacy_candidate_classifier_drift(self):
+        structural_jar = self.root / "samplemod-legacy-abstract-block-entity.jar"
+        write_fixture_jar(structural_jar)
+        class_name = "samplemod.machine.LogisticsFluidConnectorBlockEntity"
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                class_name.replace(".", "/") + ".class",
+                b"abstract block entity with a resource-shaped name",
+            )
+
+        metadata = lambda current: (
+            {
+                "access_flags": 0x0400,
+                "super_class": "net.minecraft.world.level.block.entity.BlockEntity",
+                "interfaces": [],
+            }
+            if current == class_name
+            else {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": [],
+            }
+        )
+        signature = lambda current: (
+            f"public abstract class {current} extends "
+            "net.minecraft.world.level.block.entity.BlockEntity { }"
+            if current == class_name
+            else f"public final class {current} {{ }}"
+        )
+        current = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=signature,
+            risk_reader=lambda current: f"public class {current} {{ }}",
+            class_metadata_reader=metadata,
+        )
+        legacy = copy.deepcopy(current)
+        legacy["scanner_format"] = 16
+        candidate = next(
+            entry
+            for entry in legacy["candidates"]["block_entity_classes"]
+            if entry["class"] == class_name
+        )
+        legacy["candidates"]["block_entity_classes"].remove(candidate)
+        candidate["classification"] = {
+            "method": "name_term",
+            "evidence": ["fluid"],
+        }
+        candidate["hierarchy"] = None
+        legacy["candidates"]["resource_apis"].append(candidate)
+        legacy["candidates"]["resource_apis"].sort(
+            key=lambda entry: entry["class"]
+        )
+        legacy["structural_hierarchy"] = [
+            entry
+            for entry in legacy["structural_hierarchy"]
+            if entry["class"] != class_name
+        ]
+        legacy["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                legacy["artifact"],
+                legacy["ancestry_classpath"],
+                legacy["structural_hierarchy"],
+            )
+        )
+
+        migrated = self.compat_kit.migrate_audit(
+            legacy,
+            structural_jar,
+            signature_reader=signature,
+            risk_reader=lambda current: f"public class {current} {{ }}",
+            class_metadata_reader=metadata,
+        )
+
+        self.assertIn(
+            class_name,
+            [
+                entry["class"]
+                for entry in migrated["candidates"]["block_entity_classes"]
+            ],
+        )
+        self.assertNotIn(
+            class_name,
+            [entry["class"] for entry in migrated["candidates"]["resource_apis"]],
+        )
 
     def test_scan_resolves_real_transitive_recipe_hierarchy_without_name_guessing(self):
         structural_jar = self.root / "samplemod-real-structural.jar"
@@ -1577,7 +1713,7 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
     def test_risk_evidence_detects_modern_java_random_generators(self):
-        self.assertEqual(16, self.compat_kit.SCAN_CACHE_VERSION)
+        self.assertEqual(17, self.compat_kit.SCAN_CACHE_VERSION)
         risks = self.compat_kit._risk_evidence(
             [
                 {
@@ -1875,7 +2011,7 @@ class CompatKitAuditTests(unittest.TestCase):
         stale = (
             cache
             / artifact_sha
-            / f"v{self.compat_kit.SCAN_CACHE_VERSION}"
+            / f"v{self.compat_kit.SCAN_CACHE_VERSION}-classifier-3"
             / "audit.json"
         )
         stale.parent.mkdir(parents=True)
@@ -2306,6 +2442,29 @@ class CompatKitAuditTests(unittest.TestCase):
             "unsupported audit scanner format",
         ):
             self.compat_kit._validate_audit(audit)
+
+    def test_candidate_classifier_change_advances_persisted_scanner_format(self):
+        audit = self.compat_kit.scan_jar(
+            self.jar,
+            signature_reader=self.signatures,
+        )
+
+        self.assertEqual(17, audit["scanner_format"])
+        stale = copy.deepcopy(audit)
+        stale["scanner_format"] = 16
+        with self.assertRaisesRegex(ValueError, "current scanner-format audit"):
+            self.compat_kit.validate_contract(
+                self.accepted_contract(),
+                require_complete=True,
+                source_audit=stale,
+                source_artifact=self.jar,
+            )
+        migrated = self.compat_kit.migrate_audit(
+            stale,
+            self.jar,
+            signature_reader=self.signatures,
+        )
+        self.assertEqual(17, migrated["scanner_format"])
 
     def test_complete_contract_requires_current_scanner_format_audit(self):
         current_audit = self.source_audit()
@@ -2861,6 +3020,237 @@ class CompatKitAuditTests(unittest.TestCase):
             recipes["samplemod.recipe.DollarRecipes$$Recipe"],
         )
         self.assertFalse(any("$1" in class_name for class_name in recipes))
+
+    def test_named_nested_class_under_anonymous_owner_is_handled_without_invented_source_name(self):
+        source = self.root / "anonymous-owner-source"
+        classes = self.root / "anonymous-owner-classes"
+        conveyor = source / "samplemod/client/ModelConveyor.java"
+        conveyor.parent.mkdir(parents=True)
+        conveyor.write_text(
+            "package samplemod.client; public final class ModelConveyor { "
+            "public static Object create() { return new Object() { "
+            "final class Key {} final Key key = new Key(); }; } }\n"
+        )
+        classes.mkdir()
+        subprocess.run(
+            ["javac", "-d", str(classes), str(conveyor)],
+            check=True,
+        )
+        nested_class = "samplemod.client.ModelConveyor$1$Key"
+        self.assertTrue(
+            (classes / "samplemod/client/ModelConveyor$1$Key.class").is_file()
+        )
+        target_jar = self.root / "samplemod-anonymous-owner.jar"
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="samplemod"\nversion="1.2.3"\n'
+                'displayName="Sample Machines"\n',
+            )
+            for class_file in sorted(classes.rglob("*.class")):
+                archive.write(
+                    class_file,
+                    class_file.relative_to(classes).as_posix(),
+                )
+
+        audit = self.compat_kit.scan_jar(target_jar)
+
+        source_classes = {
+            candidate["class"]: candidate["source_class"]
+            for records in audit["candidates"].values()
+            for candidate in records
+        }
+        self.assertEqual(
+            {
+                "samplemod.client.ModelConveyor": (
+                    "samplemod.client.ModelConveyor"
+                )
+            },
+            source_classes,
+        )
+        self.assertNotIn(nested_class, source_classes)
+        self.assertNotIn(
+            nested_class,
+            {record["class"] for record in audit["structural_class_graph"]},
+        )
+
+    def test_classpath_rejects_nested_owner_split_across_archives(self):
+        child_jar = self.root / "split-nested-child.jar"
+        owner_jar = self.root / "split-nested-owner.jar"
+        child_entry = "samplemod/Outer$1$Key.class"
+        owner_entry = "samplemod/Outer$1.class"
+        with zipfile.ZipFile(child_jar, "w") as archive:
+            archive.writestr(child_entry, b"child")
+        with zipfile.ZipFile(owner_jar, "w") as archive:
+            archive.writestr(owner_entry, b"owner")
+
+        def metadata(_payload: bytes, entry_name: str):
+            if entry_name == child_entry:
+                return {
+                    "access_flags": 0,
+                    "super_class": None,
+                    "interfaces": [],
+                    "inner_class_entry": True,
+                    "inner_name": "Key",
+                    "outer_class": "samplemod.Outer$1",
+                    "enclosing_method": False,
+                    "source_file": "Outer.java",
+                }
+            return {
+                "access_flags": 0,
+                "super_class": None,
+                "interfaces": [],
+                "inner_class_entry": True,
+                "inner_name": None,
+                "outer_class": "samplemod.Outer",
+                "enclosing_method": True,
+                "source_file": "Outer.java",
+            }
+
+        with mock.patch.object(
+            self.compat_kit,
+            "_class_metadata",
+            side_effect=metadata,
+        ):
+            with self.assertRaisesRegex(
+                ValueError,
+                "nested class owner is missing from its archive",
+            ):
+                self.compat_kit._classpath_metadata([child_jar, owner_jar])
+
+    def test_nested_owner_depth_fails_with_bounded_validation_error(self):
+        target_jar = self.root / "deep-nested-owner.jar"
+        entries = [f"samplemod/Owner{index}.class" for index in range(1026)]
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            for entry_name in entries:
+                archive.writestr(entry_name, b"class")
+
+        def metadata(_payload: bytes, entry_name: str):
+            index = int(
+                entry_name.removeprefix("samplemod/Owner").removesuffix(".class")
+            )
+            return {
+                "access_flags": 0,
+                "super_class": None,
+                "interfaces": [],
+                "inner_class_entry": index > 0,
+                "inner_name": f"Owner{index}" if index > 0 else None,
+                "outer_class": (
+                    f"samplemod.Owner{index - 1}" if index > 0 else None
+                ),
+                "enclosing_method": False,
+                "source_file": "Owner0.java",
+            }
+
+        with zipfile.ZipFile(target_jar) as archive:
+            with mock.patch.object(
+                self.compat_kit,
+                "_class_metadata",
+                side_effect=metadata,
+            ):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "nested class ownership exceeds 1024 levels",
+                ):
+                    self.compat_kit._is_inspectable_class(
+                        archive,
+                        entries[-1],
+                    )
+
+    def test_candidate_source_class_maps_deep_owner_chain_iteratively(self):
+        depth = 1000
+        metadata_by_class = {
+            "samplemod.Owner0": {
+                "inner_class_entry": False,
+                "inner_name": None,
+                "outer_class": None,
+            }
+        }
+        for index in range(1, depth + 1):
+            metadata_by_class[f"samplemod.Owner{index}"] = {
+                "inner_class_entry": True,
+                "inner_name": f"Owner{index}",
+                "outer_class": f"samplemod.Owner{index - 1}",
+            }
+        expected = "samplemod.Owner0." + ".".join(
+            f"Owner{index}" for index in range(1, depth + 1)
+        )
+        self.assertEqual(
+            expected,
+            self.compat_kit._candidate_source_class(
+                f"samplemod.Owner{depth}",
+                metadata_by_class,
+            ),
+        )
+
+    def test_candidate_source_class_rejects_owner_chain_past_depth_limit(self):
+        depth = self.compat_kit.MAX_NESTED_CLASS_OWNER_DEPTH + 1
+        metadata_by_class = {
+            "samplemod.Owner0": {
+                "inner_class_entry": False,
+                "inner_name": None,
+                "outer_class": None,
+            }
+        }
+        for index in range(1, depth + 1):
+            metadata_by_class[f"samplemod.Owner{index}"] = {
+                "inner_class_entry": True,
+                "inner_name": f"Owner{index}",
+                "outer_class": f"samplemod.Owner{index - 1}",
+            }
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "nested class ownership exceeds 1024 levels",
+        ):
+            self.compat_kit._candidate_source_class(
+                f"samplemod.Owner{depth}",
+                metadata_by_class,
+            )
+
+    def test_nested_owner_inspection_memoizes_each_class(self):
+        target_jar = self.root / "memoized-nested-owner.jar"
+        entries = [f"samplemod/Owner{index}.class" for index in range(64)]
+        with zipfile.ZipFile(target_jar, "w") as archive:
+            for entry_name in entries:
+                archive.writestr(entry_name, b"class")
+        metadata_reads = 0
+
+        def metadata(_payload: bytes, entry_name: str):
+            nonlocal metadata_reads
+            metadata_reads += 1
+            index = int(
+                entry_name.removeprefix("samplemod/Owner").removesuffix(".class")
+            )
+            return {
+                "access_flags": 0,
+                "super_class": None,
+                "interfaces": [],
+                "inner_class_entry": index > 0,
+                "inner_name": f"Owner{index}" if index > 0 else None,
+                "outer_class": (
+                    f"samplemod.Owner{index - 1}" if index > 0 else None
+                ),
+                "enclosing_method": False,
+                "source_file": "Owner0.java",
+            }
+
+        inspectable_cache = {}
+        with zipfile.ZipFile(target_jar) as archive:
+            with mock.patch.object(
+                self.compat_kit,
+                "_class_metadata",
+                side_effect=metadata,
+            ):
+                for entry_name in reversed(entries):
+                    self.assertTrue(self.compat_kit._is_inspectable_class(
+                        archive,
+                        entry_name,
+                        inspectable_cache=inspectable_cache,
+                    ))
+
+        self.assertEqual(len(entries), metadata_reads)
 
     def test_scan_recognizes_jdk_module_ancestry_outside_java_prefixes(self):
         source = self.root / "jdk-ancestry-source"
@@ -4822,6 +5212,33 @@ displayName="Sample Machines"
             "next-actions.md",
         ])
         self.assertEqual("migrate-contract", args.command)
+
+    def test_migrate_contract_accepts_legacy_candidate_classifier_drift(self):
+        current_audit = self.source_audit()
+        legacy_audit = copy.deepcopy(current_audit)
+        legacy_audit["scanner_format"] = 16
+        fluid_class = "samplemod.api.FluidHandler"
+        fluid_graph = next(
+            entry
+            for entry in legacy_audit["structural_class_graph"]
+            if entry["class"] == fluid_class
+        )
+        fluid_graph["metadata"] = {
+            "access_flags": 0x0400,
+            "super_class": "net.minecraft.world.level.block.entity.BlockEntity",
+            "interfaces": [],
+        }
+        self.refresh_audit_target_class_inventory(legacy_audit)
+        old_contract = self.accepted_contract()
+
+        migrated, actions = self.compat_kit.migrate_contract(
+            old_contract,
+            legacy_audit,
+            current_audit,
+        )
+
+        self.assertEqual(old_contract, migrated)
+        self.assertIn("No unresolved recipe families", actions)
 
     def test_migrate_contract_accepts_format_7_contract_and_reopens_missing_evidence(self):
         current_audit = self.source_audit()

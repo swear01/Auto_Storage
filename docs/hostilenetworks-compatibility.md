@@ -24,7 +24,7 @@ Auto Storage's built-in exact crafting families without a custom module.
   `1a844a5b081813b1edb82656329e54d38389ed470f6a6516a5887f5303d7daad`);
 - official source: https://github.com/Shadows-of-Fire/Hostile-Neural-Networks
   commit `54a1d8e15abc215e164b2247d7a3b72ad0310ebe` (`version=6.5.0`);
-- scanner-format-16 audit: `compat/audits/hostilenetworks/6.5.0.json`;
+- scanner-format-17 audit: `compat/audits/hostilenetworks/6.5.0.json`;
 - reviewed contract: `compat/contracts/hostilenetworks.json`;
 - reachable ancestry retained by the audit: Placebo, Jade, and JEI common API
   plus the shared NeoForge/Minecraft binary-pipeline platform jar.
@@ -41,7 +41,7 @@ multi-version matrix.
 
 ## Audited recipe candidates
 
-Scanner format 16 classifies **zero** actual `Recipe` classes. Migration from
+Scanner format 17 classifies **zero** actual `Recipe` classes. Migration from
 the legacy format-7 audit removed two name-shaped non-recipe surfaces that are
 no longer treated as recipe-family candidates:
 

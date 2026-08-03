@@ -28,7 +28,7 @@ ships under its namespace remain covered by Auto Storage's built-in families.
 - audit: `compat/audits/productivebees/13.13.5.json`;
 - reviewed contract: `compat/contracts/productivebees.json`.
 
-The committed audit uses scanner format 16. It binds all 1,702 declared and
+The committed audit uses scanner format 17. It binds all 1,702 declared and
 effective recipe JSON files across 74 serializers with data digest
 `22b4ffb8f346abbddb694c431a664eae055670cb64467ec2b86a8ea31bbc87db`,
 the complete target class inventory, official source, structural hierarchy,
@@ -57,7 +57,7 @@ matrix.
 ## Audited recipe candidates
 
 The legacy format-7 scan classified 71 name-shaped candidates. Current
-format-16 structure identifies exactly 16 actual `Recipe` classes; all 16 were
+format-17 structure identifies exactly 16 actual `Recipe` classes; all 16 were
 manually re-reviewed against their official source and runtime use sites, then
 rejected in the committed contract:
 

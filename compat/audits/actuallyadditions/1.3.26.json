@@ -75,6 +75,25 @@
         "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityAtomicReconstructor"
       },
       {
+        "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+        "classification": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TileEntityBase.java\"\npublic abstract class de.ellpeck.actuallyadditions.mod.tile.TileEntityBase extends net.minecraft.world.level.block.entity.BlockEntity {\n  public boolean isRedstonePowered;\n  public boolean isPulseMode;\n  public boolean stopFromDropping;\n  public de.ellpeck.actuallyadditions.mod.tile.TileEntityBase(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket();\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n  public final net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup$Provider);\n  public void handleUpdateTag(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public final void sendUpdate();\n  public void writeSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n  public void readSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n  public int getComparatorStrength();\n  public void saveDataOnChangeOrWorldStart();\n  public boolean shouldSaveDataOnChangeOrWorldStart();\n  public void setRedstonePowered(boolean);\n  public boolean canPlayerUse(net.minecraft.world.entity.player.Player);\n  public net.neoforged.neoforge.fluids.capability.IFluidHandler getFluidHandler(net.minecraft.core.Direction);\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler(net.minecraft.core.Direction);\n  public boolean isRedstoneToggle();\n  public void activateOnPulse();\n  public boolean respondsToPulses();\n  public net.minecraft.network.protocol.Packet getUpdatePacket();\n}",
+        "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase"
+      },
+      {
         "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityBatteryBox",
         "classification": {
           "evidence": [
@@ -529,6 +548,27 @@
         "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityHeatCollector"
       },
       {
+        "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+        "classification": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TileEntityInventoryBase.java\"\npublic abstract class de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase extends de.ellpeck.actuallyadditions.mod.tile.TileEntityBase {\n  public final de.ellpeck.actuallyadditions.mod.util.ItemStackHandlerAA inv;\n  public de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, int);\n  public void writeSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler(net.minecraft.core.Direction);\n  public de.ellpeck.actuallyadditions.mod.util.ItemStackHandlerAA$IAcceptor getAcceptor();\n  public de.ellpeck.actuallyadditions.mod.util.ItemStackHandlerAA$IRemover getRemover();\n  public int getMaxStackSize(int);\n  public boolean shouldSyncSlots();\n  public void setChanged();\n  public int getComparatorStrength();\n  public void readSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n}",
+        "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase"
+      },
+      {
         "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterface",
         "classification": {
           "evidence": [
@@ -571,6 +611,29 @@
         },
         "public_signature": "Compiled from \"TileEntityItemInterfaceHopping.java\"\npublic class de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterfaceHopping extends de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterface {\n  public de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterfaceHopping(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static <T extends net.minecraft.world.level.block.entity.BlockEntity> void clientTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, T);\n  public static <T extends net.minecraft.world.level.block.entity.BlockEntity> void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, T);\n  public void saveDataOnChangeOrWorldStart();\n}",
         "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterfaceHopping"
+      },
+      {
+        "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay",
+        "classification": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TileEntityLaserRelay.java\"\npublic abstract class de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay extends de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase {\n  public static final int MAX_DISTANCE;\n  public static final int MAX_DISTANCE_RANGED;\n  public final de.ellpeck.actuallyadditions.api.laser.LaserType type;\n  public de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, de.ellpeck.actuallyadditions.api.laser.LaserType);\n  public void readSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n  public void writeSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n  public de.ellpeck.actuallyadditions.api.laser.Network getNetwork();\n  public boolean shouldSyncSlots();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler(net.minecraft.core.Direction);\n  public int getMaxRange();\n  public abstract net.minecraft.network.chat.Component getExtraDisplayString();\n  public abstract net.minecraft.network.chat.Component getCompassDisplayString();\n  public abstract void onCompassAction(net.minecraft.world.entity.player.Player);\n  public io.netty.util.internal.ConcurrentSet<de.ellpeck.actuallyadditions.api.laser.IConnectionPair> getConnections();\n}",
+        "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay"
       },
       {
         "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelayEnergy",
@@ -961,6 +1024,29 @@
         },
         "public_signature": "Compiled from \"TileEntityPhantomRedstoneface.java\"\npublic class de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomRedstoneface extends de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface {\n  public final int[] providesStrong;\n  public final int[] providesWeak;\n  public de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomRedstoneface(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static <T extends net.minecraft.world.level.block.entity.BlockEntity> void clientTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, T);\n  public static <T extends net.minecraft.world.level.block.entity.BlockEntity> void serverTick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, T);\n}",
         "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomRedstoneface"
+      },
+      {
+        "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface",
+        "classification": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+            "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TileEntityPhantomface.java\"\npublic abstract class de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface extends de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase implements de.ellpeck.actuallyadditions.api.tile.IPhantomTile {\n  public static final int RANGE;\n  public net.minecraft.core.BlockPos boundPosition;\n  public de.ellpeck.actuallyadditions.mod.blocks.BlockPhantom$Type type;\n  public int range;\n  public de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static int upgradeRange(int, net.minecraft.world.level.Level, net.minecraft.core.BlockPos);\n  public void writeSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n  public void readSyncableNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider, de.ellpeck.actuallyadditions.mod.tile.TileEntityBase$NBTType);\n  public boolean hasBoundPosition();\n  public void renderParticles();\n  public boolean isBoundThingInRange();\n  public net.minecraft.core.BlockPos getBoundPosition();\n  public void setBoundPosition(net.minecraft.core.BlockPos);\n  public int getGuiID();\n  public int getRange();\n  public int getComparatorStrength();\n}",
+        "source_class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface"
       },
       {
         "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityPlacer",
@@ -3172,7 +3258,7 @@
       ]
     }
   ],
-  "scanner_format": 16,
+  "scanner_format": 17,
   "schema": 1,
   "source": {
     "files": [
@@ -3261,6 +3347,7 @@
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/ISharingEnergyProvider.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/ISharingFluidHandler.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityAtomicReconstructor.java",
+      "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityBase.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityBatteryBox.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityBioReactor.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityBreaker.java",
@@ -3281,8 +3368,10 @@
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityFluidCollector.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityFluidPlacer.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityHeatCollector.java",
+      "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityInventoryBase.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityItemInterface.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityItemInterfaceHopping.java",
+      "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityLaserRelay.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityLaserRelayEnergy.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityLaserRelayEnergyAdvanced.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityLaserRelayEnergyExtreme.java",
@@ -3299,6 +3388,7 @@
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityPhantomLiquiface.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityPhantomPlacer.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityPhantomRedstoneface.java",
+      "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityPhantomface.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityPlacer.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityPlayerInterface.java",
       "src/main/java/de/ellpeck/actuallyadditions/mod/tile/TileEntityPoweredFurnace.java",
@@ -3310,7 +3400,7 @@
     ],
     "revision": "cd9d9c63254f471f966ee51b078afdf47af5f852"
   },
-  "structural_candidate_inventory_sha256": "1b69eb46f3ed2837c34e8fb60f3c95153493b485d58131c6df0ae9b4b4cbfe46",
+  "structural_candidate_inventory_sha256": "2c68aa8f4e857b6f5f2966ff29f617b6adc332fe9cc05a7d2146022527fd9f60",
   "structural_class_graph": [
     {
       "class": "de.ellpeck.actuallyadditions.api.ActuallyAdditionsAPI",
@@ -9792,6 +9882,16 @@
       }
     },
     {
+      "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+      "classification": {
+        "evidence": [
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityBatteryBox",
       "classification": {
         "evidence": [
@@ -10029,6 +10129,17 @@
       }
     },
     {
+      "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+      "classification": {
+        "evidence": [
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
       "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterface",
       "classification": {
         "evidence": [
@@ -10045,6 +10156,18 @@
         "evidence": [
           "de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterfaceHopping",
           "de.ellpeck.actuallyadditions.mod.tile.TileEntityItemInterface",
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay",
+      "classification": {
+        "evidence": [
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityLaserRelay",
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
           "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
           "net.minecraft.world.level.block.entity.BlockEntity"
         ],
@@ -10246,6 +10369,18 @@
       "classification": {
         "evidence": [
           "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomRedstoneface",
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface",
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
+          "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface",
+      "classification": {
+        "evidence": [
           "de.ellpeck.actuallyadditions.mod.tile.TileEntityPhantomface",
           "de.ellpeck.actuallyadditions.mod.tile.TileEntityInventoryBase",
           "de.ellpeck.actuallyadditions.mod.tile.TileEntityBase",
