@@ -2198,6 +2198,90 @@ class StaticRegressionTests(unittest.TestCase):
             coexistence,
         )
 
+
+    def test_immersiveengineering_compat_is_optional_fail_closed(self):
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("immersiveengineering")
+        module = self.read_required(
+            "src/compat/immersiveengineering/java/com/swear/autostorage/compat/"
+            "immersiveengineering/ImmersiveengineeringCompatModule.java"
+        )
+        fixture = self.read_required(
+            "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/"
+            "immersiveengineering/ImmersiveengineeringIntegrationGameTests.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/immersiveengineeringFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required(
+            "docs/immersiveengineering-compatibility.md"
+        )
+        contract = self.read_required("compat/contracts/immersiveengineering.json")
+        audit = self.read_required(
+            "compat/audits/immersiveengineering/12.4.2-194.json"
+        )
+        build = self.read_required("build.gradle")
+
+        self.assert_descriptor_driven_fixture(
+            build, "immersiveengineering", "immersiveengineeringFixture", 8
+        )
+        self.assertNotIn('modId="immersiveengineering"', metadata)
+        self.assertIn('"immersiveengineering"', module_index)
+        self.assertIn('"requires"', module_index)
+        self.assertIn("maven.modrinth:immersiveengineering:uNRARSH2", module_index)
+        self.assertIn(
+            "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
+            module_index,
+        )
+        descriptor = json.loads(module_index)
+        self.assertEqual([], descriptor["matrix"]["descriptors"])
+        self.assertEqual([], descriptor["matrix"]["acceptedRecipes"])
+        self.assertEqual(
+            ["immersiveengineering"],
+            descriptor["matrix"]["recipeInventory"]["namespaces"],
+        )
+        self.assertRegex(
+            descriptor["matrix"]["recipeInventory"]["sha256"],
+            r"^[0-9a-f]{64}$",
+        )
+        self.assertNotEqual(
+            "0" * 64,
+            descriptor["matrix"]["recipeInventory"]["sha256"],
+        )
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertNotIn("import blusunrize.immersiveengineering.", module)
+        self.assertIn('modId="immersiveengineering"', fixture_metadata)
+        self.assertIn(
+            'helper.fail("Immersive Engineering mod is not loaded")',
+            fixture,
+        )
+        self.assertIn("IsolatedRecipeInventoryEvidence", fixture)
+        self.assertIn("alloysmelter/electrum", fixture)
+        self.assertIn("arcfurnace/dust_iron", fixture)
+        self.assertIn(
+            'id.getNamespace().equals("immersiveengineering")',
+            fixture,
+        )
+        self.assertIn(
+            'id.getPath().startsWith("immersiveengineering_")',
+            fixture,
+        )
+        self.assertRegex(
+            fixture,
+            r"id\.getNamespace\(\)\.equals\(\"immersiveengineering\"\)\s*"
+            r"\|\|\s*id\.getPath\(\)\.startsWith\(\"immersiveengineering_\"\)",
+        )
+        self.assertIn("outcome **C**", compatibility_doc)
+        self.assertIn(
+            "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
+            compatibility_doc,
+        )
+        self.assertIn("recipeInventory", compatibility_doc)
+        self.assertIn('"status": "rejected"', contract)
+        self.assertNotIn('"status": "accepted"', contract)
+        self.assertIn('"matrix"', contract)
+        self.assertIn("immersiveengineering", audit)
+
     def test_pneumaticcraft_fixture_locks_unsafe_contracts_out(self):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")
@@ -5238,6 +5322,44 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn(
             "MAX_BASELINE_INDEX_RETAINED_BYTES = 9L * 1024L * 1024L",
             matrix,
+        )
+
+    def test_craftable_catalog_reuses_resolved_stack_independent_match_without_retention(self):
+        catalog = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftableRecipeCatalog.java"
+        )
+        entry = self.java_block(
+            catalog,
+            r"\bprivate\s+static\s+final\s+class\s+CatalogEntry\b",
+            "CraftableRecipeCatalog.CatalogEntry",
+        )
+        resolve = self.java_block(
+            entry,
+            r"\bprivate\s+List<RecipeAdapterMatch>\s+resolveVariants\s*\(",
+            "CraftableRecipeCatalog.CatalogEntry.resolveVariants",
+        )
+        self.assertRegex(
+            resolve,
+            r"if\s*\(\s*!adapter\.requiresAvailableStacksForVariants\(\)\s*"
+            r"&&\s*baseMatch\.typedRecipePlan\(\)\.isPresent\(\)\s*\)\s*\{\s*"
+            r"return\s+List\.of\(baseMatch\);",
+            "an already-resolved stack-independent typed match must not rerun adapter "
+            "variant resolution during Craftable preparation",
+        )
+        self.assertNotIn(
+            "pendingTypedPlan",
+            resolve,
+            "legacy and built-in contracts still need adapter-level output validation",
+        )
+        self.assertLess(
+            resolve.index("return List.of(baseMatch)"),
+            resolve.index("resolveVariantsFromSnapshot"),
+            "the resolved-match fast path must run before adapter variant resolution",
+        )
+        self.assertNotIn(
+            "fixedVariants",
+            entry,
+            "the fast path must not restore the recipe-keyed fixed-variant retention removed by #79",
         )
 
     def test_processing_cells_keep_fixed_status_panel_free_of_duplicate_details(self):

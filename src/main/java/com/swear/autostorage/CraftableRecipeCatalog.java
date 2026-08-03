@@ -294,6 +294,10 @@ final class CraftableRecipeCatalog {
                 List<ItemStack> availableStacks,
                 Level level
         ) {
+            if (!adapter.requiresAvailableStacksForVariants()
+                    && baseMatch.typedRecipePlan().isPresent()) {
+                return List.of(baseMatch);
+            }
             if (adapter.requiresAvailableStacksForVariants()) {
                 return baseMatch.resolveVariantsFromSnapshot(
                         availableStacks, level);
