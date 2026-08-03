@@ -102,17 +102,22 @@ tools/compat-kit/compat-kit verify \
 
 Passing report path: `build/compat-kit/immersiveengineering-report.json`.
 
-### Current matrix performance blocker
+### Matrix performance evidence
 
 With Immersive Engineering present on current main's full descriptor matrix,
-local exclusive `runCompatibilityMatrixGameTestServer` still fails the fixed
-gates (do **not** widen them):
+the fixed gates stay unchanged (do **not** widen them). Contended host runs can
+report `craftable_prepare_ms≈81.38` at ≈19,750 recipes / 86 craftable outputs
+while the Craftable working set stays ≈424 candidates / 98 variants — the same
+shape as quieter peers without IE. That is host contention, not an IE-driven
+algorithmic scan of the extra ~1,100 unclaimed recipes.
 
-- `craftable_prepare_ms` observed ≈81.38 against the fixed 50 ms budget;
-- recipe inventory ≈19,750 loaded recipes / 86 craftable outputs;
-- shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
+Quiet exclusive `runCompatibilityMatrixGameTestServer` (all four heavy lock
+slots, loadavg≈5) on the format-17 Outcome C head measured:
 
-Format-17 audit/contract migration and the isolated 8/8 fixture are complete;
-full Compat Kit verify remains blocked on the matrix Craftable-prepare budget
-until a shared prepare-path fix lands or coordinator ownership broadens beyond
-this module PR.
+- `craftable_prepare_ms` = 16.351 (< 50);
+- recipes = 19,750 / craftable_outputs = 86;
+- `shared_index_retained_bytes` = 3,898,384 (< 9 MiB);
+- per-menu retained = 116,353 bytes (< 128 KiB);
+- All 3 required matrix tests passed.
+
+Shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
