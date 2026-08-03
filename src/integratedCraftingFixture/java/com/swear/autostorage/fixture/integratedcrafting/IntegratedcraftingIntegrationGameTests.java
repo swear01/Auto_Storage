@@ -3,6 +3,7 @@ package com.swear.autostorage.fixture.integratedcrafting;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
+import com.swear.autostorage.compat.integratedcrafting.IntegratedcraftingCompat;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +23,7 @@ public final class IntegratedcraftingIntegrationGameTests {
                 helper.getLevel().getRecipeManager(),
                 IntegratedcraftingIntegrationGameTests.class);
         if (!ModList.get().isLoaded("integratedcrafting")
+                || IntegratedcraftingCompat.registrationCount() != 1
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
                         .anyMatch(id -> id.getPath().startsWith("integratedcrafting"))
                 || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()

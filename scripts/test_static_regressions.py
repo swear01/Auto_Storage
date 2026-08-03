@@ -6288,6 +6288,35 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("supportsRecipeHolder(manual)", method)
         self.assertIn("supportsRecipeHolder(mechanical)", method)
 
+    def test_integrated_crafting_load_once_observes_module_registration_count(self):
+        compat = self.read_required(
+            "src/compat/integratedcrafting/java/com/swear/autostorage/compat/"
+            "integratedcrafting/IntegratedcraftingCompat.java"
+        )
+        self.assertRegex(
+            compat,
+            r"\bpublic\s+static\s+int\s+registrationCount\s*\(\s*\)",
+        )
+        self.assertRegex(
+            compat,
+            r"registrations\s*\+\+",
+        )
+        fixture = self.read_required(
+            "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/"
+            "integratedcrafting/IntegratedcraftingIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+present_mod_registers_no_unsafe_families\s*\(",
+            "Integrated Crafting present-target load-once GameTest",
+        )
+        self.assertIn("IntegratedcraftingCompat.registrationCount() != 1", method)
+        self.assertIn('ModList.get().isLoaded("integratedcrafting")', method)
+        self.assertIn(
+            "Integrated Crafting unsafe recipe contract was registered",
+            method,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

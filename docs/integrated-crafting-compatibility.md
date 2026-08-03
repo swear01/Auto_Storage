@@ -64,9 +64,10 @@ does not rewrite peer descriptors or commit global expected SHA values.
 ./gradlew runIntegratedCraftingGameTestServer
 ```
 
-Four GameTests load the real representative mod and assert that no
-Integrated Crafting family/descriptor is registered and that the DeadBush
-special recipe remains fail closed.
+Four GameTests load the real representative mod and assert that the present-mod
+compat module registers exactly once, that no Integrated Crafting
+family/descriptor is registered, and that the DeadBush special recipe remains
+fail closed.
 
 Full Compat Kit CLI `verify` for this module must also pass with the committed
 format-17 audit, exact jar, and staged ancestry classpath.
