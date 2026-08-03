@@ -1,5 +1,7 @@
 # Notes
 
+2026-08-03 PR #51 CI：`compatModules` 把 AE2 contract 的 `maven.terraformersmc.com` 再加一次且無 content filter，Gradle 會拿它去探 Flywheel/Create POM；該 host 回 502/timeout 時整次 `build` 失敗。module repository loop 對已有 filtered audit hosts 套用相同 `includeGroup`，與上方 AE2Audit* 區塊一致。
+
 2026-08-03 PR #51 rebase onto `9e5cf0f`（merged Create Crafts & Additions #74）：docs/overview 與 lang 衝突加性保留 Create Crafts Rolling/Charging 與 Integrated Dynamics/Crafting；Gemini AIR／IC namespace+path 修正仍在。
 
 2026-08-03 PR #51 Gemini exact-head `b9a77838…`：`BuiltInRegistries.ITEM.get` 是 DefaultedRegistry，缺 ID 回 `Items.AIR` 而非 `null`；`requiredItem` 只保留 `item == Items.AIR`，與同 repo 其他 compat 一致。IC `present_mod_registers_no_unsafe_families` 的 registry anyMatch 改為同時要求 `auto_storage` namespace 與 `integratedcrafting` path prefix，對齊同 fixture 的 overflow fail-closed 邊界；static regression 鎖住兩者。

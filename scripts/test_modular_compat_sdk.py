@@ -550,6 +550,8 @@ class ModularCompatSdkTests(unittest.TestCase):
             build,
         )
         self.assertIn("url = uri(repository)", build)
+        self.assertIn('host == "maven.terraformersmc.com"', build)
+        self.assertIn('includeGroup "dev.emi"', build)
         self.assertIn("verifyCompatArtifact", build)
         self.assertIn("MessageDigest.getInstance(\"SHA-256\")", build)
         self.assertRegex(
