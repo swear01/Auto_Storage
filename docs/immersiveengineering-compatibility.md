@@ -104,20 +104,24 @@ Passing report path: `build/compat-kit/immersiveengineering-report.json`.
 
 ### Matrix performance evidence
 
-With Immersive Engineering present on current main's full descriptor matrix,
-the fixed gates stay unchanged (do **not** widen them). Contended host runs can
-report `craftable_prepare_ms≈81.38` at ≈19,750 recipes / 86 craftable outputs
-while the Craftable working set stays ≈424 candidates / 98 variants — the same
-shape as quieter peers without IE. That is host contention, not an IE-driven
+With Immersive Engineering present on current main's full descriptor matrix
+(including Create Enchantment Industry), the fixed gates stay unchanged (do
+**not** widen them). Contended host runs can report
+`craftable_prepare_ms≈81.38` at ≈19,750 recipes / 86 craftable outputs while
+the Craftable working set stays ≈424 candidates / 98 variants — the same shape
+as quieter peers without IE. That is host contention, not an IE-driven
 algorithmic scan of the extra ~1,100 unclaimed recipes.
 
 Quiet exclusive `runCompatibilityMatrixGameTestServer` (all four heavy lock
-slots, loadavg≈5) on the format-17 Outcome C head measured:
+slots) after rebasing onto `origin/main` `481449d` measured:
 
-- `craftable_prepare_ms` = 16.351 (< 50);
-- recipes = 19,750 / craftable_outputs = 86;
-- `shared_index_retained_bytes` = 3,898,384 (< 9 MiB);
-- per-menu retained = 116,353 bytes (< 128 KiB);
+- `craftable_prepare_ms` = 35.36 (< 50);
+- recipes = 20,012 / craftable_outputs = 86;
+- `shared_index_retained_bytes` = 3,907,776 (< 9 MiB);
+- per-menu retained = 116,372 bytes (< 128 KiB);
 - All 3 required matrix tests passed.
+
+An earlier quiet exclusive reading on the pre-CEI base was prepare 16.351 ms at
+19,750 recipes / shared 3,898,384 bytes; both stay under the unchanged gates.
 
 Shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
