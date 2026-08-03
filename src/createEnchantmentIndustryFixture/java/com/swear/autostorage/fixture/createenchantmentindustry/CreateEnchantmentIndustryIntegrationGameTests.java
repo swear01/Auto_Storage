@@ -1,6 +1,7 @@
 package com.swear.autostorage.fixture.createenchantmentindustry;
 
 import com.swear.autostorage.AutoStorage;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import com.swear.autostorage.CraftingTerminalMenu;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -19,6 +20,9 @@ public final class CreateEnchantmentIndustryIntegrationGameTests {
 
     @GameTest(template = "craftingtests.platform")
     public static void present_mod_registers_no_unsafe_families(GameTestHelper helper) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                CreateEnchantmentIndustryIntegrationGameTests.class);
         if (!ModList.get().isLoaded("create_enchantment_industry")
                 || !ModList.get().isLoaded("create_dragons_plus")
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()

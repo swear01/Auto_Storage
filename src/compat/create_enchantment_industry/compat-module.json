@@ -4,21 +4,47 @@
     "sha256": "b25cc57696e6a26fef16437d88f3fe5a2690090e6f9728b6c72ca3e945cb07eb"
   },
   "dependencies": [
-    "maven.modrinth:create-enchantment-industry:8XedJhwv"
+    "maven.modrinth:create-enchantment-industry:8XedJhwv",
+    "com.simibubi.create:create-1.21.1:6.0.10-280",
+    "dev.engine-room.flywheel:flywheel-neoforge-api-1.21.1:1.0.6",
+    "dev.shadowsoffire:ApothicEnchanting:1.21.1-1.5.3",
+    "mezz.jei:jei-1.21.1-common-api:19.21.2.313",
+    "net.createmod.ponder:ponder-neoforge:1.0.82+mc1.21.1",
+    "plus.dragons.createdragonsplus:create-dragons-plus-1.21.1:1.11.3"
   ],
   "entrypoint": "com.swear.autostorage.compat.createenchantmentindustry.CreateEnchantmentIndustryCompatModule",
   "expectedTests": 5,
   "fixture": "createEnchantmentIndustryFixture",
   "id": "auto_storage:create_enchantment_industry",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "create_enchantment_industry"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "create_enchantment_industry"
+      ],
+      "sha256": "967c0ea0c4be92858443d12f2e60a02dd7b00dbf4905e4b3634e2bf83c8cdbdf"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
-    "https://api.modrinth.com/maven"
+    "https://api.modrinth.com/maven",
+    "https://maven.createmod.net",
+    "https://maven.dragons.plus/releases",
+    "https://maven.shadowsoffire.dev/releases",
+    "https://maven.blamejared.com"
   ],
   "requires": [
     "create_enchantment_industry"
   ],
   "runtimeDependencies": [
     "maven.modrinth:create-enchantment-industry:8XedJhwv",
-    "maven.modrinth:create:UjX6dr61",
+    "maven.modrinth:create:${create_ci_version}",
     "maven.modrinth:create-dragons-plus:LxesD770"
   ],
   "schema": 1,
