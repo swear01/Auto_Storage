@@ -1,7 +1,5 @@
 # Notes
 
-2026-08-03 PR #51 CI：`compatModules` 把 AE2 contract 的 `maven.terraformersmc.com` 再加一次且無 content filter，Gradle 會拿它去探 Flywheel/Create POM；該 host 回 502/timeout 時整次 `build` 失敗。module repository loop 對已有 filtered audit hosts 套用相同 `includeGroup`，與上方 AE2Audit* 區塊一致。
-
 2026-08-03 GitHub #85 GameTest cleanup：CI與release不再用`shutil.rmtree("run/world", ignore_errors=True)`忽略失敗地預刪world。Base、recipe addon、PneumaticCraft與compatibility matrix Gradle task現在和每個descriptor fixture一樣，在Minecraft啟動前呼叫既有repository-owned root-bounded cleanup gate；symlinked verification root／ancestor／`run`／`world`與resolved root escape都fail closed，正常stale world仍在每次GameTest前清除。Workflow static regression明確拒絕raw `shutil.rmtree`回歸。
 
 2026-08-03 PR #51 CI：`compatModules` 把 AE2 contract 的 `maven.terraformersmc.com` 再加一次且無 content filter，Gradle 會拿它去探 Flywheel/Create POM；該 host 回 502/timeout 時整次 `build` 失敗。module repository loop 對已有 filtered audit hosts 套用相同 `includeGroup`，與上方 AE2Audit* 區塊一致。
