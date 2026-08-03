@@ -122,7 +122,10 @@ recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
 explicitly rescan an exact format-7 through format-16 artifact;
-identity or SHA drift fails.
+identity or SHA drift fails. The legacy record's versioned schema and bounded
+structural identities are validated without forcing its candidate buckets
+through the current classifier; only the fresh exact-artifact rescan becomes
+current evidence.
 Use `migrate-contract contract.json --old-audit old.json --new-audit new.json
 --output migrated.json --next-actions migration.md` to preserve reviewed
 decisions only when class identity, public signature, class-owned risk evidence,

@@ -649,6 +649,91 @@ class CompatKitAuditTests(unittest.TestCase):
             [entry["class"] for entry in audit["candidates"]["resource_apis"]],
         )
 
+    def test_migrate_audit_rescans_legacy_candidate_classifier_drift(self):
+        structural_jar = self.root / "samplemod-legacy-abstract-block-entity.jar"
+        write_fixture_jar(structural_jar)
+        class_name = "samplemod.machine.LogisticsFluidConnectorBlockEntity"
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                class_name.replace(".", "/") + ".class",
+                b"abstract block entity with a resource-shaped name",
+            )
+
+        metadata = lambda current: (
+            {
+                "access_flags": 0x0400,
+                "super_class": "net.minecraft.world.level.block.entity.BlockEntity",
+                "interfaces": [],
+            }
+            if current == class_name
+            else {
+                "access_flags": 0,
+                "super_class": "java.lang.Object",
+                "interfaces": [],
+            }
+        )
+        signature = lambda current: (
+            f"public abstract class {current} extends "
+            "net.minecraft.world.level.block.entity.BlockEntity { }"
+            if current == class_name
+            else f"public final class {current} {{ }}"
+        )
+        current = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=signature,
+            risk_reader=lambda current: f"public class {current} {{ }}",
+            class_metadata_reader=metadata,
+        )
+        legacy = copy.deepcopy(current)
+        legacy["scanner_format"] = 16
+        candidate = next(
+            entry
+            for entry in legacy["candidates"]["block_entity_classes"]
+            if entry["class"] == class_name
+        )
+        legacy["candidates"]["block_entity_classes"].remove(candidate)
+        candidate["classification"] = {
+            "method": "name_term",
+            "evidence": ["fluid"],
+        }
+        candidate["hierarchy"] = None
+        legacy["candidates"]["resource_apis"].append(candidate)
+        legacy["candidates"]["resource_apis"].sort(
+            key=lambda entry: entry["class"]
+        )
+        legacy["structural_hierarchy"] = [
+            entry
+            for entry in legacy["structural_hierarchy"]
+            if entry["class"] != class_name
+        ]
+        legacy["structural_candidate_inventory_sha256"] = (
+            self.compat_kit._structural_candidate_inventory_sha256(
+                legacy["artifact"],
+                legacy["ancestry_classpath"],
+                legacy["structural_hierarchy"],
+            )
+        )
+
+        migrated = self.compat_kit.migrate_audit(
+            legacy,
+            structural_jar,
+            signature_reader=signature,
+            risk_reader=lambda current: f"public class {current} {{ }}",
+            class_metadata_reader=metadata,
+        )
+
+        self.assertIn(
+            class_name,
+            [
+                entry["class"]
+                for entry in migrated["candidates"]["block_entity_classes"]
+            ],
+        )
+        self.assertNotIn(
+            class_name,
+            [entry["class"] for entry in migrated["candidates"]["resource_apis"]],
+        )
+
     def test_scan_resolves_real_transitive_recipe_hierarchy_without_name_guessing(self):
         structural_jar = self.root / "samplemod-real-structural.jar"
         write_structural_fixture_jar(self.root, structural_jar)

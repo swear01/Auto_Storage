@@ -265,7 +265,12 @@ tools/compat-kit/compat-kit migrate-audit \
 ```
 
 Migration rejects a current audit, a different target identity, or different
-artifact bytes. It performs a full current scanner pass and therefore preserves no stale legacy classification.
+artifact bytes. Legacy validation still checks its versioned schema, structural
+digests, target identity, and artifact identity, but does not reapply the
+current candidate classifier to old buckets: classifier drift is the reason an
+explicit migration may be required. The exact artifact is then fully rescanned
+with the current classifier, so no stale legacy classification is preserved or
+used as semantic authorization.
 
 ### 2a. Generate unresolved machine and requirement proposals
 

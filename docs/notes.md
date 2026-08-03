@@ -1,5 +1,7 @@
 # Notes
 
+2026-08-02 Compat Kit legacy classifier migration gotcha：`migrate-audit`若先用current classifier重建legacy format-14至16的candidate buckets，任何正當的classifier修正都會讓舊audit在exact rescan前先以`audit candidates do not match independent structural evidence`失敗，等於沒有可用migration path。Explicit migration只可放寬「用current classifier重判舊bucket」這一項；舊format schema、structural/target digests、target identity及artifact SHA/size仍要完整驗證，之後必須從exact jar/source/ancestry全量current rescan，legacy bucket絕不作新語意授權。
+
 2026-08-02 Compat Kit abstract BlockEntity classifier gotcha：hierarchy優先序不能只在`concrete` branch處理BlockEntity；abstract `BlockEntity`若名稱含`fluid`等resource term，scanner會先誤列`resource_apis`，而validator由exact public signature重建direct parent後才報`candidate bucket mismatch`。BlockEntity hierarchy必須對所有non-interface class先於name terms分類，且任何classifier語意修正都要提升獨立classifier cache namespace；format-17本次由classifier 3升到4，避免重用修正前的local cache。
 
 2026-08-02 Compat Kit scanner-format migration gotcha：提升persisted scanner format後不能只遷移AE2或本次直接操作的module；repo內每份有complete committed contract的audit都會被scaffold／generate／verify當作current evidence消費。Regression若對legacy `continue`，CI可以全綠但maintainer workflow會在下一次module再生成時才以`complete contract requires a current scanner-format audit`失敗。格式提升的同一變更必須用每個module的exact target、clean source、完整exact ancestry與既有coordinate mapping正式跑`migrate-audit`／`migrate-contract`，並讓committed-audit test明確拒絕任何legacy record；不可只手改`scanner_format`。

@@ -2590,7 +2590,11 @@ def _validate_recipe_data(value: dict, artifact_sha: str):
         raise ValueError("audit recipe_data overrides must be sorted and unique")
 
 
-def _validate_audit(audit: dict):
+def _validate_audit(
+    audit: dict,
+    *,
+    allow_legacy_classifier_drift: bool = False,
+):
     if not isinstance(audit, dict):
         raise ValueError("audit must be a JSON object")
     unknown = sorted(set(audit) - AUDIT_TOP_KEYS)
@@ -2604,6 +2608,11 @@ def _validate_audit(audit: dict):
             "unsupported audit scanner format: "
             f"{scanner_format}"
         )
+    if (
+        allow_legacy_classifier_drift
+        and scanner_format not in LEGACY_SCAN_CACHE_VERSIONS
+    ):
+        raise ValueError("classifier drift is valid only for legacy audits")
     structural_inventory_sha256 = audit.get(
         "structural_candidate_inventory_sha256"
     )
@@ -2891,7 +2900,9 @@ def _validate_audit(audit: dict):
                     record["classification"],
                     location,
                 )
-                if scanner_format == 9:
+                if allow_legacy_classifier_drift:
+                    pass
+                elif scanner_format == 9:
                     _validate_hierarchy_priority(
                         class_name,
                         bucket,
@@ -3004,15 +3015,16 @@ def _validate_audit(audit: dict):
             independently_classified[class_name] = classification
             if classification[1]["method"] == "class_hierarchy":
                 independently_structural[class_name] = classification[1]
-        if candidates_by_class != independently_classified:
-            raise ValueError(
-                "audit candidates do not match independent structural evidence"
-            )
-        if structural_hierarchy != independently_structural:
-            raise ValueError(
-                "audit structural hierarchy does not match independent "
-                "structural evidence"
-            )
+        if not allow_legacy_classifier_drift:
+            if candidates_by_class != independently_classified:
+                raise ValueError(
+                    "audit candidates do not match independent structural evidence"
+                )
+            if structural_hierarchy != independently_structural:
+                raise ValueError(
+                    "audit structural hierarchy does not match independent "
+                    "structural evidence"
+                )
 
     if scanner_format != 7:
         _validate_recipe_data(audit["recipe_data"], artifact["sha256"])
@@ -3794,9 +3806,12 @@ def migrate_audit(
     class_metadata_reader=None,
     data_roots=None,
 ) -> dict:
-    _validate_audit(legacy_audit)
-    if legacy_audit["scanner_format"] not in LEGACY_SCAN_CACHE_VERSIONS:
+    if legacy_audit.get("scanner_format") not in LEGACY_SCAN_CACHE_VERSIONS:
         raise ValueError("migrate-audit requires a legacy scanner-format audit")
+    _validate_audit(
+        legacy_audit,
+        allow_legacy_classifier_drift=True,
+    )
     migrated = scan_jar(
         jar,
         source=source,
