@@ -46,7 +46,7 @@ multi-version compatibility matrix.
 ## Audited recipe candidates
 
 The legacy scanner-format-7 audit classified 52 name-shaped entries as recipe
-families. Exact format-16 structural scanning removed 39 builders, providers,
+families. Exact format-17 structural scanning removed 39 builders, providers,
 serializers, viewer wrappers, and base helpers. `migrate-contract` reopened the
 13 actual `Recipe` implementations, and each was manually reviewed again
 against the exact official source before retaining its rejection:

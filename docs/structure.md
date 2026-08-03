@@ -55,16 +55,16 @@
 | `docs/railcraft-compatibility.md` | Railcraft Reborn 1.2.10 exact target/source/6-artifact ancestry scanner-format-17 audit、52→13 candidate migration及零production-family fail-closed判定。 |
 | `src/railcraftFixture/` | 代表性Railcraft Reborn 1.2.10 present-mod隔離fixture；8個tests鎖住Crusher/Blast/Coke/Rolling、special crafting、descriptor ownership與all-candidate fail-closed。 |
 | `docs/pneumaticcraft-compatibility.md` | PneumaticCraft Air/pressure/heat/multiblock API審計與零production-family fail-closed判定。 |
-| `docs/productivemetalworks-compatibility.md` | Productive Metalworks 1.15.0 Compat Kit audit：Foundry/casting 全數拒絕與零production-family fail-closed（outcome C）。 |
+| `docs/productivemetalworks-compatibility.md` | Productive Metalworks 1.15.0 scanner-format-17 audit：Foundry/casting 全數拒絕與零production-family fail-closed（outcome C）。 |
 | `src/compat/productivemetalworks/` | Productive Metalworks present-mod entrypoint；registers no stations/families。 |
 | `src/productivemetalworksFixture/` | 代表性 Productive Metalworks 1.15.0 present-mod 隔離 fixture；8 個 tests 鎖住 melting/alloying/casting/entity boundaries。 |
 | `src/pneumaticCraftFixture/` | 代表性PneumaticCraft 8.2.22 present-mod隔離fixture；9個tests鎖住Air與七類machine recipes不被不安全接受。 |
 | `src/extendedCraftingFixture/` | 代表性Extended Crafting 7.0.8 + Cucumber 8.0.16隔離GameTest fixture；4個tests驗Ultimate Table gating、9×9/81-position exact commit、one-short no-op、full-destination rollback與真實Ultimate Singularity component identity。 |
 | `docs/extended-crafting-compatibility.md` | Extended Crafting shaped-table/Ultimate Singularity支持、81-input boundary、representative fixture政策與fail-closed transformer邊界。 |
 | `src/compat/oritech/` | Oritech 1.2.9 Compat Kit dogfood：exact pulverizer family、config-reloaded energyPerTick rate/FE/work、zero-FE progress、deterministic multi-output remainder。 |
-| `docs/oritech-compatibility.md` | Oritech pulverizer contract、source/SHA evidence、明確排除其他 RecipeContent 與20個isolated GameTests。 |
+| `docs/oritech-compatibility.md` | Oritech scanner-format-17 pulverizer contract、source/SHA evidence、明確排除其他 RecipeContent 與20個isolated GameTests。 |
 | `src/oritechFixture/` | 隔離載入代表性Oritech 1.2.9、Architectury、GeckoLib；20個GameTests驗pulverizer註冊、adamant/raw-iron/platinum craft、stable work、live/zero FE、open/shared Craftable cache、post-commit mixed rollback、fluid/ingredient/layout fail-closed與duplicate merge。 |
-| `docs/theurgy-compatibility.md` | Theurgy optional Calcination/Distillation/Liquefaction exact contract、solvent fluid、heat abstraction與代表性1.73.1 fixture政策。 |
+| `docs/theurgy-compatibility.md` | Theurgy 1.73.1 scanner-format-17 exact target/source/6-artifact ancestry audit、10個actual Recipe candidates、optional Calcination/Distillation/Liquefaction contract、solvent fluid與heat abstraction。 |
 | `src/theurgyFixture/` | 代表性Theurgy 1.73.1 + Modonomicon + GeckoLib隔離GameTest fixture；9個tests驗三個deterministic families、item/solvent/work、rejected families與atomic rollback。 |
 | `docs/advanced-ae-compatibility.md` | Advanced AE 1.6.11 evidence-backed outcome C；Reaction Chamber live-network語意與零production-family邊界。 |
 | `src/advancedAeFixture/` | 代表性Advanced AE + AE2 + GuideME + GeckoLib隔離GameTest fixture；8個tests驗present-mod載入、代表recipes與完整受審reaction type維持fail closed。 |

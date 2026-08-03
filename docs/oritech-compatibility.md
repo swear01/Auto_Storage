@@ -13,7 +13,7 @@ Architectury API and GeckoLib remain required companions of that optional target
 - dependency coordinate: `maven.modrinth:oritech:gMBPdWrE`;
 - runtime companions: Architectury API `ZxYGwlk0` (`13.0.8`), GeckoLib
   `RVIo5f6E` (`4.8.2`);
-- audit: `compat/audits/oritech/1.2.9.json` (scanner format 16);
+- audit: `compat/audits/oritech/1.2.9.json` (scanner format 17);
 - reviewed contract: `compat/contracts/oritech.json`;
 - isolated-fixture recipe-inventory SHA-256 for namespace `oritech`:
   `abc0f6addf6b1f9922e7d05a2ca57b8c210071692030dfaa083b578a59a221f8`
@@ -64,7 +64,7 @@ that token changes, and exact item candidates remain indexed. Eligibility never 
 `getInputs()` / `getResults()` / `getFluidInput()` / `getFluidOutputs()` /
 `getTime()` surfaces. Fluid outputs use Architectury's public typed
 `FluidStack` API directly; reflection is not used. Architectury artifact
-`ZxYGwlk0` is therefore recorded as exact compile ancestry in the format-16
+`ZxYGwlk0` is therefore recorded as exact compile ancestry in the format-17
 audit and emitted into both bundled and independent-addon compile classpaths,
 rather than being hidden by a repository-only Gradle declaration.
 
