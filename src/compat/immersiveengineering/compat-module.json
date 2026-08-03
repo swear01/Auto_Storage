@@ -4,7 +4,16 @@
     "sha256": "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc"
   },
   "dependencies": [
-    "maven.modrinth:immersiveengineering:uNRARSH2"
+    "maven.modrinth:immersiveengineering:uNRARSH2",
+    "cc.tweaked:cc-tweaked-1.20.4-core-api:1.110.2",
+    "com.google.guava:guava:28.2-jre",
+    "com.mojang:brigadier:1.3.10",
+    "curse.maven:jade-324717:6291517",
+    "curse.maven:the-one-probe-245211:3825695",
+    "it.unimi.dsi:fastutil:8.5.12",
+    "mezz.jei:jei-1.21.1-common-api:19.10.0.126",
+    "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7",
+    "net.neoforged:bus:8.0.5"
   ],
   "entrypoint": "com.swear.autostorage.compat.immersiveengineering.ImmersiveengineeringCompatModule",
   "expectedTests": 8,
@@ -27,7 +36,8 @@
     "resourceKinds": []
   },
   "repositories": [
-    "https://api.modrinth.com/maven"
+    "https://api.modrinth.com/maven",
+    "https://maven.squiddev.cc"
   ],
   "requires": [
     "immersiveengineering"

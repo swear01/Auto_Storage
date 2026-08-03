@@ -22,11 +22,18 @@ without a custom module.
   `45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc`;
 - official source tag `12.4.2-194`, commit
   `583a182549d284a35c813b55ac2a0d1fddcf945a`;
-- audit: `compat/audits/immersiveengineering/12.4.2-194.json`;
-- reviewed contract: `compat/contracts/immersiveengineering.json`.
+- scanner format **17** / candidate classifier **4** audit:
+  `compat/audits/immersiveengineering/12.4.2-194.json`;
+- reviewed contract: `compat/contracts/immersiveengineering.json`;
+- reachable ancestry: 10 artifacts / 9 exact Maven coordinates (NeoForge/Minecraft
+  platform binary `2382ea29…eb5f`, plus bus, mixin, fastutil, guava, brigadier,
+  JEI common API, Jade, The One Probe, and CC Tweaked core API);
+- reviewed repositories include Modrinth and `https://maven.squiddev.cc` for the
+  CC Tweaked compile ancestry coordinate.
 
 JarJar embeds BlockModelSplitter and DualCodecs inside the representative jar,
-so the reviewed contract declares no additional runtime dependencies.
+so the reviewed contract declares no additional runtime dependencies beyond the
+primary Immersive Engineering artifact.
 
 This version is representative CI/audit evidence. Auto Storage does not impose
 an exact Immersive Engineering version on players and does not claim a
@@ -34,21 +41,23 @@ multi-version matrix.
 
 ## Audited recipe candidates
 
-Compat Kit enumerated 128 recipe-class candidates. Every candidate is rejected
-in the committed contract. The runtime machine families behind that inventory
-are:
+Compat Kit format-17 structural scan keeps **44** actual recipe-class candidates
+(legacy format-7 name-shaped inventory of 128 is superseded). Every candidate is
+rejected in the committed contract. The runtime machine families behind that
+inventory include:
 
 | Family | Result | Reason |
 |---|---|---|
 | Alloy Smelter | rejected | stone multiblock; live vanilla furnace fuel burn; `TagOutput` may resolve via mod preference |
 | Coke Oven | rejected | stone multiblock; creosote tank capacity/batching is live state |
-| Blast Furnace | rejected | stone multiblock; separate `BlastFurnaceFuel` burn state; tag preference outputs |
-| Crusher / Arc Furnace | rejected | multiblock; live `RecipeMultiplier` energy/time; chance secondaries |
-| Metal Press | rejected | multiblock; retained mold; live multipliers |
+| Blast Furnace / BlastFurnaceFuel | rejected | stone multiblock; separate live burn state; tag preference outputs |
+| Crusher / Arc Furnace / Arc recycling | rejected | multiblock; live `RecipeMultiplier` energy/time; chance secondaries |
+| Metal Press / packing helpers | rejected | multiblock; retained mold; live multipliers |
 | Bottling / Fermenter / Squeezer / Mixer / Refinery / Sawmill | rejected | multiblock with live multipliers and/or fluid inventory state |
 | Blueprint crafting | rejected | typed Engineers Blueprint plus workbench/auto-workbench multiblock path |
-| Garden Cloche | rejected | `StackWithChance` plus `ApiUtils.RANDOM` outputs |
-| Special crafting / fluid-aware / jerrycan / serializers / JEI helpers | rejected | not independent deterministic Auto Storage machine families |
+| Garden Cloche / ClocheFertilizer | rejected | `StackWithChance` plus `ApiUtils.RANDOM` outputs / live growth modifiers |
+| GeneratorFuel / ThermoelectricSource / WindmillBiome / MineralMix | rejected | live energy/world configuration, not craftable Auto Storage families |
+| Special crafting / fluid-aware / jerrycan / repair / shader helpers | rejected | not independent deterministic Auto Storage machine families |
 
 Typed resources were not introduced. Multiblock composition, live fuel/tank
 state, config-backed `DoubleSupplier` multipliers, chance outputs, and
@@ -81,39 +90,29 @@ descriptor and asserts the zero-family boundary via empty
 `descriptors`/`acceptedRecipes`; combined coexistence and unclaimed inventories
 are recorded only in the matrix report.
 
-With Immersive Engineering present in the current full matrix, local
-`build/reports/terminal-scale-10000.json` records
-`shared_index_retained_bytes=9477112` (≈9.038 MiB) against the fixed
-`MAX_BASELINE_INDEX_RETAINED_BYTES` of `9L * 1024L * 1024L` (=9437184), so the
-shared retained-index gate fails by 39928 bytes. The same report records
-`craftable_prepare_ms=86.36` against the fixed 50 ms first-Craftable budget,
-`recipes=16272`, and `craftable_outputs=86`. Do not raise the 9 MiB gate.
-
 ```bash
 tools/compat-kit/compat-kit verify \
   compat/contracts/immersiveengineering.json \
   --audit compat/audits/immersiveengineering/12.4.2-194.json \
   --jar build/compat-kit/artifacts/ImmersiveEngineering-1.21.1-12.4.2-194.jar \
+  --classpath <exact ancestry jars from the audit> \
   --bundled . \
   --output build/compat-kit/immersiveengineering-report.json
 ```
 
 Passing report path: `build/compat-kit/immersiveengineering-report.json`.
 
-The committed audit/contract currently remain scanner format 7. Compat Kit v2
-complete verify requires a current scanner-format (16) audit; format-16
-`scan`/`migrate-audit` is blocked by a verified scanner defect on IE client
-class `blusunrize.immersiveengineering.client.models.ModelConveyor$1$Key`:
+### Current matrix performance blocker
 
-- `ModelConveyor$1` is anonymous (`EnclosingMethod` present, `inner_name=null`)
-  and correctly excluded from inspectable metadata.
-- `ModelConveyor$1$Key` is a named nested record (`inner_name=Key`,
-  `outer_class=ModelConveyor$1`) and remains inspectable.
-- `_candidate_source_class` then raises
-  `named nested class owner is unresolved: ...ModelConveyor$1$Key`
-  because the anonymous outer was omitted from `metadata_by_class`.
+With Immersive Engineering present on current main's full descriptor matrix,
+local exclusive `runCompatibilityMatrixGameTestServer` still fails the fixed
+gates (do **not** widen them):
 
-Do not bypass complete-verify's current-format requirement and do not patch the
-scanner inside this module PR; keep the format-7 audit/contract as blocked
-evidence until a scanner fix lands separately.
+- `craftable_prepare_ms` observed ≈81.38 against the fixed 50 ms budget;
+- recipe inventory ≈19,750 loaded recipes / 86 craftable outputs;
+- shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
 
+Format-17 audit/contract migration and the isolated 8/8 fixture are complete;
+full Compat Kit verify remains blocked on the matrix Craftable-prepare budget
+until a shared prepare-path fix lands or coordinator ownership broadens beyond
+this module PR.

@@ -1,34 +1,4 @@
 {
-  "kind": "auto_storage_compat_contract",
-  "matrix": {
-    "acceptedRecipes": [],
-    "descriptors": [],
-    "mods": [
-      "immersiveengineering"
-    ],
-    "recipeInventory": {
-      "namespaces": [
-        "immersiveengineering"
-      ],
-      "sha256": "b733a4b670dbb507a71df7f819c2296f627d42f2ed89240c6040c9c55c445c7d"
-    },
-    "rejectedDescriptors": [],
-    "rejectedResourceKinds": [],
-    "resourceKinds": []
-  },
-  "schema": 1,
-  "source_audit_sha256": "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
-  "source_recipe_inventory_sha256": "774ab7d8bb6cda0bcfa0b38f6adf1d492355ced760877906c59714b0f823d4f7",
-  "target": {
-    "dependency": "maven.modrinth:immersiveengineering:uNRARSH2",
-    "display_name": "Immersive Engineering",
-    "mod_id": "immersiveengineering",
-    "repositories": [
-      "https://api.modrinth.com/maven"
-    ],
-    "runtime_dependencies": [],
-    "version": "12.4.2-194"
-  },
   "families": [
     {
       "class": "blusunrize.immersiveengineering.api.crafting.AlloyRecipe",
@@ -77,7 +47,28 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "multiblock",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "blusunrize.immersiveengineering.api.crafting.BlastFurnaceFuel",
+      "costs": [],
+      "decision": "BlastFurnaceFuel is live burn-state fuel for the stone Blast Furnace multiblock, not a deterministic Auto Storage craftable family.",
+      "evidence": [
+        "blusunrize.immersiveengineering.api.crafting.BlastFurnaceFuel#public_signature"
+      ],
+      "id": "blast_furnace_fuel",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "world_mutation"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -129,6 +120,23 @@
       "recipe_type": null,
       "risks": [
         "multiblock",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "blusunrize.immersiveengineering.api.crafting.ClocheFertilizer",
+      "costs": [],
+      "decision": "ClocheFertilizer is garden-cloche growth modifier state tied to live Cloche processing, not a simulate-then-commit craftable family.",
+      "evidence": [
+        "blusunrize.immersiveengineering.api.crafting.ClocheFertilizer#public_signature"
+      ],
+      "id": "cloche_fertilizer",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
         "world_mutation"
       ],
       "station": null,
@@ -208,98 +216,6 @@
       "status": "rejected"
     },
     {
-      "class": "blusunrize.immersiveengineering.api.crafting.IERecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.IERecipeSerializer#public_signature"
-      ],
-      "id": "i_e_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.crafting.IERecipeTypes",
-      "costs": [],
-      "decision": "Shared IE recipe base/type registry helper; not an independent production family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.IERecipeTypes#public_signature"
-      ],
-      "id": "i_e_recipe_types",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.crafting.IERecipeTypes$TypeWithClass",
-      "costs": [],
-      "decision": "Shared IE recipe base/type registry helper; not an independent production family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.IERecipeTypes$TypeWithClass#public_signature"
-      ],
-      "id": "i_e_recipe_types__type_with_class",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.crafting.IESerializableRecipe",
-      "costs": [],
-      "decision": "Shared IE recipe base/type registry helper; not an independent production family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.IESerializableRecipe#public_signature"
-      ],
-      "id": "i_e_serializable_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.crafting.IJEIRecipe",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.IJEIRecipe#public_signature"
-      ],
-      "id": "i_j_e_i_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.crafting.IMultiblockRecipe",
-      "costs": [],
-      "decision": "Abstract multiblock recipe surface; concrete machine families remain rejected until a non-multiblock simulate-then-commit contract exists.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.IMultiblockRecipe#public_signature"
-      ],
-      "id": "i_multiblock_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
       "class": "blusunrize.immersiveengineering.api.crafting.MetalPressRecipe",
       "costs": [],
       "decision": "Metal Press is a multiblock requiring a retained mold item plus live RecipeMultiplier modifiers.",
@@ -331,40 +247,6 @@
       "risks": [
         "multiblock",
         "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.crafting.MultiblockRecipe",
-      "costs": [],
-      "decision": "Abstract multiblock recipe surface; concrete machine families remain rejected until a non-multiblock simulate-then-commit contract exists.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.MultiblockRecipe#public_signature"
-      ],
-      "id": "multiblock_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.crafting.MultiblockRecipe$RecipeMultiplier",
-      "costs": [],
-      "decision": "Nested live DoubleSupplier multiplier record; parent MultiblockRecipe families remain rejected because time/energy depend on config/machine modifiers.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.MultiblockRecipe$RecipeMultiplier#public_signature"
-      ],
-      "id": "multiblock_recipe__recipe_multiplier",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
       ],
       "station": null,
       "status": "rejected"
@@ -424,13 +306,13 @@
       "status": "rejected"
     },
     {
-      "class": "blusunrize.immersiveengineering.api.crafting.cache.CachedRecipeList",
+      "class": "blusunrize.immersiveengineering.api.energy.GeneratorFuel",
       "costs": [],
-      "decision": "Recipe cache, generated list, or iterator helper; not an independent deterministic family.",
+      "decision": "GeneratorFuel configures live diesel-generator burn behavior rather than an exact craftable Auto Storage recipe family.",
       "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.cache.CachedRecipeList#public_signature"
+        "blusunrize.immersiveengineering.api.energy.GeneratorFuel#public_signature"
       ],
-      "id": "cached_recipe_list",
+      "id": "generator_fuel",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
@@ -441,43 +323,31 @@
       "status": "rejected"
     },
     {
-      "class": "blusunrize.immersiveengineering.api.crafting.cache.IListRecipe",
+      "class": "blusunrize.immersiveengineering.api.energy.ThermoelectricSource",
       "costs": [],
-      "decision": "Recipe cache, generated list, or iterator helper; not an independent deterministic family.",
+      "decision": "ThermoelectricSource is world/block heat-source configuration for live thermoelectric generation, not a craftable recipe family.",
       "evidence": [
-        "blusunrize.immersiveengineering.api.crafting.cache.IListRecipe#public_signature"
+        "blusunrize.immersiveengineering.api.energy.ThermoelectricSource#public_signature"
       ],
-      "id": "i_list_recipe",
+      "id": "thermoelectric_source",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "randomness",
+        "world_mutation"
+      ],
       "station": null,
       "status": "rejected"
     },
     {
-      "class": "blusunrize.immersiveengineering.api.shader.CapabilityShader$WrapperSerializer",
+      "class": "blusunrize.immersiveengineering.api.energy.WindmillBiome",
       "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
+      "decision": "WindmillBiome is biome modifier configuration for live windmill generation, not a craftable recipe family.",
       "evidence": [
-        "blusunrize.immersiveengineering.api.shader.CapabilityShader$WrapperSerializer#public_signature"
+        "blusunrize.immersiveengineering.api.energy.WindmillBiome#public_signature"
       ],
-      "id": "capability_shader__wrapper_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.tool.assembler.AssemblerHandler$IRecipeAdapter",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.tool.assembler.AssemblerHandler$IRecipeAdapter#public_signature"
-      ],
-      "id": "assembler_handler__i_recipe_adapter",
+      "id": "windmill_biome",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
@@ -488,138 +358,19 @@
       "status": "rejected"
     },
     {
-      "class": "blusunrize.immersiveengineering.api.tool.assembler.FluidStackRecipeQuery",
+      "class": "blusunrize.immersiveengineering.api.excavator.MineralMix",
       "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
+      "decision": "MineralMix drives excavator vein generation with weighted/random mineral selection in world state; no simulate-then-commit craft contract.",
       "evidence": [
-        "blusunrize.immersiveengineering.api.tool.assembler.FluidStackRecipeQuery#public_signature"
+        "blusunrize.immersiveengineering.api.excavator.MineralMix#public_signature"
       ],
-      "id": "fluid_stack_recipe_query",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.tool.assembler.FluidTagRecipeQuery",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.tool.assembler.FluidTagRecipeQuery#public_signature"
-      ],
-      "id": "fluid_tag_recipe_query",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.tool.assembler.IngredientRecipeQuery",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.tool.assembler.IngredientRecipeQuery#public_signature"
-      ],
-      "id": "ingredient_recipe_query",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.tool.assembler.ItemStackRecipeQuery",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.tool.assembler.ItemStackRecipeQuery#public_signature"
-      ],
-      "id": "item_stack_recipe_query",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.api.tool.assembler.RecipeQuery",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.api.tool.assembler.RecipeQuery#public_signature"
-      ],
-      "id": "recipe_query",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.blocks.multiblocks.logic.AssemblerLogic$RecipeInputSources",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.blocks.multiblocks.logic.AssemblerLogic$RecipeInputSources#public_signature"
-      ],
-      "id": "assembler_logic__recipe_input_sources",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.blocks.multiblocks.logic.mixer.MixerLogic$RecipeEnqueueState",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.blocks.multiblocks.logic.mixer.MixerLogic$RecipeEnqueueState#public_signature"
-      ],
-      "id": "mixer_logic__recipe_enqueue_state",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.blocks.multiblocks.logic.sawmill.SawmillProcess$RecipeDependentData",
-      "costs": [],
-      "decision": "Assembler/multiblock runtime query or enqueue helper; retained multiblock/live state is outside the current transaction contract.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.blocks.multiblocks.logic.sawmill.SawmillProcess$RecipeDependentData#public_signature"
-      ],
-      "id": "sawmill_process__recipe_dependent_data",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.ArcRecyclingCalculator$RecipeIterator",
-      "costs": [],
-      "decision": "Recipe cache, generated list, or iterator helper; not an independent deterministic family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.ArcRecyclingCalculator$RecipeIterator#public_signature"
-      ],
-      "id": "arc_recycling_calculator__recipe_iterator",
+      "id": "mineral_mix",
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
       "risks": [
-        "generic_ingredients"
+        "randomness",
+        "world_mutation"
       ],
       "station": null,
       "status": "rejected"
@@ -688,22 +439,9 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.GeneratedListRecipe$RecipeListGenerator",
-      "costs": [],
-      "decision": "Recipe cache, generated list, or iterator helper; not an independent deterministic family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.GeneratedListRecipe$RecipeListGenerator#public_signature"
+      "risks": [
+        "world_mutation"
       ],
-      "id": "generated_list_recipe__recipe_list_generator",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
       "station": null,
       "status": "rejected"
     },
@@ -772,40 +510,8 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.MetalPressPackingRecipes",
-      "costs": [],
-      "decision": "Metal Press packing/unpacking helper over multiblock Metal Press recipes; parent family remains rejected.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.MetalPressPackingRecipes#public_signature"
-      ],
-      "id": "metal_press_packing_recipes",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
       "risks": [
         "generic_ingredients",
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.MetalPressPackingRecipes$MetalPressContainerRecipe",
-      "costs": [],
-      "decision": "Metal Press packing/unpacking helper over multiblock Metal Press recipes; parent family remains rejected.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.MetalPressPackingRecipes$MetalPressContainerRecipe#public_signature"
-      ],
-      "id": "metal_press_packing_recipes__metal_press_container_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
         "world_mutation"
       ],
       "station": null,
@@ -823,6 +529,7 @@
       "outputs": [],
       "recipe_type": null,
       "risks": [
+        "multiblock",
         "world_mutation"
       ],
       "station": null,
@@ -839,7 +546,10 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "multiblock",
+        "world_mutation"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -854,7 +564,10 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -869,7 +582,10 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -887,36 +603,6 @@
       "risks": [
         "world_mutation"
       ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.PotionHelper$PotionRecipeProcessor",
-      "costs": [],
-      "decision": "Potion recipe generator helper; not an independent deterministic family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.PotionHelper$PotionRecipeProcessor#public_signature"
-      ],
-      "id": "potion_helper__potion_recipe_processor",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.PotionRecipeGenerators",
-      "costs": [],
-      "decision": "Potion recipe generator helper; not an independent deterministic family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.PotionRecipeGenerators#public_signature"
-      ],
-      "id": "potion_recipe_generators",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
       "station": null,
       "status": "rejected"
     },
@@ -966,7 +652,10 @@
       "inputs": [],
       "outputs": [],
       "recipe_type": null,
-      "risks": [],
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
       "station": null,
       "status": "rejected"
     },
@@ -1022,55 +711,6 @@
       "status": "rejected"
     },
     {
-      "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.AbstractFluidAwareRecipe",
-      "costs": [],
-      "decision": "Fluid-aware crafting-table specialty; fluid fill/drain and generic ingredients are not reduced to a Core ledger family here. Vanilla-class IE crafting still uses built-in adapters.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.fluidaware.AbstractFluidAwareRecipe#public_signature"
-      ],
-      "id": "abstract_fluid_aware_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "generic_ingredients"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.AbstractFluidAwareRecipe$IMatchLocation",
-      "costs": [],
-      "decision": "Nested matching/value helper; not an independent recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.fluidaware.AbstractFluidAwareRecipe$IMatchLocation#public_signature"
-      ],
-      "id": "abstract_fluid_aware_recipe__i_match_location",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.AbstractShapedRecipe",
-      "costs": [],
-      "decision": "Fluid-aware crafting-table specialty; fluid fill/drain and generic ingredients are not reduced to a Core ledger family here. Vanilla-class IE crafting still uses built-in adapters.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.fluidaware.AbstractShapedRecipe#public_signature"
-      ],
-      "id": "abstract_shaped_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "generic_ingredients"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
       "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.BasicShapedRecipe",
       "costs": [],
       "decision": "Fluid-aware crafting-table specialty; fluid fill/drain and generic ingredients are not reduced to a Core ledger family here. Vanilla-class IE crafting still uses built-in adapters.",
@@ -1082,23 +722,9 @@
       "outputs": [],
       "recipe_type": null,
       "risks": [
-        "generic_ingredients"
+        "generic_ingredients",
+        "world_mutation"
       ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.BasicShapedRecipe$MatchLocation",
-      "costs": [],
-      "decision": "Nested matching/value helper; not an independent recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.fluidaware.BasicShapedRecipe$MatchLocation#public_signature"
-      ],
-      "id": "basic_shaped_recipe__match_location",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
       "station": null,
       "status": "rejected"
     },
@@ -1133,23 +759,9 @@
       "recipe_type": null,
       "risks": [
         "generic_ingredients",
-        "simulation_required"
+        "simulation_required",
+        "world_mutation"
       ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.ShapelessFluidAwareRecipe$MatchLocation",
-      "costs": [],
-      "decision": "Nested matching/value helper; not an independent recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.fluidaware.ShapelessFluidAwareRecipe$MatchLocation#public_signature"
-      ],
-      "id": "shapeless_fluid_aware_recipe__match_location",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
       "station": null,
       "status": "rejected"
     },
@@ -1165,958 +777,45 @@
       "outputs": [],
       "recipe_type": null,
       "risks": [
-        "generic_ingredients"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.TurnAndCopyRecipe$MatchLocation",
-      "costs": [],
-      "decision": "Nested matching/value helper; not an independent recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.fluidaware.TurnAndCopyRecipe$MatchLocation#public_signature"
-      ],
-      "id": "turn_and_copy_recipe__match_location",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.fluidaware.TurnAndCopyRecipe$Rotation",
-      "costs": [],
-      "decision": "Nested matching/value helper; not an independent recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.fluidaware.TurnAndCopyRecipe$Rotation#public_signature"
-      ],
-      "id": "turn_and_copy_recipe__rotation",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.AlloyRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.AlloyRecipeSerializer#public_signature"
-      ],
-      "id": "alloy_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.ArcFurnaceRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.ArcFurnaceRecipeSerializer#public_signature"
-      ],
-      "id": "arc_furnace_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.BlastFurnaceFuelSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.BlastFurnaceFuelSerializer#public_signature"
-      ],
-      "id": "blast_furnace_fuel_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.BlastFurnaceRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.BlastFurnaceRecipeSerializer#public_signature"
-      ],
-      "id": "blast_furnace_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.BlueprintCraftingRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.BlueprintCraftingRecipeSerializer#public_signature"
-      ],
-      "id": "blueprint_crafting_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.BottlingMachineRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.BottlingMachineRecipeSerializer#public_signature"
-      ],
-      "id": "bottling_machine_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.ClocheFertilizerSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.ClocheFertilizerSerializer#public_signature"
-      ],
-      "id": "cloche_fertilizer_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.ClocheRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.ClocheRecipeSerializer#public_signature"
-      ],
-      "id": "cloche_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.CokeOvenRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.CokeOvenRecipeSerializer#public_signature"
-      ],
-      "id": "coke_oven_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.CrusherRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.CrusherRecipeSerializer#public_signature"
-      ],
-      "id": "crusher_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.DamageToolRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.DamageToolRecipeSerializer#public_signature"
-      ],
-      "id": "damage_tool_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.FermenterRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.FermenterRecipeSerializer#public_signature"
-      ],
-      "id": "fermenter_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.GeneratedListSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.GeneratedListSerializer#public_signature"
-      ],
-      "id": "generated_list_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.GeneratorFuelSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.GeneratorFuelSerializer#public_signature"
-      ],
-      "id": "generator_fuel_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.HammerCrushingRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.HammerCrushingRecipeSerializer#public_signature"
-      ],
-      "id": "hammer_crushing_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "generic_ingredients"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.MetalPressRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.MetalPressRecipeSerializer#public_signature"
-      ],
-      "id": "metal_press_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.MineralMixSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.MineralMixSerializer#public_signature"
-      ],
-      "id": "mineral_mix_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.MixerRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.MixerRecipeSerializer#public_signature"
-      ],
-      "id": "mixer_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.NoContainerSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.NoContainerSerializer#public_signature"
-      ],
-      "id": "no_container_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.RGBRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.RGBRecipeSerializer#public_signature"
-      ],
-      "id": "r_g_b_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.RefineryRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.RefineryRecipeSerializer#public_signature"
-      ],
-      "id": "refinery_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.RevolverAssemblyRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.RevolverAssemblyRecipeSerializer#public_signature"
-      ],
-      "id": "revolver_assembly_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.SawmillRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.SawmillRecipeSerializer#public_signature"
-      ],
-      "id": "sawmill_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.SimpleRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.SimpleRecipeSerializer#public_signature"
-      ],
-      "id": "simple_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.SqueezerRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.SqueezerRecipeSerializer#public_signature"
-      ],
-      "id": "squeezer_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.ThermoelectricSourceSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.ThermoelectricSourceSerializer#public_signature"
-      ],
-      "id": "thermoelectric_source_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.TurnAndCopyRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.TurnAndCopyRecipeSerializer#public_signature"
-      ],
-      "id": "turn_and_copy_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.TurnAndCopyRecipeSerializer$AdditionalData",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.TurnAndCopyRecipeSerializer$AdditionalData#public_signature"
-      ],
-      "id": "turn_and_copy_recipe_serializer__additional_data",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.WindmillBiomeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.WindmillBiomeSerializer#public_signature"
-      ],
-      "id": "windmill_biome_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.crafting.serializers.WrappingRecipeSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.crafting.serializers.WrappingRecipeSerializer#public_signature"
-      ],
-      "id": "wrapping_recipe_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.fluids.IEFluid$EntityFluidSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.fluids.IEFluid$EntityFluidSerializer#public_signature"
-      ],
-      "id": "i_e_fluid__entity_fluid_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.gui.sync.GenericDataSerializers",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.gui.sync.GenericDataSerializers#public_signature"
-      ],
-      "id": "generic_data_serializers",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
+        "generic_ingredients",
         "world_mutation"
       ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.gui.sync.GenericDataSerializers$DataPair",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.gui.sync.GenericDataSerializers$DataPair#public_signature"
-      ],
-      "id": "generic_data_serializers__data_pair",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.gui.sync.GenericDataSerializers$DataSerializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.gui.sync.GenericDataSerializers$DataSerializer#public_signature"
-      ],
-      "id": "generic_data_serializers__data_serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.register.IEEntityDataSerializers",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.register.IEEntityDataSerializers#public_signature"
-      ],
-      "id": "i_e_entity_data_serializers",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.CachedRecipe",
-      "costs": [],
-      "decision": "Recipe cache, generated list, or iterator helper; not an independent deterministic family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.CachedRecipe#public_signature"
-      ],
-      "id": "cached_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.RecipeSerializers",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.RecipeSerializers#public_signature"
-      ],
-      "id": "recipe_serializers",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.AssemblerRecipeTransferHandler",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.AssemblerRecipeTransferHandler#public_signature"
-      ],
-      "id": "assembler_recipe_transfer_handler",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "entity_mutation",
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.IERecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.IERecipeCategory#public_signature"
-      ],
-      "id": "i_e_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.JEIRecipeTypes",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.JEIRecipeTypes#public_signature"
-      ],
-      "id": "j_e_i_recipe_types",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.alloysmelter.AlloySmelterRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.alloysmelter.AlloySmelterRecipeCategory#public_signature"
-      ],
-      "id": "alloy_smelter_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.arcfurnace.ArcFurnaceRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.arcfurnace.ArcFurnaceRecipeCategory#public_signature"
-      ],
-      "id": "arc_furnace_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.blastfurnace.BlastFurnaceRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.blastfurnace.BlastFurnaceRecipeCategory#public_signature"
-      ],
-      "id": "blast_furnace_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.bottlingmachine.BottlingMachineRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.bottlingmachine.BottlingMachineRecipeCategory#public_signature"
-      ],
-      "id": "bottling_machine_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.cloche.ClocheRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.cloche.ClocheRecipeCategory#public_signature"
-      ],
-      "id": "cloche_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.cokeoven.CokeOvenRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.cokeoven.CokeOvenRecipeCategory#public_signature"
-      ],
-      "id": "coke_oven_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.crusher.CrusherRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.crusher.CrusherRecipeCategory#public_signature"
-      ],
-      "id": "crusher_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.fermenter.FermenterRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.fermenter.FermenterRecipeCategory#public_signature"
-      ],
-      "id": "fermenter_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.metalpress.MetalPressRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.metalpress.MetalPressRecipeCategory#public_signature"
-      ],
-      "id": "metal_press_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.mixer.MixerRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.mixer.MixerRecipeCategory#public_signature"
-      ],
-      "id": "mixer_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.refinery.RefineryRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.refinery.RefineryRecipeCategory#public_signature"
-      ],
-      "id": "refinery_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.sawmill.SawmillRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.sawmill.SawmillRecipeCategory#public_signature"
-      ],
-      "id": "sawmill_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.squeezer.SqueezerRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.squeezer.SqueezerRecipeCategory#public_signature"
-      ],
-      "id": "squeezer_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "multiblock"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.util.compat.jei.workbench.WorkbenchRecipeCategory",
-      "costs": [],
-      "decision": "JEI category or recipe-viewer helper; not a server recipe family. Auto Storage does not register third-party EMI/JEI workstations.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.util.compat.jei.workbench.WorkbenchRecipeCategory#public_signature"
-      ],
-      "id": "workbench_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.common.wires.WireNetworkCreator$Serializer",
-      "costs": [],
-      "decision": "Recipe serializer or codec helper; not an independent Auto Storage recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.common.wires.WireNetworkCreator$Serializer#public_signature"
-      ],
-      "id": "wire_network_creator__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.immersiveengineering.mixin.accessors.ShapedRecipeAccess",
-      "costs": [],
-      "decision": "Manual/mixin accessor helper; not a server recipe family.",
-      "evidence": [
-        "blusunrize.immersiveengineering.mixin.accessors.ShapedRecipeAccess#public_signature"
-      ],
-      "id": "shaped_recipe_access",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "blusunrize.lib.manual.utils.ManualRecipeRef",
-      "costs": [],
-      "decision": "Manual/mixin accessor helper; not a server recipe family.",
-      "evidence": [
-        "blusunrize.lib.manual.utils.ManualRecipeRef#public_signature"
-      ],
-      "id": "manual_recipe_ref",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
       "station": null,
       "status": "rejected"
     }
   ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "immersiveengineering"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "immersiveengineering"
+      ],
+      "sha256": "b733a4b670dbb507a71df7f819c2296f627d42f2ed89240c6040c9c55c445c7d"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
+  "source_recipe_data_sha256": "c6ffd3ca67e52e6b0bcc08f04827f3844f785be8c4567efd97f26c0e52aaa5a3",
+  "source_recipe_inventory_sha256": "d2dcabb9088eda4348e701857d3e91f73f3751f1189e10c8365df4dcfc4993ea",
+  "target": {
+    "dependency": "maven.modrinth:immersiveengineering:uNRARSH2",
+    "display_name": "Immersive Engineering",
+    "mod_id": "immersiveengineering",
+    "repositories": [
+      "https://api.modrinth.com/maven",
+      "https://maven.squiddev.cc"
+    ],
+    "runtime_dependencies": [],
+    "version": "12.4.2-194"
+  },
   "verification": {
     "checks": [
       "absent_target_no_classload",
@@ -2230,3 +929,4 @@
     ]
   }
 }
+

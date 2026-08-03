@@ -1,13 +1,14 @@
 {
-  "schema": 1,
-  "tool_version": "0.3.0",
-  "contract_sha256": "1d1fb7a47d34de60f4cc5a3e9d0118ed6d4650e3f2776dd66090051202a8607d",
+  "contract_sha256": "0cd46073a969e6c13ec18f0dc6aabde241ccbabda55236e052f457f6b65c5b16",
   "files": {
-    "src/compat/immersiveengineering/compat-module.json": "276ce31d24fe1fec055b9701651ef13ca63e393769f73174970aea49eda8890c",
+    "src/compat/immersiveengineering/compat-module.json": "ee0f0b873149deba7d3e96d3681912649849e544097aeded75deff069f7e2533",
     "src/compat/immersiveengineering/java/com/swear/autostorage/compat/immersiveengineering/ImmersiveengineeringCompatModule.java": "0b2fdf763b33dc9d81a0d371401b4829d605adec61ab5538f10fec6d55d7cdf6",
     "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/immersiveengineering/ImmersiveengineeringFixtureMod.java": "ea01eecb60f235f59931fea288a644e98c1e073dfffef97d952cc9222a9523bc",
     "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/immersiveengineering/ImmersiveengineeringIntegrationGameTests.java": "ad0b50bb423d248e646d39aa5d8305e86aa033891fbb8ce0d63d339c349c8bdc",
     "src/immersiveengineeringFixture/resources/META-INF/neoforge.mods.toml": "a4317cfaab87868117f63f40530e7b630940f806b0bf4c8693bab85ab7e37925",
     "src/immersiveengineeringFixture/resources/data/auto_storage_immersiveengineering_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
-  }
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
 }
+
