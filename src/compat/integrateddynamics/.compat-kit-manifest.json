@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "c0d6713cc38265d485352bbabe715a0e7069d6d02583affd56f54c39313dcb17",
+  "contract_sha256": "ae426f43a889057085d41e2740ddfe50f2780cf7c3ac51185de71a6b6645ac6b",
   "files": {
-    "src/compat/integrateddynamics/compat-module.json": "afb39d0763df0dab9e7afd8928d9bf3ac42e3025e474a83021af78509cdb4164",
+    "src/compat/integrateddynamics/compat-module.json": "3cb73b4fdcb32d465a3bde8f997558e70f285926cb565bc0fe1616f7e8373c9f",
     "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompat.java": "f933f453f9dc1c5b42707d620232b1ac7124a13db4b8067300d5192f7014a182",
     "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompatModule.java": "b0a9ed875ed11eb77bb6de0204801c59bfc8d36b2d99b440dd4ebcc3afbc5818",
     "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsFixtureMod.java": "09cafe93da5cb14084a3e3714efd1f786edcb81b2d7f605cfa1f33d8d71a7d64",

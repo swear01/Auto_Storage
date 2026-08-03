@@ -4,27 +4,15 @@
     "sha256": "1c49c774bc8fa28d344592b65ae5d0082c497b21dd5250fcc2aadefedb964cec"
   },
   "dependencies": [
-    "maven.modrinth:integrated-crafting:se5g7ewq"
+    "maven.modrinth:integrated-crafting:se5g7ewq",
+    "maven.modrinth:common-capabilities:c50bCinZ",
+    "maven.modrinth:cyclops-core:vEjxRv40",
+    "maven.modrinth:integrated-dynamics:tG3ZKTep"
   ],
   "entrypoint": "com.swear.autostorage.compat.integratedcrafting.IntegratedcraftingCompatModule",
   "expectedTests": 4,
   "fixture": "integratedCraftingFixture",
   "id": "auto_storage:integratedcrafting",
-  "repositories": [
-    "https://api.modrinth.com/maven"
-  ],
-  "requires": [
-    "integratedcrafting"
-  ],
-  "runtimeDependencies": [
-    "maven.modrinth:integrated-crafting:se5g7ewq",
-    "maven.modrinth:integrated-dynamics:tG3ZKTep",
-    "maven.modrinth:cyclops-core:vEjxRv40",
-    "maven.modrinth:common-capabilities:c50bCinZ"
-  ],
-  "schema": 1,
-  "side": "both",
-  "sourceSet": "compatIntegratedcrafting",
   "matrix": {
     "acceptedRecipes": [],
     "descriptors": [],
@@ -40,5 +28,20 @@
     "rejectedDescriptors": [],
     "rejectedResourceKinds": [],
     "resourceKinds": []
-  }
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "integratedcrafting"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:integrated-crafting:se5g7ewq",
+    "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "maven.modrinth:cyclops-core:vEjxRv40",
+    "maven.modrinth:common-capabilities:c50bCinZ"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatIntegratedcrafting"
 }

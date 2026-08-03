@@ -4,26 +4,14 @@
     "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
   },
   "dependencies": [
-    "maven.modrinth:integrated-dynamics:tG3ZKTep"
+    "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "maven.modrinth:common-capabilities:c50bCinZ",
+    "maven.modrinth:cyclops-core:vEjxRv40"
   ],
   "entrypoint": "com.swear.autostorage.compat.integrateddynamics.IntegrateddynamicsCompatModule",
   "expectedTests": 8,
   "fixture": "integratedDynamicsFixture",
   "id": "auto_storage:integrateddynamics",
-  "repositories": [
-    "https://api.modrinth.com/maven"
-  ],
-  "requires": [
-    "integrateddynamics"
-  ],
-  "runtimeDependencies": [
-    "maven.modrinth:integrated-dynamics:tG3ZKTep",
-    "maven.modrinth:cyclops-core:vEjxRv40",
-    "maven.modrinth:common-capabilities:c50bCinZ"
-  ],
-  "schema": 1,
-  "side": "both",
-  "sourceSet": "compatIntegrateddynamics",
   "matrix": {
     "acceptedRecipes": [
       "integrateddynamics:drying_basin/base/crystalized_menril_block"
@@ -47,5 +35,19 @@
     ],
     "rejectedResourceKinds": [],
     "resourceKinds": []
-  }
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "integrateddynamics"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:integrated-dynamics:tG3ZKTep",
+    "maven.modrinth:cyclops-core:vEjxRv40",
+    "maven.modrinth:common-capabilities:c50bCinZ"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatIntegrateddynamics"
 }
