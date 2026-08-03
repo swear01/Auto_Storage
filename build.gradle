@@ -917,11 +917,6 @@ configurations {
         canBeResolved = true
         transitive = false
     }
-    integratedDynamicsPristineArtifact {
-        canBeConsumed = false
-        canBeResolved = true
-        transitive = false
-    }
     clientSmokePatchouli {
         canBeConsumed = false
         canBeResolved = true
@@ -1170,10 +1165,6 @@ dependencies {
     ae2CompatAuditAncestry "dev.emi:emi-neoforge:1.1.22+1.21.1:api"
     ae2CompatAuditAncestry "curse.maven:jade-324717:5427817"
     ae2CompatAuditAncestry "net.fabricmc:sponge-mixin:0.15.2+mixin.0.8.7"
-    integratedDynamicsPristineArtifact(
-            "maven.modrinth:integrated-dynamics:tG3ZKTep") {
-        transitive = false
-    }
     compatModules.each { spec ->
         spec.dependencies.each { notation ->
             add(sourceSets[spec.sourceSet].compileOnlyConfigurationName, notation) {
@@ -1493,64 +1484,6 @@ tasks.register("stageAe2CompatAuditAncestry") {
         manifest.text = staged.join("\n") + "\n"
     }
 }
-def integratedDynamicsRsGameTestClass =
-        'org/cyclops/integrateddynamicscompat/modcompat/refinedstorage/gametest/GameTestsAspectsRefinedStorage.class'
-def strippedIntegratedDynamicsJar = layout.buildDirectory.file(
-        'compat-kit/runtime/integrateddynamics-stripped-rs-gametest.jar')
-def stripIntegratedDynamicsRsGameTest = tasks.register('stripIntegratedDynamicsRsGameTest') {
-    inputs.files(configurations.integratedDynamicsPristineArtifact)
-    inputs.property('dropClass', integratedDynamicsRsGameTestClass)
-    outputs.file(strippedIntegratedDynamicsJar)
-    doLast {
-        def artifacts = inputs.files.files.findAll { it.name.endsWith('.jar') }
-        if (artifacts.size() != 1) {
-            throw new GradleException(
-                    "Integrated Dynamics strip expected one resolved jar, found ${artifacts.size()}")
-        }
-        def inputJar = artifacts.iterator().next()
-        def outputJar = outputs.files.singleFile
-        outputJar.parentFile.mkdirs()
-        def dropped = false
-        new java.util.zip.ZipInputStream(inputJar.newInputStream()).withCloseable { zin ->
-            new java.util.zip.ZipOutputStream(outputJar.newOutputStream()).withCloseable { zout ->
-                def entry = zin.nextEntry
-                while (entry != null) {
-                    if (entry.name == integratedDynamicsRsGameTestClass) {
-                        dropped = true
-                        zin.closeEntry()
-                        entry = zin.nextEntry
-                        continue
-                    }
-                    def copy = new java.util.zip.ZipEntry(entry.name)
-                    copy.time = entry.time
-                    if (entry.method == java.util.zip.ZipEntry.STORED) {
-                        copy.method = java.util.zip.ZipEntry.STORED
-                        copy.size = entry.size
-                        copy.compressedSize = entry.compressedSize
-                        copy.crc = entry.crc
-                    }
-                    zout.putNextEntry(copy)
-                    zin.transferTo(zout)
-                    zout.closeEntry()
-                    zin.closeEntry()
-                    entry = zin.nextEntry
-                }
-            }
-        }
-        if (!dropped) {
-            throw new GradleException(
-                    "Integrated Dynamics jar did not contain ${integratedDynamicsRsGameTestClass}")
-        }
-    }
-}
-dependencies {
-    def strippedIntegratedDynamicsFiles = files(strippedIntegratedDynamicsJar)
-    strippedIntegratedDynamicsFiles.builtBy(stripIntegratedDynamicsRsGameTest)
-    integratedDynamicsFixtureRuntimeOnly(strippedIntegratedDynamicsFiles)
-    integratedCraftingFixtureRuntimeOnly(strippedIntegratedDynamicsFiles)
-    compatibilityMatrixFixtureRuntimeOnly(strippedIntegratedDynamicsFiles)
-}
-
 def compatArtifactVerificationTasks = []
 compatModules.findAll { it.auditArtifact != null }.each { spec ->
     def configurationName = "${spec.sourceSet}AuditArtifact"
@@ -1593,10 +1526,6 @@ compatModules.findAll { it.auditArtifact != null }.each { spec ->
     compatArtifactVerificationTasks.add(verifyTask)
     tasks.named(spec.runTask).configure {
         dependsOn verifyTask
-        if (spec.runtimeDependencies.contains(
-                "maven.modrinth:integrated-dynamics:tG3ZKTep")) {
-            dependsOn stripIntegratedDynamicsRsGameTest
-        }
     }
 }
 
@@ -1983,7 +1912,6 @@ tasks.named('runCompatibilityMatrixGameTestServer').configure {
     }
     dependsOn tasks.named('verifyBotaniaFixtureArtifact')
     dependsOn generateCompatibilityMatrixManifest
-    dependsOn stripIntegratedDynamicsRsGameTest
     doLast {
         if (!compatibilityMatrixLatestLog.exists()) {
             throw new GradleException(

@@ -38,10 +38,12 @@ Required runtime companions for the fixture:
 
 The published jar embeds a `@GameTestHolder` Refined Storage aspect suite.
 NeoForge `GameTestHooks` classloads every holder before namespace filtering, so
-fixture/matrix runtimes use a byte-identical copy of the audited jar with only
-`GameTestsAspectsRefinedStorage` removed. Audit SHA verification still resolves
-the pristine Modrinth artifact. Refined Storage is not an Auto Storage recipe
-target and is not loaded as a companion.
+the reviewed contract declares one exact-SHA runtime artifact transform that
+removes only `GameTestsAspectsRefinedStorage`. The shared Compat Kit transform
+pipeline supplies that transformed jar to the Integrated Dynamics, Integrated
+Crafting, and compatibility-matrix runtimes, while audit verification still
+resolves the pristine Modrinth artifact. Refined Storage is not an Auto Storage
+recipe target and is not loaded as a companion.
 
 ## Accepted families
 

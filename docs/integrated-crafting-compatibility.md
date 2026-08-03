@@ -29,8 +29,8 @@ Runtime companions declared by the contract:
 - Cyclops Core Modrinth `vEjxRv40` (`1.29.1`);
 - Common Capabilities Modrinth `c50bCinZ` (`2.11.5`).
 
-The Integrated Dynamics companion jar is the same GameTestHolder-stripped
-runtime copy documented in
+The Integrated Dynamics companion uses the same contract-owned exact-SHA
+runtime transform documented in
 [`integrated-dynamics-compatibility.md`](integrated-dynamics-compatibility.md).
 
 Complete Compat Kit verification reopens the exact target jar and all four

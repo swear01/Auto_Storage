@@ -82,7 +82,7 @@
 | `src/enderIoFixture/` | 代表性Ender IO 8.2.11-beta隔離GameTest fixture；6個tests驗Alloy Smelting註冊／rate／craft／rollback與smelting-batch、Sag Mill rejection。 |
 | `docs/immersiveengineering-compatibility.md` | Immersive Engineering 12.4.2-194 scanner-format-17 audit：44 actual recipe classes 全拒、10/9 ancestry、multiblock/live fuel/chance/TagOutput 邊界與零production-family outcome C。 |
 | `src/immersiveengineeringFixture/` | 代表性 Immersive Engineering present-mod隔離fixture；8個tests鎖住 Alloy/Coke Oven/Blast Furnace/Crusher/Cloche/Metal Press/Arc Furnace 與全受審type掃描仍fail closed。 |
-| `docs/integrated-dynamics-compatibility.md` | Integrated Dynamics 1.33.3 format-17審計（1,475 target classes／10 structural recipe classes／18 ancestry）、Drying Basin / Mechanical Drying Basin / Mechanical Squeezer exact item/fluid/FE/work contract、multi-mod `--mod-id` scan evidence與8個isolated GameTests。 |
+| `docs/integrated-dynamics-compatibility.md` | Integrated Dynamics 1.33.3 format-17審計（1,475 target classes／10 structural recipe classes／18 ancestry）、Drying Basin / Mechanical Drying Basin / Mechanical Squeezer exact item/fluid/FE/work contract、multi-mod `--mod-id` scan evidence、contract-owned exact-SHA runtime transform與8個isolated GameTests。 |
 | `src/integratedDynamicsFixture/` | 隔離載入代表性Integrated Dynamics 1.33.3 + Cyclops Core + Common Capabilities；8個GameTests驗三個deterministic families、chance/manual Squeezer fail-closed與atomic rollback。 |
 | `docs/integrated-crafting-compatibility.md` | Integrated Crafting 1.4.6 format-17 Outcome C audit（80 target classes／1 recipe class／4 ancestry）與零production-family fail-closed判定。 |
 | `src/integratedCraftingFixture/` | 代表性Integrated Crafting 1.4.6 present-mod隔離fixture；4個tests鎖住DeadBush與network index不被不安全接受。 |

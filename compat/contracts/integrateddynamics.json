@@ -379,6 +379,14 @@
     "repositories": [
       "https://api.modrinth.com/maven"
     ],
+    "runtime_artifact_transforms": {
+      "maven.modrinth:integrated-dynamics:tG3ZKTep": {
+        "remove_entries": [
+          "org/cyclops/integrateddynamicscompat/modcompat/refinedstorage/gametest/GameTestsAspectsRefinedStorage.class"
+        ],
+        "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+      }
+    },
     "runtime_dependencies": [
       "maven.modrinth:cyclops-core:vEjxRv40",
       "maven.modrinth:common-capabilities:c50bCinZ"

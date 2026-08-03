@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "edc7e4fc60b582ce676ff85140a90021e0924359d821e10cc95895cd17eb456f",
+  "contract_sha256": "288ffbc4fec915ff91748ecfda22550ddfbfa21d987a28414d7309813e00879a",
   "files": {
-    "src/compat/integratedcrafting/compat-module.json": "e0b08b0216d961c0f17f6caf920debc0d7598fdd00e5183c727ed8d8fb4f9bb5",
+    "src/compat/integratedcrafting/compat-module.json": "65a1b9678dcd89b6250dd27f94b0371a039c6b6fe1d9261b684801d274ccd605",
     "src/compat/integratedcrafting/java/com/swear/autostorage/compat/integratedcrafting/IntegratedcraftingCompat.java": "45aac91656e2eec629e7238e91cd156a96d734475d38135ac37fea2d0b14b637",
     "src/compat/integratedcrafting/java/com/swear/autostorage/compat/integratedcrafting/IntegratedcraftingCompatModule.java": "c4058a4d5353239e38ebae0dbc22431858048c2b558096a80a9ef1b31de04abd",
     "src/integratedCraftingFixture/java/com/swear/autostorage/fixture/integratedcrafting/IntegratedcraftingFixtureMod.java": "ff3d4284addb3d3de35ac2c42e92e39258a42c0b43f7c6055d59b71264a167ed",

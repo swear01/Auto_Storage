@@ -35,6 +35,15 @@
   "requires": [
     "integratedcrafting"
   ],
+  "runtimeArtifactTransforms": [
+    {
+      "dependency": "maven.modrinth:integrated-dynamics:tG3ZKTep",
+      "remove_entries": [
+        "org/cyclops/integrateddynamicscompat/modcompat/refinedstorage/gametest/GameTestsAspectsRefinedStorage.class"
+      ],
+      "sha256": "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+    }
+  ],
   "runtimeDependencies": [
     "maven.modrinth:integrated-crafting:se5g7ewq",
     "maven.modrinth:integrated-dynamics:tG3ZKTep",

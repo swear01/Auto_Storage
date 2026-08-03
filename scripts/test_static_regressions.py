@@ -6067,6 +6067,42 @@ class StaticRegressionTests(unittest.TestCase):
             r'xycraft\("buildings/temp"\)',
         )
 
+    def test_integrated_fixtures_use_declarative_runtime_transform(self):
+        dependency = "maven.modrinth:integrated-dynamics:tG3ZKTep"
+        transform = {
+            "sha256": (
+                "7c508ebd4048a589812562740132d39802ea0034e11a011fbfd53188b39fdba2"
+            ),
+            "remove_entries": [
+                "org/cyclops/integrateddynamicscompat/modcompat/refinedstorage/"
+                "gametest/GameTestsAspectsRefinedStorage.class"
+            ],
+        }
+        for module_id in ("integrateddynamics", "integratedcrafting"):
+            contract = json.loads(
+                (ROOT / f"compat/contracts/{module_id}.json").read_text()
+            )
+            descriptor = json.loads(
+                (ROOT / f"src/compat/{module_id}/compat-module.json").read_text()
+            )
+            self.assertEqual(
+                {dependency: transform},
+                contract["target"]["runtime_artifact_transforms"],
+            )
+            self.assertEqual(
+                [{"dependency": dependency, **transform}],
+                descriptor["runtimeArtifactTransforms"],
+            )
+
+        build = (ROOT / "build.gradle").read_text()
+        for obsolete in (
+            "integratedDynamicsPristineArtifact",
+            "integratedDynamicsRsGameTestClass",
+            "strippedIntegratedDynamicsJar",
+            "stripIntegratedDynamicsRsGameTest",
+        ):
+            self.assertNotIn(obsolete, build)
+
 
 if __name__ == "__main__":
     unittest.main()
