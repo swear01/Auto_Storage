@@ -404,7 +404,8 @@ scaffold an addon without an Auto Storage checkout.
 Bundled contracts may own exact `runtime_artifact_transforms`; generated
 descriptors copy them as `runtimeArtifactTransforms`. The contract field is an
 object keyed by declared runtime dependency, so duplicate coordinates are not a
-representable schema value; each value binds the pristine SHA-256 and a literal
+representable schema value. Each contract owns exactly one transform, which also
+makes artifact-SHA aliasing unrepresentable; its value binds the pristine SHA-256 and a literal
 non-empty unique ZIP entry list. `transform-runtime-artifact` verifies the pristine bytes and every
 entry, then writes a sorted fixed-timestamp stored-entry jar atomically. Pristine
 bytes remain on audit/compile/SHA gates, while only isolated and matrix runtimes

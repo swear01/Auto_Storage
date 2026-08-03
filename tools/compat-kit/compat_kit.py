@@ -4434,11 +4434,14 @@ def _validate_runtime_artifact_transforms(
         raise ValueError(
             "contract target runtime_artifact_transforms must be a non-empty object"
         )
+    if len(value) != 1:
+        raise ValueError(
+            "contract target runtime_artifact_transforms must own exactly one artifact"
+        )
     runtime_dependencies = {
         target.get("dependency"),
         *target.get("runtime_dependencies", []),
     }
-    seen_artifacts = set()
     for dependency, transform in sorted(value.items()):
         location = f"contract target runtime_artifact_transforms {dependency!r}"
         _validate_dependency_coordinate(dependency, f"{location} dependency")
@@ -4456,11 +4459,6 @@ def _validate_runtime_artifact_transforms(
         sha256 = transform["sha256"]
         if not isinstance(sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", sha256):
             raise ValueError(f"{location} sha256 must be a SHA-256 digest")
-        if sha256 in seen_artifacts:
-            raise ValueError(
-                "contract target runtime_artifact_transforms repeat an artifact"
-            )
-        seen_artifacts.add(sha256)
         if dependency == target.get("dependency") and sha256 != source_audit_sha256:
             raise ValueError(f"{location} target SHA must match the source audit")
         if dependency != target.get("dependency") and sha256 == source_audit_sha256:

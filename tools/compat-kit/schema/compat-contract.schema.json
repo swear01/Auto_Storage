@@ -38,6 +38,7 @@
         "runtime_artifact_transforms": {
           "type": "object",
           "minProperties": 1,
+          "maxProperties": 1,
           "propertyNames": {
             "pattern": "^[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+:[^:\\s\\u0000-\\u001F\\u007F]+$"
           },

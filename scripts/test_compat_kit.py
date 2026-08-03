@@ -7392,6 +7392,29 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
                 source_artifact=self.jar,
             )
 
+        multiple_artifacts = copy.deepcopy(base)
+        multiple_artifacts["target"]["runtime_dependencies"] = [
+            "com.example:first-runtime:1.0.0",
+            "com.example:second-runtime:1.0.0",
+        ]
+        multiple_artifacts["target"]["runtime_artifact_transforms"] = {
+            "com.example:first-runtime:1.0.0": {
+                "sha256": "1" * 64,
+                "remove_entries": ["samplemod/FirstGameTests.class"],
+            },
+            "com.example:second-runtime:1.0.0": {
+                "sha256": "2" * 64,
+                "remove_entries": ["samplemod/SecondGameTests.class"],
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "exactly one artifact"):
+            self.compat_kit.validate_contract(
+                multiple_artifacts,
+                require_complete=True,
+                source_audit=self.source_audit(),
+                source_artifact=self.jar,
+            )
+
     def test_contract_runtime_dependencies_reject_primary_dependency(self):
         contract = self.accepted_contract()
         contract["target"]["runtime_dependencies"] = [
@@ -8885,6 +8908,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         transforms = target["runtime_artifact_transforms"]
         self.assertEqual("object", transforms["type"])
         self.assertEqual(1, transforms["minProperties"])
+        self.assertEqual(1, transforms["maxProperties"])
         self.assertEqual(
             target["dependency"]["pattern"],
             transforms["propertyNames"]["pattern"],

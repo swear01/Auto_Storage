@@ -240,6 +240,9 @@ Repository-owned bundled fixtures may additionally declare exact
 `target.runtime_artifact_transforms` for reviewed removal of unrelated test-only
 ZIP entries. This contract field is an object keyed by exact runtime dependency,
 which makes duplicate dependency plans unrepresentable to schema-only consumers.
+One bundled contract may own exactly one transform, so it also cannot alias one
+artifact SHA through multiple coordinates; separate descriptors may share the
+same identical plan.
 The pristine coordinate and SHA remain the audit, compile, and
 artifact-gate input; only isolated/matrix test runtimes receive the deterministic
 transformed output. Identical transforms shared by multiple bundled descriptors

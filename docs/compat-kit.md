@@ -639,7 +639,9 @@ exact reviewed runtime artifact embeds unrelated test-only ZIP entries that the
 loader classloads before fixture namespace filtering. The field is an object
 keyed by existing runtime dependency; each value binds its pristine SHA-256 and
 a non-empty unique list of literal `remove_entries`. Dependency-keyed object
-shape prevents two plans for one coordinate from passing the published schema.
+shape plus an exact one-property bound prevents duplicate coordinate or artifact
+plans from passing the published schema. Multiple bundled descriptors may still
+share one identical transformed artifact.
 Absolute/traversal/directory paths, wildcards, control
 characters, absent entries, duplicate ZIP entries, unexpected artifacts, and SHA
 drift fail closed. Audit, compile, and artifact verification continue to use the
