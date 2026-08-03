@@ -87,8 +87,9 @@ peer Create digests or commit global coexistence/unclaimed expected SHA values.
 
 Eight GameTests cover registration/manual-Squeezer exclusion, Drying Basin
 fluid/duration commit, Mechanical Squeezer item/fluid/FE/work commit,
-missing-ingredient and full-destination atomic no-ops, `Long.MAX_VALUE` energy,
-chance-output rejection, and loaded mechanical energy config.
+missing-ingredient and full item-destination atomic no-ops, `Long.MAX_VALUE`
+fluid-output overflow rollback, chance-output rejection, and loaded mechanical
+energy config.
 
 Full Compat Kit CLI `verify` for this module must also pass with the committed
 format-17 audit, exact jar, and staged ancestry classpath.

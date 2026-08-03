@@ -6103,6 +6103,34 @@ class StaticRegressionTests(unittest.TestCase):
         ):
             self.assertNotIn(obsolete, build)
 
+    def test_integrated_dynamics_overflow_fixture_exercises_fluid_destination(self):
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+checked_fluid_output_overflow_is_atomic\s*\(",
+            "Integrated Dynamics fluid-output overflow GameTest",
+        )
+
+        self.assertIn("Long.MAX_VALUE", method)
+        self.assertIn("StorageResourceKey.fluid(", method)
+        self.assertIn("if (craft(context, SQUEEZER_RECIPE)", method)
+        self.assertIn(
+            'fluidAmount(context, idFluid("menril_resin")) != Long.MAX_VALUE',
+            method,
+        )
+        self.assertIn(
+            "getStationWork(MECHANICAL_SQUEEZER) != 15",
+            method,
+        )
+        self.assertRegex(
+            method,
+            r"getResourceAmount\(\s*StorageResourceKey\.neoforgeEnergy\(\)\s*\)"
+            r"\s*!=\s*energy",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

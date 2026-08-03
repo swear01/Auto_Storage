@@ -167,20 +167,32 @@ public final class IntegrateddynamicsIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void checked_overflow_rejects_long_max_energy(GameTestHelper helper) {
+    public static void checked_fluid_output_overflow_is_atomic(GameTestHelper helper) {
         withCore(helper, context -> {
+            long energy = expectedSqueezerEnergy(15);
             seedItem(context.core(), idItem("menril_planks"), 1);
             seedResource(
                     context.core(),
                     StorageResourceKey.neoforgeEnergy(),
+                    energy);
+            seedResource(
+                    context.core(),
+                    StorageResourceKey.fluid(
+                            new FluidStack(idFluid("menril_resin"), 1),
+                            context.level().registryAccess()),
                     Long.MAX_VALUE);
             installStation(context, "mechanical_squeezer");
             tick(context.core(), 15);
-            if (!craft(context, SQUEEZER_RECIPE)
+            if (craft(context, SQUEEZER_RECIPE)
+                    || itemCount(context.core(), idItem("menril_planks")) != 1
+                    || itemCount(context.core(), idItem("crystalized_menril_chunk")) != 0
+                    || fluidAmount(context, idFluid("menril_resin")) != Long.MAX_VALUE
                     || context.core().getResourceAmount(
                             StorageResourceKey.neoforgeEnergy())
-                    != Long.MAX_VALUE - expectedSqueezerEnergy(15)) {
-                helper.fail("Long.MAX_VALUE energy path failed for Integrated Dynamics");
+                    != energy
+                    || context.core().getStationWork(MECHANICAL_SQUEEZER) != 15) {
+                helper.fail(
+                        "Integrated Dynamics fluid-output overflow was not an atomic no-op");
                 return;
             }
             helper.succeed();
