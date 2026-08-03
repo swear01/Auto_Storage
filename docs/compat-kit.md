@@ -195,7 +195,7 @@ artifact bytes. The target jar's recipe source count is independently rebuilt on
 complete use; when `target_jar` is the audit's only recipe-data source, the
 entire effective recipe inventory, serializer summary, overrides, and digest
 must match the reopened jar exactly.
-Format 16 retains each candidate's structural classification and source-level
+Scanner format 16 and later retain each candidate's structural classification and source-level
 Java type, a separate sorted top-level `structural_hierarchy` inventory, and an
 artifact/classpath-bound `structural_candidate_inventory_sha256`. Its
 `structural_class_graph` starts from every target class and includes reachable
@@ -767,7 +767,7 @@ the canonical jar through `--classpath`; raw ZIP metadata is not cross-run
 stable. The command fixes entry order, timestamps, storage mode, and permissions.
 Only ModDev outputs are canonicalized automatically; Maven artifacts remain raw
 exact bytes.
-Scanner-format-16 audits persist exact coordinates for reachable compile APIs
+Scanner-format-16 and later audits persist exact coordinates for reachable compile APIs
 under `ancestry_dependencies`; generated addons emit each as non-transitive
 `compileOnly` and `compatKitAncestryArtifacts` dependencies. No post-scaffold
 edit is needed or allowed, and unresolved hashes remain a hard failure. Complete consumers independently rebuild the reachable
