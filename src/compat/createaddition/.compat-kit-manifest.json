@@ -5,7 +5,7 @@
     "src/compat/createaddition/java/com/swear/autostorage/compat/createaddition/CreateadditionCompat.java": "3d2fdc141bd9c1302714d1ff272d62de967e85ed62fab5edca68adf6236cc81b",
     "src/compat/createaddition/java/com/swear/autostorage/compat/createaddition/CreateadditionCompatModule.java": "e980cf1754b0cb3a77c2fe54f6ea866d1c9739b343871f7aaa29c11b37e58784",
     "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionFixtureMod.java": "5a2ffda9ee35447c9aedd366952584d8ef4d03ede358b6e10992a7e823f6291a",
-    "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java": "6c68d9525a6486c18b1e08406709c0c4c98fe3fd1688628fb28255471c232b48",
+    "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java": "f32584ee2a911eb1db66417ec07f2dbd2fa7d83f7a78f15a8c9516d599294a32",
     "src/createadditionFixture/resources/META-INF/neoforge.mods.toml": "e544e4eb01f76c598cd49b966615b29d34893ec0974f01f62ab017b310b11456",
     "src/createadditionFixture/resources/data/auto_storage_createaddition_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },
