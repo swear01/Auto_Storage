@@ -12,7 +12,7 @@
     "net.createmod.ponder:ponder-neoforge:1.0.82+mc1.21.1"
   ],
   "entrypoint": "com.swear.autostorage.compat.createaddition.CreateadditionCompatModule",
-  "expectedTests": 8,
+  "expectedTests": 9,
   "fixture": "createadditionFixture",
   "id": "auto_storage:createaddition",
   "matrix": {

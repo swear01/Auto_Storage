@@ -2234,7 +2234,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
 
         self.assert_descriptor_driven_fixture(
-            build, "createaddition", "createadditionFixture", 8
+            build, "createaddition", "createadditionFixture", 9
         )
         self.assertNotIn('modId="createaddition"', metadata)
         self.assertIn('"createaddition"', module_index)
@@ -2260,30 +2260,89 @@ class StaticRegressionTests(unittest.TestCase):
             "57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3",
             descriptor["matrix"]["recipeInventory"]["sha256"],
         )
+        self.assertEqual(9, contract["verification"]["expected_game_tests"])
+        self.assertEqual(9, descriptor["expectedTests"])
         self.assertIn("IsolatedRecipeInventoryEvidence", fixture)
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn("CreateadditionCompat.register(MACHINES, RECIPES)", module)
         self.assertIn("RollingRecipe.class", compat)
         self.assertIn("ChargingRecipe.class", compat)
         self.assertNotIn("LiquidBurningRecipe.class", compat)
+        self.assertEqual(
+            2,
+            compat.count("RecipeFamilyFactories.dynamicDeterministicResources("),
+        )
+        self.assertNotIn(
+            "RecipeFamilyFactories.deterministicResources(",
+            compat,
+        )
+        self.assertIn("getFluidIngredients()", compat)
+        self.assertIn("getFluidResults()", compat)
+        self.assertIn("getRollableResults()", compat)
+        self.assertIn("getChance() == 1.0F", compat)
+        self.assertIn("rolling_returns_item_remainder_and_consumes_duration", fixture)
+        self.assertIn(
+            "Create Crafts & Additions rolling remainder transaction was wrong",
+            fixture,
+        )
+        self.assertIn("recipePresent(helper, fixtureRecipe(\"chance_rolling\"))", fixture)
+        self.assertIn("recipePresent(helper, fixtureRecipe(\"chance_charging\"))", fixture)
+        self.assertIn("chance_rolling", fixture)
+        self.assertIn("fluid_result_rolling", fixture)
+        self.assertIn("fluid_ingredient_rolling", fixture)
+        self.assertIn("chance_charging", fixture)
+        self.assertIn("fluid_result_charging", fixture)
+        self.assertIn("fluid_ingredient_charging", fixture)
+        self.assertEqual(
+            "Create Crafts & Additions rolling remainder transaction was wrong",
+            contract["verification"]["evidence"]["catalyst_tool_remainder_exact"][0][
+                "marker"
+            ],
+        )
+        self.assertEqual(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java",
+            contract["verification"]["evidence"]["catalyst_tool_remainder_exact"][0][
+                "source"
+            ],
+        )
+        self.assertEqual(
+            "Typed family changed the wrong exact resources or output amounts",
+            contract["verification"]["evidence"]["multi_output_merge_exact"][0][
+                "marker"
+            ],
+        )
+        self.assertEqual(
+            "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/"
+            "RecipeFamilyIntegrationTests.java",
+            contract["verification"]["evidence"]["multi_output_merge_exact"][0][
+                "source"
+            ],
+        )
+        self.assertEqual(
+            "runRecipeAddonGameTestServer",
+            contract["verification"]["evidence"]["multi_output_merge_exact"][0][
+                "task"
+            ],
+        )
         self.assertIn('modId="createaddition"', fixture_metadata)
         self.assertIn("maven.modrinth:create:UjX6dr61", module_index)
         self.assertIn("representative CI", compatibility_doc)
         self.assertIn("scanner format `17`", compatibility_doc)
         self.assertEqual(
-            "Rolling Mill",
+            "Rolling",
             en_us["gui.auto_storage.station.createaddition_rolling_mill"],
         )
         self.assertEqual(
-            "Tesla Coil",
+            "Charging",
             en_us["gui.auto_storage.station.createaddition_tesla_coil"],
         )
         self.assertEqual(
-            "軋機",
+            "軋制",
             zh_tw["gui.auto_storage.station.createaddition_rolling_mill"],
         )
         self.assertEqual(
-            "特斯拉線圈",
+            "充電",
             zh_tw["gui.auto_storage.station.createaddition_tesla_coil"],
         )
 

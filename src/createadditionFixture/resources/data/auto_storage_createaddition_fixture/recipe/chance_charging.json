@@ -1,0 +1,16 @@
+{
+  "type": "createaddition:charging",
+  "energy": 1000,
+  "ingredients": [
+    {
+      "item": "minecraft:iron_nugget"
+    }
+  ],
+  "max_charge_rate": 360,
+  "results": [
+    {
+      "chance": 0.5,
+      "id": "createaddition:electrum_nugget"
+    }
+  ]
+}

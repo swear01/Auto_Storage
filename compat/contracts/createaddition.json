@@ -219,7 +219,7 @@
       ],
       "catalyst_tool_remainder_exact": [
         {
-          "marker": "Create Crafts & Additions charging did not consume exact FE/work",
+          "marker": "Create Crafts & Additions rolling remainder transaction was wrong",
           "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
           "task": "runCreateadditionGameTestServer"
         }
@@ -261,9 +261,9 @@
       ],
       "multi_output_merge_exact": [
         {
-          "marker": "Create Crafts & Additions rolling did not emit exact wire output",
-          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
-          "task": "runCreateadditionGameTestServer"
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
         }
       ],
       "present_target_load_once": [
@@ -281,7 +281,7 @@
         }
       ]
     },
-    "expected_game_tests": 8,
+    "expected_game_tests": 9,
     "fixture": "createadditionFixture",
     "game_test_task": "runCreateadditionGameTestServer",
     "gradle_tasks": [

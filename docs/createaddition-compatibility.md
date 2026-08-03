@@ -62,8 +62,14 @@ Logical station:
 Transaction:
 
 - one simple item ingredient consumed once, with crafting remainders;
-- one exact item output from `getResultStack()`;
+- one exact item output from the single guaranteed `ProcessingOutput`
+  (`chance == 1.0`); inherited fluid ingredients/results and any extra or
+  chance outputs fail closed before exposure;
 - Create RPM/stress is abstracted exactly as Create milling.
+- station work and Craftable cache identity follow
+  `CommonConfig.ROLLING_MILL_PROCESSING_DURATION` through
+  `dynamicDeterministicResources`, so a live config reload cannot leave a
+  stale work cost.
 
 ### Charging
 
@@ -88,9 +94,14 @@ Transaction:
 
 - one simple item ingredient consumed once, with crafting remainders;
 - exact FE consume;
-- one exact item output from `getResultStack()`, including enchantment
-  components when present;
+- one exact item output from the single guaranteed `ProcessingOutput`
+  (`chance == 1.0`), including enchantment components when present;
+  inherited fluid ingredients/results and any extra or chance outputs fail
+  closed before exposure;
 - belt transport is abstracted away like Create spout/drain.
+- FE charge-rate config participates in
+  `dynamicDeterministicResources` so a live
+  `TESLA_COIL_RECIPE_CHARGE_RATE` reload cannot leave a stale work cost.
 
 ## Explicit exclusions
 
@@ -126,13 +137,17 @@ tools/compat-kit/compat-kit verify compat/contracts/createaddition.json \
 ./gradlew runCompatibilityMatrixGameTestServer
 ```
 
-Eight real GameTests cover rolling/charging registration and liquid-burning
-exclusion, exact rolling output, exact charging FE/work, missing ingredient,
+Nine real GameTests cover rolling/charging registration and liquid-burning
+exclusion plus chance/fluid shape fail-closed, exact rolling remainder,
+exact rolling output, exact charging FE/work, missing ingredient,
 insufficient FE, destination overflow, `Long.MAX_VALUE` overflow, and stale
 holder rollback. Bundled Compat Kit verify reports twelve exact checks across
 five commands (`build`, base GameTests, recipe-addon, createaddition, matrix).
+`catalyst_tool_remainder_exact` maps to the rolling remainder GameTest;
+`multi_output_merge_exact` binds the generic public-SDK typed-family multi-output
+evidence because accepted Rolling/Charging families are single-output only.
+Processing labels use the JEI family names Rolling / Charging.
 Latest local matrix evidence: **18,503** recipes, Craftable prepare
-**32.554 ms**, first/shared p95/warm switch **1.406 / 1.157 / 0.790 ms**,
-shared index **3,711,264** bytes (under the fixed 9 MiB gate), per-menu
-**116,493** bytes, and report
+**19.933 ms**, first/shared p95/warm switch **0.873 / 0.361 / 0.304 ms**,
+storage interaction p95 **16.918 ms**, per-menu **116,600** bytes, and report
 `build/reports/terminal-scale-10000.json`.

@@ -4,6 +4,7 @@ import com.mrh0.createaddition.config.CommonConfig;
 import com.mrh0.createaddition.index.CARecipes;
 import com.mrh0.createaddition.recipe.charging.ChargingRecipe;
 import com.mrh0.createaddition.recipe.rolling.RollingRecipe;
+import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
@@ -80,13 +81,14 @@ public final class CreateadditionCompat {
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
         recipeFamilies.register(rollingId.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
+                RecipeFamilyFactories.dynamicDeterministicResources(
                         RollingRecipe.class,
                         CARecipes.ROLLING_TYPE::get,
                         rollingId,
                         CreateadditionCompat::supportsRolling,
                         CreateadditionCompat::rollingPlan,
                         recipe -> RecipeFamilyCost.stationWork(rollingDuration()),
+                        CreateadditionCompat::rollingDuration,
                         RecipePresentationKind.CRAFTING));
 
         machineDescriptors.register(chargingId.getPath(), () ->
@@ -101,29 +103,33 @@ public final class CreateadditionCompat {
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
         recipeFamilies.register(chargingId.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
+                RecipeFamilyFactories.dynamicDeterministicResources(
                         ChargingRecipe.class,
                         CARecipes.CHARGING_TYPE::get,
                         chargingId,
                         CreateadditionCompat::supportsCharging,
                         CreateadditionCompat::chargingPlan,
                         recipe -> RecipeFamilyCost.stationWork(chargingWork(recipe)),
+                        CreateadditionCompat::chargingConfigToken,
                         RecipePresentationKind.CRAFTING));
     }
 
     private static boolean supportsRolling(RollingRecipe recipe) {
         return rollingDuration() > 0
-                && exact(recipe.getIngredient())
-                && !recipe.getResultStack().isEmpty();
+                && recipe.getIngredients().size() == 1
+                && exact(recipe.getIngredients().getFirst())
+                && recipe.getFluidIngredients().isEmpty()
+                && recipe.getFluidResults().isEmpty()
+                && singleGuaranteed(recipe.getRollableResults());
     }
 
     private static TypedRecipePlan rollingPlan(
             RollingRecipe recipe,
             HolderLookup.Provider registries
     ) {
-        ItemStack output = recipe.getResultStack().copy();
+        ItemStack output = recipe.getRollableResults().getFirst().getStack().copy();
         return TypedRecipePlan.builder()
-                .input(consumedWithRemainder(recipe.getIngredient(), registries))
+                .input(consumedWithRemainder(recipe.getIngredients().getFirst(), registries))
                 .output(TypedRecipeOutput.primary(
                         StorageResourceKey.item(output.copyWithCount(1), registries),
                         output.getCount()))
@@ -138,14 +144,16 @@ public final class CreateadditionCompat {
                 && chargeRate(recipe) > 0
                 && recipe.getIngredients().size() == 1
                 && exact(recipe.getIngredients().getFirst())
-                && !recipe.getResultStack().isEmpty();
+                && recipe.getFluidIngredients().isEmpty()
+                && recipe.getFluidResults().isEmpty()
+                && singleGuaranteed(recipe.getRollableResults());
     }
 
     private static TypedRecipePlan chargingPlan(
             ChargingRecipe recipe,
             HolderLookup.Provider registries
     ) {
-        ItemStack output = recipe.getResultStack().copy();
+        ItemStack output = recipe.getRollableResults().getFirst().getStack().copy();
         int inputCount = 2;
         int width = Math.min(3, inputCount);
         return TypedRecipePlan.builder()
@@ -188,8 +196,18 @@ public final class CreateadditionCompat {
                         alternatives, 1, remainders);
     }
 
+    private static boolean singleGuaranteed(List<ProcessingOutput> outputs) {
+        return outputs.size() == 1
+                && outputs.getFirst().getChance() == 1.0F
+                && !outputs.getFirst().getStack().isEmpty();
+    }
+
     private static long rollingDuration() {
         return CommonConfig.ROLLING_MILL_PROCESSING_DURATION.get();
+    }
+
+    private static long chargingConfigToken() {
+        return CommonConfig.TESLA_COIL_RECIPE_CHARGE_RATE.get();
     }
 
     private static long chargingWork(ChargingRecipe recipe) {

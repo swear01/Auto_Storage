@@ -79,12 +79,43 @@ public final class CreateadditionIntegrationGameTests {
                 || AutoStorage.RECIPE_FAMILY_REGISTRY.containsKey(LIQUID_BURNER)
                 || !supports(helper, IRON_ROD)
                 || !supports(helper, ELECTRUM_NUGGET)
-                || supports(helper, PLANTOIL)) {
+                || !supports(helper, fixtureRecipe("remainder_rolling"))
+                || supports(helper, PLANTOIL)
+                || !recipePresent(helper, fixtureRecipe("chance_rolling"))
+                || supports(helper, fixtureRecipe("chance_rolling"))
+                || supports(helper, fixtureRecipe("fluid_result_rolling"))
+                || supports(helper, fixtureRecipe("fluid_ingredient_rolling"))
+                || !recipePresent(helper, fixtureRecipe("chance_charging"))
+                || supports(helper, fixtureRecipe("chance_charging"))
+                || supports(helper, fixtureRecipe("fluid_result_charging"))
+                || supports(helper, fixtureRecipe("fluid_ingredient_charging"))) {
             helper.fail(
                     "Create Crafts & Additions rolling/charging registration was incorrect");
             return;
         }
         helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void rolling_returns_item_remainder_and_consumes_duration(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            long work = rollingDuration();
+            seedItem(context.core(), Items.LAVA_BUCKET, 1);
+            installStation(context, "rolling_mill", ROLLING_MILL);
+            tick(context.core(), (int) work);
+            if (!craft(context, fixtureRecipe("remainder_rolling"))
+                    || itemCount(context.core(), Items.LAVA_BUCKET) != 0
+                    || itemCount(context.core(), Items.BUCKET) != 1
+                    || itemCount(context.core(), Items.OBSIDIAN) != 1
+                    || context.core().getStationWork(ROLLING_MILL) != 0) {
+                helper.fail(
+                        "Create Crafts & Additions rolling remainder transaction was wrong");
+                return;
+            }
+            helper.succeed();
+        });
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -235,6 +266,10 @@ public final class CreateadditionIntegrationGameTests {
         });
     }
 
+    private static boolean recipePresent(GameTestHelper helper, ResourceLocation recipeId) {
+        return helper.getLevel().getRecipeManager().byKey(recipeId).isPresent();
+    }
+
     private static boolean supports(GameTestHelper helper, ResourceLocation recipeId) {
         var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
         return CraftingTerminalMenu.supportsRecipeHolder(holder);
@@ -376,6 +411,11 @@ public final class CreateadditionIntegrationGameTests {
 
     private static ResourceLocation createadditionRecipe(String path) {
         return createadditionId(path);
+    }
+
+    private static ResourceLocation fixtureRecipe(String path) {
+        return ResourceLocation.fromNamespaceAndPath(
+                CreateadditionFixtureMod.MODID, path);
     }
 
     private static ResourceLocation createadditionId(String path) {
