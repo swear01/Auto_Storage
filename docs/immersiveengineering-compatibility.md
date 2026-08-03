@@ -105,12 +105,13 @@ Passing report path: `build/compat-kit/immersiveengineering-report.json`.
 ### Matrix performance evidence
 
 With Immersive Engineering present on the full descriptor matrix (including
-Create Enchantment Industry), the fixed gates stay unchanged (do **not** widen
-them). The earlier `craftable_prepare_ms≈81.38` result was initially attributed
-only to host contention because its ≈424 candidates / 98 variants / 86 outputs
-matched quieter peers. PR #62 CI run `30796564023` disproved that conclusion by
-failing the same unchanged gate twice at 52.990 and 68.603 ms. The latter run
-had 20,012 recipes, 453 candidates, 98 variants, and 86 outputs; 44 ms was in
+Create Enchantment Industry and Mystical Agriculture on current main
+`1102032`), the fixed gates stay unchanged (do **not** widen them). The earlier
+`craftable_prepare_ms≈81.38` result was initially attributed only to host
+contention because its ≈424 candidates / 98 variants / 86 outputs matched
+quieter peers. PR #62 CI run `30796564023` disproved that conclusion by failing
+the same unchanged gate twice at 52.990 and 68.603 ms. The latter run had
+20,012 recipes, 453 candidates, 98 variants, and 86 outputs; 44 ms was in
 variant resolution rather than a full scan of IE's ~1,100 unclaimed recipes.
 
 The root cause was stack-independent, already-resolved typed catalog matches still
@@ -123,19 +124,21 @@ smithing/dynamic variants retain the existing resolution path.
 This does not restore `fixedVariants` or any recipe-keyed retained cache; the
 next-tick `releaseTransientMatches()` lifetime from #79 remains unchanged.
 
-Quiet exclusive `runCompatibilityMatrixGameTestServer` (three holder processes
-reserved three heavy-Gradle slots and the matrix acquired the fourth) measured:
+Quiet exclusive `runCompatibilityMatrixGameTestServer` after rebase onto
+`1102032` (three holder processes reserved three heavy-Gradle slots and the
+matrix acquired the fourth) measured:
 
-- `craftable_prepare_ms` = 14.065 (< 50);
-- recipes = 20,012 / craftable_outputs = 86;
-- `shared_index_retained_bytes` = 0 (the fixture's nonnegative full-GC delta
-  floor; < 9 MiB and no fixed-variant retention was added);
-- per-menu retained = 116,959 bytes (< 128 KiB);
+- `craftable_prepare_ms` = 26.484 (< 50);
+- recipes = 21,022 / craftable_outputs = 87;
+- `shared_index_retained_bytes` = 4,103,576 (< 9 MiB; no fixed-variant
+  retention was added);
+- per-menu retained = 116,437 bytes (< 128 KiB);
 - All 3 required matrix tests passed.
 
 Historical pre-fix quiet readings were 35.36 ms / 3,907,776 shared bytes at
-20,012 recipes and 16.351 ms / 3,898,384 shared bytes at 19,750 recipes. They
-remain useful memory baselines, but no longer justify labeling the CI failures
-as contention-only.
+20,012 recipes and 16.351 ms / 3,898,384 shared bytes at 19,750 recipes. An
+earlier post-fix exclusive reading at 20,012 recipes was 14.065 ms with a
+nonnegative GC-delta shared floor of 0 bytes. They remain useful baselines, but
+no longer justify labeling the CI failures as contention-only.
 
 Shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
