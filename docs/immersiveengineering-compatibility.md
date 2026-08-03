@@ -74,12 +74,20 @@ Metal Press/Arc Furnace recipes stay unsupported, and every loaded recipe in
 each audited custom recipe type remains fail closed. The isolated fixture also
 verifies the owning descriptor's `immersiveengineering` namespace
 `recipeInventory` digest
-`da8a4cc0a9dc507091e87de2a244750da6fd0aa04f6af901cd778f0956e437d1`
-(1178 loaded recipe ids) via `IsolatedRecipeInventoryEvidence`. The all-mod
+`b733a4b670dbb507a71df7f819c2296f627d42f2ed89240c6040c9c55c445c7d`
+(1100 loaded recipe ids) via `IsolatedRecipeInventoryEvidence`. The all-mod
 compatibility matrix loads the representative artifact through the module
 descriptor and asserts the zero-family boundary via empty
 `descriptors`/`acceptedRecipes`; combined coexistence and unclaimed inventories
 are recorded only in the matrix report.
+
+With Immersive Engineering present in the current full matrix, local
+`build/reports/terminal-scale-10000.json` records
+`shared_index_retained_bytes=9477112` (≈9.038 MiB) against the fixed
+`MAX_BASELINE_INDEX_RETAINED_BYTES` of `9L * 1024L * 1024L` (=9437184), so the
+shared retained-index gate fails by 39928 bytes. The same report records
+`craftable_prepare_ms=86.36` against the fixed 50 ms first-Craftable budget,
+`recipes=16272`, and `craftable_outputs=86`. Do not raise the 9 MiB gate.
 
 ```bash
 tools/compat-kit/compat-kit verify \
@@ -92,5 +100,20 @@ tools/compat-kit/compat-kit verify \
 
 Passing report path: `build/compat-kit/immersiveengineering-report.json`.
 
-The committed audit/contract currently remain scanner format 7, matching the merged Theurgy dogfood on main. Compat Kit v2 complete verify requires a format-16 audit; upgrading is blocked by scanner failure on `ModelConveyor$1$Key` after IE's compileOnly ancestry jars are supplied.
+The committed audit/contract currently remain scanner format 7. Compat Kit v2
+complete verify requires a current scanner-format (16) audit; format-16
+`scan`/`migrate-audit` is blocked by a verified scanner defect on IE client
+class `blusunrize.immersiveengineering.client.models.ModelConveyor$1$Key`:
+
+- `ModelConveyor$1` is anonymous (`EnclosingMethod` present, `inner_name=null`)
+  and correctly excluded from inspectable metadata.
+- `ModelConveyor$1$Key` is a named nested record (`inner_name=Key`,
+  `outer_class=ModelConveyor$1`) and remains inspectable.
+- `_candidate_source_class` then raises
+  `named nested class owner is unresolved: ...ModelConveyor$1$Key`
+  because the anonymous outer was omitted from `metadata_by_class`.
+
+Do not bypass complete-verify's current-format requirement and do not patch the
+scanner inside this module PR; keep the format-7 audit/contract as blocked
+evidence until a scanner fix lands separately.
 
