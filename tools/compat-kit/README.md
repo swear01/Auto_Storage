@@ -34,6 +34,10 @@ python3 --version
   --next-actions next-actions.md
 ```
 
+If `target.jar` declares multiple NeoForge `[[mods]]`, pass
+`--mod-id <selected-mod-id>` to `scan`. The selected entry is persisted as the
+audit target; a multi-mod jar without an exact selection fails.
+
 When `--source` points at a Git checkout, tracked and untracked state must be
 clean so its HEAD identifies the exact inspected source. A module subdirectory
 uses the enclosing Git worktree's status and HEAD; evidence paths remain
@@ -47,7 +51,8 @@ class metadata, and recompute private-bytecode risk evidence; only explicit migr
 read formats 7 through 16. Complete consumers also rebuild the target jar's
 recipe source count; when it is the only recipe-data source, the complete
 effective inventory, serializer summary, overrides, and digest must match the
-reopened jar.
+reopened jar. They use the audit target mod ID when reopening multi-mod
+metadata.
 Committed source files must be sorted, unique, canonical POSIX
 repository-relative `.java` paths. A null revision requires no files, while a
 recorded revision with classified candidates requires at least one file. The
@@ -82,7 +87,9 @@ major version 21 before that inventory is read or a cached audit is returned.
 Cache metadata binds the selected JDK installation, version, module-file
 identity, and resolved `javap` path/version/size/SHA; a changed JDK 21
 inventory forces a fresh scan. A `java.*` or `javax.*` prefix alone never
-authorizes an unresolved class.
+authorizes an unresolved class. The resolved target mod ID always enters the
+cache identity, so implicit and explicit selection of one target reuse the same
+audit while multiple targets declared by the same jar remain isolated.
 JVM modified UTF-8 class constants are handled correctly. Repeatable
 `--data-root` inputs use normal
 data-pack precedence and add bounded recipe counts, sample IDs, fields,
@@ -122,7 +129,8 @@ recipe to `Recipe`, so side-superclass and default-interface behavior remains
 review evidence.
 Use `migrate-audit legacy.json --jar target.jar --output audit.json` to
 explicitly rescan an exact format-7 through format-16 artifact;
-identity or SHA drift fails. The legacy record's versioned schema and bounded
+identity or SHA drift fails. Migration selects the legacy audit target mod ID.
+The legacy record's versioned schema and bounded
 structural identities are validated without forcing its candidate buckets
 through the current classifier; only the fresh exact-artifact rescan becomes
 current evidence.
@@ -407,6 +415,9 @@ outputs are excluded.
   --source target-new-source \
   --output delta.json
 ```
+
+Jar-backed `diff` validates the old audit first, then selects that audit's
+target mod ID for the rescan.
 
 The audit, contract, conformance-plan, delta, generation-plan, proposals,
 report, resource-plan, runtime-probe-plan, and runtime-probe schemas are under

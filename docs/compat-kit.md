@@ -52,7 +52,7 @@ tools/compat-kit/
 compat/audits/<mod-id>/<version>.json
 compat/contracts/<mod-id>.json
 compat/generation/<mod-id>.json
-build/compat-kit/cache/<jar-sha>/v*/ ignored versioned scan cache
+build/compat-kit/cache/<scan-identity>/v*/ ignored versioned scan cache
 build/compat-kit/report.json         ignored verification report
 ```
 
@@ -96,6 +96,11 @@ tools/compat-kit/compat-kit scan \
   --data-root build/compat-kit/datapacks/target-override \
   --output compat/audits/target/1.2.3.json
 ```
+
+If NeoForge metadata declares multiple `[[mods]]`, `scan` requires
+`--mod-id <selected-mod-id>`. The selected entry is persisted as the audit
+target; omitting `--mod-id` remains valid only when metadata declares exactly
+one mod.
 
 `--classpath` is repeatable and supplies the target's complete compile-time
 ancestry without turning dependency classes into target candidates. Every
@@ -160,9 +165,10 @@ limit plus one byte and terminate `javap` immediately on overflow, so neither
 one process nor all classes can bypass the memory bound. `RandomSource`,
 `ThreadLocalRandom`, `SplittableRandom`, `SecureRandom`, and `RandomGenerator`
 are all randomness evidence. Without `--source`, scans are
-cached by jar SHA under `build/compat-kit/cache/`;
-repeating the same SHA and scanner format needs no network access. A scanner
-format change uses a new cache namespace instead of trusting stale evidence.
+cached under `build/compat-kit/cache/` by jar SHA, scanner format, and the
+resolved target mod ID; repeating the same identity needs no network access. A
+scanner format change uses a new cache namespace instead of trusting stale
+evidence.
 Every repository-owned audit that backs a complete committed contract is
 migrated in the same change; the committed-audit regression rejects legacy
 records instead of skipping modules whose scaffold or verification would then
@@ -172,9 +178,12 @@ present in the same archive; a missing owner fails closed rather than allowing
 a descendant of an excluded anonymous, local, or synthetic owner through a
 split classpath.
 Data-root scans bind the ordered layer digests into their cache identity;
-ancestry classpaths bind their exact artifact set. Cache metadata also records
-the selected JDK 21 installation, release version, module-file identity, and
-the resolved `javap` path, reported version, size, and SHA-256.
+ancestry classpaths bind their exact artifact set. The resolved target mod ID
+always enters the cache identity, so implicit and explicit selection of the
+same single-mod target reuse one audit while two targets declared by the same
+jar cannot reuse each other's audit. Cache metadata also records the selected
+JDK 21 installation, release version, module-file identity, and the resolved
+`javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
 current scanner format is `17` with candidate classifier `4`; formats `7`
@@ -187,11 +196,12 @@ independently rebuilds its NeoForge target metadata, complete sorted
 class/metadata inventory, and every real candidate's public signature with the
 pinned JDK 21 `javap`. It derives named nested `source_class` values from exact
 `InnerClasses` metadata and recomputes bounded private-bytecode risk evidence
-from the target/ancestry jars. Every supplied ancestry jar is enumerated before
-graph traversal, so a second inspectable class owner fails even when that class
-is not reachable from a target parent. A self-consistent edited audit target,
-signature, count, source name, risk list, or digest cannot replace those
-artifact bytes. The target jar's recipe source count is independently rebuilt on every
+from the target/ancestry jars. The audit target mod ID selects the same metadata
+entry when the exact jar declares multiple mods. Every supplied ancestry jar is
+enumerated before graph traversal, so a second inspectable class owner fails
+even when that class is not reachable from a target parent. A self-consistent
+edited audit target, signature, count, source name, risk list, or digest cannot
+replace those artifact bytes. The target jar's recipe source count is independently rebuilt on every
 complete use; when `target_jar` is the audit's only recipe-data source, the
 entire effective recipe inventory, serializer summary, overrides, and digest
 must match the reopened jar exactly.
@@ -238,8 +248,8 @@ collisions append the same collision-free binary-name encoding.
 
 Archive limits, the 1 MiB per-entry NeoForge metadata limit, the 16 MiB
 per-entry class limit, candidate counts, signature size, source-file counts,
-malformed metadata, ambiguous multi-mod jars, missing JDK tools, and `javap`
-failures all fail closed. Metadata and class sizes are checked before
+malformed metadata, unselected or missing multi-mod targets, missing JDK tools,
+and `javap` failures all fail closed. Metadata and class sizes are checked before
 decompression. The target path is rehashed after inspection; a replaced or
 mutated jar cannot combine one artifact SHA with another artifact's metadata
 or candidates. Every supplied ancestry jar has the same post-inspection
@@ -269,9 +279,10 @@ Migration rejects a current audit, a different target identity, or different
 artifact bytes. Legacy validation still checks its versioned schema, structural
 digests, target identity, and artifact identity, but does not reapply the
 current candidate classifier to old buckets: classifier drift is the reason an
-explicit migration may be required. The exact artifact is then fully rescanned
-with the current classifier, so no stale legacy classification is preserved or
-used as semantic authorization.
+explicit migration may be required. Migration selects the legacy audit target
+mod ID for the full current scanner pass. The exact artifact is then fully
+rescanned with the current classifier, so no stale legacy classification is
+preserved or used as semantic authorization.
 
 ### 2a. Generate unresolved machine and requirement proposals
 
@@ -844,6 +855,8 @@ recipe/resource/station signatures and risk evidence. Any target jar SHA change
 sets `contract_affected=true`, including private implementation-only changes
 whose public signatures happen to be stable. The compact surface delta narrows
 the review, but it never waives contract review for different artifact bytes.
+When the new target is a jar, `diff` validates the old audit first, then selects
+that audit's target mod ID for the rescan.
 
 ## Distribution
 

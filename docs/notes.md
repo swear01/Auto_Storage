@@ -1,5 +1,7 @@
 # Notes
 
+2026-08-03 PR #84 review correction：authoritative Compat Kit cache copy must name jar SHA, scanner format, and the resolved target mod ID together; repeating only SHA＋format is no longer accurate because multi-mod jars isolate selections. Jar-backed `diff` must call `_validate_audit(old)` before reading `old["target"]["mod_id"]`, matching `migrate-audit`, so malformed/wrong-format old JSON returns the normal concise validation error／exit 2 instead of an uncaught `KeyError`／exit 1.
+
 2026-08-03 Compat Kit nested `source_class` recursion gotcha：`_is_inspectable_class`改成iterative／1,024-bound後，`_candidate_source_class`若仍遞迴走同一條admitted owner chain，約1,000層named nested會在Python預設recursion limit撞上`RecursionError`，而不是受控的1,024層驗證錯誤。source-level type導出必須同樣iterative並重用`MAX_NESTED_CLASS_OWNER_DEPTH`；不可只修inspectability。
 
 2026-08-02 Compat Kit legacy classifier migration gotcha：`migrate-audit`或其後的`migrate-contract --old-audit`若先用current classifier重建legacy format-14至16的candidate buckets，任何正當的classifier修正都會讓舊audit在exact rescan／contract comparison前先以`audit candidates do not match independent structural evidence`失敗，等於沒有可用migration path。兩條explicit migration只可放寬「用current classifier重判舊bucket」這一項；舊format schema、structural/target digests、target identity、artifact SHA/size及舊contract bindings仍要完整驗證，fresh `--new-audit`也維持current strict validation；之後只可從exact jar/source/ancestry全量current rescan及逐family evidence comparison取得新證據，legacy bucket絕不作新語意授權。

@@ -1,7 +1,9 @@
+import contextlib
 import hashlib
 import importlib.util
 import inspect
 import copy
+import io
 import json
 import os
 import selectors
@@ -40,17 +42,24 @@ def write_fixture_jar(
     *,
     mod_id: str = "samplemod",
     display_name: str = "Sample Machines",
+    additional_mods: tuple[tuple[str, str, str], ...] = (),
 ):
-    mods_toml = f"""
+    mods_toml = """
 modLoader="javafml"
 loaderVersion="[4,)"
 license="MIT"
+""".strip()
+    for current_mod_id, current_version, current_display_name in (
+        (mod_id, version, display_name),
+        *additional_mods,
+    ):
+        mods_toml += f"""
 
 [[mods]]
-modId={json.dumps(mod_id)}
-version={json.dumps(version)}
-displayName={json.dumps(display_name)}
-""".strip()
+modId={json.dumps(current_mod_id)}
+version={json.dumps(current_version)}
+displayName={json.dumps(current_display_name)}
+"""
     entries = {
         "META-INF/neoforge.mods.toml": mods_toml.encode(),
         "samplemod/recipe/CrushingRecipe.class": b"recipe",
@@ -1400,6 +1409,82 @@ class CompatKitAuditTests(unittest.TestCase):
         )
         self.assertGreater(len(calls), first_calls)
 
+    def test_scan_cache_is_isolated_by_selected_mod_id(self):
+        multi_mod_jar = self.root / "integrated-dynamics.jar"
+        write_fixture_jar(
+            multi_mod_jar,
+            mod_id="integrateddynamics",
+            display_name="Integrated Dynamics",
+            additional_mods=((
+                "integrateddynamicscompat",
+                "1.2.3",
+                "Integrated Dynamics Compatibility",
+            ),),
+        )
+        cache = self.root / "multi-mod-cache"
+        calls = []
+
+        def counted_reader(class_name: str):
+            calls.append(class_name)
+            return self.signatures(class_name)
+
+        primary = self.compat_kit.scan_jar(
+            multi_mod_jar,
+            selected_mod_id="integrateddynamics",
+            cache_dir=cache,
+            signature_reader=counted_reader,
+        )
+        primary_calls = len(calls)
+        compatibility = self.compat_kit.scan_jar(
+            multi_mod_jar,
+            selected_mod_id="integrateddynamicscompat",
+            cache_dir=cache,
+            signature_reader=counted_reader,
+        )
+
+        self.assertEqual("integrateddynamics", primary["target"]["mod_id"])
+        self.assertEqual(
+            "integrateddynamicscompat",
+            compatibility["target"]["mod_id"],
+        )
+        self.assertGreater(len(calls), primary_calls)
+        self.assertEqual(
+            2,
+            len(list(cache.glob(
+                f"*/{self.compat_kit.SCAN_CACHE_DIRECTORY}/audit.json"
+            ))),
+        )
+
+    def test_scan_cache_reuses_single_mod_target_with_explicit_selection(self):
+        cache = self.root / "single-mod-cache"
+        calls = []
+
+        def counted_reader(class_name: str):
+            calls.append(class_name)
+            return self.signatures(class_name)
+
+        implicit = self.compat_kit.scan_jar(
+            self.jar,
+            cache_dir=cache,
+            signature_reader=counted_reader,
+        )
+        implicit_calls = len(calls)
+        explicit = self.compat_kit.scan_jar(
+            self.jar,
+            selected_mod_id="samplemod",
+            cache_dir=cache,
+            signature_reader=counted_reader,
+        )
+
+        self.assertEqual(implicit, explicit)
+        self.assertEqual(implicit_calls, len(calls))
+        self.assertEqual(
+            1,
+            len(list(cache.glob(
+                f"*/{self.compat_kit.SCAN_CACHE_DIRECTORY}/audit.json"
+            ))),
+        )
+
     def test_scan_cache_rechecks_recipe_data_after_artifact_validation(self):
         cache = self.root / "late-cache"
         data_root = self.root / "late-cache-data"
@@ -1997,9 +2082,12 @@ class CompatKitAuditTests(unittest.TestCase):
         )
 
         self.assertEqual(first, second)
+        cache_identity = hashlib.sha256(
+            f'{first["artifact"]["sha256"]}:mod_id:samplemod'.encode("utf-8")
+        ).hexdigest()
         cached = (
             cache
-            / first["artifact"]["sha256"]
+            / cache_identity
             / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )
@@ -2008,9 +2096,12 @@ class CompatKitAuditTests(unittest.TestCase):
     def test_scan_ignores_cache_from_previous_candidate_classifier(self):
         cache = self.root / "cache"
         artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
+        cache_identity = hashlib.sha256(
+            f"{artifact_sha}:mod_id:samplemod".encode("utf-8")
+        ).hexdigest()
         stale = (
             cache
-            / artifact_sha
+            / cache_identity
             / f"v{self.compat_kit.SCAN_CACHE_VERSION}-classifier-3"
             / "audit.json"
         )
@@ -2025,7 +2116,7 @@ class CompatKitAuditTests(unittest.TestCase):
 
         current = (
             cache
-            / artifact_sha
+            / cache_identity
             / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )
@@ -2829,12 +2920,56 @@ class CompatKitAuditTests(unittest.TestCase):
         ])
         self.assertEqual("migrate-audit", args.command)
 
+    def test_migrate_audit_uses_legacy_target_mod_id(self):
+        current = self.source_audit()
+        current["target"] = {
+            "mod_id": "integrateddynamics",
+            "display_name": "Integrated Dynamics",
+            "version": "1.2.3",
+        }
+        legacy = copy.deepcopy(current)
+        legacy["scanner_format"] = 7
+        self.downgrade_audit_artifact(legacy)
+        legacy.pop("recipe_data")
+        legacy.pop("ancestry_classpath")
+        legacy.pop("structural_class_graph")
+        legacy.pop("structural_hierarchy")
+        legacy.pop("structural_candidate_inventory_sha256")
+        for bucket in tuple(legacy["candidates"]):
+            if bucket not in {
+                "recipe_classes",
+                "resource_apis",
+                "station_classes",
+            }:
+                legacy["candidates"].pop(bucket)
+        for records in legacy["candidates"].values():
+            for record in records:
+                record.pop("classification")
+                record.pop("hierarchy")
+                record.pop("source_class")
+
+        with mock.patch.object(
+            self.compat_kit,
+            "scan_jar",
+            return_value=current,
+        ) as scan:
+            migrated = self.compat_kit.migrate_audit(legacy, self.jar)
+
+        self.assertEqual("integrateddynamics", migrated["target"]["mod_id"])
+        self.assertEqual(
+            "integrateddynamics",
+            scan.call_args.kwargs["selected_mod_id"],
+        )
+
     def test_scan_rejects_malformed_current_cache_structure(self):
         cache = self.root / "cache"
         artifact_sha = hashlib.sha256(self.jar.read_bytes()).hexdigest()
+        cache_identity = hashlib.sha256(
+            f"{artifact_sha}:mod_id:samplemod".encode("utf-8")
+        ).hexdigest()
         cached = (
             cache
-            / artifact_sha
+            / cache_identity
             / self.compat_kit.SCAN_CACHE_DIRECTORY
             / "audit.json"
         )
@@ -3491,6 +3626,21 @@ class CompatKitAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exactly one mod"):
             self.compat_kit.scan_jar(ambiguous, signature_reader=lambda _: "")
 
+        malformed_companion = self.root / "malformed-companion.jar"
+        with zipfile.ZipFile(malformed_companion, "w") as archive:
+            archive.writestr(
+                "META-INF/neoforge.mods.toml",
+                'modLoader="javafml"\nloaderVersion="[4,)"\nlicense="MIT"\n'
+                '[[mods]]\nmodId="first"\nversion="1"\ndisplayName="First"\n'
+                '[[mods]]\nmodId="second"\nversion="1"\n',
+            )
+        with self.assertRaisesRegex(ValueError, "missing string fields"):
+            self.compat_kit.scan_jar(
+                malformed_companion,
+                selected_mod_id="first",
+                signature_reader=lambda _: "",
+            )
+
     def test_scan_rejects_oversized_mod_metadata_before_decompression(self):
         oversized = self.root / "oversized-metadata.jar"
         with zipfile.ZipFile(
@@ -3878,6 +4028,28 @@ displayName="Sample Machines"
                         audit,
                         target_jar,
                     )
+
+    def test_complete_validation_uses_audit_target_mod_id(self):
+        audit = self.source_audit()
+        audit["target"] = {
+            "mod_id": "integrateddynamics",
+            "display_name": "Integrated Dynamics",
+            "version": "1.2.3",
+        }
+
+        def read_selected_metadata(_archive, *, selected_mod_id=None):
+            self.assertEqual("integrateddynamics", selected_mod_id)
+            return audit["target"]
+
+        with mock.patch.object(
+            self.compat_kit,
+            "_read_mod_metadata",
+            side_effect=read_selected_metadata,
+        ):
+            self.compat_kit._validate_audit_target_artifact(
+                audit,
+                self.jar,
+            )
 
     def test_exact_artifact_rebuilds_candidate_public_signatures(self):
         target_jar = self.root / "candidate-signature.jar"
@@ -4544,6 +4716,91 @@ displayName="Sample Machines"
         self.assertEqual([], delta["recipe_classes"]["removed"])
         self.assertTrue(delta["contract_affected"])
         self.assertNotIn("samplemod.Unrelated", json.dumps(delta))
+
+    def test_diff_scan_uses_old_audit_target_mod_id(self):
+        old = self.source_audit()
+        old["target"] = {
+            "mod_id": "integrateddynamics",
+            "display_name": "Integrated Dynamics",
+            "version": "1.2.3",
+        }
+        new = copy.deepcopy(old)
+        new["target"]["version"] = "1.2.4"
+        old_path = self.root / "old-audit.json"
+        output = self.root / "delta.json"
+        old_path.write_text(json.dumps(old))
+
+        with mock.patch.object(
+            self.compat_kit,
+            "scan_jar",
+            return_value=new,
+        ) as scan:
+            result = self.compat_kit.main([
+                "diff",
+                str(old_path),
+                str(self.jar),
+                "--output",
+                str(output),
+            ])
+
+        self.assertEqual(0, result)
+        self.assertEqual(
+            "integrateddynamics",
+            scan.call_args.kwargs["selected_mod_id"],
+        )
+
+    def test_jar_backed_diff_rejects_malformed_old_audit_before_scan(self):
+        old_path = self.root / "malformed-old-audit.json"
+        output = self.root / "delta.json"
+        old_path.write_text(
+            json.dumps(
+                {
+                    "schema": self.compat_kit.SCHEMA_VERSION,
+                    "scanner_format": self.compat_kit.SCAN_CACHE_VERSION,
+                    "structural_candidate_inventory_sha256": "a" * 64,
+                    "kind": "auto_storage_compat_audit",
+                }
+            )
+        )
+        stderr = io.StringIO()
+
+        with mock.patch.object(self.compat_kit, "scan_jar") as scan:
+            with contextlib.redirect_stderr(stderr):
+                result = self.compat_kit.main([
+                    "diff",
+                    str(old_path),
+                    str(self.jar),
+                    "--output",
+                    str(output),
+                ])
+
+        self.assertEqual(2, result)
+        self.assertIn("compat-kit: audit is missing target", stderr.getvalue())
+        scan.assert_not_called()
+        self.assertFalse(output.exists())
+
+    def test_scan_cli_passes_selected_mod_id(self):
+        output = self.root / "selected-audit.json"
+        with mock.patch.object(
+            self.compat_kit,
+            "scan_jar",
+            return_value=self.source_audit(),
+        ) as scan:
+            result = self.compat_kit.main([
+                "scan",
+                "--jar",
+                "target.jar",
+                "--mod-id",
+                "integrateddynamics",
+                "--output",
+                str(output),
+            ])
+
+        self.assertEqual(0, result)
+        self.assertEqual(
+            "integrateddynamics",
+            scan.call_args.kwargs["selected_mod_id"],
+        )
 
     def test_diff_requires_contract_review_when_artifact_bytes_change(self):
         old = self.compat_kit.scan_jar(
