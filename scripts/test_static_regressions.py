@@ -2197,7 +2197,308 @@ class StaticRegressionTests(unittest.TestCase):
             'id.getNamespace().equals("productivemetalworks")',
             coexistence,
         )
+    def test_createaddition_compat_is_optional_and_isolated(self):
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("createaddition")
+        module = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        fixture = self.read_required(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/createadditionFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required("docs/createaddition-compatibility.md")
+        build = self.read_required("build.gradle")
+        contract = json.loads(
+            self.read_required("compat/contracts/createaddition.json")
+        )
+        audit = json.loads(
+            self.read_required("compat/audits/createaddition/1.6.0.json")
+        )
+        descriptor = json.loads(
+            self.read_required("src/compat/createaddition/compat-module.json")
+        )
+        en_us = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/en_us.json")
+        )
+        zh_tw = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/zh_tw.json")
+        )
 
+        self.assert_descriptor_driven_fixture(
+            build, "createaddition", "createadditionFixture", 9
+        )
+        self.assertNotIn('modId="createaddition"', metadata)
+        self.assertIn('"createaddition"', module_index)
+        self.assertIn("maven.modrinth:createaddition:qPr8V4G2", module_index)
+        self.assertIn(
+            "41876c3780b70365a1848994d146a73423cc19fbe86485885795d9e7d855e7e9",
+            module_index,
+        )
+        self.assertEqual(17, audit["scanner_format"])
+        self.assertEqual(
+            [
+                "com.mrh0.createaddition.recipe.charging.ChargingRecipe",
+                "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe",
+                "com.mrh0.createaddition.recipe.rolling.RollingRecipe",
+            ],
+            sorted(
+                candidate["class"]
+                for candidate in audit["candidates"]["recipe_classes"]
+            ),
+        )
+        self.assertEqual(contract["matrix"], descriptor["matrix"])
+        self.assertEqual(
+            "57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3",
+            descriptor["matrix"]["recipeInventory"]["sha256"],
+        )
+        self.assertEqual(9, contract["verification"]["expected_game_tests"])
+        self.assertEqual(9, descriptor["expectedTests"])
+        self.assertIn("IsolatedRecipeInventoryEvidence", fixture)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("CreateadditionCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn("RollingRecipe.class", compat)
+        self.assertIn("ChargingRecipe.class", compat)
+        self.assertNotIn("LiquidBurningRecipe.class", compat)
+        self.assertEqual(
+            2,
+            compat.count("RecipeFamilyFactories.dynamicDeterministicResources("),
+        )
+        self.assertNotIn(
+            "RecipeFamilyFactories.deterministicResources(",
+            compat,
+        )
+        self.assertIn("getFluidIngredients()", compat)
+        self.assertIn("getFluidResults()", compat)
+        self.assertIn("getRollableResults()", compat)
+        self.assertIn("getChance() == 1.0F", compat)
+        self.assertIn("rolling_returns_item_remainder_and_consumes_duration", fixture)
+        self.assertIn(
+            "Create Crafts & Additions rolling remainder transaction was wrong",
+            fixture,
+        )
+        self.assertIn("recipePresent(helper, fixtureRecipe(\"chance_rolling\"))", fixture)
+        self.assertIn("recipePresent(helper, fixtureRecipe(\"chance_charging\"))", fixture)
+        for recipe_name in (
+            "fluid_result_rolling",
+            "fluid_ingredient_rolling",
+            "fluid_result_charging",
+            "fluid_ingredient_charging",
+        ):
+            self.assertRegex(
+                fixture,
+                rf'upstreamAndAutoStorageReject\(\s*fixtureRecipe\("{recipe_name}"\)',
+            )
+            self.assertFalse(
+                (ROOT / "src/createadditionFixture/resources/data/"
+                 "auto_storage_createaddition_fixture/recipe/"
+                 f"{recipe_name}.json").exists()
+            )
+        self.assertIn("chance_rolling", fixture)
+        self.assertIn("fluid_result_rolling", fixture)
+        self.assertIn("fluid_ingredient_rolling", fixture)
+        self.assertIn("chance_charging", fixture)
+        self.assertIn("fluid_result_charging", fixture)
+        self.assertIn("fluid_ingredient_charging", fixture)
+        self.assertEqual(
+            "Create Crafts & Additions rolling remainder transaction was wrong",
+            contract["verification"]["evidence"]["catalyst_tool_remainder_exact"][0][
+                "marker"
+            ],
+        )
+        self.assertEqual(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java",
+            contract["verification"]["evidence"]["catalyst_tool_remainder_exact"][0][
+                "source"
+            ],
+        )
+        self.assertEqual(
+            "Typed family changed the wrong exact resources or output amounts",
+            contract["verification"]["evidence"]["multi_output_merge_exact"][0][
+                "marker"
+            ],
+        )
+        self.assertEqual(
+            "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/"
+            "RecipeFamilyIntegrationTests.java",
+            contract["verification"]["evidence"]["multi_output_merge_exact"][0][
+                "source"
+            ],
+        )
+        self.assertEqual(
+            "runRecipeAddonGameTestServer",
+            contract["verification"]["evidence"]["multi_output_merge_exact"][0][
+                "task"
+            ],
+        )
+        self.assertIn('modId="createaddition"', fixture_metadata)
+        self.assertIn("maven.modrinth:create:UjX6dr61", module_index)
+        self.assertIn("representative CI", compatibility_doc)
+        self.assertIn("scanner format `17`", compatibility_doc)
+        self.assertEqual(
+            "Rolling",
+            en_us["gui.auto_storage.station.createaddition_rolling_mill"],
+        )
+        self.assertEqual(
+            "Charging",
+            en_us["gui.auto_storage.station.createaddition_tesla_coil"],
+        )
+        self.assertEqual(
+            "軋制",
+            zh_tw["gui.auto_storage.station.createaddition_rolling_mill"],
+        )
+        self.assertEqual(
+            "充電",
+            zh_tw["gui.auto_storage.station.createaddition_tesla_coil"],
+        )
+
+    def test_createaddition_charging_work_rejects_non_positive_rate(self):
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        match = re.search(
+            r"private static long chargingWork\(ChargingRecipe recipe\)\s*"
+            r"\{(?P<body>.*?)\n    \}",
+            compat,
+            re.S,
+        )
+        self.assertIsNotNone(match, "missing CreateadditionCompat.chargingWork")
+        body = match.group("body")
+        self.assertRegex(
+            body,
+            r"long rate = chargeRate\(recipe\);",
+        )
+        self.assertRegex(
+            body,
+            r"if\s*\(\s*rate\s*<=\s*0L?\s*\)",
+        )
+        self.assertIn("Math.addExact(energy, rate - 1L) / rate", body)
+        self.assertNotIn("Math.max(1L, chargeRate", compat)
+        self.assertNotIn("Math.max(1L, rate", body)
+
+
+    def test_createaddition_reloadable_rates_do_not_change_candidate_eligibility(self):
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        rolling = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+boolean\s+supportsRolling\s*\(",
+            "Createaddition rolling eligibility",
+        )
+        charging = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+boolean\s+supportsCharging\s*\(",
+            "Createaddition charging eligibility",
+        )
+
+        self.assertNotIn("rollingDuration()", rolling)
+        self.assertNotIn("chargeRate(recipe)", charging)
+        self.assertIn("RecipeFamilyCost.stationWork(rollingDuration())", compat)
+        self.assertIn("RecipeFamilyCost.stationWork(chargingWork(recipe))", compat)
+
+    def test_createaddition_checked_overflow_fixture_asserts_complete_atomic_no_op(self):
+        fixture = self.read_required(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+checked_overflow_rejects_long_max_seed\s*\(",
+            "Createaddition checked-overflow GameTest",
+        )
+
+        self.assertIn('itemCount(context.core(), Items.IRON_INGOT) != 1', method)
+        self.assertIn(
+            "context.core().getStationWork(ROLLING_MILL) != work",
+            method,
+        )
+
+    def test_createaddition_stale_holder_fixture_selects_then_invalidates_real_recipe(self):
+        fixture = self.read_required(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+stale_holder_is_atomic\s*\(",
+            "Createaddition stale-holder GameTest",
+        )
+
+        self.assertNotIn("missing_stale_holder", method)
+        self.assertIn("IRON_ROD", method)
+        self.assertIn("replaceRecipes", method)
+        self.assertIn("CraftingDestination.NONE", method)
+        self.assertIn("CraftingDestination.STORAGE", method)
+
+    def test_createaddition_dedupes_ingredient_alternatives_by_canonical_key(self):
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        method = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+TypedRecipeInput\s+consumedWithRemainder\s*\(",
+            "Createaddition consumedWithRemainder",
+        )
+        representatives = self.java_block(
+            compat,
+            r"\bprivate\s+static\s+List<ItemStack>\s+representatives\s*\(",
+            "Createaddition representatives",
+        )
+
+        self.assertIn("LinkedHashMap", method)
+        self.assertIn("StorageResourceKey.item", method)
+        self.assertIn("putIfAbsent", method)
+        self.assertNotRegex(
+            representatives,
+            r"\.map\(\s*stack\s*->\s*stack\.copyWithCount\(1\)\s*\)\s*\.distinct\(\)",
+            "ItemStack.distinct cannot normalize duplicate ingredient alternatives",
+        )
+
+    def test_createaddition_dynamic_cost_refresh_fails_closed_without_throwing(self):
+        family = self.read_required(
+            "src/main/java/com/swear/autostorage/RecipeFamily.java"
+        )
+        resolve = self.java_block(
+            family,
+            r"\bpublic\s+List<RecipeAdapterMatch\.Contract>\s+resolveVariants\s*\(",
+            "RecipeFamily.resolveVariants",
+        )
+        contract = self.java_block(
+            family,
+            r"\bpublic\s+RecipeAdapterMatch\.Contract\s+contract\s*\(",
+            "RecipeFamily.contract",
+        )
+
+        self.assertIn("IllegalArgumentException", resolve)
+        self.assertIn("return List.of()", resolve)
+        self.assertIn("cacheTypedPlan", contract)
+        self.assertIn("Cost.free()", contract)
+
+    def test_createaddition_notes_distinguish_eligibility_from_live_rate_cost(self):
+        notes = self.read_required("docs/notes.md")
+        compatibility = self.read_required("docs/createaddition-compatibility.md")
+
+        self.assertNotIn("正確作法是eligibility已要求正rate", notes)
+        self.assertIn("maxChargeRate", notes)
+        self.assertIn("cost", notes.lower())
+        self.assertNotIn(
+            "cost evaluation fail-closes with\n  `IllegalArgumentException`",
+            compatibility,
+        )
+        self.assertIn("no usable variant", compatibility)
 
     def test_immersiveengineering_compat_is_optional_fail_closed(self):
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")

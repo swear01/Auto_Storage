@@ -117,6 +117,9 @@ current complete identity of every server value that can affect the plan or
 cost. Equal behavior may reuse a token; changed behavior must not. Family
 eligibility and candidate-index shape must remain stable across token changes;
 use a recipe-manager reload rather than this factory when membership changes.
+When a live token value makes cost or plan construction throw
+`IllegalArgumentException`, dynamic resolution yields no usable variant without
+propagating that exception through Craftable refresh or server tick.
 Shared Craftable result caches compare the token map before reuse, so a config
 reload cannot restore outputs built from stale amounts. The supplier runs on
 the authoritative server thread and must be deterministic, side-effect free,
@@ -136,6 +139,7 @@ leave stale FE/work costs.
 - **Powah:** Energizing consumes one to six exact items plus scaled NeoForge Energy, uses the same scaled amount as station work, and derives each installed rod tier rate from loaded Powah config. Dynamic/custom inputs, non-positive energy, physical warm-up, and world links fail closed.
 - **Industrial Foregoing:** Dissolution Chamber plans consume grouped exact item slots, sized fluid, live-config FE, and station work while preserving deterministic item/fluid outputs. Material Stonework Factory plans preserve water/lava catalysts or consume exact full thresholds; Crusher accepts only one exact deterministic output. Partial thresholds, laser/extractor world state, custom output callbacks, and ambiguous outputs fail closed.
 - **Create:** Milling, Crushing, and Cutting consume one exact item plus recipe duration; Filling consumes exact item + fluid; Emptying returns exact item + fluid. All outputs must be deterministic and all five stations use normalized station work. Chance, heat, RPM-dependent, multi-station, tool-durability, world-catalyst, Mechanical Crafting, and Sequenced Assembly shapes fail closed.
+- **Create Crafts & Additions:** exact `RollingRecipe` and `ChargingRecipe` with Rolling / Charging Processing labels, config-backed dynamic work tokens, exact FE consume for charging, crafting remainders, single guaranteed ProcessingOutput shape fail-closed, and Liquid Burning fail-closed; see [`createaddition-compatibility.md`](createaddition-compatibility.md).
 - **Create Aquatic Ambitions:** the present-mod module registers no station, resource kind, or recipe family. Channeling remains fail closed because its Encased Fan catalyst is selected from live Conduit/block/fluid world state, mutates entity Conduit Power, and may emit chance outputs. Exact vanilla/Create-class datapack recipes remain owned by the corresponding built-in/Create contracts rather than a CAA-specific approximation.
 - **Create Enchantment Industry:** the present-mod module registers no station, resource kind, or recipe family. Mechanical Grindstone kinetics/tank/disenchant paths, Printer template behaviours, and Blaze Enchanter/Forger randomness remain outside the transaction contract; see [`create-enchantment-industry-compatibility.md`](create-enchantment-industry-compatibility.md).
 - **Extended Crafting:** exact shaped-table recipes from 3×3 through 9×9 and the real `UltimateSingularityRecipe` require one installed Ultimate Crafting Table. Up to 81 exact groups preserve alternatives, remainders, components, and atomic rollback; custom transformers fail closed; see [`extended-crafting-compatibility.md`](extended-crafting-compatibility.md).

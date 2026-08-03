@@ -1,0 +1,295 @@
+{
+  "families": [
+    {
+      "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe",
+      "costs": [
+        {
+          "amount": "ceil(recipe.energy / min(CommonConfig.TESLA_COIL_RECIPE_CHARGE_RATE, recipe.maxChargeRate))",
+          "resource_kind": "auto_storage:station_work"
+        },
+        {
+          "amount": "recipe.getEnergy()",
+          "resource_kind": "neoforge_energy"
+        }
+      ],
+      "decision": "Accept ChargingRecipe / createaddition:charging when the recipe has exactly one simple non-empty item ingredient, no fluid ingredients/results, exactly one ProcessingOutput with chance 1.0 and a non-empty stack, positive energy, and positive maxChargeRate. Station is createaddition:tesla_coil at 1 work/tick. FE cost equals recipe.energy; station work equals ceil(energy / min(CommonConfig.TESLA_COIL_RECIPE_CHARGE_RATE, recipe.maxChargeRate)). Tesla Coil entity-hurt, redstone zap, and capability item-charging without a ChargingRecipe remain unsupported. Belt transport is abstracted away like Create spout/drain.",
+      "evidence": [
+        "src/main/java/com/mrh0/createaddition/recipe/charging/ChargingRecipe.java",
+        "src/main/java/com/mrh0/createaddition/blocks/tesla_coil/TeslaCoilBlockEntity.java#chargeRecipe",
+        "src/main/java/com/mrh0/createaddition/config/CommonConfig.java#TESLA_COIL_RECIPE_CHARGE_RATE",
+        "src/main/java/com/mrh0/createaddition/index/CARecipes.java#CHARGING_TYPE"
+      ],
+      "id": "charging_recipe",
+      "inputs": [
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe ingredients[0] simple Ingredient alternatives with crafting remainders"
+        },
+        {
+          "amount": "recipe.getEnergy()",
+          "resource_kind": "neoforge_energy",
+          "role": "consume",
+          "selector": "recipe.energy FE"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.getResultStack().getCount()",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.getResultStack() exact ItemStack including enchantment components"
+        }
+      ],
+      "recipe_type": "createaddition:charging",
+      "risks": [
+        "generic_ingredients",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:createaddition_tesla_coil",
+        "variants": [
+          {
+            "bounds": "plain tesla_coil item; entity-hurt and capability item-charging without ChargingRecipe are not modeled",
+            "item": "createaddition:tesla_coil",
+            "rate": {
+              "denominator": 1,
+              "numerator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    },
+    {
+      "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe",
+      "costs": [],
+      "decision": "Liquid burning consumes a sized fluid into Liquid Blaze Burner live burn-time/superheated heat state and emits no item/fluid craft outputs. Auto Storage has no exact simulate-then-commit contract for retained burner heat, so the family is rejected.",
+      "evidence": [
+        "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe#public_signature"
+      ],
+      "id": "liquid_burning_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": null,
+      "risks": [
+        "generic_ingredients",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "com.mrh0.createaddition.recipe.rolling.RollingRecipe",
+      "costs": [
+        {
+          "amount": "CommonConfig.ROLLING_MILL_PROCESSING_DURATION.get()",
+          "resource_kind": "auto_storage:station_work"
+        }
+      ],
+      "decision": "Accept RollingRecipe / createaddition:rolling when the recipe has exactly one simple non-empty item ingredient, no fluid ingredients/results, exactly one ProcessingOutput with chance 1.0 and a non-empty stack, and CommonConfig.ROLLING_MILL_PROCESSING_DURATION is positive. Station is createaddition:rolling_mill at 1 work/tick; station work equals the loaded config duration (default 120). Kinetic RPM is abstracted exactly as Create milling. Input is consumed once with crafting remainders; output is the exact result stack/components/count.",
+      "evidence": [
+        "src/main/java/com/mrh0/createaddition/recipe/rolling/RollingRecipe.java",
+        "src/main/java/com/mrh0/createaddition/blocks/rolling_mill/RollingMillBlockEntity.java",
+        "src/main/java/com/mrh0/createaddition/config/CommonConfig.java#ROLLING_MILL_PROCESSING_DURATION",
+        "src/main/java/com/mrh0/createaddition/index/CARecipes.java#ROLLING_TYPE"
+      ],
+      "id": "rolling_recipe",
+      "inputs": [
+        {
+          "amount": 1,
+          "resource_kind": "item",
+          "role": "consume",
+          "selector": "recipe.getIngredient() simple Ingredient alternatives with crafting remainders"
+        }
+      ],
+      "outputs": [
+        {
+          "amount": "recipe.getRollableResults().getFirst().getStack().getCount()",
+          "resource_kind": "item",
+          "role": "primary",
+          "selector": "recipe.getResultStack() exact ItemStack"
+        }
+      ],
+      "recipe_type": "createaddition:rolling",
+      "risks": [
+        "generic_ingredients",
+        "randomness",
+        "world_mutation"
+      ],
+      "station": {
+        "category": "process",
+        "descriptor_id": "auto_storage:createaddition_rolling_mill",
+        "variants": [
+          {
+            "bounds": "plain rolling_mill item; Create RPM/stress is not simulated",
+            "item": "createaddition:rolling_mill",
+            "rate": {
+              "denominator": 1,
+              "numerator": 1
+            }
+          }
+        ]
+      },
+      "status": "accepted"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [
+      "createaddition:rolling/iron_ingot",
+      "createaddition:charging/electrify_gold_nugget"
+    ],
+    "descriptors": [
+      "auto_storage:createaddition_rolling_mill",
+      "auto_storage:createaddition_tesla_coil"
+    ],
+    "mods": [
+      "createaddition"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "createaddition"
+      ],
+      "sha256": "57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "41876c3780b70365a1848994d146a73423cc19fbe86485885795d9e7d855e7e9",
+  "source_recipe_data_sha256": "08c912d27581a94ba005c8b58713e3f95942ffa1e2660b23f6db812e0d306034",
+  "source_recipe_inventory_sha256": "2631e6d878b23243382174fde8da370438577821db650c81166829e344b57de1",
+  "target": {
+    "dependency": "maven.modrinth:createaddition:qPr8V4G2",
+    "display_name": "Create Crafts & Additions",
+    "mod_id": "createaddition",
+    "repositories": [
+      "https://api.modrinth.com/maven",
+      "https://maven.createmod.net",
+      "https://maven.squiddev.cc",
+      "https://maven.blamejared.com/"
+    ],
+    "runtime_dependencies": [
+      "maven.modrinth:create:UjX6dr61"
+    ],
+    "version": "1.6.0"
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Create Crafts & Additions rolling remainder transaction was wrong",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "Long.MAX_VALUE",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Create Crafts & Additions full destination transaction was not an atomic no-op",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "Create Crafts & Additions missing-ingredient transaction was not an atomic no-op",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Create Crafts & Additions rolling/charging registration was incorrect",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Create Crafts & Additions stale holder transaction was not an atomic no-op",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 9,
+    "fixture": "createadditionFixture",
+    "game_test_task": "runCreateadditionGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runCreateadditionGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}
