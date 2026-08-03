@@ -53,6 +53,11 @@ recipe target and is not loaded as a companion.
 | `RecipeMechanicalDryingBasin` | Mechanical Drying Basin | same IO rules; duration work plus `consumptionRate × duration` FE from loaded config |
 | `RecipeMechanicalSqueezer` | Mechanical Squeezer | exact item input; only `chance == 1.0F` item outputs; optional exact fluid; duration work plus `consumptionRate × duration` FE |
 
+Each descriptor uses its localized logical recipe-family name in the Stations
+page and Processing resource tooltip. The label does not come from a particular
+installed item stack, so representative items or future variants cannot rename
+the family.
+
 Tag-derived `ItemStackFromIngredient` outputs, non-simple ingredients, empty
 plans, non-positive duration, and non-positive FE totals fail closed. Chance
 item outputs below `1.0F` fail closed.

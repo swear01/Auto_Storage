@@ -17,6 +17,7 @@ import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -60,9 +61,24 @@ public final class IntegrateddynamicsCompat {
         ResourceLocation mechanicalSqueezer = id(
                 namespace, "integrateddynamics_mechanical_squeezer");
 
-        registerStation(machineDescriptors, dryingBasin, "drying_basin");
-        registerStation(machineDescriptors, mechanicalDryingBasin, "mechanical_drying_basin");
-        registerStation(machineDescriptors, mechanicalSqueezer, "mechanical_squeezer");
+        registerStation(
+                machineDescriptors,
+                dryingBasin,
+                "drying_basin",
+                Component.translatable(
+                        "gui.auto_storage.station.integrateddynamics_drying_basin"));
+        registerStation(
+                machineDescriptors,
+                mechanicalDryingBasin,
+                "mechanical_drying_basin",
+                Component.translatable(
+                        "gui.auto_storage.station.integrateddynamics_mechanical_drying_basin"));
+        registerStation(
+                machineDescriptors,
+                mechanicalSqueezer,
+                "mechanical_squeezer",
+                Component.translatable(
+                        "gui.auto_storage.station.integrateddynamics_mechanical_squeezer"));
 
         recipeFamilies.register(dryingBasin.getPath(), () ->
                 RecipeFamilyFactories.deterministicResources(
@@ -116,13 +132,14 @@ public final class IntegrateddynamicsCompat {
     private static void registerStation(
             DeferredRegister<MachineDescriptor> machineDescriptors,
             ResourceLocation descriptorId,
-            String itemPath
+            String itemPath,
+            Component label
     ) {
         machineDescriptors.register(descriptorId.getPath(), () -> {
             Item item = requiredItem(itemPath);
             return MachineDescriptor.installableVariants(
                     descriptorId,
-                    new ItemStack(item).getHoverName(),
+                    label,
                     () -> List.of(MachineVariant.of(new ItemStack(item), MachineWorkRate.ONE)),
                     MachineCategory.PROCESS,
                     MachineDescriptorApi.MAX_INSTALLED_COUNT,

@@ -6131,6 +6131,39 @@ class StaticRegressionTests(unittest.TestCase):
             r"\s*!=\s*energy",
         )
 
+    def test_integrated_dynamics_stations_use_localized_logical_family_labels(self):
+        compat = self.read_required(
+            "src/compat/integrateddynamics/java/com/swear/autostorage/compat/"
+            "integrateddynamics/IntegrateddynamicsCompat.java"
+        )
+        en_us = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/en_us.json")
+        )
+        zh_tw = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/zh_tw.json")
+        )
+        labels = {
+            "integrateddynamics_drying_basin": ("Drying Basin", "乾燥盆"),
+            "integrateddynamics_mechanical_drying_basin": (
+                "Mechanical Drying Basin",
+                "機械乾燥盆",
+            ),
+            "integrateddynamics_mechanical_squeezer": (
+                "Mechanical Squeezer",
+                "機械壓榨機",
+            ),
+        }
+
+        self.assertNotIn("getHoverName()", compat)
+        for path, (english, traditional_chinese) in labels.items():
+            key = f"gui.auto_storage.station.{path}"
+            self.assertRegex(
+                compat,
+                rf'Component\.translatable\(\s*"{re.escape(key)}"\s*\)',
+            )
+            self.assertEqual(english, en_us[key])
+            self.assertEqual(traditional_chinese, zh_tw[key])
+
 
 if __name__ == "__main__":
     unittest.main()
