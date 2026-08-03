@@ -104,7 +104,8 @@ def isSafeExactZipEntry = { value ->
             && !value.contains('[')
             && !value.contains(']')
             && !value.any { character ->
-                ((int) character) < 32 || ((int) character) == 127
+                int code = character.charAt(0)
+                code < 32 || code == 127
             }
             && !value.split('/', -1).any { it in ['', '.', '..'] }
 }

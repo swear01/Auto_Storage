@@ -645,6 +645,12 @@ class ModularCompatSdkTests(unittest.TestCase):
             r"validateCompatRuntimeDependencyNotations",
         )
 
+    def test_runtime_transform_entry_character_validation_uses_character_code(self):
+        build = (ROOT / "build.gradle").read_text()
+
+        self.assertIn("character.charAt(0)", build)
+        self.assertNotIn("((int) character)", build)
+
     def test_registration_and_reload_lifecycle_are_fail_closed_and_ordered(self):
         addon = (
             ROOT
