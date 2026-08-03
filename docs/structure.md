@@ -52,6 +52,8 @@
 | `src/createFixture/` | 代表性Create 6.0.10隔離GameTest fixture；13個tests驗五個deterministic families、item/fluid/remainder/work/reload與atomic rollback。 |
 | `docs/create-aquatic-ambitions-compatibility.md` | Create Aquatic Ambitions 2.0.4 scanner-format-17 audit：79個target classes、6個reachable ancestry、2個actual Recipe candidates重審拒絕、Channeling world/chance邊界與零production-family Outcome C。 |
 | `src/createAquaticAmbitionsFixture/` | 代表性Create Aquatic Ambitions 2.0.4 + Create隔離GameTest fixture；4個tests驗present target、零custom registration及全部Channeling recipes fail closed。 |
+| `docs/create-enchantment-industry-compatibility.md` | Create Enchantment Industry `2.5.0-preview-alpha1` Compat Kit Outcome C：Grindstone/Printer/Enchanter/Forger fail-closed與零production-family邊界。 |
+| `src/createEnchantmentIndustryFixture/` | 代表性Create Enchantment Industry preview + Create + Create Dragons Plus隔離GameTest fixture；5個tests驗present-mod載入、零custom registration、namespace vanilla crafting及grinding fail closed。 |
 | `docs/railcraft-compatibility.md` | Railcraft Reborn 1.2.10 exact target/source/6-artifact ancestry scanner-format-17 audit、52→13 candidate migration及零production-family fail-closed判定。 |
 | `src/railcraftFixture/` | 代表性Railcraft Reborn 1.2.10 present-mod隔離fixture；8個tests鎖住Crusher/Blast/Coke/Rolling、special crafting、descriptor ownership與all-candidate fail-closed。 |
 | `docs/pneumaticcraft-compatibility.md` | PneumaticCraft Air/pressure/heat/multiblock API審計與零production-family fail-closed判定。 |

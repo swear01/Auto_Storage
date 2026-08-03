@@ -1,0 +1,14 @@
+{
+  "contract_sha256": "a4d6cf5c1efd1a5135dd232da33c166b38692b2e8aa3ffb522129aa336992473",
+  "files": {
+    "src/compat/create_enchantment_industry/compat-module.json": "8b79004b7f275148498d8dd57c529759bb47d8f8dcd3d90bb226461373bef5fe",
+    "src/compat/create_enchantment_industry/java/com/swear/autostorage/compat/createenchantmentindustry/CreateEnchantmentIndustryCompat.java": "4e4043ab048fe85c988508f77b1f7863c91d04460a4861e04a296c7b25d01fdf",
+    "src/compat/create_enchantment_industry/java/com/swear/autostorage/compat/createenchantmentindustry/CreateEnchantmentIndustryCompatModule.java": "4ab86110580e407f5ffc4e98d5e2719fe2044b8d5306abe2f2a84dac236001dc",
+    "src/createEnchantmentIndustryFixture/java/com/swear/autostorage/fixture/createenchantmentindustry/CreateEnchantmentIndustryFixtureMod.java": "7a2ee7d13abced7b69fa88586b190fce07eb5005b6e42d4da4e4ab95ddbda4c6",
+    "src/createEnchantmentIndustryFixture/java/com/swear/autostorage/fixture/createenchantmentindustry/CreateEnchantmentIndustryIntegrationGameTests.java": "838f6a25229bd72f5f27dc5397d5924be4c3d44a0b5644e49d8badd24455ef97",
+    "src/createEnchantmentIndustryFixture/resources/META-INF/neoforge.mods.toml": "bcb2dae1fcdce359fd5edeb79c5ecd7554823c77b0623c5006fcfebc75173e5f",
+    "src/createEnchantmentIndustryFixture/resources/data/auto_storage_create_enchantment_industry_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
+}
