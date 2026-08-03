@@ -27,6 +27,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import org.cyclops.integrateddynamics.block.BlockMechanicalDryingBasinConfig;
 import org.cyclops.integrateddynamics.block.BlockMechanicalSqueezerConfig;
 
 @GameTestHolder(IntegrateddynamicsFixtureMod.MODID)
@@ -44,6 +45,8 @@ public final class IntegrateddynamicsIntegrationGameTests {
             autoStorage("integrateddynamics_squeezer");
     private static final ResourceLocation DRYING_RECIPE = idRecipe(
             "drying_basin/base/crystalized_menril_block");
+    private static final ResourceLocation MECHANICAL_DRYING_RECIPE = idRecipe(
+            "mechanical_drying_basin/base/crystalized_menril_block");
     private static final ResourceLocation SQUEEZER_RECIPE = idRecipe(
             "mechanical_squeezer/base/menril_resin_planks");
     private static final ResourceLocation CHANCE_SQUEEZER_RECIPE = idRecipe(
@@ -85,6 +88,30 @@ public final class IntegrateddynamicsIntegrationGameTests {
                     || itemCount(context.core(), idItem("crystalized_menril_block")) != 1
                     || context.core().getStationWork(DRYING_BASIN) != 0) {
                 helper.fail("Integrated Dynamics drying basin transaction was wrong");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void mechanical_drying_basin_consumes_fluid_fe_and_duration(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            long energy = expectedMechanicalDryingEnergy(15);
+            seedFluid(context, idFluid("menril_resin"), 1000);
+            seedResource(context.core(), StorageResourceKey.neoforgeEnergy(), energy);
+            installStation(context, "mechanical_drying_basin");
+            tick(context.core(), 15);
+            if (!craft(context, MECHANICAL_DRYING_RECIPE)
+                    || fluidAmount(context, idFluid("menril_resin")) != 0
+                    || itemCount(context.core(), idItem("crystalized_menril_block")) != 1
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 0
+                    || context.core().getStationWork(MECHANICAL_DRYING_BASIN) != 0) {
+                helper.fail(
+                        "Integrated Dynamics mechanical drying basin transaction was wrong");
                 return;
             }
             helper.succeed();
@@ -241,6 +268,12 @@ public final class IntegrateddynamicsIntegrationGameTests {
     private static long expectedSqueezerEnergy(int duration) {
         return Math.multiplyExact(
                 (long) BlockMechanicalSqueezerConfig.consumptionRate, (long) duration);
+    }
+
+    private static long expectedMechanicalDryingEnergy(int duration) {
+        return Math.multiplyExact(
+                (long) BlockMechanicalDryingBasinConfig.consumptionRate,
+                (long) duration);
     }
 
     private static void withCore(GameTestHelper helper, FixtureAssertion assertion) {

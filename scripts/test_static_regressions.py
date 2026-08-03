@@ -6164,6 +6164,91 @@ class StaticRegressionTests(unittest.TestCase):
             self.assertEqual(english, en_us[key])
             self.assertEqual(traditional_chinese, zh_tw[key])
 
+    def test_integrated_dynamics_contract_encodes_conditional_fluid_primary_roles(self):
+        contract = json.loads(
+            self.read_required("compat/contracts/integrateddynamics.json")
+        )
+        families = {family["id"]: family for family in contract["families"]}
+        expected = {
+            "recipe_drying_basin": "recipe.outputFluid.amount",
+            "recipe_mechanical_drying_basin": "recipe.outputFluid.amount",
+            "recipe_mechanical_squeezer": "recipe.outputFluid.amount",
+        }
+        for family_id, amount_fragment in expected.items():
+            fluid_outputs = [
+                output
+                for output in families[family_id]["outputs"]
+                if output["resource_kind"] == "fluid"
+                and output["selector"] == "recipe.outputFluid"
+            ]
+            self.assertEqual(
+                {"primary", "remainder"},
+                {output["role"] for output in fluid_outputs},
+                f"{family_id} must bind fluid-only primary and item-present remainder roles",
+            )
+            primary = next(
+                output for output in fluid_outputs if output["role"] == "primary"
+            )
+            remainder = next(
+                output for output in fluid_outputs if output["role"] == "remainder"
+            )
+            self.assertIn(amount_fragment, str(primary["amount"]))
+            self.assertIn("item", str(primary["amount"]).lower())
+            self.assertIn("absent", str(primary["amount"]).lower())
+            self.assertIn(amount_fragment, str(remainder["amount"]))
+            self.assertIn("item", str(remainder["amount"]).lower())
+            self.assertIn("present", str(remainder["amount"]).lower())
+
+    def test_integrated_dynamics_remainder_evidence_executes_exact_fluid_output(self):
+        contract = json.loads(
+            self.read_required("compat/contracts/integrateddynamics.json")
+        )
+        marker = contract["verification"]["evidence"][
+            "catalyst_tool_remainder_exact"
+        ][0]["marker"]
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+mechanical_squeezer_consumes_item_fe_and_duration\s*\(",
+            "Integrated Dynamics exact fluid remainder GameTest",
+        )
+        self.assertEqual(
+            "Integrated Dynamics mechanical squeezer transaction was wrong",
+            marker,
+        )
+        self.assertIn(marker, method)
+        self.assertIn('fluidAmount(context, idFluid("menril_resin")) != 250', method)
+        self.assertIn('itemCount(context.core(), idItem("crystalized_menril_chunk")) != 1', method)
+
+    def test_integrated_dynamics_fixture_executes_mechanical_drying_basin_transaction(self):
+        fixture = self.read_required(
+            "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/"
+            "integrateddynamics/IntegrateddynamicsIntegrationGameTests.java"
+        )
+        method = self.java_block(
+            fixture,
+            r"\bpublic\s+static\s+void\s+mechanical_drying_basin_consumes_fluid_fe_and_duration\s*\(",
+            "Integrated Dynamics Mechanical Drying Basin GameTest",
+        )
+        self.assertIn("MECHANICAL_DRYING_RECIPE", method)
+        self.assertIn('seedFluid(context, idFluid("menril_resin"), 1000)', method)
+        self.assertIn("StorageResourceKey.neoforgeEnergy()", method)
+        self.assertIn('installStation(context, "mechanical_drying_basin")', method)
+        self.assertIn("tick(context.core(), 15)", method)
+        self.assertIn('itemCount(context.core(), idItem("crystalized_menril_block")) != 1', method)
+        self.assertIn("getStationWork(MECHANICAL_DRYING_BASIN) != 0", method)
+        descriptor = json.loads(
+            self.read_required("src/compat/integrateddynamics/compat-module.json")
+        )
+        contract = json.loads(
+            self.read_required("compat/contracts/integrateddynamics.json")
+        )
+        self.assertEqual(9, descriptor["expectedTests"])
+        self.assertEqual(9, contract["verification"]["expected_game_tests"])
+
 
 if __name__ == "__main__":
     unittest.main()

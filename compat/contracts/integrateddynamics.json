@@ -42,7 +42,13 @@
           "selector": "recipe.outputItem"
         },
         {
-          "amount": "optional recipe.outputFluid.amount",
+          "amount": "optional recipe.outputFluid.amount when recipe.outputItem is absent",
+          "resource_kind": "fluid",
+          "role": "primary",
+          "selector": "recipe.outputFluid"
+        },
+        {
+          "amount": "optional recipe.outputFluid.amount when recipe.outputItem is present",
           "resource_kind": "fluid",
           "role": "remainder",
           "selector": "recipe.outputFluid"
@@ -135,7 +141,13 @@
           "selector": "recipe.outputItem"
         },
         {
-          "amount": "optional recipe.outputFluid.amount",
+          "amount": "optional recipe.outputFluid.amount when recipe.outputItem is absent",
+          "resource_kind": "fluid",
+          "role": "primary",
+          "selector": "recipe.outputFluid"
+        },
+        {
+          "amount": "optional recipe.outputFluid.amount when recipe.outputItem is present",
           "resource_kind": "fluid",
           "role": "remainder",
           "selector": "recipe.outputFluid"
@@ -173,7 +185,7 @@
           "resource_kind": "neoforge_energy"
         }
       ],
-      "decision": "Accept Mechanical Squeezer recipes only when the input ingredient is simple/exact, every item output chance is exactly 1.0F, optional fluid output is exact, duration is positive, and loaded BlockMechanicalSqueezerConfig.consumptionRate * duration is a finite positive FE total. The first guaranteed item is primary; additional guaranteed items and fluid are remainders. Chance outputs below 1.0 fail closed. Manual Squeezer remains rejected.",
+      "decision": "Accept Mechanical Squeezer recipes only when the input ingredient is simple/exact, every item output chance is exactly 1.0F, optional fluid output is exact, duration is positive, and loaded BlockMechanicalSqueezerConfig.consumptionRate * duration is a finite positive FE total. The first guaranteed item is primary; additional guaranteed items are remainders. When no guaranteed item exists the exact fluid is primary; otherwise fluid is a remainder. Chance outputs below 1.0 fail closed. Manual Squeezer remains rejected.",
       "evidence": [
         "org.cyclops.integrateddynamics.core.recipe.type.RecipeMechanicalSqueezer#public_signature",
         "src/main/java/org/cyclops/integrateddynamics/core/recipe/type/RecipeMechanicalSqueezer.java#getDuration",
@@ -212,7 +224,13 @@
           "selector": "recipe.outputItems[1..]"
         },
         {
-          "amount": "optional recipe.outputFluid.amount",
+          "amount": "optional recipe.outputFluid.amount when guaranteed item outputs are absent",
+          "resource_kind": "fluid",
+          "role": "primary",
+          "selector": "recipe.outputFluid"
+        },
+        {
+          "amount": "optional recipe.outputFluid.amount when a guaranteed item output is present",
           "resource_kind": "fluid",
           "role": "remainder",
           "selector": "recipe.outputFluid"
@@ -432,7 +450,7 @@
       ],
       "catalyst_tool_remainder_exact": [
         {
-          "marker": "Integrated Dynamics chance-output recipes must remain fail closed",
+          "marker": "Integrated Dynamics mechanical squeezer transaction was wrong",
           "source": "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java",
           "task": "runIntegratedDynamicsGameTestServer"
         }
@@ -494,7 +512,7 @@
         }
       ]
     },
-    "expected_game_tests": 8,
+    "expected_game_tests": 9,
     "fixture": "integratedDynamicsFixture",
     "game_test_task": "runIntegratedDynamicsGameTestServer",
     "gradle_tasks": [

@@ -49,9 +49,9 @@ recipe target and is not loaded as a companion.
 
 | Family | Station | Cost and resources |
 |---|---|---|
-| `RecipeDryingBasin` | Drying Basin | optional exact item and/or sized fluid input; exact item output; recipe duration as station work |
-| `RecipeMechanicalDryingBasin` | Mechanical Drying Basin | same IO rules; duration work plus `consumptionRate × duration` FE from loaded config |
-| `RecipeMechanicalSqueezer` | Mechanical Squeezer | exact item input; only `chance == 1.0F` item outputs; optional exact fluid; duration work plus `consumptionRate × duration` FE |
+| `RecipeDryingBasin` | Drying Basin | optional exact item and/or sized fluid input/output; item is primary when present, otherwise fluid is primary; recipe duration as station work |
+| `RecipeMechanicalDryingBasin` | Mechanical Drying Basin | same conditional item/fluid output roles; duration work plus `consumptionRate × duration` FE from loaded config |
+| `RecipeMechanicalSqueezer` | Mechanical Squeezer | exact item input; only `chance == 1.0F` item outputs; fluid is primary only when no item output exists, otherwise remainder; duration work plus `consumptionRate × duration` FE |
 
 Each descriptor uses its localized logical recipe-family name in the Stations
 page and Processing resource tooltip. The label does not come from a particular
@@ -90,8 +90,9 @@ peer Create digests or commit global coexistence/unclaimed expected SHA values.
 ./gradlew runIntegratedDynamicsGameTestServer
 ```
 
-Eight GameTests cover registration/manual-Squeezer exclusion, Drying Basin
-fluid/duration commit, Mechanical Squeezer item/fluid/FE/work commit,
+Nine GameTests cover registration/manual-Squeezer exclusion, Drying Basin
+fluid/duration commit, Mechanical Drying Basin fluid/FE/work commit,
+Mechanical Squeezer item/fluid/FE/work commit and exact fluid remainder,
 missing-ingredient and full item-destination atomic no-ops, `Long.MAX_VALUE`
 fluid-output overflow rollback, chance-output rejection, and loaded mechanical
 energy config.
