@@ -6,6 +6,7 @@ import com.swear.autostorage.Action;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import com.swear.autostorage.ItemKey;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
@@ -54,6 +55,9 @@ public final class CreateadditionIntegrationGameTests {
     public static void rolling_and_charging_register_and_liquid_burning_stays_excluded(
             GameTestHelper helper
     ) {
+        IsolatedRecipeInventoryEvidence.assertMatchesDescriptor(
+                helper.getLevel().getRecipeManager(),
+                CreateadditionIntegrationGameTests.class);
         MachineDescriptor rolling = MachineEnergyTable.get(ROLLING_MILL);
         MachineDescriptor charging = MachineEnergyTable.get(TESLA_COIL);
         ItemStack rollingMill = new ItemStack(createadditionItem("rolling_mill"));

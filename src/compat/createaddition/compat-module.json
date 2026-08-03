@@ -5,14 +5,43 @@
   },
   "dependencies": [
     "maven.modrinth:createaddition:qPr8V4G2",
-    "maven.modrinth:create:UjX6dr61"
+    "cc.tweaked:cc-tweaked-1.21.1-core-api:1.115.1",
+    "com.simibubi.create:create-1.21.1:6.0.10-280:slim",
+    "dev.engine-room.flywheel:flywheel-neoforge-api-1.21.1:1.0.6",
+    "mezz.jei:jei-1.21.1-common-api:19.25.0.323",
+    "net.createmod.ponder:ponder-neoforge:1.0.82+mc1.21.1"
   ],
   "entrypoint": "com.swear.autostorage.compat.createaddition.CreateadditionCompatModule",
   "expectedTests": 8,
   "fixture": "createadditionFixture",
   "id": "auto_storage:createaddition",
+  "matrix": {
+    "acceptedRecipes": [
+      "createaddition:rolling/iron_ingot",
+      "createaddition:charging/electrify_gold_nugget"
+    ],
+    "descriptors": [
+      "auto_storage:createaddition_rolling_mill",
+      "auto_storage:createaddition_tesla_coil"
+    ],
+    "mods": [
+      "createaddition"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "createaddition"
+      ],
+      "sha256": "57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "repositories": [
-    "https://api.modrinth.com/maven"
+    "https://api.modrinth.com/maven",
+    "https://maven.createmod.net",
+    "https://maven.squiddev.cc",
+    "https://maven.blamejared.com/"
   ],
   "requires": [
     "createaddition"

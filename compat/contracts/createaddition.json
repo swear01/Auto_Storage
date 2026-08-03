@@ -1,308 +1,6 @@
 {
   "families": [
     {
-      "class": "com.mrh0.createaddition.compat.jei.CARecipeCategory",
-      "costs": [],
-      "decision": "JEI recipe category base; client viewer helper, not a server recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.compat.jei.CARecipeCategory#public_signature"
-      ],
-      "id": "c_a_recipe_category",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder",
-      "costs": [],
-      "decision": "Datagen builder for LiquidBurningRecipe; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeBuilders.CALiquidBurningRecipeBuilder#public_signature"
-      ],
-      "id": "c_a_liquid_burning_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeBuilders.CARecipeBuilder",
-      "costs": [],
-      "decision": "Datagen builder base; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeBuilders.CARecipeBuilder#public_signature"
-      ],
-      "id": "c_a_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder",
-      "costs": [],
-      "decision": "Datagen builder for ChargingRecipe; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeBuilders.ChargingRecipeBuilder#public_signature"
-      ],
-      "id": "charging_recipe_builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeGen.ChargingRecipeGen",
-      "costs": [],
-      "decision": "Datagen generator for charging recipes; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeGen.ChargingRecipeGen#public_signature"
-      ],
-      "id": "charging_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeGen.LiquidBurningRecipeGen",
-      "costs": [],
-      "decision": "Datagen generator for liquid burning recipes; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeGen.LiquidBurningRecipeGen#public_signature"
-      ],
-      "id": "liquid_burning_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeGen.RollingRecipeGen",
-      "costs": [],
-      "decision": "Datagen generator for rolling recipes; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeGen.RollingRecipeGen#public_signature"
-      ],
-      "id": "rolling_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAChargingRecipeProvider",
-      "costs": [],
-      "decision": "Datagen provider that emits Create Crafts & Additions charging recipes; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CAChargingRecipeProvider#public_signature"
-      ],
-      "id": "c_a_charging_recipe_provider",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACompactingRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider that emits Create compacting recipes under createaddition namespace; vanilla Create compacting remains owned by Create and is already fail-closed there.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CACompactingRecipeGen#public_signature"
-      ],
-      "id": "c_a_compacting_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider",
-      "costs": [],
-      "decision": "Datagen provider for standard crafting recipes; vanilla crafting classes need no custom module.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider#public_signature"
-      ],
-      "id": "c_a_crafting_recipe_provider",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider$SaveUtility",
-      "costs": [],
-      "decision": "Nested datagen save helper; not a recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CACraftingRecipeProvider$SaveUtility#public_signature"
-      ],
-      "id": "c_a_crafting_recipe_provider__save_utility",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CACrushingRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider that emits Create crushing recipes; Create crushing is already handled by the Create module when present.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CACrushingRecipeGen#public_signature"
-      ],
-      "id": "c_a_crushing_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAFillingRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider that emits Create filling recipes; Create filling is already handled by the Create module when present.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CAFillingRecipeGen#public_signature"
-      ],
-      "id": "c_a_filling_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CALiquidBurningRecipeProvider",
-      "costs": [],
-      "decision": "Datagen provider for liquid burning recipes; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CALiquidBurningRecipeProvider#public_signature"
-      ],
-      "id": "c_a_liquid_burning_recipe_provider",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAMechanicalCrafterRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider that emits Create mechanical crafting recipes; Mechanical Crafting remains fail-closed in the Create module.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CAMechanicalCrafterRecipeGen#public_signature"
-      ],
-      "id": "c_a_mechanical_crafter_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAMixingRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider that emits Create mixing recipes; Mixing remains fail-closed in the Create module.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CAMixingRecipeGen#public_signature"
-      ],
-      "id": "c_a_mixing_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CAPressingRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider that emits Create pressing recipes; Pressing remains fail-closed in the Create module.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CAPressingRecipeGen#public_signature"
-      ],
-      "id": "c_a_pressing_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.datagen.RecipeProvider.CARollingRecipeGen",
-      "costs": [],
-      "decision": "Datagen provider for rolling recipes; not a runtime recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.datagen.RecipeProvider.CARollingRecipeGen#public_signature"
-      ],
-      "id": "c_a_rolling_recipe_gen",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.index.CARecipes",
-      "costs": [],
-      "decision": "Serializer/type registration index; not a recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.index.CARecipes#public_signature"
-      ],
-      "id": "c_a_recipes",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.FluidRecipeWrapper",
-      "costs": [],
-      "decision": "RecipeInput wrapper carrying a FluidStack for liquid burning matching; not a recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.FluidRecipeWrapper#public_signature"
-      ],
-      "id": "fluid_recipe_wrapper",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "entity_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
       "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe",
       "costs": [
         {
@@ -346,6 +44,8 @@
       ],
       "recipe_type": "createaddition:charging",
       "risks": [
+        "generic_ingredients",
+        "randomness",
         "world_mutation"
       ],
       "station": {
@@ -356,88 +56,13 @@
             "bounds": "plain tesla_coil item; entity-hurt and capability item-charging without ChargingRecipe are not modeled",
             "item": "createaddition:tesla_coil",
             "rate": {
-              "numerator": 1,
-              "denominator": 1
+              "denominator": 1,
+              "numerator": 1
             }
           }
         ]
       },
       "status": "accepted"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder",
-      "costs": [],
-      "decision": "Builder nested class for ChargingRecipe construction/datagen; owned by the ChargingRecipe decision.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Builder#public_signature"
-      ],
-      "id": "charging_recipe__builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Factory",
-      "costs": [],
-      "decision": "Factory nested interface for ChargingRecipe; owned by the ChargingRecipe decision.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Factory#public_signature"
-      ],
-      "id": "charging_recipe__factory",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer nested class for ChargingRecipe; owned by the ChargingRecipe decision.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.charging.ChargingRecipe$Serializer#public_signature"
-      ],
-      "id": "charging_recipe__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.charging.ChargingRecipeParams",
-      "costs": [],
-      "decision": "ProcessingRecipeParams carrier for charging energy/maxChargeRate; owned by the ChargingRecipe decision.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.charging.ChargingRecipeParams#public_signature"
-      ],
-      "id": "charging_recipe_params",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition",
-      "costs": [],
-      "decision": "NeoForge recipe condition codec for optional fluid-tag presence; not a recipe family.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.conditions.HasFluidTagCondition#public_signature"
-      ],
-      "id": "has_fluid_tag_condition",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
     },
     {
       "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe",
@@ -451,68 +76,10 @@
       "outputs": [],
       "recipe_type": null,
       "risks": [
+        "generic_ingredients",
+        "randomness",
         "world_mutation"
       ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder",
-      "costs": [],
-      "decision": "Builder nested class for rejected LiquidBurningRecipe; not an independent family.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Builder#public_signature"
-      ],
-      "id": "liquid_burning_recipe__builder",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Factory",
-      "costs": [],
-      "decision": "Factory nested interface for rejected LiquidBurningRecipe; not an independent family.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Factory#public_signature"
-      ],
-      "id": "liquid_burning_recipe__factory",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Serializer",
-      "costs": [],
-      "decision": "Serializer nested class for rejected LiquidBurningRecipe; not an independent family.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe$Serializer#public_signature"
-      ],
-      "id": "liquid_burning_recipe__serializer",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams",
-      "costs": [],
-      "decision": "Params carrier for rejected LiquidBurningRecipe; not an independent family.",
-      "evidence": [
-        "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipeParams#public_signature"
-      ],
-      "id": "liquid_burning_recipe_params",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [],
       "station": null,
       "status": "rejected"
     },
@@ -550,6 +117,8 @@
       ],
       "recipe_type": "createaddition:rolling",
       "risks": [
+        "generic_ingredients",
+        "randomness",
         "world_mutation"
       ],
       "station": {
@@ -560,8 +129,8 @@
             "bounds": "plain rolling_mill item; Create RPM/stress is not simulated",
             "item": "createaddition:rolling_mill",
             "rate": {
-              "numerator": 1,
-              "denominator": 1
+              "denominator": 1,
+              "numerator": 1
             }
           }
         ]
@@ -570,31 +139,48 @@
     }
   ],
   "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [
+      "createaddition:rolling/iron_ingot",
+      "createaddition:charging/electrify_gold_nugget"
+    ],
+    "descriptors": [
+      "auto_storage:createaddition_rolling_mill",
+      "auto_storage:createaddition_tesla_coil"
+    ],
+    "mods": [
+      "createaddition"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "createaddition"
+      ],
+      "sha256": "57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
   "schema": 1,
   "source_audit_sha256": "41876c3780b70365a1848994d146a73423cc19fbe86485885795d9e7d855e7e9",
-  "source_recipe_inventory_sha256": "cecc8f3722ddd8fb14ff13c1492de854dab8ad4f3516bad5448aa6af2e0fe407",
+  "source_recipe_data_sha256": "08c912d27581a94ba005c8b58713e3f95942ffa1e2660b23f6db812e0d306034",
+  "source_recipe_inventory_sha256": "2631e6d878b23243382174fde8da370438577821db650c81166829e344b57de1",
   "target": {
-    "mod_id": "createaddition",
-    "display_name": "Create Crafts & Additions",
-    "version": "1.6.0",
     "dependency": "maven.modrinth:createaddition:qPr8V4G2",
+    "display_name": "Create Crafts & Additions",
+    "mod_id": "createaddition",
     "repositories": [
-      "https://api.modrinth.com/maven"
+      "https://api.modrinth.com/maven",
+      "https://maven.createmod.net",
+      "https://maven.squiddev.cc",
+      "https://maven.blamejared.com/"
     ],
     "runtime_dependencies": [
       "maven.modrinth:create:UjX6dr61"
-    ]
+    ],
+    "version": "1.6.0"
   },
   "verification": {
-    "fixture": "createadditionFixture",
-    "game_test_task": "runCreateadditionGameTestServer",
-    "gradle_tasks": [
-      "build",
-      "runGameTestServer",
-      "runRecipeAddonGameTestServer",
-      "runCreateadditionGameTestServer",
-      "runCompatibilityMatrixGameTestServer"
-    ],
     "checks": [
       "absent_target_no_classload",
       "present_target_load_once",
@@ -617,23 +203,23 @@
           "task": "runGameTestServer"
         }
       ],
-      "present_target_load_once": [
+      "all_mod_coexistence": [
         {
-          "marker": "Create Crafts & Additions rolling/charging registration was incorrect",
-          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
-          "task": "runCreateadditionGameTestServer"
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
         }
       ],
-      "ingredient_shortage_atomic": [
+      "api_only_compilation": [
         {
-          "marker": "Create Crafts & Additions missing-ingredient transaction was not an atomic no-op",
-          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
-          "task": "runCreateadditionGameTestServer"
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
         }
       ],
-      "destination_capacity_atomic": [
+      "catalyst_tool_remainder_exact": [
         {
-          "marker": "Create Crafts & Additions full destination transaction was not an atomic no-op",
+          "marker": "Create Crafts & Additions charging did not consume exact FE/work",
           "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
           "task": "runCreateadditionGameTestServer"
         }
@@ -645,23 +231,23 @@
           "task": "runCreateadditionGameTestServer"
         }
       ],
-      "stale_recipe_holder_atomic": [
+      "dedicated_server_client_isolation": [
         {
-          "marker": "Create Crafts & Additions stale holder transaction was not an atomic no-op",
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Create Crafts & Additions full destination transaction was not an atomic no-op",
           "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
           "task": "runCreateadditionGameTestServer"
         }
       ],
-      "catalyst_tool_remainder_exact": [
+      "ingredient_shortage_atomic": [
         {
-          "marker": "Create Crafts & Additions charging did not consume exact FE/work",
-          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
-          "task": "runCreateadditionGameTestServer"
-        }
-      ],
-      "multi_output_merge_exact": [
-        {
-          "marker": "Create Crafts & Additions rolling did not emit exact wire output",
+          "marker": "Create Crafts & Additions missing-ingredient transaction was not an atomic no-op",
           "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
           "task": "runCreateadditionGameTestServer"
         }
@@ -673,28 +259,37 @@
           "task": "runRecipeAddonGameTestServer"
         }
       ],
-      "dedicated_server_client_isolation": [
+      "multi_output_merge_exact": [
         {
-          "marker": "verifyCompatIsolation",
-          "source": "build.gradle",
-          "task": "build"
+          "marker": "Create Crafts & Additions rolling did not emit exact wire output",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
         }
       ],
-      "api_only_compilation": [
+      "present_target_load_once": [
         {
-          "marker": "compileAddonExampleJava",
-          "source": "build.gradle",
-          "task": "build"
+          "marker": "Create Crafts & Additions rolling/charging registration was incorrect",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
         }
       ],
-      "all_mod_coexistence": [
+      "stale_recipe_holder_atomic": [
         {
-          "marker": "Combined compatibility registry is missing",
-          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
-          "task": "runCompatibilityMatrixGameTestServer"
+          "marker": "Create Crafts & Additions stale holder transaction was not an atomic no-op",
+          "source": "src/createadditionFixture/java/com/swear/autostorage/fixture/createaddition/CreateadditionIntegrationGameTests.java",
+          "task": "runCreateadditionGameTestServer"
         }
       ]
     },
-    "expected_game_tests": 8
+    "expected_game_tests": 8,
+    "fixture": "createadditionFixture",
+    "game_test_task": "runCreateadditionGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runCreateadditionGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
   }
 }

@@ -2197,6 +2197,96 @@ class StaticRegressionTests(unittest.TestCase):
             'id.getNamespace().equals("productivemetalworks")',
             coexistence,
         )
+    def test_createaddition_compat_is_optional_and_isolated(self):
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("createaddition")
+        module = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        fixture = self.read_required(
+            "src/createadditionFixture/java/com/swear/autostorage/fixture/"
+            "createaddition/CreateadditionIntegrationGameTests.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/createadditionFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required("docs/createaddition-compatibility.md")
+        build = self.read_required("build.gradle")
+        contract = json.loads(
+            self.read_required("compat/contracts/createaddition.json")
+        )
+        audit = json.loads(
+            self.read_required("compat/audits/createaddition/1.6.0.json")
+        )
+        descriptor = json.loads(
+            self.read_required("src/compat/createaddition/compat-module.json")
+        )
+        en_us = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/en_us.json")
+        )
+        zh_tw = json.loads(
+            self.read_required("src/main/resources/assets/auto_storage/lang/zh_tw.json")
+        )
+
+        self.assert_descriptor_driven_fixture(
+            build, "createaddition", "createadditionFixture", 8
+        )
+        self.assertNotIn('modId="createaddition"', metadata)
+        self.assertIn('"createaddition"', module_index)
+        self.assertIn("maven.modrinth:createaddition:qPr8V4G2", module_index)
+        self.assertIn(
+            "41876c3780b70365a1848994d146a73423cc19fbe86485885795d9e7d855e7e9",
+            module_index,
+        )
+        self.assertEqual(17, audit["scanner_format"])
+        self.assertEqual(
+            [
+                "com.mrh0.createaddition.recipe.charging.ChargingRecipe",
+                "com.mrh0.createaddition.recipe.liquid_burning.LiquidBurningRecipe",
+                "com.mrh0.createaddition.recipe.rolling.RollingRecipe",
+            ],
+            sorted(
+                candidate["class"]
+                for candidate in audit["candidates"]["recipe_classes"]
+            ),
+        )
+        self.assertEqual(contract["matrix"], descriptor["matrix"])
+        self.assertEqual(
+            "57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3",
+            descriptor["matrix"]["recipeInventory"]["sha256"],
+        )
+        self.assertIn("IsolatedRecipeInventoryEvidence", fixture)
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("CreateadditionCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn("RollingRecipe.class", compat)
+        self.assertIn("ChargingRecipe.class", compat)
+        self.assertNotIn("LiquidBurningRecipe.class", compat)
+        self.assertIn('modId="createaddition"', fixture_metadata)
+        self.assertIn("maven.modrinth:create:UjX6dr61", module_index)
+        self.assertIn("representative CI", compatibility_doc)
+        self.assertIn("scanner format `17`", compatibility_doc)
+        self.assertEqual(
+            "Rolling Mill",
+            en_us["gui.auto_storage.station.createaddition_rolling_mill"],
+        )
+        self.assertEqual(
+            "Tesla Coil",
+            en_us["gui.auto_storage.station.createaddition_tesla_coil"],
+        )
+        self.assertEqual(
+            "軋機",
+            zh_tw["gui.auto_storage.station.createaddition_rolling_mill"],
+        )
+        self.assertEqual(
+            "特斯拉線圈",
+            zh_tw["gui.auto_storage.station.createaddition_tesla_coil"],
+        )
+
     def test_createaddition_item_keys_preserve_representative_indexes(self):
         compat = self.read_required(
             "src/compat/createaddition/java/com/swear/autostorage/compat/"

@@ -19,6 +19,22 @@ and its required Create companion.
 - official source branch `1.21.1`, commit
   `84c7b2ceafc0b382da4606ac0770085e63104c3a`;
 - required runtime companion: Create `6.0.10+mc1.21.1` (`UjX6dr61`);
+- scanner format `17`: 215 target classes and 3 actual `Recipe` candidates
+  (`ChargingRecipe`, `LiquidBurningRecipe`, `RollingRecipe`); legacy format-7
+  name-shaped datagen/JEI/builder/serializer false candidates are no longer
+  contract families;
+- six reachable ancestry artifacts: normalized NeoForge/Minecraft
+  `2382ea29…eb5f` / `56,279,815` bytes plus five exact Maven coordinates
+  (`cc.tweaked:cc-tweaked-1.21.1-core-api:1.115.1`,
+  `com.simibubi.create:create-1.21.1:6.0.10-280:slim`,
+  `dev.engine-room.flywheel:flywheel-neoforge-api-1.21.1:1.0.6`,
+  `mezz.jei:jei-1.21.1-common-api:19.25.0.323`,
+  `net.createmod.ponder:ponder-neoforge:1.0.82+mc1.21.1`);
+- exact target-jar recipe-data inventory: 152 declared/effective recipes,
+  SHA-256 `08c912d27581a94ba005c8b58713e3f95942ffa1e2660b23f6db812e0d306034`;
+- isolated fixture recipe-inventory digest for loaded `createaddition:*`
+  recipes: `57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3`
+  (110 recipes);
 - audit: `compat/audits/createaddition/1.6.0.json`;
 - reviewed contract: `compat/contracts/createaddition.json`.
 
@@ -87,13 +103,36 @@ Transaction:
 - Runtime reflection, viewer authority, and third-party EMI workstation
   registration.
 
+## Declarative matrix evidence
+
+The module descriptor and reviewed contract declare `createaddition` present
+with Rolling Mill and Tesla Coil descriptors plus the two accepted recipe IDs
+used by the fixture. The isolated Create Crafts & Additions fixture locks the
+110 successfully loaded `createaddition:*` recipes by SHA-256
+`57916d79470225dd3db82f96c7e5c70a87192df1930c8d8efa4768add46fd0a3`. Cross-namespace
+Create datapack recipes shipped inside the jar remain Create-owned coexistence
+evidence in the matrix report only.
+
 ## Verification
 
 ```bash
 ./gradlew runCreateadditionGameTestServer
+tools/compat-kit/compat-kit verify compat/contracts/createaddition.json \
+  --audit compat/audits/createaddition/1.6.0.json \
+  --jar build/compat-kit/artifacts/createaddition-1.6.0.jar \
+  --classpath …exact ancestry jars… \
+  --bundled . \
+  --output build/compat-kit/createaddition-report.json
+./gradlew runCompatibilityMatrixGameTestServer
 ```
 
 Eight real GameTests cover rolling/charging registration and liquid-burning
 exclusion, exact rolling output, exact charging FE/work, missing ingredient,
 insufficient FE, destination overflow, `Long.MAX_VALUE` overflow, and stale
-holder rollback. The all-mod compatibility matrix protects coexistence.
+holder rollback. Bundled Compat Kit verify reports twelve exact checks across
+five commands (`build`, base GameTests, recipe-addon, createaddition, matrix).
+Latest local matrix evidence: **18,503** recipes, Craftable prepare
+**32.554 ms**, first/shared p95/warm switch **1.406 / 1.157 / 0.790 ms**,
+shared index **3,711,264** bytes (under the fixed 9 MiB gate), per-menu
+**116,493** bytes, and report
+`build/reports/terminal-scale-10000.json`.

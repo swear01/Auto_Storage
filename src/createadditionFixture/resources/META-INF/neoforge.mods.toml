@@ -6,7 +6,7 @@ license="MIT"
 modId="auto_storage_createaddition_fixture"
 version="1.0.0"
 displayName="Auto Storage Createaddition Fixture"
-description="Compat Kit generated RED fixture for Create Crafts & Additions."
+description="Isolated GameTest fixture for Create Crafts & Additions Rolling and Charging compatibility."
 
 [[dependencies.auto_storage_createaddition_fixture]]
 modId="neoforge"
