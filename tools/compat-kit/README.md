@@ -110,6 +110,12 @@ Java uses the source-level name for named nested classes without rewriting legal
 top-level `$` identifiers. Direct `extends`/`implements` parents
 in the public declaration are also cross-checked without treating generic type
 bounds as direct ancestry.
+Concrete and abstract `BlockEntity` descendants are classified structurally
+before resource or station name terms, so a name such as `FluidConnector` cannot
+override its actual hierarchy.
+Repository-owned complete contracts therefore keep their committed audits at
+the current format; the regression fails on legacy records rather than silently
+skipping modules that complete scaffold/generate/verify can no longer consume.
 Risk scanning separately traverses every reachable non-JDK superclass and
 interface implementation, rather than only the first path from a concrete
 recipe to `Recipe`, so side-superclass and default-interface behavior remains

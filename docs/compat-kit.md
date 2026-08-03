@@ -139,7 +139,8 @@ therefore fails explicitly instead of mixing parsed bytes with a later digest.
 The deterministic audit
 contains NeoForge identity, artifact SHA/size, source revision and exact source
 paths, structurally classified concrete recipe and serializer classes,
-recipe types, builders, datagen classes, client/viewer wrappers, block entities,
+recipe types, builders, datagen classes, client/viewer wrappers, concrete or
+abstract block entities,
 resource/station candidates, per-serializer recipe counts, bounded sample IDs,
 top-level fields and array cardinalities, NeoForge condition types, override
 provenance, and explicit risk flags. Risk
@@ -162,6 +163,10 @@ are all randomness evidence. Without `--source`, scans are
 cached by jar SHA under `build/compat-kit/cache/`;
 repeating the same SHA and scanner format needs no network access. A scanner
 format change uses a new cache namespace instead of trusting stale evidence.
+Every repository-owned audit that backs a complete committed contract is
+migrated in the same change; the committed-audit regression rejects legacy
+records instead of skipping modules whose scaffold or verification would then
+be unusable.
 Named nested classes remain inspectable only when their complete owner chain is
 present in the same archive; a missing owner fails closed rather than allowing
 a descendant of an excluded anonymous, local, or synthetic owner through a
@@ -172,7 +177,7 @@ the selected JDK 21 installation, release version, module-file identity, and
 the resolved `javap` path, reported version, size, and SHA-256.
 JDK validation occurs before every cache return, and an identity change forces
 a fresh scan rather than reusing evidence from another module inventory. The
-current scanner format is `17` with candidate classifier `3`; formats `7`
+current scanner format is `17` with candidate classifier `4`; formats `7`
 through `16` remain readable
 only as explicit legacy evidence while committed contracts are migrated.
 Complete validation, scaffolding, generation, and verification require a

@@ -22,7 +22,7 @@ from pathlib import Path
 
 SCHEMA_VERSION = 1
 SCAN_CACHE_VERSION = 17
-CANDIDATE_CLASSIFIER_VERSION = 3
+CANDIDATE_CLASSIFIER_VERSION = 4
 SCAN_CACHE_DIRECTORY = (
     f"v{SCAN_CACHE_VERSION}-classifier-{CANDIDATE_CLASSIFIER_VERSION}"
 )
@@ -1276,6 +1276,7 @@ def _classify_candidate(
                     "method": "class_hierarchy",
                     "evidence": recipe_type_path,
                 }
+        if not is_interface:
             block_entity_path = _inheritance_path(
                 class_name,
                 BLOCK_ENTITY_CLASS,

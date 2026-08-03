@@ -269,6 +269,9 @@ class CompatKitAuditTests(unittest.TestCase):
         for audit_path in sorted((ROOT / "compat/audits").glob("*/*.json")):
             audit = json.loads(audit_path.read_text())
             if audit["scanner_format"] != self.compat_kit.SCAN_CACHE_VERSION:
+                failures.append(
+                    f"{audit_path.relative_to(ROOT)}: committed audit is not current"
+                )
                 continue
             try:
                 self.compat_kit._validate_audit(audit)
@@ -597,6 +600,54 @@ class CompatKitAuditTests(unittest.TestCase):
                     [class_name],
                     [entry["class"] for entry in audit["candidates"][bucket]],
                 )
+
+    def test_scan_classifies_abstract_block_entity_before_resource_name_terms(self):
+        structural_jar = self.root / "samplemod-abstract-block-entity.jar"
+        write_fixture_jar(structural_jar)
+        class_name = "samplemod.machine.LogisticsFluidConnectorBlockEntity"
+        with zipfile.ZipFile(structural_jar, "a") as archive:
+            archive.writestr(
+                class_name.replace(".", "/") + ".class",
+                b"abstract block entity with a resource-shaped name",
+            )
+
+        audit = self.compat_kit.scan_jar(
+            structural_jar,
+            signature_reader=lambda current: (
+                f"public abstract class {current} extends "
+                "net.minecraft.world.level.block.entity.BlockEntity { }"
+                if current == class_name
+                else f"public final class {current} {{ }}"
+            ),
+            risk_reader=lambda current: f"public class {current} {{ }}",
+            class_metadata_reader=lambda current: (
+                {
+                    "access_flags": 0x0400,
+                    "super_class": (
+                        "net.minecraft.world.level.block.entity.BlockEntity"
+                    ),
+                    "interfaces": [],
+                }
+                if current == class_name
+                else {
+                    "access_flags": 0,
+                    "super_class": "java.lang.Object",
+                    "interfaces": [],
+                }
+            ),
+        )
+
+        self.assertEqual(
+            [class_name],
+            [
+                entry["class"]
+                for entry in audit["candidates"]["block_entity_classes"]
+            ],
+        )
+        self.assertNotIn(
+            class_name,
+            [entry["class"] for entry in audit["candidates"]["resource_apis"]],
+        )
 
     def test_scan_resolves_real_transitive_recipe_hierarchy_without_name_guessing(self):
         structural_jar = self.root / "samplemod-real-structural.jar"
@@ -1875,10 +1926,7 @@ class CompatKitAuditTests(unittest.TestCase):
         stale = (
             cache
             / artifact_sha
-            / (
-                f"v{self.compat_kit.SCAN_CACHE_VERSION}-classifier-"
-                f"{self.compat_kit.CANDIDATE_CLASSIFIER_VERSION - 1}"
-            )
+            / f"v{self.compat_kit.SCAN_CACHE_VERSION}-classifier-3"
             / "audit.json"
         )
         stale.parent.mkdir(parents=True)
