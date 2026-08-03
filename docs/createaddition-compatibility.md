@@ -64,6 +64,9 @@ Logical station:
 - FE cost equals `recipe.energy`;
 - station work equals
   `ceil(energy / min(CommonConfig.TESLA_COIL_RECIPE_CHARGE_RATE, recipe.maxChargeRate))`.
+  Eligibility already requires a positive evaluated charge rate; if a live config
+  reload makes the rate non-positive, cost evaluation fail-closes with
+  `IllegalArgumentException` instead of dividing by zero or inventing a rate.
 
 Transaction:
 

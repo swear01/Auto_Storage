@@ -194,6 +194,10 @@ public final class CreateadditionCompat {
 
     private static long chargingWork(ChargingRecipe recipe) {
         long rate = chargeRate(recipe);
+        if (rate <= 0L) {
+            throw new IllegalArgumentException(
+                    "Create Crafts & Additions charge rate must be positive");
+        }
         long energy = recipe.getEnergy();
         return Math.addExact(energy, rate - 1L) / rate;
     }
@@ -225,7 +229,6 @@ public final class CreateadditionCompat {
     ) {
         return representatives.stream()
                 .map(stack -> StorageResourceKey.item(stack, registries))
-                .distinct()
                 .toList();
     }
 

@@ -2197,6 +2197,51 @@ class StaticRegressionTests(unittest.TestCase):
             'id.getNamespace().equals("productivemetalworks")',
             coexistence,
         )
+    def test_createaddition_item_keys_preserve_representative_indexes(self):
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        match = re.search(
+            r"private static List<StorageResourceKey> itemKeys\([^)]*\)\s*"
+            r"\{(?P<body>.*?)\n    \}",
+            compat,
+            re.S,
+        )
+        self.assertIsNotNone(match, "missing CreateadditionCompat.itemKeys")
+        body = match.group("body")
+        self.assertIn("StorageResourceKey.item(stack, registries)", body)
+        self.assertNotIn(
+            ".distinct()",
+            body,
+            "itemKeys must not re-deduplicate keys; "
+            "consumedWithRemainder indexes alternatives by representative",
+        )
+
+    def test_createaddition_charging_work_rejects_non_positive_rate(self):
+        compat = self.read_required(
+            "src/compat/createaddition/java/com/swear/autostorage/compat/"
+            "createaddition/CreateadditionCompat.java"
+        )
+        match = re.search(
+            r"private static long chargingWork\(ChargingRecipe recipe\)\s*"
+            r"\{(?P<body>.*?)\n    \}",
+            compat,
+            re.S,
+        )
+        self.assertIsNotNone(match, "missing CreateadditionCompat.chargingWork")
+        body = match.group("body")
+        self.assertRegex(
+            body,
+            r"long rate = chargeRate\(recipe\);",
+        )
+        self.assertRegex(
+            body,
+            r"if\s*\(\s*rate\s*<=\s*0L?\s*\)",
+        )
+        self.assertIn("Math.addExact(energy, rate - 1L) / rate", body)
+        self.assertNotIn("Math.max(1L, chargeRate", compat)
+        self.assertNotIn("Math.max(1L, rate", body)
 
 
     def test_immersiveengineering_compat_is_optional_fail_closed(self):
