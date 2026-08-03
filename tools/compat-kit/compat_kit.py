@@ -1852,7 +1852,22 @@ TAG_PATH = re.compile(
     r"^data/[a-z0-9_.-]+/tags/[a-z0-9_./-]+\.json$"
 )
 RESOURCE_LOCATION = re.compile(r"^[a-z0-9_.-]+:[a-z0-9_./-]+$")
+RESOURCE_PATH = re.compile(r"^[a-z0-9_./-]+$")
 GAME_TEST_NAMESPACE = re.compile(r"^[a-z0-9_.-]+$")
+
+
+def _minecraft_resource_location(value: str) -> str | None:
+    """Match Minecraft ResourceLocation.parse / bySeparator default-namespace rules."""
+    if RESOURCE_LOCATION.fullmatch(value):
+        return value
+    if value.startswith(":"):
+        path = value[1:]
+        if RESOURCE_PATH.fullmatch(path):
+            return f"minecraft:{path}"
+        return None
+    if RESOURCE_PATH.fullmatch(value):
+        return f"minecraft:{value}"
+    return None
 
 
 def _recipe_record(source_id: str, relative_path: str, payload: bytes) -> dict:
@@ -1870,9 +1885,10 @@ def _recipe_record(source_id: str, relative_path: str, payload: bytes) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"recipe JSON must be an object: {relative_path}")
     serializer_id = value.get("type")
-    if not isinstance(serializer_id, str) or not RESOURCE_LOCATION.fullmatch(
-        serializer_id
-    ):
+    if not isinstance(serializer_id, str):
+        raise ValueError(f"recipe JSON has invalid type: {relative_path}")
+    serializer_id = _minecraft_resource_location(serializer_id)
+    if serializer_id is None:
         raise ValueError(f"recipe JSON has invalid type: {relative_path}")
     recipe_id = f"{match.group('namespace')}:{match.group('path')}"
     conditions = value.get("neoforge:conditions", [])
@@ -1881,9 +1897,12 @@ def _recipe_record(source_id: str, relative_path: str, payload: bytes) -> dict:
     condition_types = []
     for index, condition in enumerate(conditions):
         condition_type = condition.get("type") if isinstance(condition, dict) else None
-        if not isinstance(condition_type, str) or not RESOURCE_LOCATION.fullmatch(
-            condition_type
-        ):
+        if not isinstance(condition_type, str):
+            raise ValueError(
+                f"recipe JSON condition {index} has invalid type: {relative_path}"
+            )
+        condition_type = _minecraft_resource_location(condition_type)
+        if condition_type is None:
             raise ValueError(
                 f"recipe JSON condition {index} has invalid type: {relative_path}"
             )

@@ -1,0 +1,14 @@
+{
+  "contract_sha256": "6f63e0dd69b97c24da598f128c8eb5eb38cc1c97809282a9390ad10adb245b0a",
+  "files": {
+    "src/compat/mysticalagriculture/compat-module.json": "c2464235207c36c9873deaf98591ece70acd875f529c83b37758a58e48d539ef",
+    "src/compat/mysticalagriculture/java/com/swear/autostorage/compat/mysticalagriculture/MysticalagricultureCompat.java": "c8923080597d8b52fd1a171f0a50e99f10816ac995fc97125ec26c3dabda0bb6",
+    "src/compat/mysticalagriculture/java/com/swear/autostorage/compat/mysticalagriculture/MysticalagricultureCompatModule.java": "68554bbf6903aca0eba5df6bcda5955c5e84f1d44c8ad91db7a0bf286055fba2",
+    "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureFixtureMod.java": "ee96055ef14ee283dd86ee5e5df2fd8dea147a0700bb58130390321d55afbc1b",
+    "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/mysticalagriculture/MysticalagricultureIntegrationGameTests.java": "62e1b16bde899ede163a015a1edd514c3b1897d09fcf86ae29e5534df7ec71ba",
+    "src/mysticalagricultureFixture/resources/META-INF/neoforge.mods.toml": "bfe60902c6418fc5f23b661647e456d269938470c09e359caa1771436ca0b2b3",
+    "src/mysticalagricultureFixture/resources/data/auto_storage_mysticalagriculture_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "0.3.0"
+}

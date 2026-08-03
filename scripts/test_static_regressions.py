@@ -1867,6 +1867,115 @@ class StaticRegressionTests(unittest.TestCase):
             contract["verification"]["evidence"]["catalyst_tool_remainder_exact"][0]["marker"],
         )
 
+    def test_mysticalagriculture_compat_is_optional_and_isolated(self):
+        build = self.read_required("build.gradle")
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("mysticalagriculture")
+        module = self.read_required(
+            "src/compat/mysticalagriculture/java/com/swear/autostorage/compat/"
+            "mysticalagriculture/MysticalagricultureCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/mysticalagriculture/java/com/swear/autostorage/compat/"
+            "mysticalagriculture/MysticalagricultureCompat.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/mysticalagricultureFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        fixture_tests = self.read_required(
+            "src/mysticalagricultureFixture/java/com/swear/autostorage/fixture/"
+            "mysticalagriculture/MysticalagricultureIntegrationGameTests.java"
+        )
+        compatibility_doc = self.read_required(
+            "docs/mysticalagriculture-compatibility.md"
+        )
+        contract = self.read_required("compat/contracts/mysticalagriculture.json")
+        lang_en = self.read_required(
+            "src/main/resources/assets/auto_storage/lang/en_us.json"
+        )
+        lang_zh = self.read_required(
+            "src/main/resources/assets/auto_storage/lang/zh_tw.json"
+        )
+
+        self.assertIn(
+            '"maven.modrinth:mystical-agriculture:izIaJr8V"',
+            module_index,
+        )
+        self.assertIn(
+            "d67bb701fbe4ade2efeb0aafd477f569b5e6a5a7c8ac696a8a1f658f8477eb99",
+            module_index,
+        )
+        self.assert_descriptor_driven_fixture(
+            build, "mysticalagriculture", "mysticalagricultureFixture", 8
+        )
+        self.assertNotIn('modId="mysticalagriculture"', metadata)
+        self.assertEqual(["mysticalagriculture"], json.loads(module_index)["requires"])
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("MysticalagricultureCompat.register(MACHINES, RECIPES)", module)
+        self.assertNotIn("import com.blakebr0.mysticalagriculture.", module)
+        self.assertIn("ReprocessorRecipe.class", compat)
+        self.assertIn("ModRecipeTypes.REPROCESSOR", compat)
+        self.assertNotIn("InfusionRecipe.class", compat)
+        self.assertNotIn("AwakeningRecipe.class", compat)
+        self.assertNotIn("EnchanterRecipe.class", compat)
+        self.assertNotIn("SoulExtractionRecipe.class", compat)
+        self.assertNotIn("SouliumSpawnerRecipe.class", compat)
+        self.assertIn('modId="mysticalagriculture"', fixture_metadata)
+        self.assertIn('versionRange="[8.0,)"', fixture_metadata)
+        self.assertNotIn("8.0.27", fixture_metadata)
+        self.assertIn("IsolatedRecipeInventoryEvidence", fixture_tests)
+        self.assertIn(
+            "IsolatedRecipeInventoryEvidence.assertMatchesDescriptor",
+            fixture_tests,
+        )
+        self.assertIn("COMPAT_KIT_PRESENT_TARGET_LOAD_ONCE", fixture_tests)
+        self.assertIn("COMPAT_KIT_INGREDIENT_SHORTAGE_ATOMIC", fixture_tests)
+        self.assertIn("COMPAT_KIT_DESTINATION_CAPACITY_ATOMIC", fixture_tests)
+        self.assertIn("COMPAT_KIT_REJECTED_FAMILY_FAIL_CLOSED", fixture_tests)
+        self.assertIn("COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT", fixture_tests)
+        self.assertIn("seed/reprocessor/inferium", fixture_tests)
+        self.assertRegex(
+            fixture_tests,
+            r"reprocessor_consumes_seed_fe_and_work[\s\S]*?"
+            r"MachineEnergyTable\.isInstalled[\s\S]*?"
+            r"COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT",
+        )
+        self.assertNotRegex(
+            fixture_tests,
+            r"rejected_machine_families_fail_closed[\s\S]*?"
+            r"COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT",
+        )
+        contract_json = json.loads(contract)
+        self.assertEqual(
+            "COMPAT_KIT_CATALYST_TOOL_REMAINDER_EXACT",
+            contract_json["verification"]["evidence"][
+                "catalyst_tool_remainder_exact"
+            ][0]["marker"],
+        )
+        self.assertIn("reprocessor_consumes_seed_fe_and_work", fixture_tests)
+        self.assertIn('"status": "accepted"', contract)
+        self.assertIn("ReprocessorRecipe", contract)
+        self.assertIn(
+            '"gui.auto_storage.station.mysticalagriculture_reprocessor": '
+            '"Seed Reprocessing"',
+            lang_en,
+        )
+        self.assertIn(
+            '"gui.auto_storage.station.mysticalagriculture_reprocessor": '
+            '"種子再處理"',
+            lang_zh,
+        )
+        self.assertIn("representative CI/audit evidence", compatibility_doc)
+        self.assertIn("does not impose", compatibility_doc)
+        self.assertIn(
+            "d67bb701fbe4ade2efeb0aafd477f569b5e6a5a7c8ac696a8a1f658f8477eb99",
+            compatibility_doc,
+        )
+        self.assertIn("outcome **B**", compatibility_doc)
+        self.assertIn("isolated recipe-inventory digest", compatibility_doc)
+        self.assertNotIn("peer digest sync", compatibility_doc)
+
+
     def test_theurgy_compat_is_optional_and_isolated(self):
         metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
         module_index = self.read_compat_module("theurgy")

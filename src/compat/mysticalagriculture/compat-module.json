@@ -1,0 +1,53 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:mystical-agriculture:izIaJr8V",
+    "sha256": "d67bb701fbe4ade2efeb0aafd477f569b5e6a5a7c8ac696a8a1f658f8477eb99"
+  },
+  "dependencies": [
+    "maven.modrinth:mystical-agriculture:izIaJr8V",
+    "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.16",
+    "com.blamejared.crafttweaker:CraftTweaker-neoforge-1.21:20.0.21",
+    "curse.maven:jade-324717:5591256",
+    "mezz.jei:jei-1.21.1-common-api:19.16.1.156"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.mysticalagriculture.MysticalagricultureCompatModule",
+  "expectedTests": 8,
+  "fixture": "mysticalagricultureFixture",
+  "id": "auto_storage:mysticalagriculture",
+  "matrix": {
+    "acceptedRecipes": [
+      "mysticalagriculture:seed/reprocessor/inferium"
+    ],
+    "descriptors": [
+      "auto_storage:mysticalagriculture_reprocessor"
+    ],
+    "mods": [
+      "mysticalagriculture"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "mysticalagriculture"
+      ],
+      "sha256": "c1879fd12cbfbc2fc9849ec9628be26b7c1c6f0f0d35c53dead1d09aa0601b8c"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven",
+    "https://maven.blakesmods.com",
+    "https://maven.blamejared.com",
+    "https://www.cursemaven.com"
+  ],
+  "requires": [
+    "mysticalagriculture"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:mystical-agriculture:izIaJr8V",
+    "maven.modrinth:cucumber:8421rqFF"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatMysticalagriculture"
+}
