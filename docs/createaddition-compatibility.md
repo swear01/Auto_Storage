@@ -151,9 +151,9 @@ evidence because accepted Rolling/Charging families are single-output only.
 Processing labels use the JEI family names Rolling / Charging.
 Both overflow cases assert the input stack, full output destination, and
 accumulated station work remain unchanged.
-Latest local matrix evidence after rebase onto main `a1582ad` (CEI #72 plus
-fixture runtime transforms #87): **18,765** recipes, Craftable prepare
-**17.321 ms**, first/shared p95/warm switch **0.884 / 0.430 / 0.344 ms**,
-storage interaction p95 **11.948 ms**, shared index **3,716,144** bytes
-(≈ 3.544 MiB), per-menu **117,223** bytes, and report
+Latest local matrix evidence after the eligibility／overflow review fix on
+`b4bef5e`: **19,772** recipes, Craftable prepare **22.819 ms**, first/shared
+p95/warm switch **1.092 / 3.816 / 0.435 ms**, storage interaction p95
+**28.735 ms**, shared index retained **0** bytes under the #79 steady-state
+contract, per-menu **116,626** bytes, and report
 `build/reports/terminal-scale-10000.json`.
