@@ -51,7 +51,7 @@ recipe target and is not loaded as a companion.
 |---|---|---|
 | `RecipeDryingBasin` | Drying Basin | optional exact item and/or sized fluid input/output; item is primary when present, otherwise fluid is primary; recipe duration as station work |
 | `RecipeMechanicalDryingBasin` | Mechanical Drying Basin | same conditional item/fluid output roles; duration work plus `consumptionRate × duration` FE from loaded config |
-| `RecipeMechanicalSqueezer` | Mechanical Squeezer | exact item input; only `chance == 1.0F` item outputs; fluid is primary only when no item output exists, otherwise remainder; duration work plus `consumptionRate × duration` FE |
+| `RecipeMechanicalSqueezer` | Mechanical Squeezer | exact item input; only `chance == 1.0F` item outputs; fluid is primary only when no item output exists, otherwise remainder; duration work plus `consumptionRate × duration` FE only when that product is positive |
 
 Each descriptor uses its localized logical recipe-family name in the Stations
 page and Processing resource tooltip. The label does not come from a particular
@@ -59,10 +59,14 @@ installed item stack, so representative items or future variants cannot rename
 the family.
 
 Tag-derived `ItemStackFromIngredient` outputs, non-simple ingredients, empty
-plans, non-positive duration, and non-positive FE totals fail closed. Chance
-item outputs below `1.0F` fail closed. A declared `ItemStackFromIngredient`
-output never becomes "absent" merely because an exact fluid output is also
-present; both Drying Basin families reject that whole recipe.
+plans, non-positive duration, and negative FE totals fail closed. A zero loaded
+consumption rate yields zero FE and omits the energy input rather than building
+an invalid non-positive consume amount. Chance item outputs below `1.0F` fail
+closed. A present drying item or fluid input that is not exact rejects the whole
+recipe, including mixed exact-fluid plus non-exact-item cases. A declared
+`ItemStackFromIngredient` output never becomes "absent" merely because an exact
+fluid output is also present; both Drying Basin families reject that whole
+recipe.
 
 ## Explicit exclusions
 

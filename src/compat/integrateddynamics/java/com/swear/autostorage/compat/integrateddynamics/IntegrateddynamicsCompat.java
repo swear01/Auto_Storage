@@ -196,9 +196,9 @@ public final class IntegrateddynamicsCompat {
     ) {
         long energy = energyCost(energyPerTick, recipe.getDuration()).orElseThrow();
         TypedRecipePlan.Builder builder = TypedRecipePlan.builder();
-        recipe.getInputIngredient().ifPresent(ingredient ->
+        recipe.getInputIngredient().filter(IntegrateddynamicsCompat::exact).ifPresent(ingredient ->
                 builder.input(consumed(ingredient, registries)));
-        recipe.getInputFluid().ifPresent(fluid ->
+        recipe.getInputFluid().filter(IntegrateddynamicsCompat::exact).ifPresent(fluid ->
                 builder.input(TypedRecipeInput.consume(
                         StorageResourceKey.fluid(fluid.copyWithAmount(1), registries),
                         fluid.getAmount())));
@@ -238,8 +238,10 @@ public final class IntegrateddynamicsCompat {
                 BlockMechanicalSqueezerConfig.consumptionRate,
                 recipe.getDuration()).orElseThrow();
         TypedRecipePlan.Builder builder = TypedRecipePlan.builder()
-                .input(consumed(recipe.getInputIngredient(), registries))
-                .input(TypedRecipeInput.consume(StorageResourceKey.neoforgeEnergy(), energy));
+                .input(consumed(recipe.getInputIngredient(), registries));
+        if (energy > 0) {
+            builder.input(TypedRecipeInput.consume(StorageResourceKey.neoforgeEnergy(), energy));
+        }
         List<ItemStack> itemOutputs = guaranteedSqueezerItems(recipe);
         Optional<FluidStack> fluidOutput = recipe.getOutputFluid().filter(IntegrateddynamicsCompat::exact);
         ItemStack presentation = ItemStack.EMPTY;
@@ -276,14 +278,14 @@ public final class IntegrateddynamicsCompat {
         }
         return builder
                 .presentationOutput(presentation)
-                .layout(2, 1, true)
+                .layout(energy > 0 ? 2 : 1, 1, true)
                 .build();
     }
 
     private static int builderInputCount(RecipeDryingBasin recipe, long energy) {
         int count = 0;
-        if (recipe.getInputIngredient().isPresent()) count++;
-        if (recipe.getInputFluid().isPresent()) count++;
+        if (recipe.getInputIngredient().filter(IntegrateddynamicsCompat::exact).isPresent()) count++;
+        if (recipe.getInputFluid().filter(IntegrateddynamicsCompat::exact).isPresent()) count++;
         if (energy > 0) count++;
         return count;
     }
@@ -291,9 +293,13 @@ public final class IntegrateddynamicsCompat {
     private static boolean hasDryingInputs(RecipeDryingBasin recipe) {
         Optional<Ingredient> item = recipe.getInputIngredient();
         Optional<FluidStack> fluid = recipe.getInputFluid();
-        boolean hasItem = item.isPresent() && exact(item.get());
-        boolean hasFluid = fluid.isPresent() && exact(fluid.get());
-        return hasItem || hasFluid;
+        if (item.isPresent() && !exact(item.get())) {
+            return false;
+        }
+        if (fluid.isPresent() && !exact(fluid.get())) {
+            return false;
+        }
+        return item.isPresent() || fluid.isPresent();
     }
 
     private static boolean exactDryingOutput(RecipeDryingBasin recipe) {

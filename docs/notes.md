@@ -82,6 +82,8 @@
 
 2026-08-02 Oritech matrix GeckoLib coexistence：Advanced AE 1.6.11 requires GeckoLib ≥4.8.2。Oritech isolated/runtime closure原先釘`qj2pTqCr`（4.6.6），descriptor-owned matrix會把兩份GeckoLib一起放上classpath並讓4.6.6勝出，導致`advanced_ae requires geckolib 4.8.2 or above`在pre-loading失敗。Oritech contract/module runtime dependency改為與shared matrix相同的`RVIo5f6E`（4.8.2）；Oritech本身未限制GeckoLib上限。Audit ancestry classpath仍可保留掃描時的4.6.6 jar bytes。
 
+2026-08-03 Integrated Dynamics Bugbot eligibility/plan edges：Drying Basin eligibility must reject a present non-exact item or fluid input even when the other input is exact;Mechanical Squeezer plans omit NeoForge Energy when `consumptionRate × duration` is zero instead of building a non-positive consume amount.Fixture GameTest extends the derived-output fail-closed case with a non-simple item plus exact fluid probe.
+
 2026-08-02 Oritech post-evidence-isolation rebase：#77要求descriptor只鎖own isolated fixture。Oritech isolated run的`oritech` namespace為613 recipes（`abc0f6ad…1f8`）；combined matrix仍實際載入15,822 recipes，其coexistence SHA、unclaimed SHA與跨模組條件效果只寫入`build/reports/terminal-scale-*.json`。不可把combined的Oritech 802或Productive Bees 647 digest回寫owning／peer descriptor、contract或manifest。
 
 2026-08-02 Oritech matrix retained-memory correction：15,822-recipe current composition在真值更新後先以9,532,520 bytes確實撞上既有9 MiB gate；只移除`CraftableRecipeCatalog.CatalogEntry`重複保存的holder ID與跨rebuild retained fixed-variant lists，不調高gate。Server-owned shared result cache仍阻止普通頁面切換重建；latest post-review GREEN matrix為3/3、shared index 9,250,944 bytes、first switch 0.918 ms、prefetched switch p95 0.458 ms、per-menu 114,859 bytes。

@@ -14,6 +14,7 @@ import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineWorkRate;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
@@ -269,10 +270,25 @@ public final class IntegrateddynamicsIntegrationGameTests {
                         Optional.of(Either.right(derived)),
                         Optional.of(fluid),
                         15));
+        Ingredient nonSimpleItem = DataComponentIngredient.of(
+                true, new ItemStack(Items.STONE));
+        if (nonSimpleItem.isSimple()) {
+            helper.fail("Integrated Dynamics non-simple drying input fixture became simple");
+            return;
+        }
+        RecipeHolder<RecipeDryingBasin> mixedInputs = new RecipeHolder<>(
+                idRecipe("fixture/non_exact_item_with_exact_fluid"),
+                new RecipeDryingBasin(
+                        Optional.of(nonSimpleItem),
+                        Optional.of(fluid),
+                        Optional.of(Either.left(new ItemStack(Items.STONE))),
+                        Optional.empty(),
+                        15));
         if (CraftingTerminalMenu.supportsRecipeHolder(manual)
-                || CraftingTerminalMenu.supportsRecipeHolder(mechanical)) {
+                || CraftingTerminalMenu.supportsRecipeHolder(mechanical)
+                || CraftingTerminalMenu.supportsRecipeHolder(mixedInputs)) {
             helper.fail(
-                    "Integrated Dynamics derived item outputs with fluid must remain fail closed");
+                    "Integrated Dynamics drying recipes with non-exact or derived item outputs must remain fail closed");
             return;
         }
         helper.succeed();
