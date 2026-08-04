@@ -66,9 +66,10 @@ recipes, overflow, or missing representatives are rejected before mutation.
 
 ```bash
 export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
-python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
 ./gradlew runModernIndustrializationGameTestServer --console=plain --no-daemon
 ```
+
+The Gradle task performs root-bounded fresh-world cleanup before Minecraft starts.
 
 The isolated run requires the current SelfTest summary and
 `All 7 required tests passed`. It covers all 14 registrations and tier rates,

@@ -78,31 +78,26 @@ jobs:
       - name: Run GameTest server
         run: |
           set -o pipefail
-          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/gametest.log
 
       - name: Run recipe addon GameTest server
         run: |
           set -o pipefail
-          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runRecipeAddonGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/recipe-addon-gametest.log
 
       - name: Run compatibility fixture GameTest servers
         run: |
           set -o pipefail
-          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runCompatFixtureGameTestServers --console=plain --no-daemon 2>&1 | tee build/ci-logs/compat-fixture-gametest.log
 
       - name: Run PneumaticCraft GameTest server
         run: |
           set -o pipefail
-          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runPneumaticCraftGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/pneumaticcraft-gametest.log
 
       - name: Run optional compatibility matrix GameTest server
         run: |
           set -o pipefail
-          python3 -c 'import shutil; shutil.rmtree("run/world", ignore_errors=True)'
           ./gradlew runCompatibilityMatrixGameTestServer --console=plain --no-daemon 2>&1 | tee build/ci-logs/compatibility-matrix-gametest.log
 
       - name: Run script tests
