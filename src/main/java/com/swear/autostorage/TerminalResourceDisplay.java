@@ -19,7 +19,16 @@ public final class TerminalResourceDisplay {
     }
 
     static ItemStack create(ItemStack representative, StorageResourceKey key, long amount) {
-        ItemStack display = TerminalDisplayStack.create(representative, amount);
+        return create(representative, key, amount, ExactRational.ZERO);
+    }
+
+    static ItemStack create(
+            ItemStack representative,
+            StorageResourceKey key,
+            long amount,
+            ExactRational pending
+    ) {
+        ItemStack display = TerminalDisplayStack.create(representative, amount, pending);
         CustomData.update(DataComponents.CUSTOM_DATA, display, root -> {
             CompoundTag resource = new CompoundTag();
             resource.putString(KIND_KEY, key.kindId().toString());

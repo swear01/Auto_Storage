@@ -45,6 +45,10 @@ public record TypedRecipeInput(
                 throw new IllegalArgumentException(
                         "Typed recipe input alternatives require remainder outputs");
             }
+            if (!remainder.expected().isWhole()) {
+                throw new IllegalArgumentException(
+                        "Typed recipe input remainders require whole expected amounts");
+            }
         }
     }
 

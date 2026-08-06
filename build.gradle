@@ -649,6 +649,7 @@ def apiClassNames = [
         'BusFilterRule',
         'EnergyCost',
         'EnergyType',
+        'ExactRational',
         'ItemKey',
         'MachineCategory',
         'MachineDescriptor',
@@ -1863,7 +1864,7 @@ tasks.named('check').configure {
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-def expectedSelfTestSummary = 'SelfTest: 204927 passed, 0 failed, 204927 total'
+def expectedSelfTestSummary = 'SelfTest: 204935 passed, 0 failed, 204935 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {

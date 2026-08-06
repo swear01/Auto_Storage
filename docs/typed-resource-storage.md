@@ -19,7 +19,10 @@ Every stored entry has:
 - a stable resource-kind ID;
 - a stable resource ID inside that kind;
 - exact amount-independent variant data;
-- a non-negative `long` amount.
+- a non-negative `long` whole amount used by extract, Bus transfer, craft inputs, and grid counts;
+- an optional exact rational `pending` carry in `[0, 1)` for chance expected-value credits (GitHub [#89](https://github.com/swear01/Auto_Storage/issues/89)).
+
+`pending > 0` still occupies type capacity even when `whole == 0`. Terminal cells show `whole`; hover may show the pending fraction. Persistence schema 2 stores pending numerator/denominator; schema 1 loads as `pending = 0`.
 
 The initial internal key is deliberately independent from optional-mod Java classes. Persistence and atomic planning can therefore retain an unavailable kind as raw keyed data when its provider mod is missing. A kind-specific bridge converts between this universal identity and an `ItemStack`, `FluidStack`, energy value, `ChemicalStack`, or future addon value.
 

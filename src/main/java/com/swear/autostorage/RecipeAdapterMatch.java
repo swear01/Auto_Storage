@@ -408,10 +408,20 @@ record RecipeAdapterMatch(
             Map<ItemKey, Long> primaryOutputs,
             Map<ItemKey, Long> remainders,
             Map<StorageResourceKey, Long> resourcePrimaryOutputs,
-            Map<StorageResourceKey, Long> resourceRemainders
+            Map<StorageResourceKey, Long> resourceRemainders,
+            Map<StorageResourceKey, ExactRational> expectedCredits
     ) {
         CheckedOutput(Map<ItemKey, Long> primaryOutputs, Map<ItemKey, Long> remainders) {
-            this(primaryOutputs, remainders, Map.of(), Map.of());
+            this(primaryOutputs, remainders, Map.of(), Map.of(), Map.of());
+        }
+
+        CheckedOutput(
+                Map<ItemKey, Long> primaryOutputs,
+                Map<ItemKey, Long> remainders,
+                Map<StorageResourceKey, Long> resourcePrimaryOutputs,
+                Map<StorageResourceKey, Long> resourceRemainders
+        ) {
+            this(primaryOutputs, remainders, resourcePrimaryOutputs, resourceRemainders, Map.of());
         }
 
         CheckedOutput {
@@ -421,9 +431,16 @@ record RecipeAdapterMatch(
                     resourcePrimaryOutputs, "resourcePrimaryOutputs");
             resourceRemainders = checkedResourceAmounts(
                     resourceRemainders, "resourceRemainders");
-            if (primaryOutputs.isEmpty() && resourcePrimaryOutputs.isEmpty()) {
+            expectedCredits = checkedExpectedCredits(expectedCredits, "expectedCredits");
+            if (primaryOutputs.isEmpty()
+                    && resourcePrimaryOutputs.isEmpty()
+                    && !hasPrimaryCredit(expectedCredits)) {
                 throw new IllegalArgumentException("Checked output requires a primary output");
             }
+        }
+
+        private static boolean hasPrimaryCredit(Map<StorageResourceKey, ExactRational> credits) {
+            return !credits.isEmpty();
         }
 
         private static Map<ItemKey, Long> checkedAmounts(Map<ItemKey, Long> amounts, String name) {
@@ -449,6 +466,21 @@ record RecipeAdapterMatch(
                 }
             }
             return Map.copyOf(amounts);
+        }
+
+        private static Map<StorageResourceKey, ExactRational> checkedExpectedCredits(
+                Map<StorageResourceKey, ExactRational> credits,
+                String name
+        ) {
+            Objects.requireNonNull(credits, name);
+            for (Map.Entry<StorageResourceKey, ExactRational> entry : credits.entrySet()) {
+                Objects.requireNonNull(entry.getKey(), name + ".key");
+                ExactRational credit = Objects.requireNonNull(entry.getValue(), name + ".credit");
+                if (credit.isZero()) {
+                    throw new IllegalArgumentException(name + " credits must be positive");
+                }
+            }
+            return Map.copyOf(credits);
         }
     }
 
