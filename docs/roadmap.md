@@ -1,3 +1,4 @@
+- 2026-08-06 GitHub #89：chance recipe EV → exact rational Core pending；Create milling/crushing/cutting dogfood；grid shows whole, tooltip may show pending.
 - 2026-08-03 GitHub #67／PR #72 Create Enchantment Industry：Compat Kit Outcome C fail-closed（零 custom family）；present-mod module registers no stations/families；5 isolated GameTests plus descriptor-owned matrix coexistence. See [`create-enchantment-industry-compatibility.md`](create-enchantment-industry-compatibility.md)。
 - **GitHub #64／PR #71 Mystical Agriculture**：Outcome B Seed Reprocessor only；scanner format 17 audit/contract、descriptor isolation、isolated digest `c1879fd1…1b8c`；rebased onto `a1582ad`（#87） with unchanged 9 MiB shared-index gate.
 - 2026-08-02 GitHub #54／PR #60 rebased onto `4464493`（#78）：module-owned isolated digest + fixture evidence；no peer Theurgy/global digest edits；Gemini `exact()`/`keysWithoutRegistries` findings addressed.

@@ -153,6 +153,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             List<ItemStack> playerInventory,
             ItemStack carried,
             Map<StorageResourceKey, Long> coreDeltas,
+            Map<StorageResourceKey, ExactRational> expectedCredits,
             ToolUsePlan toolUse
     ) {}
     private record TypedConsumption(
@@ -2071,7 +2072,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 && !selectionKey.kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
             TypedRecipePlan plan = match.typedRecipePlan().orElseThrow();
             output = TerminalResourceDisplay.create(
-                    output, selectionKey, plan.selectionOutput().amount());
+                    output, selectionKey, plan.selectionOutput().displayAmount());
         }
 
         selectionContainer.clearContent();
@@ -2406,6 +2407,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 return null;
             }
         } else if (destination == DeliveryTarget.PLAYER) {
+            if (primaryOutputs.isEmpty() && resourcePrimaryOutputs.isEmpty()) return null;
             for (Map.Entry<ItemKey, Long> output : primaryOutputs.entrySet()) {
                 if (!addOutputToInventoryThenCore(
                         inventory, output.getKey().toStack(1), output.getValue(), coreOutputs)) {
@@ -2437,17 +2439,26 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         } catch (ArithmeticException exception) {
             return null;
         }
+        Map<StorageResourceKey, ExactRational> expectedCredits = Map.copyOf(
+                checkedOutput.expectedCredits());
         Map<StorageResourceKey, Long> coreDeltas = coreDeltas(
                 core,
                 ingredientPlan,
                 coreOutputs,
                 resourceOutputs,
                 typedConsumption.coreConsumed());
-        if (coreDeltas == null || !coreDeltas.isEmpty()
-                && !applyCoreResourceDeltas(
-                core, coreDeltas, Action.SIMULATE)) return null;
+        if (coreDeltas == null) return null;
+        if ((!coreDeltas.isEmpty() || !expectedCredits.isEmpty())
+                && !applyCoreResourceMutation(
+                core, coreDeltas, expectedCredits, Action.SIMULATE)) {
+            return null;
+        }
         return new DeliveryPlan(
-                List.copyOf(inventory), carried, Map.copyOf(coreDeltas), toolUse);
+                List.copyOf(inventory),
+                carried,
+                Map.copyOf(coreDeltas),
+                expectedCredits,
+                toolUse);
     }
 
     private static Map<StorageResourceKey, Long> coreDeltas(
@@ -2619,11 +2630,24 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             Map<StorageResourceKey, Long> deltas,
             Action action
     ) {
-        if (deltas.isEmpty()) return true;
-        StorageResourceTransaction.Builder transaction = StorageResourceTransaction.builder();
-        deltas.forEach(transaction::add);
+        return applyCoreResourceMutation(core, deltas, Map.of(), action);
+    }
+
+    private static boolean applyCoreResourceMutation(
+            StorageCoreBlockEntity core,
+            Map<StorageResourceKey, Long> deltas,
+            Map<StorageResourceKey, ExactRational> expectedCredits,
+            Action action
+    ) {
+        if (deltas.isEmpty() && expectedCredits.isEmpty()) return true;
+        if (expectedCredits.isEmpty()) {
+            StorageResourceTransaction.Builder transaction = StorageResourceTransaction.builder();
+            deltas.forEach(transaction::add);
+            return core.applyResourceTransaction(
+                    transaction.build(), action, Actor.crafting());
+        }
         return core.applyResourceTransaction(
-                transaction.build(), action, Actor.crafting());
+                deltas, expectedCredits, action, Actor.crafting());
     }
 
     private static ToolUsePlan planToolUse(
@@ -2722,13 +2746,20 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     return false;
                 }
             }
-            if (!delivery.coreDeltas().isEmpty()
-                    && (!applyCoreResourceDeltas(
-                    core, delivery.coreDeltas(), Action.SIMULATE)
-                    || !applyCoreResourceDeltas(
-                    core, delivery.coreDeltas(), Action.EXECUTE))) return false;
+            if ((!delivery.coreDeltas().isEmpty() || !delivery.expectedCredits().isEmpty())
+                    && (!applyCoreResourceMutation(
+                    core,
+                    delivery.coreDeltas(),
+                    delivery.expectedCredits(),
+                    Action.SIMULATE)
+                    || !applyCoreResourceMutation(
+                    core,
+                    delivery.coreDeltas(),
+                    delivery.expectedCredits(),
+                    Action.EXECUTE))) return false;
             if (!core.consumeCraftCosts(currentMatch.cost(), crafts)) {
-                rollbackResourceTransaction(core, delivery.coreDeltas());
+                rollbackResourceTransaction(
+                        core, delivery.coreDeltas(), delivery.expectedCredits());
                 return false;
             }
             for (int slot = 0; slot < delivery.playerInventory().size(); slot++) {
@@ -2744,20 +2775,33 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
 
     private static void rollbackResourceTransaction(
             StorageCoreBlockEntity core,
+            Map<StorageResourceKey, Long> committed,
+            Map<StorageResourceKey, ExactRational> expectedCredits
+    ) {
+        if (!committed.isEmpty()) {
+            Map<StorageResourceKey, Long> inverse = new LinkedHashMap<>();
+            try {
+                for (Map.Entry<StorageResourceKey, Long> entry : committed.entrySet()) {
+                    inverse.put(entry.getKey(), Math.negateExact(entry.getValue()));
+                }
+            } catch (ArithmeticException exception) {
+                throw new IllegalStateException("Crafting transaction cannot be inverted", exception);
+            }
+            if (!applyCoreResourceDeltas(core, inverse, Action.EXECUTE)) {
+                throw new IllegalStateException("Failed to roll back crafting resource transaction");
+            }
+        }
+        if (!expectedCredits.isEmpty()
+                && !core.applyExpectedDebits(expectedCredits, Action.EXECUTE, Actor.crafting())) {
+            throw new IllegalStateException("Failed to roll back crafting expected-value credits");
+        }
+    }
+
+    private static void rollbackResourceTransaction(
+            StorageCoreBlockEntity core,
             Map<StorageResourceKey, Long> committed
     ) {
-        if (committed.isEmpty()) return;
-        Map<StorageResourceKey, Long> inverse = new LinkedHashMap<>();
-        try {
-            for (Map.Entry<StorageResourceKey, Long> entry : committed.entrySet()) {
-                inverse.put(entry.getKey(), Math.negateExact(entry.getValue()));
-            }
-        } catch (ArithmeticException exception) {
-            throw new IllegalStateException("Crafting transaction cannot be inverted", exception);
-        }
-        if (!applyCoreResourceDeltas(core, inverse, Action.EXECUTE)) {
-            throw new IllegalStateException("Failed to roll back crafting resource transaction");
-        }
+        rollbackResourceTransaction(core, committed, Map.of());
     }
 
     private static void addFlowEdge(List<List<FlowEdge>> graph, int from, int to, long capacity) {

@@ -456,29 +456,46 @@ public final class RecipeFamily {
             Map<ItemKey, Long> remainders = new java.util.LinkedHashMap<>();
             Map<StorageResourceKey, Long> resourcePrimary = new java.util.LinkedHashMap<>();
             Map<StorageResourceKey, Long> resourceRemainders = new java.util.LinkedHashMap<>();
+            Map<StorageResourceKey, ExactRational> expectedCredits = new java.util.LinkedHashMap<>();
+            boolean primaryCredited = false;
             try {
                 for (TypedRecipeOutput output : plan.outputs()) {
-                    long amount = Math.multiplyExact(output.amount(), crafts);
-                    if (output.key().kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
-                        ItemKey key = StorageResourceBridge.itemKey(
-                                output.key(), level.registryAccess()).orElse(null);
-                        if (key == null) return Optional.empty();
-                        Map<ItemKey, Long> target = output.role() == TypedRecipeOutput.Role.PRIMARY
-                                ? primary : remainders;
-                        target.merge(key, amount, Math::addExact);
-                    } else {
-                        Map<StorageResourceKey, Long> target =
-                                output.role() == TypedRecipeOutput.Role.PRIMARY
-                                        ? resourcePrimary : resourceRemainders;
-                        target.merge(output.key(), amount, Math::addExact);
+                    ExactRational total = output.expected().multiply(crafts);
+                    long whole = total.floor();
+                    ExactRational fraction = total.fractionalPart();
+                    if (output.role() == TypedRecipeOutput.Role.PRIMARY
+                            && (whole > 0 || !fraction.isZero())) {
+                        primaryCredited = true;
+                    }
+                    if (whole > 0) {
+                        if (output.key().kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
+                            ItemKey key = StorageResourceBridge.itemKey(
+                                    output.key(), level.registryAccess()).orElse(null);
+                            if (key == null) return Optional.empty();
+                            Map<ItemKey, Long> target = output.role() == TypedRecipeOutput.Role.PRIMARY
+                                    ? primary : remainders;
+                            target.merge(key, whole, Math::addExact);
+                        } else {
+                            Map<StorageResourceKey, Long> target =
+                                    output.role() == TypedRecipeOutput.Role.PRIMARY
+                                            ? resourcePrimary : resourceRemainders;
+                            target.merge(output.key(), whole, Math::addExact);
+                        }
+                    }
+                    if (!fraction.isZero()) {
+                        expectedCredits.merge(output.key(), fraction, ExactRational::add);
                     }
                 }
             } catch (ArithmeticException exception) {
                 return Optional.empty();
             }
-            if (primary.isEmpty() && resourcePrimary.isEmpty()) return Optional.empty();
+            if (!primaryCredited) return Optional.empty();
             return Optional.of(new RecipeAdapterMatch.CheckedOutput(
-                    primary, remainders, resourcePrimary, resourceRemainders));
+                    primary,
+                    remainders,
+                    resourcePrimary,
+                    resourceRemainders,
+                    expectedCredits));
         }
 
         @Override

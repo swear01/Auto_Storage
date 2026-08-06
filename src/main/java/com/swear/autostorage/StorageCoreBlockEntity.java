@@ -682,10 +682,10 @@ public class StorageCoreBlockEntity extends BlockEntity {
                 : left.componentIdentity.compareTo(right.componentIdentity);
     }
 
-    private void updateItemIndex(ItemKey key, long newAmount) {
+    private void updateItemIndex(ItemKey key, long newAmount, boolean present) {
         if (cacheDirty) return;
         IndexedItem existing = itemIndex.get(key);
-        if (newAmount <= 0) {
+        if (!present || newAmount < 0) {
             if (existing != null) {
                 itemIndex.remove(key);
                 Item item = existing.identity.getItem();
@@ -861,7 +861,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
     long insertResource(StorageResourceKey key, long amount, Action action, Actor actor) {
         if (amount <= 0 || conflicted || !isStorageAvailable()) return 0;
         long existing = resourceLedger.amount(key);
-        if (existing == 0
+        if (!resourceLedger.occupies(key)
                 && !key.kindId().equals(StorageResourceBridge.WORK_KIND)
                 && !ledgerCapacity().canAcceptNewType(capacityTypeCount())) return 0;
         long inserted = Math.min(amount, Long.MAX_VALUE - existing);
@@ -923,7 +923,8 @@ public class StorageCoreBlockEntity extends BlockEntity {
             for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
                 updateItemIndex(
                         entry.getValue(),
-                        resourceLedger.amount(entry.getKey()));
+                        resourceLedger.amount(entry.getKey()),
+                        resourceLedger.occupies(entry.getKey()));
                 fireChanged(
                         entry.getValue(),
                         deltas.get(entry.getKey()),
@@ -947,6 +948,191 @@ public class StorageCoreBlockEntity extends BlockEntity {
             }
         }
         return true;
+    }
+
+    boolean applyResourceTransaction(
+            Map<StorageResourceKey, Long> deltas,
+            Map<StorageResourceKey, ExactRational> expectedCredits,
+            Action action,
+            Actor actor
+    ) {
+        Objects.requireNonNull(deltas, "deltas");
+        Objects.requireNonNull(expectedCredits, "expectedCredits");
+        Objects.requireNonNull(action, "action");
+        Objects.requireNonNull(actor, "actor");
+        if ((deltas.isEmpty() && expectedCredits.isEmpty())
+                || conflicted || !isStorageAvailable() || level == null) return false;
+        Map<StorageResourceKey, ItemKey> itemKeys = new HashMap<>();
+        boolean capacityTypesChanged = false;
+        boolean invalidatesCraftableCache = false;
+        for (StorageResourceKey key : deltas.keySet()) {
+            if (!StorageResourceKinds.accepts(key)) return false;
+            if (!key.kindId().equals(StorageResourceBridge.WORK_KIND)) {
+                capacityTypesChanged = true;
+            }
+            long delta = deltas.get(key);
+            if (delta != 0 && (!key.kindId().equals(StorageResourceBridge.WORK_KIND)
+                    || delta < 0
+                    || StorageResourceBridge.energyType(key).isEmpty()
+                    && StorageResourceBridge.stationWorkDescriptorId(key).isEmpty())) {
+                invalidatesCraftableCache = true;
+            }
+            if (!key.kindId().equals(StorageResourceBridge.ITEM_KIND)) continue;
+            var itemKey = StorageResourceBridge.itemKey(key, level.registryAccess());
+            if (itemKey.isEmpty()) return false;
+            itemKeys.put(key, itemKey.get());
+        }
+        for (StorageResourceKey key : expectedCredits.keySet()) {
+            if (!StorageResourceKinds.accepts(key)) return false;
+            if (!key.kindId().equals(StorageResourceBridge.WORK_KIND)) {
+                capacityTypesChanged = true;
+            }
+            invalidatesCraftableCache = true;
+            if (!key.kindId().equals(StorageResourceBridge.ITEM_KIND)) continue;
+            if (itemKeys.containsKey(key)) continue;
+            var itemKey = StorageResourceBridge.itemKey(key, level.registryAccess());
+            if (itemKey.isEmpty()) return false;
+            itemKeys.put(key, itemKey.get());
+        }
+        Map<StorageResourceKey, Long> previousAmounts = new HashMap<>();
+        if (action == Action.EXECUTE) {
+            for (StorageResourceKey key : deltas.keySet()) {
+                previousAmounts.put(key, resourceLedger.amount(key));
+            }
+            for (StorageResourceKey key : expectedCredits.keySet()) {
+                previousAmounts.putIfAbsent(key, resourceLedger.amount(key));
+            }
+        }
+        if (!resourceLedger.apply(
+                deltas, expectedCredits, ledgerCapacity(deltas, expectedCredits), action)) {
+            return false;
+        }
+        if (action == Action.EXECUTE) {
+            if (invalidatesCraftableCache) craftableRevision++;
+            if (capacityTypesChanged) refreshTypeCount();
+            if (deltas.keySet().stream().anyMatch(
+                    key -> StorageResourceBridge.descriptorId(key).isPresent())
+                    || expectedCredits.keySet().stream().anyMatch(
+                    key -> StorageResourceBridge.descriptorId(key).isPresent())) {
+                machineRevision++;
+            }
+            markStorageChanged();
+            for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
+                long newAmount = resourceLedger.amount(entry.getKey());
+                long delta = newAmount - previousAmounts.getOrDefault(entry.getKey(), 0L);
+                updateItemIndex(
+                        entry.getValue(),
+                        newAmount,
+                        resourceLedger.occupies(entry.getKey()));
+                fireChanged(
+                        entry.getValue(),
+                        delta,
+                        newAmount,
+                        actor);
+            }
+            for (StorageResourceKey key : deltas.keySet()) {
+                if (itemKeys.containsKey(key)) continue;
+                long newAmount = resourceLedger.amount(key);
+                long delta = newAmount - previousAmounts.getOrDefault(key, 0L);
+                fireResourceChanged(
+                        key,
+                        delta,
+                        newAmount,
+                        actor);
+                StorageResourceBridge.energyType(key).ifPresent(
+                        type -> fireEnergyChanged(type, newAmount));
+                StorageResourceBridge.stationWorkDescriptorId(key).ifPresent(
+                        descriptorId -> fireStationWorkChanged(
+                                descriptorId,
+                                delta,
+                                newAmount));
+            }
+            for (StorageResourceKey key : expectedCredits.keySet()) {
+                if (itemKeys.containsKey(key) || deltas.containsKey(key)) continue;
+                long newAmount = resourceLedger.amount(key);
+                long delta = newAmount - previousAmounts.getOrDefault(key, 0L);
+                fireResourceChanged(
+                        key,
+                        delta,
+                        newAmount,
+                        actor);
+            }
+        }
+        return true;
+    }
+
+    boolean applyExpectedDebits(
+            Map<StorageResourceKey, ExactRational> expectedDebits,
+            Action action,
+            Actor actor
+    ) {
+        Objects.requireNonNull(expectedDebits, "expectedDebits");
+        Objects.requireNonNull(action, "action");
+        Objects.requireNonNull(actor, "actor");
+        if (expectedDebits.isEmpty() || conflicted || !isStorageAvailable() || level == null) {
+            return false;
+        }
+        Map<StorageResourceKey, ItemKey> itemKeys = new HashMap<>();
+        for (StorageResourceKey key : expectedDebits.keySet()) {
+            if (!StorageResourceKinds.accepts(key)) return false;
+            if (!key.kindId().equals(StorageResourceBridge.ITEM_KIND)) continue;
+            var itemKey = StorageResourceBridge.itemKey(key, level.registryAccess());
+            if (itemKey.isEmpty()) return false;
+            itemKeys.put(key, itemKey.get());
+        }
+        Map<StorageResourceKey, Long> previousAmounts = new HashMap<>();
+        if (action == Action.EXECUTE) {
+            for (StorageResourceKey key : expectedDebits.keySet()) {
+                previousAmounts.put(key, resourceLedger.amount(key));
+            }
+        }
+        if (!resourceLedger.applyExpectedDebits(
+                expectedDebits, ledgerCapacity(), action)) {
+            return false;
+        }
+        if (action == Action.EXECUTE) {
+            craftableRevision++;
+            refreshTypeCount();
+            markStorageChanged();
+            for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
+                long newAmount = resourceLedger.amount(entry.getKey());
+                long delta = newAmount - previousAmounts.getOrDefault(entry.getKey(), 0L);
+                updateItemIndex(
+                        entry.getValue(),
+                        newAmount,
+                        resourceLedger.occupies(entry.getKey()));
+                fireChanged(
+                        entry.getValue(),
+                        delta,
+                        newAmount,
+                        actor);
+            }
+            for (StorageResourceKey key : expectedDebits.keySet()) {
+                if (itemKeys.containsKey(key)) continue;
+                long newAmount = resourceLedger.amount(key);
+                long delta = newAmount - previousAmounts.getOrDefault(key, 0L);
+                fireResourceChanged(
+                        key,
+                        delta,
+                        newAmount,
+                        actor);
+            }
+        }
+        return true;
+    }
+
+    public ExactRational getResourcePending(StorageResourceKey key) {
+        return isStorageAvailable() ? resourceLedger.pending(key) : ExactRational.ZERO;
+    }
+
+    private ExactRational pendingForItem(ItemKey key) {
+        if (level == null || !isStorageAvailable()) return ExactRational.ZERO;
+        return resourceLedger.pending(StorageResourceBridge.itemKey(key, level.registryAccess()));
+    }
+
+    private ItemStack displayFor(IndexedItem item) {
+        return TerminalDisplayStack.create(
+                item.key.toStack(1), item.amount, pendingForItem(item.key));
     }
 
     public boolean applyResourceTransaction(
@@ -991,11 +1177,19 @@ public class StorageCoreBlockEntity extends BlockEntity {
     }
 
     private StorageTypeCapacity ledgerCapacity(Map<StorageResourceKey, Long> deltas) {
+        return ledgerCapacity(deltas, Map.of());
+    }
+
+    private StorageTypeCapacity ledgerCapacity(
+            Map<StorageResourceKey, Long> deltas,
+            Map<StorageResourceKey, ExactRational> expectedCredits
+    ) {
         StorageTypeCapacity base = ledgerCapacity();
         if (base.unlimited()) return base;
         int projectedWorkTypes = resourceLedger.typeCount(StorageResourceBridge.WORK_KIND);
         for (Map.Entry<StorageResourceKey, Long> entry : deltas.entrySet()) {
             if (!entry.getKey().kindId().equals(StorageResourceBridge.WORK_KIND)) continue;
+            boolean occupied = resourceLedger.occupies(entry.getKey());
             long current = resourceLedger.amount(entry.getKey());
             long updated;
             try {
@@ -1003,8 +1197,37 @@ public class StorageCoreBlockEntity extends BlockEntity {
             } catch (ArithmeticException exception) {
                 return base;
             }
-            if (current == 0 && updated > 0) projectedWorkTypes++;
-            else if (current > 0 && updated == 0) projectedWorkTypes--;
+            if (updated < 0) {
+                return base;
+            }
+            ExactRational pending = resourceLedger.pending(entry.getKey());
+            ExactRational credit = expectedCredits.getOrDefault(
+                    entry.getKey(), ExactRational.ZERO);
+            boolean stillOccupied;
+            try {
+                ExactRational total = ExactRational.whole(updated).add(pending).add(credit);
+                stillOccupied = total.floor() > 0 || !total.fractionalPart().isZero();
+            } catch (ArithmeticException exception) {
+                return base;
+            }
+            if (!occupied && stillOccupied) projectedWorkTypes++;
+            else if (occupied && !stillOccupied) projectedWorkTypes--;
+        }
+        for (Map.Entry<StorageResourceKey, ExactRational> entry : expectedCredits.entrySet()) {
+            if (!entry.getKey().kindId().equals(StorageResourceBridge.WORK_KIND)) continue;
+            if (deltas.containsKey(entry.getKey())) continue;
+            boolean occupied = resourceLedger.occupies(entry.getKey());
+            boolean stillOccupied;
+            try {
+                ExactRational total = ExactRational.whole(resourceLedger.amount(entry.getKey()))
+                        .add(resourceLedger.pending(entry.getKey()))
+                        .add(entry.getValue());
+                stillOccupied = total.floor() > 0 || !total.fractionalPart().isZero();
+            } catch (ArithmeticException exception) {
+                return base;
+            }
+            if (!occupied && stillOccupied) projectedWorkTypes++;
+            else if (occupied && !stillOccupied) projectedWorkTypes--;
         }
         long adjusted = (long) base.finiteTypeSlots() + projectedWorkTypes;
         return StorageTypeCapacity.finite((int) Math.min(Integer.MAX_VALUE, adjusted));
@@ -1082,7 +1305,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
             if (query.matches(item.search())) {
                 ItemStack stack = item.key.toStack(1);
                 if (!stack.isEmpty()) {
-                    result.add(TerminalDisplayStack.create(stack, item.amount));
+                    result.add(displayFor(item));
                 }
             }
         }
@@ -1098,7 +1321,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
             IndexedItem item = sorted.get(order == SortOrder.ASCENDING
                     ? index : sorted.size() - 1 - index);
             if (query.matches(item.search())) {
-                result.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+                result.add(displayFor(item));
             }
         }
         return result;
@@ -1132,7 +1355,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
             for (int index = offset; index < Math.min(sorted.size(), offset + limit); index++) {
                 IndexedItem item = sorted.get(order == SortOrder.ASCENDING
                         ? index : sorted.size() - 1 - index);
-                visible.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+                visible.add(displayFor(item));
             }
             return new TerminalDisplayPage(sorted.size(), offset, visible);
         }
@@ -1148,7 +1371,7 @@ public class StorageCoreBlockEntity extends BlockEntity {
                     ? index : sorted.size() - 1 - index);
             if (!query.matches(item.search())) continue;
             if (matchIndex++ < offset) continue;
-            visible.add(TerminalDisplayStack.create(item.key.toStack(1), item.amount));
+            visible.add(displayFor(item));
         }
         return new TerminalDisplayPage(total, offset, visible);
     }
@@ -1242,8 +1465,10 @@ public class StorageCoreBlockEntity extends BlockEntity {
                     key, level.registryAccess());
             if (!matchesResourceFilter(key, representative, query)) continue;
             result.add(key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
-                    ? TerminalDisplayStack.create(representative, entry.getValue())
-                    : TerminalResourceDisplay.create(representative, key, entry.getValue()));
+                    ? TerminalDisplayStack.create(
+                            representative, entry.getValue(), resourceLedger.pending(key))
+                    : TerminalResourceDisplay.create(
+                            representative, key, entry.getValue(), resourceLedger.pending(key)));
         }
         result.sort(TerminalEntryComparator.forMode(mode, order));
         return result;

@@ -60,6 +60,7 @@
   "gui.auto_storage.type_capacity": "%s / %s types",
   "gui.auto_storage.type_capacity_unlimited": "%s / Unlimited types",
   "gui.auto_storage.stored_amount": "Stored: %s",
+  "gui.auto_storage.pending_amount": "Pending: %s",
   "gui.auto_storage.select_recipe_item": "Select an item to preview its recipes",
   "gui.auto_storage.no_recipe": "No supported recipe",
   "gui.auto_storage.previous_recipe": "Previous recipe",

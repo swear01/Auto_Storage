@@ -739,6 +739,12 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         if (TerminalDisplayStack.isDisplay(stack)) {
             tooltip.add(Component.translatable(
                     "gui.auto_storage.stored_amount", TerminalDisplayStack.amount(stack)));
+            ExactRational pending = TerminalDisplayStack.pending(stack);
+            if (!pending.isZero()) {
+                tooltip.add(Component.translatable(
+                        "gui.auto_storage.pending_amount",
+                        pending.numerator() + "/" + pending.denominator()));
+            }
         }
         return tooltip;
     }

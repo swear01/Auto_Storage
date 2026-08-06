@@ -11,6 +11,7 @@ import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
 import com.swear.autostorage.MachineEnergyTable;
 import com.swear.autostorage.MachineWorkRate;
+import com.swear.autostorage.ExactRational;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.StorageCoreBlockEntity;
 import com.swear.autostorage.StorageResourceKey;
@@ -69,9 +70,12 @@ public final class CreateIntegrationGameTests {
                 || supports(helper, createRecipe("mixing/lava_from_cobble"))
                 || supports(helper, createRecipe("deploying/cogwheel"))
                 || supports(helper, createRecipe("sequenced_assembly/precision_mechanism"))
-                || supports(helper, createRecipe("milling/short_grass"))
                 || supports(helper, fixtureRecipe("zero_time_cutting"))) {
             helper.fail("Create compatibility did not fail closed outside the audited slice");
+            return;
+        }
+        if (!supports(helper, createRecipe("milling/short_grass"))) {
+            helper.fail("Create chance milling was not accepted as expected-value output");
             return;
         }
         helper.succeed();
@@ -290,16 +294,40 @@ public final class CreateIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void chance_output_rejects_without_mutation(GameTestHelper helper) {
+    public static void chance_output_credits_expected_value(GameTestHelper helper) {
         withCore(helper, context -> {
-            seedItem(context.core(), Items.SHORT_GRASS, 1);
+            seedItem(context.core(), Items.SHORT_GRASS, 4);
             installStation(context, "millstone");
-            tick(context.core(), 50);
-            if (craft(context, createRecipe("milling/short_grass"))
-                    || itemCount(context.core(), Items.SHORT_GRASS) != 1
+            tick(context.core(), 200);
+            StorageResourceKey seeds = StorageResourceKey.item(
+                    new ItemStack(Items.WHEAT_SEEDS), helper.getLevel().registryAccess());
+            ItemKey seedKey = ItemKey.of(new ItemStack(Items.WHEAT_SEEDS));
+            long[] observedSeedDelta = {0L};
+            long[] observedSeedAmount = {-1L};
+            context.core().addListener((key, delta, newAmount, actor) -> {
+                if (key.equals(seedKey)) {
+                    observedSeedDelta[0] = delta;
+                    observedSeedAmount[0] = newAmount;
+                }
+            });
+            if (!craft(context, createRecipe("milling/short_grass"), 1)
+                    || itemCount(context.core(), Items.SHORT_GRASS) != 3
                     || itemCount(context.core(), Items.WHEAT_SEEDS) != 0
-                    || context.core().getStationWork(stationId("milling")) != 50) {
-                helper.fail("Create chance output did not fail closed");
+                    || !context.core().getResourcePending(seeds).equals(ExactRational.of(1, 4))
+                    || context.core().getStationWork(stationId("milling")) != 150
+                    || observedSeedDelta[0] != 0L
+                    || observedSeedAmount[0] != 0L) {
+                helper.fail("Create chance milling did not credit one-quarter pending wheat seeds");
+                return;
+            }
+            if (!craft(context, createRecipe("milling/short_grass"), 3)
+                    || itemCount(context.core(), Items.SHORT_GRASS) != 0
+                    || itemCount(context.core(), Items.WHEAT_SEEDS) != 1
+                    || !context.core().getResourcePending(seeds).isZero()
+                    || context.core().getStationWork(stationId("milling")) != 0
+                    || observedSeedDelta[0] != 1L
+                    || observedSeedAmount[0] != 1L) {
+                helper.fail("Create chance milling did not consolidate four crafts into one whole seed");
                 return;
             }
             helper.succeed();
@@ -383,17 +411,21 @@ public final class CreateIntegrationGameTests {
     }
 
     private static boolean craft(FixtureContext context, ResourceLocation recipeId) {
+        return craft(context, recipeId, 1);
+    }
+
+    private static boolean craft(FixtureContext context, ResourceLocation recipeId, int crafts) {
         var menu = new CraftingTerminalMenu(
                 915, context.player().getInventory(), context.core());
         if (!menu.handleRecipeRequest(
-                context.level(), recipeId, 1, CraftingDestination.NONE, context.player())) {
+                context.level(), recipeId, crafts, CraftingDestination.NONE, context.player())) {
             return false;
         }
-        if (menu.computeCraftPreview(context.core(), context.player()).craftable() < 1) {
+        if (menu.computeCraftPreview(context.core(), context.player()).craftable() < crafts) {
             return false;
         }
         return menu.handleRecipeRequest(
-                context.level(), recipeId, 1,
+                context.level(), recipeId, crafts,
                 CraftingDestination.STORAGE, context.player());
     }
 

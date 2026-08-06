@@ -60,6 +60,7 @@
   "gui.auto_storage.type_capacity": "%s / %s 種類",
   "gui.auto_storage.type_capacity_unlimited": "%s / 無限種類",
   "gui.auto_storage.stored_amount": "已儲存：%s",
+  "gui.auto_storage.pending_amount": "待結算：%s",
   "gui.auto_storage.select_recipe_item": "選擇物品以預覽配方",
   "gui.auto_storage.no_recipe": "沒有支援的配方",
   "gui.auto_storage.previous_recipe": "上一個配方",

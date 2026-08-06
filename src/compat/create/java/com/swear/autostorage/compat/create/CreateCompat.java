@@ -12,6 +12,7 @@ import com.simibubi.create.content.kinetics.saw.CuttingRecipe;
 import com.simibubi.create.content.processing.recipe.HeatCondition;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
+import com.swear.autostorage.ExactRational;
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
 import com.swear.autostorage.MachineVariant;
@@ -241,18 +242,20 @@ public final class CreateCompat {
             List<ProcessingOutput> recipeOutputs,
             HolderLookup.Provider registries
     ) {
-        LinkedHashMap<StorageResourceKey, Long> outputs = new LinkedHashMap<>();
+        LinkedHashMap<StorageResourceKey, ExactRational> outputs = new LinkedHashMap<>();
         ItemStack presentation = recipeOutputs.getFirst().getStack();
         for (ProcessingOutput recipeOutput : recipeOutputs) {
             ItemStack output = recipeOutput.getStack();
+            ExactRational expected = ExactRational.whole(output.getCount())
+                    .multiply(ExactRational.fromUnitInterval(recipeOutput.getChance()));
             outputs.merge(
                     StorageResourceKey.item(output.copyWithCount(1), registries),
-                    (long) output.getCount(),
-                    Math::addExact);
+                    expected,
+                    ExactRational::add);
         }
         TypedRecipePlan.Builder builder = TypedRecipePlan.builder().input(input);
         boolean primary = true;
-        for (Map.Entry<StorageResourceKey, Long> output : outputs.entrySet()) {
+        for (Map.Entry<StorageResourceKey, ExactRational> output : outputs.entrySet()) {
             builder.output(primary
                     ? TypedRecipeOutput.primary(output.getKey(), output.getValue())
                     : TypedRecipeOutput.remainder(output.getKey(), output.getValue()));
@@ -310,8 +313,19 @@ public final class CreateCompat {
 
     private static boolean deterministic(List<ProcessingOutput> outputs) {
         return !outputs.isEmpty()
-                && outputs.stream().allMatch(output ->
-                output.getChance() == 1.0F && !output.getStack().isEmpty());
+                && outputs.stream().allMatch(CreateCompat::acceptableChanceOutput);
+    }
+
+    private static boolean acceptableChanceOutput(ProcessingOutput output) {
+        if (output == null || output.getStack().isEmpty()) return false;
+        float chance = output.getChance();
+        if (!Float.isFinite(chance) || chance <= 0.0F || chance > 1.0F) return false;
+        try {
+            ExactRational.fromUnitInterval(chance);
+            return true;
+        } catch (IllegalArgumentException | ArithmeticException exception) {
+            return false;
+        }
     }
 
     private static boolean exact(Ingredient ingredient) {

@@ -53,6 +53,7 @@ class SelfTest {
     static void runAll() {
         testItemKey();
         testStorageResourceLedger();
+        testExactRational();
         testBusResourceEscrow();
         testResourceContainerTransferContract();
         testAxeSyntheticDiscovery();
@@ -592,6 +593,71 @@ class SelfTest {
             duplicateRejected = true;
         }
         assertTrue("duplicate persisted resource keys fail closed", duplicateRejected);
+
+        StorageResourceLedger pendingLedger = new StorageResourceLedger();
+        assertTrue("expected-value credit creates pending-only type occupancy",
+                pendingLedger.applyExpectedCredits(
+                        Map.of(item, ExactRational.of(1, 4)),
+                        StorageTypeCapacity.finite(4),
+                        Action.EXECUTE)
+                        && pendingLedger.amount(item) == 0
+                        && pendingLedger.pending(item).equals(ExactRational.of(1, 4))
+                        && pendingLedger.typeCount() == 1
+                        && pendingLedger.occupies(item));
+        assertTrue("whole underflow against pending-only stock rejects without mutation",
+                !pendingLedger.applyExact(
+                        Map.of(item, -1L),
+                        StorageTypeCapacity.finite(4),
+                        Action.SIMULATE)
+                        && pendingLedger.amount(item) == 0
+                        && pendingLedger.pending(item).equals(ExactRational.of(1, 4))
+                        && pendingLedger.occupies(item));
+        assertTrue("four quarter credits consolidate into one whole unit",
+                pendingLedger.applyExpectedCredits(
+                        Map.of(item, ExactRational.of(3, 4)),
+                        StorageTypeCapacity.finite(4),
+                        Action.EXECUTE)
+                        && pendingLedger.amount(item) == 1
+                        && pendingLedger.pending(item).isZero());
+        StorageResourceLedger reloadedPending = StorageResourceLedger.load(pendingLedger.save());
+        assertTrue("pending stock round-trips through schema 2",
+                reloadedPending.amount(item) == 1
+                        && reloadedPending.pending(item).isZero()
+                        && reloadedPending.save().getInt("schema") == 2);
+        CompoundTag legacy = pendingLedger.save();
+        legacy.putInt("schema", 1);
+        legacy.getList("entries", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                .getCompound(0)
+                .remove("pending_n");
+        legacy.getList("entries", net.minecraft.nbt.Tag.TAG_COMPOUND)
+                .getCompound(0)
+                .remove("pending_d");
+        StorageResourceLedger migrated = StorageResourceLedger.load(legacy);
+        assertTrue("schema 1 loads as whole-only pending zero",
+                migrated.amount(item) == 1 && migrated.pending(item).isZero());
+    }
+
+    private static void testExactRational() {
+        assertTrue("unit-interval 0.25 reduces to 1/4",
+                ExactRational.fromUnitInterval(0.25F).equals(ExactRational.of(1, 4)));
+        assertTrue("unit-interval 1.0 is exact one",
+                ExactRational.fromUnitInterval(1.0F).equals(ExactRational.ONE));
+        assertTrue("exact rational multiply by crafts consolidates",
+                ExactRational.of(1, 4).multiply(4L).equals(ExactRational.ONE));
+        boolean rejected = false;
+        try {
+            ExactRational.fromUnitInterval(0.0F);
+        } catch (IllegalArgumentException expected) {
+            rejected = true;
+        }
+        assertTrue("zero chance fails closed", rejected);
+        boolean unrepresentableRejected = false;
+        try {
+            ExactRational.fromUnitInterval(0.12345F);
+        } catch (IllegalArgumentException expected) {
+            unrepresentableRejected = true;
+        }
+        assertTrue("chance off the 1/10000 basis fails closed", unrepresentableRejected);
     }
 
     private static void testResourceContainerTransferContract() {
