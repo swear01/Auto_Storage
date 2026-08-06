@@ -52,6 +52,9 @@ public record ExactRational(long numerator, long denominator) {
         if (scaled <= 0 || scaled > CHANCE_BASIS) {
             throw new IllegalArgumentException("Chance could not be represented on basis " + CHANCE_BASIS);
         }
+        if (Math.abs((double) chance * CHANCE_BASIS - scaled) > 0.01) {
+            throw new IllegalArgumentException("Chance could not be represented on basis " + CHANCE_BASIS);
+        }
         return of(scaled, CHANCE_BASIS);
     }
 

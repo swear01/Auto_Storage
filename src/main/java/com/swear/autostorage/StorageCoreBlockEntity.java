@@ -1107,6 +1107,16 @@ public class StorageCoreBlockEntity extends BlockEntity {
                         newAmount,
                         actor);
             }
+            for (StorageResourceKey key : expectedDebits.keySet()) {
+                if (itemKeys.containsKey(key)) continue;
+                long newAmount = resourceLedger.amount(key);
+                long delta = newAmount - previousAmounts.getOrDefault(key, 0L);
+                fireResourceChanged(
+                        key,
+                        delta,
+                        newAmount,
+                        actor);
+            }
         }
         return true;
     }

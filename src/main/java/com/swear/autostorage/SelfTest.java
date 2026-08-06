@@ -651,6 +651,13 @@ class SelfTest {
             rejected = true;
         }
         assertTrue("zero chance fails closed", rejected);
+        boolean unrepresentableRejected = false;
+        try {
+            ExactRational.fromUnitInterval(0.12345F);
+        } catch (IllegalArgumentException expected) {
+            unrepresentableRejected = true;
+        }
+        assertTrue("chance off the 1/10000 basis fails closed", unrepresentableRejected);
     }
 
     private static void testResourceContainerTransferContract() {
