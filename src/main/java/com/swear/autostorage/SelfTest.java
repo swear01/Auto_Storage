@@ -604,6 +604,14 @@ class SelfTest {
                         && pendingLedger.pending(item).equals(ExactRational.of(1, 4))
                         && pendingLedger.typeCount() == 1
                         && pendingLedger.occupies(item));
+        assertTrue("whole underflow against pending-only stock rejects without mutation",
+                !pendingLedger.applyExact(
+                        Map.of(item, -1L),
+                        StorageTypeCapacity.finite(4),
+                        Action.SIMULATE)
+                        && pendingLedger.amount(item) == 0
+                        && pendingLedger.pending(item).equals(ExactRational.of(1, 4))
+                        && pendingLedger.occupies(item));
         assertTrue("four quarter credits consolidate into one whole unit",
                 pendingLedger.applyExpectedCredits(
                         Map.of(item, ExactRational.of(3, 4)),

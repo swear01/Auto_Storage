@@ -1165,6 +1165,9 @@ public class StorageCoreBlockEntity extends BlockEntity {
             } catch (ArithmeticException exception) {
                 return base;
             }
+            if (updated < 0) {
+                return base;
+            }
             ExactRational pending = resourceLedger.pending(entry.getKey());
             ExactRational credit = expectedCredits.getOrDefault(
                     entry.getKey(), ExactRational.ZERO);
