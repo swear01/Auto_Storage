@@ -4293,8 +4293,17 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("putLong(AMOUNT_KEY, amount)", helper)
         self.assertIn("static ItemStack strip", helper)
         self.assertIn("TerminalDisplayStack.strip(stack)", key)
-        self.assertIn("TerminalDisplayStack.create(stack, item.amount)", core)
-        self.assertIn("TerminalDisplayStack.create(item.key.toStack(1), item.amount)", core)
+        self.assertIn("pendingForItem(item.key)", core)
+        self.assertIn(
+            "TerminalDisplayStack.create(\n"
+            "                item.key.toStack(1), item.amount, pendingForItem(item.key))",
+            core,
+        )
+        self.assertIn(
+            "TerminalDisplayStack.create(\n"
+            "                            representative, entry.getValue(), resourceLedger.pending(key))",
+            core,
+        )
         self.assertIn("core.getResourceAmount(key)", crafting)
         self.assertIn("TerminalDisplayStack.create(output.icon(), output.storedAmount())", crafting)
         self.assertNotIn("preview.craftable() * output.getCount()", crafting)
@@ -4447,16 +4456,25 @@ class StaticRegressionTests(unittest.TestCase):
             r"\bprivate\s+boolean\s+commitCraft\s*\(",
             "CraftingTerminalMenu.commitCraft",
         )
-        transaction = self.java_block(
+        mutation = self.java_block(
+            menu,
+            r"\bprivate\s+static\s+boolean\s+applyCoreResourceMutation\s*\(",
+            "CraftingTerminalMenu.applyCoreResourceMutation",
+        )
+        self.assertIn("applyCoreResourceMutation(", commit)
+        self.assertIn("delivery.expectedCredits()", commit)
+        self.assertRegex(
             menu,
             r"\bprivate\s+static\s+boolean\s+applyCoreResourceDeltas\s*\(",
-            "CraftingTerminalMenu.applyCoreResourceDeltas",
         )
-        self.assertIn("applyCoreResourceDeltas(", commit)
-        self.assertIn("StorageResourceTransaction.builder()", transaction)
-        self.assertIn("core.applyResourceTransaction(", transaction)
+        self.assertIn(
+            "applyCoreResourceMutation(core, deltas, Map.of(), action)",
+            menu,
+        )
+        self.assertIn("StorageResourceTransaction.builder()", mutation)
+        self.assertIn("core.applyResourceTransaction(", mutation)
         self.assertNotIn("while (remaining > 0)", commit)
-        self.assertNotIn("while (remaining > 0)", transaction)
+        self.assertNotIn("while (remaining > 0)", mutation)
 
     def test_smithing_variant_paths_bind_same_id_to_exact_selected_output(self):
         menu = self.read_required(
