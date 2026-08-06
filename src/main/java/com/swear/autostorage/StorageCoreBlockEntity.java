@@ -994,6 +994,15 @@ public class StorageCoreBlockEntity extends BlockEntity {
             if (itemKey.isEmpty()) return false;
             itemKeys.put(key, itemKey.get());
         }
+        Map<StorageResourceKey, Long> previousAmounts = new HashMap<>();
+        if (action == Action.EXECUTE) {
+            for (StorageResourceKey key : deltas.keySet()) {
+                previousAmounts.put(key, resourceLedger.amount(key));
+            }
+            for (StorageResourceKey key : expectedCredits.keySet()) {
+                previousAmounts.putIfAbsent(key, resourceLedger.amount(key));
+            }
+        }
         if (!resourceLedger.apply(
                 deltas, expectedCredits, ledgerCapacity(deltas, expectedCredits), action)) {
             return false;
@@ -1009,38 +1018,43 @@ public class StorageCoreBlockEntity extends BlockEntity {
             }
             markStorageChanged();
             for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
+                long newAmount = resourceLedger.amount(entry.getKey());
+                long delta = newAmount - previousAmounts.getOrDefault(entry.getKey(), 0L);
                 updateItemIndex(
                         entry.getValue(),
-                        resourceLedger.amount(entry.getKey()),
+                        newAmount,
                         resourceLedger.occupies(entry.getKey()));
-                long delta = deltas.getOrDefault(entry.getKey(), 0L);
                 fireChanged(
                         entry.getValue(),
                         delta,
-                        resourceLedger.amount(entry.getKey()),
+                        newAmount,
                         actor);
             }
             for (StorageResourceKey key : deltas.keySet()) {
                 if (itemKeys.containsKey(key)) continue;
+                long newAmount = resourceLedger.amount(key);
+                long delta = newAmount - previousAmounts.getOrDefault(key, 0L);
                 fireResourceChanged(
                         key,
-                        deltas.get(key),
-                        resourceLedger.amount(key),
+                        delta,
+                        newAmount,
                         actor);
                 StorageResourceBridge.energyType(key).ifPresent(
-                        type -> fireEnergyChanged(type, resourceLedger.amount(key)));
+                        type -> fireEnergyChanged(type, newAmount));
                 StorageResourceBridge.stationWorkDescriptorId(key).ifPresent(
                         descriptorId -> fireStationWorkChanged(
                                 descriptorId,
-                                deltas.get(key),
-                                resourceLedger.amount(key)));
+                                delta,
+                                newAmount));
             }
             for (StorageResourceKey key : expectedCredits.keySet()) {
                 if (itemKeys.containsKey(key) || deltas.containsKey(key)) continue;
+                long newAmount = resourceLedger.amount(key);
+                long delta = newAmount - previousAmounts.getOrDefault(key, 0L);
                 fireResourceChanged(
                         key,
-                        0L,
-                        resourceLedger.amount(key),
+                        delta,
+                        newAmount,
                         actor);
             }
         }
@@ -1066,6 +1080,12 @@ public class StorageCoreBlockEntity extends BlockEntity {
             if (itemKey.isEmpty()) return false;
             itemKeys.put(key, itemKey.get());
         }
+        Map<StorageResourceKey, Long> previousAmounts = new HashMap<>();
+        if (action == Action.EXECUTE) {
+            for (StorageResourceKey key : expectedDebits.keySet()) {
+                previousAmounts.put(key, resourceLedger.amount(key));
+            }
+        }
         if (!resourceLedger.applyExpectedDebits(
                 expectedDebits, ledgerCapacity(), action)) {
             return false;
@@ -1075,14 +1095,16 @@ public class StorageCoreBlockEntity extends BlockEntity {
             refreshTypeCount();
             markStorageChanged();
             for (Map.Entry<StorageResourceKey, ItemKey> entry : itemKeys.entrySet()) {
+                long newAmount = resourceLedger.amount(entry.getKey());
+                long delta = newAmount - previousAmounts.getOrDefault(entry.getKey(), 0L);
                 updateItemIndex(
                         entry.getValue(),
-                        resourceLedger.amount(entry.getKey()),
+                        newAmount,
                         resourceLedger.occupies(entry.getKey()));
                 fireChanged(
                         entry.getValue(),
-                        0L,
-                        resourceLedger.amount(entry.getKey()),
+                        delta,
+                        newAmount,
                         actor);
             }
         }

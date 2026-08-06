@@ -301,11 +301,22 @@ public final class CreateIntegrationGameTests {
             tick(context.core(), 200);
             StorageResourceKey seeds = StorageResourceKey.item(
                     new ItemStack(Items.WHEAT_SEEDS), helper.getLevel().registryAccess());
+            ItemKey seedKey = ItemKey.of(new ItemStack(Items.WHEAT_SEEDS));
+            long[] observedSeedDelta = {0L};
+            long[] observedSeedAmount = {-1L};
+            context.core().addListener((key, delta, newAmount, actor) -> {
+                if (key.equals(seedKey)) {
+                    observedSeedDelta[0] = delta;
+                    observedSeedAmount[0] = newAmount;
+                }
+            });
             if (!craft(context, createRecipe("milling/short_grass"), 1)
                     || itemCount(context.core(), Items.SHORT_GRASS) != 3
                     || itemCount(context.core(), Items.WHEAT_SEEDS) != 0
                     || !context.core().getResourcePending(seeds).equals(ExactRational.of(1, 4))
-                    || context.core().getStationWork(stationId("milling")) != 150) {
+                    || context.core().getStationWork(stationId("milling")) != 150
+                    || observedSeedDelta[0] != 0L
+                    || observedSeedAmount[0] != 0L) {
                 helper.fail("Create chance milling did not credit one-quarter pending wheat seeds");
                 return;
             }
@@ -313,7 +324,9 @@ public final class CreateIntegrationGameTests {
                     || itemCount(context.core(), Items.SHORT_GRASS) != 0
                     || itemCount(context.core(), Items.WHEAT_SEEDS) != 1
                     || !context.core().getResourcePending(seeds).isZero()
-                    || context.core().getStationWork(stationId("milling")) != 0) {
+                    || context.core().getStationWork(stationId("milling")) != 0
+                    || observedSeedDelta[0] != 1L
+                    || observedSeedAmount[0] != 1L) {
                 helper.fail("Create chance milling did not consolidate four crafts into one whole seed");
                 return;
             }
