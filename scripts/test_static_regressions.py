@@ -1122,7 +1122,7 @@ class StaticRegressionTests(unittest.TestCase):
                 descriptor["fixture"],
                 descriptor["expectedTests"],
             )
-        self.assertIn("SelfTest: 204927 passed, 0 failed, 204927 total", build)
+        self.assertIn("SelfTest: 204937 passed, 0 failed, 204937 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
     def test_compatibility_matrix_uses_descriptor_owned_recipe_inventories(self):
