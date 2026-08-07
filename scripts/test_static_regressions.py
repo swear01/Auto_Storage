@@ -249,6 +249,9 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn(".apply(", send_search)
         self.assertIn("TerminalSearchSynchronizer", screen)
         self.assertIn("synchronizeFromTerminal", screen)
+        self.assertIn("searchSynchronizer()", screen)
+        self.assertIn("searchViewerBinding", screen)
+        self.assertIn("binding != searchViewerBinding", screen)
         self.assertIn("EmiApi.setSearchText", emi)
         self.assertIn("EmiApi.getSearchText", emi)
         self.assertIn("getIngredientFilter().setFilterText", jei)
@@ -3082,16 +3085,23 @@ class StaticRegressionTests(unittest.TestCase):
         )
 
         self.assertIn("NativeRecipeDiagramRenderer", setup)
+        self.assertIn("selectedViewerBinding", setup)
+        self.assertIn("ViewerBinding", setup)
         self.assertIn('ModList.get().isLoaded("emi")', setup)
         self.assertIn('ModList.get().isLoaded("jei")', setup)
         self.assertIn("JeiRecipeDiagramBootstrap", setup)
         self.assertIn("preferredRecipeDiagramRenderer", screen)
+        self.assertIn("preferredViewerBinding", screen)
         self.assertIn("nativeRecipeDiagramRenderer", screen)
         self.assertRegex(
             screen,
-            r"preferredRecipeDiagramRenderer\.supports\([^)]*\)\s*"
-            r"\?\s*preferredRecipeDiagramRenderer\s*:\s*nativeRecipeDiagramRenderer",
+            r"preferredRecipeDiagramRenderer\(\)\.supports\([^)]*\)\s*"
+            r"\?\s*preferred\s*:\s*nativeRecipeDiagramRenderer"
+            r"|RecipeDiagramRenderer preferred = preferredRecipeDiagramRenderer\(\);\s*"
+            r"return preferred\.supports\([^)]*\)\s*"
+            r"\?\s*preferred\s*:\s*nativeRecipeDiagramRenderer",
         )
+        self.assertIn("binding != preferredViewerBinding", screen)
         self.assertIn("return true;", native)
         self.assertIn("RecipePresentationKind.AXE", renderer)
         self.assertIn("EmiApi.getRecipeManager()", renderer)

@@ -23,7 +23,8 @@ import java.util.function.IntSupplier;
 public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTerminalMenu> {
 
     private final NativeRecipeDiagramRenderer nativeRecipeDiagramRenderer;
-    private final RecipeDiagramRenderer preferredRecipeDiagramRenderer;
+    private ClientSetup.ViewerBinding preferredViewerBinding;
+    private RecipeDiagramRenderer preferredRecipeDiagramRenderer;
     private Button prevRecipeBtn;
     private Button nextRecipeBtn;
     private Button craft1Btn;
@@ -70,7 +71,17 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     public CraftingTerminalScreen(CraftingTerminalMenu menu, Inventory playerInv, Component title) {
         super(menu, playerInv, title);
         nativeRecipeDiagramRenderer = new NativeRecipeDiagramRenderer();
+        preferredViewerBinding = ClientSetup.selectedViewerBinding();
         preferredRecipeDiagramRenderer = ClientSetup.createRecipeDiagramRenderer();
+    }
+
+    private RecipeDiagramRenderer preferredRecipeDiagramRenderer() {
+        ClientSetup.ViewerBinding binding = ClientSetup.selectedViewerBinding();
+        if (binding != preferredViewerBinding) {
+            preferredViewerBinding = binding;
+            preferredRecipeDiagramRenderer = ClientSetup.createRecipeDiagramRenderer();
+        }
+        return preferredRecipeDiagramRenderer;
     }
 
     @Override
@@ -267,8 +278,9 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     }
 
     private RecipeDiagramRenderer activeRecipeDiagramRenderer(RecipePresentation presentation) {
-        return preferredRecipeDiagramRenderer.supports(presentation, recipeDiagramGeometry)
-                ? preferredRecipeDiagramRenderer : nativeRecipeDiagramRenderer;
+        RecipeDiagramRenderer preferred = preferredRecipeDiagramRenderer();
+        return preferred.supports(presentation, recipeDiagramGeometry)
+                ? preferred : nativeRecipeDiagramRenderer;
     }
 
     private Button addRecipeAmountButton(

@@ -16,6 +16,12 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 public class ClientSetup {
 
+    enum ViewerBinding {
+        EMI,
+        JEI,
+        NONE
+    }
+
     public static void register(IEventBus modEventBus) {
         modEventBus.addListener(ClientSetup::registerScreens);
         modEventBus.addListener(
@@ -25,24 +31,30 @@ public class ClientSetup {
         modEventBus.addListener(ClientSetup::addFusionConnectedCasingPack);
     }
 
-    static RecipeDiagramRenderer createRecipeDiagramRenderer() {
+    static ViewerBinding selectedViewerBinding() {
         if (ModList.get().isLoaded("emi")) {
-            return EmiRecipeDiagramBootstrap.create();
+            return ViewerBinding.EMI;
         }
         if (ModList.get().isLoaded("jei") && JeiRecipeDiagramBootstrap.isRuntimeReady()) {
-            return JeiRecipeDiagramBootstrap.createRenderer();
+            return ViewerBinding.JEI;
         }
-        return new NativeRecipeDiagramRenderer();
+        return ViewerBinding.NONE;
+    }
+
+    static RecipeDiagramRenderer createRecipeDiagramRenderer() {
+        return switch (selectedViewerBinding()) {
+            case EMI -> EmiRecipeDiagramBootstrap.create();
+            case JEI -> JeiRecipeDiagramBootstrap.createRenderer();
+            case NONE -> new NativeRecipeDiagramRenderer();
+        };
     }
 
     static TerminalSearchSynchronizer createTerminalSearchSynchronizer() {
-        if (ModList.get().isLoaded("emi")) {
-            return new EmiTerminalSearchSynchronizer();
-        }
-        if (ModList.get().isLoaded("jei") && JeiRecipeDiagramBootstrap.isRuntimeReady()) {
-            return JeiRecipeDiagramBootstrap.createSearchSynchronizer();
-        }
-        return TerminalSearchSynchronizer.NONE;
+        return switch (selectedViewerBinding()) {
+            case EMI -> new EmiTerminalSearchSynchronizer();
+            case JEI -> JeiRecipeDiagramBootstrap.createSearchSynchronizer();
+            case NONE -> TerminalSearchSynchronizer.NONE;
+        };
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {
