@@ -5,39 +5,40 @@ This is the maintainer runbook for the tag-driven alpha publisher in
 
 ## Next release target
 
-- Version: `v0.3.0`
-- Mod ID and registry namespace: `auto_storage`
-- Java package: `com.swear.autostorage`
-- Artifact: `build/libs/auto_storage-0.3.0.jar`
-- Tracking issue: <https://github.com/swear01/Auto_Storage/issues/31>
-
-This is an intentional breaking identity release. It does not migrate or alias
-0.2.x worlds, registries, configs, commands, addon IDs, or saved data. Release
-notes and both external listings must tell players to start a new world and
-must not present 0.3.0 as a drop-in replacement for 0.2.x.
+No next tag is scheduled. Ship the next version only after `gradle.properties`
+`mod_version` changes and a matching `docs/release-notes/<mod_version>.md`
+exists.
 
 ## Current release evidence
 
-- Version: `v0.2.0`
-- Source commit: `dd2f254707654dca03ec615be5da6bc64dd8479c`
-- Main CI: `30467153149`
-- Release run: `30468162688`
+- Version: `v0.3.0`
+- Source commit: `54eb5164f345d1c95274b92fbffef20c7ec04908`
+- Main CI: `31090996633`
+- Release run: `31121735740` (attempt 2)
 - GitHub prerelease:
-  <https://github.com/swear01/Auto_Storage/releases/tag/v0.2.0>
-- Canonical jar SHA-256:
-  `64cbe2705f2a1d20f83eb1bf848c1df7b74ffe9dab0e4fb958cfde498457b43c`
+  <https://github.com/swear01/Auto_Storage/releases/tag/v0.3.0>
+- Canonical player jar SHA-256:
+  `56883bbc33d3fe8dca4e5df5eee30b15f4af449a710fe737422daa01786e18b1`
+- Developer assets on the same GitHub Release:
+  `auto_storage-0.3.0-api.jar`,
+  `auto_storage-0.3.0-api-sources.jar`,
+  `auto_storage-0.3.0-api-javadoc.jar`,
+  `auto-storage-compat-kit-0.3.0.zip`
+- Wiki developer mirrors pushed before the tag:
+  `Addon-Development.md` / `Compat-Kit.md` commit `33ef21d`
 
-The release run accepted the same `build/libs/magic_storage-0.2.0.jar` upload
-for CurseForge, Modrinth, and GitHub. Public Modrinth and CurseForge downloads
-can remain unavailable until their listing reviews finish.
+The release run accepted the same `build/libs/auto_storage-0.3.0.jar` upload for
+CurseForge, Modrinth, and GitHub. Post-publish dashboard checks confirmed
+Minecraft 1.21.1 + NeoForge on both Modrinth (`0.3.0`, project under review)
+and CurseForge file `8589895` (`Auto Storage 0.3.0 Alpha`). Downloaded
+Modrinth CDN and CurseForge CDN player jars both matched the GitHub canonical
+SHA-256 above. Public Modrinth visibility remains subject to listing
+moderation.
 
-The 2026-07-30 listing audit completed the missing platform metadata. Modrinth
-now has the long description, MIT license, categories and featured tags,
-canonical source/issues/wiki links, and corrected `0.2.0` Minecraft 1.21.1 +
-NeoForge metadata; the project is submitted for moderation. CurseForge now has
-the same long description, canonical public GitHub source and Wiki links,
-comments enabled, MIT/open-distribution settings, and its `0.2.0` file remains
-under review.
+This is an intentional breaking identity release. It does not migrate or alias
+0.2.x worlds, registries, configs, commands, addon IDs, or saved data. Players
+must remove every 0.2.x jar, keep only one Auto Storage version in the
+instance, and start a new world.
 
 ## Public project metadata
 

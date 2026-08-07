@@ -371,9 +371,9 @@ class GitHubWorkflowTests(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self.assertIn("Python 302", self.read_required(relative_path))
 
-    def test_0_2_0_release_evidence_is_recorded(self):
-        release_url = "https://github.com/swear01/Auto_Storage/releases/tag/v0.2.0"
-        release_hash = "64cbe2705f2a1d20f83eb1bf848c1df7b74ffe9dab0e4fb958cfde498457b43c"
+    def test_0_3_0_release_evidence_is_recorded(self):
+        release_url = "https://github.com/swear01/Auto_Storage/releases/tag/v0.3.0"
+        release_hash = "56883bbc33d3fe8dca4e5df5eee30b15f4af449a710fe737422daa01786e18b1"
         for relative_path in (
             "docs/notes.md",
             "docs/plan.md",
@@ -384,7 +384,7 @@ class GitHubWorkflowTests(unittest.TestCase):
             with self.subTest(path=relative_path):
                 self.assertIn(release_url, text)
                 self.assertIn(release_hash, text)
-                self.assertIn("30468162688", text)
+                self.assertIn("31121735740", text)
 
     def test_current_manual_gui_log_check_does_not_pin_historical_version_or_selftest_total(self):
         notes = self.read_required("docs/notes.md")
