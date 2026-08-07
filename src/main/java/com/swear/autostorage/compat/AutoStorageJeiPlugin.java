@@ -37,6 +37,7 @@ public final class AutoStorageJeiPlugin implements IModPlugin {
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
         JeiRecipeDiagramBootstrap.markRuntimeAvailable(jeiRuntime);
+        JeiDiagramPerformanceProbe.scheduleOnce(jeiRuntime);
     }
 
     @Override

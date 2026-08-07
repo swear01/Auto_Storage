@@ -26,7 +26,7 @@ target audit into an explicit contract, RED scaffold, and verification report.
 
 - JDK 21
 - Gradle wrapper from this repository
-- EMI `1.1.24` or any later compatible `1.x` build for Minecraft 1.21.1 is required on clients; dedicated servers do not require EMI
+- Clients need **either EMI or JEI** (EMI preferred when both are present). EMI `1.1.24+` / JEI `19.21+` NeoForge are the supported baselines; dedicated servers do not require a recipe viewer
 - Fusion `1.2.12` for NeoForge 1.21.1 is optional: it automatically enables connected casing when installed; clients without it use ordinary casing and can play normally
 
 On the local Mac dev machine, set:

@@ -978,7 +978,12 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertRegex(
             build,
             r'fusionRuntimeRuntimeOnly\s+"maven\.modrinth:emi:\$\{emi_runtime_version\}"',
-            "the isolated client/data runtime must use the Modrinth full EMI artifact",
+            "the isolated client/data runtime must use the Modrinth full EMI artifact by default",
+        )
+        self.assertIn('findProperty(\'recipeViewer\')', build)
+        self.assertIn(
+            'fusionRuntimeRuntimeOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"',
+            build,
         )
         self.assertNotRegex(
             build,
@@ -2965,6 +2970,24 @@ class StaticRegressionTests(unittest.TestCase):
             r"SelfTest\.runAll\(\);\s*}\);",
         )
 
+    def test_terminal_resource_renderer_selftest_runs_before_client_freeze(self):
+        selftest = self.read_required(
+            "src/main/java/com/swear/autostorage/SelfTest.java"
+        )
+        setup = self.read_required(
+            "src/main/java/com/swear/autostorage/ClientSetup.java"
+        )
+        construction = selftest.split("static void runConstructionPhaseTests()", 1)[1].split(
+            "static void runAll()", 1
+        )[0]
+        run_all = selftest.split("static void runAll()", 1)[1].split(
+            "AutoStorage.LOGGER.info(\"SelfTest:", 1
+        )[0]
+        self.assertIn("testTerminalResourceRendererApi();", construction)
+        self.assertNotIn("testTerminalResourceRendererApi();", run_all)
+        self.assertIn("TerminalResourceRendererApi.freeze()", setup)
+        self.assertIn("RegisterMenuScreensEvent.class", setup)
+
     def test_recipe_renderer_boundary_keeps_emi_out_of_base_screen_and_native_path(self):
         interface = self.read_required(
             "src/main/java/com/swear/autostorage/RecipeDiagramRenderer.java"
@@ -3051,6 +3074,7 @@ class StaticRegressionTests(unittest.TestCase):
         ]:
             self.assertIn(public_api, renderer)
         self.assertIn("createRecipeLayoutDrawable", renderer)
+        self.assertIn("createDrawable(manager, category, holder, focuses)", renderer)
         self.assertIn("drawRecipe", renderer)
         self.assertIn("drawOverlays", renderer)
         self.assertIn("getInputHandler", renderer)

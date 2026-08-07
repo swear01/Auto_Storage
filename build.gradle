@@ -841,6 +841,10 @@ neoForge {
             sourceSet = sourceSets.fusionRuntime
             loadedMods = [mods."${mod_id}"]
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            if (providers.gradleProperty('jeiDiagramBench').present) {
+                systemProperty 'auto_storage.jeiDiagramBench', 'true'
+                programArguments.addAll '--quickPlaySingleplayer', 'New World'
+            }
         }
 
         server {
@@ -1299,9 +1303,13 @@ dependencies {
     compatibilityMatrixFixtureRuntimeOnly(
             "maven.modrinth:extended-crafting:${extended_crafting_ci_version}")
     compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
-    fusionRuntimeRuntimeOnly "maven.modrinth:emi:${emi_runtime_version}"
     emiRuntime "maven.modrinth:emi:${emi_runtime_version}"
     fusionRuntimeRuntimeOnly "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
+    if ((findProperty('recipeViewer') ?: 'emi').toString() == 'jei') {
+        fusionRuntimeRuntimeOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+    } else {
+        fusionRuntimeRuntimeOnly "maven.modrinth:emi:${emi_runtime_version}"
+    }
     clientSmokePatchouli "vazkii.patchouli:Patchouli:${patchouli_version}"
     clientSmokeFusion "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
     prismGuiIronFurnaces "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"

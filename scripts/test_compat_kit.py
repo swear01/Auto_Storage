@@ -7989,8 +7989,8 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         metadata = (
             output / "src/main/resources/META-INF/neoforge.mods.toml"
         ).read_text()
-        self.assertIn('versionRange="[0.3.0,0.4)"', metadata)
-        self.assertNotIn('versionRange="[0.3.0,1)"', metadata)
+        self.assertIn('versionRange="[0.3.1,0.4)"', metadata)
+        self.assertNotIn('versionRange="[0.3.1,1)"', metadata)
 
     def test_external_scaffold_rejects_descriptor_only_runtime_artifact_transform(self):
         contract = self.addon_contract()

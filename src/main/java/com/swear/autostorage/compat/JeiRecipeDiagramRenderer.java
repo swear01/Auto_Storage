@@ -227,6 +227,10 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
             return Optional.empty();
         }
         IRecipeCategory<?> category = manager.getRecipeCategory(recipeType.get());
+        Optional<IRecipeLayoutDrawable<?>> direct = createDrawable(manager, category, holder, focuses);
+        if (direct.isPresent()) {
+            return direct;
+        }
         return manager.createRecipeLookup(recipeType.get())
                 .get()
                 .filter(recipe -> recipeId.equals(category.getRegistryName(cast(recipe))))

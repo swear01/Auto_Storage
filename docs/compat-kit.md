@@ -763,7 +763,7 @@ Rerunning an unchanged scaffold restores `0755` on `gradlew` and
 `tools/compat-kit/compat-kit`.
 
 Generated independent addons require the current compatible Auto Storage minor
-line. A 0.3.0 kit emits `[0.3.0,0.4)`: patches remain compatible, while the
+line. A 0.3.1 kit emits `[0.3.1,0.4)`: patches remain compatible, while the
 next pre-1.0 minor requires an explicit addon review.
 
 ### 5. Implement with strict TDD
