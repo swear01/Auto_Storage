@@ -186,7 +186,7 @@ uses its descriptor's localized logical family name rather than `Station Work`.
 ## Mod-Specific Essentials
 
 - `auto_storage` — NeoForge 1.21.1 storage+crafting mod. Build: `./gradlew build`.
-- EMI is a required **client-only** dependency with release range `[1.1.24,2)`; `emi_version=1.1.24+1.21.1` plus its matching `emi_runtime_version` Modrinth ID are only the reproducible minimum development baseline. Integration code may use only EMI public API packages; dedicated servers must not require EMI.
+- EMI is an optional **client-only** recipe viewer with release range `[1.1.24,2)`; JEI is the other optional client viewer with range `[19.21.0,20)`. Players need **either EMI or JEI** (EMI preferred when both are present). `emi_version=1.1.24+1.21.1` plus its matching `emi_runtime_version` Modrinth ID, and `jei_version`, are reproducible development baselines — not exclusive player pins. Integration code may use only each viewer's public API packages; dedicated servers must not require EMI or JEI.
 - Auto Storage must not register third-party recipe workstations into EMI. The owning mod registers its JEI/EMI catalyst; the Prism GUI support pack uses TMRV to expose JEI-plugin metadata to EMI without installing JEI.
 - Canonical Item resource variant data must encode the reconstructed `ItemStack`'s `DataComponentPatch`, never its full effective `DataComponentMap`. Third-party item prototypes may contain default components that are valid in memory but intentionally cannot be serialized as explicit values.
 - When stuck on storage/network/grid/resource code, **check Refined Storage 2 source first** (patterns only, never copy verbatim — license differs). Full reference table + workflow in `docs/notes.md`.

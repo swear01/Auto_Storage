@@ -2,6 +2,7 @@ package com.swear.autostorage;
 
 import com.swear.autostorage.compat.EmiRecipeDiagramBootstrap;
 import com.swear.autostorage.compat.EmiTerminalSearchSynchronizer;
+import com.swear.autostorage.compat.JeiRecipeDiagramBootstrap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -28,12 +29,18 @@ public class ClientSetup {
         if (ModList.get().isLoaded("emi")) {
             return EmiRecipeDiagramBootstrap.create();
         }
+        if (ModList.get().isLoaded("jei") && JeiRecipeDiagramBootstrap.isRuntimeReady()) {
+            return JeiRecipeDiagramBootstrap.createRenderer();
+        }
         return new NativeRecipeDiagramRenderer();
     }
 
     static TerminalSearchSynchronizer createTerminalSearchSynchronizer() {
         if (ModList.get().isLoaded("emi")) {
             return new EmiTerminalSearchSynchronizer();
+        }
+        if (ModList.get().isLoaded("jei") && JeiRecipeDiagramBootstrap.isRuntimeReady()) {
+            return JeiRecipeDiagramBootstrap.createSearchSynchronizer();
         }
         return TerminalSearchSynchronizer.NONE;
     }

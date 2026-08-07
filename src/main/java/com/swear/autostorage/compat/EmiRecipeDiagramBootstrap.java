@@ -12,6 +12,10 @@ public final class EmiRecipeDiagramBootstrap {
         registryReady = true;
     }
 
+    public static boolean isRegistryReady() {
+        return registryReady;
+    }
+
     public static RecipeDiagramRenderer create() {
         if (!registryReady) {
             throw new IllegalStateException("EMI recipe registry is not ready");

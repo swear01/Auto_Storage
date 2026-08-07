@@ -222,6 +222,9 @@ class StaticRegressionTests(unittest.TestCase):
         emi = self.read_required(
             "src/main/java/com/swear/autostorage/compat/EmiTerminalSearchSynchronizer.java"
         )
+        jei = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiTerminalSearchSynchronizer.java"
+        )
 
         self.assertIn("OFF", mode)
         self.assertIn("EMI_TWO_WAY", mode)
@@ -246,6 +249,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn(".apply(", send_search)
         self.assertIn("TerminalSearchSynchronizer", screen)
         self.assertIn("synchronizeFromTerminal", screen)
+        self.assertIn("EmiApi.setSearchText", emi)
+        self.assertIn("EmiApi.getSearchText", emi)
+        self.assertIn("getIngredientFilter().setFilterText", jei)
+        self.assertIn("getIngredientFilter().getFilterText", jei)
         self.assertIn("textToSynchronizeToTerminal", screen)
 
         self.assertNotIn("import dev.emi.", synchronizer)
@@ -1000,12 +1007,28 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn('rename { "patchouli-neoforge.jar" }', build)
         self.assertIn('rename { "fusion-connected-textures.jar" }', build)
         self.assertRegex(build, r"emi_version_range\s*:\s*emi_version_range")
+        self.assertRegex(build, r"jei_version_range\s*:\s*jei_version_range")
+        self.assertRegex(
+            build,
+            r'compileOnly\s+"mezz\.jei:jei-1\.21\.1-neoforge-api:\$\{jei_version\}"',
+        )
+        self.assertIn("jei_version=19.27.0.343", properties)
+        self.assertIn("jei_version_range=[19.21.0,20)", properties)
         self.assertRegex(
             metadata,
             r'''(?s)\[\[dependencies\.\$\{mod_id\}\]\]\s*
 \s*modId="emi"\s*
-\s*type="required"\s*
+\s*type="optional"\s*
 \s*versionRange="\$\{emi_version_range\}"\s*
+\s*ordering="NONE"\s*
+\s*side="CLIENT"''',
+        )
+        self.assertRegex(
+            metadata,
+            r'''(?s)\[\[dependencies\.\$\{mod_id\}\]\]\s*
+\s*modId="jei"\s*
+\s*type="optional"\s*
+\s*versionRange="\$\{jei_version_range\}"\s*
 \s*ordering="NONE"\s*
 \s*side="CLIENT"''',
         )
@@ -2791,7 +2814,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotRegex(build, r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:tmrv:')
         self.assertNotIn('modId="tmrv"', metadata)
         self.assertNotIn('modId="macfix"', metadata)
-        self.assertNotIn('modId="jei"', metadata)
+        self.assertRegex(
+            metadata,
+            r'(?s)modId="jei"\s*type="optional"',
+            "JEI must stay a client optional viewer dependency, never a GUI-pack runtime pin",
+        )
         self.assertNotIn('modId="mekanism"', metadata)
 
     def test_active_docs_name_the_correct_macfix_project_and_local_pin(self):
@@ -2963,11 +2990,17 @@ class StaticRegressionTests(unittest.TestCase):
                 f"{relative_path} must not link EMI API classes",
             )
         self.assertIn('ModList.get().isLoaded("emi")', setup)
+        self.assertIn('ModList.get().isLoaded("jei")', setup)
         self.assertIn("EmiRecipeDiagramBootstrap", setup)
+        self.assertIn("JeiRecipeDiagramBootstrap", setup)
         self.assertIn("RecipeDiagramRenderer", bootstrap)
         self.assertIn("EmiRecipeDiagramRenderer", bootstrap)
         self.assertIn("RecipeDiagramRenderer", screen)
         self.assertIn("NativeRecipeDiagramRenderer", screen)
+        self.assertNotIn("import mezz.jei.", setup)
+        self.assertNotIn("import mezz.jei.", screen)
+        self.assertNotIn("import mezz.jei.", native)
+        self.assertNotIn("import mezz.jei.", interface)
 
     def test_emi_diagram_adapter_uses_only_public_recipe_widget_contracts(self):
         renderer = self.read_required(
@@ -2997,6 +3030,35 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("widget.mouseClicked(", renderer)
         self.assertIn("widget.keyPressed(", renderer)
 
+    def test_jei_diagram_adapter_uses_only_public_layout_contracts(self):
+        renderer = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiRecipeDiagramRenderer.java"
+        )
+        plugin = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/AutoStorageJeiPlugin.java"
+        )
+        setup = self.read_required(
+            "src/main/java/com/swear/autostorage/ClientSetup.java"
+        )
+
+        for public_api in [
+            "mezz.jei.api.gui.IRecipeLayoutDrawable",
+            "mezz.jei.api.recipe.IRecipeManager",
+            "mezz.jei.api.runtime.IJeiRuntime",
+        ]:
+            self.assertIn(public_api, renderer)
+        self.assertIn("createRecipeLayoutDrawable", renderer)
+        self.assertIn("drawRecipe", renderer)
+        self.assertIn("drawOverlays", renderer)
+        self.assertIn("getInputHandler", renderer)
+        self.assertNotIn("mezz.jei.gui.", renderer)
+        self.assertNotIn("mezz.jei.library.", renderer)
+        self.assertNotIn("mezz.jei.common.", renderer)
+        self.assertIn("@JeiPlugin", plugin)
+        self.assertIn("addUniversalRecipeTransferHandler", plugin)
+        self.assertIn("JeiRecipeDiagramBootstrap", setup)
+        self.assertIn('ModList.get().isLoaded("jei")', setup)
+
     def test_emi_compat_sources_never_link_internal_packages(self):
         compat_root = ROOT / "src/main/java/com/swear/autostorage/compat"
         sources = "\n".join(path.read_text() for path in sorted(compat_root.glob("*.java")))
@@ -3021,6 +3083,8 @@ class StaticRegressionTests(unittest.TestCase):
 
         self.assertIn("NativeRecipeDiagramRenderer", setup)
         self.assertIn('ModList.get().isLoaded("emi")', setup)
+        self.assertIn('ModList.get().isLoaded("jei")', setup)
+        self.assertIn("JeiRecipeDiagramBootstrap", setup)
         self.assertIn("preferredRecipeDiagramRenderer", screen)
         self.assertIn("nativeRecipeDiagramRenderer", screen)
         self.assertRegex(
