@@ -3105,6 +3105,13 @@ class StaticRegressionTests(unittest.TestCase):
             "            return cachedLayout;",
             renderer,
         )
+        self.assertIn("registerGuiHandlers", plugin)
+        self.assertIn("addGuiContainerHandler(CraftingTerminalScreen.class", plugin)
+        self.assertIn("getEmiExclusionAreas()", plugin)
+        self.assertIn("currentHolder == holder", plugin)
+        self.assertIn("graphics.pose().popPose();", renderer)
+        self.assertIn("renderTooltip", renderer)
+        self.assertIn("EMI **或** JEI", self.read_required("docs/notes.md"))
 
     def test_emi_compat_sources_never_link_internal_packages(self):
         compat_root = ROOT / "src/main/java/com/swear/autostorage/compat"

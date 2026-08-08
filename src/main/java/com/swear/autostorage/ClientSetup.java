@@ -23,6 +23,9 @@ public class ClientSetup {
     }
 
     public static void register(IEventBus modEventBus) {
+        if (!ModList.get().isLoaded("emi") && !ModList.get().isLoaded("jei")) {
+            throw new IllegalStateException("Auto Storage requires EMI or JEI on clients");
+        }
         modEventBus.addListener(ClientSetup::registerScreens);
         modEventBus.addListener(
                 EventPriority.LOWEST,

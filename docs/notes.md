@@ -1,6 +1,6 @@
 # Notes
 
-2026-08-07 GitHub #92 follow-up：終端畫面不再把 viewer adapter 釘死在 constructor。`ClientSetup.selectedViewerBinding()` 區分 EMI／JEI-ready／NONE；Craftable diagram 與 Search Sync 在 binding 改變時（例如 JEI `onRuntimeAvailable` 之後）重建 adapter，避免開畫面當下 JEI 尚未 ready 就整次停在 Native／NONE。
+2026-08-07 GitHub #92 follow-up：終端畫面不再把 viewer adapter 釘死在 constructor。`ClientSetup.selectedViewerBinding()` 區分 EMI／JEI-ready／NONE；Craftable diagram 與 Search Sync 在 binding 或 JEI runtime generation 改變時（例如 JEI `onRuntimeAvailable` 之後）重建 adapter，避免開畫面當下 JEI 尚未 ready 就整次停在 Native／NONE。`NONE`只容許 JEI runtime 的短暫未就緒；client 必須安裝 EMI **或** JEI，兩者皆無會在 client startup 拒絕。
 
 2026-08-07 GitHub #92：客戶端配方瀏覽器改為 optional EMI **或** JEI（兩者都在時優先 EMI）。`IRecipeLayoutDrawable`／`IIngredientFilter`／`IUniversalRecipeTransferHandler` 只走 JEI 公開 API；Craftable 內嵌圖、Search Sync、viewer→Crafting Terminal transfer 與既有 EMI 路徑對齊。`neoforge.mods.toml` 不再把 EMI 訂成 required；dedicated server 仍不載入任一 viewer。
 

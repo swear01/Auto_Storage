@@ -4,9 +4,12 @@ import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingRecipeSelectionPacket;
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.CraftingTerminalScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.gui.handlers.IGuiContainerHandler;
+import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.transfer.IUniversalRecipeTransferHandler;
@@ -15,6 +18,7 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -22,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.List;
 
 @JeiPlugin
 public final class AutoStorageJeiPlugin implements IModPlugin {
@@ -49,6 +54,17 @@ public final class AutoStorageJeiPlugin implements IModPlugin {
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
         registration.addUniversalRecipeTransferHandler(
                 new CraftingTerminalTransferHandler(registration.getTransferHelper()));
+    }
+
+    @Override
+    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addGuiContainerHandler(CraftingTerminalScreen.class,
+                new IGuiContainerHandler<CraftingTerminalScreen>() {
+                    @Override
+                    public List<Rect2i> getGuiExtraAreas(CraftingTerminalScreen screen) {
+                        return screen.getEmiExclusionAreas();
+                    }
+                });
     }
 
     private static final class CraftingTerminalTransferHandler
@@ -113,7 +129,8 @@ public final class AutoStorageJeiPlugin implements IModPlugin {
             if (minecraft.level == null) {
                 return null;
             }
-            return minecraft.level.getRecipeManager().byKey(holder.id()).orElse(null);
+            RecipeHolder<?> currentHolder = minecraft.level.getRecipeManager().byKey(holder.id()).orElse(null);
+            return currentHolder == holder ? currentHolder : null;
         }
     }
 }
