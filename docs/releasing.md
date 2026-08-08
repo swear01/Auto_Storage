@@ -5,9 +5,11 @@ This is the maintainer runbook for the tag-driven alpha publisher in
 
 ## Next release target
 
-No next tag is scheduled. Ship the next version only after `gradle.properties`
-`mod_version` changes and a matching `docs/release-notes/<mod_version>.md`
-exists.
+- Version: `0.3.1`
+- Notes: `docs/release-notes/0.3.1.md`
+- Intent: optional EMI **or** JEI client recipe viewer (closes #92)
+- Tag only after PR merge to `main`, green CI on that commit, and maintainer
+  confirmation to run the tag-driven publisher
 
 ## Current release evidence
 
@@ -66,8 +68,8 @@ instance, and start a new world.
   `5bbd61d561cf5f6f3f3b87bbfc439c05b1f48b4a650d76e8e3ca665a5847945c`
 
 Keep both platform long descriptions aligned with the current README feature and
-requirement facts. EMI is client-required with the supported range
-`[1.1.24,2)`; Patchouli is required; Fusion is optional and must not be declared
+requirement facts. Clients need **either EMI or JEI** (EMI preferred when both
+are present); Patchouli is required; Fusion is optional and must not be declared
 as required. Optional compatibility fixtures are CI evidence, not player-facing
 exact dependency pins.
 

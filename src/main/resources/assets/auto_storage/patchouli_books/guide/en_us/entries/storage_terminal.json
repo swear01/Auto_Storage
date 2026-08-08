@@ -19,7 +19,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "The search field parses ordinary names, @mod, and #tag. A bare @, #, or $ behaves like an empty search. Click outside to release Search without clearing its filter. Auto Focus gives Search initial focus only when the terminal opens; Search Sync separately controls EMI."
+      "text": "The search field parses ordinary names, @mod, and #tag. A bare @, #, or $ behaves like an empty search. Click outside to release Search without clearing its filter. Auto Focus gives Search initial focus only when the terminal opens; Search Sync separately controls the installed recipe viewer (EMI or JEI)."
     },
     {
       "type": "patchouli:text",

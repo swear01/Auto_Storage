@@ -312,7 +312,7 @@ preflight, and existing ancestors above a not-yet-created root are included.
 Byte-identical reruns repair both generated launchers to mode `0755`. Generated
 TOML also escapes DEL (`U+007F`).
 Generated addon metadata accepts only the current compatible Auto Storage minor
-(`[0.3.0,0.4)` for this kit).
+(`[0.3.1,0.4)` for this kit).
 Addon contracts use fixture `main` and exactly the `build` and
 `runGameTestServer` tasks. Generated builds bind both gates to the exact
 reviewed target jar SHA; target compile/runtime and explicit runtime

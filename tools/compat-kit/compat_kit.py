@@ -47,7 +47,7 @@ MAX_RUNTIME_PROBE_RECIPES = 50_000
 MAX_RUNTIME_PROBE_VALUES = 4_096
 GRADLE_INTEGER_MAX = 2_147_483_647
 JAVA_LONG_MAX = 9_223_372_036_854_775_807
-TOOL_VERSION = "0.3.0"
+TOOL_VERSION = "0.3.1"
 SOURCE_EVIDENCE_PATH_PATTERN = (
     r"^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\.\.?(?:/|$))(?!.*//)(?!.*\\)"
     r"(?!.*[\u0000-\u001f\u007f])(?:[^/]+/)*[^/]+\.java$"

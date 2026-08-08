@@ -47,7 +47,9 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
 
     private final List<Slot> semanticSlots;
     private final TerminalPreferenceSession preferenceSession;
-    private final TerminalSearchSynchronizer searchSynchronizer;
+    private ClientSetup.ViewerBinding searchViewerBinding;
+    private long searchViewerGeneration;
+    private TerminalSearchSynchronizer searchSynchronizer;
     private EditBox searchBox;
     private final TerminalScrollbar scrollbar = new TerminalScrollbar();
     private int lastRequestedScroll = Integer.MIN_VALUE;
@@ -78,7 +80,24 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 menu instanceof CraftingTerminalMenu
                         ? TerminalPreferenceSession.Scope.CRAFTING
                         : TerminalPreferenceSession.Scope.STORAGE);
+        this.searchViewerBinding = ClientSetup.selectedViewerBinding();
+        this.searchViewerGeneration = ClientSetup.viewerGeneration();
         this.searchSynchronizer = ClientSetup.createTerminalSearchSynchronizer();
+    }
+
+    private TerminalSearchSynchronizer searchSynchronizer() {
+        ClientSetup.ViewerBinding binding = ClientSetup.selectedViewerBinding();
+        long generation = ClientSetup.viewerGeneration();
+        if (binding != searchViewerBinding || generation != searchViewerGeneration) {
+            searchViewerBinding = binding;
+            searchViewerGeneration = generation;
+            searchSynchronizer = ClientSetup.createTerminalSearchSynchronizer();
+            if (searchBox != null) {
+                searchSynchronizer.synchronizeFromTerminal(
+                        displayedPreferences().searchMode(), searchBox.getValue());
+            }
+        }
+        return searchSynchronizer;
     }
 
     protected TerminalLayout.Geometry createGeometry() {
@@ -891,7 +910,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     private void scheduleSearch(String ignored) {
-        searchSynchronizer.synchronizeFromTerminal(
+        searchSynchronizer().synchronizeFromTerminal(
                 displayedPreferences().searchMode(), searchBox.getValue());
         searchTimer = SEARCH_DEBOUNCE_TICKS;
     }
@@ -922,7 +941,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             boolean searchModeChanged = preferences.searchMode() != lastSeenSearchMode;
             updateViewSettingButtons();
             if (searchModeChanged) {
-                searchSynchronizer.synchronizeFromTerminal(
+                searchSynchronizer().synchronizeFromTerminal(
                         preferences.searchMode(), searchBox.getValue());
             }
         }
@@ -931,7 +950,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     private void synchronizeSearchFromEmi() {
-        String text = searchSynchronizer.textToSynchronizeToTerminal(
+        String text = searchSynchronizer().textToSynchronizeToTerminal(
                 displayedPreferences().searchMode());
         if (text == null || text.equals(searchBox.getValue())) return;
         searchBox.setValue(text);

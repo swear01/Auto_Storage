@@ -48,6 +48,7 @@ class SelfTest {
 
     static void runConstructionPhaseTests() {
         testAddonRegistrationFacade();
+        testTerminalResourceRendererApi();
     }
 
     static void runAll() {
@@ -78,7 +79,6 @@ class SelfTest {
         testEnergyCost();
         testFuelValue();
         testTransformProviderApi();
-        testTerminalResourceRendererApi();
         testAddonRegistrationFreeze();
         testCompatibilityModuleLoader();
         testEnergyTypeUniqueness();

@@ -525,7 +525,7 @@ The API artifact version equals the Auto Storage mod version.
 - Patch releases must remain source- and binary-compatible with the preceding
   release in the same minor line.
 - Compat Kit therefore generates a current-minor dependency range; version
-  0.3.0 produces `[0.3.0,0.4)`, not an open-ended pre-1.0 range.
+  0.3.1 produces `[0.3.1,0.4)`, not an open-ended pre-1.0 range.
 - Compat Kit publication receives the authoritative Gradle `mod_version` and
   fails if it differs from the tool version. Its addon example and ten
   machine-readable schemas use explicit tracked allowlists, never recursive or
