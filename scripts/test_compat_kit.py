@@ -10714,7 +10714,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
         ):
             self.compat_kit.publish_archive(
                 self.root / "compat-kit.zip",
-                "0.3.1",
+                "0.3.2",
             )
 
     def test_compatibility_matrix_verifies_every_audited_compat_artifact(self):
