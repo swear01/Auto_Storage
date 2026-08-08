@@ -6,20 +6,27 @@ import mezz.jei.api.runtime.IJeiRuntime;
 
 public final class JeiRecipeDiagramBootstrap {
     private static volatile IJeiRuntime runtime;
+    private static volatile long runtimeGeneration;
 
     private JeiRecipeDiagramBootstrap() {
     }
 
     public static void markRuntimeAvailable(IJeiRuntime jeiRuntime) {
         runtime = jeiRuntime;
+        runtimeGeneration++;
     }
 
     public static void markRuntimeUnavailable() {
         runtime = null;
+        runtimeGeneration++;
     }
 
     public static boolean isRuntimeReady() {
         return runtime != null;
+    }
+
+    public static long runtimeGeneration() {
+        return runtimeGeneration;
     }
 
     static IJeiRuntime runtime() {

@@ -48,6 +48,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     private final List<Slot> semanticSlots;
     private final TerminalPreferenceSession preferenceSession;
     private ClientSetup.ViewerBinding searchViewerBinding;
+    private long searchViewerGeneration;
     private TerminalSearchSynchronizer searchSynchronizer;
     private EditBox searchBox;
     private final TerminalScrollbar scrollbar = new TerminalScrollbar();
@@ -80,14 +81,21 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                         ? TerminalPreferenceSession.Scope.CRAFTING
                         : TerminalPreferenceSession.Scope.STORAGE);
         this.searchViewerBinding = ClientSetup.selectedViewerBinding();
+        this.searchViewerGeneration = ClientSetup.viewerGeneration();
         this.searchSynchronizer = ClientSetup.createTerminalSearchSynchronizer();
     }
 
     private TerminalSearchSynchronizer searchSynchronizer() {
         ClientSetup.ViewerBinding binding = ClientSetup.selectedViewerBinding();
-        if (binding != searchViewerBinding) {
+        long generation = ClientSetup.viewerGeneration();
+        if (binding != searchViewerBinding || generation != searchViewerGeneration) {
             searchViewerBinding = binding;
+            searchViewerGeneration = generation;
             searchSynchronizer = ClientSetup.createTerminalSearchSynchronizer();
+            if (searchBox != null) {
+                searchSynchronizer.synchronizeFromTerminal(
+                        displayedPreferences().searchMode(), searchBox.getValue());
+            }
         }
         return searchSynchronizer;
     }

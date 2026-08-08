@@ -24,6 +24,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
 
     private final NativeRecipeDiagramRenderer nativeRecipeDiagramRenderer;
     private ClientSetup.ViewerBinding preferredViewerBinding;
+    private long preferredViewerGeneration;
     private RecipeDiagramRenderer preferredRecipeDiagramRenderer;
     private Button prevRecipeBtn;
     private Button nextRecipeBtn;
@@ -72,13 +73,16 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         super(menu, playerInv, title);
         nativeRecipeDiagramRenderer = new NativeRecipeDiagramRenderer();
         preferredViewerBinding = ClientSetup.selectedViewerBinding();
+        preferredViewerGeneration = ClientSetup.viewerGeneration();
         preferredRecipeDiagramRenderer = ClientSetup.createRecipeDiagramRenderer();
     }
 
     private RecipeDiagramRenderer preferredRecipeDiagramRenderer() {
         ClientSetup.ViewerBinding binding = ClientSetup.selectedViewerBinding();
-        if (binding != preferredViewerBinding) {
+        long generation = ClientSetup.viewerGeneration();
+        if (binding != preferredViewerBinding || generation != preferredViewerGeneration) {
             preferredViewerBinding = binding;
+            preferredViewerGeneration = generation;
             preferredRecipeDiagramRenderer = ClientSetup.createRecipeDiagramRenderer();
         }
         return preferredRecipeDiagramRenderer;

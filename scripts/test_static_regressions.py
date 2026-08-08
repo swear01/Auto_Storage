@@ -3060,6 +3060,15 @@ class StaticRegressionTests(unittest.TestCase):
         renderer = self.read_required(
             "src/main/java/com/swear/autostorage/compat/JeiRecipeDiagramRenderer.java"
         )
+        bootstrap = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiRecipeDiagramBootstrap.java"
+        )
+        storage_screen = self.read_required(
+            "src/main/java/com/swear/autostorage/StorageTerminalScreen.java"
+        )
+        crafting_screen = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalScreen.java"
+        )
         plugin = self.read_required(
             "src/main/java/com/swear/autostorage/compat/AutoStorageJeiPlugin.java"
         )
@@ -3085,6 +3094,17 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("addUniversalRecipeTransferHandler", plugin)
         self.assertIn("JeiRecipeDiagramBootstrap", setup)
         self.assertIn('ModList.get().isLoaded("jei")', setup)
+        self.assertIn("runtimeGeneration", bootstrap)
+        self.assertIn("viewerGeneration", setup)
+        self.assertIn("searchViewerGeneration", storage_screen)
+        self.assertIn("synchronizeFromTerminal(", storage_screen)
+        self.assertIn("preferredViewerGeneration", crafting_screen)
+        self.assertIn("cachedId = presentation.recipeId();", renderer)
+        self.assertIn(
+            "if (Objects.equals(cachedId, presentation.recipeId())) {\n"
+            "            return cachedLayout;",
+            renderer,
+        )
 
     def test_emi_compat_sources_never_link_internal_packages(self):
         compat_root = ROOT / "src/main/java/com/swear/autostorage/compat"

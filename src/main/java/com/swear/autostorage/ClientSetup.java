@@ -41,6 +41,12 @@ public class ClientSetup {
         return ViewerBinding.NONE;
     }
 
+    static long viewerGeneration() {
+        return selectedViewerBinding() == ViewerBinding.JEI
+                ? JeiRecipeDiagramBootstrap.runtimeGeneration()
+                : 0L;
+    }
+
     static RecipeDiagramRenderer createRecipeDiagramRenderer() {
         return switch (selectedViewerBinding()) {
             case EMI -> EmiRecipeDiagramBootstrap.create();

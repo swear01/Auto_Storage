@@ -156,12 +156,12 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
     }
 
     private IRecipeLayoutDrawable<?> compatibleLayout(RecipePresentation presentation) {
-        if (Objects.equals(cachedId, presentation.recipeId()) && cachedLayout != null) {
+        if (Objects.equals(cachedId, presentation.recipeId())) {
             return cachedLayout;
         }
         Optional<IRecipeLayoutDrawable<?>> created = createLayout(presentation.recipeId());
         if (created.isEmpty()) {
-            cachedId = null;
+            cachedId = presentation.recipeId();
             cachedLayout = null;
             cachedWidth = 0;
             cachedHeight = 0;
