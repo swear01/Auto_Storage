@@ -1182,7 +1182,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         }
     }
 
-    protected List<Rect2i> terminalExclusionAreas() {
+    public List<Rect2i> terminalExclusionAreas() {
         List<Rect2i> result = new ArrayList<>(geometry.exclusionRects().size());
         for (TerminalLayout.Rect rectangle : geometry.exclusionRects()) {
             result.add(new Rect2i(

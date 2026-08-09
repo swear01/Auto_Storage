@@ -142,10 +142,18 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         LayoutState state = layoutState(presentation, geometry, left, top);
         int localMouseX = (int) ((mouseX - state.originX()) / state.scale());
         int localMouseY = (int) ((mouseY - state.originY()) / state.scale());
+        int overlayMouseX = state.originX() + localMouseX;
+        int overlayMouseY = state.originY() + localMouseY;
+        graphics.pose().pushPose();
+        graphics.pose().translate(mouseX - overlayMouseX, mouseY - overlayMouseY, 0);
         state.layout().setPosition(state.originX(), state.originY());
-        state.layout().drawOverlays(graphics, mouseX, mouseY);
-        return state.layout().isMouseOver(localMouseX, localMouseY)
-                || state.layout().getSlotUnderMouse(localMouseX, localMouseY).isPresent();
+        try {
+            state.layout().drawOverlays(graphics, overlayMouseX, overlayMouseY);
+        } finally {
+            graphics.pose().popPose();
+        }
+        return state.layout().isMouseOver(overlayMouseX, overlayMouseY)
+                || state.layout().getSlotUnderMouse(overlayMouseX, overlayMouseY).isPresent();
     }
 
     private IRecipeLayoutDrawable<?> compatibleLayout(RecipePresentation presentation) {

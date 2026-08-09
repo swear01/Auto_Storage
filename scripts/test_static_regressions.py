@@ -3112,6 +3112,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("graphics.pose().popPose();", renderer)
         self.assertIn("renderTooltip", renderer)
         self.assertIn("EMI **或** JEI", self.read_required("docs/notes.md"))
+        self.assertIn("StorageTerminalScreen.class", plugin)
+        self.assertIn("candidate.value() == recipe", plugin)
+        self.assertIn("Minecraft.getInstance().stop()", self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
+        self.assertIn("emi(optional)", self.read_required(".github/workflows/release.yml"))
 
     def test_emi_compat_sources_never_link_internal_packages(self):
         compat_root = ROOT / "src/main/java/com/swear/autostorage/compat"

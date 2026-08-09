@@ -175,7 +175,8 @@ jobs:
           game-versions: 1.21.1
           java: 21
           dependencies: |
-            emi(required){modrinth:fRiHVvU7}{curseforge:580555}#(ignore:github)
+            emi(optional){modrinth:fRiHVvU7}{curseforge:580555}#(ignore:github)
+            jei(optional){modrinth:u6dRKJwZ}{curseforge:238222}#(ignore:github)
             patchouli(required){modrinth:nU0bVIaL}{curseforge:306770}#(ignore:github)
 
       - name: Upload addon SDK assets

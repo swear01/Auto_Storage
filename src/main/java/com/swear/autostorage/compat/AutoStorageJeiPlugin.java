@@ -5,6 +5,7 @@ import com.swear.autostorage.CraftingDestination;
 import com.swear.autostorage.CraftingRecipeSelectionPacket;
 import com.swear.autostorage.CraftingTerminalMenu;
 import com.swear.autostorage.CraftingTerminalScreen;
+import com.swear.autostorage.StorageTerminalScreen;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -58,6 +59,13 @@ public final class AutoStorageJeiPlugin implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addGenericGuiContainerHandler(StorageTerminalScreen.class,
+                new IGuiContainerHandler<StorageTerminalScreen<?>>() {
+                    @Override
+                    public List<Rect2i> getGuiExtraAreas(StorageTerminalScreen<?> screen) {
+                        return screen.terminalExclusionAreas();
+                    }
+                });
         registration.addGuiContainerHandler(CraftingTerminalScreen.class,
                 new IGuiContainerHandler<CraftingTerminalScreen>() {
                     @Override
@@ -122,15 +130,18 @@ public final class AutoStorageJeiPlugin implements IModPlugin {
 
         @Nullable
         private static RecipeHolder<?> resolveHolder(Object recipe) {
-            if (!(recipe instanceof RecipeHolder<?> holder)) {
-                return null;
-            }
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.level == null) {
                 return null;
             }
-            RecipeHolder<?> currentHolder = minecraft.level.getRecipeManager().byKey(holder.id()).orElse(null);
-            return currentHolder == holder ? currentHolder : null;
+            if (recipe instanceof RecipeHolder<?> holder) {
+                RecipeHolder<?> currentHolder = minecraft.level.getRecipeManager().byKey(holder.id()).orElse(null);
+                return currentHolder == holder ? currentHolder : null;
+            }
+            return minecraft.level.getRecipeManager().getRecipes().stream()
+                    .filter(candidate -> candidate.value() == recipe)
+                    .findFirst()
+                    .orElse(null);
         }
     }
 }
