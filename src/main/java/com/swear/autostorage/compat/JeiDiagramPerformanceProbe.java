@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 final class JeiDiagramPerformanceProbe {
     private static final Logger LOGGER = LoggerFactory.getLogger(JeiDiagramPerformanceProbe.class);
@@ -71,12 +72,17 @@ final class JeiDiagramPerformanceProbe {
         IFocusGroup focuses = runtime.getJeiHelpers().getFocusFactory().getEmptyFocusGroup();
         IRecipeCategory<RecipeHolder<CraftingRecipe>> category =
                 manager.getRecipeCategory(RecipeTypes.CRAFTING);
-        List<RecipeHolder<CraftingRecipe>> samples = manager.createRecipeLookup(RecipeTypes.CRAFTING)
+        List<RecipeHolder<CraftingRecipe>> allSamples = manager.createRecipeLookup(RecipeTypes.CRAFTING)
                 .get()
-                .limit(SAMPLE_LIMIT)
+                .toList();
+        int sampleCount = Math.min(SAMPLE_LIMIT, allSamples.size());
+        List<RecipeHolder<CraftingRecipe>> samples = IntStream.range(0, sampleCount)
+                .mapToObj(index -> allSamples.get((int) ((long) index * (allSamples.size() - 1)
+                        / Math.max(1, sampleCount - 1))))
                 .toList();
         if (samples.isEmpty()) {
             LOGGER.warn("JEI diagram probe skipped: no crafting recipes");
+            Minecraft.getInstance().execute(() -> Minecraft.getInstance().stop());
             return;
         }
 

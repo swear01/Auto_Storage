@@ -842,6 +842,9 @@ neoForge {
             loadedMods = [mods."${mod_id}"]
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             if (providers.gradleProperty('jeiDiagramBench').present) {
+                if ((providers.gradleProperty('recipeViewer').orNull ?: 'emi') != 'jei') {
+                    throw new GradleException('jeiDiagramBench requires -PrecipeViewer=jei')
+                }
                 systemProperty 'auto_storage.jeiDiagramBench', 'true'
                 programArguments.addAll '--quickPlaySingleplayer', 'New World'
             }

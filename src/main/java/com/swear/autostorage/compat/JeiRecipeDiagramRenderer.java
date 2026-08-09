@@ -24,6 +24,7 @@ import java.util.Optional;
 public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
     private final IJeiRuntime runtime;
     private ResourceLocation cachedId;
+    private Object cachedRecipeSnapshot;
     private IRecipeLayoutDrawable<?> cachedLayout;
     private int cachedWidth;
     private int cachedHeight;
@@ -142,27 +143,23 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         LayoutState state = layoutState(presentation, geometry, left, top);
         int localMouseX = (int) ((mouseX - state.originX()) / state.scale());
         int localMouseY = (int) ((mouseY - state.originY()) / state.scale());
-        int overlayMouseX = state.originX() + localMouseX;
-        int overlayMouseY = state.originY() + localMouseY;
-        graphics.pose().pushPose();
-        graphics.pose().translate(mouseX - overlayMouseX, mouseY - overlayMouseY, 0);
-        state.layout().setPosition(state.originX(), state.originY());
-        try {
-            state.layout().drawOverlays(graphics, overlayMouseX, overlayMouseY);
-        } finally {
-            graphics.pose().popPose();
-        }
-        return state.layout().isMouseOver(overlayMouseX, overlayMouseY)
-                || state.layout().getSlotUnderMouse(overlayMouseX, overlayMouseY).isPresent();
+        state.layout().setPosition(mouseX - localMouseX, mouseY - localMouseY);
+        state.layout().drawOverlays(graphics, mouseX, mouseY);
+        return state.layout().isMouseOver(mouseX, mouseY)
+                || state.layout().getSlotUnderMouse(mouseX, mouseY).isPresent();
     }
 
     private IRecipeLayoutDrawable<?> compatibleLayout(RecipePresentation presentation) {
-        if (Objects.equals(cachedId, presentation.recipeId())) {
+        Object recipeSnapshot = currentRecipeSnapshot();
+        if (recipeSnapshot != null
+                && Objects.equals(cachedId, presentation.recipeId())
+                && cachedRecipeSnapshot == recipeSnapshot) {
             return cachedLayout;
         }
         Optional<IRecipeLayoutDrawable<?>> created = createLayout(presentation.recipeId());
         if (created.isEmpty()) {
             cachedId = presentation.recipeId();
+            cachedRecipeSnapshot = recipeSnapshot;
             cachedLayout = null;
             cachedWidth = 0;
             cachedHeight = 0;
@@ -171,10 +168,16 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         IRecipeLayoutDrawable<?> layout = created.get();
         Rect2i rect = layout.getRect();
         cachedId = presentation.recipeId();
+        cachedRecipeSnapshot = recipeSnapshot;
         cachedLayout = layout;
         cachedWidth = rect.getWidth();
         cachedHeight = rect.getHeight();
         return layout;
+    }
+
+    private static Object currentRecipeSnapshot() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return minecraft.level == null ? null : minecraft.level.getRecipeManager().getRecipes();
     }
 
     private LayoutState layoutState(RecipePresentation presentation, Geometry geometry, int left, int top) {
@@ -228,10 +231,6 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
             return Optional.empty();
         }
         IRecipeCategory<?> category = manager.getRecipeCategory(recipeType.get());
-        Optional<IRecipeLayoutDrawable<?>> direct = createDrawable(manager, category, holder, focuses);
-        if (direct.isPresent()) {
-            return direct;
-        }
         return manager.createRecipeLookup(recipeType.get())
                 .get()
                 .filter(recipe -> recipeId.equals(category.getRegistryName(cast(recipe))))

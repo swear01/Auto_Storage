@@ -3083,7 +3083,7 @@ class StaticRegressionTests(unittest.TestCase):
         ]:
             self.assertIn(public_api, renderer)
         self.assertIn("createRecipeLayoutDrawable", renderer)
-        self.assertIn("createDrawable(manager, category, holder, focuses)", renderer)
+        self.assertIn("createRecipeLookup(recipeType.get())", renderer)
         self.assertIn("drawRecipe", renderer)
         self.assertIn("drawOverlays", renderer)
         self.assertIn("getInputHandler", renderer)
@@ -3100,11 +3100,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("synchronizeFromTerminal(", storage_screen)
         self.assertIn("preferredViewerGeneration", crafting_screen)
         self.assertIn("cachedId = presentation.recipeId();", renderer)
-        self.assertIn(
-            "if (Objects.equals(cachedId, presentation.recipeId())) {\n"
-            "            return cachedLayout;",
-            renderer,
-        )
+        self.assertIn("cachedRecipeSnapshot == recipeSnapshot", renderer)
         self.assertIn("registerGuiHandlers", plugin)
         self.assertIn("addGuiContainerHandler(CraftingTerminalScreen.class", plugin)
         self.assertIn("getEmiExclusionAreas()", plugin)
@@ -3122,6 +3118,17 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("Minecraft.getInstance().stop()", self.read_required(
             "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
         self.assertIn("Invalid recipeViewer", self.read_required("build.gradle"))
+        self.assertIn("jeiDiagramBench requires -PrecipeViewer=jei", self.read_required("build.gradle"))
+        self.assertIn("createRecipeLookup(recipeType.get())", renderer)
+        self.assertNotIn("createDrawable(manager, category, holder, focuses)", renderer)
+        self.assertIn("cachedRecipeSnapshot", renderer)
+        self.assertIn("getRecipeManager().getRecipes()", renderer)
+        self.assertIn("state.layout().setPosition(mouseX - localMouseX, mouseY - localMouseY)", renderer)
+        probe = self.read_required("src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java")
+        self.assertIn("allSamples", probe)
+        self.assertIn("allSamples.size() - 1", probe)
+        self.assertIn("Minecraft.getInstance().execute", self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
 
     def test_emi_compat_sources_never_link_internal_packages(self):
         compat_root = ROOT / "src/main/java/com/swear/autostorage/compat"
