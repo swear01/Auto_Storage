@@ -3124,9 +3124,12 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("cachedRecipeSnapshot", renderer)
         self.assertIn("getRecipeManager().getRecipes()", renderer)
         self.assertIn("state.layout().setPosition(mouseX - localMouseX, mouseY - localMouseY)", renderer)
+        self.assertGreaterEqual(renderer.count("state.layout().setPosition(0, 0);"), 3)
         probe = self.read_required("src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java")
         self.assertIn("allSamples", probe)
         self.assertIn("allSamples.size() - 1", probe)
+        self.assertIn("throw new IllegalStateException(", probe)
+        self.assertIn("JEI diagram probe timed out waiting for a client level", probe)
         self.assertIn("Minecraft.getInstance().execute", self.read_required(
             "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
 

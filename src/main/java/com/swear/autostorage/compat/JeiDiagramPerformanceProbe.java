@@ -59,7 +59,8 @@ final class JeiDiagramPerformanceProbe {
                     NeoForge.EVENT_BUS.unregister(this);
                     SCHEDULED.set(false);
                     LOGGER.warn("JEI diagram probe skipped: client level never became ready");
-                    Minecraft.getInstance().execute(() -> Minecraft.getInstance().stop());
+                    throw new IllegalStateException(
+                            "JEI diagram probe timed out waiting for a client level");
                 }
             }
         };

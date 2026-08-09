@@ -97,6 +97,7 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         LayoutState state = layoutState(presentation, geometry, left, top);
         double localMouseX = (mouseX - state.originX()) / state.scale();
         double localMouseY = (mouseY - state.originY()) / state.scale();
+        state.layout().setPosition(0, 0);
         IJeiInputHandler inputHandler = state.layout().getInputHandler();
         if (!inputHandler.handleInput(localMouseX, localMouseY, JeiUserInput.mouse(button, true))) {
             return false;
@@ -121,6 +122,7 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         LayoutState state = layoutState(presentation, geometry, left, top);
         double localMouseX = (mouseX - state.originX()) / (double) state.scale();
         double localMouseY = (mouseY - state.originY()) / (double) state.scale();
+        state.layout().setPosition(0, 0);
         return state.layout().getInputHandler().handleInput(
                 localMouseX,
                 localMouseY,
