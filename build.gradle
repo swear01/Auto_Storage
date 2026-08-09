@@ -1305,7 +1305,11 @@ dependencies {
     compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
     emiRuntime "maven.modrinth:emi:${emi_runtime_version}"
     fusionRuntimeRuntimeOnly "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
-    if ((findProperty('recipeViewer') ?: 'emi').toString() == 'jei') {
+    def recipeViewer = (findProperty('recipeViewer') ?: 'emi').toString()
+    if (recipeViewer != 'emi' && recipeViewer != 'jei') {
+        throw new GradleException("Invalid recipeViewer: ${recipeViewer}; expected emi or jei")
+    }
+    if (recipeViewer == 'jei') {
         fusionRuntimeRuntimeOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
     } else {
         fusionRuntimeRuntimeOnly "maven.modrinth:emi:${emi_runtime_version}"

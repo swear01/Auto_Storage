@@ -27,7 +27,7 @@
     },
     {
       "type": "patchouli:text",
-      "text": "EMI or JEI is the client recipe viewer. Either one is enough: the installed viewer may request the exact recipe shown by the terminal, sending its result to the chosen cursor or inventory destination. This remains one-level magic crafting: missing intermediates are not crafted recursively."
+      "text": "EMI or JEI is the client recipe viewer. Either one is enough: EMI follows its requested cursor or inventory destination; JEI always delivers to the player inventory. This remains one-level magic crafting: missing intermediates are not crafted recursively."
     },
     {
       "type": "patchouli:text",

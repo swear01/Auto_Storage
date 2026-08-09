@@ -3117,6 +3117,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("Minecraft.getInstance().stop()", self.read_required(
             "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
         self.assertIn("emi(optional)", self.read_required(".github/workflows/release.yml"))
+        self.assertIn("JEI always delivers to the player inventory", self.read_required(
+            "src/main/resources/assets/auto_storage/patchouli_books/guide/en_us/entries/crafting_terminal.json"))
+        self.assertIn("Minecraft.getInstance().stop()", self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
+        self.assertIn("Invalid recipeViewer", self.read_required("build.gradle"))
 
     def test_emi_compat_sources_never_link_internal_packages(self):
         compat_root = ROOT / "src/main/java/com/swear/autostorage/compat"

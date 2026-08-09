@@ -162,6 +162,7 @@ final class JeiDiagramPerformanceProbe {
             }
         } catch (IOException exception) {
             LOGGER.error("Failed to write JEI diagram probe report", exception);
+            Minecraft.getInstance().execute(() -> Minecraft.getInstance().stop());
         }
     }
 
