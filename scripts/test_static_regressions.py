@@ -222,6 +222,9 @@ class StaticRegressionTests(unittest.TestCase):
         emi = self.read_required(
             "src/main/java/com/swear/autostorage/compat/EmiTerminalSearchSynchronizer.java"
         )
+        jei = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiTerminalSearchSynchronizer.java"
+        )
 
         self.assertIn("OFF", mode)
         self.assertIn("EMI_TWO_WAY", mode)
@@ -246,6 +249,13 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn(".apply(", send_search)
         self.assertIn("TerminalSearchSynchronizer", screen)
         self.assertIn("synchronizeFromTerminal", screen)
+        self.assertIn("searchSynchronizer()", screen)
+        self.assertIn("searchViewerBinding", screen)
+        self.assertIn("binding != searchViewerBinding", screen)
+        self.assertIn("EmiApi.setSearchText", emi)
+        self.assertIn("EmiApi.getSearchText", emi)
+        self.assertIn("getIngredientFilter().setFilterText", jei)
+        self.assertIn("getIngredientFilter().getFilterText", jei)
         self.assertIn("textToSynchronizeToTerminal", screen)
 
         self.assertNotIn("import dev.emi.", synchronizer)
@@ -968,7 +978,12 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertRegex(
             build,
             r'fusionRuntimeRuntimeOnly\s+"maven\.modrinth:emi:\$\{emi_runtime_version\}"',
-            "the isolated client/data runtime must use the Modrinth full EMI artifact",
+            "the isolated client/data runtime must use the Modrinth full EMI artifact by default",
+        )
+        self.assertIn('findProperty(\'recipeViewer\')', build)
+        self.assertIn(
+            'fusionRuntimeRuntimeOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"',
+            build,
         )
         self.assertNotRegex(
             build,
@@ -1000,12 +1015,28 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn('rename { "patchouli-neoforge.jar" }', build)
         self.assertIn('rename { "fusion-connected-textures.jar" }', build)
         self.assertRegex(build, r"emi_version_range\s*:\s*emi_version_range")
+        self.assertRegex(build, r"jei_version_range\s*:\s*jei_version_range")
+        self.assertRegex(
+            build,
+            r'compileOnly\s+"mezz\.jei:jei-1\.21\.1-neoforge-api:\$\{jei_version\}"',
+        )
+        self.assertIn("jei_version=19.27.0.343", properties)
+        self.assertIn("jei_version_range=[19.21.0,20)", properties)
         self.assertRegex(
             metadata,
             r'''(?s)\[\[dependencies\.\$\{mod_id\}\]\]\s*
 \s*modId="emi"\s*
-\s*type="required"\s*
+\s*type="optional"\s*
 \s*versionRange="\$\{emi_version_range\}"\s*
+\s*ordering="NONE"\s*
+\s*side="CLIENT"''',
+        )
+        self.assertRegex(
+            metadata,
+            r'''(?s)\[\[dependencies\.\$\{mod_id\}\]\]\s*
+\s*modId="jei"\s*
+\s*type="optional"\s*
+\s*versionRange="\$\{jei_version_range\}"\s*
 \s*ordering="NONE"\s*
 \s*side="CLIENT"''',
         )
@@ -2791,7 +2822,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotRegex(build, r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:tmrv:')
         self.assertNotIn('modId="tmrv"', metadata)
         self.assertNotIn('modId="macfix"', metadata)
-        self.assertNotIn('modId="jei"', metadata)
+        self.assertRegex(
+            metadata,
+            r'(?s)modId="jei"\s*type="optional"',
+            "JEI must stay a client optional viewer dependency, never a GUI-pack runtime pin",
+        )
         self.assertNotIn('modId="mekanism"', metadata)
 
     def test_active_docs_name_the_correct_macfix_project_and_local_pin(self):
@@ -2935,6 +2970,24 @@ class StaticRegressionTests(unittest.TestCase):
             r"SelfTest\.runAll\(\);\s*}\);",
         )
 
+    def test_terminal_resource_renderer_selftest_runs_before_client_freeze(self):
+        selftest = self.read_required(
+            "src/main/java/com/swear/autostorage/SelfTest.java"
+        )
+        setup = self.read_required(
+            "src/main/java/com/swear/autostorage/ClientSetup.java"
+        )
+        construction = selftest.split("static void runConstructionPhaseTests()", 1)[1].split(
+            "static void runAll()", 1
+        )[0]
+        run_all = selftest.split("static void runAll()", 1)[1].split(
+            "AutoStorage.LOGGER.info(\"SelfTest:", 1
+        )[0]
+        self.assertIn("testTerminalResourceRendererApi();", construction)
+        self.assertNotIn("testTerminalResourceRendererApi();", run_all)
+        self.assertIn("TerminalResourceRendererApi.freeze()", setup)
+        self.assertIn("RegisterMenuScreensEvent.class", setup)
+
     def test_recipe_renderer_boundary_keeps_emi_out_of_base_screen_and_native_path(self):
         interface = self.read_required(
             "src/main/java/com/swear/autostorage/RecipeDiagramRenderer.java"
@@ -2963,11 +3016,17 @@ class StaticRegressionTests(unittest.TestCase):
                 f"{relative_path} must not link EMI API classes",
             )
         self.assertIn('ModList.get().isLoaded("emi")', setup)
+        self.assertIn('ModList.get().isLoaded("jei")', setup)
         self.assertIn("EmiRecipeDiagramBootstrap", setup)
+        self.assertIn("JeiRecipeDiagramBootstrap", setup)
         self.assertIn("RecipeDiagramRenderer", bootstrap)
         self.assertIn("EmiRecipeDiagramRenderer", bootstrap)
         self.assertIn("RecipeDiagramRenderer", screen)
         self.assertIn("NativeRecipeDiagramRenderer", screen)
+        self.assertNotIn("import mezz.jei.", setup)
+        self.assertNotIn("import mezz.jei.", screen)
+        self.assertNotIn("import mezz.jei.", native)
+        self.assertNotIn("import mezz.jei.", interface)
 
     def test_emi_diagram_adapter_uses_only_public_recipe_widget_contracts(self):
         renderer = self.read_required(
@@ -2997,6 +3056,83 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("widget.mouseClicked(", renderer)
         self.assertIn("widget.keyPressed(", renderer)
 
+    def test_jei_diagram_adapter_uses_only_public_layout_contracts(self):
+        renderer = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiRecipeDiagramRenderer.java"
+        )
+        bootstrap = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiRecipeDiagramBootstrap.java"
+        )
+        storage_screen = self.read_required(
+            "src/main/java/com/swear/autostorage/StorageTerminalScreen.java"
+        )
+        crafting_screen = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalScreen.java"
+        )
+        plugin = self.read_required(
+            "src/main/java/com/swear/autostorage/compat/AutoStorageJeiPlugin.java"
+        )
+        setup = self.read_required(
+            "src/main/java/com/swear/autostorage/ClientSetup.java"
+        )
+
+        for public_api in [
+            "mezz.jei.api.gui.IRecipeLayoutDrawable",
+            "mezz.jei.api.recipe.IRecipeManager",
+            "mezz.jei.api.runtime.IJeiRuntime",
+        ]:
+            self.assertIn(public_api, renderer)
+        self.assertIn("createRecipeLayoutDrawable", renderer)
+        self.assertIn("createRecipeLookup(recipeType.get())", renderer)
+        self.assertIn("drawRecipe", renderer)
+        self.assertIn("drawOverlays", renderer)
+        self.assertIn("getInputHandler", renderer)
+        self.assertNotIn("mezz.jei.gui.", renderer)
+        self.assertNotIn("mezz.jei.library.", renderer)
+        self.assertNotIn("mezz.jei.common.", renderer)
+        self.assertIn("@JeiPlugin", plugin)
+        self.assertIn("addUniversalRecipeTransferHandler", plugin)
+        self.assertIn("JeiRecipeDiagramBootstrap", setup)
+        self.assertIn('ModList.get().isLoaded("jei")', setup)
+        self.assertIn("runtimeGeneration", bootstrap)
+        self.assertIn("viewerGeneration", setup)
+        self.assertIn("searchViewerGeneration", storage_screen)
+        self.assertIn("synchronizeFromTerminal(", storage_screen)
+        self.assertIn("preferredViewerGeneration", crafting_screen)
+        self.assertIn("cachedId = presentation.recipeId();", renderer)
+        self.assertIn("cachedRecipeSnapshot == recipeSnapshot", renderer)
+        self.assertIn("registerGuiHandlers", plugin)
+        self.assertIn("addGuiContainerHandler(CraftingTerminalScreen.class", plugin)
+        self.assertIn("getEmiExclusionAreas()", plugin)
+        self.assertIn("currentHolder == holder", plugin)
+        self.assertIn("graphics.pose().popPose();", renderer)
+        self.assertIn("renderTooltip", renderer)
+        self.assertIn("EMI **或** JEI", self.read_required("docs/notes.md"))
+        self.assertIn("StorageTerminalScreen.class", plugin)
+        self.assertIn("candidate.value() == recipe", plugin)
+        self.assertIn("Minecraft.getInstance().stop()", self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
+        self.assertIn("emi(optional)", self.read_required(".github/workflows/release.yml"))
+        self.assertIn("JEI always delivers to the player inventory", self.read_required(
+            "src/main/resources/assets/auto_storage/patchouli_books/guide/en_us/entries/crafting_terminal.json"))
+        self.assertIn("Minecraft.getInstance().stop()", self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
+        self.assertIn("Invalid recipeViewer", self.read_required("build.gradle"))
+        self.assertIn("jeiDiagramBench requires -PrecipeViewer=jei", self.read_required("build.gradle"))
+        self.assertIn("createRecipeLookup(recipeType.get())", renderer)
+        self.assertNotIn("createDrawable(manager, category, holder, focuses)", renderer)
+        self.assertIn("cachedRecipeSnapshot", renderer)
+        self.assertIn("getRecipeManager().getRecipes()", renderer)
+        self.assertIn("state.layout().setPosition(mouseX - localMouseX, mouseY - localMouseY)", renderer)
+        self.assertGreaterEqual(renderer.count("state.layout().setPosition(0, 0);"), 3)
+        probe = self.read_required("src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java")
+        self.assertIn("allSamples", probe)
+        self.assertIn("allSamples.size() - 1", probe)
+        self.assertIn("throw new IllegalStateException(", probe)
+        self.assertIn("JEI diagram probe timed out waiting for a client level", probe)
+        self.assertIn("Minecraft.getInstance().execute", self.read_required(
+            "src/main/java/com/swear/autostorage/compat/JeiDiagramPerformanceProbe.java"))
+
     def test_emi_compat_sources_never_link_internal_packages(self):
         compat_root = ROOT / "src/main/java/com/swear/autostorage/compat"
         sources = "\n".join(path.read_text() for path in sorted(compat_root.glob("*.java")))
@@ -3020,14 +3156,23 @@ class StaticRegressionTests(unittest.TestCase):
         )
 
         self.assertIn("NativeRecipeDiagramRenderer", setup)
+        self.assertIn("selectedViewerBinding", setup)
+        self.assertIn("ViewerBinding", setup)
         self.assertIn('ModList.get().isLoaded("emi")', setup)
+        self.assertIn('ModList.get().isLoaded("jei")', setup)
+        self.assertIn("JeiRecipeDiagramBootstrap", setup)
         self.assertIn("preferredRecipeDiagramRenderer", screen)
+        self.assertIn("preferredViewerBinding", screen)
         self.assertIn("nativeRecipeDiagramRenderer", screen)
         self.assertRegex(
             screen,
-            r"preferredRecipeDiagramRenderer\.supports\([^)]*\)\s*"
-            r"\?\s*preferredRecipeDiagramRenderer\s*:\s*nativeRecipeDiagramRenderer",
+            r"preferredRecipeDiagramRenderer\(\)\.supports\([^)]*\)\s*"
+            r"\?\s*preferred\s*:\s*nativeRecipeDiagramRenderer"
+            r"|RecipeDiagramRenderer preferred = preferredRecipeDiagramRenderer\(\);\s*"
+            r"return preferred\.supports\([^)]*\)\s*"
+            r"\?\s*preferred\s*:\s*nativeRecipeDiagramRenderer",
         )
+        self.assertIn("binding != preferredViewerBinding", screen)
         self.assertIn("return true;", native)
         self.assertIn("RecipePresentationKind.AXE", renderer)
         self.assertIn("EmiApi.getRecipeManager()", renderer)

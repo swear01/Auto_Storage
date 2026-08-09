@@ -841,6 +841,13 @@ neoForge {
             sourceSet = sourceSets.fusionRuntime
             loadedMods = [mods."${mod_id}"]
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            if (providers.gradleProperty('jeiDiagramBench').present) {
+                if ((providers.gradleProperty('recipeViewer').orNull ?: 'emi') != 'jei') {
+                    throw new GradleException('jeiDiagramBench requires -PrecipeViewer=jei')
+                }
+                systemProperty 'auto_storage.jeiDiagramBench', 'true'
+                programArguments.addAll '--quickPlaySingleplayer', 'New World'
+            }
         }
 
         server {
@@ -1188,6 +1195,7 @@ dependencies {
     compileOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_version}"
     compileOnly "maven.modrinth:emi:${emi_runtime_version}"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
     ae2CompatAuditAncestry "mcp.mobius.waila:wthit-api:neo-12.1.2"
     ae2CompatAuditAncestry "mcjty.theoneprobe:theoneprobe:1.20.4_neo-11.0.1-2"
     ae2CompatAuditAncestry "org.appliedenergistics:guideme:21.1.1"
@@ -1298,9 +1306,17 @@ dependencies {
     compatibilityMatrixFixtureRuntimeOnly(
             "maven.modrinth:extended-crafting:${extended_crafting_ci_version}")
     compatibilityMatrixFixtureRuntimeOnly "maven.modrinth:cucumber:${cucumber_ci_version}"
-    fusionRuntimeRuntimeOnly "maven.modrinth:emi:${emi_runtime_version}"
     emiRuntime "maven.modrinth:emi:${emi_runtime_version}"
     fusionRuntimeRuntimeOnly "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
+    def recipeViewer = (findProperty('recipeViewer') ?: 'emi').toString()
+    if (recipeViewer != 'emi' && recipeViewer != 'jei') {
+        throw new GradleException("Invalid recipeViewer: ${recipeViewer}; expected emi or jei")
+    }
+    if (recipeViewer == 'jei') {
+        fusionRuntimeRuntimeOnly "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+    } else {
+        fusionRuntimeRuntimeOnly "maven.modrinth:emi:${emi_runtime_version}"
+    }
     clientSmokePatchouli "vazkii.patchouli:Patchouli:${patchouli_version}"
     clientSmokeFusion "maven.modrinth:fusion-connected-textures:${fusion_runtime_version}"
     prismGuiIronFurnaces "maven.modrinth:iron-furnaces:${iron_furnaces_ci_version}"
@@ -1703,6 +1719,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_license            : mod_license,
             mod_version            : mod_version,
             emi_version_range      : emi_version_range,
+            jei_version_range      : jei_version_range,
     ]
     inputs.properties replaceProperties
     expand replaceProperties

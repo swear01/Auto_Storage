@@ -2,6 +2,7 @@ package com.swear.autostorage;
 
 import com.swear.autostorage.compat.EmiRecipeDiagramBootstrap;
 import com.swear.autostorage.compat.EmiTerminalSearchSynchronizer;
+import com.swear.autostorage.compat.JeiRecipeDiagramBootstrap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
@@ -15,7 +16,16 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 public class ClientSetup {
 
+    enum ViewerBinding {
+        EMI,
+        JEI,
+        NONE
+    }
+
     public static void register(IEventBus modEventBus) {
+        if (!ModList.get().isLoaded("emi") && !ModList.get().isLoaded("jei")) {
+            throw new IllegalStateException("Auto Storage requires EMI or JEI on clients");
+        }
         modEventBus.addListener(ClientSetup::registerScreens);
         modEventBus.addListener(
                 EventPriority.LOWEST,
@@ -24,18 +34,36 @@ public class ClientSetup {
         modEventBus.addListener(ClientSetup::addFusionConnectedCasingPack);
     }
 
-    static RecipeDiagramRenderer createRecipeDiagramRenderer() {
+    static ViewerBinding selectedViewerBinding() {
         if (ModList.get().isLoaded("emi")) {
-            return EmiRecipeDiagramBootstrap.create();
+            return ViewerBinding.EMI;
         }
-        return new NativeRecipeDiagramRenderer();
+        if (ModList.get().isLoaded("jei") && JeiRecipeDiagramBootstrap.isRuntimeReady()) {
+            return ViewerBinding.JEI;
+        }
+        return ViewerBinding.NONE;
+    }
+
+    static long viewerGeneration() {
+        return selectedViewerBinding() == ViewerBinding.JEI
+                ? JeiRecipeDiagramBootstrap.runtimeGeneration()
+                : 0L;
+    }
+
+    static RecipeDiagramRenderer createRecipeDiagramRenderer() {
+        return switch (selectedViewerBinding()) {
+            case EMI -> EmiRecipeDiagramBootstrap.create();
+            case JEI -> JeiRecipeDiagramBootstrap.createRenderer();
+            case NONE -> new NativeRecipeDiagramRenderer();
+        };
     }
 
     static TerminalSearchSynchronizer createTerminalSearchSynchronizer() {
-        if (ModList.get().isLoaded("emi")) {
-            return new EmiTerminalSearchSynchronizer();
-        }
-        return TerminalSearchSynchronizer.NONE;
+        return switch (selectedViewerBinding()) {
+            case EMI -> new EmiTerminalSearchSynchronizer();
+            case JEI -> JeiRecipeDiagramBootstrap.createSearchSynchronizer();
+            case NONE -> TerminalSearchSynchronizer.NONE;
+        };
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {

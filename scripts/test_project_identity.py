@@ -35,7 +35,8 @@ class ProjectIdentityTests(unittest.TestCase):
         properties = (ROOT / "gradle.properties").read_text()
         self.assertIn("mod_id=auto_storage", properties)
         self.assertIn("mod_name=Auto Storage", properties)
-        self.assertIn("mod_version=0.3.0", properties)
+        self.assertRegex(properties, r"(?m)^mod_version=0\.3\.\d+$")
+        self.assertIn("mod_version=0.3.1", properties)
         self.assertIn("mod_group_id=com.swear.autostorage", properties)
 
         main_class = ROOT / "src/main/java/com/swear/autostorage/AutoStorage.java"
