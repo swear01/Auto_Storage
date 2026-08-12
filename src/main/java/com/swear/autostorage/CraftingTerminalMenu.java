@@ -13,6 +13,7 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -122,9 +123,15 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             return matchingCache.computeIfAbsent(input, ignored -> {
                 List<Item> items = input.representativeItems();
                 if (!input.representativeItemsExhaustive() || items.isEmpty()) {
-                    return core == null
-                            ? allSources.stream().filter(source -> input.test(source.stack())).toList()
-                            : core.storedItemSources(input::test);
+                    boolean vanillaValues = hasExhaustiveVanillaValues(input);
+                    if (items.isEmpty() || !vanillaValues) {
+                        return core == null
+                                ? allSources.stream().filter(source -> input.test(source.stack())).toList()
+                                : core.storedItemSources(input::test);
+                    }
+                    List<IngredientSource> matching = new ArrayList<>();
+                    for (Item item : items) matching.addAll(sources(item));
+                    return List.copyOf(matching);
                 }
                 if (items.size() == 1) return sources(items.getFirst());
                 List<IngredientSource> matching = new ArrayList<>();
@@ -140,6 +147,18 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                         available, amount(item));
             }
             return available;
+        }
+
+        private static boolean hasExhaustiveVanillaValues(RecipeAdapterMatch.Input input) {
+            if (!(input.identity() instanceof Ingredient ingredient)) return false;
+            if (ingredient.isCustom()) return false;
+            for (Ingredient.Value value : ingredient.getValues()) {
+                if (!(value instanceof Ingredient.TagValue)
+                        && !(value instanceof Ingredient.ItemValue)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
     private record PlayerReservation(ItemKey key, int count) {}

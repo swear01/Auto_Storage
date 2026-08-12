@@ -1,5 +1,7 @@
 # Notes
 
+2026-08-13 GitHub perf gate (0.3.1 release) gotcha：`runCompatibilityMatrixGameTestServer` 的 `full_support_pack_switches_craftable_under_fifty_milliseconds` 在 v0.3.1 release 兩次 CI 失敗（craftable_prepare_ms 73.8／62.6，gate <50）。Profile 發現 `IngredientAvailability.matching()` 對 non-exhaustive（tag／custom）ingredient 每 candidate 掃描全部 stored items（10k 型態 → potentialMs 12.9ms）。修正：`matching()` 只對 vanilla `Ingredient.TagValue`／`ItemValue` values（`getValues()` 可窮舉、`isCustom()` 為 false）改用 per-item index union（O(tag size)），custom ingredient（AE2 `ConduitIngredient`、Create `IngredientFluidStack`、任何 `ICustomIngredient`）保留逐項掃描以遵守 non-exhaustive contract（`getItems()` 不可靠，GameTest `NonExhaustiveStoneIngredient` 守護此行為）。修正後 local potentialMs 12.9→6.5；注意本機 benchmark 會被 hapi fleet 程序（CPU 80%+）污染，local 數字只能看相對改善，最終以 GitHub runner 為準。
+
 2026-08-07 GitHub #92 follow-up：終端畫面不再把 viewer adapter 釘死在 constructor。`ClientSetup.selectedViewerBinding()` 區分 EMI／JEI-ready／NONE；Craftable diagram 與 Search Sync 在 binding 或 JEI runtime generation 改變時（例如 JEI `onRuntimeAvailable` 之後）重建 adapter，避免開畫面當下 JEI 尚未 ready 就整次停在 Native／NONE。`NONE`只容許 JEI runtime 的短暫未就緒；client 必須安裝 EMI **或** JEI，兩者皆無會在 client startup 拒絕。
 
 2026-08-07 GitHub #92：客戶端配方瀏覽器改為 optional EMI **或** JEI（兩者都在時優先 EMI）。`IRecipeLayoutDrawable`／`IIngredientFilter`／`IUniversalRecipeTransferHandler` 只走 JEI 公開 API；Craftable 內嵌圖、Search Sync、viewer→Crafting Terminal transfer 與既有 EMI 路徑對齊。`neoforge.mods.toml` 不再把 EMI 訂成 required；dedicated server 仍不載入任一 viewer。

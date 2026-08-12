@@ -315,6 +315,10 @@ record RecipeAdapterMatch(
             return representativeItems;
         }
 
+        Object identity() {
+            return identity;
+        }
+
         boolean representativeItemsExhaustive() {
             return representativeItemsExhaustive;
         }
