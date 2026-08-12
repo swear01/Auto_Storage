@@ -48,6 +48,9 @@ OPTION_OVERRIDES = {
     "overrideHeight": "720",
     "tutorialStep": "none",
     "autoJump": "false",
+    "onboardAccessibility": "false",
+    "skipMultiplayerWarning": "true",
+    "skipTransitionsScreen": "true",
 }
 OPTION_REMOVALS = {"fullscreenResolution"}
 
