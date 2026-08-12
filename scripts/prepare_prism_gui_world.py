@@ -1305,6 +1305,7 @@ def update_level_dat(
     _set_compound_item(data, "SpawnZ", TAG_INT, LAB["spawn"][2])
     _rewrite_overworld_as_true_void(data)
     _remove_compound_item(data, "Player")
+    _remove_compound_item(root[2], "fml")
     _write_gzip_nbt(path, root)
 
 
