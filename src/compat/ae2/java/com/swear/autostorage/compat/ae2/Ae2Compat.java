@@ -6,6 +6,7 @@ import appeng.recipes.handlers.InscriberProcessType;
 import appeng.recipes.handlers.InscriberRecipe;
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.RecipeFamily;
+import com.swear.autostorage.TransformProvider;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.StorageResourceKey;
 import com.swear.autostorage.TypedRecipeInput;
@@ -29,9 +30,11 @@ public final class Ae2Compat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
-        Ae2GeneratedCompat.register(machineDescriptors, recipeFamilies);
+        Ae2GeneratedCompat.register(
+                machineDescriptors, recipeFamilies, transformProviders);
     }
 
     static boolean supports(InscriberRecipe recipe) {

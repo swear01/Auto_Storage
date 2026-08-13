@@ -6186,6 +6186,136 @@ displayName="Sample Machines"
                 source_artifact=self.jar,
             )
 
+    def test_generation_transform_shape_is_validated_and_generated(self):
+        audit = self.source_audit()
+        contract = self.accepted_contract()
+        contract["families"] = [
+            family
+            for family in contract["families"]
+            if family["id"] != "crushing_recipe"
+        ] + [
+            {
+                "id": "thermalily",
+                "class": "samplemod.recipe.CrushingRecipe",
+                "status": "accepted",
+                "recipe_type": None,
+                "station": {
+                    "descriptor_id": "auto_storage:samplemod_thermalily",
+                    "category": "process",
+                    "variants": [{
+                        "item": "samplemod:thermalily",
+                        "rate": {"numerator": 1, "denominator": 1},
+                    }],
+                },
+                "inputs": [{
+                    "role": "consume",
+                    "resource_kind": "item",
+                    "amount": 1,
+                    "selector": "transform.input",
+                }],
+                "outputs": [{
+                    "role": "primary",
+                    "resource_kind": "auto_storage:mana",
+                    "amount": "transform.amount_per_item",
+                    "selector": "transform.output",
+                }],
+                "costs": [],
+                "risks": [],
+                "evidence": [
+                    "samplemod.recipe.CrushingRecipe#public_signature"
+                ],
+                "decision": "Time-based lava conversion with retained bucket.",
+            }
+        ]
+        self.rebind_contract_source(contract, audit)
+        plan = self.generation_plan(contract)
+        plan["families"] = [{
+            "id": "thermalily",
+            "status": "generate",
+            "shape": "transform",
+            "registration_id": "auto_storage:samplemod_thermalily",
+            "station_label_key": "gui.auto_storage.station.samplemod_thermalily",
+            "bindings": {
+                "input_items": ["minecraft:lava_bucket"],
+                "output": {
+                    "kind": "auto_storage:mana",
+                    "resource": "auto_storage:mana",
+                },
+                "amount_per_item": 27_000,
+                "station": "auto_storage:samplemod_thermalily",
+                "station_work_per_item": 6_600,
+                "retained_items": [{
+                    "item": "minecraft:bucket",
+                    "count": 1,
+                }],
+                "target_label_key": "gui.auto_storage.resource.mana",
+                "source_label_key": "gui.auto_storage.station.samplemod_thermalily",
+            },
+            "rate_bindings": [{
+                "item": "samplemod:thermalily",
+                "template": "fixed",
+                "numerator": 1,
+                "denominator": 1,
+            }],
+        }]
+        output = self.root / "transform-generated"
+        self.compat_kit.generate_compatibility(
+            contract,
+            audit,
+            plan,
+            output,
+            source_artifact=self.jar,
+        )
+        generated = next((output / "src/main/java").rglob("*.java")).read_text()
+        self.assertIn(
+            "DeferredRegister<TransformProvider> transformProviders", generated
+        )
+        self.assertIn("TransformProviderApi.REGISTRY_KEY", generated)
+        self.assertIn("transformProviders.register(", generated)
+        self.assertIn("TransformProvider.of(", generated)
+        self.assertIn('stack.is(requiredItem(id("minecraft", "lava_bucket")))', generated)
+        self.assertIn("StorageResourceKey.of(", generated)
+        self.assertIn("new CompoundTag()", generated)
+        self.assertIn("6600L", generated)
+        self.assertIn("27000L", generated)
+        self.assertIn(
+            'new ItemStack(requiredItem(id("minecraft", "bucket")), 1)',
+            generated,
+        )
+        self.assertIn("MachineCategory.PROCESS", generated)
+
+        malformed = [
+            ({"input_items": []}, "input items must be non-empty"),
+            ({"input_items": ["minecraft:LavaBucket"]}, "input item is invalid"),
+            ({"amount_per_item": 0}, "amount per item"),
+            ({"station": None, "station_work_per_item": 100}, "matching work"),
+            ({"station": "auto_storage:other", "station_work_per_item": 10},
+             "does not match the contract descriptor"),
+            ({"retained_items": [
+                {"item": "minecraft:bucket", "count": 1},
+                {"item": "minecraft:bucket", "count": 1},
+            ]}, "retained items must be unique"),
+            ({"retained_items": [{"item": "minecraft:bucket", "count": 65}]},
+             "count must be in 1..64"),
+            ({"output": {"kind": "auto_storage:mana"}}, "transform output is invalid"),
+        ]
+        for mutation, message in malformed:
+            with self.subTest(mutation=mutation):
+                bad_plan = self.generation_plan(contract)
+                bad_plan["families"] = [dict(plan["families"][0])]
+                bad_plan["families"][0]["bindings"] = dict(
+                    plan["families"][0]["bindings"]
+                )
+                bad_plan["families"][0]["bindings"].update(mutation)
+                with self.assertRaisesRegex(ValueError, message):
+                    self.compat_kit.generate_compatibility(
+                        contract,
+                        audit,
+                        bad_plan,
+                        self.root / "transform-bad",
+                        source_artifact=self.jar,
+                    )
+
     def test_generation_uses_reviewed_descriptor_namespace_and_rejects_shared_drift(self):
         audit = self.source_audit()
         contract = self.accepted_contract()
@@ -7623,7 +7753,11 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             "SamplemodIntegrationGameTests.java"
         ).read_text()
         self.assertEqual(1, module.count("context.register("))
-        self.assertIn("SamplemodCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn("SamplemodCompat.register(MACHINES, RECIPES, TRANSFORMS)", module)
+        self.assertIn(".transformProviders(TRANSFORMS)", module)
+        self.assertIn(
+            "DeferredRegister<TransformProvider> transforms", adapter
+        )
         self.assertIn("throw new IllegalStateException", adapter)
         self.assertIn("compat-kit scaffold is intentionally RED", adapter)
         for check in self.compat_kit.REQUIRED_VERIFICATION_CHECKS:
@@ -8696,7 +8830,7 @@ public enum FactoryTier { BASIC(3); public final int processes; FactoryTier(int 
             for variant in generated_family_schema["oneOf"]
         }
         self.assertEqual(
-            {"single_item_to_item", "typed_resources"},
+            {"single_item_to_item", "typed_resources", "transform"},
             set(generated_shapes),
         )
         self.assertTrue(all(

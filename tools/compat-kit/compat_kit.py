@@ -4749,6 +4749,15 @@ def validate_contract(
         if family_class in seen_classes:
             raise ValueError(f"duplicate family class: {family_class}")
         seen_classes.add(family_class)
+        is_transform_family = (
+            isinstance(family.get("inputs"), list)
+            and family["inputs"] == [{
+                "role": "consume",
+                "resource_kind": "item",
+                "amount": 1,
+                "selector": "transform.input",
+            }]
+        )
         recipe_type = family.get("recipe_type")
         if recipe_type is not None:
             _validate_nonempty_string(recipe_type, f"family {family_id} recipe_type")
@@ -4783,6 +4792,8 @@ def validate_contract(
                 raise ValueError(f"rejected family {family_id} requires a decision")
         else:
             for key in ("station", "recipe_type", "inputs", "outputs", "costs", "decision"):
+                if key == "recipe_type" and is_transform_family:
+                    continue
                 value = family.get(key)
                 if value is None or value == "" or (key != "costs" and value == []):
                     raise ValueError(f"accepted family {family_id} requires {key}")
@@ -5062,6 +5073,8 @@ import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
 import com.swear.autostorage.RecipeFamily;
 import com.swear.autostorage.RecipeFamilyApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.api.AutoStorageApi;
 import com.swear.autostorage.api.AutoStorageCompatContext;
 import com.swear.autostorage.api.AutoStorageCompatModule;
@@ -5072,13 +5085,16 @@ public final class {class_prefix}CompatModule implements AutoStorageCompatModule
             MachineDescriptorApi.createDeferredRegister(AutoStorageApi.MOD_ID);
     private static final DeferredRegister<RecipeFamily> RECIPES =
             RecipeFamilyApi.createDeferredRegister(AutoStorageApi.MOD_ID);
+    private static final DeferredRegister<TransformProvider> TRANSFORMS =
+            TransformProviderApi.createDeferredRegister(AutoStorageApi.MOD_ID);
 
     @Override
     public void register(AutoStorageCompatContext context) {{
-        {class_prefix}Compat.register(MACHINES, RECIPES);
+        {class_prefix}Compat.register(MACHINES, RECIPES, TRANSFORMS);
         context.register(addon -> addon
                 .machineDescriptors(MACHINES)
-                .recipeFamilies(RECIPES));
+                .recipeFamilies(RECIPES)
+                .transformProviders(TRANSFORMS));
     }}
 }}
 """
@@ -5091,6 +5107,7 @@ public final class {class_prefix}CompatModule implements AutoStorageCompatModule
 
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.RecipeFamily;
+import com.swear.autostorage.TransformProvider;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class {class_prefix}Compat {{
@@ -5099,7 +5116,8 @@ public final class {class_prefix}Compat {{
 
     public static void register(
             DeferredRegister<MachineDescriptor> machines,
-            DeferredRegister<RecipeFamily> recipes
+            DeferredRegister<RecipeFamily> recipes,
+            DeferredRegister<TransformProvider> transforms
     ) {{
         throw new IllegalStateException(
                 "compat-kit scaffold is intentionally RED: implement {', '.join(accepted)}");
@@ -8465,7 +8483,9 @@ def _validate_generation_plan(plan: dict, contract: dict):
             "rate_bindings",
         }:
             raise ValueError(f"{location} has invalid fields")
-        if entry["shape"] not in {"single_item_to_item", "typed_resources"}:
+        if entry["shape"] not in {
+            "single_item_to_item", "typed_resources", "transform"
+        }:
             raise ValueError(f"{location} has unsupported generation shape")
         if not isinstance(entry["registration_id"], str) or not RESOURCE_LOCATION.fullmatch(
             entry["registration_id"]
@@ -8525,6 +8545,112 @@ def _validate_generation_plan(plan: dict, contract: dict):
                 )
             ):
                 raise ValueError(f"{location} contract shape is not supported")
+        elif entry["shape"] == "transform":
+            if not isinstance(bindings, dict) or set(bindings) != {
+                "input_items",
+                "output",
+                "amount_per_item",
+                "station",
+                "station_work_per_item",
+                "retained_items",
+                "target_label_key",
+                "source_label_key",
+            }:
+                raise ValueError(f"{location} transform bindings are invalid")
+            input_items = bindings["input_items"]
+            if not isinstance(input_items, list) or not input_items:
+                raise ValueError(f"{location} transform input items must be non-empty")
+            if len(input_items) != len(set(input_items)):
+                raise ValueError(f"{location} transform input items must be unique")
+            for item in input_items:
+                if not isinstance(item, str) or not RESOURCE_LOCATION.fullmatch(item):
+                    raise ValueError(f"{location} transform input item is invalid")
+            output = bindings["output"]
+            if not isinstance(output, dict) or set(output) != {"kind", "resource"}:
+                raise ValueError(f"{location} transform output is invalid")
+            for key in ("kind", "resource"):
+                if not isinstance(output[key], str) or not RESOURCE_LOCATION.fullmatch(
+                    output[key]
+                ):
+                    raise ValueError(f"{location} transform output {key} is invalid")
+            amount = bindings["amount_per_item"]
+            if isinstance(amount, bool) or not isinstance(amount, int) \
+                    or not 1 <= amount <= 9223372036854775807:
+                raise ValueError(
+                    f"{location} transform amount per item must be in 1..Long.MAX_VALUE"
+                )
+            station = bindings["station"]
+            if station is not None and (
+                not isinstance(station, str) or not RESOURCE_LOCATION.fullmatch(station)
+            ):
+                raise ValueError(f"{location} transform station is invalid")
+            work = bindings["station_work_per_item"]
+            if isinstance(work, bool) or not isinstance(work, int) \
+                    or not 0 <= work <= 9223372036854775807:
+                raise ValueError(
+                    f"{location} transform station work must be in 0..Long.MAX_VALUE"
+                )
+            if (station is None) != (work == 0):
+                raise ValueError(
+                    f"{location} transform station requires matching work"
+                )
+            if station is not None and station != contract_family["station"][
+                "descriptor_id"
+            ]:
+                raise ValueError(
+                    f"{location} transform station does not match the contract descriptor"
+                )
+            retained = bindings["retained_items"]
+            if not isinstance(retained, list):
+                raise ValueError(f"{location} transform retained items must be a list")
+            retained_items = []
+            for retained_index, entry_retained in enumerate(retained):
+                if not isinstance(entry_retained, dict) or set(entry_retained) != {
+                    "item",
+                    "count",
+                }:
+                    raise ValueError(
+                        f"{location} transform retained item {retained_index} is invalid"
+                    )
+                item = entry_retained["item"]
+                if not isinstance(item, str) or not RESOURCE_LOCATION.fullmatch(item):
+                    raise ValueError(
+                        f"{location} transform retained item {retained_index} id is invalid"
+                    )
+                count = entry_retained["count"]
+                if isinstance(count, bool) or not isinstance(count, int) \
+                        or not 1 <= count <= 64:
+                    raise ValueError(
+                        f"{location} transform retained item {retained_index} "
+                        "count must be in 1..64"
+                    )
+                if item in retained_items:
+                    raise ValueError(
+                        f"{location} transform retained items must be unique"
+                    )
+                retained_items.append(item)
+            for label_key in ("target_label_key", "source_label_key"):
+                label = bindings[label_key]
+                if not isinstance(label, str) or not TRANSLATION_KEY.fullmatch(label):
+                    raise ValueError(f"{location} transform {label_key} is invalid")
+            if contract_family["station"]["category"] not in {
+                "process",
+                "instant",
+            }:
+                raise ValueError(
+                    f"{location} transform families require a process or "
+                    "instant station descriptor"
+                )
+            if contract_family["inputs"] != [{
+                "role": "consume",
+                "resource_kind": "item",
+                "amount": 1,
+                "selector": "transform.input",
+            }] or len(contract_family["outputs"]) != 1 or \
+                    contract_family["outputs"][0]["resource_kind"] == "item" or \
+                    contract_family["outputs"][0]["role"] != "primary" or \
+                    contract_family["costs"]:
+                raise ValueError(f"{location} contract shape is not supported")
         else:
             if not isinstance(bindings, dict) or set(bindings) != {
                 "eligibility",
@@ -8549,7 +8675,8 @@ def _validate_generation_plan(plan: dict, contract: dict):
         if not isinstance(rates, list) or not rates:
             raise ValueError(f"{location} requires rate bindings")
         allow_zero = contract_family["station"]["category"] == "instant"
-        if contract_family["station"]["category"] == "transform":
+        if contract_family["station"]["category"] == "transform" \
+                and entry["shape"] != "transform":
             raise ValueError(f"{location} transform stations are not generated")
         for rate_index, rate in enumerate(rates):
             _validate_rate_binding(
@@ -8629,6 +8756,8 @@ def _generated_compat_java(
     body = []
     registered_descriptors = set()
     for entry in generated:
+        if entry["shape"] == "transform":
+            continue
         family = contract_by_id[entry["id"]]
         descriptor_id = family["station"]["descriptor_id"]
         descriptor_path = descriptor_id.split(":", 1)[1]
@@ -8706,6 +8835,89 @@ def _generated_compat_java(
                 f"{cost_binding['owner']}.{cost_binding['member']}(recipe),",
                 "                        RecipePresentationKind.CRAFTING));",
             ])
+    for entry in generated:
+        if entry["shape"] != "transform":
+            continue
+        family = contract_by_id[entry["id"]]
+        descriptor_id = family["station"]["descriptor_id"]
+        descriptor_path = descriptor_id.split(":", 1)[1]
+        descriptor_variable = _family_java_identifier(entry["id"]) + "Descriptor"
+        descriptor_item_namespace = descriptor_id.split(":", 1)[0]
+        descriptor_item = entry["rate_bindings"][0]["item"]
+        descriptor_item_namespace, descriptor_item_path = descriptor_item.split(
+            ":", 1
+        )
+        if descriptor_id not in registered_descriptors:
+            category = (
+                "MachineCategory.PROCESS"
+                if family["station"]["category"] == "process"
+                else "MachineCategory.INSTANT"
+            )
+            allow_zero = family["station"]["category"] == "instant"
+            variants = ",\n                        ".join(
+                _render_rate_binding(binding, allow_zero=allow_zero)
+                for binding in entry["rate_bindings"]
+            )
+            body.extend([
+                f"        ResourceLocation {descriptor_variable} = "
+                f"id(\"{descriptor_item_namespace}\", \"{descriptor_path}\");",
+                f"        machineDescriptors.register({descriptor_variable}.getPath(), () ->",
+                "                MachineDescriptor.installableVariants(",
+                f"                        {descriptor_variable},",
+                f"                        Component.translatable({_java_string(entry['station_label_key'])}),",
+                "                        () -> List.of(",
+                f"                        {variants}),",
+                f"                        {category},",
+                "                        MachineDescriptorApi.MAX_INSTALLED_COUNT,",
+                "                        null));",
+            ])
+            registered_descriptors.add(descriptor_id)
+        bindings = entry["bindings"]
+        output = bindings["output"]
+        output_kind = output["kind"].split(":", 1)
+        output_resource = output["resource"].split(":", 1)
+        station = bindings["station"]
+        station_expr = (
+            f"id(\"{station.split(':', 1)[0]}\", \"{station.split(':', 1)[1]}\")"
+            if station is not None
+            else "null"
+        )
+        station_work = bindings["station_work_per_item"]
+        retained_expr = "List.of()"
+        if bindings["retained_items"]:
+            retained_expr = "List.of(" + ", ".join(
+                "new ItemStack(requiredItem("
+                + _java_resource_location(item["item"])
+                + f"), {item['count']})"
+                for item in bindings["retained_items"]
+            ) + ")"
+        input_checks = " || ".join(
+            "stack.is(requiredItem(" + _java_resource_location(item) + "))"
+            for item in bindings["input_items"]
+        )
+        target = bindings["output"]["kind"]
+        target_namespace, target_path = target.split(":", 1)
+        body.extend([
+            f"        transformProviders.register({descriptor_variable}.getPath(), () ->",
+            "                TransformProvider.of(",
+            f"                        id(\"{target_namespace}\", \"{target_path}\"),",
+            f"                        new ItemStack(requiredItem("
+            f"id(\"{descriptor_item_namespace}\", \"{descriptor_item_path}\"))),",
+            f"                        Component.translatable({_java_string(bindings['target_label_key'])}),",
+            f"                        Component.translatable({_java_string(bindings['source_label_key'])}),",
+            "                        stack -> {",
+            f"                            if (!({input_checks})) return null;",
+            "                            return new TransformProviderApi.Result(",
+            f"                                    StorageResourceKey.of("
+            f"id(\"{output_kind[0]}\", \"{output_kind[1]}\"), "
+            f"id(\"{output_resource[0]}\", \"{output_resource[1]}\"), "
+            "new CompoundTag()),",
+            f"                                    {bindings['amount_per_item']}L,",
+            f"                                    {station_expr},",
+            f"                                    {station_work}L,",
+            f"                                    {retained_expr}));",
+            "                        }));",
+        ])
     if boundaries:
         reasons = "; ".join(
             f"{entry['id']}: {entry['reason']}" for entry in boundaries
@@ -8727,7 +8939,11 @@ import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -8747,18 +8963,24 @@ public final class {plan['class_name']} {{
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {{
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
+        Objects.requireNonNull(transformProviders, "transformProviders");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {{
             throw new IllegalArgumentException("Generated descriptor register targets the wrong registry");
         }}
         if (!recipeFamilies.getRegistryKey().equals(RecipeFamilyApi.REGISTRY_KEY)) {{
             throw new IllegalArgumentException("Generated family register targets the wrong registry");
         }}
-        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())) {{
-            throw new IllegalArgumentException("Generated descriptors and families must share one namespace");
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {{
+            throw new IllegalArgumentException("Generated transform provider register targets the wrong registry");
+        }}
+        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())
+                || !machineDescriptors.getNamespace().equals(transformProviders.getNamespace())) {{
+            throw new IllegalArgumentException("Generated descriptors, families, and transform providers must share one namespace");
         }}
         if (!machineDescriptors.getNamespace().equals("{descriptor_namespace}")) {{
             throw new IllegalArgumentException("Generated descriptor namespace must be {descriptor_namespace}");

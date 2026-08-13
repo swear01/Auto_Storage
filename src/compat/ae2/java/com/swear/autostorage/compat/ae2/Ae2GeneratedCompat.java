@@ -10,7 +10,11 @@ import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -30,18 +34,24 @@ public final class Ae2GeneratedCompat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
+        Objects.requireNonNull(transformProviders, "transformProviders");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
             throw new IllegalArgumentException("Generated descriptor register targets the wrong registry");
         }
         if (!recipeFamilies.getRegistryKey().equals(RecipeFamilyApi.REGISTRY_KEY)) {
             throw new IllegalArgumentException("Generated family register targets the wrong registry");
         }
-        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())) {
-            throw new IllegalArgumentException("Generated descriptors and families must share one namespace");
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {
+            throw new IllegalArgumentException("Generated transform provider register targets the wrong registry");
+        }
+        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())
+                || !machineDescriptors.getNamespace().equals(transformProviders.getNamespace())) {
+            throw new IllegalArgumentException("Generated descriptors, families, and transform providers must share one namespace");
         }
         if (!machineDescriptors.getNamespace().equals("auto_storage")) {
             throw new IllegalArgumentException("Generated descriptor namespace must be auto_storage");

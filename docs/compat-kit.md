@@ -407,6 +407,20 @@ signed Java `long`; the published generation-plan schema enforces the same
 maximum. These rules match runtime
 `MachineDescriptor` validation and fail before scaffolding.
 
+Generation plans may also declare `transform` families: one-way, exact-input
+conversions that either produce immediately or consume station work over time.
+The contract family for a transform uses a process/instant station descriptor,
+a single `consume` item input with selector `transform.input`, one primary
+non-item output, and an empty `costs` list (work lives in the plan bindings).
+The plan entry binds exact accepted input items, the output typed key
+(`kind`/`resource`), the amount per item, the optional station descriptor and
+station work per item (station present iff work is positive), optional
+retained items (`item`/`count`, unique, count 1..64) for bucket/container
+round-trips, and the target/source label keys. Generated code emits the
+`MachineDescriptor` plus a `TransformProvider` whose resolver returns
+`null` for non-accepted inputs, so the scaffold RED fixture and the final
+addon share the reviewed exact-input contract.
+
 For a bundled module, `verification.game_test_task` is not arbitrary evidence:
 it must match the task derived from the fixture's preserved camel case
 (`evilCraftFixture` becomes `runEvilCraftGameTestServer`). This prevents a
