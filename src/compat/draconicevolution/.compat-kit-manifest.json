@@ -1,11 +1,11 @@
 {
   "contract_sha256": "b749637ec1a27db2899cf58306302b3e236609c1887aa102e5b8f9231bd89bba",
   "files": {
-    "src/compat/draconicevolution/compat-module.json": "7983a455e0025e41c22ec1077cac3be77a9fa8451b5613b7a714b27abae87340",
-    "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompat.java": "6e7dcbd43fb52fc84ae86edfd54f5002a861363d480dd48df8f539cf0c993b70",
-    "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompatModule.java": "ede0f2b8e43de19b0c89d228c9f8680fe26cebd4fc35cdd777317cb97fe6d43d",
+    "src/compat/draconicevolution/compat-module.json": "6211e7a4a187899be0f3b9a6960df6fa895443eaff9f75e9a7cebc3f4f34562b",
+    "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompat.java": "a74b6e9945f616d3d83910af5f2f188ca51a4e41a32c30c83df3e71e852db154",
+    "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompatModule.java": "5c91956e05736860600b49ab23e14b75374ff35c03f78a0ddd63e562e42fd0dd",
     "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionFixtureMod.java": "408f1c093272944773c73bad26fd90c243f6452acde389ff7e10a022040a40e3",
-    "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionIntegrationGameTests.java": "8aac395fe191a77632a374986e3ef6741532c7b297aff18c9342dd80e2541675",
+    "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionIntegrationGameTests.java": "dcb0e856276b5d56c3519ad850bc166e9bfacb1155acc6ab61761285e4243b0f",
     "src/draconicevolutionFixture/resources/META-INF/neoforge.mods.toml": "7bc9701f0f31701f5a4e666d1923148ee465b12650183c135d3b376e99ef2f34",
     "src/draconicevolutionFixture/resources/data/auto_storage_draconicevolution_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

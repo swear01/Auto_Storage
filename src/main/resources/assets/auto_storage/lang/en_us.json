@@ -183,5 +183,9 @@
   "gui.auto_storage.station.botania_endoflame": "Endoflame",
   "gui.auto_storage.station.enderio_stirling_generator": "Stirling Generator",
   "gui.auto_storage.station.actuallyadditions_coal_generator": "Coal Generator",
-  "gui.auto_storage.station.integrateddynamics_coal_generator": "Coal Generator"
+  "gui.auto_storage.station.integrateddynamics_coal_generator": "Coal Generator",
+  "gui.auto_storage.station.draconicevolution_generator": "Generator",
+  "gui.auto_storage.station.industrial_foregoing_pitiful_generator": "Pitiful Generator",
+  "gui.auto_storage.station.oritech_fuel_generator": "Fuel Generator",
+  "gui.auto_storage.station.powah_magmator": "Magmator"
 }

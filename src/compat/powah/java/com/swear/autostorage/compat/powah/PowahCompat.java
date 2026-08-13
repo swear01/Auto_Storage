@@ -26,8 +26,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import owmii.powah.Powah;
+import owmii.powah.api.PowahAPI;
 import owmii.powah.block.Tier;
 import owmii.powah.block.energizing.EnergizingRecipe;
 import owmii.powah.recipe.Recipes;
@@ -106,6 +108,41 @@ public final class PowahCompat {
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable("gui.auto_storage.station.powah_furnator"),
                         stack -> furnatorTransform(stack, furnatorId)));
+        ResourceLocation magmatorId = ResourceLocation.fromNamespaceAndPath(
+                machineDescriptors.getNamespace(), "powah_magmator");
+        machineDescriptors.register(magmatorId.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        magmatorId,
+                        Component.translatable("gui.auto_storage.station.powah_magmator"),
+                        () -> List.of(MachineVariant.of(
+                                new ItemStack(requiredItem("magmator_starter")),
+                                MachineWorkRate.ONE)),
+                        MachineCategory.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
+        transformProviders.register(magmatorId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable("gui.auto_storage.station.powah_magmator"),
+                        stack -> magmatorTransform(stack, magmatorId)));
+    }
+
+    private static TransformProviderApi.Result magmatorTransform(
+            ItemStack stack,
+            ResourceLocation magmatorId
+    ) {
+        if (!stack.is(Items.LAVA_BUCKET)) return null;
+        int energyPer100Mb = PowahAPI.getMagmaticFluidEnergyProduced(Fluids.LAVA);
+        if (energyPer100Mb <= 0) return null;
+        long fe = Math.multiplyExact((long) energyPer100Mb, 10L);
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                fe,
+                magmatorId,
+                10L,
+                List.of(new ItemStack(Items.BUCKET)));
     }
 
     private static List<MachineVariant> rodVariants() {

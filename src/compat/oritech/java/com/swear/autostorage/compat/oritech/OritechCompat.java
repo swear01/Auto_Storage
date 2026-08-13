@@ -10,7 +10,11 @@ import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.api.AutoStorageApi;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceKindApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
@@ -23,6 +27,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import rearth.oritech.init.OritechConfig;
@@ -46,8 +51,41 @@ public final class OritechCompat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
+        Objects.requireNonNull(transformProviders, "transformProviders");
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {
+            throw new IllegalArgumentException(
+                    "Oritech transform provider register targets the wrong registry");
+        }
+        if (!machineDescriptors.getNamespace().equals(transformProviders.getNamespace())) {
+            throw new IllegalArgumentException(
+                    "Oritech descriptors and transform providers must share one namespace");
+        }
+        ResourceLocation fuelGeneratorId = ResourceLocation.fromNamespaceAndPath(
+                machineDescriptors.getNamespace(), "oritech_fuel_generator");
+        machineDescriptors.register(fuelGeneratorId.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        fuelGeneratorId,
+                        Component.translatable(
+                                "gui.auto_storage.station.oritech_fuel_generator"),
+                        () -> List.of(MachineVariant.of(
+                                new ItemStack(requiredItem(
+                                        ResourceLocation.fromNamespaceAndPath(
+                                                "oritech", "fuel_generator_block"))),
+                                MachineWorkRate.ONE)),
+                        MachineCategory.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
+        transformProviders.register(fuelGeneratorId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.station.oritech_fuel_generator"),
+                        OritechCompat::fuelGeneratorTransform));
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
@@ -213,6 +251,19 @@ public final class OritechCompat {
                 .map(stack -> stack.copyWithCount(1))
                 .distinct()
                 .toList();
+    }
+
+    private static TransformProviderApi.Result fuelGeneratorTransform(ItemStack input) {
+        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        if (burnTime <= 0) return null;
+        int energyPerTick = OritechConfig.generators.fuelGeneratorData.energyPerTick.get();
+        if (energyPerTick <= 0) return null;
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                Math.multiplyExact((long) burnTime, energyPerTick),
+                ResourceLocation.fromNamespaceAndPath(
+                        AutoStorageApi.MOD_ID, "oritech_fuel_generator"),
+                burnTime);
     }
 
     private static Item requiredItem(ResourceLocation id) {

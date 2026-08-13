@@ -49,3 +49,12 @@ Auto Storage does not register Industrial Foregoing workstations into EMI. The r
 ```
 
 The isolated fixture runs nine GameTests covering exact registration, official Dissolution/Stonework/Crusher recipes, fluid tags, repeated slots, no crafting remainder, live FE/work costs, unsupported thresholds/outputs, and atomic shortage/overflow rollback.
+
+## Pitiful Generator (Transform)
+
+`auto_storage:industrial_foregoing_pitiful_generator` is a PROCESS
+descriptor (one work/tick) plus a time-based Transform use: any
+smelting-burnable fuel **without a crafting remainder** converts to FE
+over the exact burn duration at `PitifulGeneratorConfig.powerPerTick`
+(default 30). Verified against Industrial Foregoing 3.6.38 bytecode.
+Coal: 1,600 work → 48,000 FE.

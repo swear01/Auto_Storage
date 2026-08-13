@@ -38,3 +38,12 @@ persistence, FE/work shortages, and output-overflow rollback.
 This representative CI artifact is compatibility evidence, not an exact player dependency pin.
 Other versions are accepted; incompatible versions are handled from user
 reports rather than a multi-version matrix.
+
+## Magmator (Transform)
+
+`auto_storage:powah_magmator` is a PROCESS descriptor (one work/tick)
+plus a time-based Transform use: one lava bucket converts to 10 ×
+`PowahAPI.getMagmaticFluidEnergyProduced(lava)` FE over 10 work ticks,
+retaining the empty bucket. Verified against Powah 6.2.10 bytecode
+(`postTick` drains 100 mb per tick, `Energy.setStored(amount × value /
+100)`).

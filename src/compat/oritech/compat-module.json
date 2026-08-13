@@ -8,7 +8,7 @@
     "maven.modrinth:architectury-api:ZxYGwlk0"
   ],
   "entrypoint": "com.swear.autostorage.compat.oritech.OritechCompatModule",
-  "expectedTests": 20,
+  "expectedTests": 21,
   "fixture": "oritechFixture",
   "id": "auto_storage:oritech",
   "matrix": {

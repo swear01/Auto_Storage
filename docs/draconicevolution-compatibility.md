@@ -107,3 +107,13 @@ supported, representative fusion recipes stay rejected, and every loaded
 `fusion_crafting` recipe remains fail closed. The all-mod compatibility matrix
 also loads the representative artifact plus Brandon's Core and CodeChicken Lib
 and locks the same zero-family boundary.
+
+## Generator (Transform)
+
+`auto_storage:draconicevolution_generator` is a PROCESS descriptor (one
+work/tick) plus a time-based Transform use: any smelting-burnable fuel
+converts to FE over the exact burn duration at the base NORMAL-mode rate
+(40 FE/tick; in-world production scales with the stored buffer, the
+transform models the base). Verified against Draconic Evolution 3.1.4.632
+bytecode (`TileGenerator$Mode.NORMAL.powerOutput = 40`, fuel = Forge
+smelting burn time). Coal: 1,600 work → 64,000 FE.

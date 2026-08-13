@@ -7,7 +7,7 @@
     "maven.modrinth:draconic-evolution:lBMsiWyw"
   ],
   "entrypoint": "com.swear.autostorage.compat.draconicevolution.DraconicevolutionCompatModule",
-  "expectedTests": 6,
+  "expectedTests": 7,
   "fixture": "draconicevolutionFixture",
   "id": "auto_storage:draconicevolution",
   "matrix": {

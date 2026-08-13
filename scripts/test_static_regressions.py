@@ -1665,7 +1665,7 @@ class StaticRegressionTests(unittest.TestCase):
             r'(powah|cloth-config|guideme):',
         )
         self.assert_descriptor_driven_fixture(
-            build, "powah", "powahFixture", 11
+            build, "powah", "powahFixture", 12
         )
         self.assertNotIn('modId="powah"', metadata)
         self.assertEqual(["powah"], json.loads(module_index)["requires"])
@@ -1736,13 +1736,13 @@ class StaticRegressionTests(unittest.TestCase):
             build,
             "industrial_foregoing",
             "industrialForegoingFixture",
-            9,
+            10,
         )
         self.assertNotIn('modId="industrialforegoing"', metadata)
         self.assertEqual(["industrialforegoing"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn(
-            "IndustrialForegoingCompat.register(MACHINES, RECIPES)",
+            "IndustrialForegoingCompat.register(MACHINES, RECIPES, TRANSFORMS)",
             module,
         )
         self.assertNotIn("import com.buuz135.", module)

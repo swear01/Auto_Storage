@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
@@ -320,6 +321,73 @@ public final class IndustrialForegoingIntegrationGameTests {
         var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
         if (holder == null) throw new IllegalStateException("Missing recipe " + recipeId);
         return CraftingTerminalMenu.supportsRecipeHolder(holder);
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void pitiful_generator_converts_fuel_to_fe_over_exact_work(GameTestHelper helper) {
+        withCore(helper, context -> {
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            var use = menu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "industrial_foregoing_pitiful_generator")))
+                    .findFirst()
+                    .orElse(null);
+            if (use == null) {
+                helper.fail("Generator transform use is missing");
+                return;
+            }
+            selectTransform(menu, context, ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "industrial_foregoing_pitiful_generator"));
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 0) {
+                helper.fail("Generator must reject without an installed machine");
+                return;
+            }
+            installStation(context, ifItem("pitiful_generator"));
+            tick(context.core(), 1600);
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 1_600L * 30L
+                    || context.core().getStationWork(ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "industrial_foregoing_pitiful_generator")) != 0) {
+                helper.fail("Generator committed the wrong FE/work transaction");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static final int TRANSFORM_PAGE_BUTTON = 15;
+
+    private static CraftingTerminalMenu transformMenu(
+            FixtureContext context,
+            ItemStack input
+    ) {
+        var menu = new CraftingTerminalMenu(
+                962, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), TRANSFORM_PAGE_BUTTON);
+        menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(input);
+        return menu;
+    }
+
+    private static void selectTransform(
+            CraftingTerminalMenu menu,
+            FixtureContext context,
+            ResourceLocation transformId
+    ) {
+        int useIndex = -1;
+        var uses = menu.getVisibleTransformUses();
+        for (int index = 0; index < uses.size(); index++) {
+            if (uses.get(index).id().equals(transformId)) {
+                useIndex = index;
+                break;
+            }
+        }
+        if (useIndex < 0 || !menu.clickMenuButton(
+                context.player(), CraftingTerminalMenu.transformUseButtonId(useIndex))) {
+            throw new IllegalStateException("Could not select transform " + transformId);
+        }
     }
 
     private static void withCore(GameTestHelper helper, FixtureAssertion assertion) {

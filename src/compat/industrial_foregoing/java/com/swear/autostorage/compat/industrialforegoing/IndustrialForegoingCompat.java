@@ -1,6 +1,7 @@
 package com.swear.autostorage.compat.industrialforegoing;
 
 import com.swear.autostorage.MachineCategory;
+import com.buuz135.industrial.config.machine.generator.PitifulGeneratorConfig;
 import com.buuz135.industrial.config.machine.core.DissolutionChamberConfig;
 import com.buuz135.industrial.config.machine.resourceproduction.MaterialStoneWorkFactoryConfig;
 import com.buuz135.industrial.module.ModuleCore;
@@ -16,18 +17,24 @@ import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.api.AutoStorageApi;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceKindApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -50,9 +57,24 @@ public final class IndustrialForegoingCompat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
-        requireRegisters(machineDescriptors, recipeFamilies);
+        requireRegisters(machineDescriptors, recipeFamilies, transformProviders);
+        ResourceLocation pitifulId = id(
+                machineDescriptors.getNamespace(), "industrial_foregoing_pitiful_generator");
+        registerStation(
+                machineDescriptors,
+                pitifulId,
+                "pitiful_generator");
+        transformProviders.register(pitifulId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.station.industrial_foregoing_pitiful_generator"),
+                        IndustrialForegoingCompat::pitifulGeneratorTransform));
         String namespace = machineDescriptors.getNamespace();
         ResourceLocation dissolution = id(namespace, "industrial_foregoing_dissolution_chamber");
         ResourceLocation stonework = id(
@@ -93,8 +115,18 @@ public final class IndustrialForegoingCompat {
 
     private static void requireRegisters(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
+        Objects.requireNonNull(transformProviders, "transformProviders");
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {
+            throw new IllegalArgumentException(
+                    "Industrial Foregoing transform provider register targets the wrong registry");
+        }
+        if (!machineDescriptors.getNamespace().equals(transformProviders.getNamespace())) {
+            throw new IllegalArgumentException(
+                    "Industrial Foregoing descriptors and transform providers must share one namespace");
+        }
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
@@ -335,6 +367,20 @@ public final class IndustrialForegoingCompat {
         } catch (NoSuchMethodException exception) {
             throw new IllegalStateException("Minecraft Item.onCraftedBy signature changed", exception);
         }
+    }
+
+    private static TransformProviderApi.Result pitifulGeneratorTransform(ItemStack input) {
+        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        int energyPerTick = PitifulGeneratorConfig.powerPerTick;
+        if (burnTime <= 0 || energyPerTick <= 0 || input.hasCraftingRemainingItem()) {
+            return null;
+        }
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                Math.multiplyExact((long) burnTime, energyPerTick),
+                ResourceLocation.fromNamespaceAndPath(
+                        AutoStorageApi.MOD_ID, "industrial_foregoing_pitiful_generator"),
+                burnTime);
     }
 
     private static Item requiredItem(String path) {

@@ -112,3 +112,11 @@ also proves that crossing zero FE does not change oversized-family eligibility.
 Fail-closed checks cover nonempty and null fluid data, non-simple
 ingredients, oversized ingredient+FE layouts, while another test merges
 duplicate exact item outputs. The all-mod compatibility matrix protects coexistence.
+
+## Fuel Generator (Transform)
+
+`auto_storage:oritech_fuel_generator` is a PROCESS descriptor (one
+work/tick) plus a time-based Transform use: any smelting-burnable fuel
+converts to FE over the exact burn duration at
+`OritechConfig.generators.fuelGeneratorData.energyPerTick` (default 256).
+Verified against Oritech 1.2.8 bytecode. Coal: 1,600 work → 409,600 FE.

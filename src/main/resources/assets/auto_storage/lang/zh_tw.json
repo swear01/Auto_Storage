@@ -183,5 +183,9 @@
   "gui.auto_storage.station.botania_endoflame": "末地火焰花",
   "gui.auto_storage.station.enderio_stirling_generator": "斯特林發電機",
   "gui.auto_storage.station.actuallyadditions_coal_generator": "煤炭發電機",
-  "gui.auto_storage.station.integrateddynamics_coal_generator": "煤炭發電機"
+  "gui.auto_storage.station.integrateddynamics_coal_generator": "煤炭發電機",
+  "gui.auto_storage.station.draconicevolution_generator": "發電機",
+  "gui.auto_storage.station.industrial_foregoing_pitiful_generator": "可憐發電機",
+  "gui.auto_storage.station.oritech_fuel_generator": "燃料發電機",
+  "gui.auto_storage.station.powah_magmator": "岩漿發電機"
 }

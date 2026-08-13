@@ -49,6 +49,9 @@ public final class PowahIntegrationGameTests {
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;
     private static final ResourceLocation ENERGIZING = stationId("energizing");
     private static final ResourceLocation FURNATOR = stationId("furnator");
+    private static final ResourceLocation MAGMATOR =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "powah_magmator");
     private static final ResourceLocation FURNATOR_TRANSFORM =
             ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, "powah_furnator");
     private static final ResourceLocation ENERGIZED_STEEL =
@@ -410,6 +413,56 @@ public final class PowahIntegrationGameTests {
         var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
         if (holder == null) throw new IllegalStateException("Missing recipe " + recipeId);
         return CraftingTerminalMenu.supportsRecipeHolder(holder);
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void magmator_lava_bucket_converts_to_fe_work_and_retained_bucket(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            var menu = transformMenu(
+                    context, new ItemStack(Items.LAVA_BUCKET));
+            var magmatorUse = menu.getTransformUses().stream()
+                    .filter(use -> use.id().equals(MAGMATOR))
+                    .findFirst()
+                    .orElse(null);
+            long energyPerBucket = Math.multiplyExact(
+                    10L,
+                    owmii.powah.api.PowahAPI.getMagmaticFluidEnergyProduced(
+                            net.minecraft.world.level.material.Fluids.LAVA));
+            if (magmatorUse == null
+                    || magmatorUse.amountPerItem() != energyPerBucket
+                    || magmatorUse.stationWorkPerItem() != 10
+                    || magmatorUse.retainedItems().size() != 1
+                    || !magmatorUse.retainedItems().getFirst().is(Items.BUCKET)) {
+                helper.fail("Magmator use must convert one lava bucket to exact FE "
+                        + "over 10 work retaining an empty bucket");
+                return;
+            }
+            selectTransform(menu, context, MAGMATOR);
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 0) {
+                helper.fail("Magmator must reject without an installed magmator");
+                return;
+            }
+            if (!installStation(context, new ItemStack(powahItem("magmator_starter")))) {
+                helper.fail("Could not install the Magmator");
+                return;
+            }
+            tick(context.core(), 10);
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != energyPerBucket
+                    || context.core().getStationWork(MAGMATOR) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().isEmpty()
+                    || context.player().getInventory().countItem(Items.BUCKET) != 1) {
+                helper.fail("Magmator committed the wrong FE/work/input/bucket transaction");
+                return;
+            }
+            helper.succeed();
+        });
     }
 
     private static void withCore(GameTestHelper helper, FixtureAssertion assertion) {

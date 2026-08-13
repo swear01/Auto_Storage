@@ -5,7 +5,7 @@
     "maven.modrinth:guideme:${guideme_ci_version}"
   ],
   "entrypoint": "com.swear.autostorage.compat.powah.PowahCompatModule",
-  "expectedTests": 11,
+  "expectedTests": 12,
   "fixture": "powahFixture",
   "id": "auto_storage:powah",
   "matrix": {
