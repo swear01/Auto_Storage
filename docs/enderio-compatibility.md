@@ -84,3 +84,17 @@ present in the GameTest recipe manager.
 This representative CI artifact is compatibility evidence, not an exact player
 dependency pin. Other versions are accepted; incompatible versions are handled
 from user reports rather than a multi-version matrix.
+
+## Stirling Generator (Transform)
+
+`auto_storage:enderio_stirling_generator` is a PROCESS descriptor (one
+work/tick) plus a time-based Transform use: any smelting-burnable fuel
+**without a crafting remainder** converts to FE over the exact burn
+duration. Verified against Ender IO 8.2.11 bytecode and config:
+
+- `burnDuration = burnTime × STIRLING_GENERATOR_BURN_SPEED × (FUEL_EFFICIENCY_BASE / 100)`
+  (defaults 0.375 and 80; `burnTime` = Forge smelting burn time)
+- FE per item = `burnDuration × STIRLING_GENERATOR_PRODUCTION` (default 40)
+- Coal: 1,600 × 0.375 × 0.8 = 480 ticks → 19,200 FE
+- Fuels with crafting remainders (lava buckets…) are rejected, matching
+  the machine's fuel filter.

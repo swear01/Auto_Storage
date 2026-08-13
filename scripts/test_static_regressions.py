@@ -1216,12 +1216,18 @@ class StaticRegressionTests(unittest.TestCase):
             r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:enderio:',
         )
         self.assert_descriptor_driven_fixture(
-            build, "enderio", "enderIoFixture", 6
+            build, "enderio", "enderIoFixture", 8
         )
         self.assertNotIn('modId="enderio"', metadata)
         self.assertEqual(["enderio"], descriptor["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
-        self.assertIn("EnderioCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn("EnderioCompat.register(MACHINES, RECIPES, TRANSFORMS)", module)
+        self.assertIn(".transformProviders(TRANSFORMS)", module)
+        self.assertIn("stirlingTransform", compat)
+        self.assertIn("STIRLING_GENERATOR_BURN_SPEED", compat)
+        self.assertIn("STIRLING_GENERATOR_PRODUCTION", compat)
+        self.assertIn("hasCraftingRemainingItem()", compat)
+        self.assertIn("enderio_stirling_generator", compatibility_doc)
         self.assertNotIn("import com.enderio.enderio.", module)
         self.assertIn("AlloySmeltingRecipe.class", compat)
         self.assertNotIn("SagMillingRecipe.class", compat)

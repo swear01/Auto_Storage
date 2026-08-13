@@ -180,5 +180,6 @@
   "gui.auto_storage.transform_retained": "每物品保留",
   "gui.auto_storage.transform_retained_item": "%s ×%s",
   "gui.auto_storage.station.botania_thermalily": "熔岩百合",
-  "gui.auto_storage.station.botania_endoflame": "末地火焰花"
+  "gui.auto_storage.station.botania_endoflame": "末地火焰花",
+  "gui.auto_storage.station.enderio_stirling_generator": "斯特林發電機"
 }

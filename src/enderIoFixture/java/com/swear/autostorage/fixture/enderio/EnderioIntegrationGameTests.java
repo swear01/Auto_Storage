@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -212,6 +213,111 @@ public final class EnderioIntegrationGameTests {
         return Math.toIntExact((work + usage - 1) / usage);
     }
 
+    private static final int TRANSFORM_PAGE_BUTTON = 15;
+    private static final ResourceLocation STIRLING =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "enderio_stirling_generator");
+
+    @GameTest(template = "craftingtests.platform")
+    public static void stirling_generator_converts_fuel_to_fe_over_exact_work(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            var stirlingUse = menu.getTransformUses().stream()
+                    .filter(use -> use.id().equals(STIRLING))
+                    .findFirst()
+                    .orElse(null);
+            long expected = stirlingEnergy(new ItemStack(Items.COAL));
+            long expectedWork = expected / MachinesConfig.COMMON.ENERGY
+                    .STIRLING_GENERATOR_PRODUCTION.get();
+            if (stirlingUse == null
+                    || stirlingUse.amountPerItem() != expected
+                    || stirlingUse.stationWorkPerItem() != expectedWork
+                    || !stirlingUse.retainedItems().isEmpty()) {
+                helper.fail("Stirling use must convert coal to exact FE/work "
+                        + expected + "/" + expectedWork);
+                return;
+            }
+            if (transformMenu(context, new ItemStack(Items.LAVA_BUCKET))
+                    .getTransformUses().stream()
+                    .anyMatch(use -> use.id().equals(STIRLING))) {
+                helper.fail("Stirling must reject fuels with crafting remainders");
+                return;
+            }
+            selectTransform(menu, context, STIRLING);
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().is(Items.COAL)) {
+                helper.fail("Stirling must reject without an installed generator");
+                return;
+            }
+
+            if (!installStation(context, "stirling_generator")) {
+                helper.fail("Could not install the Stirling Generator");
+                return;
+            }
+            tick(context.core(), Math.toIntExact(expectedWork));
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != expected
+                    || context.core().getStationWork(STIRLING) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().isEmpty()) {
+                helper.fail("Stirling committed the wrong FE/work/input transaction");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void stirling_generator_overflow_rolls_back_work_and_input(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            if (!installStation(context, "stirling_generator")) {
+                helper.fail("Could not install the Stirling Generator");
+                return;
+            }
+            long expected = stirlingEnergy(new ItemStack(Items.COAL));
+            long expectedWork = expected / MachinesConfig.COMMON.ENERGY
+                    .STIRLING_GENERATOR_PRODUCTION.get();
+            seedResource(
+                    context.core(), StorageResourceKey.neoforgeEnergy(),
+                    Long.MAX_VALUE);
+            tick(context.core(), Math.toIntExact(expectedWork));
+            long workBefore = context.core().getStationWork(STIRLING);
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            selectTransform(menu, context, STIRLING);
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != Long.MAX_VALUE
+                    || context.core().getStationWork(STIRLING) != workBefore
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().is(Items.COAL)) {
+                helper.fail("Stirling overflow partially mutated the transform");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static long stirlingEnergy(ItemStack fuel) {
+        int burnTime = fuel.getBurnTime(RecipeType.SMELTING);
+        double speed = MachinesConfig.COMMON.ENERGY
+                .STIRLING_GENERATOR_BURN_SPEED.get();
+        double efficiency = MachinesConfig.COMMON.ENERGY
+                .STIRLING_GENERATOR_FUEL_EFFICIENCY_BASE.get();
+        int production = MachinesConfig.COMMON.ENERGY
+                .STIRLING_GENERATOR_PRODUCTION.get();
+        long duration = (long) Math.floor(
+                burnTime * speed * (efficiency / 100.0));
+        return Math.multiplyExact(duration, production);
+    }
+
     private static void withCore(GameTestHelper helper, FixtureAssertion assertion) {
         var level = helper.getLevel();
         BlockPos corePos = helper.absolutePos(new BlockPos(1, 3, 1));
@@ -257,6 +363,60 @@ public final class EnderioIntegrationGameTests {
             return;
         }
         throw new IllegalStateException("Could not install Ender IO Alloy Smelter");
+    }
+
+    private static boolean installStation(
+            FixtureContext context,
+            String itemPath
+    ) {
+        ItemStack station = new ItemStack(enderioItem(itemPath));
+        var menu = new CraftingTerminalMenu(
+                942, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), STATIONS_PAGE_BUTTON);
+        for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
+             index < CraftingTerminalMenu.MACHINE_SLOT_START
+                     + CraftingTerminalMenu.MACHINE_SLOT_COUNT;
+             index++) {
+            var slot = menu.getSlot(index);
+            if (!slot.isActive() || !slot.mayPlace(station)) continue;
+            slot.set(station.copy());
+            slot.setChanged();
+            menu.clickMenuButton(context.player(), STORAGE_PAGE_BUTTON);
+            return slot.getItem().getCount() == 1
+                    && ItemStack.isSameItemSameComponents(slot.getItem(), station);
+        }
+        menu.clickMenuButton(context.player(), STORAGE_PAGE_BUTTON);
+        return false;
+    }
+
+    private static CraftingTerminalMenu transformMenu(
+            FixtureContext context,
+            ItemStack input
+    ) {
+        var menu = new CraftingTerminalMenu(
+                943, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), TRANSFORM_PAGE_BUTTON);
+        menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(input);
+        return menu;
+    }
+
+    private static void selectTransform(
+            CraftingTerminalMenu menu,
+            FixtureContext context,
+            ResourceLocation transformId
+    ) {
+        int useIndex = -1;
+        var uses = menu.getVisibleTransformUses();
+        for (int index = 0; index < uses.size(); index++) {
+            if (uses.get(index).id().equals(transformId)) {
+                useIndex = index;
+                break;
+            }
+        }
+        if (useIndex < 0 || !menu.clickMenuButton(
+                context.player(), CraftingTerminalMenu.transformUseButtonId(useIndex))) {
+            throw new IllegalStateException("Could not select transform " + transformId);
+        }
     }
 
     private static boolean craft(FixtureContext context, ResourceLocation recipeId) {

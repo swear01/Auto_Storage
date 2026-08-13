@@ -180,5 +180,6 @@
   "gui.auto_storage.transform_retained": "Retained per item",
   "gui.auto_storage.transform_retained_item": "%s ×%s",
   "gui.auto_storage.station.botania_thermalily": "Thermalily",
-  "gui.auto_storage.station.botania_endoflame": "Endoflame"
+  "gui.auto_storage.station.botania_endoflame": "Endoflame",
+  "gui.auto_storage.station.enderio_stirling_generator": "Stirling Generator"
 }

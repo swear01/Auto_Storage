@@ -7,7 +7,7 @@
     "maven.modrinth:enderio:Tfs8aJPH"
   ],
   "entrypoint": "com.swear.autostorage.compat.enderio.EnderioCompatModule",
-  "expectedTests": 6,
+  "expectedTests": 8,
   "fixture": "enderIoFixture",
   "id": "auto_storage:enderio",
   "matrix": {

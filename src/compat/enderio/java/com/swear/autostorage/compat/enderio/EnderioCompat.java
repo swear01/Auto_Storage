@@ -1,6 +1,7 @@
 package com.swear.autostorage.compat.enderio;
 
 import com.enderio.enderio.config.machines.MachinesConfig;
+import com.enderio.enderio.config.machines.common.EnergyConfig;
 import com.enderio.enderio.content.machines.alloy.AlloySmeltingRecipe;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
@@ -12,7 +13,11 @@ import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.api.AutoStorageApi;
+import com.swear.autostorage.StorageResourceKindApi;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
@@ -43,10 +48,12 @@ public final class EnderioCompat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
+        Objects.requireNonNull(transformProviders, "transformProviders");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
             throw new IllegalArgumentException(
                     "Ender IO descriptor register targets the wrong registry");
@@ -55,10 +62,41 @@ public final class EnderioCompat {
             throw new IllegalArgumentException(
                     "Ender IO family register targets the wrong registry");
         }
-        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())) {
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {
             throw new IllegalArgumentException(
-                    "Ender IO descriptors and families must share one namespace");
+                    "Ender IO transform provider register targets the wrong registry");
         }
+        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())
+                || !machineDescriptors.getNamespace().equals(
+                        transformProviders.getNamespace())) {
+            throw new IllegalArgumentException(
+                    "Ender IO descriptors, families, and transform providers "
+                            + "must share one namespace");
+        }
+
+        ResourceLocation stirlingId = ResourceLocation.fromNamespaceAndPath(
+                machineDescriptors.getNamespace(), "enderio_stirling_generator");
+        machineDescriptors.register(stirlingId.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        stirlingId,
+                        Component.translatable(
+                                "gui.auto_storage.station.enderio_stirling_generator"),
+                        () -> List.of(MachineVariant.of(
+                                new ItemStack(requiredItem(
+                                        ResourceLocation.fromNamespaceAndPath(
+                                                "enderio", "stirling_generator"))),
+                                MachineWorkRate.ONE)),
+                        MachineCategory.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
+        transformProviders.register(stirlingId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.station.enderio_stirling_generator"),
+                        EnderioCompat::stirlingTransform));
 
         ResourceLocation descriptorId = ResourceLocation.fromNamespaceAndPath(
                 machineDescriptors.getNamespace(), "enderio_alloy_smelting");
@@ -164,6 +202,28 @@ public final class EnderioCompat {
                     "Missing Ender IO recipe type " + ALLOY_SMELTING_TYPE);
         }
         return (RecipeType<AlloySmeltingRecipe>) type;
+    }
+
+    private static TransformProviderApi.Result stirlingTransform(ItemStack input) {
+        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        if (burnTime <= 0 || input.hasCraftingRemainingItem()) return null;
+        EnergyConfig energy = MachinesConfig.COMMON.ENERGY;
+        double speed = energy.STIRLING_GENERATOR_BURN_SPEED.get();
+        double efficiency = energy.STIRLING_GENERATOR_FUEL_EFFICIENCY_BASE.get();
+        int production = energy.STIRLING_GENERATOR_PRODUCTION.get();
+        long duration = (long) Math.floor(
+                burnTime * speed * (efficiency / 100.0));
+        if (duration <= 0 || production <= 0) return null;
+        try {
+            return new TransformProviderApi.Result(
+                    StorageResourceKey.neoforgeEnergy(),
+                    Math.multiplyExact(duration, production),
+                    ResourceLocation.fromNamespaceAndPath(
+                            AutoStorageApi.MOD_ID, "enderio_stirling_generator"),
+                    duration);
+        } catch (ArithmeticException exception) {
+            return null;
+        }
     }
 
     private static int baseAlloyUsage() {
