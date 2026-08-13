@@ -959,22 +959,19 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         Slot source = getSlot(FUEL_INPUT_SLOT);
         ItemStack stack = source.getItem();
         if (core == null || stack.isEmpty()) return false;
-        int available = transformableCount(core, stack);
+        int available = transformableCount(core, stack, player);
         int amount = requested == Integer.MAX_VALUE ? available : requested;
         if (amount <= 0 || amount > available || amount > stack.getCount()) return false;
         ItemStack converted = stack.copyWithCount(amount);
         TransformProviderApi.Use use = getSelectedTransformUse();
-        if (use == null || !commitTransform(core, use, converted)) return false;
+        if (use == null || !commitTransform(core, use, converted, player)) return false;
+        List<ItemStack> templates = retainedTemplates(use, stack);
 
-        ItemStack remainder = stack.hasCraftingRemainingItem()
-                ? stack.getCraftingRemainingItem() : ItemStack.EMPTY;
         processingFuelInput = true;
         try {
             stack.shrink(amount);
             source.setChanged();
-            if (!remainder.isEmpty()) {
-                returnFuelRemaindersToPlayer(remainder, amount, player);
-            }
+            deliverTransformRetainedItems(templates, amount, player);
         } finally {
             processingFuelInput = false;
         }
@@ -989,10 +986,15 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             return;
         }
         craftableCount = transformableCount(
-                core, getSlot(FUEL_INPUT_SLOT).getItem());
+                core, getSlot(FUEL_INPUT_SLOT).getItem(),
+                playerInventory == null ? null : playerInventory.player);
     }
 
-    private int transformableCount(StorageCoreBlockEntity core, ItemStack input) {
+    private int transformableCount(
+            StorageCoreBlockEntity core,
+            ItemStack input,
+            @Nullable Player player
+    ) {
         if (input.isEmpty()) return 0;
         TransformProviderApi.Use use = getSelectedTransformUse();
         if (use == null) return 0;
@@ -1000,7 +1002,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         int high = input.getCount();
         while (low < high) {
             int candidate = low + (high - low) / 2 + (high - low) % 2;
-            if (canCommitTransform(core, use, input.copyWithCount(candidate))) {
+            if (canCommitTransform(core, use, input.copyWithCount(candidate), player)) {
                 low = candidate;
             } else {
                 high = candidate - 1;
@@ -1012,28 +1014,52 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private boolean canCommitTransform(
             StorageCoreBlockEntity core,
             TransformProviderApi.Use use,
-            ItemStack input
+            ItemStack input,
+            @Nullable Player player
     ) {
         MachineDescriptor descriptor = transformDescriptor(use);
         if (descriptor != null) {
             return core.canAddDescriptorTransform(descriptor.id(), input);
         }
         StorageResourceTransaction transaction = transformTransaction(core, use, input);
-        return transaction != null
-                && core.applyResourceTransaction(transaction, Action.SIMULATE, Actor.EMPTY);
+        if (transaction == null
+                || !core.applyResourceTransaction(transaction, Action.SIMULATE, Actor.EMPTY)) {
+            return false;
+        }
+        StorageResourceTransaction retainedOverflow =
+                retainedOverflowTransaction(core, use, input, player);
+        return retainedOverflow == null
+                || core.applyResourceTransaction(
+                        retainedOverflow, Action.SIMULATE, Actor.EMPTY);
     }
 
     private boolean commitTransform(
             StorageCoreBlockEntity core,
             TransformProviderApi.Use use,
-            ItemStack input
+            ItemStack input,
+            @Nullable Player player
     ) {
         MachineDescriptor descriptor = transformDescriptor(use);
         if (descriptor != null) return core.addDescriptorTransform(descriptor.id(), input);
         StorageResourceTransaction transaction = transformTransaction(core, use, input);
-        return transaction != null
-                && core.applyResourceTransaction(transaction, Action.SIMULATE, Actor.EMPTY)
-                && core.applyResourceTransaction(transaction, Action.EXECUTE, Actor.EMPTY);
+        if (transaction == null) return false;
+        if (!core.applyResourceTransaction(transaction, Action.SIMULATE, Actor.EMPTY)) {
+            return false;
+        }
+        StorageResourceTransaction retainedOverflow =
+                retainedOverflowTransaction(core, use, input, player);
+        if (retainedOverflow != null
+                && !core.applyResourceTransaction(
+                        retainedOverflow, Action.SIMULATE, Actor.EMPTY)) {
+            return false;
+        }
+        if (!core.applyResourceTransaction(transaction, Action.EXECUTE, Actor.EMPTY)) {
+            return false;
+        }
+        if (retainedOverflow != null) {
+            core.applyResourceTransaction(retainedOverflow, Action.EXECUTE, Actor.EMPTY);
+        }
+        return true;
     }
 
     @Nullable
@@ -1090,6 +1116,86 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 player.drop(stack, false);
             }
             remaining -= amount;
+        }
+    }
+
+    private List<ItemStack> retainedTemplates(
+            TransformProviderApi.Use use,
+            ItemStack input
+    ) {
+        if (!use.retainedItems().isEmpty()) return use.retainedItems();
+        return input.hasCraftingRemainingItem()
+                ? List.of(input.getCraftingRemainingItem()) : List.of();
+    }
+
+    private static long playerRetainedOverflow(
+            @Nullable Player player,
+            ItemStack template,
+            long total
+    ) {
+        if (player == null) return total;
+        Inventory inventory = player.getInventory();
+        long capacity = 0;
+        for (int index = 0; index < inventory.getContainerSize(); index++) {
+            ItemStack slot = inventory.getItem(index);
+            if (slot.isEmpty()) {
+                capacity = Math.addExact(capacity, template.getMaxStackSize());
+            } else if (ItemStack.isSameItemSameComponents(slot, template)) {
+                capacity = Math.addExact(
+                        capacity, template.getMaxStackSize() - slot.getCount());
+            }
+        }
+        return Math.max(0L, total - capacity);
+    }
+
+    @Nullable
+    private StorageResourceTransaction retainedOverflowTransaction(
+            StorageCoreBlockEntity core,
+            TransformProviderApi.Use use,
+            ItemStack input,
+            @Nullable Player player
+    ) {
+        StorageResourceTransaction.Builder builder = null;
+        for (ItemStack template : retainedTemplates(use, input)) {
+            try {
+                long total = Math.multiplyExact(
+                        (long) template.getCount(), input.getCount());
+                long overflow = playerRetainedOverflow(player, template, total);
+                if (overflow <= 0) continue;
+                StorageResourceKey key = StorageResourceBridge.itemKey(
+                        ItemKey.of(template), core.getLevel().registryAccess());
+                if (builder == null) builder = StorageResourceTransaction.builder();
+                builder.add(key, overflow);
+            } catch (ArithmeticException | IllegalArgumentException exception) {
+                return null;
+            }
+        }
+        if (builder == null) return null;
+        try {
+            return builder.build();
+        } catch (ArithmeticException | IllegalArgumentException exception) {
+            return null;
+        }
+    }
+
+    private void deliverTransformRetainedItems(
+            List<ItemStack> templates,
+            int amount,
+            Player player
+    ) {
+        for (ItemStack template : templates) {
+            long total = Math.multiplyExact((long) template.getCount(), amount);
+            long overflow = playerRetainedOverflow(player, template, total);
+            long toPlayer = total - overflow;
+            int remaining = (int) toPlayer;
+            while (remaining > 0) {
+                int batch = Math.min(remaining, template.getMaxStackSize());
+                ItemStack stack = template.copyWithCount(batch);
+                if (!player.getInventory().add(stack) && !stack.isEmpty()) {
+                    player.drop(stack, false);
+                }
+                remaining -= batch;
+            }
         }
     }
 

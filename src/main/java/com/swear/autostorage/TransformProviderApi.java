@@ -193,7 +193,8 @@ public final class TransformProviderApi {
                     resolved.amountPerItem(),
                     false,
                     resolved.stationId(),
-                    resolved.stationWorkPerItem()));
+                    resolved.stationWorkPerItem(),
+                    resolved.retainedItems()));
         }
         return List.copyOf(result);
     }
@@ -218,12 +219,14 @@ public final class TransformProviderApi {
      * @param amountPerItem positive output amount for one input item
      * @param stationId required station descriptor, or {@code null}
      * @param stationWorkPerItem positive work cost when a station is present
+     * @param retainedItems exact item stacks returned per consumed input item
      */
     public record Result(
             StorageResourceKey output,
             long amountPerItem,
             @Nullable ResourceLocation stationId,
-            long stationWorkPerItem
+            long stationWorkPerItem,
+            List<ItemStack> retainedItems
     ) {
         public Result {
             Objects.requireNonNull(output, "output");
@@ -231,7 +234,38 @@ public final class TransformProviderApi {
                     || (stationId == null) != (stationWorkPerItem == 0)) {
                 throw new IllegalArgumentException("Invalid transform result");
             }
+            retainedItems = checkedRetainedItems(retainedItems);
         }
+
+        public Result(
+                StorageResourceKey output,
+                long amountPerItem,
+                @Nullable ResourceLocation stationId,
+                long stationWorkPerItem
+        ) {
+            this(output, amountPerItem, stationId, stationWorkPerItem, List.of());
+        }
+    }
+
+    private static List<ItemStack> checkedRetainedItems(List<ItemStack> retainedItems) {
+        Objects.requireNonNull(retainedItems, "retainedItems");
+        List<ItemStack> retained = new ArrayList<>(retainedItems.size());
+        for (ItemStack stack : retainedItems) {
+            Objects.requireNonNull(stack, "retained item");
+            ItemStack copy = stack.copy();
+            if (copy.isEmpty() || copy.getCount() <= 0
+                    || copy.getCount() > copy.getMaxStackSize()) {
+                throw new IllegalArgumentException(
+                        "Retained item must have a positive stackable count");
+            }
+            if (retained.stream().anyMatch(existing ->
+                    ItemStack.isSameItemSameComponents(existing, copy))) {
+                throw new IllegalArgumentException(
+                        "Duplicate retained item " + copy.getItem());
+            }
+            retained.add(copy);
+        }
+        return List.copyOf(retained);
     }
 
     public record Target(
@@ -255,7 +289,8 @@ public final class TransformProviderApi {
             long amountPerItem,
             boolean infinite,
             @Nullable ResourceLocation stationId,
-            long stationWorkPerItem
+            long stationWorkPerItem,
+            List<ItemStack> retainedItems
     ) {
         public Use {
             Objects.requireNonNull(id, "id");
@@ -269,6 +304,21 @@ public final class TransformProviderApi {
             if (stationWorkPerItem < 0 || (stationId == null) != (stationWorkPerItem == 0)) {
                 throw new IllegalArgumentException("Invalid transform station cost");
             }
+            retainedItems = checkedRetainedItems(retainedItems);
+        }
+
+        public Use(
+                ResourceLocation id,
+                ResourceLocation targetId,
+                ItemStack representative,
+                StorageResourceKey output,
+                long amountPerItem,
+                boolean infinite,
+                @Nullable ResourceLocation stationId,
+                long stationWorkPerItem
+        ) {
+            this(id, targetId, representative, output, amountPerItem, infinite,
+                    stationId, stationWorkPerItem, List.of());
         }
     }
 

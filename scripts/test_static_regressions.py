@@ -4071,6 +4071,49 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("gui.auto_storage.transform_source_direct", zh_tw)
         self.assertIn("gui.auto_storage.transform_station_work", en_us)
         self.assertIn("gui.auto_storage.transform_station_work", zh_tw)
+        self.assertIn("use.retainedItems()", card_render)
+        self.assertIn("gui.auto_storage.transform_retained", en_us)
+        self.assertIn("gui.auto_storage.transform_retained", zh_tw)
+
+    def test_transform_retained_items_deliver_inventory_first_then_core(self):
+        menu = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
+        )
+        provider = self.read_required(
+            "src/main/java/com/swear/autostorage/TransformProviderApi.java"
+        )
+        screen = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalScreen.java"
+        )
+        retained_templates = self.java_block(
+            menu,
+            r"\bprivate\s+List<ItemStack>\s+retainedTemplates\s*\(",
+            "transform retained templates",
+        )
+        self.assertIn("use.retainedItems()", retained_templates)
+        self.assertIn("input.hasCraftingRemainingItem()", retained_templates)
+        self.assertIn("getCraftingRemainingItem()", retained_templates)
+        overflow = self.java_block(
+            menu,
+            r"\bprivate\s+static\s+long\s+playerRetainedOverflow\s*\(",
+            "player retained overflow",
+        )
+        self.assertIn("inventory.getContainerSize()", overflow)
+        self.assertIn("ItemStack.isSameItemSameComponents(slot, template)", overflow)
+        self.assertIn("Math.max(0L, total - capacity)", overflow)
+        transaction = self.java_block(
+            menu,
+            r"\bprivate\s+StorageResourceTransaction\s+retainedOverflowTransaction\s*\(",
+            "retained overflow ledger transaction",
+        )
+        self.assertIn("StorageResourceBridge.itemKey", transaction)
+        self.assertIn("Math.multiplyExact", transaction)
+        self.assertIn("retainedOverflowTransaction(core, use, input, player)", menu)
+        self.assertIn("deliverTransformRetainedItems(templates, amount, player)", menu)
+        self.assertIn("retainedItems = checkedRetainedItems(retainedItems)", provider)
+        self.assertIn("List.copyOf(retained)", provider)
+        self.assertIn("renderTransformRetainedTooltip", screen)
+        self.assertIn("use.retainedItems().isEmpty()", screen)
 
     def test_station_stack_counts_overlay_items_and_only_processing_shows_stored_work(self):
         screen = self.read_required(

@@ -401,9 +401,17 @@ Create a `DeferredRegister<TransformProvider>` through
 one exact inserted item into a positive typed output and, optionally, a matching
 station-work cost. Resolvers must be deterministic and side-effect free.
 
+A resolver may additionally declare **retained items** in its `Result`
+(`retainedItems`): exact component-bearing stacks returned per consumed input
+item (buckets, bottles, catalysts, bowls, …). Retained items are validated
+(non-empty, stackable count, no duplicates), delivered to the player inventory
+first with Core overflow, and included in the same simulate-then-commit
+capacity check as the output and station work, so a full inventory plus a full
+Core blocks the conversion instead of dropping or losing the retained stack.
+
 Auto mode only discovers matching uses. The server revalidates the exact input,
-selected provider, output capacity, and station work before one
-simulate-then-commit mutation.
+selected provider, output capacity, retained-item capacity, and station work
+before one simulate-then-commit mutation.
 
 ### Existing-station variants
 

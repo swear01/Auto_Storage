@@ -176,5 +176,7 @@
   "gui.auto_storage.station.theurgy_liquefaction": "Liquefaction",
   "gui.auto_storage.station.actuallyadditions_crushing": "Crushing",
   "gui.auto_storage.station.actuallyadditions_pressing": "Pressing",
-  "gui.auto_storage.station.actuallyadditions_fermenting": "Fermenting"
+  "gui.auto_storage.station.actuallyadditions_fermenting": "Fermenting",
+  "gui.auto_storage.transform_retained": "Retained per item",
+  "gui.auto_storage.transform_retained_item": "%s ×%s"
 }

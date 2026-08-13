@@ -336,6 +336,7 @@ public interface com.swear.autostorage.TransformProviderApi$Resolver {
 }
 
 public final class com.swear.autostorage.TransformProviderApi$Result extends java.lang.Record {
+  public com.swear.autostorage.TransformProviderApi$Result(com.swear.autostorage.StorageResourceKey, long, net.minecraft.resources.ResourceLocation, long, java.util.List<net.minecraft.world.item.ItemStack>);
   public com.swear.autostorage.TransformProviderApi$Result(com.swear.autostorage.StorageResourceKey, long, net.minecraft.resources.ResourceLocation, long);
   public final java.lang.String toString();
   public final int hashCode();
@@ -344,6 +345,7 @@ public final class com.swear.autostorage.TransformProviderApi$Result extends jav
   public long amountPerItem();
   public net.minecraft.resources.ResourceLocation stationId();
   public long stationWorkPerItem();
+  public java.util.List<net.minecraft.world.item.ItemStack> retainedItems();
 }
 
 public final class com.swear.autostorage.TransformProviderApi$Target extends java.lang.Record {
@@ -357,6 +359,7 @@ public final class com.swear.autostorage.TransformProviderApi$Target extends jav
 }
 
 public final class com.swear.autostorage.TransformProviderApi$Use extends java.lang.Record {
+  public com.swear.autostorage.TransformProviderApi$Use(net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation, net.minecraft.world.item.ItemStack, com.swear.autostorage.StorageResourceKey, long, boolean, net.minecraft.resources.ResourceLocation, long, java.util.List<net.minecraft.world.item.ItemStack>);
   public com.swear.autostorage.TransformProviderApi$Use(net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation, net.minecraft.world.item.ItemStack, com.swear.autostorage.StorageResourceKey, long, boolean, net.minecraft.resources.ResourceLocation, long);
   public final java.lang.String toString();
   public final int hashCode();
@@ -369,6 +372,7 @@ public final class com.swear.autostorage.TransformProviderApi$Use extends java.l
   public boolean infinite();
   public net.minecraft.resources.ResourceLocation stationId();
   public long stationWorkPerItem();
+  public java.util.List<net.minecraft.world.item.ItemStack> retainedItems();
 }
 
 public final class com.swear.autostorage.TypedRecipeInput extends java.lang.Record {

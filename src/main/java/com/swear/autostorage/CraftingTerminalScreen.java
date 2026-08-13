@@ -959,6 +959,24 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                     use.representative(),
                     leftPos + cell.x() + 33,
                     topPos + cell.y() + (cell.height() - 16) / 2);
+            List<ItemStack> retained = use.retainedItems();
+            int retainedInset = 0;
+            if (!retained.isEmpty()) {
+                graphics.renderItem(
+                        retained.getFirst(),
+                        leftPos + cell.x() + 54,
+                        topPos + cell.y() + (cell.height() - 16) / 2);
+                retainedInset = 18;
+                if (retained.size() > 1) {
+                    graphics.drawString(
+                            font,
+                            "+" + retained.size(),
+                            leftPos + cell.x() + 72,
+                            topPos + cell.y() + (cell.height() - font.lineHeight) / 2,
+                            0xFF606060,
+                            false);
+                }
+            }
             Component label = fuelTargetOption(use.targetId()).label();
             String text = label.getString() + "  "
                     + (use.infinite() ? "∞" : formatAmount(use.amountPerItem()));
@@ -968,8 +986,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                     : cell.y() + 4;
             graphics.drawString(
                     font,
-                    font.plainSubstrByWidth(text, Math.max(1, cell.width() - 54)),
-                    leftPos + cell.x() + 52,
+                    font.plainSubstrByWidth(
+                            text,
+                            Math.max(1, cell.width() - 54 - retainedInset)),
+                    leftPos + cell.x() + 52 + retainedInset,
                     topPos + textY,
                     0xFF404040,
                     false);
@@ -977,8 +997,9 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 graphics.drawString(
                         font,
                         font.plainSubstrByWidth(
-                                source.getString(), Math.max(1, cell.width() - 54)),
-                        leftPos + cell.x() + 52,
+                                source.getString(),
+                                Math.max(1, cell.width() - 54 - retainedInset)),
+                        leftPos + cell.x() + 52 + retainedInset,
                         topPos + cell.bottom() - font.lineHeight - 4,
                         0xFF606060,
                         false);
@@ -1477,6 +1498,41 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         }
     }
 
+    private boolean renderTransformRetainedTooltip(
+            GuiGraphics graphics,
+            int mouseX,
+            int mouseY
+    ) {
+        List<TransformProviderApi.Use> uses = menu.getVisibleTransformUses();
+        TerminalLayout.FlowGrid grid = geometry.transformCards();
+        int first = transformUsePage * grid.capacity();
+        List<TerminalLayout.Rect> cells = grid.cells(transformUsePage, uses.size());
+        int localX = mouseX - leftPos;
+        int localY = mouseY - topPos;
+        for (int visibleIndex = 0; visibleIndex < cells.size(); visibleIndex++) {
+            TransformProviderApi.Use use = uses.get(first + visibleIndex);
+            if (use.retainedItems().isEmpty()) continue;
+            TerminalLayout.Rect cell = cells.get(visibleIndex);
+            TerminalLayout.Rect retainedIcon = new TerminalLayout.Rect(
+                    cell.x() + 54,
+                    cell.y(),
+                    16,
+                    cell.height());
+            if (!retainedIcon.contains(localX, localY)) continue;
+            List<Component> lines = new ArrayList<>();
+            lines.add(Component.translatable("gui.auto_storage.transform_retained"));
+            for (ItemStack retained : use.retainedItems()) {
+                lines.add(Component.translatable(
+                        "gui.auto_storage.transform_retained_item",
+                        retained.getHoverName(),
+                        retained.getCount()));
+            }
+            graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+            return true;
+        }
+        return false;
+    }
+
     private boolean renderFuelTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         CraftingTerminalPage page = displayedPreferences().page();
         if (page == CraftingTerminalPage.TRANSFORM) {
@@ -1490,7 +1546,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                         mouseY);
                 return true;
             }
-            return false;
+            return renderTransformRetainedTooltip(graphics, mouseX, mouseY);
         }
         if (page != CraftingTerminalPage.STATIONS) return false;
         if (fuelSearchActive) {

@@ -176,5 +176,7 @@
   "gui.auto_storage.station.theurgy_liquefaction": "液化",
   "gui.auto_storage.station.actuallyadditions_crushing": "粉碎",
   "gui.auto_storage.station.actuallyadditions_pressing": "壓榨",
-  "gui.auto_storage.station.actuallyadditions_fermenting": "發酵"
+  "gui.auto_storage.station.actuallyadditions_fermenting": "發酵",
+  "gui.auto_storage.transform_retained": "每物品保留",
+  "gui.auto_storage.transform_retained_item": "%s ×%s"
 }

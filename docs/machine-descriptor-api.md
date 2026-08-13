@@ -71,9 +71,11 @@ representative, or currently installed stack. If no single truthful label
 covers every match, register separate logical families rather than inventing a
 generic name. The resolver receives a one-count copy of the exact inserted item
 and returns either no use or a positive typed output plus an optional matching
-station ID/work cost. It must be deterministic and side-effect free.
+station ID/work cost and an optional retained-items list (exact stacks returned
+per consumed input item; player inventory first, Core overflow, atomic with the
+rest of the conversion). It must be deterministic and side-effect free.
 
-Auto lists every compatible exact-input use without selecting or executing one. An explicit target filters those same uses by `targetId`; it is not a global recipe catalog. The server validates the visible card index, stable use ID, current exact input, output capacity, and station work again before simulate-then-commit.
+Auto lists every compatible exact-input use without selecting or executing one. An explicit target filters those same uses by `targetId`; it is not a global recipe catalog. The server validates the visible card index, stable use ID, current exact input, output capacity, retained-item capacity, and station work again before simulate-then-commit.
 
 ## Polymorphic station variants
 

@@ -175,6 +175,51 @@ class SelfTest {
         assertTrue("Transform targets carry a localized produced-resource label",
                 fuel.label().equals(
                         Component.translatable("gui.auto_storage.energy.furnace_fuel")));
+        var energy = StorageResourceBridge.energyKey(EnergyType.FURNACE_FUEL);
+        var retained = new TransformProviderApi.Result(
+                energy, 32, null, 0, List.of(new ItemStack(Items.BUCKET)));
+        assertTrue("Transform retained items round-trip exactly",
+                retained.retainedItems().size() == 1
+                        && retained.retainedItems().getFirst().is(Items.BUCKET));
+        assertTrue("Transform results keep the no-retained convenience constructor",
+                new TransformProviderApi.Result(energy, 32, null, 0)
+                        .retainedItems().isEmpty());
+        try {
+            new TransformProviderApi.Result(
+                    energy, 32, null, 0, List.of(ItemStack.EMPTY));
+            assertTrue("empty retained items fail explicitly", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("empty retained items fail explicitly",
+                    expected.getMessage().contains("Retained item"));
+        }
+        try {
+            new TransformProviderApi.Result(
+                    energy,
+                    32,
+                    null,
+                    0,
+                    List.of(new ItemStack(Items.BUCKET), new ItemStack(Items.BUCKET)));
+            assertTrue("duplicate retained items fail explicitly", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("duplicate retained items fail explicitly",
+                    expected.getMessage().contains("Duplicate retained item"));
+        }
+        try {
+            new TransformProviderApi.Use(
+                    ResourceLocation.fromNamespaceAndPath("selftest", "use"),
+                    TransformProviderApi.energyTargetId(EnergyType.FURNACE_FUEL),
+                    new ItemStack(Items.COAL),
+                    energy,
+                    32,
+                    false,
+                    null,
+                    0,
+                    List.of(new ItemStack(Items.BUCKET, 0)));
+            assertTrue("zero-count retained uses fail explicitly", false);
+        } catch (IllegalArgumentException expected) {
+            assertTrue("zero-count retained uses fail explicitly",
+                    expected.getMessage().contains("Retained item"));
+        }
     }
 
     private static void testTerminalResourceRendererApi() {
