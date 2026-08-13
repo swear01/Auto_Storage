@@ -6186,6 +6186,50 @@ displayName="Sample Machines"
                 source_artifact=self.jar,
             )
 
+    def test_transform_candidates_detect_conversion_machines(self):
+        jar = self.root / "transform-fixture.jar"
+        with zipfile.ZipFile(jar, "w") as archive:
+            archive.writestr(
+                "vazkii/botania/common/block/block_entity/flower/"
+                "generating/ThermalilyBlockEntity.class",
+                b"fixture",
+            )
+            archive.writestr(
+                "mekanism/generators/common/tile/"
+                "TileEntityHeatGenerator.class",
+                b"fixture",
+            )
+            archive.writestr(
+                "mekanism/generators/common/tile/"
+                "TileEntityWindGenerator.class",
+                b"fixture",
+            )
+            archive.writestr(
+                "com/example/datagen/RecipeGenerator.class",
+                b"fixture",
+            )
+            archive.writestr(
+                "com/example/client/ConverterRenderer.class",
+                b"fixture",
+            )
+            archive.writestr(
+                "com/example/plain/Helper.class",
+                b"fixture",
+            )
+        candidates = self.compat_kit.transform_candidates(jar)
+        found = {entry["class"]: entry["evidence"] for entry in candidates}
+        self.assertEqual(
+            {
+                "mekanism.generators.common.tile.TileEntityHeatGenerator":
+                    "generator",
+                "mekanism.generators.common.tile.TileEntityWindGenerator":
+                    "generator",
+                "vazkii.botania.common.block.block_entity.flower.generating."
+                "ThermalilyBlockEntity": "generating",
+            },
+            found,
+        )
+
     def test_generation_transform_shape_is_validated_and_generated(self):
         audit = self.source_audit()
         contract = self.accepted_contract()

@@ -117,6 +117,26 @@ STATION_TERMS = (
     "processor",
     "station",
 )
+TRANSFORM_TERMS = (
+    "boiler",
+    "burner",
+    "combustion",
+    "converter",
+    "convert",
+    "generating",
+    "generator",
+    "magmator",
+    "turbine",
+)
+TRANSFORM_EXCLUDED_TERMS = (
+    "recipegenerator",
+    "datagen",
+    "loot",
+    "model",
+    "packet",
+    "render",
+    "client",
+)
 RECIPE_BUILDER_TERMS = ("recipebuilder", "recipe_builder")
 DATAGEN_TERMS = ("datagen", "datagenerator", ".data.", ".datagen.")
 CLIENT_VIEWER_TERMS = (
@@ -1291,6 +1311,50 @@ def _current_name_bucket(class_name: str) -> tuple[str, str] | None:
         if term is not None:
             return bucket, term
     return None
+
+
+def transform_candidates(jar_path: Path) -> list[dict]:
+    """Detect one-way conversion-machine candidates in a jar.
+
+    Matches class names and package paths against TRANSFORM_TERMS
+    (generators, converters, burners, boilers, combustion, turbines,
+    magmators, and Botania-style `generating` flowers) while excluding
+    datagen/rendering/packet/client helpers. The result is evidence for
+    the Transform page spec (docs/compat-kit.md): reviewers still verify
+    the exact per-item output, determinism, and one-way semantics before
+    adding a TransformProvider.
+    """
+    jar_path = Path(jar_path)
+    if not jar_path.is_file():
+        raise ValueError(f"jar not found: {jar_path}")
+    candidates = []
+    with zipfile.ZipFile(jar_path) as archive:
+        for info in archive.infolist():
+            if not info.filename.endswith(".class"):
+                continue
+            if info.filename.startswith("META-INF/"):
+                continue
+            binary = info.filename[:-6].replace("/", ".")
+            if any(marker in binary for marker in (
+                "$", "module-info", "package-info"
+            )):
+                continue
+            lowered = binary.lower()
+            excluded = any(term in lowered for term in TRANSFORM_EXCLUDED_TERMS)
+            if excluded:
+                continue
+            term = next(
+                (term for term in TRANSFORM_TERMS if term in lowered), None
+            )
+            if term is None:
+                continue
+            candidates.append({
+                "class": binary,
+                "evidence": term,
+                "matched": binary,
+            })
+    candidates.sort(key=lambda entry: entry["class"])
+    return candidates
 
 
 def _inheritance_path(
@@ -10055,6 +10119,11 @@ def _build_parser() -> argparse.ArgumentParser:
     publish.add_argument("--output", required=True)
     publish.add_argument("--version", required=True)
 
+    transforms = subparsers.add_parser(
+        "transform-candidates",
+        help="list one-way conversion-machine candidates in a jar",
+    )
+    transforms.add_argument("source", type=Path, help="target jar to scan")
     normalize = subparsers.add_parser("normalize-jar")
     normalize.add_argument("source")
     normalize.add_argument("output")
@@ -10212,6 +10281,15 @@ def main(argv=None) -> int:
             _write_json(args.output, report)
         elif args.command == "publish":
             publish_archive(args.output, args.version)
+        elif args.command == "transform-candidates":
+            candidates = transform_candidates(args.source)
+            print(
+                "Transform-page candidates (spec: docs/compat-kit.md; "
+                "verify exact one-way per-item output before adding):"
+            )
+            for entry in candidates:
+                print(f"- {entry['class']}  (term: {entry['evidence']})")
+            print(f"total: {len(candidates)}")
         elif args.command == "normalize-jar":
             normalize_jar(args.source, args.output)
         elif args.command == "transform-runtime-artifact":

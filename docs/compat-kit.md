@@ -407,6 +407,39 @@ signed Java `long`; the published generation-plan schema enforces the same
 maximum. These rules match runtime
 `MachineDescriptor` validation and fail before scaffolding.
 
+## Transform-page candidates (automatic detection)
+
+`compat-kit transform-candidates <target.jar>` lists one-way conversion-machine
+candidates by matching class names and package paths against conversion terms
+(`generator`, `generating`, `converter`/`convert`, `burner`, `boiler`,
+`combustion`, `turbine`, `magmator`) while excluding datagen/rendering/packet/
+client helpers. It is a fast evidence pass, not a review: the reviewer still
+applies the Transform-page spec below.
+
+A class belongs on the Transform page only when **all** of these hold:
+
+1. **One-way**: it converts an input item (or a typed resource) into an output
+   typed resource (FE, Mana, Source, gas, fluid…); never bidirectional
+   charge/discharge, storage, or pure transfer.
+2. **Discrete and storable**: one input unit yields one exact, storable output
+   amount (continuous passive output such as wind/solar, or per-second output
+   without an item input, is excluded).
+3. **Deterministic**: the output amount is exact — no chance, no randomness,
+   no entity/world dependence. Chance outputs are normalized to exact rational
+   EV decimals (the #89 1/10000 basis pattern).
+4. **Time-based is allowed**: burn/cooldown conversions belong on the Transform
+   page as station-work uses (Botania Thermalily/Endoflame, Powah Furnator);
+   the work equals the real-world cycle so the throughput matches the machine.
+5. **Retained inputs are declared**: bucket/container/catalyst round-trips use
+   the retained-items contract (#95), player-inventory-first with Core
+   overflow.
+
+Known rejection classes surfaced by the detector: fluid-input-only machines
+(Mekanism Bio/Gas-Burning Generator, IE Diesel, EnderIO Combustion, IF
+Biofuel), passive generators (Mekanism Wind/Solar), live multiblocks
+(Extreme Reactors, Mekanism Fission/Turbine), and recipe-crafting machines
+(covered by recipe families instead).
+
 Generation plans may also declare `transform` families: one-way, exact-input
 conversions that either produce immediately or consume station work over time.
 The contract family for a transform uses a process/instant station descriptor,
