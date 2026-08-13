@@ -44,7 +44,7 @@
   item prototype 的 encoded count 仍必須是 1。
 - Processing icon overlay、總 rate 與 station work 必須在此數量下不溢位且可讀。
 - Instant Stations 是二元解鎖，只顯示物品，不顯示 installed count 或假 work。
-- Stations `All`與搜尋結果中的未安裝代表物必須明顯比已安裝物暗；已安裝物保持原始亮度。
+- Stations `All`與搜尋結果中的未安裝代表物必須明顯比已安裝物暗；已安裝物保持原始亮度。未安裝且支援多種機器的 station（例如 Mekanism factory 的 basic＋四階、Powah Furnator 多 tier）預覽必須約每秒輪播不同機器方塊物品，不是固定第一個 representative。
 - 四頁各自保存查詢，但搜尋欄都使用 Storage/Craftable 的 top search 位置與同一
   focused input/query pipeline；只有候選 scope 不同。只輸入裸 `@`、`#`、`$`時必須顯示全部且focus可留在欄位繼續輸入；點擊欄外則解除focus但保留query；`@mod`是namespace substring match，因此`@creat`必須命中Create。
 - Storage/Craftable的resource selector只顯示已註冊群組，另永遠提供All聚合item與typed resources，tooltip必須精確為`Show: All`。Mekanism Gases的Oxygen/Hydrogen/Chlorine必須顯示各自名稱與EMI的colored chemical glyph，不得顯示Chemical Tank或Brewing Stand；recipe amount也不得誤用64,000 tank capacity。

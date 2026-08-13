@@ -15,7 +15,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
@@ -63,6 +65,9 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     private ResourceLocation stationCycleRecipeId;
     private ItemStack stationCycleInstalled = ItemStack.EMPTY;
     private long stationCycleAnchorMillis;
+    private long stationPreviewCycleAnchorMillis;
+    private final Map<MachineDescriptor, List<ItemStack>> stationPreviewVariants =
+            new IdentityHashMap<>();
     private ResourceLocation recipeLedgerRecipeId;
     private int recipeLedgerOffset;
     private SortMode lastUtilitySortMode;
@@ -815,7 +820,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                             installed.getCount());
                 }
             } else {
-                renderDimmedItem(graphics, descriptor.representativeStack(), slot);
+                renderDimmedItem(graphics, uninstalledStationPreview(descriptor), slot);
             }
             if (descriptor.category() == MachineCategory.PROCESS) {
                 drawFlowAmount(
@@ -1142,7 +1147,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                             installed.getCount());
                 }
             } else if (entry != null) {
-                renderDimmedItem(graphics, entry.representativeStack(), slot);
+                renderDimmedItem(graphics, uninstalledStationPreview(entry), slot);
             }
             if (entry != null) {
                 if (category == MachineCategory.PROCESS) {
@@ -1371,6 +1376,25 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         return presentation.stationForCycle(cycle);
     }
 
+    private ItemStack uninstalledStationPreview(MachineDescriptor descriptor) {
+        List<ItemStack> variants = stationPreviewVariants.computeIfAbsent(
+                descriptor, CraftingTerminalScreen::stationVariantStacks);
+        if (variants.size() <= 1) return descriptor.representativeStack();
+        long now = System.currentTimeMillis();
+        if (stationPreviewCycleAnchorMillis == 0L || now < stationPreviewCycleAnchorMillis) {
+            stationPreviewCycleAnchorMillis = now;
+        }
+        long cycle = RecipeStationCycle.cycle(now - stationPreviewCycleAnchorMillis);
+        return variants.get(Math.floorMod(cycle, variants.size()));
+    }
+
+    private static List<ItemStack> stationVariantStacks(MachineDescriptor descriptor) {
+        return descriptor.variants().stream()
+                .map(MachineVariant::stack)
+                .distinct()
+                .toList();
+    }
+
     private void renderResourceRow(
             GuiGraphics graphics,
             TerminalLayout.Rect cell,
@@ -1516,7 +1540,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             ItemStack installed = menu.getSlot(
                     CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).getItem();
             ItemStack displayStack = installed.isEmpty()
-                    ? descriptor.representativeStack()
+                    ? uninstalledStationPreview(descriptor)
                     : installed.copyWithCount(1);
             if (TerminalLayout.fuelSlot(cell).contains(localX, localY)) {
                 graphics.renderTooltip(font, displayStack, mouseX, mouseY);

@@ -5283,6 +5283,29 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("presentation.stationForCycle(cycle)", displayed_station)
         self.assertIn("displayedRecipeStation(presentation)", screen)
         self.assertNotIn("stationForCycle", native)
+
+        uninstalled_preview = self.java_block(
+            screen,
+            r"\bprivate\s+ItemStack\s+uninstalledStationPreview\s*\(",
+            "cycling uninstalled station preview",
+        )
+        self.assertIn("stationPreviewCycleAnchorMillis", uninstalled_preview)
+        self.assertIn("System.currentTimeMillis()", uninstalled_preview)
+        self.assertIn(
+            "RecipeStationCycle.cycle(now - stationPreviewCycleAnchorMillis)",
+            uninstalled_preview,
+        )
+        self.assertIn("Math.floorMod(cycle, variants.size())", uninstalled_preview)
+        self.assertIn("CraftingTerminalScreen::stationVariantStacks", uninstalled_preview)
+        variant_stacks = self.java_block(
+            screen,
+            r"\bprivate\s+static\s+List<ItemStack>\s+stationVariantStacks\s*\(",
+            "station variant stacks",
+        )
+        self.assertIn("MachineVariant::stack", variant_stacks)
+        self.assertIn("descriptor.variants()", variant_stacks)
+        self.assertIn("uninstalledStationPreview(entry)", screen)
+        self.assertIn("uninstalledStationPreview(descriptor)", screen)
         recipe_geometry = self.java_block(
             layout,
             r"\bprivate\s+static\s+RecipeGeometry\s+recipeGeometry\s*\(",
