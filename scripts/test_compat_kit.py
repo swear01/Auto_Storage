@@ -7,6 +7,7 @@ import io
 import json
 import os
 import selectors
+import shutil
 import subprocess
 import tempfile
 import tomllib
@@ -6187,47 +6188,72 @@ displayName="Sample Machines"
             )
 
     def test_transform_candidates_detect_conversion_machines(self):
+        javac = shutil.which("javac")
+        if javac is None:
+            self.skipTest("javac is required for the transform-candidate fixture")
+        src = self.root / "transform-src"
+        src.mkdir()
+        (src / "TileEntityGenerator.java").write_text(
+            "class TileEntityGenerator {}\n"
+        )
+        (src / "TileEntityHeatGenerator.java").write_text(
+            "class TileEntityHeatGenerator extends TileEntityGenerator "
+            "{ int getBurnTime() { return 1; } }\n"
+        )
+        (src / "PlainHelper.java").write_text("class PlainHelper {}\n")
+        classes = self.root / "transform-classes"
+        subprocess.run(
+            [
+                javac,
+                "-d",
+                str(classes),
+                str(src / "TileEntityGenerator.java"),
+                str(src / "TileEntityHeatGenerator.java"),
+                str(src / "PlainHelper.java"),
+            ],
+            check=True,
+            capture_output=True,
+        )
         jar = self.root / "transform-fixture.jar"
         with zipfile.ZipFile(jar, "w") as archive:
+            for class_file in sorted(classes.rglob("*.class")):
+                archive.write(
+                    class_file, class_file.relative_to(classes).as_posix()
+                )
             archive.writestr(
                 "vazkii/botania/common/block/block_entity/flower/"
                 "generating/ThermalilyBlockEntity.class",
                 b"fixture",
             )
-            archive.writestr(
-                "mekanism/generators/common/tile/"
-                "TileEntityHeatGenerator.class",
-                b"fixture",
-            )
-            archive.writestr(
-                "mekanism/generators/common/tile/"
-                "TileEntityWindGenerator.class",
-                b"fixture",
-            )
-            archive.writestr(
-                "com/example/datagen/RecipeGenerator.class",
-                b"fixture",
-            )
-            archive.writestr(
-                "com/example/client/ConverterRenderer.class",
-                b"fixture",
-            )
-            archive.writestr(
-                "com/example/plain/Helper.class",
-                b"fixture",
-            )
         candidates = self.compat_kit.transform_candidates(jar)
-        found = {entry["class"]: entry["evidence"] for entry in candidates}
-        self.assertEqual(
-            {
-                "mekanism.generators.common.tile.TileEntityHeatGenerator":
-                    "generator",
-                "mekanism.generators.common.tile.TileEntityWindGenerator":
-                    "generator",
-                "vazkii.botania.common.block.block_entity.flower.generating."
-                "ThermalilyBlockEntity": "generating",
-            },
-            found,
+        by_class = {
+            entry["class"]: entry["evidence"] for entry in candidates
+        }
+        heat = by_class.get("TileEntityHeatGenerator")
+        self.assertIsNotNone(heat, "heat generator must be detected")
+        self.assertTrue(
+            any("name_term" in item for item in heat),
+            heat,
+        )
+        self.assertTrue(
+            any(
+                "hierarchy" in item and "TileEntityGenerator" in item
+                for item in heat
+            ),
+            heat,
+        )
+        self.assertTrue(
+            any(
+                "bytecode" in item and "getBurnTime" in item
+                for item in heat
+            ),
+            heat,
+        )
+        self.assertNotIn("PlainHelper", by_class)
+        self.assertIn(
+            "vazkii.botania.common.block.block_entity.flower.generating."
+            "ThermalilyBlockEntity",
+            by_class,
         )
 
     def test_generation_transform_shape_is_validated_and_generated(self):

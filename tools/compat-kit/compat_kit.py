@@ -137,6 +137,18 @@ TRANSFORM_EXCLUDED_TERMS = (
     "render",
     "client",
 )
+TRANSFORM_BEHAVIOR_PATTERNS = (
+    ("burn_time", re.compile(r"\bgetBurnTime\b"), "getBurnTime"),
+    ("mana_production", re.compile(r"\baddMana\b"), "addMana"),
+    (
+        "energy_production",
+        re.compile(
+            r"\b(?:receiveEnergy|insertEnergy|addEnergy|produceEnergy|"
+            r"generateEnergy|getGenerationRate|getGeneration)\b"
+        ),
+        "energy production",
+    ),
+)
 RECIPE_BUILDER_TERMS = ("recipebuilder", "recipe_builder")
 DATAGEN_TERMS = ("datagen", "datagenerator", ".data.", ".datagen.")
 CLIENT_VIEWER_TERMS = (
@@ -1313,21 +1325,33 @@ def _current_name_bucket(class_name: str) -> tuple[str, str] | None:
     return None
 
 
-def transform_candidates(jar_path: Path) -> list[dict]:
+def transform_candidates(jar_path: Path, *, javap: Path | None = None) -> list[dict]:
     """Detect one-way conversion-machine candidates in a jar.
 
-    Matches class names and package paths against TRANSFORM_TERMS
-    (generators, converters, burners, boilers, combustion, turbines,
-    magmators, and Botania-style `generating` flowers) while excluding
-    datagen/rendering/packet/client helpers. The result is evidence for
-    the Transform page spec (docs/compat-kit.md): reviewers still verify
-    the exact per-item output, determinism, and one-way semantics before
-    adding a TransformProvider.
+    Three evidence layers, cheapest first:
+
+    1. `name_term` — class names and package paths against TRANSFORM_TERMS
+       (generators, converters, burners, boilers, combustion, turbines,
+       magmators, and Botania-style `generating` flowers).
+    2. `hierarchy` — an ancestor class or implemented interface whose simple
+       name matches a transform term (for example Mekanism's
+       `TileEntityGenerator` base, Botania's `GeneratingFlowerBlockEntity` /
+       `FluidGeneratorBlockEntity`, Generator Galore's
+       `GeneratorBlockEntity`), read from class-file metadata without javap.
+    3. `bytecode` — private bytecode patterns for fuel burning
+       (`getBurnTime`), Mana production (`addMana`), or energy production
+       (`receiveEnergy`/`insertEnergy`/`addEnergy`/`produceEnergy`/
+       `generateEnergy`/`getGenerationRate`).
+
+    Datagen/rendering/packet/client helpers are excluded. The result is
+    evidence for the Transform page spec (docs/compat-kit.md): reviewers
+    still verify the exact per-item output, determinism, and one-way
+    semantics before adding a TransformProvider.
     """
     jar_path = Path(jar_path)
     if not jar_path.is_file():
         raise ValueError(f"jar not found: {jar_path}")
-    candidates = []
+    metadata_by_class = {}
     with zipfile.ZipFile(jar_path) as archive:
         for info in archive.infolist():
             if not info.filename.endswith(".class"):
@@ -1339,21 +1363,68 @@ def transform_candidates(jar_path: Path) -> list[dict]:
                 "$", "module-info", "package-info"
             )):
                 continue
-            lowered = binary.lower()
-            excluded = any(term in lowered for term in TRANSFORM_EXCLUDED_TERMS)
-            if excluded:
-                continue
-            term = next(
-                (term for term in TRANSFORM_TERMS if term in lowered), None
+            metadata_by_class[binary] = _class_metadata(
+                archive.read(info.filename), info.filename
             )
-            if term is None:
-                continue
-            candidates.append({
-                "class": binary,
-                "evidence": term,
-                "matched": binary,
-            })
-    candidates.sort(key=lambda entry: entry["class"])
+
+    def hierarchy_evidence(class_name: str) -> str | None:
+        seen = set()
+        current = class_name
+        while current and current not in seen:
+            seen.add(current)
+            metadata = metadata_by_class.get(current)
+            if metadata is None:
+                return None
+            for parent in (
+                [metadata["super_class"]]
+                if metadata["super_class"] is not None
+                else []
+            ) + metadata["interfaces"]:
+                simple = parent.split(".")[-1].lower()
+                if any(term in simple for term in TRANSFORM_TERMS):
+                    return parent
+            current = metadata["super_class"]
+        return None
+
+    candidates = []
+    for binary, metadata in sorted(metadata_by_class.items()):
+        lowered = binary.lower()
+        if any(term in lowered for term in TRANSFORM_EXCLUDED_TERMS):
+            continue
+        evidence = []
+        term = next(
+            (term for term in TRANSFORM_TERMS if term in lowered), None
+        )
+        if term is not None:
+            evidence.append(("name_term", term))
+        if metadata is not None:
+            ancestor = hierarchy_evidence(binary)
+            if ancestor is not None:
+                evidence.append(("hierarchy", ancestor))
+        if not evidence:
+            continue
+        bytecode = ""
+        try:
+            bytecode = _run_javap(
+                jar_path,
+                binary,
+                "-c",
+                "-p",
+                output_limit=MAX_PRIVATE_BYTECODE_BYTES,
+                output_label="transform candidate bytecode",
+                javap=javap,
+            )
+        except (OSError, RuntimeError, ValueError):
+            bytecode = ""
+        for code, pattern, label in TRANSFORM_BEHAVIOR_PATTERNS:
+            if pattern.search(bytecode):
+                evidence.append(("bytecode", label))
+        candidates.append({
+            "class": binary,
+            "evidence": [
+                f"{kind}:{value}" for kind, value in evidence
+            ],
+        })
     return candidates
 
 
@@ -10288,7 +10359,11 @@ def main(argv=None) -> int:
                 "verify exact one-way per-item output before adding):"
             )
             for entry in candidates:
-                print(f"- {entry['class']}  (term: {entry['evidence']})")
+                print(
+                    f"- {entry['class']}  ("
+                    + ", ".join(entry["evidence"])
+                    + ")"
+                )
             print(f"total: {len(candidates)}")
         elif args.command == "normalize-jar":
             normalize_jar(args.source, args.output)

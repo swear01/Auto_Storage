@@ -410,11 +410,22 @@ maximum. These rules match runtime
 ## Transform-page candidates (automatic detection)
 
 `compat-kit transform-candidates <target.jar>` lists one-way conversion-machine
-candidates by matching class names and package paths against conversion terms
-(`generator`, `generating`, `converter`/`convert`, `burner`, `boiler`,
-`combustion`, `turbine`, `magmator`) while excluding datagen/rendering/packet/
-client helpers. It is a fast evidence pass, not a review: the reviewer still
-applies the Transform-page spec below.
+candidates with three evidence layers, cheapest first:
+
+1. **name_term** — class names and package paths against conversion terms
+   (`generator`, `generating`, `converter`/`convert`, `burner`, `boiler`,
+   `combustion`, `turbine`, `magmator`);
+2. **hierarchy** — an ancestor class or interface whose simple name matches a
+   conversion term (Mekanism `TileEntityGenerator`, Botania
+   `GeneratingFlowerBlockEntity`/`FluidGeneratorBlockEntity`, Generator Galore
+   `GeneratorBlockEntity`), read from class-file metadata without javap;
+3. **bytecode** — private bytecode patterns proving the conversion behavior:
+   fuel burning (`getBurnTime`), Mana production (`addMana`), or energy
+   production (`receiveEnergy`/`insertEnergy`/`addEnergy`/`produceEnergy`/
+   `generateEnergy`/`getGenerationRate`).
+
+Datagen/rendering/packet/client helpers are excluded. It is a fast evidence
+pass, not a review: the reviewer still applies the Transform-page spec below.
 
 A class belongs on the Transform page only when **all** of these hold:
 
