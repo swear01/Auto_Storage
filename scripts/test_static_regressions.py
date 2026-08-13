@@ -1153,7 +1153,7 @@ class StaticRegressionTests(unittest.TestCase):
                 descriptor["fixture"],
                 descriptor["expectedTests"],
             )
-        self.assertIn("SelfTest: 204937 passed, 0 failed, 204937 total", build)
+        self.assertIn("SelfTest: 204942 passed, 0 failed, 204942 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
     def test_compatibility_matrix_uses_descriptor_owned_recipe_inventories(self):
@@ -1390,12 +1390,25 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertNotIn("project.", verify)
         self.assertIn('dependsOn tasks.named("verifyBotaniaFixtureArtifact")', build)
         self.assert_descriptor_driven_fixture(
-            build, "botania", "botaniaFixture", 14
+            build, "botania", "botaniaFixture", 17
         )
+        self.assertIn("BotaniaCompat.register(MACHINES, RECIPES, TRANSFORMS)", module)
+        self.assertIn(".transformProviders(TRANSFORMS)", module)
+        compat = self.read_required(
+            "src/compat/botania/java/com/swear/autostorage/compat/"
+            "botania/BotaniaCompat.java"
+        )
+        self.assertIn('registerFlower(machineDescriptors, "botania_thermalily"', compat)
+        self.assertIn('registerFlower(machineDescriptors, "botania_endoflame"', compat)
+        self.assertIn("27_000", compat)
+        self.assertIn("6_600", compat)
+        self.assertIn("List.of(new ItemStack(Items.BUCKET))", compat)
+        self.assertIn("Math.multiplyExact((long) burnTime, 3L)", compat)
+        self.assertIn("(long) burnTime + 40L", compat)
         self.assertNotIn('modId="botania"', metadata)
         self.assertEqual(["botania"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
-        self.assertIn("BotaniaCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn("BotaniaCompat.register(MACHINES, RECIPES, TRANSFORMS)", module)
         self.assertIn(".containerStrategies(CONTAINERS)", module)
         self.assertNotIn("import vazkii.botania.", module)
         self.assertIn("BOTANIA_MANA_KIND", kinds)

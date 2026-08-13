@@ -178,5 +178,7 @@
   "gui.auto_storage.station.actuallyadditions_pressing": "壓榨",
   "gui.auto_storage.station.actuallyadditions_fermenting": "發酵",
   "gui.auto_storage.transform_retained": "每物品保留",
-  "gui.auto_storage.transform_retained_item": "%s ×%s"
+  "gui.auto_storage.transform_retained_item": "%s ×%s",
+  "gui.auto_storage.station.botania_thermalily": "熔岩百合",
+  "gui.auto_storage.station.botania_endoflame": "末地火焰花"
 }

@@ -4,6 +4,8 @@ import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
 import com.swear.autostorage.RecipeFamily;
 import com.swear.autostorage.RecipeFamilyApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.StorageResourceContainerApi;
 import com.swear.autostorage.StorageResourceContainerStrategy;
 import com.swear.autostorage.StorageResourceKey;
@@ -28,6 +30,8 @@ public final class BotaniaCompatModule implements AutoStorageCompatModule {
             MachineDescriptorApi.createDeferredRegister(AutoStorageApi.MOD_ID);
     private static final DeferredRegister<RecipeFamily> RECIPES =
             RecipeFamilyApi.createDeferredRegister(AutoStorageApi.MOD_ID);
+    private static final DeferredRegister<TransformProvider> TRANSFORMS =
+            TransformProviderApi.createDeferredRegister(AutoStorageApi.MOD_ID);
     private static final DeferredRegister<StorageResourceKind> KINDS =
             StorageResourceKindApi.createDeferredRegister(AutoStorageApi.MOD_ID);
     private static final DeferredRegister<StorageResourceContainerStrategy> CONTAINERS =
@@ -46,15 +50,16 @@ public final class BotaniaCompatModule implements AutoStorageCompatModule {
 
     @Override
     public void register(AutoStorageCompatContext context) {
-        BotaniaCompat.register(MACHINES, RECIPES);
+        BotaniaCompat.register(MACHINES, RECIPES, TRANSFORMS);
         context.register(addon -> addon
                 .machineDescriptors(MACHINES)
                 .recipeFamilies(RECIPES)
+                .transformProviders(TRANSFORMS)
                 .resourceKinds(KINDS)
                 .containerStrategies(CONTAINERS));
     }
 
-    private static ItemStack manaRepresentative() {
+    static ItemStack manaRepresentative() {
         var item = BuiltInRegistries.ITEM.get(MANA_POWDER_ID);
         if (item == Items.AIR) {
             throw new IllegalStateException(

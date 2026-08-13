@@ -453,6 +453,121 @@ public final class BotaniaIntegrationGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void thermalily_lava_bucket_converts_to_mana_work_and_retained_bucket(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            var menu = transformMenu(
+                    context, new ItemStack(Items.LAVA_BUCKET));
+            var thermalilyUse = menu.getTransformUses().stream()
+                    .filter(use -> use.id().equals(stationId("thermalily")))
+                    .findFirst()
+                    .orElse(null);
+            if (thermalilyUse == null
+                    || thermalilyUse.amountPerItem() != 27_000
+                    || thermalilyUse.stationWorkPerItem() != 6_600
+                    || thermalilyUse.retainedItems().size() != 1
+                    || !thermalilyUse.retainedItems().getFirst().is(Items.BUCKET)) {
+                helper.fail("Thermalily use must be a 27,000-Mana / 6,600-work lava conversion "
+                        + "retaining one empty bucket");
+                return;
+            }
+            selectTransform(menu, context, stationId("thermalily"));
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(manaKey()) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().is(Items.LAVA_BUCKET)) {
+                helper.fail("Thermalily must reject without an installed flower");
+                return;
+            }
+
+            if (!installStation(context, "thermalily")) {
+                helper.fail("Could not install the Thermalily");
+                return;
+            }
+            tick(context.core(), 6_600);
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(manaKey()) != 27_000
+                    || context.core().getStationWork(stationId("thermalily")) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().isEmpty()
+                    || context.player().getInventory().countItem(Items.BUCKET) != 1) {
+                helper.fail("Thermalily committed the wrong mana/work/input/bucket transaction");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void endoflame_fuel_converts_to_exact_mana_with_burn_plus_cooldown_work(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            if (!installStation(context, "endoflame")) {
+                helper.fail("Could not install the Endoflame");
+                return;
+            }
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            var endoflameUse = menu.getTransformUses().stream()
+                    .filter(use -> use.id().equals(stationId("endoflame")))
+                    .findFirst()
+                    .orElse(null);
+            if (endoflameUse == null
+                    || endoflameUse.amountPerItem() != 4_800
+                    || endoflameUse.stationWorkPerItem() != 1_640
+                    || !endoflameUse.retainedItems().isEmpty()) {
+                helper.fail("Endoflame use must convert one coal to 4,800 Mana over "
+                        + "1,640 work with no retained item");
+                return;
+            }
+            if (transformMenu(context, new ItemStack(Items.STONE))
+                    .getTransformUses().stream()
+                    .anyMatch(use -> use.id().equals(stationId("endoflame")))) {
+                helper.fail("Endoflame must reject non-fuel inputs");
+                return;
+            }
+            selectTransform(menu, context, stationId("endoflame"));
+            tick(context.core(), 1_640);
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(manaKey()) != 4_800
+                    || context.core().getStationWork(stationId("endoflame")) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem().isEmpty()) {
+                helper.fail("Endoflame committed the wrong mana/work/input transaction");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void thermalily_mana_overflow_rolls_back_work_input_and_retained_bucket(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            if (!installStation(context, "thermalily")) {
+                helper.fail("Could not install the Thermalily");
+                return;
+            }
+            seedResource(context.core(), manaKey(), Long.MAX_VALUE);
+            tick(context.core(), 6_600);
+            long workBefore = context.core().getStationWork(stationId("thermalily"));
+            var menu = transformMenu(
+                    context, new ItemStack(Items.LAVA_BUCKET));
+            selectTransform(menu, context, stationId("thermalily"));
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(manaKey()) != Long.MAX_VALUE
+                    || context.core().getStationWork(stationId("thermalily")) != workBefore
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().is(Items.LAVA_BUCKET)
+                    || context.player().getInventory().countItem(Items.BUCKET) != 0) {
+                helper.fail("Thermalily mana overflow partially mutated the transform");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
     private static void withCore(GameTestHelper helper, FixtureAssertion assertion) {
         var level = helper.getLevel();
         BlockPos corePos = helper.absolutePos(new BlockPos(1, 3, 1));
@@ -605,6 +720,42 @@ public final class BotaniaIntegrationGameTests {
 
     private static ResourceLocation recipeId(String path) {
         return ResourceLocation.fromNamespaceAndPath(BotaniaFixtureMod.MODID, path);
+    }
+
+    private static final int TRANSFORM_PAGE_BUTTON = 15;
+
+    private static CraftingTerminalMenu transformMenu(
+            FixtureContext context,
+            ItemStack input
+    ) {
+        var menu = new CraftingTerminalMenu(
+                706, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), TRANSFORM_PAGE_BUTTON);
+        menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(input);
+        return menu;
+    }
+
+    private static void selectTransform(
+            CraftingTerminalMenu menu,
+            FixtureContext context,
+            ResourceLocation transformId
+    ) {
+        int useIndex = -1;
+        var uses = menu.getVisibleTransformUses();
+        for (int index = 0; index < uses.size(); index++) {
+            if (uses.get(index).id().equals(transformId)) {
+                useIndex = index;
+                break;
+            }
+        }
+        if (useIndex < 0 || !menu.clickMenuButton(
+                context.player(), CraftingTerminalMenu.transformUseButtonId(useIndex))) {
+            throw new IllegalStateException("Could not select transform " + transformId);
+        }
+    }
+
+    private static void tick(StorageCoreBlockEntity core, int ticks) {
+        for (int tick = 0; tick < ticks; tick++) core.tick();
     }
 
     @FunctionalInterface

@@ -3,6 +3,11 @@ package com.swear.autostorage.compat.botania;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
+import com.swear.autostorage.MachineVariant;
+import com.swear.autostorage.MachineWorkRate;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
+import com.swear.autostorage.api.AutoStorageApi;
 import com.swear.autostorage.RecipeFamily;
 import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
@@ -17,11 +22,13 @@ import com.swear.autostorage.TypedRecipePlan;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -38,6 +45,7 @@ import vazkii.botania.common.crafting.TerrestrialAgglomerationRecipe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,10 +64,12 @@ public final class BotaniaCompat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
+        Objects.requireNonNull(transformProviders, "transformProviders");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
             throw new IllegalArgumentException(
                     "Botania descriptor register targets the wrong registry");
@@ -68,12 +78,35 @@ public final class BotaniaCompat {
             throw new IllegalArgumentException(
                     "Botania recipe family register targets the wrong registry");
         }
-        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())) {
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {
             throw new IllegalArgumentException(
-                    "Botania descriptors and recipe families must share one namespace");
+                    "Botania transform provider register targets the wrong registry");
+        }
+        if (!machineDescriptors.getNamespace().equals(recipeFamilies.getNamespace())
+                || !machineDescriptors.getNamespace().equals(
+                        transformProviders.getNamespace())) {
+            throw new IllegalArgumentException(
+                    "Botania descriptors, recipe families, and transform providers "
+                            + "must share one namespace");
         }
 
         String namespace = machineDescriptors.getNamespace();
+        registerFlower(machineDescriptors, "botania_thermalily", "thermalily");
+        transformProviders.register("botania_thermalily", () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.BOTANIA_MANA_KIND,
+                        BotaniaCompatModule.manaRepresentative(),
+                        Component.translatable("gui.auto_storage.resource.mana"),
+                        Component.translatable("gui.auto_storage.station.botania_thermalily"),
+                        BotaniaCompat::thermalilyTransform));
+        registerFlower(machineDescriptors, "botania_endoflame", "endoflame");
+        transformProviders.register("botania_endoflame", () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.BOTANIA_MANA_KIND,
+                        BotaniaCompatModule.manaRepresentative(),
+                        Component.translatable("gui.auto_storage.resource.mana"),
+                        Component.translatable("gui.auto_storage.station.botania_endoflame"),
+                        BotaniaCompat::endoflameTransform));
         registerStation(
                 machineDescriptors,
                 "botania_mana_pool",
@@ -210,6 +243,53 @@ public final class BotaniaCompat {
                     null,
                     0);
         });
+    }
+
+    private static void registerFlower(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            String path,
+            String itemPath
+    ) {
+        ResourceLocation id = descriptorId(machineDescriptors.getNamespace(), path);
+        machineDescriptors.register(path, () -> {
+            Item item = requiredItem(itemPath);
+            return MachineDescriptor.installableVariants(
+                    id,
+                    new ItemStack(item).getHoverName(),
+                    () -> List.of(MachineVariant.of(
+                            new ItemStack(item), MachineWorkRate.ONE)),
+                    MachineCategory.PROCESS,
+                    MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                    null);
+        });
+    }
+
+    private static TransformProviderApi.Result thermalilyTransform(ItemStack input) {
+        if (!input.is(Items.LAVA_BUCKET)) return null;
+        return new TransformProviderApi.Result(
+                manaKey(),
+                27_000,
+                descriptorId(
+                        AutoStorageApi.MOD_ID, "botania_thermalily"),
+                6_600,
+                List.of(new ItemStack(Items.BUCKET)));
+    }
+
+    private static TransformProviderApi.Result endoflameTransform(ItemStack input) {
+        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        if (burnTime <= 0) return null;
+        return new TransformProviderApi.Result(
+                manaKey(),
+                Math.multiplyExact((long) burnTime, 3L),
+                descriptorId(AutoStorageApi.MOD_ID, "botania_endoflame"),
+                (long) burnTime + 40L);
+    }
+
+    private static StorageResourceKey manaKey() {
+        return StorageResourceKey.of(
+                StorageResourceKindApi.BOTANIA_MANA_KIND,
+                StorageResourceKindApi.BOTANIA_MANA_KIND,
+                new CompoundTag());
     }
 
     private static boolean supportsManaInfusion(ManaInfusionRecipe recipe) {
@@ -512,13 +592,6 @@ public final class BotaniaCompat {
 
     private static ResourceLocation descriptorId(String namespace, String path) {
         return ResourceLocation.fromNamespaceAndPath(namespace, path);
-    }
-
-    private static StorageResourceKey manaKey() {
-        return StorageResourceKey.of(
-                StorageResourceKindApi.BOTANIA_MANA_KIND,
-                StorageResourceKindApi.BOTANIA_MANA_KIND,
-                new CompoundTag());
     }
 
     private record ItemStackKey(ItemStack stack) {

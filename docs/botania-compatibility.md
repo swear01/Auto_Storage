@@ -36,6 +36,17 @@ Each family requires one matching installed instant station:
 
 All item, water, Mana, catalyst, remainder, and output deltas are part of one existing typed simulate-then-commit transaction. Elven Trade reads Botania's exposed runtime Mana cost and fails explicitly if that contract is unavailable; it does not assume a local fallback value. Output overflow, missing station, missing input, empty Mana Infusion output, or invalid plan leaves every resource unchanged. Plans above the shared nine-input bound and ingredient/state semantics that cannot be represented exactly fail closed.
 
+## Generating flowers as time-based Transform machines
+
+Thermalily and Endoflame are PROCESS station descriptors with one work-per-tick variant; their Transform uses consume station work over time, so the conversion duration matches the real flower cycle exactly:
+
+| Flower | Input | Mana output | Work per item | Retained | Verified mechanics (Botania 455-SNAPSHOT bytecode) |
+|---|---|---|---|---|---|
+| Thermalily | `minecraft:lava_bucket` | 27,000 | 6,600 ticks (600 burn + 6,000 cooldown) | one empty bucket | `FluidGeneratorBlockEntity(600, 45, 6000)` → 600×45 Mana, fixed 6,000-tick cooldown |
+| Endoflame | any smelting-burnable item | burnTime × 3 | burnTime + 40 ticks | none | `getBurnTime` = Forge smelting burn time, `addMana(3)` per burn tick, 40-tick cooldown |
+
+Coal converts to 4,800 Mana over 1,640 ticks (80 s burn + 2 s cooldown). The retained bucket follows the shared retained-item contract (player inventory first, Core overflow, atomic capacity check); mana overflow, missing flower, or insufficient work rolls the whole conversion back including the retained bucket. The lava input is the bucket item (the fluid-ledger source variant remains a future design; the flower's `botania:thermalily_consumable` world-fluid mechanic is not simulated).
+
 ## Excluded semantics
 
 - Botanical Brewery is not in this slice. Its public recipe result is empty and `getOutput(ItemStack container)` depends on the runtime container, so one static typed plan cannot prove the output/remainder pair.

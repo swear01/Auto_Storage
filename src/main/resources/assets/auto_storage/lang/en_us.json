@@ -178,5 +178,7 @@
   "gui.auto_storage.station.actuallyadditions_pressing": "Pressing",
   "gui.auto_storage.station.actuallyadditions_fermenting": "Fermenting",
   "gui.auto_storage.transform_retained": "Retained per item",
-  "gui.auto_storage.transform_retained_item": "%s ×%s"
+  "gui.auto_storage.transform_retained_item": "%s ×%s",
+  "gui.auto_storage.station.botania_thermalily": "Thermalily",
+  "gui.auto_storage.station.botania_endoflame": "Endoflame"
 }

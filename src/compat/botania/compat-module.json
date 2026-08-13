@@ -4,7 +4,7 @@
     "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}"
   ],
   "entrypoint": "com.swear.autostorage.compat.botania.BotaniaCompatModule",
-  "expectedTests": 14,
+  "expectedTests": 17,
   "fixture": "botaniaFixture",
   "id": "auto_storage:botania",
   "matrix": {
