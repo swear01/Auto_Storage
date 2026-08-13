@@ -10,7 +10,11 @@ import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.api.AutoStorageApi;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceKindApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
@@ -28,6 +32,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -55,8 +60,41 @@ public final class ActuallyadditionsCompat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
+        Objects.requireNonNull(transformProviders, "transformProviders");
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {
+            throw new IllegalArgumentException(
+                    "Actually Additions transform provider register targets the wrong registry");
+        }
+        if (!machineDescriptors.getNamespace().equals(transformProviders.getNamespace())) {
+            throw new IllegalArgumentException(
+                    "Actually Additions descriptors and transform providers must share one namespace");
+        }
+        ResourceLocation coalGeneratorId = ResourceLocation.fromNamespaceAndPath(
+                machineDescriptors.getNamespace(), "actuallyadditions_coal_generator");
+        machineDescriptors.register(coalGeneratorId.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        coalGeneratorId,
+                        Component.translatable(
+                                "gui.auto_storage.station.actuallyadditions_coal_generator"),
+                        () -> List.of(MachineVariant.of(
+                                new ItemStack(requiredItem(
+                                        ResourceLocation.fromNamespaceAndPath(
+                                                "actuallyadditions", "coal_generator"))),
+                                MachineWorkRate.ONE)),
+                        MachineCategory.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
+        transformProviders.register(coalGeneratorId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.station.actuallyadditions_coal_generator"),
+                        ActuallyadditionsCompat::coalGeneratorTransform));
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
@@ -279,6 +317,17 @@ public final class ActuallyadditionsCompat {
                             + BuiltInRegistries.FLUID.getKey(fluid));
         }
         return stack;
+    }
+
+    private static TransformProviderApi.Result coalGeneratorTransform(ItemStack input) {
+        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        if (burnTime <= 0) return null;
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                Math.multiplyExact((long) burnTime, 20L),
+                ResourceLocation.fromNamespaceAndPath(
+                        AutoStorageApi.MOD_ID, "actuallyadditions_coal_generator"),
+                burnTime);
     }
 
     private static Item requiredItem(ResourceLocation id) {

@@ -11,7 +11,11 @@ import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
+import com.swear.autostorage.api.AutoStorageApi;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceKindApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
@@ -23,10 +27,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.cyclops.cyclopscore.recipe.ItemStackFromIngredient;
 import org.cyclops.integrateddynamics.RegistryEntries;
+import org.cyclops.integrateddynamics.blockentity.BlockEntityCoalGeneratorConfig;
 import org.cyclops.integrateddynamics.block.BlockMechanicalDryingBasinConfig;
 import org.cyclops.integrateddynamics.block.BlockMechanicalSqueezerConfig;
 import org.cyclops.integrateddynamics.core.recipe.type.RecipeDryingBasin;
@@ -51,10 +57,27 @@ public final class IntegrateddynamicsCompat {
 
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
-        requireRegisters(machineDescriptors, recipeFamilies);
+        requireRegisters(machineDescriptors, recipeFamilies, transformProviders);
         String namespace = machineDescriptors.getNamespace();
+        ResourceLocation coalGeneratorId = id(
+                namespace, "integrateddynamics_coal_generator");
+        registerStation(
+                machineDescriptors,
+                coalGeneratorId,
+                "coal_generator",
+                Component.translatable(
+                        "gui.auto_storage.station.integrateddynamics_coal_generator"));
+        transformProviders.register(coalGeneratorId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.station.integrateddynamics_coal_generator"),
+                        IntegrateddynamicsCompat::coalGeneratorTransform));
         ResourceLocation dryingBasin = id(namespace, "integrateddynamics_drying_basin");
         ResourceLocation mechanicalDryingBasin = id(
                 namespace, "integrateddynamics_mechanical_drying_basin");
@@ -111,8 +134,18 @@ public final class IntegrateddynamicsCompat {
 
     private static void requireRegisters(
             DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
+            DeferredRegister<RecipeFamily> recipeFamilies,
+            DeferredRegister<TransformProvider> transformProviders
     ) {
+        Objects.requireNonNull(transformProviders, "transformProviders");
+        if (!transformProviders.getRegistryKey().equals(TransformProviderApi.REGISTRY_KEY)) {
+            throw new IllegalArgumentException(
+                    "Integrated Dynamics transform provider register targets the wrong registry");
+        }
+        if (!machineDescriptors.getNamespace().equals(transformProviders.getNamespace())) {
+            throw new IllegalArgumentException(
+                    "Integrated Dynamics descriptors and transform providers must share one namespace");
+        }
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
@@ -415,6 +448,18 @@ public final class IntegrateddynamicsCompat {
                 .map(stack -> StorageResourceKey.item(stack, registries))
                 .distinct()
                 .toList();
+    }
+
+    private static TransformProviderApi.Result coalGeneratorTransform(ItemStack input) {
+        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        int energyPerTick = BlockEntityCoalGeneratorConfig.energyPerTick;
+        if (burnTime <= 0 || energyPerTick <= 0) return null;
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                Math.multiplyExact((long) burnTime, energyPerTick),
+                ResourceLocation.fromNamespaceAndPath(
+                        AutoStorageApi.MOD_ID, "integrateddynamics_coal_generator"),
+                burnTime);
     }
 
     private static Item requiredItem(String path) {

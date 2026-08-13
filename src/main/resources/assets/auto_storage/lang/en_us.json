@@ -181,5 +181,7 @@
   "gui.auto_storage.transform_retained_item": "%s ×%s",
   "gui.auto_storage.station.botania_thermalily": "Thermalily",
   "gui.auto_storage.station.botania_endoflame": "Endoflame",
-  "gui.auto_storage.station.enderio_stirling_generator": "Stirling Generator"
+  "gui.auto_storage.station.enderio_stirling_generator": "Stirling Generator",
+  "gui.auto_storage.station.actuallyadditions_coal_generator": "Coal Generator",
+  "gui.auto_storage.station.integrateddynamics_coal_generator": "Coal Generator"
 }

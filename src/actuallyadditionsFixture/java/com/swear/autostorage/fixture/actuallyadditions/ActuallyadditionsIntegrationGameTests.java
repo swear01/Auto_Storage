@@ -25,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
@@ -376,6 +377,80 @@ public final class ActuallyadditionsIntegrationGameTests {
     private static boolean supports(GameTestHelper helper, ResourceLocation recipeId) {
         var holder = helper.getLevel().getRecipeManager().byKey(recipeId).orElse(null);
         return CraftingTerminalMenu.supportsRecipeHolder(holder);
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void coal_generator_converts_fuel_to_fe_over_exact_work(GameTestHelper helper) {
+        withCore(helper, context -> {
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            var use = menu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "actuallyadditions_coal_generator")))
+                    .findFirst()
+                    .orElse(null);
+            if (use == null) {
+                helper.fail("Coal generator transform use is missing");
+                return;
+            }
+            selectTransform(menu, context, ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "actuallyadditions_coal_generator"));
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().is(Items.COAL)) {
+                helper.fail("Coal generator must reject without an installed generator");
+                return;
+            }
+            installStation(context, "coal_generator", COAL_GENERATOR);
+            long expected = 1_600L * 20L;
+            tick(context.core(), 1600);
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != expected
+                    || context.core().getStationWork(ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "actuallyadditions_coal_generator")) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .getItem().isEmpty()) {
+                helper.fail("Coal generator committed the wrong FE/work/input transaction");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static final int TRANSFORM_PAGE_BUTTON = 15;
+    private static final ResourceLocation COAL_GENERATOR = ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "actuallyadditions_coal_generator");
+
+    private static CraftingTerminalMenu transformMenu(
+            FixtureContext context,
+            ItemStack input
+    ) {
+        var menu = new CraftingTerminalMenu(
+                950, context.player().getInventory(), context.core());
+        menu.clickMenuButton(context.player(), TRANSFORM_PAGE_BUTTON);
+        menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(input);
+        return menu;
+    }
+
+    private static void selectTransform(
+            CraftingTerminalMenu menu,
+            FixtureContext context,
+            ResourceLocation transformId
+    ) {
+        int useIndex = -1;
+        var uses = menu.getVisibleTransformUses();
+        for (int index = 0; index < uses.size(); index++) {
+            if (uses.get(index).id().equals(transformId)) {
+                useIndex = index;
+                break;
+            }
+        }
+        if (useIndex < 0 || !menu.clickMenuButton(
+                context.player(), CraftingTerminalMenu.transformUseButtonId(useIndex))) {
+            throw new IllegalStateException("Could not select transform " + transformId);
+        }
     }
 
     private static void withCore(GameTestHelper helper, FixtureAssertion assertion) {

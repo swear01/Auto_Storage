@@ -11,7 +11,7 @@
     "xyz.brassgoggledcoders:PatchouliProvider:1.21.1-1.0.11-Snapshot.5"
   ],
   "entrypoint": "com.swear.autostorage.compat.actuallyadditions.ActuallyadditionsCompatModule",
-  "expectedTests": 14,
+  "expectedTests": 15,
   "fixture": "actuallyadditionsFixture",
   "id": "auto_storage:actuallyadditions",
   "matrix": {

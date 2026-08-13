@@ -1844,7 +1844,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
 
         self.assert_descriptor_driven_fixture(
-            build, "actuallyadditions", "actuallyadditionsFixture", 14
+            build, "actuallyadditions", "actuallyadditionsFixture", 15
         )
         self.assertNotIn('modId="actuallyadditions"', metadata)
         self.assertIn('"actuallyadditions"', module_index)
@@ -1859,7 +1859,8 @@ class StaticRegressionTests(unittest.TestCase):
             "auditArtifact, dependencies, and runtimeDependencies once each",
         )
         self.assertIn("implements AutoStorageCompatModule", module)
-        self.assertIn("ActuallyadditionsCompat.register(MACHINES, RECIPES)", module)
+        self.assertIn("ActuallyadditionsCompat.register(MACHINES, RECIPES, TRANSFORMS)", module)
+        self.assertIn("coalGeneratorTransform", compat)
         self.assertNotIn("import de.ellpeck.actuallyadditions.", module)
         self.assertIn("CrushingRecipe.class", compat)
         self.assertIn("PressingRecipe.class", compat)
@@ -6502,7 +6503,7 @@ class StaticRegressionTests(unittest.TestCase):
         contract = json.loads(
             self.read_required("compat/contracts/integrateddynamics.json")
         )
-        self.assertEqual(10, descriptor["expectedTests"])
+        self.assertEqual(11, descriptor["expectedTests"])
         self.assertEqual(10, contract["verification"]["expected_game_tests"])
 
     def test_integrated_dynamics_rejects_declared_derived_item_even_with_fluid(self):

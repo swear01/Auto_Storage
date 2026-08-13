@@ -105,3 +105,12 @@ rejection, and loaded mechanical energy config.
 
 Full Compat Kit CLI `verify` for this module must also pass with the committed
 format-17 audit, exact jar, and staged ancestry classpath.
+
+## Coal Generator (Transform)
+
+`auto_storage:integrateddynamics_coal_generator` is a PROCESS descriptor (one
+work/tick) plus a time-based Transform use: any smelting-burnable fuel
+converts to FE over the exact burn duration. Verified against Integrated
+Dynamics 1.33.3 bytecode: `BlockEntityCoalGeneratorConfig.energyPerTick`
+(default 20) FE per burn tick, burn duration = Forge smelting burn time.
+Coal: 1,600 ticks → 32,000 FE.

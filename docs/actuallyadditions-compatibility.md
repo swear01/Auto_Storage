@@ -118,3 +118,11 @@ coexistence/unclaimed digests only in `build/reports/terminal-scale-*.json`.
 
 Processing labels use the logical recipe-family names Crushing, Pressing, and
 Fermenting; installed station item tooltips retain the concrete machine names.
+
+## Coal Generator (Transform)
+
+`auto_storage:actuallyadditions_coal_generator` is a PROCESS descriptor (one
+work/tick) plus a time-based Transform use: any smelting-burnable fuel
+converts to FE over the exact burn duration. Verified against Actually
+Additions 1.3.26 bytecode: the generator burns Forge smelting burn time and
+produces 20 FE per burn tick. Coal: 1,600 ticks → 32,000 FE.
