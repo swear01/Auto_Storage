@@ -187,5 +187,6 @@
   "gui.auto_storage.station.draconicevolution_generator": "Generator",
   "gui.auto_storage.station.industrial_foregoing_pitiful_generator": "Pitiful Generator",
   "gui.auto_storage.station.oritech_fuel_generator": "Fuel Generator",
-  "gui.auto_storage.station.powah_magmator": "Magmator"
+  "gui.auto_storage.station.powah_magmator": "Magmator",
+  "gui.auto_storage.station.productivebees_honey_generator": "Honey Generator"
 }

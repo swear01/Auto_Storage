@@ -111,3 +111,13 @@ in each audited custom recipe type remains fail closed. The descriptor-owned
 combined matrix loads the representative artifact and verifies the same
 zero-family boundary through
 `manifest.assertCoexistence(helper, "Descriptor matrix coexistence")`.
+
+## Honey Generator (Transform)
+
+`auto_storage:productivebees_honey_generator` is a PROCESS descriptor (one
+work/tick) plus a time-based Transform use: honey bottles (250 mb → 125
+work, retained glass bottle), honey blocks (1000 mb → 500 work), and honey
+buckets (1000 mb → 500 work, retained bucket) convert to FE at
+`generatorPowerGen` (default 60) FE/tick while consuming
+`generatorHoneyUse` (default 2) mb/tick. Verified against Productive Bees
+13.13.5 bytecode and config. Honey bottle: 125 work → 7,500 FE.
