@@ -16,6 +16,12 @@ import com.swear.autostorage.TerminalDisplayStack;
 import com.swear.autostorage.TerminalResourceDisplay;
 import com.swear.autostorage.TerminalResourceView;
 import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
+import mekanism.api.chemical.IChemicalHandler;
+import mekanism.api.datamaps.IMekanismDataMapTypes;
+import mekanism.api.datamaps.chemical.attribute.ChemicalFuel;
+import com.swear.autostorage.MekanismChemicalCompat;
+import mekanism.common.registries.MekanismChemicals;
+import net.minecraft.world.entity.player.Player;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -70,7 +76,189 @@ import java.util.List;
 @GameTestHolder(MekanismFixtureMod.MODID)
 @PrefixGameTestTemplate(false)
 public final class MekanismRecipeIntegrationTests {
+    @GameTest(template = "craftingtests.platform")
+    public static void gas_generator_converts_gas_tank_to_exact_fe_and_work(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (level, core, player) -> {
+            Item tankItem = registeredItem(
+                    helper, mekanismId("basic_chemical_tank"));
+            ItemStack tank = new ItemStack(tankItem);
+            IChemicalHandler handler = tank.getCapability(
+                    MekanismChemicalCompat.CHEMICAL_ITEM_CAPABILITY);
+            if (handler == null) {
+                helper.fail("Basic chemical tank has no chemical capability");
+                return;
+            }
+            handler.setChemicalInTank(
+                    0, MekanismChemicals.HYDROGEN.asStack(32_000));
+            ChemicalStack contents = handler.getChemicalInTank(0);
+            if (contents.isEmpty() || contents.getAmount() != 32_000
+                    || !contents.is(MekanismChemicals.HYDROGEN)) {
+                helper.fail("Could not fill basic chemical tank with hydrogen: "
+                        + contents.getAmount());
+                return;
+            }
+            ChemicalFuel fuel = handler.getChemicalInTank(0).getData(
+                    IMekanismDataMapTypes.INSTANCE.chemicalFuel());
+            if (fuel == null || fuel.energyDensity() <= 0) {
+                helper.fail("Hydrogen has no gas-burning fuel datamap");
+                return;
+            }
+            long expectedFe = 32_000L * fuel.energyDensity();
+            long expectedWork = (32_000L + 255L) / 256L;
+            var menu = transformMenu(core, player, tank);
+            var use = menu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(GAS_GENERATOR))
+                    .findFirst()
+                    .orElse(null);
+            if (use == null
+                    || use.amountPerItem() != expectedFe
+                    || use.stationWorkPerItem() != expectedWork
+                    || use.retainedItems().size() != 1
+                    || !use.retainedItems().getFirst().is(tankItem)) {
+                helper.fail("Gas generator transform use is missing or wrong");
+                return;
+            }
+            selectTransform(menu, player, GAS_GENERATOR);
+            if (menu.clickMenuButton(player, 2)
+                    || core.getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 0) {
+                helper.fail("Gas generator must reject without an installed generator");
+                return;
+            }
+            installTransformStation(core, player,
+                    ResourceLocation.fromNamespaceAndPath(
+                            "mekanismgenerators", "gas_burning_generator"));
+            addCoreTicks(core, Math.toIntExact(expectedWork));
+            boolean committed = menu.clickMenuButton(player, 2);
+            long fe = core.getResourceAmount(StorageResourceKey.neoforgeEnergy());
+            long work = core.getStationWork(GAS_GENERATOR);
+            int emptyTanks = player.getInventory().countItem(tankItem);
+            if (!committed
+                    || fe != expectedFe
+                    || work != 0
+                    || emptyTanks != 1) {
+                helper.fail("Gas generator committed the wrong FE/work/input transaction: "
+                        + "committed=" + committed + " fe=" + fe
+                        + " expected=" + expectedFe + " work=" + work
+                        + " emptyTanks=" + emptyTanks + " slot="
+                        + menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem());
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static final int TRANSFORM_PAGE_BUTTON = 15;
     private static final int STORAGE_PAGE_BUTTON = 14;
+    private static final ResourceLocation GAS_GENERATOR =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "mekanism_gas_generator");
+
+    private static void withCore(
+            GameTestHelper helper,
+            TransformFixtureAssertion assertion
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(
+                corePos,
+                AutoStorage.STORAGE_CORE.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        level.setBlock(
+                corePos.south(),
+                AutoStorage.STORAGE_UNIT_T1.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            var player = helper.makeMockPlayer(GameType.SURVIVAL);
+            player.setPos(
+                    corePos.getX() + 0.5,
+                    corePos.getY() + 0.5,
+                    corePos.getZ() + 0.5);
+            assertion.run(level, core, player);
+        });
+    }
+
+    private static CraftingTerminalMenu transformMenu(
+            StorageCoreBlockEntity core,
+            Player player,
+            ItemStack input
+    ) {
+        var menu = new CraftingTerminalMenu(
+                601, player.getInventory(), core);
+        menu.clickMenuButton(player, TRANSFORM_PAGE_BUTTON);
+        menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT).set(input);
+        return menu;
+    }
+
+    private static void selectTransform(
+            CraftingTerminalMenu menu,
+            Player player,
+            ResourceLocation transformId
+    ) {
+        int useIndex = -1;
+        var uses = menu.getVisibleTransformUses();
+        for (int index = 0; index < uses.size(); index++) {
+            if (uses.get(index).id().equals(transformId)) {
+                useIndex = index;
+                break;
+            }
+        }
+        if (useIndex < 0 || !menu.clickMenuButton(
+                player, CraftingTerminalMenu.transformUseButtonId(useIndex))) {
+            throw new IllegalStateException("Could not select transform " + transformId);
+        }
+    }
+
+    private static void installTransformStation(
+            StorageCoreBlockEntity core,
+            Player player,
+            ResourceLocation stationItemId
+    ) {
+        Item stationItem = BuiltInRegistries.ITEM.get(stationItemId);
+        if (stationItem == Items.AIR) {
+            throw new IllegalStateException("Missing Mekanism Generators item "
+                    + stationItemId);
+        }
+        ItemStack station = new ItemStack(stationItem);
+        var menu = new CraftingTerminalMenu(
+                602, player.getInventory(), core);
+        menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
+        for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
+             index < CraftingTerminalMenu.MACHINE_SLOT_START
+                     + CraftingTerminalMenu.MACHINE_SLOT_COUNT;
+             index++) {
+            var slot = menu.getSlot(index);
+            if (!slot.isActive() || !slot.mayPlace(station)) continue;
+            slot.set(station.copy());
+            slot.setChanged();
+            menu.clickMenuButton(player, STORAGE_PAGE_BUTTON);
+            return;
+        }
+        menu.clickMenuButton(player, STORAGE_PAGE_BUTTON);
+        throw new IllegalStateException("Could not install Mekanism gas generator");
+    }
+
+    private static void addCoreTicks(StorageCoreBlockEntity core, int ticks) {
+        for (int tick = 0; tick < ticks; tick++) core.tick();
+    }
+
+    @FunctionalInterface
+    private interface TransformFixtureAssertion {
+        void run(
+                net.minecraft.server.level.ServerLevel level,
+                StorageCoreBlockEntity core,
+                Player player
+        );
+    }
+
+
     private static final int CRAFTABLE_PAGE_BUTTON = 6;
     private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int NEXT_RESOURCE_VIEW_BUTTON = 26;

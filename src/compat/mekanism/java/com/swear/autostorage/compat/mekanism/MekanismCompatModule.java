@@ -5,6 +5,7 @@ import com.swear.autostorage.MachineDescriptorApi;
 import com.swear.autostorage.MekanismChemicalCompat;
 import com.swear.autostorage.MekanismChemicalClientCompat;
 import com.swear.autostorage.MekanismRecipeCompat;
+import com.swear.autostorage.MekanismTransformCompat;
 import com.swear.autostorage.RecipeFamily;
 import com.swear.autostorage.RecipeFamilyApi;
 import com.swear.autostorage.StorageResourceBlockApi;
@@ -15,6 +16,8 @@ import com.swear.autostorage.StorageResourceHandler;
 import com.swear.autostorage.StorageResourceKey;
 import com.swear.autostorage.StorageResourceKind;
 import com.swear.autostorage.StorageResourceKindApi;
+import com.swear.autostorage.TransformProvider;
+import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.api.AutoStorageApi;
 import com.swear.autostorage.api.AutoStorageCompatContext;
 import com.swear.autostorage.api.AutoStorageCompatModule;
@@ -37,6 +40,8 @@ public final class MekanismCompatModule implements AutoStorageCompatModule {
             MachineDescriptorApi.createDeferredRegister(AutoStorageApi.MOD_ID);
     private static final DeferredRegister<RecipeFamily> RECIPES =
             RecipeFamilyApi.createDeferredRegister(AutoStorageApi.MOD_ID);
+    private static final DeferredRegister<TransformProvider> TRANSFORMS =
+            TransformProviderApi.createDeferredRegister(AutoStorageApi.MOD_ID);
     private static final DeferredRegister<StorageResourceKind> KINDS =
             StorageResourceKindApi.createDeferredRegister(AutoStorageApi.MOD_ID);
     private static final DeferredRegister<StorageResourceContainerStrategy> CONTAINERS =
@@ -60,12 +65,14 @@ public final class MekanismCompatModule implements AutoStorageCompatModule {
     @Override
     public void register(AutoStorageCompatContext context) {
         MekanismRecipeCompat.register(MACHINES, RECIPES);
+        MekanismTransformCompat.register(MACHINES, TRANSFORMS);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             MekanismChemicalClientCompat.register();
         }
         context.register(addon -> addon
                 .machineDescriptors(MACHINES)
                 .recipeFamilies(RECIPES)
+                .transformProviders(TRANSFORMS)
                 .resourceKinds(KINDS)
                 .containerStrategies(CONTAINERS)
                 .blockStrategies(BLOCKS)

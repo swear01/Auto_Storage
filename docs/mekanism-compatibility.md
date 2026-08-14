@@ -119,3 +119,15 @@ SelfTest summary. It covers all nine basic/factory families, exact factory
 throughput, the 13 additional supported recipe types, typed-resource
 transactions, chemical-only output, overflow and rollback, recipe reload,
 bidirectional Rotary rejection, and the Nutritional synthetic-recipe boundary.
+
+## Gas-Burning Generator (Transform)
+
+`auto_storage:mekanism_gas_generator` is a PROCESS descriptor (one
+work/tick) plus a time-based Transform use: any chemical-tank item
+carrying a gas with a ChemicalFuel datamap converts to FE = contents ×
+`ChemicalFuel.energyDensity()` over ceil(contents / 256) work ticks at the
+max 256 mb/tick burn rate, retaining the empty tank item. Verified against
+Mekanism 10.7.19.85 + MekanismGenerators 10.7.19.85 bytecode
+(`TileEntityGasGenerator.onUpdateServer`, `FuelTank.getFuel`, hard-coded
+256 mb/tick `getToUse` ceiling). Hydrogen basic tank (32,000 mb): 125 work
+→ 25,600,000 FE at default fuel values.

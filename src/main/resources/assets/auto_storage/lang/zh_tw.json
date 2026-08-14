@@ -189,5 +189,6 @@
   "gui.auto_storage.station.oritech_fuel_generator": "燃料發電機",
   "gui.auto_storage.station.powah_magmator": "岩漿發電機",
   "gui.auto_storage.station.productivebees_honey_generator": "蜂蜜發電機",
-  "gui.auto_storage.station.rftoolspower_coal_generator": "煤炭發電機"
+  "gui.auto_storage.station.rftoolspower_coal_generator": "煤炭發電機",
+  "gui.auto_storage.station.mekanism_gas_generator": "燃氣發電機"
 }

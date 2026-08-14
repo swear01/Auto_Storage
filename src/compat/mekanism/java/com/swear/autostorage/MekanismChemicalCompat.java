@@ -27,7 +27,7 @@ public final class MekanismChemicalCompat {
             BlockCapability.createSided(
                     ResourceLocation.fromNamespaceAndPath("mekanism", "chemical_handler"),
                     IChemicalHandler.class);
-    private static final ItemCapability<IChemicalHandler, Void> CHEMICAL_ITEM_CAPABILITY =
+    public static final ItemCapability<IChemicalHandler, Void> CHEMICAL_ITEM_CAPABILITY =
             ItemCapability.createVoid(
                     ResourceLocation.fromNamespaceAndPath("mekanism", "chemical_handler"),
                     IChemicalHandler.class);

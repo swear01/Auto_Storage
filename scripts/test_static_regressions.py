@@ -1303,6 +1303,15 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertEqual(["mekanism"], json.loads(module_index)["requires"])
         self.assertIn("implements AutoStorageCompatModule", module)
         self.assertIn(".capabilities(MekanismChemicalCompat::register)", module)
+        self.assertIn(".transformProviders(TRANSFORMS)", module)
+        self.assertIn(
+            "MekanismTransformCompat.register(MACHINES, TRANSFORMS)",
+            module,
+        )
+        self.assertIn(
+            '"maven.modrinth:mekanism-generators:a6gl7srE"',
+            json.dumps(json.loads(module_index)["runtimeDependencies"]),
+        )
         self.assertNotIn("import mekanism.", module)
         self.assertIn(
             "AutoStorageCapabilityApi.registerSidedResourceCapability(",
@@ -1315,7 +1324,7 @@ class StaticRegressionTests(unittest.TestCase):
             "a weak-key map still leaks when each strongly held handler references its Core key",
         )
         self.assert_descriptor_driven_fixture(
-            build, "mekanism", "mekanismFixture", 47
+            build, "mekanism", "mekanismFixture", 48
         )
         self.assertIn('modId="mekanism"', fixture_metadata)
         self.assertIn('versionRange="[10.7,)"', fixture_metadata)
