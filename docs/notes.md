@@ -1,4 +1,10 @@
-# Notes
+2026-08-14 新模組批次裁決（ATM10 Transform expansion 剩餘）：
+- #112 Refurbished Furniture REJECT：`ElectricityGeneratorBlockEntity` 把 burnTime×fuelToPowerRatio(16) 轉進 mod 自己的 electricity node network（`ElectricitySourceLootBlockEntity`/`searchNodeNetwork`），無 Forge Energy 輸出、非可儲存資源。
+- #114 Nature's Aura REJECT：所有 generator 產 Aura（無支援的 resource kind）；`BlockEntityRFConverter` 是雙向 RF↔Aura（RFStorage 兩向）違反單向原則。
+- #113 QuarryPlus：ATM10 instance 無 jar（只剩 `config/quarryplus.toml`），批次掃描零候選 → 無可 audit 之物。
+- #111 JustDireThings DEFER（機制已驗證）：`GeneratorT1BE` FE 總量 = burnTime×`generator_t1_fe_per_fuel_tick`(15)，work = floor(burnTime/`generator_t1_burn_speed_multiplier`(4)) → coal 24,000 FE/400w；`generator_t1_fe_per_tick`=1000 只是輸出上限；有 crafting-remainder 處理。block `justdirethings:generator_t1`。CF-only（Modrinth 只到 1.1.3）且 CurseMaven 目前全面 404 → CI 無法解析，等 repo 恢復即落地。
+- #110 GeneratorGalore DEFER：8+ 階 generator（GeneratorObject per tier）＋ SolidFuelMap datamap 燃料；ATM10 用 1.6.3（CF-only，Modrinth 只到 1.3.4），同受 CurseMaven 故障阻擋。
+- CurseMaven 故障會連帶卡 `stageAe2CompatAuditAncestry`（jade 也在 curse maven）。
 
 2026-08-14 新模組 contract 流程 gotcha：Modrinth maven coordinate 用 **project slug**（rftoolspower → `maven.modrinth:rftools-power`、rftoolsbase → `rftools-base`），不是 jar 檔名；contract `runtime_dependencies` 不得重複 target dependency；contract target version/display_name 必須等於 audit 的（`${file.jarVersion}` 原樣保留）；matrix recipeInventory sha256 = jar 內 `data/<ns>/recipe/*.json` 路徑轉 `ns:path` 後 sorted canonical JSON array 的 SHA-256（用 `namespace:path` 格式，別用 raw path）；transform 模組的 core tick 會預累積 station work，atomic 測試要驗證 work 不變而不是 0；RFTools Coal Generator 只吃 coal/charcoal/coal block（非通用燃燒物），ticksPerCoal=600、RF/tick=60（config），infusion 加成模型化 base rate。
 
