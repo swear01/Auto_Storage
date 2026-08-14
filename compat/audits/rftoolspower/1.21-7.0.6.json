@@ -1,0 +1,3018 @@
+{
+  "ancestry_classpath": [
+    {
+      "sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3",
+      "size": 31574447
+    },
+    {
+      "sha256": "5195ba530e6cf9ba61c9954a3297679e6d29aa1b6182e27ae14ea43463dd4b00",
+      "size": 463973
+    },
+    {
+      "sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e",
+      "size": 699982
+    }
+  ],
+  "ancestry_dependencies": [],
+  "artifact": {
+    "class_count": 90,
+    "class_inventory_sha256": "9db30033708b8fa8062dbe259bb8b5fce485b19d7590b9b10a06f8dae4c6c4ca",
+    "sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8",
+    "size": 579975
+  },
+  "candidates": {
+    "block_entity_classes": [
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"BlazingAgitatorTileEntity.java\"\npublic class mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity extends mcjty.lib.tileentity.TickingTileEntity {\n  public static final int BUFFER_SIZE;\n  public static final net.neoforged.neoforge.common.util.Lazy<mcjty.lib.container.ContainerFactory> CONTAINER_FACTORY;\n  public static final net.minecraft.world.phys.shapes.VoxelShape SLAB;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_00;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_01;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_02;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_10;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_11;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_12;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_20;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_21;\n  public static final mcjty.lib.bindings.Value<?, java.lang.Boolean> VALUE_LOCK_22;\n  public mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static mcjty.lib.blocks.BaseBlock createBlock();\n  public void saveClientDataToNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadClientDataFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public float getCurrentAngle(int, int);\n  public void setCurrentAngle(int, int, float);\n  public float getRotationSpeed(int, int);\n  public boolean isLocked(int, int);\n  public void setLocked(int, int, boolean);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"BlazingGeneratorTileEntity.java\"\npublic class mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity extends mcjty.lib.tileentity.TickingTileEntity {\n  public static final int BUFFER_SIZE;\n  public static final net.minecraft.world.level.block.state.properties.BooleanProperty WORKING;\n  public static final net.neoforged.neoforge.common.util.Lazy<mcjty.lib.container.ContainerFactory> CONTAINER_FACTORY;\n  public mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static mcjty.lib.blocks.BaseBlock createBlock();\n  public void setPowerInput(int);\n  public void setRSMode(mcjty.lib.varia.RedstoneMode);\n  public float getRfPerTick(int);\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"BlazingInfuserTileEntity.java\"\npublic class mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity extends mcjty.lib.tileentity.TickingTileEntity {\n  public static final net.neoforged.neoforge.common.util.Lazy<mcjty.lib.container.ContainerFactory> CONTAINER_FACTORY;\n  public mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static mcjty.lib.blocks.BaseBlock createBlock();\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"DimensionalCellAdvancedTileEntity.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity extends mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity {\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"DimensionalCellCreativeTileEntity.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity extends mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity {\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"DimensionalCellNormalTileEntity.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity extends mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity {\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity",
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"DimensionalCellSimpleTileEntity.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity extends mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity {\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"DimensionalCellTileEntity.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity extends mcjty.lib.tileentity.TickingTileEntity implements mcjty.lib.api.smartwrench.ISmartWrenchSelector {\n  public static final int SLOT_CARD;\n  public static final int SLOT_CARDCOPY;\n  public static final int SLOT_CHARGEITEM;\n  public static final net.neoforged.neoforge.common.util.Lazy<mcjty.lib.container.ContainerFactory> CONTAINER_FACTORY;\n  public int tooltipEnergy;\n  public int tooltipBlocks;\n  public int tooltipSimpleBlocks;\n  public int tooltipAdvancedBlocks;\n  public long tooltipInserted;\n  public long tooltipExtracted;\n  public int tooltipRfPerTick;\n  public float tooltipCostFactor;\n  public static final mcjty.lib.blockcommands.Command<?> ACTION_CLEARSTATS;\n  public static final mcjty.lib.blockcommands.Command<?> ACTION_SETOUTPUT;\n  public static final mcjty.lib.blockcommands.Command<?> ACTION_SETINPUT;\n  public static final mcjty.lib.blockcommands.Command<?> ACTION_SETNONE;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_ENERGY;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_BLOCKS;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_SIMPLEBLOCKS;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_ADVANCEDBLOCKS;\n  public static final mcjty.lib.typed.Key<java.lang.Long> PARAM_TOTAL_INSERTED;\n  public static final mcjty.lib.typed.Key<java.lang.Long> PARAM_TOTAL_EXTRACTED;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_RFPERTICK;\n  public static final mcjty.lib.typed.Key<java.lang.Double> PARAM_COSTFACTOR;\n  public static final mcjty.lib.blockcommands.ResultCommand<?> CMD_GET_INFO;\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public int getLastRfPerTickIn();\n  public int getLastRfPerTickOut();\n  public int getNetworkId();\n  public void setNetworkId(int);\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork$Network getNetwork();\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode getMode(net.minecraft.core.Direction);\n  public void toggleMode(net.minecraft.core.Direction);\n  public float getCostFactor();\n  public int getRfPerTickPerSide();\n  public int getEnergy();\n  public net.minecraft.core.GlobalPos getGlobalPos();\n  public long getTotalExtracted();\n  public long getTotalInserted();\n  public void resetTotalExtracted();\n  public void resetTotalInserted();\n  public int receiveEnergyFacing(net.minecraft.core.Direction, int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public void setAllOutput();\n  public void selectBlock(net.minecraft.world.entity.player.Player, net.minecraft.core.BlockPos);\n  public static void dumpNetwork(net.minecraft.world.entity.player.Player, mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity);\n  public mcjty.rftoolsbase.api.machineinfo.IMachineInformation getInfoHandler();\n  public mcjty.rftoolsbase.api.infoscreen.IInformationScreenInfo getInfoScreenInfo();\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"EnderMonitorTileEntity.java\"\npublic class mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity extends mcjty.lib.tileentity.TickingTileEntity implements mcjty.rftoolsbase.tools.TickOrderHandler$IOrderTicker {\n  public static final mcjty.lib.bindings.Value<mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity, java.lang.String> VALUE_MODE;\n  public static mcjty.lib.blocks.LogicSlabBlock createBlock();\n  public mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode getMode();\n  public void checkRedstone(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);\n  public int getRedstoneOutput(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public void setMode(mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode);\n  public void fireFromEndergenic(mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode);\n  public mcjty.rftoolsbase.tools.TickOrderHandler$Rank getRank();\n  public void tickOnServer();\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"EndergenicTileEntity.java\"\npublic class mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity extends mcjty.lib.tileentity.TickingTileEntity implements mcjty.rftoolsbase.api.client.IHudSupport,mcjty.rftoolsbase.tools.TickOrderHandler$IOrderTicker {\n  public static final int CHARGE_IDLE;\n  public static final int CHARGE_HOLDING;\n  public long clientLastRfPerTick;\n  public int clientLastPearlsLost;\n  public int clientLastPearlsLaunched;\n  public int clientLastPearlOpportunities;\n  public static final net.minecraft.world.phys.shapes.VoxelShape SHAPE;\n  public static final net.minecraft.core.Direction[] HORIZ_DIRECTIONS;\n  public static final mcjty.lib.typed.Key<java.lang.Long> PARAM_STATRF;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_STATLOST;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_STATLAUNCHED;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_STATOPPORTUNITIES;\n  public static final mcjty.lib.blockcommands.ResultCommand<?> CMD_GETSTATS;\n  public static final mcjty.lib.typed.Key<net.minecraft.core.BlockPos> PARAM_DESTINATION;\n  public static final mcjty.lib.blockcommands.Command<?> CMD_SETDESTINATION;\n  public static final mcjty.lib.blockcommands.ListCommand<?, ?> CMD_GETHUDLOG;\n  public static mcjty.lib.blocks.BaseBlock createBlock();\n  public mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void tick();\n  public long getTicker();\n  public void setTicker(long);\n  public mcjty.rftoolsbase.tools.TickOrderHandler$Rank getRank();\n  public net.minecraft.core.Direction getBlockOrientation();\n  public boolean isBlockAboveAir();\n  public java.util.List<java.lang.String> getHudLog();\n  public net.minecraft.core.BlockPos getHudPos();\n  public java.util.List<java.lang.String> getClientLog();\n  public long getLastUpdateTime();\n  public void setLastUpdateTime(long);\n  public int getBadCounter();\n  public long getLastRfPerTick();\n  public long getLastRfGained();\n  public long getLastRfLost();\n  public int getLastPearlsLost();\n  public int getLastPearlsLaunched();\n  public int getLastChargeCounter();\n  public int getLastPearlArrivedAt();\n  public java.lang.String getLastPearlsLostReason();\n  public int getGoodCounter();\n  public void tickOnServer();\n  public void modifyEnergyStored(long);\n  public void syncCountersFromServer(int, int);\n  public mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity getDestinationTE();\n  public void firePearl();\n  public void firePearlFromInjector();\n  public void receivePearl(int);\n  public void startCharging();\n  public void useWrenchClient(net.minecraft.world.entity.player.Player);\n  public int getChargingMode();\n  public int calculateDistance(net.minecraft.core.BlockPos);\n  public net.minecraft.core.BlockPos getDestination();\n  public void setDestination(net.minecraft.core.BlockPos);\n  public int getDistanceInTicks();\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public boolean wrenchUse(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.Direction, net.minecraft.world.entity.player.Player);\n  public long getCapacity();\n  public mcjty.rftoolsbase.api.machineinfo.IMachineInformation getInfoHandler();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PearlInjectorTileEntity.java\"\npublic class mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity extends mcjty.lib.tileentity.TickingTileEntity implements mcjty.rftoolsbase.tools.TickOrderHandler$IOrderTicker {\n  public static final int BUFFER_SIZE;\n  public static final int SLOT_BUFFER;\n  public static final int SLOT_PLAYERINV;\n  public static final net.neoforged.neoforge.common.util.Lazy<mcjty.lib.container.ContainerFactory> CONTAINER_FACTORY;\n  public static mcjty.lib.blocks.BaseBlock createBlock();\n  public mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity findEndergenicTileEntity();\n  public mcjty.rftoolsbase.tools.TickOrderHandler$Rank getRank();\n  public void tickOnServer();\n  public void injectPearl();\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"CoalGeneratorTileEntity.java\"\npublic class mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity extends mcjty.lib.tileentity.TickingTileEntity {\n  public static final int SLOT_COALINPUT;\n  public static final int SLOT_CHARGEITEM;\n  public mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static mcjty.lib.blocks.BaseBlock createBlock();\n  public void setPowerInput(int);\n  public long getRfPerTick();\n  public boolean isWorking();\n}",
+        "source_class": "mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PowerLevelTileEntity.java\"\npublic class mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity extends mcjty.lib.tileentity.TickingTileEntity {\n  public mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static mcjty.lib.blocks.LogicSlabBlock createBlock();\n  public mcjty.lib.tileentity.LogicSupport getLogicSupport();\n  public void checkRedstone(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);\n  public int getRedstoneOutput(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public void saveClientDataToNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadClientDataFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PowerMonitorTileEntity.java\"\npublic class mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity extends mcjty.lib.tileentity.TickingTileEntity {\n  public static final net.minecraft.world.level.block.state.properties.IntegerProperty LEVEL;\n  public mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static mcjty.lib.blocks.LogicSlabBlock createBlock();\n  public void checkRedstone(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);\n  public int getRedstoneOutput(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.core.Direction);\n  public int getMinimum();\n  public void setMinimum(int);\n  public int getMaximum();\n  public void setMaximum(int);\n  public void setInvalid();\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity",
+        "classification": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity",
+            "mcjty.lib.tileentity.TickingTileEntity",
+            "mcjty.lib.tileentity.GenericTileEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PowerCellTileEntity.java\"\npublic class mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity extends mcjty.lib.tileentity.TickingTileEntity implements mcjty.lib.api.power.IBigPower {\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<mcjty.rftoolspower.modules.powercell.data.SideType> NORTH;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<mcjty.rftoolspower.modules.powercell.data.SideType> SOUTH;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<mcjty.rftoolspower.modules.powercell.data.SideType> WEST;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<mcjty.rftoolspower.modules.powercell.data.SideType> EAST;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<mcjty.rftoolspower.modules.powercell.data.SideType> UP;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<mcjty.rftoolspower.modules.powercell.data.SideType> DOWN;\n  public static final net.neoforged.neoforge.client.model.data.ModelProperty<mcjty.rftoolspower.modules.powercell.data.Tier> TIER;\n  public mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity(mcjty.rftoolspower.modules.powercell.data.Tier, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public mcjty.rftoolspower.modules.powercell.data.SideType getMode(net.minecraft.core.Direction);\n  public void toggleMode(net.minecraft.core.Direction);\n  public mcjty.rftoolspower.modules.powercell.data.Tier getTier();\n  public static long safeCast(java.lang.Object);\n  public long getLocalMaxEnergy();\n  public long getRfPerTickPerSide();\n  public long getRfPerTickReal();\n  public long getStoredPower();\n  public long getCapacity();\n  public void redistributeNetwork();\n  public long getLocalEnergy();\n  public void setLocalEnergy(long);\n  public mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork getNetwork();\n  public void setNetwork(mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork);\n  public void onReplaced(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.state.BlockState);\n  public void dismantleNetwork(mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork);\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n  public net.neoforged.neoforge.client.model.data.ModelData getModelData();\n  public void loadAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveAdditional(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void saveClientDataToNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadClientDataFromNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public mcjty.rftoolsbase.api.infoscreen.IInformationScreenInfo getInfoScreenInfo();\n  public net.neoforged.neoforge.energy.IEnergyStorage getEnergyStorage(net.minecraft.core.Direction);\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity"
+      }
+    ],
+    "client_viewer_classes": [
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.client.BlazingAgitatorRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlazingAgitatorRenderer.java\"\npublic class mcjty.rftoolspower.modules.blazing.client.BlazingAgitatorRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity> {\n  public mcjty.rftoolspower.modules.blazing.client.BlazingAgitatorRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public static void register();\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.client.BlazingAgitatorRenderer"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingAgitator",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiBlazingAgitator.java\"\npublic class mcjty.rftoolspower.modules.blazing.client.GuiBlazingAgitator extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.blazing.client.GuiBlazingAgitator(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingAgitator"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingGenerator",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiBlazingGenerator.java\"\npublic class mcjty.rftoolspower.modules.blazing.client.GuiBlazingGenerator extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.blazing.client.GuiBlazingGenerator(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingGenerator"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingInfuser",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiBlazingInfuser.java\"\npublic class mcjty.rftoolspower.modules.blazing.client.GuiBlazingInfuser extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.blazing.client.GuiBlazingInfuser(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingInfuser"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.client.GuiDimensionalCell",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiDimensionalCell.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.client.GuiDimensionalCell extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity, mcjty.lib.container.GenericContainer> {\n  public static final int POWERCELL_WIDTH;\n  public static final int POWERCELL_HEIGHT;\n  public mcjty.rftoolspower.modules.dimensionalcell.client.GuiDimensionalCell(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.client.GuiDimensionalCell"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.client.ClientSetup",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ClientSetup.java\"\npublic class mcjty.rftoolspower.modules.endergenic.client.ClientSetup {\n  public mcjty.rftoolspower.modules.endergenic.client.ClientSetup();\n  public static java.util.List<net.minecraft.resources.ResourceLocation> onTextureStitch();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.client.ClientSetup"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.client.EndergenicRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EndergenicRenderer.java\"\npublic class mcjty.rftoolspower.modules.endergenic.client.EndergenicRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity> {\n  public static final net.minecraft.resources.ResourceLocation HALO;\n  public static final net.minecraft.resources.ResourceLocation WHITEFLASH;\n  public static final net.minecraft.resources.ResourceLocation BLACKFLASH;\n  public static final net.minecraft.resources.ResourceLocation REDGLOW;\n  public static final net.minecraft.resources.ResourceLocation BLUEGLOW;\n  public static final mcjty.lib.client.RenderSettings FLASH_SETTINGS;\n  public mcjty.rftoolspower.modules.endergenic.client.EndergenicRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public net.minecraft.world.phys.AABB getRenderBoundingBox(mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity);\n  public static void register();\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public net.minecraft.world.phys.AABB getRenderBoundingBox(net.minecraft.world.level.block.entity.BlockEntity);\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.client.EndergenicRenderer"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.client.GuiEnderMonitor",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiEnderMonitor.java\"\npublic class mcjty.rftoolspower.modules.endergenic.client.GuiEnderMonitor extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.endergenic.client.GuiEnderMonitor(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.client.GuiEnderMonitor"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.client.GuiEndergenic",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiEndergenic.java\"\npublic class mcjty.rftoolspower.modules.endergenic.client.GuiEndergenic extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.endergenic.client.GuiEndergenic(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.client.GuiEndergenic"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.client.GuiPearlInjector",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiPearlInjector.java\"\npublic class mcjty.rftoolspower.modules.endergenic.client.GuiPearlInjector extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.endergenic.client.GuiPearlInjector(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.client.GuiPearlInjector"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.generator.client.GuiCoalGenerator",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiCoalGenerator.java\"\npublic class mcjty.rftoolspower.modules.generator.client.GuiCoalGenerator extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.generator.client.GuiCoalGenerator(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.generator.client.GuiCoalGenerator"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.monitor.client.GuiPowerMonitor",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GuiPowerMonitor.java\"\npublic class mcjty.rftoolspower.modules.monitor.client.GuiPowerMonitor extends mcjty.lib.gui.GenericGuiContainer<mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity, mcjty.lib.container.GenericContainer> {\n  public mcjty.rftoolspower.modules.monitor.client.GuiPowerMonitor(mcjty.lib.container.GenericContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public static void register(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void init();\n}",
+        "source_class": "mcjty.rftoolspower.modules.monitor.client.GuiPowerMonitor"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.monitor.client.PowerLevelRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerLevelRenderer.java\"\npublic class mcjty.rftoolspower.modules.monitor.client.PowerLevelRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity> {\n  public static final net.minecraft.resources.ResourceLocation[] DIGITS;\n  public mcjty.rftoolspower.modules.monitor.client.PowerLevelRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public static void register();\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "mcjty.rftoolspower.modules.monitor.client.PowerLevelRenderer"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.client.ClientSetup",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ClientSetup.java\"\npublic class mcjty.rftoolspower.modules.powercell.client.ClientSetup {\n  public mcjty.rftoolspower.modules.powercell.client.ClientSetup();\n  public static java.util.List<net.minecraft.resources.ResourceLocation> onTextureStitch();\n  public static void onModelBake(java.util.Map<net.minecraft.client.resources.model.ModelResourceLocation, net.minecraft.client.resources.model.BakedModel>);\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.client.ClientSetup"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.client.PowerCellBakedModel",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellBakedModel.java\"\npublic class mcjty.rftoolspower.modules.powercell.client.PowerCellBakedModel extends mcjty.lib.client.AbstractDynamicBakedModel {\n  public static final net.minecraft.resources.ResourceLocation TEXTURE_INPUTMASK;\n  public static final net.minecraft.resources.ResourceLocation TEXTURE_OUTPUTMASK;\n  public mcjty.rftoolspower.modules.powercell.client.PowerCellBakedModel();\n  public java.util.List<net.minecraft.client.renderer.block.model.BakedQuad> getQuads(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.Direction, net.minecraft.util.RandomSource, net.neoforged.neoforge.client.model.data.ModelData, net.minecraft.client.renderer.RenderType);\n  public net.minecraft.client.renderer.texture.TextureAtlasSprite getParticleIcon();\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.client.PowerCellBakedModel"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.client.PowerCellInformationRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellInformationRenderer.java\"\npublic class mcjty.rftoolspower.modules.powercell.client.PowerCellInformationRenderer {\n  public mcjty.rftoolspower.modules.powercell.client.PowerCellInformationRenderer();\n  public static void renderGraphical(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, mcjty.lib.typed.TypedMap, net.minecraft.core.Direction, double);\n  public static void renderDefault(com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, mcjty.lib.typed.TypedMap, net.minecraft.core.Direction, double);\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.client.PowerCellInformationRenderer"
+      }
+    ],
+    "datagen_classes": [
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.data.AgitatorData",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"AgitatorData.java\"\npublic final class mcjty.rftoolspower.modules.blazing.data.AgitatorData extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.blazing.data.AgitatorData> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, mcjty.rftoolspower.modules.blazing.data.AgitatorData> STREAM_CODEC;\n  public mcjty.rftoolspower.modules.blazing.data.AgitatorData(java.util.List<java.lang.Boolean>);\n  public boolean isLocked(int);\n  public mcjty.rftoolspower.modules.blazing.data.AgitatorData setLocked(int, boolean);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.util.List<java.lang.Boolean> locked();\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.data.AgitatorData"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.data.BlazingRodData",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlazingRodData.java\"\npublic final class mcjty.rftoolspower.modules.blazing.data.BlazingRodData extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.blazing.data.BlazingRodData> CODEC;\n  public static final mcjty.rftoolspower.modules.blazing.data.BlazingRodData DEFAULT;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, mcjty.rftoolspower.modules.blazing.data.BlazingRodData> STREAM_CODEC;\n  public mcjty.rftoolspower.modules.blazing.data.BlazingRodData(int, float, float, float);\n  public mcjty.rftoolspower.modules.blazing.data.BlazingRodData withSteps(int);\n  public mcjty.rftoolspower.modules.blazing.data.BlazingRodData withTime(float);\n  public mcjty.rftoolspower.modules.blazing.data.BlazingRodData withQuality(float);\n  public mcjty.rftoolspower.modules.blazing.data.BlazingRodData withDuration(float);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public int steps();\n  public float time();\n  public float quality();\n  public float duration();\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.data.BlazingRodData"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.DataGenHelper",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataGenHelper.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.DataGenHelper {\n  public mcjty.rftoolspower.modules.dimensionalcell.DataGenHelper();\n  public static void createDimensionalCellModel(mcjty.lib.datagen.BaseBlockStateProvider, net.minecraft.world.level.block.Block, java.lang.String);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.DataGenHelper"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellData.java\"\npublic final class mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData> STREAM_CODEC;\n  public mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData(int, long, long, int);\n  public mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData withEnergy(int);\n  public mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData withNetworkId(int);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public int energy();\n  public long totalInserted();\n  public long totalExtracted();\n  public int networkId();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCardData.java\"\npublic final class mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData extends java.lang.Record {\n  public static final mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData EMPTY;\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData> STREAM_CODEC;\n  public mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData(int);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public int id();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EnderMonitorData.java\"\npublic final class mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData> STREAM_CODEC;\n  public mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData(mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode mode();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EnderMonitorMode.java\"\npublic final class mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode extends java.lang.Enum<mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode> implements mcjty.lib.varia.NamedEnum<mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode>, net.minecraft.util.StringRepresentable {\n  public static final mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode MODE_LOSTPEARL;\n  public static final mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode MODE_PEARLFIRED;\n  public static final mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode MODE_PEARLARRIVED;\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.FriendlyByteBuf, mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode> STREAM_CODEC;\n  public static mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode[] values();\n  public static mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode valueOf(java.lang.String);\n  public java.lang.String getName();\n  public java.lang.String[] getDescription();\n  public static mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode getMode(java.lang.String);\n  public java.lang.String getSerializedName();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.data.EndergenicPearl",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EndergenicPearl.java\"\npublic class mcjty.rftoolspower.modules.endergenic.data.EndergenicPearl {\n  public mcjty.rftoolspower.modules.endergenic.data.EndergenicPearl(int, net.minecraft.core.BlockPos, int);\n  public mcjty.rftoolspower.modules.endergenic.data.EndergenicPearl(net.minecraft.nbt.CompoundTag);\n  public int getTicksLeft();\n  public int getAge();\n  public net.minecraft.core.BlockPos getDestination();\n  public boolean handleTick(net.minecraft.world.level.Level);\n  public net.minecraft.nbt.CompoundTag getTagCompound();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.data.EndergenicPearl"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.generator.data.CoalGeneratorData",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CoalGeneratorData.java\"\npublic final class mcjty.rftoolspower.modules.generator.data.CoalGeneratorData extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.generator.data.CoalGeneratorData> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, mcjty.rftoolspower.modules.generator.data.CoalGeneratorData> STREAM_CODEC;\n  public mcjty.rftoolspower.modules.generator.data.CoalGeneratorData(int);\n  public mcjty.rftoolspower.modules.generator.data.CoalGeneratorData withBurning(int);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public int burning();\n}",
+        "source_class": "mcjty.rftoolspower.modules.generator.data.CoalGeneratorData"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.monitor.data.PowerMonitorData",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerMonitorData.java\"\npublic final class mcjty.rftoolspower.modules.monitor.data.PowerMonitorData extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<mcjty.rftoolspower.modules.monitor.data.PowerMonitorData> CODEC;\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, mcjty.rftoolspower.modules.monitor.data.PowerMonitorData> STREAM_CODEC;\n  public mcjty.rftoolspower.modules.monitor.data.PowerMonitorData(int, byte, byte);\n  public mcjty.rftoolspower.modules.monitor.data.PowerMonitorData withRflevel(int);\n  public mcjty.rftoolspower.modules.monitor.data.PowerMonitorData withMinimum(byte);\n  public mcjty.rftoolspower.modules.monitor.data.PowerMonitorData withMaximum(byte);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public int rflevel();\n  public byte minimum();\n  public byte maximum();\n}",
+        "source_class": "mcjty.rftoolspower.modules.monitor.data.PowerMonitorData"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellNetwork.java\"\npublic class mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork {\n  public mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork();\n  public int getNetworkId();\n  public boolean isValid();\n  public boolean contains(net.minecraft.core.BlockPos);\n  public void add(net.minecraft.core.BlockPos);\n  public java.util.Set<java.lang.Long> getPositions();\n  public long getEnergy();\n  public void setEnergy(long);\n  public void addEnergy(long);\n  public void extractEnergy(long);\n  public long getExtracted();\n  public void setExtracted(long);\n  public long getInserted();\n  public void setInserted(long);\n  public long getMaxEnergy();\n  public void setMaxEnergy(long);\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.data.SideType",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SideType.java\"\npublic final class mcjty.rftoolspower.modules.powercell.data.SideType extends java.lang.Enum<mcjty.rftoolspower.modules.powercell.data.SideType> implements net.minecraft.util.StringRepresentable {\n  public static final mcjty.rftoolspower.modules.powercell.data.SideType NONE;\n  public static final mcjty.rftoolspower.modules.powercell.data.SideType OUTPUT;\n  public static final mcjty.rftoolspower.modules.powercell.data.SideType INPUT;\n  public static final mcjty.rftoolspower.modules.powercell.data.SideType[] VALUES;\n  public static mcjty.rftoolspower.modules.powercell.data.SideType[] values();\n  public static mcjty.rftoolspower.modules.powercell.data.SideType valueOf(java.lang.String);\n  public boolean isInput();\n  public boolean isOutput();\n  public java.lang.String getSerializedName();\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.data.SideType"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.data.Tier",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"Tier.java\"\npublic final class mcjty.rftoolspower.modules.powercell.data.Tier extends java.lang.Enum<mcjty.rftoolspower.modules.powercell.data.Tier> implements net.minecraft.util.StringRepresentable {\n  public static final mcjty.rftoolspower.modules.powercell.data.Tier TIER1;\n  public static final mcjty.rftoolspower.modules.powercell.data.Tier TIER2;\n  public static final mcjty.rftoolspower.modules.powercell.data.Tier TIER3;\n  public static final java.util.List<mcjty.rftoolspower.modules.powercell.data.Tier> VALUES;\n  public static mcjty.rftoolspower.modules.powercell.data.Tier[] values();\n  public static mcjty.rftoolspower.modules.powercell.data.Tier valueOf(java.lang.String);\n  public net.minecraft.world.level.block.entity.BlockEntityType<?> getType();\n  public java.lang.String getSerializedName();\n  public java.lang.String getSuffix();\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.data.Tier"
+      }
+    ],
+    "recipe_builders": [],
+    "recipe_classes": [],
+    "recipe_serializers": [],
+    "recipe_types": [],
+    "resource_apis": [
+      {
+        "class": "mcjty.rftoolspower.RFToolsPower",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPower.java\"\npublic class mcjty.rftoolspower.RFToolsPower {\n  public static final java.lang.String MODID;\n  public static final mcjty.rftoolspower.setup.ModSetup setup;\n  public static mcjty.rftoolspower.RFToolsPower instance;\n  public mcjty.rftoolspower.RFToolsPower(net.neoforged.fml.ModContainer, net.neoforged.bus.api.IEventBus, net.neoforged.api.distmarker.Dist);\n  public static <T extends net.minecraft.world.item.Item> java.util.function.Supplier<T> tab(java.util.function.Supplier<T>);\n}",
+        "source_class": "mcjty.rftoolspower.RFToolsPower"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsDimensionChecker",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsDimensionChecker.java\"\npublic class mcjty.rftoolspower.compat.RFToolsDimensionChecker {\n  public mcjty.rftoolspower.compat.RFToolsDimensionChecker();\n  public static boolean isRFToolsDimension(net.minecraft.world.level.Level, net.minecraft.world.level.Level);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsDimensionChecker"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\npublic class mcjty.rftoolspower.compat.RFToolsPowerTOPDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public static final mcjty.rftoolspower.compat.RFToolsPowerTOPDriver DRIVER;\n  public mcjty.rftoolspower.compat.RFToolsPowerTOPDriver();\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$BlazingAgitatorDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$BlazingAgitatorDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.BlazingAgitatorDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$BlazingGeneratorDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$BlazingGeneratorDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.BlazingGeneratorDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$CoalDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$CoalDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.CoalDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$DefaultDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$DefaultDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.DefaultDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$DimensionalCellDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$DimensionalCellDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.DimensionalCellDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$EndergenicDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$EndergenicDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.EndergenicDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$EndermonitorDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$EndermonitorDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.EndermonitorDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$PowerCellDriver",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RFToolsPowerTOPDriver.java\"\nclass mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$PowerCellDriver implements mcjty.lib.compat.theoneprobe.TOPDriver {\n  public void addProbeInfo(mcjty.theoneprobe.api.ProbeMode, mcjty.theoneprobe.api.IProbeInfo, net.minecraft.world.entity.player.Player, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, mcjty.theoneprobe.api.IProbeHitData);\n}",
+        "source_class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver.PowerCellDriver"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.BlazingConfiguration",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlazingConfiguration.java\"\npublic class mcjty.rftoolspower.modules.blazing.BlazingConfiguration {\n  public static final java.lang.String CATEGORY_BLAZING;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue GENERATOR_MAXENERGY;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue GENERATOR_SENDPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue AGITATOR_MAXENERGY;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue AGITATOR_ENERGY_INPUT_PERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue AGITATOR_USE_PER_TICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue INFUSER_MAXENERGY;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue INFUSER_ENERGY_INPUT_PERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue INFUSER_USE_PER_TICK;\n  public mcjty.rftoolspower.modules.blazing.BlazingConfiguration();\n  public static void setup(net.neoforged.neoforge.common.ModConfigSpec$Builder, net.neoforged.neoforge.common.ModConfigSpec$Builder);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.BlazingConfiguration"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.BlazingModule",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlazingModule.java\"\npublic class mcjty.rftoolspower.modules.blazing.BlazingModule implements mcjty.lib.modules.IModule {\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.BaseBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity> BLAZING_GENERATOR;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_BLAZING_GENERATOR;\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.BaseBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity> BLAZING_AGITATOR;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_BLAZING_AGITATOR;\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.BaseBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity> BLAZING_INFUSER;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_BLAZING_INFUSER;\n  public static final net.neoforged.neoforge.registries.DeferredItem<mcjty.rftoolspower.modules.blazing.items.BlazingRod> BLAZING_ROD;\n  public static final java.util.function.Supplier<net.neoforged.neoforge.attachment.AttachmentType<mcjty.rftoolspower.modules.blazing.data.AgitatorData>> AGITATOR_DATA;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mcjty.rftoolspower.modules.blazing.data.AgitatorData>> ITEM_AGITATOR_DATA;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mcjty.rftoolspower.modules.blazing.data.BlazingRodData>> ITEM_BLAZING_ROD_DATA;\n  public mcjty.rftoolspower.modules.blazing.BlazingModule(net.neoforged.bus.api.IEventBus);\n  public void init(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent);\n  public void initClient(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent);\n  public void registerScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void initConfig(net.neoforged.bus.api.IEventBus);\n  public void initDatagen(mcjty.lib.datagen.DataGen, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.BlazingModule"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.items.BlazingRod",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlazingRod.java\"\npublic class mcjty.rftoolspower.modules.blazing.items.BlazingRod extends net.minecraft.world.item.Item implements mcjty.lib.tooltips.ITooltipSettings {\n  public static final float MAXTIME;\n  public static final float START_QUALITY;\n  public static final float START_DURATION;\n  public static final int MAX_INFUSION_STEPS;\n  public mcjty.rftoolspower.modules.blazing.items.BlazingRod();\n  public void appendHoverText(net.minecraft.world.item.ItemStack, net.minecraft.world.item.Item$TooltipContext, java.util.List<net.minecraft.network.chat.Component>, net.minecraft.world.item.TooltipFlag);\n  public static boolean isCharging(net.minecraft.world.item.ItemStack);\n  public static boolean isInfused(net.minecraft.world.item.ItemStack);\n  public static int getInfusionPercentage(net.minecraft.world.item.ItemStack);\n  public static int getInfusionStepsLeft(net.minecraft.world.item.ItemStack);\n  public static void setInfusionStepsLeft(net.minecraft.world.item.ItemStack, int);\n  public static float getAgitationTimeLeft(net.minecraft.world.item.ItemStack);\n  public static void setAgitationTimeLeft(net.minecraft.world.item.ItemStack, float);\n  public static int getAgitationTimePercentage(net.minecraft.world.item.ItemStack);\n  public static float getPowerQuality(net.minecraft.world.item.ItemStack);\n  public static void setPowerQuality(net.minecraft.world.item.ItemStack, float);\n  public static int getRfPerTick(net.minecraft.world.item.ItemStack);\n  public static float getPowerDuration(net.minecraft.world.item.ItemStack);\n  public static void setPowerDuration(net.minecraft.world.item.ItemStack, float);\n  public static int getTotalTicks(net.minecraft.world.item.ItemStack);\n  public mcjty.lib.gui.ManualEntry getManualEntry();\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.items.BlazingRod"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.items.BlazingRodStack",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlazingRodStack.java\"\npublic class mcjty.rftoolspower.modules.blazing.items.BlazingRodStack implements mcjty.rftoolspower.modules.blazing.items.IBlazingRod {\n  public boolean isValid();\n  public mcjty.rftoolspower.modules.blazing.items.BlazingRodStack(net.minecraft.world.item.ItemStack);\n  public int getInfusionStepsLeft();\n  public void setInfusionStepsLeft(int);\n  public float getAgitationTimeLeft();\n  public void setAgitationTimeLeft(float);\n  public float getPowerQuality();\n  public void setPowerQuality(float);\n  public float getPowerDuration();\n  public void setPowerDuration(float);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.items.BlazingRodStack"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.items.IBlazingRod",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"IBlazingRod.java\"\npublic interface mcjty.rftoolspower.modules.blazing.items.IBlazingRod {\n  public abstract boolean isValid();\n  public abstract int getInfusionStepsLeft();\n  public abstract void setInfusionStepsLeft(int);\n  public abstract float getAgitationTimeLeft();\n  public abstract void setAgitationTimeLeft(float);\n  public abstract float getPowerQuality();\n  public abstract void setPowerQuality(float);\n  public abstract float getPowerDuration();\n  public abstract void setPowerDuration(float);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.items.IBlazingRod"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.logic.BlazingAgitatorAlgorithm",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlazingAgitatorAlgorithm.java\"\npublic class mcjty.rftoolspower.modules.blazing.logic.BlazingAgitatorAlgorithm {\n  public mcjty.rftoolspower.modules.blazing.logic.BlazingAgitatorAlgorithm(java.util.function.Function<java.lang.Integer, mcjty.rftoolspower.modules.blazing.items.IBlazingRod>);\n  public void tickBlazingRod(int, mcjty.rftoolspower.modules.blazing.items.IBlazingRod, float, float);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.logic.BlazingAgitatorAlgorithm"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.logic.TestAgitator",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TestAgitator.java\"\npublic class mcjty.rftoolspower.modules.blazing.logic.TestAgitator {\n  public mcjty.rftoolspower.modules.blazing.logic.TestAgitator();\n  public mcjty.rftoolspower.modules.blazing.items.IBlazingRod tick();\n  public static void main(java.lang.String[]);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.logic.TestAgitator"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.blazing.logic.TestAgitator$DummyBlazingRod",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TestAgitator.java\"\nclass mcjty.rftoolspower.modules.blazing.logic.TestAgitator$DummyBlazingRod implements mcjty.rftoolspower.modules.blazing.items.IBlazingRod {\n  public static final mcjty.rftoolspower.modules.blazing.items.IBlazingRod EMPTY;\n  public mcjty.rftoolspower.modules.blazing.logic.TestAgitator$DummyBlazingRod();\n  public mcjty.rftoolspower.modules.blazing.logic.TestAgitator$DummyBlazingRod(float, float, float);\n  public mcjty.rftoolspower.modules.blazing.logic.TestAgitator$DummyBlazingRod(mcjty.rftoolspower.modules.blazing.items.IBlazingRod);\n  public boolean isValid();\n  public int getInfusionStepsLeft();\n  public void setInfusionStepsLeft(int);\n  public float getAgitationTimeLeft();\n  public void setAgitationTimeLeft(float);\n  public float getPowerQuality();\n  public void setPowerQuality(float);\n  public float getPowerDuration();\n  public void setPowerDuration(float);\n}",
+        "source_class": "mcjty.rftoolspower.modules.blazing.logic.TestAgitator.DummyBlazingRod"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellConfiguration",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellConfiguration.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellConfiguration {\n  public static final java.lang.String CATEGORY_DIMENSIONALCELL;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue rfPerNormalCell;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue advancedFactor;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue simpleFactor;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue rfPerTick;\n  public static net.neoforged.neoforge.common.ModConfigSpec$DoubleValue powerCellCostFactor;\n  public static net.neoforged.neoforge.common.ModConfigSpec$DoubleValue powerCellDistanceCap;\n  public static net.neoforged.neoforge.common.ModConfigSpec$DoubleValue powerCellMinDistance;\n  public static net.neoforged.neoforge.common.ModConfigSpec$DoubleValue powerCellRFToolsDimensionAdvantage;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue CHARGEITEMPERTICK;\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellConfiguration();\n  public static void setup(net.neoforged.neoforge.common.ModConfigSpec$Builder, net.neoforged.neoforge.common.ModConfigSpec$Builder);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellConfiguration"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellModule",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellModule.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellModule implements mcjty.lib.modules.IModule {\n  public static final mcjty.lib.blocks.RBlock<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity> DIMENSIONAL_CELL;\n  public static final mcjty.lib.blocks.RBlock<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity> DIMENSIONAL_CELL_ADVANCED;\n  public static final mcjty.lib.blocks.RBlock<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity> DIMENSIONAL_CELL_SIMPLE;\n  public static final mcjty.lib.blocks.RBlock<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity> DIMENSIONAL_CELL_CREATIVE;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_DIMENSIONAL_CELL;\n  public static final net.neoforged.neoforge.registries.DeferredItem<mcjty.rftoolspower.modules.dimensionalcell.items.PowerCellCardItem> POWERCELL_CARD;\n  public static final java.util.function.Supplier<net.neoforged.neoforge.attachment.AttachmentType<mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData>> DIMENSIONAL_CELL_DATA;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData>> ITEM_DIMENSIONAL_CELL_DATA;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData>> ITEM_POWERCARD_DATA;\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellModule(net.neoforged.bus.api.IEventBus);\n  public void init(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent);\n  public void initClient(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent);\n  public void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void initConfig(net.neoforged.bus.api.IEventBus);\n  public void initDatagen(mcjty.lib.datagen.DataGen, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellModule"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellNetwork.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork extends mcjty.lib.worlddata.AbstractWorldData<mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork> {\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork();\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork(net.minecraft.nbt.CompoundTag);\n  public static mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork get(net.minecraft.world.level.Level);\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork$Network getOrCreateNetwork(int);\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork$Network getChannel(int);\n  public void deleteChannel(int);\n  public int newChannel();\n  public net.minecraft.nbt.CompoundTag save(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork$Network",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellNetwork.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork$Network {\n  public mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork$Network();\n  public java.util.Set<net.minecraft.core.GlobalPos> getBlocks();\n  public int getBlockCount();\n  public int getAdvancedBlockCount();\n  public int getSimpleBlockCount();\n  public int calculateMaximumEnergy();\n  public void updateNetwork(net.minecraft.world.level.Level);\n  public void add(net.minecraft.world.level.Level, net.minecraft.core.GlobalPos, mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType);\n  public void remove(net.minecraft.world.level.Level, net.minecraft.core.GlobalPos, mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType);\n  public float calculateCostFactor(net.minecraft.world.level.Level, net.minecraft.core.GlobalPos);\n  public int getEnergySingleBlock(mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType);\n  public int extractEnergySingleBlock(mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType);\n  public int getEnergy();\n  public int extractEnergy(int);\n  public int receiveEnergy(int);\n  public void setEnergy(int);\n  public void writeToNBT(net.minecraft.nbt.CompoundTag);\n  public void readFromNBT(net.minecraft.nbt.CompoundTag);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork.Network"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellBlock.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock extends mcjty.lib.blocks.BaseBlock implements mcjty.lib.crafting.IComponentsToPreserve {\n  public static final net.minecraft.world.level.block.state.properties.EnumProperty<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode> NORTH;\n  public static final net.minecraft.world.level.block.state.properties.EnumProperty<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode> SOUTH;\n  public static final net.minecraft.world.level.block.state.properties.EnumProperty<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode> WEST;\n  public static final net.minecraft.world.level.block.state.properties.EnumProperty<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode> EAST;\n  public static final net.minecraft.world.level.block.state.properties.EnumProperty<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode> UP;\n  public static final net.minecraft.world.level.block.state.properties.EnumProperty<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode> DOWN;\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType getType();\n  public net.minecraft.world.phys.shapes.VoxelShape getOcclusionShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos);\n  public static mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType getType(net.minecraft.world.level.block.Block);\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock(mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType, net.minecraft.world.level.block.entity.BlockEntityType$BlockEntitySupplier<net.minecraft.world.level.block.entity.BlockEntity>);\n  public mcjty.lib.blocks.RotationType getRotationType();\n  public java.util.Collection<net.minecraft.core.component.DataComponentType<?>> getComponentsToPreserve();\n  public void setPlacedBy(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.entity.LivingEntity, net.minecraft.world.item.ItemStack);\n  public java.util.List<net.minecraft.world.item.ItemStack> getDrops(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.storage.loot.LootParams$Builder);\n  public void wasExploded(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.Explosion);\n  public void onRemove(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, boolean);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellInformationScreenInfo",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellInformationScreenInfo.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellInformationScreenInfo implements mcjty.rftoolsbase.api.infoscreen.IInformationScreenInfo {\n  public static final int MODE_POWER_EXTENDED;\n  public mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellInformationScreenInfo(mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity);\n  public int[] getSupportedModes();\n  public void tick();\n  public mcjty.lib.typed.TypedMap getInfo(int);\n  public void render(int, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, mcjty.lib.typed.TypedMap, net.minecraft.core.Direction, double);\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellInformationScreenInfo"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellTileEntity.java\"\npublic final class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode extends java.lang.Enum<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode> implements net.minecraft.util.StringRepresentable {\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode MODE_NONE;\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode MODE_INPUT;\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode MODE_OUTPUT;\n  public static mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode[] values();\n  public static mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode valueOf(java.lang.String);\n  public java.lang.String getOverlayName();\n  public java.lang.String getSerializedName();\n  public java.lang.String toString();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity.Mode"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$NullHandler",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellTileEntity.java\"\nclass mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$NullHandler implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity.NullHandler"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$SidedHandler",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellTileEntity.java\"\nclass mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$SidedHandler implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity.SidedHandler"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DimensionalCellType.java\"\npublic final class mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType extends java.lang.Enum<mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType> {\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType UNKNOWN;\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType NORMAL;\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType SIMPLE;\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType ADVANCED;\n  public static final mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType CREATIVE;\n  public static mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType[] values();\n  public static mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType valueOf(java.lang.String);\n  public boolean isSimple();\n  public boolean isAdvanced();\n  public boolean isCreative();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.dimensionalcell.items.PowerCellCardItem",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellCardItem.java\"\npublic class mcjty.rftoolspower.modules.dimensionalcell.items.PowerCellCardItem extends net.minecraft.world.item.Item implements mcjty.lib.tooltips.ITooltipSettings {\n  public mcjty.rftoolspower.modules.dimensionalcell.items.PowerCellCardItem();\n  public static void initOverrides(mcjty.rftoolspower.modules.dimensionalcell.items.PowerCellCardItem);\n  public void appendHoverText(net.minecraft.world.item.ItemStack, net.minecraft.world.item.Item$TooltipContext, java.util.List<net.minecraft.network.chat.Component>, net.minecraft.world.item.TooltipFlag);\n  public static int getId(net.minecraft.world.item.ItemStack);\n  public static void setId(net.minecraft.world.item.ItemStack, int);\n  public mcjty.lib.gui.ManualEntry getManualEntry();\n}",
+        "source_class": "mcjty.rftoolspower.modules.dimensionalcell.items.PowerCellCardItem"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.ClientCommandHandler",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ClientCommandHandler.java\"\npublic class mcjty.rftoolspower.modules.endergenic.ClientCommandHandler {\n  public static final java.lang.String CMD_FLASH_ENDERGENIC;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_GOODCOUNTER;\n  public static final mcjty.lib.typed.Key<java.lang.Integer> PARAM_BADCOUNTER;\n  public static final mcjty.lib.typed.Key<net.minecraft.core.BlockPos> PARAM_POS;\n  public mcjty.rftoolspower.modules.endergenic.ClientCommandHandler();\n  public static void registerCommands();\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.ClientCommandHandler"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.EndergenicConfiguration",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EndergenicConfiguration.java\"\npublic class mcjty.rftoolspower.modules.endergenic.EndergenicConfiguration {\n  public static final java.lang.String CATEGORY_ENDERGENIC;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue MAXENERGY;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue chanceLost;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue rfToHoldPearl;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue ENDERGENIC_KEEPRF;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue ENDERGENIC_SENDPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue goodParticleCount;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue badParticleCount;\n  public static net.neoforged.neoforge.common.ModConfigSpec$DoubleValue powergenFactor;\n  public mcjty.rftoolspower.modules.endergenic.EndergenicConfiguration();\n  public static void setup(net.neoforged.neoforge.common.ModConfigSpec$Builder, net.neoforged.neoforge.common.ModConfigSpec$Builder);\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.EndergenicConfiguration"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.endergenic.EndergenicModule",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"EndergenicModule.java\"\npublic class mcjty.rftoolspower.modules.endergenic.EndergenicModule implements mcjty.lib.modules.IModule {\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.LogicSlabBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity> ENDER_MONITOR;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_ENDER_MONITOR;\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.BaseBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity> PEARL_INJECTOR;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_PEARL_INJECTOR;\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.BaseBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity> ENDERGENIC;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_ENDERGENIC;\n  public static final java.util.function.Supplier<net.neoforged.neoforge.attachment.AttachmentType<mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData>> ENDER_MONITOR_DATA;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData>> ITEM_ENDER_MONITOR_DATA;\n  public mcjty.rftoolspower.modules.endergenic.EndergenicModule(net.neoforged.bus.api.IEventBus, net.neoforged.api.distmarker.Dist);\n  public void init(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent);\n  public void initClient(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent);\n  public void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void initConfig(net.neoforged.bus.api.IEventBus);\n  public void initDatagen(mcjty.lib.datagen.DataGen, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.endergenic.EndergenicModule"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.generator.CoalGeneratorConfig",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CoalGeneratorConfig.java\"\npublic class mcjty.rftoolspower.modules.generator.CoalGeneratorConfig {\n  public static final java.lang.String SUB_CATEGORY_COALGENERATOR;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue MAXENERGY;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue SENDPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue CHARGEITEMPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue RFPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue TICKSPERCOAL;\n  public mcjty.rftoolspower.modules.generator.CoalGeneratorConfig();\n  public static void setup(net.neoforged.neoforge.common.ModConfigSpec$Builder);\n}",
+        "source_class": "mcjty.rftoolspower.modules.generator.CoalGeneratorConfig"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.generator.CoalGeneratorModule",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CoalGeneratorModule.java\"\npublic class mcjty.rftoolspower.modules.generator.CoalGeneratorModule implements mcjty.lib.modules.IModule {\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.BaseBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity> COALGENERATOR;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_COALGENERATOR;\n  public static final java.util.function.Supplier<net.neoforged.neoforge.attachment.AttachmentType<mcjty.rftoolspower.modules.generator.data.CoalGeneratorData>> COAL_GENERATOR_DATA;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mcjty.rftoolspower.modules.generator.data.CoalGeneratorData>> ITEM_COAL_GENERATOR_DATA;\n  public mcjty.rftoolspower.modules.generator.CoalGeneratorModule(net.neoforged.bus.api.IEventBus);\n  public void init(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent);\n  public void initClient(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent);\n  public void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void initConfig(net.neoforged.bus.api.IEventBus);\n  public void initDatagen(mcjty.lib.datagen.DataGen, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.generator.CoalGeneratorModule"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.monitor.MonitorModule",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MonitorModule.java\"\npublic class mcjty.rftoolspower.modules.monitor.MonitorModule implements mcjty.lib.modules.IModule {\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.BaseBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity> POWER_MONITOR;\n  public static final java.util.function.Supplier<net.minecraft.world.inventory.MenuType<mcjty.lib.container.GenericContainer>> CONTAINER_POWER_MONITOR;\n  public static final mcjty.lib.blocks.RBlock<mcjty.lib.blocks.LogicSlabBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity> POWER_LEVEL;\n  public static final java.util.function.Supplier<net.neoforged.neoforge.attachment.AttachmentType<mcjty.rftoolspower.modules.monitor.data.PowerMonitorData>> POWER_MONITOR_DATA;\n  public static final net.neoforged.neoforge.registries.DeferredHolder<net.minecraft.core.component.DataComponentType<?>, net.minecraft.core.component.DataComponentType<mcjty.rftoolspower.modules.monitor.data.PowerMonitorData>> ITEM_POWER_MONITOR_DATA;\n  public mcjty.rftoolspower.modules.monitor.MonitorModule(net.neoforged.bus.api.IEventBus, net.neoforged.api.distmarker.Dist);\n  public void init(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent);\n  public void initClient(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent);\n  public void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public void initConfig(net.neoforged.bus.api.IEventBus);\n  public static java.util.List<net.minecraft.resources.ResourceLocation> onTextureStitch();\n  public void initDatagen(mcjty.lib.datagen.DataGen, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.monitor.MonitorModule"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.PowerCellConfig",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellConfig.java\"\npublic class mcjty.rftoolspower.modules.powercell.PowerCellConfig {\n  public static final java.lang.String SUB_CATEGORY_POWERCELL;\n  public static net.neoforged.neoforge.common.ModConfigSpec$LongValue TIER1_MAXRF;\n  public static net.neoforged.neoforge.common.ModConfigSpec$LongValue TIER2_MAXRF;\n  public static net.neoforged.neoforge.common.ModConfigSpec$LongValue TIER3_MAXRF;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue TIER1_RFPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue TIER2_RFPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue TIER3_RFPERTICK;\n  public static net.neoforged.neoforge.common.ModConfigSpec$DoubleValue RFPERTICK_SCALE;\n  public static net.neoforged.neoforge.common.ModConfigSpec$IntValue NETWORK_MAX;\n  public mcjty.rftoolspower.modules.powercell.PowerCellConfig();\n  public static void setup(net.neoforged.neoforge.common.ModConfigSpec$Builder);\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.PowerCellConfig"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.PowerCellModule",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellModule.java\"\npublic class mcjty.rftoolspower.modules.powercell.PowerCellModule implements mcjty.lib.modules.IModule {\n  public static final mcjty.lib.blocks.RBlock<mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity> CELL1;\n  public static final mcjty.lib.blocks.RBlock<mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity> CELL2;\n  public static final mcjty.lib.blocks.RBlock<mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock, net.minecraft.world.item.BlockItem, mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity> CELL3;\n  public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.Item> POWER_CORE1;\n  public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.Item> POWER_CORE2;\n  public static final net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.Item> POWER_CORE3;\n  public mcjty.rftoolspower.modules.powercell.PowerCellModule(net.neoforged.bus.api.IEventBus, net.neoforged.api.distmarker.Dist);\n  public void init(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent);\n  public void initClient(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent);\n  public void initConfig(net.neoforged.bus.api.IEventBus);\n  public void initDatagen(mcjty.lib.datagen.DataGen, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.PowerCellModule"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellBlock.java\"\npublic class mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock extends mcjty.lib.blocks.BaseBlock implements mcjty.lib.crafting.IComponentsToPreserve {\n  public static final net.minecraft.world.level.block.state.properties.BooleanProperty UPPER;\n  public static final net.minecraft.world.level.block.state.properties.BooleanProperty LOWER;\n  public mcjty.lib.blocks.RotationType getRotationType();\n  public mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock(mcjty.rftoolspower.modules.powercell.data.Tier);\n  public void setPlacedBy(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.entity.LivingEntity, net.minecraft.world.item.ItemStack);\n  public net.minecraft.world.level.block.state.BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext);\n  public net.minecraft.world.level.block.state.BlockState updateShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.Direction, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos, net.minecraft.core.BlockPos);\n  public net.minecraft.world.level.block.RenderShape getRenderShape(net.minecraft.world.level.block.state.BlockState);\n  public java.util.Collection<net.minecraft.core.component.DataComponentType<?>> getComponentsToPreserve();\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellInformationScreenInfo",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellInformationScreenInfo.java\"\npublic class mcjty.rftoolspower.modules.powercell.blocks.PowerCellInformationScreenInfo implements mcjty.rftoolsbase.api.infoscreen.IInformationScreenInfo {\n  public static final int MODE_POWER_EXTENDED;\n  public static final mcjty.lib.typed.Key<java.lang.Long> RFEXTRACT_PERTICK;\n  public static final mcjty.lib.typed.Key<java.lang.Long> RFINSERT_PERTICK;\n  public static final mcjty.lib.typed.Key<java.lang.Long> ROUGH_MAXRF_PERTICK;\n  public mcjty.rftoolspower.modules.powercell.blocks.PowerCellInformationScreenInfo(mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity);\n  public int[] getSupportedModes();\n  public void tick();\n  public mcjty.lib.typed.TypedMap getInfo(int);\n  public void render(int, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, mcjty.lib.typed.TypedMap, net.minecraft.core.Direction, double);\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellInformationScreenInfo"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity$NullHandler",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellTileEntity.java\"\nclass mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity$NullHandler implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity.NullHandler"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity$SidedHandler",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCellTileEntity.java\"\nclass mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity$SidedHandler implements net.neoforged.neoforge.energy.IEnergyStorage {\n  public mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity$SidedHandler(mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity, net.minecraft.core.Direction);\n  public int receiveEnergy(int, boolean);\n  public int extractEnergy(int, boolean);\n  public int getEnergyStored();\n  public int getMaxEnergyStored();\n  public boolean canExtract();\n  public boolean canReceive();\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity.SidedHandler"
+      },
+      {
+        "class": "mcjty.rftoolspower.modules.powercell.items.PowerCoreItem",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PowerCoreItem.java\"\npublic class mcjty.rftoolspower.modules.powercell.items.PowerCoreItem extends net.minecraft.world.item.Item implements mcjty.lib.tooltips.ITooltipSettings {\n  public mcjty.rftoolspower.modules.powercell.items.PowerCoreItem();\n  public void appendHoverText(net.minecraft.world.item.ItemStack, net.minecraft.world.item.Item$TooltipContext, java.util.List<net.minecraft.network.chat.Component>, net.minecraft.world.item.TooltipFlag);\n  public mcjty.lib.gui.ManualEntry getManualEntry();\n}",
+        "source_class": "mcjty.rftoolspower.modules.powercell.items.PowerCoreItem"
+      },
+      {
+        "class": "mcjty.rftoolspower.setup.Config",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"Config.java\"\npublic class mcjty.rftoolspower.setup.Config {\n  public static final java.lang.String CATEGORY_GENERAL;\n  public static final net.neoforged.neoforge.common.ModConfigSpec$Builder SERVER_BUILDER;\n  public static final net.neoforged.neoforge.common.ModConfigSpec$Builder CLIENT_BUILDER;\n  public static net.neoforged.neoforge.common.ModConfigSpec SERVER_CONFIG;\n  public static net.neoforged.neoforge.common.ModConfigSpec CLIENT_CONFIG;\n  public mcjty.rftoolspower.setup.Config();\n  public static void register(net.neoforged.fml.ModContainer, net.neoforged.bus.api.IEventBus, mcjty.lib.modules.Modules);\n}",
+        "source_class": "mcjty.rftoolspower.setup.Config"
+      },
+      {
+        "class": "mcjty.rftoolspower.setup.ModSetup",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ModSetup.java\"\npublic class mcjty.rftoolspower.setup.ModSetup extends mcjty.lib.setup.DefaultModSetup {\n  public boolean rftoolsDimensions;\n  public mcjty.rftoolspower.setup.ModSetup();\n  public void init(net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent);\n}",
+        "source_class": "mcjty.rftoolspower.setup.ModSetup"
+      },
+      {
+        "class": "mcjty.rftoolspower.setup.Registration",
+        "classification": {
+          "evidence": [
+            "power"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"Registration.java\"\npublic class mcjty.rftoolspower.setup.Registration {\n  public static final mcjty.lib.blocks.RBlockRegistry RBLOCKS;\n  public static final mcjty.lib.setup.DeferredItems ITEMS;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.world.level.block.entity.BlockEntityType<?>> TILES;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.world.inventory.MenuType<?>> CONTAINERS;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.sounds.SoundEvent> SOUNDS;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.world.entity.EntityType<?>> ENTITIES;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.world.item.CreativeModeTab> TABS;\n  public static final net.neoforged.neoforge.registries.DeferredRegister<net.neoforged.neoforge.attachment.AttachmentType<?>> ATTACHMENT_TYPES;\n  public static final net.neoforged.neoforge.registries.DeferredRegister$DataComponents COMPONENTS;\n  public static java.util.function.Supplier<net.minecraft.world.item.CreativeModeTab> TAB;\n  public mcjty.rftoolspower.setup.Registration();\n  public static void register(net.neoforged.bus.api.IEventBus);\n  public static net.minecraft.world.item.Item$Properties createStandardProperties();\n}",
+        "source_class": "mcjty.rftoolspower.setup.Registration"
+      }
+    ],
+    "station_classes": []
+  },
+  "kind": "auto_storage_compat_audit",
+  "recipe_data": {
+    "declared_recipes": 19,
+    "digest": "ca94d6b0aed92cb9b769824279b9043443d59d9c5ab74bdc47fb11e8174551dc",
+    "effective_recipes": 19,
+    "format": 1,
+    "overrides": [],
+    "serializers": [
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "recipe",
+          "type"
+        ],
+        "max_array_sizes": {},
+        "recipe_count": 2,
+        "sample_recipe_ids": [
+          "rftoolspower:cell2",
+          "rftoolspower:cell3"
+        ],
+        "serializer_id": "mcjtylib:copy_components"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "key",
+          "pattern",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "pattern": 3
+        },
+        "recipe_count": 17,
+        "sample_recipe_ids": [
+          "rftoolspower:blazing_agitator",
+          "rftoolspower:blazing_generator",
+          "rftoolspower:blazing_infuser",
+          "rftoolspower:cell1",
+          "rftoolspower:coalgenerator",
+          "rftoolspower:dimensionalcell",
+          "rftoolspower:dimensionalcell_advanced",
+          "rftoolspower:dimensionalcell_simple",
+          "rftoolspower:ender_monitor",
+          "rftoolspower:endergenic",
+          "rftoolspower:pearl_injector",
+          "rftoolspower:power_core1",
+          "rftoolspower:power_core2",
+          "rftoolspower:power_core3",
+          "rftoolspower:power_level",
+          "rftoolspower:power_monitor"
+        ],
+        "serializer_id": "minecraft:crafting_shaped"
+      }
+    ],
+    "sources": [
+      {
+        "declared_recipes": 19,
+        "id": "target_jar",
+        "sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+      }
+    ]
+  },
+  "risks": [],
+  "scanner_format": 17,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/mcjty/rftoolspower/RFToolsPower.java",
+      "src/main/java/mcjty/rftoolspower/compat/RFToolsDimensionChecker.java",
+      "src/main/java/mcjty/rftoolspower/compat/RFToolsPowerTOPDriver.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/BlazingConfiguration.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/BlazingModule.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/blocks/BlazingAgitatorTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/blocks/BlazingGeneratorTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/blocks/BlazingInfuserTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/client/BlazingAgitatorRenderer.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/client/GuiBlazingAgitator.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/client/GuiBlazingGenerator.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/client/GuiBlazingInfuser.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/data/AgitatorData.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/data/BlazingRodData.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/items/BlazingRod.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/items/BlazingRodStack.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/items/IBlazingRod.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/logic/BlazingAgitatorAlgorithm.java",
+      "src/main/java/mcjty/rftoolspower/modules/blazing/logic/TestAgitator.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/DataGenHelper.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/DimensionalCellConfiguration.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/DimensionalCellModule.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/DimensionalCellNetwork.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellAdvancedTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellBlock.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellCreativeTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellInformationScreenInfo.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellNormalTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellSimpleTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/blocks/DimensionalCellType.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/client/GuiDimensionalCell.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/data/DimensionalCellData.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/data/PowerCardData.java",
+      "src/main/java/mcjty/rftoolspower/modules/dimensionalcell/items/PowerCellCardItem.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/ClientCommandHandler.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/EndergenicConfiguration.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/EndergenicModule.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/blocks/EnderMonitorTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/blocks/EndergenicTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/blocks/PearlInjectorTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/client/ClientSetup.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/client/EndergenicRenderer.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/client/GuiEnderMonitor.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/client/GuiEndergenic.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/client/GuiPearlInjector.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/data/EnderMonitorData.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/data/EnderMonitorMode.java",
+      "src/main/java/mcjty/rftoolspower/modules/endergenic/data/EndergenicPearl.java",
+      "src/main/java/mcjty/rftoolspower/modules/generator/CoalGeneratorConfig.java",
+      "src/main/java/mcjty/rftoolspower/modules/generator/CoalGeneratorModule.java",
+      "src/main/java/mcjty/rftoolspower/modules/generator/blocks/CoalGeneratorTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/generator/client/GuiCoalGenerator.java",
+      "src/main/java/mcjty/rftoolspower/modules/generator/data/CoalGeneratorData.java",
+      "src/main/java/mcjty/rftoolspower/modules/monitor/MonitorModule.java",
+      "src/main/java/mcjty/rftoolspower/modules/monitor/blocks/PowerLevelTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/monitor/blocks/PowerMonitorTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/monitor/client/GuiPowerMonitor.java",
+      "src/main/java/mcjty/rftoolspower/modules/monitor/client/PowerLevelRenderer.java",
+      "src/main/java/mcjty/rftoolspower/modules/monitor/data/PowerMonitorData.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/PowerCellConfig.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/PowerCellModule.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/blocks/PowerCellBlock.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/blocks/PowerCellInformationScreenInfo.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/blocks/PowerCellTileEntity.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/client/ClientSetup.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/client/PowerCellBakedModel.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/client/PowerCellInformationRenderer.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/data/PowerCellNetwork.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/data/SideType.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/data/Tier.java",
+      "src/main/java/mcjty/rftoolspower/modules/powercell/items/PowerCoreItem.java",
+      "src/main/java/mcjty/rftoolspower/setup/Config.java",
+      "src/main/java/mcjty/rftoolspower/setup/ModSetup.java",
+      "src/main/java/mcjty/rftoolspower/setup/Registration.java"
+    ],
+    "revision": "e44463cacddb85155839373b42d39bc705d618c0"
+  },
+  "structural_candidate_inventory_sha256": "7dca0a45f08f2e9c86cb43cc9ebc19b87ff090c69c81d5d4e2c9401057eb0787",
+  "structural_class_graph": [
+    {
+      "class": "mcjty.lib.api.ITabExpander",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.api.power.IBigPower",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.api.smartwrench.ISmartWrenchSelector",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.blocks.BaseBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.compat.waila.WailaInfoProvider",
+          "mcjty.lib.compat.theoneprobe.TOPInfoProvider",
+          "mcjty.lib.multipart.IPartBlock",
+          "mcjty.lib.tooltips.ITooltipSettings",
+          "net.minecraft.world.level.block.EntityBlock",
+          "mcjty.lib.api.ITabExpander"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.client.AbstractDynamicBakedModel",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.client.model.IDynamicBakedModel"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.compat.theoneprobe.TOPDriver",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.compat.theoneprobe.TOPInfoProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.compat.waila.WailaInfoProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.crafting.IComponentsToPreserve",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.gui.GenericGuiContainer",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "mcjty.lib.gui.IKeyReceiver"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.gui.IKeyReceiver",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.modules.IModule",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.multipart.IPartBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.setup.DefaultModSetup",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.tileentity.GenericTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.tileentity.TickingTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.tileentity.GenericTileEntity"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.tooltips.ITooltipSettings",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.varia.NamedEnum",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.lib.worlddata.AbstractWorldData",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.saveddata.SavedData"
+      },
+      "owner_sha256": "b8eca900d4fe77a495c74137bd6be79c67281e5d7ae67ca55f59980c64960a0e"
+    },
+    {
+      "class": "mcjty.rftoolsbase.api.client.IHudSupport",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "5195ba530e6cf9ba61c9954a3297679e6d29aa1b6182e27ae14ea43463dd4b00"
+    },
+    {
+      "class": "mcjty.rftoolsbase.api.infoscreen.IInformationScreenInfo",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "5195ba530e6cf9ba61c9954a3297679e6d29aa1b6182e27ae14ea43463dd4b00"
+    },
+    {
+      "class": "mcjty.rftoolsbase.tools.TickOrderHandler$IOrderTicker",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "5195ba530e6cf9ba61c9954a3297679e6d29aa1b6182e27ae14ea43463dd4b00"
+    },
+    {
+      "class": "mcjty.rftoolspower.RFToolsPower",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsDimensionChecker",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$BlazingAgitatorDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$BlazingGeneratorDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$CoalDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$DefaultDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$DimensionalCellDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$EndergenicDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$EndermonitorDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.compat.RFToolsPowerTOPDriver$PowerCellDriver",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.lib.compat.theoneprobe.TOPDriver"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.BlazingConfiguration",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.BlazingModule",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.modules.IModule"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.client.BlazingAgitatorRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingAgitator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingGenerator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.client.GuiBlazingInfuser",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.data.AgitatorData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.data.BlazingRodData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.items.BlazingRod",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.tooltips.ITooltipSettings"
+        ],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.items.BlazingRodStack",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.rftoolspower.modules.blazing.items.IBlazingRod"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.items.IBlazingRod",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.logic.BlazingAgitatorAlgorithm",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.logic.TestAgitator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.logic.TestAgitator$DummyBlazingRod",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "mcjty.rftoolspower.modules.blazing.items.IBlazingRod"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.DataGenHelper",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellConfiguration",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellModule",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.modules.IModule"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.worlddata.AbstractWorldData"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.DimensionalCellNetwork$Network",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.crafting.IComponentsToPreserve"
+        ],
+        "super_class": "mcjty.lib.blocks.BaseBlock"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellInformationScreenInfo",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.rftoolsbase.api.infoscreen.IInformationScreenInfo"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.api.smartwrench.ISmartWrenchSelector"
+        ],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$Mode",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$NullHandler",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "net.neoforged.neoforge.energy.IEnergyStorage"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity$SidedHandler",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "net.neoforged.neoforge.energy.IEnergyStorage"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellType",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.client.GuiDimensionalCell",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.data.DimensionalCellData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.data.PowerCardData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.items.PowerCellCardItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.tooltips.ITooltipSettings"
+        ],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.ClientCommandHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.EndergenicConfiguration",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.EndergenicModule",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.modules.IModule"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.rftoolsbase.tools.TickOrderHandler$IOrderTicker"
+        ],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.rftoolsbase.api.client.IHudSupport",
+          "mcjty.rftoolsbase.tools.TickOrderHandler$IOrderTicker"
+        ],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.rftoolsbase.tools.TickOrderHandler$IOrderTicker"
+        ],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.client.ClientSetup",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.client.EndergenicRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.client.GuiEnderMonitor",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.client.GuiEndergenic",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.client.GuiPearlInjector",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.data.EnderMonitorData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.data.EnderMonitorMode",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "mcjty.lib.varia.NamedEnum",
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.data.EndergenicPearl",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.generator.CoalGeneratorConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.generator.CoalGeneratorModule",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.modules.IModule"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.generator.client.GuiCoalGenerator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.generator.data.CoalGeneratorData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.MonitorModule",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.modules.IModule"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.client.GuiPowerMonitor",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.gui.GenericGuiContainer"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.client.PowerLevelRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.data.PowerMonitorData",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.PowerCellConfig",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.PowerCellModule",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.modules.IModule"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.crafting.IComponentsToPreserve"
+        ],
+        "super_class": "mcjty.lib.blocks.BaseBlock"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellInformationScreenInfo",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.rftoolsbase.api.infoscreen.IInformationScreenInfo"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.api.power.IBigPower"
+        ],
+        "super_class": "mcjty.lib.tileentity.TickingTileEntity"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity$NullHandler",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "net.neoforged.neoforge.energy.IEnergyStorage"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity$SidedHandler",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "net.neoforged.neoforge.energy.IEnergyStorage"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.client.ClientSetup",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.client.PowerCellBakedModel",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.client.AbstractDynamicBakedModel"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.client.PowerCellInformationRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.data.PowerCellNetwork",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.data.SideType",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.data.Tier",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.items.PowerCoreItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mcjty.lib.tooltips.ITooltipSettings"
+        ],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.setup.Config",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.setup.ModSetup",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "mcjty.lib.setup.DefaultModSetup"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "mcjty.rftoolspower.setup.Registration",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.Renderable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.TabOrderedElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.ContainerEventHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.ContainerEventHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.GuiEventListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.GuiEventListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.TabOrderedElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.Screen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.Renderable"
+        ],
+        "super_class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.MenuAccess"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.Screen"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.MenuAccess",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.renderer.blockentity.BlockEntityRenderer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.resources.model.BakedModel",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IBakedModelExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.util.StringRepresentable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.flag.FeatureElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.item.Item",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement",
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IItemExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.ItemLike",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.Block",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IBlockExtension"
+        ],
+        "super_class": "net.minecraft.world.level.block.state.BlockBehaviour"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.EntityBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.BlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBlockEntityExtension"
+        ],
+        "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.state.BlockBehaviour",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.saveddata.SavedData",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.AttachmentHolder",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.attachment.IAttachmentHolder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.IAttachmentHolder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IBakedModelExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.model.IDynamicBakedModel",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.resources.model.BakedModel"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockEntityExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IItemExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.energy.IEnergyStorage",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    }
+  ],
+  "structural_hierarchy": [
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.blazing.blocks.BlazingAgitatorTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.blazing.blocks.BlazingGeneratorTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.blazing.blocks.BlazingInfuserTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellAdvancedTileEntity",
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellCreativeTileEntity",
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellNormalTileEntity",
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellSimpleTileEntity",
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.dimensionalcell.blocks.DimensionalCellTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.endergenic.blocks.EnderMonitorTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.endergenic.blocks.EndergenicTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.endergenic.blocks.PearlInjectorTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.generator.blocks.CoalGeneratorTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.monitor.blocks.PowerLevelTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.monitor.blocks.PowerMonitorTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity",
+      "classification": {
+        "evidence": [
+          "mcjty.rftoolspower.modules.powercell.blocks.PowerCellTileEntity",
+          "mcjty.lib.tileentity.TickingTileEntity",
+          "mcjty.lib.tileentity.GenericTileEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    }
+  ],
+  "target": {
+    "display_name": "RFToolsPower",
+    "mod_id": "rftoolspower",
+    "version": "${file.jarVersion}"
+  }
+}

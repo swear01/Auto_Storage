@@ -1,0 +1,43 @@
+{
+  "auditArtifact": {
+    "dependency": "maven.modrinth:rftools-power:Ujyiiyqz",
+    "sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8"
+  },
+  "dependencies": [
+    "maven.modrinth:rftools-power:Ujyiiyqz"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.rftoolspower.RftoolspowerCompatModule",
+  "expectedTests": 5,
+  "fixture": "rftoolspowerFixture",
+  "id": "auto_storage:rftoolspower",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "rftoolspower"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "rftoolspower"
+      ],
+      "sha256": "3696d8e5c834e32659671ca489bfa7080a3626868916be0bd83724543870bd01"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://api.modrinth.com/maven"
+  ],
+  "requires": [
+    "rftoolspower"
+  ],
+  "runtimeDependencies": [
+    "maven.modrinth:rftools-power:Ujyiiyqz",
+    "maven.modrinth:rftools-base:f8Tk2cfj",
+    "maven.modrinth:mcjtylib:9B2CiAN5"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatRftoolspower"
+}

@@ -1,0 +1,149 @@
+{
+ "families": [],
+ "kind": "auto_storage_compat_contract",
+ "matrix": {
+  "acceptedRecipes": [],
+  "descriptors": [],
+  "mods": [
+   "rftoolspower"
+  ],
+  "recipeInventory": {
+   "namespaces": [
+    "rftoolspower"
+   ],
+   "sha256": "3696d8e5c834e32659671ca489bfa7080a3626868916be0bd83724543870bd01"
+  },
+  "rejectedDescriptors": [],
+  "rejectedResourceKinds": [],
+  "resourceKinds": []
+ },
+ "schema": 1,
+ "source_audit_sha256": "259ebd617cc48e82bf0f1384ab661584829c6bcf0296273e338ceaa38a11f5d8",
+ "source_recipe_data_sha256": "ca94d6b0aed92cb9b769824279b9043443d59d9c5ab74bdc47fb11e8174551dc",
+ "source_recipe_inventory_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+ "target": {
+  "display_name": "RFToolsPower",
+  "mod_id": "rftoolspower",
+  "version": "${file.jarVersion}",
+  "dependency": "maven.modrinth:rftools-power:Ujyiiyqz",
+  "repositories": [
+   "https://api.modrinth.com/maven"
+  ],
+  "runtime_dependencies": [
+   "maven.modrinth:rftools-base:f8Tk2cfj",
+   "maven.modrinth:mcjtylib:9B2CiAN5"
+  ]
+ },
+ "verification": {
+  "fixture": "rftoolspowerFixture",
+  "expected_game_tests": 5,
+  "game_test_task": "runRftoolspowerGameTestServer",
+  "gradle_tasks": [
+   "build",
+   "runGameTestServer",
+   "runRecipeAddonGameTestServer",
+   "runRftoolspowerGameTestServer",
+   "runCompatibilityMatrixGameTestServer"
+  ],
+  "checks": [
+   "absent_target_no_classload",
+   "present_target_load_once",
+   "ingredient_shortage_atomic",
+   "destination_capacity_atomic",
+   "checked_overflow_atomic",
+   "stale_recipe_holder_atomic",
+   "catalyst_tool_remainder_exact",
+   "multi_output_merge_exact",
+   "mixed_resource_rollback_atomic",
+   "dedicated_server_client_isolation",
+   "api_only_compilation",
+   "all_mod_coexistence"
+  ],
+  "evidence": {
+   "absent_target_no_classload": [
+    {
+     "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "stale_recipe_holder_atomic": [
+    {
+     "marker": "Unknown recipe id must fail closed",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "multi_output_merge_exact": [
+    {
+     "marker": "Typed family changed the wrong exact resources or output amounts",
+     "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+     "task": "runRecipeAddonGameTestServer"
+    }
+   ],
+   "mixed_resource_rollback_atomic": [
+    {
+     "marker": "Failed typed family commit partially mutated resources",
+     "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+     "task": "runRecipeAddonGameTestServer"
+    }
+   ],
+   "all_mod_coexistence": [
+    {
+     "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+     "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+     "task": "runCompatibilityMatrixGameTestServer"
+    }
+   ],
+   "api_only_compilation": [
+    {
+     "marker": "compileAddonExampleJava",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "dedicated_server_client_isolation": [
+    {
+     "marker": "verifyCompatIsolation",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "present_target_load_once": [
+    {
+     "marker": "RFTools Power unsafe machine contract was registered",
+     "source": "src/rftoolspowerFixture/java/com/swear/autostorage/fixture/rftoolspower/RftoolspowerIntegrationGameTests.java",
+     "task": "runRftoolspowerGameTestServer"
+    }
+   ],
+   "ingredient_shortage_atomic": [
+    {
+     "marker": "RFTools Power missing-ingredient transform was not an atomic no-op",
+     "source": "src/rftoolspowerFixture/java/com/swear/autostorage/fixture/rftoolspower/RftoolspowerIntegrationGameTests.java",
+     "task": "runRftoolspowerGameTestServer"
+    }
+   ],
+   "destination_capacity_atomic": [
+    {
+     "marker": "RFTools Power full destination transform was not an atomic no-op",
+     "source": "src/rftoolspowerFixture/java/com/swear/autostorage/fixture/rftoolspower/RftoolspowerIntegrationGameTests.java",
+     "task": "runRftoolspowerGameTestServer"
+    }
+   ],
+   "checked_overflow_atomic": [
+    {
+     "marker": "Long.MAX_VALUE",
+     "source": "src/rftoolspowerFixture/java/com/swear/autostorage/fixture/rftoolspower/RftoolspowerIntegrationGameTests.java",
+     "task": "runRftoolspowerGameTestServer"
+    }
+   ],
+   "catalyst_tool_remainder_exact": [
+    {
+     "marker": "RFTools Power generator committed the wrong FE/work/input transaction",
+     "source": "src/rftoolspowerFixture/java/com/swear/autostorage/fixture/rftoolspower/RftoolspowerIntegrationGameTests.java",
+     "task": "runRftoolspowerGameTestServer"
+    }
+   ]
+  }
+ }
+}

@@ -2696,6 +2696,57 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("zero production recipe families", compatibility_doc)
         self.assertIn("not an exact player dependency pin", compatibility_doc)
 
+    def test_rftoolspower_compat_is_optional_and_isolated(self):
+        build = self.read_required("build.gradle")
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("rftoolspower")
+        module = self.read_required(
+            "src/compat/rftoolspower/java/com/swear/autostorage/compat/"
+            "rftoolspower/RftoolspowerCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/rftoolspower/java/com/swear/autostorage/compat/"
+            "rftoolspower/RftoolspowerCompat.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/rftoolspowerFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required(
+            "docs/rftoolspower-compatibility.md"
+        )
+
+        self.assertEqual(
+            ["maven.modrinth:rftools-power:Ujyiiyqz"],
+            json.loads(module_index)["dependencies"],
+        )
+        self.assertEqual(
+            [
+                "maven.modrinth:rftools-power:Ujyiiyqz",
+                "maven.modrinth:rftools-base:f8Tk2cfj",
+                "maven.modrinth:mcjtylib:9B2CiAN5",
+            ],
+            json.loads(module_index)["runtimeDependencies"],
+        )
+        self.assertNotRegex(
+            build,
+            r'(?m)^\s*runtimeOnly\s+"maven\.modrinth:'
+            r'(rftools-power|rftools-base|mcjtylib):',
+        )
+        self.assert_descriptor_driven_fixture(
+            build, "rftoolspower", "rftoolspowerFixture", 5
+        )
+        self.assertNotIn('modId="rftoolspower"', metadata)
+        self.assertEqual(["rftoolspower"], json.loads(module_index)["requires"])
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn(
+            "RftoolspowerCompat.register(MACHINES, RECIPES, TRANSFORMS)",
+            module,
+        )
+        self.assertIn("mcjty.rftoolspower.modules.generator.CoalGeneratorConfig", compat)
+        self.assertIn("rftoolspower_coal_generator", compat)
+        self.assertIn('modId="rftoolspower"', fixture_metadata)
+        self.assertIn("Coal Generator (Transform)", compatibility_doc)
+
     def test_oritech_energy_per_tick_reads_live_config_without_null_fallback(self):
         compat = self.read_required(
             "src/compat/oritech/java/com/swear/autostorage/compat/"
