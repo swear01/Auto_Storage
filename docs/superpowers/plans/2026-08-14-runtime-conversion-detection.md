@@ -71,7 +71,7 @@
 |---|---|---|---|
 | `mekanism:conversion_shapes` | ANY `ItemStackToChemicalRecipe` / `ItemStackToEnergyRecipe` holder (not type-filtered) | mekanism chemical / FE | **automatic** — rebuilt on server start + datapack reload, no hand-written module pattern |
 | `mekanism:chemical_fuel` | `ChemicalFuel` datamap (gas) | FE | module pattern (datamap, not recipes) |
-| `generatorgalore:solid_fuel_map` | block `SolidFuelMap` datamap + generator JSON registry | FE | module pattern (datamap, not recipes) |
+| `generatorgalore:generator_registry` | ONE pattern walking the live GeneratorObject registry + per-block `SolidFuelMap` datamap | FE | **automatic** — new/edited generator JSONs appear without code; per-generator providers stay for their station descriptors |
 | per-module generator patterns | live config values | FE | module pattern (config, not recipes) |
 
 Additional patterns (user-provided) register through the public registry

@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 
 public final class GeneratorgaloreCompat {
@@ -44,15 +45,18 @@ public final class GeneratorgaloreCompat {
             DeferredRegister<RecipeFamily> recipes,
             DeferredRegister<TransformProvider> transforms
     ) {
+        GeneratorRegistryPattern pattern = new GeneratorRegistryPattern();
+        com.swear.autostorage.ConversionScanner.register(pattern);
         for (String generator : GENERATORS) {
-            registerGenerator(machines, transforms, generator);
+            registerGenerator(machines, transforms, generator, pattern);
         }
     }
 
     private static void registerGenerator(
             DeferredRegister<MachineDescriptor> machines,
             DeferredRegister<TransformProvider> transforms,
-            String generator
+            String generator,
+            GeneratorRegistryPattern pattern
     ) {
         ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                 AutoStorageApi.MOD_ID, "generatorgalore_" + generator + "_generator");
@@ -70,8 +74,6 @@ public final class GeneratorgaloreCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
-        SolidFuelMapPattern pattern = new SolidFuelMapPattern(generator);
-        com.swear.autostorage.ConversionScanner.register(pattern);
         transforms.register(generatorId.getPath(), () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
@@ -80,7 +82,7 @@ public final class GeneratorgaloreCompat {
                         Component.translatable(
                                 "gui.auto_storage.station.generatorgalore_"
                                         + generator + "_generator"),
-                        pattern::resolve));
+                        input -> pattern.resolve(input, generator)));
     }
 
     private static long safeMultiply(long rate, long work) {
@@ -91,22 +93,27 @@ public final class GeneratorgaloreCompat {
         }
     }
 
-    private static final class SolidFuelMapPattern
+    private static final class GeneratorRegistryPattern
             implements com.swear.autostorage.ConversionPattern {
-        private final String generator;
-
-        private SolidFuelMapPattern(String generator) {
-            this.generator = generator;
-        }
-
         @Override
         public ResourceLocation patternId() {
             return ResourceLocation.fromNamespaceAndPath(
-                    "generatorgalore", generator + "_solid_fuel");
+                    "generatorgalore", "generator_registry");
         }
 
         @Override
         public TransformProviderApi.Result resolve(ItemStack input) {
+            if (input == null || input.isEmpty()) return null;
+            for (Map.Entry<ResourceLocation, GeneratorObject> entry :
+                    GeneratorRegistry.generators.entrySet()) {
+                TransformProviderApi.Result result = resolve(
+                        input, entry.getKey().getPath());
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        TransformProviderApi.Result resolve(ItemStack input, String generator) {
             if (input == null || input.isEmpty()) return null;
             ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                     "generatorgalore", generator);
@@ -181,23 +188,24 @@ public final class GeneratorgaloreCompat {
 
         @Override
         public String revisionKey() {
-            GeneratorObject generatorObject = GeneratorRegistry.generators.get(
-                    ResourceLocation.fromNamespaceAndPath(
-                            "generatorgalore", generator));
-            if (generatorObject == null) return "";
             StringBuilder digest = new StringBuilder();
-            digest.append(generatorObject.getGenerationRate()).append('/')
-                    .append(generatorObject.getConsumptionRate()).append(';');
-            Block block = generatorObject.getBlockSupplier().get();
-            if (block != null) {
-                SolidFuelMap map = block.builtInRegistryHolder().getData(
-                        GeneratorGalore.SOLID_FUEL_MAP);
-                if (map != null) {
-                    for (SolidFuelMap.SolidFuel fuel : map.fuels()) {
-                        digest.append(fuel.item()).append('=')
-                                .append(fuel.generationRate()).append('/')
-                                .append(fuel.burnTime()).append('/')
-                                .append(fuel.consumptionRate()).append(';');
+            for (Map.Entry<ResourceLocation, GeneratorObject> entry :
+                    GeneratorRegistry.generators.entrySet()) {
+                GeneratorObject generatorObject = entry.getValue();
+                digest.append(entry.getKey()).append('=')
+                        .append(generatorObject.getGenerationRate()).append('/')
+                        .append(generatorObject.getConsumptionRate()).append(';');
+                Block block = generatorObject.getBlockSupplier().get();
+                if (block != null) {
+                    SolidFuelMap map = block.builtInRegistryHolder().getData(
+                            GeneratorGalore.SOLID_FUEL_MAP);
+                    if (map != null) {
+                        for (SolidFuelMap.SolidFuel fuel : map.fuels()) {
+                            digest.append(fuel.item()).append('=')
+                                    .append(fuel.generationRate()).append('/')
+                                    .append(fuel.burnTime()).append('/')
+                                    .append(fuel.consumptionRate()).append(';');
+                        }
                     }
                 }
             }
