@@ -139,10 +139,8 @@ public final class TransformProviderApi {
                 .forEach(target -> putTarget(result, target));
         List<Target> ordered = new ArrayList<>(result.values());
         ordered.sort(Comparator
-                .comparingInt((Target target) -> {
-                    int core = CORE_TARGET_ORDER.indexOf(target.id());
-                    return core < 0 ? Integer.MAX_VALUE : core;
-                })
+                .comparingInt((Target target) ->
+                        CORE_TARGET_ORDER.contains(target.id()) ? 0 : 1)
                 .thenComparing(target -> target.label().getString()));
         return List.copyOf(ordered);
     }
@@ -158,23 +156,7 @@ public final class TransformProviderApi {
             energyTargetId(EnergyType.BLAZE_FUEL),
             StorageResourceKindApi.BOTANIA_MANA_KIND);
 
-    /**
-     * Input-first target picker: with an input item present, only targets
-     * that have at least one use for that exact input are listed, so the
-     * player never browses unrelated output resources. Empty input keeps
-     * the full browse list.
-     */
-    static List<Target> targetsForInput(
-            List<MachineDescriptor> descriptors,
-            ItemStack input,
-            List<Use> uses
-    ) {
-        if (input.isEmpty()) return targets(descriptors);
-        return targets(descriptors).stream()
-                .filter(target -> uses.stream()
-                        .anyMatch(use -> use.targetId().equals(target.id())))
-                .toList();
-    }
+
 
     private static void putTarget(
             Map<ResourceLocation, Target> targets,

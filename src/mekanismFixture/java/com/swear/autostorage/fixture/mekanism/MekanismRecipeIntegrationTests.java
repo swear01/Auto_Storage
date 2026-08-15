@@ -334,10 +334,10 @@ public final class MekanismRecipeIntegrationTests {
             var menu = new CraftingTerminalMenu(
                     603, player.getInventory(), core);
             menu.clickMenuButton(player, TRANSFORM_PAGE_BUTTON);
-            List<com.swear.autostorage.TransformProviderApi.Target> emptyInput =
+            List<com.swear.autostorage.TransformProviderApi.Target> browseTargets =
                     menu.getTransformTargetsForInput();
-            if (emptyInput.size() < 2) {
-                helper.fail("Empty input must keep the full target browse list");
+            if (browseTargets.size() < 2) {
+                helper.fail("The target sidebar must keep the full browse list");
                 return;
             }
             menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
@@ -346,34 +346,27 @@ public final class MekanismRecipeIntegrationTests {
                     menu.getTransformTargetsForInput();
             List<com.swear.autostorage.TransformProviderApi.Use> redstoneUses =
                     menu.getTransformUses();
-            if (withInput.isEmpty()
-                    || withInput.stream().noneMatch(target ->
-                            target.id().equals(StorageResourceKey
-                                    .neoforgeEnergy().kindId()))
-                    || withInput.stream().noneMatch(target ->
-                            target.id().equals(StorageResourceKindApi
-                                    .CHEMICAL_KIND))) {
-                helper.fail("Input-first targets must list every use for the input: "
-                        + withInput.stream().map(
-                                com.swear.autostorage.TransformProviderApi.Target::id)
-                                .toList()
-                        + " uses=" + redstoneUses.stream().map(
+            if (withInput.size() != browseTargets.size()) {
+                helper.fail("Placing an input must not shrink the target sidebar: "
+                        + withInput.size() + " != " + browseTargets.size());
+                return;
+            }
+            if (redstoneUses.stream()
+                    .noneMatch(use -> use.targetId().equals(StorageResourceKey
+                            .neoforgeEnergy().kindId()))
+                    || redstoneUses.stream()
+                    .noneMatch(use -> use.targetId().equals(StorageResourceKindApi
+                            .CHEMICAL_KIND))) {
+                helper.fail("Uses must be filtered by the input item: "
+                        + redstoneUses.stream().map(
                                 com.swear.autostorage.TransformProviderApi.Use::targetId)
                                 .toList());
                 return;
             }
-            for (com.swear.autostorage.TransformProviderApi.Target target : withInput) {
-                if (menu.getTransformUses().stream()
-                        .noneMatch(use -> use.targetId().equals(target.id()))) {
-                    helper.fail("Input-first target has no use for the input: "
-                            + target.id());
-                    return;
-                }
-            }
             menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
                     .set(ItemStack.EMPTY);
-            if (menu.getTransformTargetsForInput().size() != emptyInput.size()) {
-                helper.fail("Clearing the input must restore the full browse list");
+            if (menu.getTransformTargetsForInput().size() != browseTargets.size()) {
+                helper.fail("Clearing the input must keep the same browse list");
                 return;
             }
             helper.succeed();
