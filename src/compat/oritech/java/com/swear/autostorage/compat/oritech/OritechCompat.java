@@ -81,7 +81,7 @@ public final class OritechCompat {
                 com.swear.autostorage.ConversionScanner.register(FUEL_GENERATOR_PATTERN);
 transformProviders.register(fuelGeneratorId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.oritech_fuel_generator"),

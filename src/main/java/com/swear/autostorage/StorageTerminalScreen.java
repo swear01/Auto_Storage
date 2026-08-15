@@ -444,7 +444,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         return switch (displayedPreferences().resourceView()) {
             case ITEM -> Items.CHEST.getDefaultInstance();
             case FLUID -> Items.WATER_BUCKET.getDefaultInstance();
-            case ENERGY -> Items.REDSTONE.getDefaultInstance();
+            case ENERGY -> Items.LIGHTNING_ROD.getDefaultInstance();
             case GAS -> TerminalResourceDisplay.create(
                     StorageResourceKinds.kindRepresentative(
                             StorageResourceKindApi.CHEMICAL_KIND),

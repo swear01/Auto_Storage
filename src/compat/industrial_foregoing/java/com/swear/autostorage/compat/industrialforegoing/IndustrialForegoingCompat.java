@@ -72,7 +72,7 @@ public final class IndustrialForegoingCompat {
                 com.swear.autostorage.ConversionScanner.register(PITIFUL_GENERATOR_PATTERN);
 transformProviders.register(pitifulId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.industrial_foregoing_pitiful_generator"),
@@ -84,7 +84,7 @@ transformProviders.register(pitifulId.getPath(), () ->                TransformP
                 com.swear.autostorage.ConversionScanner.register(MYCELIAL_FURNACE_PATTERN);
 transformProviders.register(furnaceId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.industrial_foregoing_mycelial_furnace"),

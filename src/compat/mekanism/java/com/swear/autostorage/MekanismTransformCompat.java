@@ -75,7 +75,7 @@ public final class MekanismTransformCompat {
         transforms.register("mekanism_energy_conversion", () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.source.mekanism_energy_conversion"),
@@ -84,7 +84,7 @@ public final class MekanismTransformCompat {
         transforms.register(gasProviderId.getPath(), () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.mekanism_gas_generator"),

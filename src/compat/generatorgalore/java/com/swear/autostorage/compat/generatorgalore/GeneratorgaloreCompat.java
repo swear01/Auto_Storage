@@ -77,7 +77,7 @@ public final class GeneratorgaloreCompat {
         transforms.register(generatorId.getPath(), () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.generatorgalore_"

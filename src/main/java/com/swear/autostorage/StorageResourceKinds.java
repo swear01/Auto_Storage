@@ -25,7 +25,7 @@ final class StorageResourceKinds {
                 StorageResourceKind.variantAware(() -> new ItemStack(Items.BUCKET)));
         kinds.register(StorageResourceKindApi.ENERGY_KIND.getPath(), () ->
                 StorageResourceKind.variantless(() -> named(
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource.neoforge_energy"))));
         kinds.register(StorageResourceKindApi.WORK_KIND.getPath(), () ->
                 StorageResourceKind.variantAware(() -> new ItemStack(Items.CLOCK)));

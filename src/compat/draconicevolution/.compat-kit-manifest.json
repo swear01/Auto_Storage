@@ -2,7 +2,7 @@
   "contract_sha256": "b749637ec1a27db2899cf58306302b3e236609c1887aa102e5b8f9231bd89bba",
   "files": {
     "src/compat/draconicevolution/compat-module.json": "6211e7a4a187899be0f3b9a6960df6fa895443eaff9f75e9a7cebc3f4f34562b",
-    "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompat.java": "2b9ff92fce65fd25762a6baf22f1fcfeda053b9445c29575b9111c0148e5ff5f",
+    "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompat.java": "ef2dacc261c78dd51afcba91905fd861f2f75692e82cba21ae77540771e8331b",
     "src/compat/draconicevolution/java/com/swear/autostorage/compat/draconicevolution/DraconicevolutionCompatModule.java": "5c91956e05736860600b49ab23e14b75374ff35c03f78a0ddd63e562e42fd0dd",
     "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionFixtureMod.java": "408f1c093272944773c73bad26fd90c243f6452acde389ff7e10a022040a40e3",
     "src/draconicevolutionFixture/java/com/swear/autostorage/fixture/draconicevolution/DraconicevolutionIntegrationGameTests.java": "dcb0e856276b5d56c3519ad850bc166e9bfacb1155acc6ab61761285e4243b0f",

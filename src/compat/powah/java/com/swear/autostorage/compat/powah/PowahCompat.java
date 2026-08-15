@@ -106,7 +106,7 @@ public final class PowahCompat {
                 furnatorId.getPath(),
                 () -> TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable("gui.auto_storage.station.powah_furnator"),
                         furnatorPattern::resolve));
@@ -127,7 +127,7 @@ public final class PowahCompat {
         transformProviders.register(magmatorId.getPath(), () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
+                        new ItemStack(Items.LIGHTNING_ROD),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable("gui.auto_storage.station.powah_magmator"),
                         magmatorPattern::resolve));

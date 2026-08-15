@@ -2,7 +2,7 @@
   "contract_sha256": "921050bbac7cbe089858b775eda3d6a87644a9d8064400afcb86ea4f238a5f72",
   "files": {
     "src/compat/productivebees/compat-module.json": "db3ff7b9e8ee89f156b2341a0dd76e1ae9463dba1eef664a30485d1863878462",
-    "src/compat/productivebees/java/com/swear/autostorage/compat/productivebees/ProductivebeesCompatModule.java": "f1dfaac9ce89b0c9e1c3112a624cdcfb4197d25f3eb979b2bf9a242ccd400b6b",
+    "src/compat/productivebees/java/com/swear/autostorage/compat/productivebees/ProductivebeesCompatModule.java": "63b6262c2f520f67fa3dcc3ade1fbc1668ed6fe00a8d734b8eb81539f6b6e9a3",
     "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesFixtureMod.java": "942ad68d0b600da5a3e28ced3e8954d728c0f772354b144b38cda5def69ec900",
     "src/productivebeesFixture/java/com/swear/autostorage/fixture/productivebees/ProductivebeesIntegrationGameTests.java": "3f975a46fbcb9644209a43d8e2031e68febf212a27e307d88c1dc5dfaeb49c79",
     "src/productivebeesFixture/resources/META-INF/neoforge.mods.toml": "ac7aee8bb29e374b1d46ac145b6703feac971855a07d6339775020a8846733f7",
