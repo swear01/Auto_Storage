@@ -78,14 +78,14 @@ public final class OritechCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
-        transformProviders.register(fuelGeneratorId.getPath(), () ->
-                TransformProvider.of(
+                com.swear.autostorage.ConversionScanner.register(FUEL_GENERATOR_PATTERN);
+transformProviders.register(fuelGeneratorId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
                         new ItemStack(Items.REDSTONE),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.oritech_fuel_generator"),
-                        OritechCompat::fuelGeneratorTransform));
+                        FUEL_GENERATOR_PATTERN::resolve));
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
@@ -252,9 +252,17 @@ public final class OritechCompat {
                 .distinct()
                 .toList();
     }
+    private static final FuelGeneratorPattern FUEL_GENERATOR_PATTERN = new FuelGeneratorPattern();
+    private static final class FuelGeneratorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "oritech", "fuel_generator");
+        }
 
-    private static TransformProviderApi.Result fuelGeneratorTransform(ItemStack input) {
-        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int burnTime = input.getBurnTime(RecipeType.SMELTING);
         if (burnTime <= 0) return null;
         int energyPerTick = OritechConfig.generators.fuelGeneratorData.energyPerTick.get();
         if (energyPerTick <= 0) return null;
@@ -264,8 +272,13 @@ public final class OritechCompat {
                 ResourceLocation.fromNamespaceAndPath(
                         AutoStorageApi.MOD_ID, "oritech_fuel_generator"),
                 burnTime);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return String.valueOf(OritechConfig.generators.fuelGeneratorData.energyPerTick);
+        }
+    }
     private static Item requiredItem(ResourceLocation id) {
         Item item = BuiltInRegistries.ITEM.get(id);
         if (item == Items.AIR) {

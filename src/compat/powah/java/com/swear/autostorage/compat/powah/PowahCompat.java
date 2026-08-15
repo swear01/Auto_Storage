@@ -100,6 +100,8 @@ public final class PowahCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
+        FurnatorPattern furnatorPattern = new FurnatorPattern(furnatorId);
+        com.swear.autostorage.ConversionScanner.register(furnatorPattern);
         transformProviders.register(
                 furnatorId.getPath(),
                 () -> TransformProvider.of(
@@ -107,7 +109,7 @@ public final class PowahCompat {
                         new ItemStack(Items.REDSTONE),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable("gui.auto_storage.station.powah_furnator"),
-                        stack -> furnatorTransform(stack, furnatorId)));
+                        furnatorPattern::resolve));
         ResourceLocation magmatorId = ResourceLocation.fromNamespaceAndPath(
                 machineDescriptors.getNamespace(), "powah_magmator");
         machineDescriptors.register(magmatorId.getPath(), () ->
@@ -120,31 +122,51 @@ public final class PowahCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
+        MagmatorPattern magmatorPattern = new MagmatorPattern(magmatorId);
+        com.swear.autostorage.ConversionScanner.register(magmatorPattern);
         transformProviders.register(magmatorId.getPath(), () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
                         new ItemStack(Items.REDSTONE),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable("gui.auto_storage.station.powah_magmator"),
-                        stack -> magmatorTransform(stack, magmatorId)));
+                        magmatorPattern::resolve));
     }
+    private static final class MagmatorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        private final ResourceLocation stationId;
 
-    private static TransformProviderApi.Result magmatorTransform(
-            ItemStack stack,
-            ResourceLocation magmatorId
-    ) {
-        if (!stack.is(Items.LAVA_BUCKET)) return null;
+        private MagmatorPattern(ResourceLocation stationId) {
+            this.stationId = stationId;
+        }
+
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "powah", "magmator");
+        }
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {
+            if (input == null || input.isEmpty()) return null;
+                    if (!input.is(Items.LAVA_BUCKET)) return null;
         int energyPer100Mb = PowahAPI.getMagmaticFluidEnergyProduced(Fluids.LAVA);
         if (energyPer100Mb <= 0) return null;
         long fe = Math.multiplyExact((long) energyPer100Mb, 10L);
         return new TransformProviderApi.Result(
                 StorageResourceKey.neoforgeEnergy(),
                 fe,
-                magmatorId,
+                stationId,
                 10L,
                 List.of(new ItemStack(Items.BUCKET)));
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return String.valueOf(
+                    PowahAPI.getMagmaticFluidEnergyProduced(Fluids.LAVA));
+        }
+    }
     private static List<MachineVariant> rodVariants() {
         return Arrays.stream(Tier.getNormalVariants())
                 .map(tier -> MachineVariant.of(
@@ -164,12 +186,24 @@ public final class PowahCompat {
                                 1)))
                 .toList();
     }
+    private static final class FurnatorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        private final ResourceLocation stationId;
 
-    private static TransformProviderApi.Result furnatorTransform(
-            ItemStack stack,
-            ResourceLocation furnatorId
-    ) {
-        int burnTicks = stack.getBurnTime(RecipeType.SMELTING);
+        private FurnatorPattern(ResourceLocation stationId) {
+            this.stationId = stationId;
+        }
+
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "powah", "furnator");
+        }
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {
+            if (input == null || input.isEmpty()) return null;
+                    int burnTicks = input.getBurnTime(RecipeType.SMELTING);
         if (burnTicks <= 0) return null;
         long output = Math.multiplyExact(
                 (long) burnTicks,
@@ -178,10 +212,16 @@ public final class PowahCompat {
         return new TransformProviderApi.Result(
                 StorageResourceKey.neoforgeEnergy(),
                 output,
-                furnatorId,
+                stationId,
                 output);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return String.valueOf(
+                    PowahAPI.getMagmaticFluidEnergyProduced(Fluids.LAVA));
+        }
+    }
     private static boolean supports(EnergizingRecipe recipe) {
         return recipe.getEnergy() > 0
                 && recipe.getIngredients().size() <= 6

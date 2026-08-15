@@ -2,7 +2,7 @@
   "contract_sha256": "949f970e201cf05a3460888afd1262f897e4ea0df41661c723750c3e6b07511a",
   "files": {
     "src/compat/enderio/compat-module.json": "ccf795b902d52479e8d89224f25fbe3b33459dc3de9a612c3390fb731d21e630",
-    "src/compat/enderio/java/com/swear/autostorage/compat/enderio/EnderioCompat.java": "bfb3a24de2de8e55e467e4da0a35f10c5123ba57039ac3a7b20890bfee8e94a6",
+    "src/compat/enderio/java/com/swear/autostorage/compat/enderio/EnderioCompat.java": "5a9e5376fa56fad35fe8149095ebf2ab2a0f960389d0c9f12177739bd7f50cd5",
     "src/compat/enderio/java/com/swear/autostorage/compat/enderio/EnderioCompatModule.java": "8138ef2cab256c3e8de2b1e541ab46cec8c4a63a3093a1dd10963549992a53de",
     "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioFixtureMod.java": "262ea2ee5cb6a7af8585499b24c08632ebe2ca5dcba213bc918f872495c2a92e",
     "src/enderIoFixture/java/com/swear/autostorage/fixture/enderio/EnderioIntegrationGameTests.java": "1a3ec905fbc528469e4645b8f2274485c0f4393e3918718c1e6c6f1568a96859",

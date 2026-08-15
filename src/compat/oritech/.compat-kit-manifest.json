@@ -2,7 +2,7 @@
   "contract_sha256": "201c791d2b6e923548e588ca1b2f7dda1e3badffccf142df131e9dee6de8b9f3",
   "files": {
     "src/compat/oritech/compat-module.json": "9acbd2cfc49c249ebf784c623ab3275f72cd0337a7c6ddfc44c7c161c0d8fb68",
-    "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "29ff4bf668f1c50e837c0e66d3aa29ca6c7f7041846904262ef93c08b849d0a9",
+    "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompat.java": "203bf73ed7d573a177d6b0521fb3b4a2d6b6a67d77423ddce69a591fa70234d7",
     "src/compat/oritech/java/com/swear/autostorage/compat/oritech/OritechCompatModule.java": "feba115164b92c624ec336aaa5ca441b7c051e0a5ff39191a089c262f6713dff",
     "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechFixtureMod.java": "3749b869c9b8a7a01117b1210464f53c914338c8f8773d5dea053fa0e0f60904",
     "src/oritechFixture/java/com/swear/autostorage/fixture/oritech/OritechIntegrationGameTests.java": "e3fc01bbb5ba1147fd7065dba61b2b5d9a8e49f6b0fcb2fc9878c04572638bd2",

@@ -33,6 +33,7 @@ public final class RftoolspowerCompat {
             DeferredRegister<RecipeFamily> recipes,
             DeferredRegister<TransformProvider> transforms
     ) {
+        com.swear.autostorage.ConversionScanner.register(COAL_PATTERN);
         ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                 AutoStorageApi.MOD_ID, "rftoolspower_coal_generator");
         machines.register(generatorId.getPath(), () ->
@@ -55,11 +56,19 @@ public final class RftoolspowerCompat {
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.rftoolspower_coal_generator"),
-                        RftoolspowerCompat::coalTransform));
+                        COAL_PATTERN::resolve));
     }
+    private static final CoalPattern COAL_PATTERN = new CoalPattern();
+    private static final class CoalPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "rftoolspower", "coal_generator");
+        }
 
-    private static TransformProviderApi.Result coalTransform(ItemStack input) {
-        int work = CoalGeneratorConfig.TICKSPERCOAL.get();
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int work = CoalGeneratorConfig.TICKSPERCOAL.get();
         int factor = 1;
         if (input.is(Items.COAL) || input.is(Items.CHARCOAL)) {
             // accepted
@@ -77,8 +86,13 @@ public final class RftoolspowerCompat {
                 ResourceLocation.fromNamespaceAndPath(
                         AutoStorageApi.MOD_ID, "rftoolspower_coal_generator"),
                 scaledWork);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return CoalGeneratorConfig.RFPERTICK.get() + "/" + CoalGeneratorConfig.TICKSPERCOAL.get();
+        }
+    }
     private static Item requiredItem(ResourceLocation id) {
         Item item = BuiltInRegistries.ITEM.get(id);
         if (item == Items.AIR) {

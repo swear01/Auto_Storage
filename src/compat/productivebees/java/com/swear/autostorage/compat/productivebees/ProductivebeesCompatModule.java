@@ -41,6 +41,7 @@ public final class ProductivebeesCompatModule implements AutoStorageCompatModule
 
     @Override
     public void register(AutoStorageCompatContext context) {
+        com.swear.autostorage.ConversionScanner.register(HONEY_PATTERN);
         ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                 AutoStorageApi.MOD_ID, "productivebees_honey_generator");
         MACHINES.register(generatorId.getPath(), () ->
@@ -63,15 +64,23 @@ public final class ProductivebeesCompatModule implements AutoStorageCompatModule
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.productivebees_honey_generator"),
-                        ProductivebeesCompatModule::honeyTransform));
+                        HONEY_PATTERN::resolve));
         context.register(addon -> addon
                 .machineDescriptors(MACHINES)
                 .recipeFamilies(RECIPES)
                 .transformProviders(TRANSFORMS));
     }
+    private static final HoneyPattern HONEY_PATTERN = new HoneyPattern();
+    private static final class HoneyPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "productivebees", "honey_generator");
+        }
 
-    private static TransformProviderApi.Result honeyTransform(ItemStack input) {
-        int mb;
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int mb;
         ItemStack retained = ItemStack.EMPTY;
         if (input.is(Items.HONEY_BOTTLE)) {
             mb = 250;
@@ -102,8 +111,13 @@ public final class ProductivebeesCompatModule implements AutoStorageCompatModule
         } catch (ArithmeticException exception) {
             return null;
         }
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return ProductiveBeesConfig.GENERAL.generatorHoneyUse.get() + "/" + ProductiveBeesConfig.GENERAL.generatorPowerGen.get();
+        }
+    }
     private static Item requiredItem(ResourceLocation id) {
         Item item = BuiltInRegistries.ITEM.get(id);
         if (item == Items.AIR) {

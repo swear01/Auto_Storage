@@ -2,7 +2,7 @@
   "contract_sha256": "c8c39b52314453e7f2cd344b2736ffbf6067d928b65c6c2339f17765ae3d2b32",
   "files": {
     "src/compat/integrateddynamics/compat-module.json": "442e755c61c04c4e56fae2793651124c87c81d9e3a11fa1888caf10f38fa12d3",
-    "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompat.java": "bdf64c1d4d493cdedee3e5a57f419d6430f137f4d291378d31e00c306cf528f1",
+    "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompat.java": "e6ad6e8948e96f94f0b4dbbbfc1cfd655e46ac1da820e288035fd224772e5576",
     "src/compat/integrateddynamics/java/com/swear/autostorage/compat/integrateddynamics/IntegrateddynamicsCompatModule.java": "32d3247ff09eefb36fa98fdf2be54bcda7143ed06e5fbd7fbdaf1091b11c9123",
     "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsFixtureMod.java": "09cafe93da5cb14084a3e3714efd1f786edcb81b2d7f605cfa1f33d8d71a7d64",
     "src/integratedDynamicsFixture/java/com/swear/autostorage/fixture/integrateddynamics/IntegrateddynamicsIntegrationGameTests.java": "d37e6525845e7ac822b7db34e9083667cc3ad3416d338953c035f996811b33ca",

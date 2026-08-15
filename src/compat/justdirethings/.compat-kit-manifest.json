@@ -2,7 +2,7 @@
   "contract_sha256": "1154140fca3a2ebcbf59e9d7d646af3ab4c356f2d27c3e9b7c02cfed7ad17f06",
   "files": {
     "src/compat/justdirethings/compat-module.json": "40932e656308fc8c1b622f6371496a07d445852f0fa5882d1cba882a598bf21a",
-    "src/compat/justdirethings/java/com/swear/autostorage/compat/justdirethings/JustdirethingsCompat.java": "dbb5279c47d2494bff2939e6da6c2ca9b073ad3e5c6cd435b6e627aad4314fb8",
+    "src/compat/justdirethings/java/com/swear/autostorage/compat/justdirethings/JustdirethingsCompat.java": "58fa3a953e2e8c15314e95cf061bff9bfcd6534e4ff3bd81f729e1c793844812",
     "src/compat/justdirethings/java/com/swear/autostorage/compat/justdirethings/JustdirethingsCompatModule.java": "3d724c87ad4799bfd54608c4a1936f90286a06be1afb1a1a8045cbda672e8dd7",
     "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsFixtureMod.java": "bc5fa1924fef32d9885fca8ea95aa3da3e796d069461e4ecc80a080ebab8867a",
     "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsIntegrationGameTests.java": "7ef9406d354b3e0d35f6049d3f41330f8f845e3022aab9b41dbbf0ddae27082e",

@@ -2,7 +2,7 @@
   "contract_sha256": "2ab5d4ee56b7f4adcdae5133494257738069fb3a519c689e5f18ea8a16ffe8f9",
   "files": {
     "src/compat/rftoolspower/compat-module.json": "7a4472bc037156aa52c289714d6e58443a6b8893c2990362bfcdb6d338c61c0d",
-    "src/compat/rftoolspower/java/com/swear/autostorage/compat/rftoolspower/RftoolspowerCompat.java": "1867b93772a83782f52e63480a74a7decbeed576f1a3f273391e4e066e7ebe9a",
+    "src/compat/rftoolspower/java/com/swear/autostorage/compat/rftoolspower/RftoolspowerCompat.java": "71d83b9d14cdc4b307d2506316581df75e306dcf7ac91e6025df0de027eca2bb",
     "src/compat/rftoolspower/java/com/swear/autostorage/compat/rftoolspower/RftoolspowerCompatModule.java": "1a01d59aa68f326ac424f9c141bc0c3ea54a2f3161a6dee7ad2109caf7c5e38f",
     "src/rftoolspowerFixture/java/com/swear/autostorage/fixture/rftoolspower/RftoolspowerFixtureMod.java": "f5671abdc173e0f233de4a773366d6a354fb7b8a02e89918c1fc656304da5c9f",
     "src/rftoolspowerFixture/java/com/swear/autostorage/fixture/rftoolspower/RftoolspowerIntegrationGameTests.java": "f7837ba625e28f84b8ceb93b1fd7d7c7a9b560cc0109cb322586330f351f1eb8",

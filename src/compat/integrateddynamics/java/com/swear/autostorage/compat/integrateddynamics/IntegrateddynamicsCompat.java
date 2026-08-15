@@ -70,14 +70,14 @@ public final class IntegrateddynamicsCompat {
                 "coal_generator",
                 Component.translatable(
                         "gui.auto_storage.station.integrateddynamics_coal_generator"));
-        transformProviders.register(coalGeneratorId.getPath(), () ->
-                TransformProvider.of(
+                com.swear.autostorage.ConversionScanner.register(COAL_GENERATOR_PATTERN);
+transformProviders.register(coalGeneratorId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
                         new ItemStack(Items.REDSTONE),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.integrateddynamics_coal_generator"),
-                        IntegrateddynamicsCompat::coalGeneratorTransform));
+                        COAL_GENERATOR_PATTERN::resolve));
         ResourceLocation dryingBasin = id(namespace, "integrateddynamics_drying_basin");
         ResourceLocation mechanicalDryingBasin = id(
                 namespace, "integrateddynamics_mechanical_drying_basin");
@@ -449,9 +449,17 @@ public final class IntegrateddynamicsCompat {
                 .distinct()
                 .toList();
     }
+    private static final CoalGeneratorPattern COAL_GENERATOR_PATTERN = new CoalGeneratorPattern();
+    private static final class CoalGeneratorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "integrateddynamics", "coal_generator");
+        }
 
-    private static TransformProviderApi.Result coalGeneratorTransform(ItemStack input) {
-        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int burnTime = input.getBurnTime(RecipeType.SMELTING);
         int energyPerTick = BlockEntityCoalGeneratorConfig.energyPerTick;
         if (burnTime <= 0 || energyPerTick <= 0) return null;
         return new TransformProviderApi.Result(
@@ -460,8 +468,13 @@ public final class IntegrateddynamicsCompat {
                 ResourceLocation.fromNamespaceAndPath(
                         AutoStorageApi.MOD_ID, "integrateddynamics_coal_generator"),
                 burnTime);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return String.valueOf(BlockEntityCoalGeneratorConfig.energyPerTick);
+        }
+    }
     private static Item requiredItem(String path) {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
         Item item = BuiltInRegistries.ITEM.get(id);

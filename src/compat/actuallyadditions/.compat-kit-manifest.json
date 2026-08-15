@@ -6,7 +6,7 @@
     "src/actuallyadditionsFixture/resources/META-INF/neoforge.mods.toml": "c243b7a802f1bb170c518cdcb6c9eba7b79fb4626520106da90c1c696126a696",
     "src/actuallyadditionsFixture/resources/data/auto_storage_actuallyadditions_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc",
     "src/compat/actuallyadditions/compat-module.json": "2c86292db6f6a59d42d8d781c027f8d2e861caf811ba60256ab6cdcbbee3e43f",
-    "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompat.java": "59553e9349ac95ef3e10806c25682a703491ff8894fa105038d2ea0a41143de1",
+    "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompat.java": "ddaf7697f1bc27fa54729ba98c49895794045fcb86f3c5aaed81e9efc39c7fc6",
     "src/compat/actuallyadditions/java/com/swear/autostorage/compat/actuallyadditions/ActuallyadditionsCompatModule.java": "4797750e6efee46b6c0fbf12dcd555607e6d8e004885efde9cfa631561edc739"
   },
   "schema": 1,

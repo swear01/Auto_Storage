@@ -99,7 +99,10 @@ without code changes to Auto Storage.
    mod code constants with no config or recipe — the machine itself
    hardcodes them, so there is nothing to read live; documented as
    machine truth in each compat doc. Closed as no-op.
-5. #121 Picker UX input-first search (open).
+5. #121 Picker UX input-first search. DONE
+6. #124 all generator modules unified onto ConversionPattern (enderio/
+   AA/ID/DE/IF/Oritech/Powah/PB/RFTools/JDT patterns; fixtures unchanged
+   green). DONE
 6. ~~#123~~ closed: no custom agent framework — the user already runs
    DeepSeek V4 Flash through the existing Hapi fleet tooling.
 

@@ -87,14 +87,14 @@ public final class ActuallyadditionsCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
-        transformProviders.register(coalGeneratorId.getPath(), () ->
-                TransformProvider.of(
+                com.swear.autostorage.ConversionScanner.register(COAL_GENERATOR_PATTERN);
+transformProviders.register(coalGeneratorId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
                         new ItemStack(Items.REDSTONE),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.actuallyadditions_coal_generator"),
-                        ActuallyadditionsCompat::coalGeneratorTransform));
+                        COAL_GENERATOR_PATTERN::resolve));
         Objects.requireNonNull(machineDescriptors, "machineDescriptors");
         Objects.requireNonNull(recipeFamilies, "recipeFamilies");
         if (!machineDescriptors.getRegistryKey().equals(MachineDescriptorApi.REGISTRY_KEY)) {
@@ -318,9 +318,17 @@ public final class ActuallyadditionsCompat {
         }
         return stack;
     }
+    private static final CoalGeneratorPattern COAL_GENERATOR_PATTERN = new CoalGeneratorPattern();
+    private static final class CoalGeneratorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "actuallyadditions", "coal_generator");
+        }
 
-    private static TransformProviderApi.Result coalGeneratorTransform(ItemStack input) {
-        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int burnTime = input.getBurnTime(RecipeType.SMELTING);
         if (burnTime <= 0) return null;
         return new TransformProviderApi.Result(
                 StorageResourceKey.neoforgeEnergy(),
@@ -328,8 +336,13 @@ public final class ActuallyadditionsCompat {
                 ResourceLocation.fromNamespaceAndPath(
                         AutoStorageApi.MOD_ID, "actuallyadditions_coal_generator"),
                 burnTime);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return "20";
+        }
+    }
     private static Item requiredItem(ResourceLocation id) {
         Item item = BuiltInRegistries.ITEM.get(id);
         if (item == Items.AIR) {

@@ -36,6 +36,7 @@ public final class DraconicevolutionCompat {
             DeferredRegister<RecipeFamily> recipes,
             DeferredRegister<TransformProvider> transforms
     ) {
+        com.swear.autostorage.ConversionScanner.register(GENERATOR_PATTERN);
         Objects.requireNonNull(machines, "machines");
         Objects.requireNonNull(recipes, "recipes");
         Objects.requireNonNull(transforms, "transforms");
@@ -77,11 +78,19 @@ public final class DraconicevolutionCompat {
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.draconicevolution_generator"),
-                        DraconicevolutionCompat::generatorTransform));
+                        GENERATOR_PATTERN::resolve));
     }
+    private static final GeneratorPattern GENERATOR_PATTERN = new GeneratorPattern();
+    private static final class GeneratorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "draconicevolution", "generator");
+        }
 
-    private static TransformProviderApi.Result generatorTransform(ItemStack input) {
-        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int burnTime = input.getBurnTime(RecipeType.SMELTING);
         if (burnTime <= 0) return null;
         // Base NORMAL mode: 40 FE/tick while fuel burns. In-world the
         // production scales with the stored buffer (1..40 FE/tick); the
@@ -92,8 +101,13 @@ public final class DraconicevolutionCompat {
                 ResourceLocation.fromNamespaceAndPath(
                         AutoStorageApi.MOD_ID, "draconicevolution_generator"),
                 burnTime);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return "40";
+        }
+    }
     private static Item requiredItem(ResourceLocation id) {
         Item item = BuiltInRegistries.ITEM.get(id);
         if (item == Items.AIR) {

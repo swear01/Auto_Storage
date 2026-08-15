@@ -32,6 +32,7 @@ public final class JustdirethingsCompat {
             DeferredRegister<RecipeFamily> recipes,
             DeferredRegister<TransformProvider> transforms
     ) {
+        com.swear.autostorage.ConversionScanner.register(GENERATOR_PATTERN);
         ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                 AutoStorageApi.MOD_ID, "justdirethings_generator_t1");
         machines.register(generatorId.getPath(), () ->
@@ -54,11 +55,19 @@ public final class JustdirethingsCompat {
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.justdirethings_generator_t1"),
-                        JustdirethingsCompat::generatorTransform));
+                        GENERATOR_PATTERN::resolve));
     }
+    private static final GeneratorPattern GENERATOR_PATTERN = new GeneratorPattern();
+    private static final class GeneratorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "justdirethings", "generator_t1");
+        }
 
-    private static TransformProviderApi.Result generatorTransform(ItemStack input) {
-        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int burnTime = input.getBurnTime(RecipeType.SMELTING);
         if (burnTime <= 0) return null;
         int multiplier = Config.GENERATOR_T1_BURN_SPEED_MULTIPLIER.get();
         int fePerFuelTick = Config.GENERATOR_T1_FE_PER_FUEL_TICK.get();
@@ -81,8 +90,13 @@ public final class JustdirethingsCompat {
                         AutoStorageApi.MOD_ID, "justdirethings_generator_t1"),
                 work,
                 retained);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return Config.GENERATOR_T1_FE_PER_FUEL_TICK.get() + "/" + Config.GENERATOR_T1_BURN_SPEED_MULTIPLIER.get();
+        }
+    }
     private static Item requiredItem(ResourceLocation id) {
         Item item = BuiltInRegistries.ITEM.get(id);
         if (item == Items.AIR) {

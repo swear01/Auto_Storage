@@ -89,6 +89,8 @@ public final class EnderioCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
+        StirlingPattern stirlingPattern = new StirlingPattern();
+        com.swear.autostorage.ConversionScanner.register(stirlingPattern);
         transformProviders.register(stirlingId.getPath(), () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
@@ -96,7 +98,7 @@ public final class EnderioCompat {
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.enderio_stirling_generator"),
-                        EnderioCompat::stirlingTransform));
+                        stirlingPattern::resolve));
 
         ResourceLocation descriptorId = ResourceLocation.fromNamespaceAndPath(
                 machineDescriptors.getNamespace(), "enderio_alloy_smelting");
@@ -204,25 +206,44 @@ public final class EnderioCompat {
         return (RecipeType<AlloySmeltingRecipe>) type;
     }
 
-    private static TransformProviderApi.Result stirlingTransform(ItemStack input) {
-        int burnTime = input.getBurnTime(RecipeType.SMELTING);
-        if (burnTime <= 0 || input.hasCraftingRemainingItem()) return null;
-        EnergyConfig energy = MachinesConfig.COMMON.ENERGY;
-        double speed = energy.STIRLING_GENERATOR_BURN_SPEED.get();
-        double efficiency = energy.STIRLING_GENERATOR_FUEL_EFFICIENCY_BASE.get();
-        int production = energy.STIRLING_GENERATOR_PRODUCTION.get();
-        long duration = (long) Math.floor(
-                burnTime * speed * (efficiency / 100.0));
-        if (duration <= 0 || production <= 0) return null;
-        try {
-            return new TransformProviderApi.Result(
-                    StorageResourceKey.neoforgeEnergy(),
-                    Math.multiplyExact(duration, production),
-                    ResourceLocation.fromNamespaceAndPath(
-                            AutoStorageApi.MOD_ID, "enderio_stirling_generator"),
-                    duration);
-        } catch (ArithmeticException exception) {
-            return null;
+    private static final class StirlingPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "enderio", "stirling_generator");
+        }
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {
+            int burnTime = input.getBurnTime(RecipeType.SMELTING);
+            if (burnTime <= 0 || input.hasCraftingRemainingItem()) return null;
+            EnergyConfig energy = MachinesConfig.COMMON.ENERGY;
+            double speed = energy.STIRLING_GENERATOR_BURN_SPEED.get();
+            double efficiency = energy.STIRLING_GENERATOR_FUEL_EFFICIENCY_BASE.get();
+            int production = energy.STIRLING_GENERATOR_PRODUCTION.get();
+            long duration = (long) Math.floor(
+                    burnTime * speed * (efficiency / 100.0));
+            if (duration <= 0 || production <= 0) return null;
+            try {
+                return new TransformProviderApi.Result(
+                        StorageResourceKey.neoforgeEnergy(),
+                        Math.multiplyExact(duration, production),
+                        ResourceLocation.fromNamespaceAndPath(
+                                AutoStorageApi.MOD_ID,
+                                "enderio_stirling_generator"),
+                        duration);
+            } catch (ArithmeticException exception) {
+                return null;
+            }
+        }
+
+        @Override
+        public String revisionKey() {
+            EnergyConfig energy = MachinesConfig.COMMON.ENERGY;
+            return energy.STIRLING_GENERATOR_BURN_SPEED.get() + "/"
+                    + energy.STIRLING_GENERATOR_FUEL_EFFICIENCY_BASE.get()
+                    + "/" + energy.STIRLING_GENERATOR_PRODUCTION.get();
         }
     }
 

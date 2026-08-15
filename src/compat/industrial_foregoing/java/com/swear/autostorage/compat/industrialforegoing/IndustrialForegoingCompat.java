@@ -69,26 +69,26 @@ public final class IndustrialForegoingCompat {
                 machineDescriptors,
                 pitifulId,
                 "pitiful_generator");
-        transformProviders.register(pitifulId.getPath(), () ->
-                TransformProvider.of(
+                com.swear.autostorage.ConversionScanner.register(PITIFUL_GENERATOR_PATTERN);
+transformProviders.register(pitifulId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
                         new ItemStack(Items.REDSTONE),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.industrial_foregoing_pitiful_generator"),
-                        IndustrialForegoingCompat::pitifulGeneratorTransform));
+                        PITIFUL_GENERATOR_PATTERN::resolve));
         ResourceLocation furnaceId = id(
                 machineDescriptors.getNamespace(),
                 "industrial_foregoing_mycelial_furnace");
         registerStation(machineDescriptors, furnaceId, "mycelial_furnace");
-        transformProviders.register(furnaceId.getPath(), () ->
-                TransformProvider.of(
+                com.swear.autostorage.ConversionScanner.register(MYCELIAL_FURNACE_PATTERN);
+transformProviders.register(furnaceId.getPath(), () ->                TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
                         new ItemStack(Items.REDSTONE),
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.station.industrial_foregoing_mycelial_furnace"),
-                        IndustrialForegoingCompat::mycelialFurnaceTransform));
+                        MYCELIAL_FURNACE_PATTERN::resolve));
         String namespace = machineDescriptors.getNamespace();
         ResourceLocation dissolution = id(namespace, "industrial_foregoing_dissolution_chamber");
         ResourceLocation stonework = id(
@@ -383,9 +383,17 @@ public final class IndustrialForegoingCompat {
         }
     }
 
+    private static final MycelialFurnacePattern MYCELIAL_FURNACE_PATTERN = new MycelialFurnacePattern();
+    private static final class MycelialFurnacePattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "industrial_foregoing", "mycelial_furnace");
+        }
 
-    private static TransformProviderApi.Result mycelialFurnaceTransform(ItemStack input) {
-        if (input == null || input.isEmpty()) return null;
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        if (input == null || input.isEmpty()) return null;
         int burnTime = input.getBurnTime(RecipeType.SMELTING);
         if (burnTime <= 0) return null;
         long fe = Math.multiplyExact((long) burnTime, MYCELIAL_FURNACE_FE_PER_TICK);
@@ -399,10 +407,23 @@ public final class IndustrialForegoingCompat {
                         AutoStorageApi.MOD_ID, "industrial_foregoing_mycelial_furnace"),
                 burnTime,
                 retained);
-    }
+        }
 
-    private static TransformProviderApi.Result pitifulGeneratorTransform(ItemStack input) {
-        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        @Override
+        public String revisionKey() {
+            return String.valueOf(MYCELIAL_FURNACE_FE_PER_TICK);
+        }
+    }    private static final PitifulGeneratorPattern PITIFUL_GENERATOR_PATTERN = new PitifulGeneratorPattern();
+    private static final class PitifulGeneratorPattern
+            implements com.swear.autostorage.ConversionPattern {
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "industrial_foregoing", "pitiful_generator");
+        }
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {        int burnTime = input.getBurnTime(RecipeType.SMELTING);
         int energyPerTick = PitifulGeneratorConfig.powerPerTick;
         if (burnTime <= 0 || energyPerTick <= 0 || input.hasCraftingRemainingItem()) {
             return null;
@@ -413,8 +434,13 @@ public final class IndustrialForegoingCompat {
                 ResourceLocation.fromNamespaceAndPath(
                         AutoStorageApi.MOD_ID, "industrial_foregoing_pitiful_generator"),
                 burnTime);
-    }
+        }
 
+        @Override
+        public String revisionKey() {
+            return String.valueOf(PitifulGeneratorConfig.powerPerTick);
+        }
+    }
     private static Item requiredItem(String path) {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
         Item item = BuiltInRegistries.ITEM.get(id);
