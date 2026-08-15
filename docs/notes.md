@@ -1,3 +1,9 @@
+# Notes
+
+2026-08-14 #116 已發（runtime datapack-driven conversion detection）：使用者要求 Auto Storage 不寫死配方 — 模組自己掃描已安裝 mods 的 conversion 配方（chemical/energy conversion、generator fuels 等），datapack 變更自動反映，帶 cache；pattern 由使用者提供。目前唯一 live 的：Mekanism Chemical Conversion（ServerStartedEvent 重建）、GeneratorGalore（live JSON registry + SolidFuelMap datamap）。
+- Metallurgic Infusing 的 infusion 消耗是 per-recipe（`getNeededAmount`：多數 10、clay→slime block 40、gilded blackstone 100）— Auto Storage family 讀 exact amount，無寫死。
+- Mystical Agriculture：ATM10 種植資源 mod（種子→essence→各種資源）；Auto Storage 支持其 Reprocessor（2 seed + FE → 1 essence，item→item recipe family，非 energy transform）— 已註冊。
+
 2026-08-14 新模組批次裁決（ATM10 Transform expansion 剩餘）：
 - #112 Refurbished Furniture REJECT：`ElectricityGeneratorBlockEntity` 把 burnTime×fuelToPowerRatio(16) 轉進 mod 自己的 electricity node network（`ElectricitySourceLootBlockEntity`/`searchNodeNetwork`），無 Forge Energy 輸出、非可儲存資源。
 - #114 Nature's Aura REJECT：所有 generator 產 Aura（無支援的 resource kind）；`BlockEntityRFConverter` 是雙向 RF↔Aura（RFStorage 兩向）違反單向原則。
