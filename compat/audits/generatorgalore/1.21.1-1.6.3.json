@@ -1,0 +1,1660 @@
+{
+  "ancestry_classpath": [
+    {
+      "sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3",
+      "size": 31574447
+    },
+    {
+      "sha256": "137f60018968a50c6f00e3a8ca9be790391792d2f3e6eff66237f2e9b3bc1353",
+      "size": 1529892
+    }
+  ],
+  "ancestry_dependencies": [],
+  "artifact": {
+    "class_count": 55,
+    "class_inventory_sha256": "65fce9233999b649a1594267bba7295b9c613215f6f89ab79022a792d0386053",
+    "sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d",
+    "size": 397687
+  },
+  "candidates": {
+    "block_entity_classes": [
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"CapabilityBlockEntity.java\"\npublic abstract class cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity implements net.minecraft.world.MenuProvider,net.minecraft.world.Nameable {\n  public cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity(net.minecraft.world.level.block.entity.BlockEntityType<?>, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket();\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.chat.Component getDisplayName();\n  public abstract void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public abstract void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.Packet getUpdatePacket();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity",
+            "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity",
+            "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"GeneratorBlockEntity.java\"\npublic class cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity extends cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity {\n  public int litTime;\n  public int litDuration;\n  public double remainder;\n  public int fluidId;\n  public final cy.jdkdigital.generatorgalore.util.GeneratorObject generator;\n  public final cy.jdkdigital.generatorgalore.cap.ControlledEnergyStorage energyHandler;\n  public final cy.jdkdigital.generatorgalore.common.container.ManualItemHandler inventoryHandler;\n  public final net.neoforged.neoforge.fluids.capability.templates.FluidTank fluidInventory;\n  public cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity(cy.jdkdigital.generatorgalore.util.GeneratorObject, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity);\n  public double getGenerationRate();\n  public double getConsumptionRate();\n  public boolean isLit();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public void refreshConnectedTileEntityCache();\n  public net.minecraft.network.chat.Component getName();\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity"
+      }
+    ],
+    "client_viewer_classes": [
+      {
+        "class": "cy.jdkdigital.generatorgalore.client.event.ClientEvents",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ClientEvents.java\"\npublic class cy.jdkdigital.generatorgalore.client.event.ClientEvents {\n  public cy.jdkdigital.generatorgalore.client.event.ClientEvents();\n  public static void onClientSetup(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent);\n  public static void registerParticles(net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.client.event.ClientEvents"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RisingEnchantParticle.java\"\npublic class cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle extends net.minecraft.client.particle.TextureSheetParticle {\n  public cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle(net.minecraft.client.multiplayer.ClientLevel, double, double, double);\n  public net.minecraft.client.particle.ParticleRenderType getRenderType();\n  public float getQuadSize(float);\n  public int getLightColor(float);\n  public void tick();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle$Provider",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RisingEnchantParticle.java\"\npublic class cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle$Provider implements net.minecraft.client.particle.ParticleProvider<cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType> {\n  public cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle$Provider(net.minecraft.client.particle.SpriteSet);\n  public net.minecraft.client.particle.Particle createParticle(cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType, net.minecraft.client.multiplayer.ClientLevel, double, double, double, double, double, double);\n  public net.minecraft.client.particle.Particle createParticle(net.minecraft.core.particles.ParticleOptions, net.minecraft.client.multiplayer.ClientLevel, double, double, double, double, double, double);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle.Provider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RisingEnchantParticleType.java\"\npublic class cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType extends net.minecraft.core.particles.ParticleType<cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType> implements net.minecraft.core.particles.ParticleOptions {\n  public cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType();\n  public cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType getType();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType> codec();\n  public net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType> streamCodec();\n  public net.minecraft.core.particles.ParticleType getType();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.integrations.FluidFuelRecipeCategory",
+        "classification": {
+          "evidence": [
+            "recipecategory"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidFuelRecipeCategory.java\"\npublic class cy.jdkdigital.generatorgalore.integrations.FluidFuelRecipeCategory implements mezz.jei.api.recipe.category.IRecipeCategory<cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe> {\n  public cy.jdkdigital.generatorgalore.integrations.FluidFuelRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.recipe.RecipeType<cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe> getRecipeType();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.integrations.FluidFuelRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.integrations.SolidFuelRecipeCategory",
+        "classification": {
+          "evidence": [
+            "recipecategory"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SolidFuelRecipeCategory.java\"\npublic class cy.jdkdigital.generatorgalore.integrations.SolidFuelRecipeCategory implements mezz.jei.api.recipe.category.IRecipeCategory<cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe> {\n  public cy.jdkdigital.generatorgalore.integrations.SolidFuelRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.recipe.RecipeType<cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe> getRecipeType();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void draw(cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void draw(java.lang.Object, mezz.jei.api.gui.ingredient.IRecipeSlotsView, net.minecraft.client.gui.GuiGraphics, double, double);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.integrations.SolidFuelRecipeCategory"
+      }
+    ],
+    "datagen_classes": [
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.BlockTagProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockTagProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.BlockTagProvider extends net.neoforged.neoforge.common.data.BlockTagsProvider {\n  public cy.jdkdigital.generatorgalore.data.BlockTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.BlockTagProvider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.BlockstateProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockstateProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.BlockstateProvider extends net.neoforged.neoforge.client.model.generators.BlockStateProvider {\n  public cy.jdkdigital.generatorgalore.data.BlockstateProvider(net.minecraft.data.PackOutput, net.neoforged.neoforge.common.data.ExistingFileHelper);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.BlockstateProvider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.DataMapProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataMapProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.DataMapProvider extends net.neoforged.neoforge.common.data.DataMapProvider {\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.DataMapProvider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.GeneratorGaloreDataProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"GeneratorGaloreDataProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.GeneratorGaloreDataProvider {\n  public cy.jdkdigital.generatorgalore.data.GeneratorGaloreDataProvider();\n  public static void gatherData(net.neoforged.neoforge.data.event.GatherDataEvent);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.GeneratorGaloreDataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.LanguageProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LanguageProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.LanguageProvider extends net.neoforged.neoforge.common.data.LanguageProvider {\n  public cy.jdkdigital.generatorgalore.data.LanguageProvider(net.minecraft.data.PackOutput);\n  public java.lang.String getName();\n  public static java.lang.String capName(java.lang.String);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.LanguageProvider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.LootDataProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootDataProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.LootDataProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.generatorgalore.data.LootDataProvider(net.minecraft.data.PackOutput, java.util.List<net.minecraft.data.loot.LootTableProvider$SubProviderEntry>, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.LootDataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.LootDataProvider$LootProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootDataProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.LootDataProvider$LootProvider extends net.minecraft.data.loot.BlockLootSubProvider {\n  public cy.jdkdigital.generatorgalore.data.LootDataProvider$LootProvider(net.minecraft.core.HolderLookup$Provider);\n  public void dropSelf(net.minecraft.world.level.block.Block);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.LootDataProvider.LootProvider"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.data.RecipeProvider",
+        "classification": {
+          "evidence": [
+            ".data."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RecipeProvider.java\"\npublic class cy.jdkdigital.generatorgalore.data.RecipeProvider extends net.minecraft.data.recipes.RecipeProvider implements net.neoforged.neoforge.common.conditions.IConditionBuilder {\n  public cy.jdkdigital.generatorgalore.data.RecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.data.RecipeProvider"
+      }
+    ],
+    "recipe_builders": [],
+    "recipe_classes": [
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FluidFuelRecipe.java\"\npublic final class cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe extends java.lang.Record implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe(java.util.List<net.neoforged.neoforge.fluids.FluidStack>, net.minecraft.world.item.ItemStack, float, float);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.util.List<net.neoforged.neoforge.fluids.FluidStack> fuels();\n  public net.minecraft.world.item.ItemStack generator();\n  public float rate();\n  public float consumptionRate();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"SolidFuelRecipe.java\"\npublic final class cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe extends java.lang.Record implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe(java.util.List<net.minecraft.world.item.crafting.Ingredient>, net.minecraft.world.item.ItemStack, float, float);\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.util.List<net.minecraft.world.item.crafting.Ingredient> fuels();\n  public net.minecraft.world.item.ItemStack generator();\n  public float rate();\n  public float consumptionRate();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe"
+      }
+    ],
+    "recipe_serializers": [
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"FluidFuelRecipe.java\"\npublic class cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe> STREAM_CODEC;\n  public cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe> streamCodec();\n  public static cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe.Serializer"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"SolidFuelRecipe.java\"\npublic class cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe> STREAM_CODEC;\n  public cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe> streamCodec();\n  public static cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe.Serializer"
+      }
+    ],
+    "recipe_types": [],
+    "resource_apis": [
+      {
+        "class": "cy.jdkdigital.generatorgalore.cap.ControlledEnergyStorage",
+        "classification": {
+          "evidence": [
+            "energy"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ControlledEnergyStorage.java\"\npublic class cy.jdkdigital.generatorgalore.cap.ControlledEnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {\n  public cy.jdkdigital.generatorgalore.cap.ControlledEnergyStorage(int);\n  public int receiveEnergy(int, boolean);\n  public int receiveEnergy(int, boolean, boolean);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.cap.ControlledEnergyStorage"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidFuelMap.java\"\npublic final class cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap> CODEC;\n  public cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap(java.util.List<cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap$FluidFuel>);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public java.util.List<cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap$FluidFuel> fuels();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap$FluidFuel",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidFuelMap.java\"\npublic final class cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap$FluidFuel extends java.lang.Record {\n  public static final com.mojang.serialization.Codec<cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap$FluidFuel> CODEC;\n  public cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap$FluidFuel(net.neoforged.neoforge.fluids.crafting.FluidIngredient, double, double);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.neoforged.neoforge.fluids.crafting.FluidIngredient fluid();\n  public double consumptionRate();\n  public double generationRate();\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap.FluidFuel"
+      },
+      {
+        "class": "cy.jdkdigital.generatorgalore.util.FluidContainerUtil",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FluidContainerUtil.java\"\npublic class cy.jdkdigital.generatorgalore.util.FluidContainerUtil {\n  public cy.jdkdigital.generatorgalore.util.FluidContainerUtil();\n  public static void setColors(int);\n  public static void bindTexture(net.minecraft.resources.ResourceLocation);\n  public static void renderFluidTank(net.minecraft.client.gui.GuiGraphics, net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>, net.neoforged.neoforge.fluids.FluidStack, int, int, int, int, int, int);\n  public static void renderFluidTank(net.minecraft.client.gui.GuiGraphics, net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>, net.neoforged.neoforge.fluids.FluidStack, int, int, int, int, int, int, int);\n  public static void renderTiledFluid(net.minecraft.client.gui.GuiGraphics, net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>, net.neoforged.neoforge.fluids.FluidStack, int, int, int, int, int);\n  public static void renderTiledTextureAtlas(net.minecraft.client.gui.GuiGraphics, net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>, net.minecraft.client.renderer.texture.TextureAtlasSprite, int, int, int, int, int, boolean);\n}",
+        "source_class": "cy.jdkdigital.generatorgalore.util.FluidContainerUtil"
+      }
+    ],
+    "station_classes": []
+  },
+  "kind": "auto_storage_compat_audit",
+  "recipe_data": {
+    "declared_recipes": 59,
+    "digest": "9224f2790a04edc1d1d29d190e4b9e0e3cea1012d6987d1049fa46939a382bde",
+    "effective_recipes": 59,
+    "format": 1,
+    "overrides": [],
+    "serializers": [
+      {
+        "condition_types": [
+          "generatorgalore:generator_exists",
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 57,
+        "fields": [
+          "category",
+          "key",
+          "neoforge:conditions",
+          "pattern",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 1,
+          "pattern": 3
+        },
+        "recipe_count": 57,
+        "sample_recipe_ids": [
+          "generatorgalore:64x/copper_generator_64x",
+          "generatorgalore:64x/culinary_generator_64x",
+          "generatorgalore:64x/diamond_generator_64x",
+          "generatorgalore:64x/emerald_generator_64x",
+          "generatorgalore:64x/enchantment_generator_64x",
+          "generatorgalore:64x/ender_generator_64x",
+          "generatorgalore:64x/gold_generator_64x",
+          "generatorgalore:64x/halitosis_generator_64x",
+          "generatorgalore:64x/honey_generator_64x",
+          "generatorgalore:64x/iron_generator_64x",
+          "generatorgalore:64x/magmatic_generator_64x",
+          "generatorgalore:64x/netherite_generator_64x",
+          "generatorgalore:64x/netherstar_generator_64x",
+          "generatorgalore:64x/obsidian_generator_64x",
+          "generatorgalore:64x/potion_generator_64x",
+          "generatorgalore:8x/copper_generator_8x"
+        ],
+        "serializer_id": "minecraft:crafting_shaped"
+      },
+      {
+        "condition_types": [
+          "generatorgalore:generator_exists"
+        ],
+        "conditional_recipes": 2,
+        "fields": [
+          "addition",
+          "base",
+          "neoforge:conditions",
+          "result",
+          "template",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 2,
+        "sample_recipe_ids": [
+          "generatorgalore:generators/netherite_generator",
+          "generatorgalore:upgrades/diamond_to_netherite_upgrade"
+        ],
+        "serializer_id": "minecraft:smithing_transform"
+      }
+    ],
+    "sources": [
+      {
+        "declared_recipes": 59,
+        "id": "target_jar",
+        "sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+      }
+    ]
+  },
+  "risks": [
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe: world API",
+        "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe: world API"
+      ]
+    }
+  ],
+  "scanner_format": 17,
+  "schema": 1,
+  "source": {
+    "files": [
+      "src/main/java/cy/jdkdigital/generatorgalore/cap/ControlledEnergyStorage.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/client/event/ClientEvents.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/client/particle/RisingEnchantParticle.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/client/particle/RisingEnchantParticleType.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/common/block/entity/CapabilityBlockEntity.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/common/block/entity/GeneratorBlockEntity.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/common/datamap/FluidFuelMap.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/common/recipe/FluidFuelRecipe.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/common/recipe/SolidFuelRecipe.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/data/BlockTagProvider.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/data/BlockstateProvider.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/data/DataMapProvider.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/data/GeneratorGaloreDataProvider.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/data/LanguageProvider.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/data/LootDataProvider.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/data/RecipeProvider.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/integrations/FluidFuelRecipeCategory.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/integrations/SolidFuelRecipeCategory.java",
+      "src/main/java/cy/jdkdigital/generatorgalore/util/FluidContainerUtil.java"
+    ],
+    "revision": "307cbcc91e53a1c696c0034fb431ab4f48daaa76"
+  },
+  "structural_candidate_inventory_sha256": "a244a49a5d4f897037076f5745e323fd5b413d19bb41f92ff7439ae7232d1db6",
+  "structural_class_graph": [
+    {
+      "class": "cy.jdkdigital.generatorgalore.Config",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.Config$Client",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.Config$General",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.GeneratorGalore",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.GeneratorGalore$EventHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.cap.ControlledEnergyStorage",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.energy.EnergyStorage"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.client.event.ClientEvents",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.particle.TextureSheetParticle"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticle$Provider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.particle.ParticleProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.client.particle.RisingEnchantParticleType",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.core.particles.ParticleOptions"
+        ],
+        "super_class": "net.minecraft.core.particles.ParticleType"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.block.Generator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.MenuProvider",
+          "net.minecraft.world.Nameable"
+        ],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.conditions.GeneratorExistsCondition",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.neoforged.neoforge.common.conditions.ICondition"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.container.AbstractContainer",
+      "metadata": {
+        "access_flags": 1056,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.inventory.AbstractContainerMenu"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.container.GeneratorMenu",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.generatorgalore.common.container.AbstractContainer"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.container.GeneratorScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.container.ManualItemHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.items.ItemStackHandler"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.container.ManualSlotItemHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.items.SlotItemHandler"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.datamap.FluidFuelMap$FluidFuel",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.datamap.PotionComponentIngredient",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.crafting.DataComponentIngredient"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.datamap.SolidFuelMap",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.datamap.SolidFuelMap$SolidFuel",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.item.UpgradeItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.BlockTagProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.BlockTagsProvider"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.BlockstateProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.client.model.generators.BlockStateProvider"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.DataMapProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.DataMapProvider"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.GeneratorGaloreDataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.LanguageProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.LanguageProvider"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.LootDataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.LootDataProvider$LootProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.loot.BlockLootSubProvider"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.data.RecipeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.common.conditions.IConditionBuilder"
+        ],
+        "super_class": "net.minecraft.data.recipes.RecipeProvider"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.init.ModBlockEntityTypes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.init.ModContainerTypes",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.init.ModParticles",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.init.ModRecipeTypes",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.init.ModTags",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.integrations.FluidFuelRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.integrations.JeiPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.IModPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.integrations.SolidFuelRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.registry.GeneratorRegistry",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.FluidContainerUtil",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.GeneratorCreator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.GeneratorCreator$Fuel",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.GeneratorObject",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.GeneratorUtil",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.GeneratorUtil$FuelType",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.PotionUtil",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.collection.MultiMap",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.util.collection.SetMultiMap",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.generatorgalore.util.collection.MultiMap"
+      },
+      "owner_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+    },
+    {
+      "class": "mezz.jei.api.IModPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "137f60018968a50c6f00e3a8ca9be790391792d2f3e6eff66237f2e9b3bc1353"
+    },
+    {
+      "class": "mezz.jei.api.recipe.category.IRecipeCategory",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "137f60018968a50c6f00e3a8ca9be790391792d2f3e6eff66237f2e9b3bc1353"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.Renderable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.TabOrderedElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.ContainerEventHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.ContainerEventHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.GuiEventListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.GuiEventListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.TabOrderedElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.Screen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.Renderable"
+        ],
+        "super_class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.MenuAccess"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.Screen"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.MenuAccess",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.particle.Particle",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.particle.ParticleProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.particle.SingleQuadParticle",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.particle.Particle"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.client.particle.TextureSheetParticle",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.particle.SingleQuadParticle"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.core.particles.ParticleOptions",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.core.particles.ParticleType",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.data.DataProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.data.loot.BlockLootSubProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.loot.LootTableSubProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.data.loot.LootTableSubProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.TagsProvider"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.data.tags.TagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.util.StringRepresentable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.MenuProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.inventory.MenuConstructor",
+          "net.neoforged.neoforge.client.extensions.IMenuProviderExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.Nameable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.flag.FeatureElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.inventory.AbstractContainerMenu",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.inventory.MenuConstructor",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.inventory.Slot",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.item.Item",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement",
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IItemExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.Recipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.RecipeSerializer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.ItemLike",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BaseEntityBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.level.block.EntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.Block",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IBlockExtension"
+        ],
+        "super_class": "net.minecraft.world.level.block.state.BlockBehaviour"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.EntityBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.BlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBlockEntityExtension"
+        ],
+        "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.minecraft.world.level.block.state.BlockBehaviour",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.AttachmentHolder",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.attachment.IAttachmentHolder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.IAttachmentHolder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IMenuProviderExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.model.generators.BlockStateProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.conditions.ICondition",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.conditions.IConditionBuilder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.crafting.DataComponentIngredient",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.common.crafting.ICustomIngredient"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.crafting.ICustomIngredient",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.BlockTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.DataMapProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.LanguageProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockEntityExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IItemExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.util.INBTSerializable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.energy.EnergyStorage",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.energy.IEnergyStorage",
+          "net.neoforged.neoforge.common.util.INBTSerializable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.energy.IEnergyStorage",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.IItemHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.IItemHandlerModifiable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.ItemStackHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.items.IItemHandler",
+          "net.neoforged.neoforge.items.IItemHandlerModifiable",
+          "net.neoforged.neoforge.common.util.INBTSerializable"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    },
+    {
+      "class": "net.neoforged.neoforge.items.SlotItemHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.inventory.Slot"
+      },
+      "owner_sha256": "0de596d147068a9d23eb6147b652c64dd6ad8ba359e6b337d29a653f551f7dc3"
+    }
+  ],
+  "structural_hierarchy": [
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.generatorgalore.common.block.entity.GeneratorBlockEntity",
+          "cy.jdkdigital.generatorgalore.common.block.entity.CapabilityBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    }
+  ],
+  "target": {
+    "display_name": "Generator Galore",
+    "mod_id": "generatorgalore",
+    "version": "1.21.1-1.6.3"
+  }
+}

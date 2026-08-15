@@ -1,0 +1,181 @@
+{
+ "families": [
+  {
+   "class": "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe",
+   "costs": [],
+   "decision": "FluidFuelRecipe is the fluid fuel datamap (fluid -> rate for magmatic/honey generators); those generators are fluid-input-only and rejected from the Transform page; the datamap itself is not a crafting transaction.",
+   "evidence": [
+    "cy.jdkdigital.generatorgalore.common.recipe.FluidFuelRecipe#public_signature"
+   ],
+   "id": "fluid_fuel_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe",
+   "costs": [],
+   "decision": "SolidFuelRecipe is the generator fuel datamap (item -> burnTime/rate/consumption for the solid generators), not a crafting transaction; fuel values are read live by the generator tick and by the transform resolver.",
+   "evidence": [
+    "cy.jdkdigital.generatorgalore.common.recipe.SolidFuelRecipe#public_signature"
+   ],
+   "id": "solid_fuel_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  }
+ ],
+ "kind": "auto_storage_compat_contract",
+ "matrix": {
+  "acceptedRecipes": [],
+  "descriptors": [],
+  "mods": [
+   "generatorgalore"
+  ],
+  "recipeInventory": {
+   "namespaces": [
+    "generatorgalore"
+   ],
+   "sha256": "86a5a7eb9ed65a736bc4343af503f03f30c4a9963d05325f2fd39b48a4fac0c5"
+  },
+  "rejectedDescriptors": [],
+  "rejectedResourceKinds": [],
+  "resourceKinds": []
+ },
+ "schema": 1,
+ "source_audit_sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d",
+ "source_recipe_data_sha256": "9224f2790a04edc1d1d29d190e4b9e0e3cea1012d6987d1049fa46939a382bde",
+ "source_recipe_inventory_sha256": "1c6a26030dd82a69410a10faca6e88ae53be1beda5eba5cdef5c53625cc7c01e",
+ "target": {
+  "display_name": "Generator Galore",
+  "mod_id": "generatorgalore",
+  "version": "1.21.1-1.6.3",
+  "dependency": "curse.maven:generatorgalore-691049:6799851",
+  "repositories": [
+   "https://www.cursemaven.com"
+  ],
+  "runtime_dependencies": []
+ },
+ "verification": {
+  "fixture": "generatorgaloreFixture",
+  "expected_game_tests": 15,
+  "game_test_task": "runGeneratorgaloreGameTestServer",
+  "gradle_tasks": [
+   "build",
+   "runGameTestServer",
+   "runRecipeAddonGameTestServer",
+   "runGeneratorgaloreGameTestServer",
+   "runCompatibilityMatrixGameTestServer"
+  ],
+  "checks": [
+   "absent_target_no_classload",
+   "present_target_load_once",
+   "ingredient_shortage_atomic",
+   "destination_capacity_atomic",
+   "checked_overflow_atomic",
+   "stale_recipe_holder_atomic",
+   "catalyst_tool_remainder_exact",
+   "multi_output_merge_exact",
+   "mixed_resource_rollback_atomic",
+   "dedicated_server_client_isolation",
+   "api_only_compilation",
+   "all_mod_coexistence"
+  ],
+  "evidence": {
+   "absent_target_no_classload": [
+    {
+     "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "stale_recipe_holder_atomic": [
+    {
+     "marker": "Unknown recipe id must fail closed",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "multi_output_merge_exact": [
+    {
+     "marker": "Typed family changed the wrong exact resources or output amounts",
+     "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+     "task": "runRecipeAddonGameTestServer"
+    }
+   ],
+   "mixed_resource_rollback_atomic": [
+    {
+     "marker": "Failed typed family commit partially mutated resources",
+     "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+     "task": "runRecipeAddonGameTestServer"
+    }
+   ],
+   "all_mod_coexistence": [
+    {
+     "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+     "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+     "task": "runCompatibilityMatrixGameTestServer"
+    }
+   ],
+   "api_only_compilation": [
+    {
+     "marker": "compileAddonExampleJava",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "dedicated_server_client_isolation": [
+    {
+     "marker": "verifyCompatIsolation",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "present_target_load_once": [
+    {
+     "marker": "Generator Galore unsafe machine contract was registered",
+     "source": "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreIntegrationGameTests.java",
+     "task": "runGeneratorgaloreGameTestServer"
+    }
+   ],
+   "ingredient_shortage_atomic": [
+    {
+     "marker": "Generator Galore missing-ingredient transform was not an atomic no-op",
+     "source": "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreIntegrationGameTests.java",
+     "task": "runGeneratorgaloreGameTestServer"
+    }
+   ],
+   "destination_capacity_atomic": [
+    {
+     "marker": "Generator Galore full destination transform was not an atomic no-op",
+     "source": "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreIntegrationGameTests.java",
+     "task": "runGeneratorgaloreGameTestServer"
+    }
+   ],
+   "checked_overflow_atomic": [
+    {
+     "marker": "Long.MAX_VALUE",
+     "source": "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreIntegrationGameTests.java",
+     "task": "runGeneratorgaloreGameTestServer"
+    }
+   ],
+   "catalyst_tool_remainder_exact": [
+    {
+     "marker": "Generator Galore generator committed the wrong FE/work/input transaction",
+     "source": "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreIntegrationGameTests.java",
+     "task": "runGeneratorgaloreGameTestServer"
+    }
+   ]
+  }
+ }
+}

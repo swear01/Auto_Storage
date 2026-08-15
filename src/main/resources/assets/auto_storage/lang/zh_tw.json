@@ -191,5 +191,17 @@
   "gui.auto_storage.station.productivebees_honey_generator": "蜂蜜發電機",
   "gui.auto_storage.station.rftoolspower_coal_generator": "煤炭發電機",
   "gui.auto_storage.station.mekanism_gas_generator": "燃氣發電機",
-  "gui.auto_storage.station.justdirethings_generator_t1": "簡易煤炭發電機"
+  "gui.auto_storage.station.justdirethings_generator_t1": "簡易煤炭發電機",
+  "gui.auto_storage.station.generatorgalore_copper_generator": "銅發電機",
+  "gui.auto_storage.station.generatorgalore_gold_generator": "金發電機",
+  "gui.auto_storage.station.generatorgalore_iron_generator": "鐵發電機",
+  "gui.auto_storage.station.generatorgalore_diamond_generator": "鑽石發電機",
+  "gui.auto_storage.station.generatorgalore_emerald_generator": "綠寶石發電機",
+  "gui.auto_storage.station.generatorgalore_netherite_generator": "獄髓發電機",
+  "gui.auto_storage.station.generatorgalore_obsidian_generator": "黑曜石發電機",
+  "gui.auto_storage.station.generatorgalore_netherstar_generator": "地獄之星發電機",
+  "gui.auto_storage.station.generatorgalore_halitosis_generator": "口臭發電機",
+  "gui.auto_storage.station.generatorgalore_culinary_generator": "烹飪發電機",
+  "gui.auto_storage.station.generatorgalore_enchantment_generator": "附魔發電機",
+  "gui.auto_storage.station.generatorgalore_ender_generator": "終界發電機"
 }

@@ -2798,6 +2798,48 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn('modId="justdirethings"', fixture_metadata)
         self.assertIn("Simple Coal Generator (Transform)", compatibility_doc)
 
+    def test_generatorgalore_compat_is_optional_and_isolated(self):
+        build = self.read_required("build.gradle")
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("generatorgalore")
+        module = self.read_required(
+            "src/compat/generatorgalore/java/com/swear/autostorage/compat/"
+            "generatorgalore/GeneratorgaloreCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/generatorgalore/java/com/swear/autostorage/compat/"
+            "generatorgalore/GeneratorgaloreCompat.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/generatorgaloreFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required(
+            "docs/generatorgalore-compatibility.md"
+        )
+
+        self.assertNotRegex(
+            build,
+            r'(?m)^\s*runtimeOnly\s+"[^"]*generatorgalore',
+        )
+        self.assertEqual(
+            ["curse.maven:generatorgalore-691049:6799851"],
+            json.loads(module_index)["dependencies"],
+        )
+        self.assert_descriptor_driven_fixture(
+            build, "generatorgalore", "generatorgaloreFixture", 15
+        )
+        self.assertNotIn('modId="generatorgalore"', metadata)
+        self.assertEqual(["generatorgalore"], json.loads(module_index)["requires"])
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn(
+            "GeneratorgaloreCompat.register(MACHINES, RECIPES, TRANSFORMS)",
+            module,
+        )
+        self.assertIn("GeneratorRegistry.generators", compat)
+        self.assertIn("GeneratorGalore.SOLID_FUEL_MAP", compat)
+        self.assertIn('modId="generatorgalore"', fixture_metadata)
+        self.assertIn("Generator family (Transform)", compatibility_doc)
+
     def test_oritech_energy_per_tick_reads_live_config_without_null_fallback(self):
         compat = self.read_required(
             "src/compat/oritech/java/com/swear/autostorage/compat/"

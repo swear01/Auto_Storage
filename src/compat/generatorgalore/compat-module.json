@@ -1,0 +1,41 @@
+{
+  "auditArtifact": {
+    "dependency": "curse.maven:generatorgalore-691049:6799851",
+    "sha256": "76380817dc473ebac403087c23900f8b6d54617639e506a851dc1374a9a9ea7d"
+  },
+  "dependencies": [
+    "curse.maven:generatorgalore-691049:6799851"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.generatorgalore.GeneratorgaloreCompatModule",
+  "expectedTests": 15,
+  "fixture": "generatorgaloreFixture",
+  "id": "auto_storage:generatorgalore",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "generatorgalore"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "generatorgalore"
+      ],
+      "sha256": "86a5a7eb9ed65a736bc4343af503f03f30c4a9963d05325f2fd39b48a4fac0c5"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://www.cursemaven.com"
+  ],
+  "requires": [
+    "generatorgalore"
+  ],
+  "runtimeDependencies": [
+    "curse.maven:generatorgalore-691049:6799851"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatGeneratorgalore"
+}

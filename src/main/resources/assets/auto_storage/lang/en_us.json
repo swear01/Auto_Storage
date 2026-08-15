@@ -191,5 +191,17 @@
   "gui.auto_storage.station.productivebees_honey_generator": "Honey Generator",
   "gui.auto_storage.station.rftoolspower_coal_generator": "Coal Generator",
   "gui.auto_storage.station.mekanism_gas_generator": "Gas-Burning Generator",
-  "gui.auto_storage.station.justdirethings_generator_t1": "Simple Coal Generator"
+  "gui.auto_storage.station.justdirethings_generator_t1": "Simple Coal Generator",
+  "gui.auto_storage.station.generatorgalore_copper_generator": "Copper Generator",
+  "gui.auto_storage.station.generatorgalore_gold_generator": "Gold Generator",
+  "gui.auto_storage.station.generatorgalore_iron_generator": "Iron Generator",
+  "gui.auto_storage.station.generatorgalore_diamond_generator": "Diamond Generator",
+  "gui.auto_storage.station.generatorgalore_emerald_generator": "Emerald Generator",
+  "gui.auto_storage.station.generatorgalore_netherite_generator": "Netherite Generator",
+  "gui.auto_storage.station.generatorgalore_obsidian_generator": "Obsidian Generator",
+  "gui.auto_storage.station.generatorgalore_netherstar_generator": "Nether Star Generator",
+  "gui.auto_storage.station.generatorgalore_halitosis_generator": "Halitosis Generator",
+  "gui.auto_storage.station.generatorgalore_culinary_generator": "Culinary Generator",
+  "gui.auto_storage.station.generatorgalore_enchantment_generator": "Enchantment Generator",
+  "gui.auto_storage.station.generatorgalore_ender_generator": "Ender Generator"
 }

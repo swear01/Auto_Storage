@@ -1,0 +1,14 @@
+{
+  "contract_sha256": "fa66a2c3b53b9590f6ca16d1a0ae78bd6fffa0e4875a44616d9dbdd456c19895",
+  "files": {
+    "src/compat/generatorgalore/compat-module.json": "165528ed70be2173386a9bfc31e2a834919109fa67a49e46f38d0bc68b37c3d4",
+    "src/compat/generatorgalore/java/com/swear/autostorage/compat/generatorgalore/GeneratorgaloreCompat.java": "feaddbbf46125149d4d0bd05491606a0be0de36856fcf4716791ac3330b1a773",
+    "src/compat/generatorgalore/java/com/swear/autostorage/compat/generatorgalore/GeneratorgaloreCompatModule.java": "72247e2de8efae1a0b5723789a111d4e7ab33d6a8c8849a4cbb5ed6868eeaef5",
+    "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreFixtureMod.java": "b2b868c42ac2e1dca4b48c0161636fde01a3185098cd92a543dc161a98bd7ce5",
+    "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreIntegrationGameTests.java": "c3d54d55d31e283fbbd9c380658206531557abb8a6ed4a32a56eecd11bd00aa4",
+    "src/generatorgaloreFixture/resources/META-INF/neoforge.mods.toml": "5432fbf7face3f7640de657f58b68d99f3ba4925f7c785f7961f6963862a040f",
+    "src/generatorgaloreFixture/resources/data/auto_storage_generatorgalore_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "0.3.1"
+}
