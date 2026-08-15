@@ -123,8 +123,11 @@ bidirectional Rotary rejection, and the Nutritional synthetic-recipe boundary.
 ## Chemical Conversion (Transform)
 
 `auto_storage:mekanism_chemical_conversion` is an **instant** Transform use
-(no station, no work) driven by the live `mekanism:chemical_conversion`
-datapack recipes (rebuilt on server start): `c:dusts/redstone` → 10 mb
+(no station, no work) driven by **automatic discovery**: any
+`ItemStackToChemicalRecipe` holder (not type-filtered — datapack-added
+recipe types and other mods using the Mekanism API are discovered too),
+rebuilt on server start and datapack reload. The live
+`mekanism:chemical_conversion` datapack recipes currently cover: `c:dusts/redstone` → 10 mb
 `mekanism:redstone` infusion, gold/diamond/refined-obsidian/tin dusts →
 10 mb each, osmium ingot → 200 mb / block → 1,800 mb `mekanism:osmium`,
 coal/charcoal → carbon, salt/sulfur/flint/bio/fungi conversions. These
@@ -138,12 +141,11 @@ infusion tank and Osmium Compressor chemical tank. Output is the
 ## Energy Conversion (Transform)
 
 `auto_storage:mekanism_energy_conversion` is an **instant** Transform use
-(no station, no work): `c:dusts/redstone` converts to 10,000 FE and
-`c:storage_blocks/redstone` to 90,000 FE per item, matching the
-`mekanism:energy_conversion` datapack recipes (10.7.19.85: redstone →
-10,000, redstone block → 90,000). Mekanism has no physical workstation for
-these recipes; they are datapack-driven deterministic conversions, so the
-transform is instant rather than station-work based.
+(no station, no work): any `ItemStackToEnergyRecipe` holder is discovered
+automatically — currently `c:dusts/redstone` → 10,000 FE and
+`c:storage_blocks/redstone` → 90,000 FE per item. Mekanism has no physical
+workstation for these recipes; they are datapack-driven deterministic
+conversions, so the transform is instant rather than station-work based.
 
 ## Gas-Burning Generator (Transform)
 

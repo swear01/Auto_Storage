@@ -67,13 +67,12 @@
 
 ### Built-in patterns (user-owned list, first slice)
 
-| Pattern | Source | Output |
-|---|---|---|
-| `mekanism:chemical_conversion` | `ItemStackToChemicalRecipe` holders | mekanism chemical |
-| `mekanism:energy_conversion` | `ItemStackToEnergyRecipe` holders | FE |
-| `mekanism:chemical_fuel` | `ChemicalFuel` datamap (gas) | FE |
-| `generatorgalore:solid_fuel_map` | block `SolidFuelMap` datamap + generator JSON registry | FE |
-| `vanilla:burn_time_rate` | `ItemStack.getBurnTime` + config rate per machine | FE |
+| Pattern | Source | Output | Discovery |
+|---|---|---|---|
+| `mekanism:conversion_shapes` | ANY `ItemStackToChemicalRecipe` / `ItemStackToEnergyRecipe` holder (not type-filtered) | mekanism chemical / FE | **automatic** — rebuilt on server start + datapack reload, no hand-written module pattern |
+| `mekanism:chemical_fuel` | `ChemicalFuel` datamap (gas) | FE | module pattern (datamap, not recipes) |
+| `generatorgalore:solid_fuel_map` | block `SolidFuelMap` datamap + generator JSON registry | FE | module pattern (datamap, not recipes) |
+| per-module generator patterns | live config values | FE | module pattern (config, not recipes) |
 
 Additional patterns (user-provided) register through the public registry
 without code changes to Auto Storage.

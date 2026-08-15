@@ -7,6 +7,7 @@ import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.datamaps.IMekanismDataMapTypes;
 import mekanism.api.datamaps.chemical.attribute.ChemicalFuel;
 import mekanism.api.recipes.ItemStackToChemicalRecipe;
+import mekanism.api.recipes.ItemStackToEnergyRecipe;
 import mekanism.common.recipe.MekanismRecipeType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -47,14 +48,11 @@ public final class MekanismTransformCompat {
     private static void onServerStarted(
             net.neoforged.neoforge.event.server.ServerStartedEvent event
     ) {
-        CHEMICAL_PATTERN.rebuild(event.getServer());
-        ENERGY_PATTERN.rebuild(event.getServer());
+        ConversionShapePattern.rebuild(event.getServer());
     }
 
-    private static final ChemicalConversionPattern CHEMICAL_PATTERN =
-            new ChemicalConversionPattern();
-    private static final EnergyConversionPattern ENERGY_PATTERN =
-            new EnergyConversionPattern();
+    private static final ConversionShapePattern SHAPE_PATTERN =
+            new ConversionShapePattern();
     private static final GasFuelPattern GAS_PATTERN = new GasFuelPattern();
     private static final ResourceLocation gasProviderId =
             ResourceLocation.fromNamespaceAndPath(
@@ -64,7 +62,7 @@ public final class MekanismTransformCompat {
             DeferredRegister<MachineDescriptor> machines,
             DeferredRegister<TransformProvider> transforms
     ) {
-        ConversionScanner.register(CHEMICAL_PATTERN);
+        ConversionScanner.register(SHAPE_PATTERN);
         transforms.register("mekanism_chemical_conversion", () ->
                 TransformProvider.of(
                         StorageResourceKindApi.CHEMICAL_KIND,
@@ -73,8 +71,7 @@ public final class MekanismTransformCompat {
                                 "gui.auto_storage.resource_view.chemical"),
                         Component.translatable(
                                 "gui.auto_storage.source.mekanism_chemical_conversion"),
-                        CHEMICAL_PATTERN::resolve));
-        ConversionScanner.register(ENERGY_PATTERN);
+                        SHAPE_PATTERN::resolveChemical));
         transforms.register("mekanism_energy_conversion", () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
@@ -82,7 +79,7 @@ public final class MekanismTransformCompat {
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.source.mekanism_energy_conversion"),
-                        ENERGY_PATTERN::resolve));
+                        SHAPE_PATTERN::resolveEnergy));
         ConversionScanner.register(GAS_PATTERN);
         transforms.register(gasProviderId.getPath(), () ->
                 TransformProvider.of(
@@ -110,23 +107,31 @@ public final class MekanismTransformCompat {
                         null));
     }
 
-    private static final class ChemicalConversionPattern
+    private static final class ConversionShapePattern
             implements com.swear.autostorage.ConversionPattern {
-        private static final Map<Item, ChemicalStack> CONVERSIONS = new HashMap<>();
+        private static final Map<Item, ChemicalStack> CHEMICAL_OUTPUTS =
+                new HashMap<>();
+        private static final Map<Item, Long> ENERGY_OUTPUTS = new HashMap<>();
         private static String revision = "";
 
         @Override
         public ResourceLocation patternId() {
             return ResourceLocation.fromNamespaceAndPath(
-                    "mekanism", "chemical_conversion");
+                    "mekanism", "conversion_shapes");
         }
 
         @Override
         public TransformProviderApi.Result resolve(ItemStack input) {
+            TransformProviderApi.Result result = resolveChemical(input);
+            if (result != null) return result;
+            return resolveEnergy(input);
+        }
+
+        TransformProviderApi.Result resolveChemical(ItemStack input) {
             if (input == null || input.isEmpty() || input.getCount() != 1) {
                 return null;
             }
-            ChemicalStack output = CONVERSIONS.get(input.getItem());
+            ChemicalStack output = CHEMICAL_OUTPUTS.get(input.getItem());
             if (output == null || output.isEmpty() || output.getAmount() <= 0) {
                 return null;
             }
@@ -137,63 +142,11 @@ public final class MekanismTransformCompat {
                     0);
         }
 
-        @Override
-        public String revisionKey() {
-            return revision;
-        }
-
-        static void rebuild(net.minecraft.server.MinecraftServer server) {
-            Map<Item, ChemicalStack> rebuilt = new HashMap<>();
-            StringBuilder digest = new StringBuilder();
-            for (RecipeHolder<?> holder :
-                    server.getRecipeManager().getRecipes()) {
-                if (holder.value()
-                        instanceof ItemStackToChemicalRecipe recipe
-                        && MekanismRecipeType.CHEMICAL_CONVERSION.is(
-                                recipe.getType())) {
-                    List<ItemStack> inputs =
-                            recipe.getInput().getRepresentations();
-                    List<ChemicalStack> outputs =
-                            recipe.getOutputDefinition();
-                    if (inputs.size() != 1 || outputs.size() != 1) {
-                        continue;
-                    }
-                    ItemStack input = inputs.getFirst();
-                    if (input.isEmpty() || input.getCount() != 1) {
-                        continue;
-                    }
-                    ChemicalStack output = outputs.getFirst();
-                    if (output.isEmpty() || output.getAmount() <= 0) {
-                        continue;
-                    }
-                    rebuilt.put(input.getItem(), output);
-                    digest.append(holder.id()).append('=')
-                            .append(output.getAmount()).append(';');
-                }
-            }
-            CONVERSIONS.clear();
-            CONVERSIONS.putAll(rebuilt);
-            revision = digest.toString();
-        }
-    }
-
-    private static final class EnergyConversionPattern
-            implements com.swear.autostorage.ConversionPattern {
-        private static final Map<Item, Long> CONVERSIONS = new HashMap<>();
-        private static String revision = "";
-
-        @Override
-        public ResourceLocation patternId() {
-            return ResourceLocation.fromNamespaceAndPath(
-                    "mekanism", "energy_conversion");
-        }
-
-        @Override
-        public TransformProviderApi.Result resolve(ItemStack input) {
+        TransformProviderApi.Result resolveEnergy(ItemStack input) {
             if (input == null || input.isEmpty() || input.getCount() != 1) {
                 return null;
             }
-            Long energy = CONVERSIONS.get(input.getItem());
+            Long energy = ENERGY_OUTPUTS.get(input.getItem());
             if (energy == null || energy <= 0) {
                 return null;
             }
@@ -210,39 +163,53 @@ public final class MekanismTransformCompat {
         }
 
         static void rebuild(net.minecraft.server.MinecraftServer server) {
-            Map<Item, Long> rebuilt = new HashMap<>();
+            Map<Item, ChemicalStack> chemicals = new HashMap<>();
+            Map<Item, Long> energies = new HashMap<>();
             StringBuilder digest = new StringBuilder();
             for (RecipeHolder<?> holder :
                     server.getRecipeManager().getRecipes()) {
                 if (holder.value()
-                        instanceof mekanism.api.recipes.ItemStackToEnergyRecipe
-                                recipe
-                        && MekanismRecipeType.ENERGY_CONVERSION.is(
-                                recipe.getType())) {
+                        instanceof ItemStackToChemicalRecipe recipe) {
                     List<ItemStack> inputs =
                             recipe.getInput().getRepresentations();
-                    if (inputs.size() != 1) {
+                    List<ChemicalStack> outputs =
+                            recipe.getOutputDefinition();
+                    if (inputs.size() != 1 || outputs.size() != 1) {
                         continue;
                     }
                     ItemStack input = inputs.getFirst();
-                    if (input.isEmpty() || input.getCount() != 1) {
+                    ChemicalStack output = outputs.getFirst();
+                    if (input.isEmpty() || input.getCount() != 1
+                            || output.isEmpty() || output.getAmount() <= 0) {
                         continue;
                     }
-                    long[] outputs = recipe.getOutputDefinition();
-                    if (outputs.length != 1) {
-                        continue;
-                    }
-                    long energy = outputs[0];
-                    if (energy <= 0) {
-                        continue;
-                    }
-                    rebuilt.put(input.getItem(), energy);
+                    chemicals.put(input.getItem(), output);
                     digest.append(holder.id()).append('=')
-                            .append(energy).append(';');
+                            .append(recipe.getType()).append('/')
+                            .append(output.getAmount()).append(';');
+                } else if (holder.value()
+                        instanceof ItemStackToEnergyRecipe recipe) {
+                    List<ItemStack> inputs =
+                            recipe.getInput().getRepresentations();
+                    long[] outputs = recipe.getOutputDefinition();
+                    if (inputs.size() != 1 || outputs.length != 1) {
+                        continue;
+                    }
+                    ItemStack input = inputs.getFirst();
+                    long output = outputs[0];
+                    if (input.isEmpty() || input.getCount() != 1
+                            || output <= 0) {
+                        continue;
+                    }
+                    energies.put(input.getItem(), output);
+                    digest.append(holder.id()).append('=')
+                            .append(output).append(';');
                 }
             }
-            CONVERSIONS.clear();
-            CONVERSIONS.putAll(rebuilt);
+            CHEMICAL_OUTPUTS.clear();
+            CHEMICAL_OUTPUTS.putAll(chemicals);
+            ENERGY_OUTPUTS.clear();
+            ENERGY_OUTPUTS.putAll(energies);
             revision = digest.toString();
         }
     }
