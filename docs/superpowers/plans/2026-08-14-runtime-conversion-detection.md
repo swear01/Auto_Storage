@@ -89,18 +89,19 @@ without code changes to Auto Storage.
 
 ## Migration order
 
-1. #117 ConversionScanner core (registry + reload + revision cache).
-2. #118 Migrate Mekanism Energy Conversion hardcode into the
-   chemical/energy conversion patterns (already-live Chemical Conversion
-   becomes the pattern implementation).
+1. #117 ConversionScanner core (registry + reload + revision cache). DONE
+2. #118 Mekanism chemical/energy conversion patterns. DONE
 3. #119 Generator fuel patterns: `chemical_fuel` (gas generator),
-   `solid_fuel_map` (GeneratorGalore).
-4. #120 `vanilla:burn_time_rate` pattern; migrate DE/EnderIO/AA hardcoded
-   values to config-backed or recipe-backed reads.
-5. #121 Picker UX input-first search.
-6. #123 optional: parallel agent execution via Python + DeepSeek V3 for
-   pattern authoring per mod (each agent owns one mod's pattern + fixture,
-   smaller modules).
+   `solid_fuel_map` (GeneratorGalore). DONE
+4. #120/#122 live-value audit: config-backed resolvers (IF/Oritech/JDT/
+   Productive Bees/RFTools/ID) were already live; DE (40 FE/tick), AA
+   (20), EnderIO (0.375×0.8), and Botania (27,000 mana, burnTime×3) are
+   mod code constants with no config or recipe — the machine itself
+   hardcodes them, so there is nothing to read live; documented as
+   machine truth in each compat doc. Closed as no-op.
+5. #121 Picker UX input-first search (open).
+6. ~~#123~~ closed: no custom agent framework — the user already runs
+   DeepSeek V4 Flash through the existing Hapi fleet tooling.
 
 ## Out of scope
 

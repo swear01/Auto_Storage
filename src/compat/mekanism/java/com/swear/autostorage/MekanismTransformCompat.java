@@ -55,6 +55,10 @@ public final class MekanismTransformCompat {
             new ChemicalConversionPattern();
     private static final EnergyConversionPattern ENERGY_PATTERN =
             new EnergyConversionPattern();
+    private static final GasFuelPattern GAS_PATTERN = new GasFuelPattern();
+    private static final ResourceLocation gasProviderId =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorageApi.MOD_ID, "mekanism_gas_generator");
 
     public static void register(
             DeferredRegister<MachineDescriptor> machines,
@@ -79,6 +83,15 @@ public final class MekanismTransformCompat {
                         Component.translatable(
                                 "gui.auto_storage.source.mekanism_energy_conversion"),
                         ENERGY_PATTERN::resolve));
+        ConversionScanner.register(GAS_PATTERN);
+        transforms.register(gasProviderId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.station.mekanism_gas_generator"),
+                        GAS_PATTERN::resolve));
         ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                 AutoStorageApi.MOD_ID, "mekanism_gas_generator");
         machines.register(generatorId.getPath(), () ->
@@ -95,14 +108,6 @@ public final class MekanismTransformCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
-        transforms.register(generatorId.getPath(), () ->
-                TransformProvider.of(
-                        StorageResourceKindApi.ENERGY_KIND,
-                        new ItemStack(Items.REDSTONE),
-                        Component.translatable("gui.auto_storage.resource_view.energy"),
-                        Component.translatable(
-                                "gui.auto_storage.station.mekanism_gas_generator"),
-                        MekanismTransformCompat::gasTransform));
     }
 
     private static final class ChemicalConversionPattern
@@ -242,35 +247,76 @@ public final class MekanismTransformCompat {
         }
     }
 
-    private static TransformProviderApi.Result gasTransform(ItemStack input) {
-        if (input == null || input.isEmpty()) return null;
-        IChemicalHandler handler = input.getCapability(
-                MekanismChemicalCompat.CHEMICAL_ITEM_CAPABILITY);
-        if (handler == null || handler.getChemicalTanks() <= 0) return null;
-        ChemicalStack contents = handler.getChemicalInTank(0);
-        if (contents == null || contents.isEmpty() || contents.getAmount() <= 0) {
-            return null;
+    private static final class GasFuelPattern
+            implements com.swear.autostorage.ConversionPattern {
+        private static String revision = "";
+
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "mekanism", "chemical_fuel");
         }
-        ChemicalFuel fuel = contents.getData(
-                IMekanismDataMapTypes.INSTANCE.chemicalFuel());
-        if (fuel == null || fuel.burnTicks() <= 0 || fuel.energyPerTick() <= 0) {
-            return null;
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {
+            if (input == null || input.isEmpty()) return null;
+            IChemicalHandler handler = input.getCapability(
+                    MekanismChemicalCompat.CHEMICAL_ITEM_CAPABILITY);
+            if (handler == null || handler.getChemicalTanks() <= 0) return null;
+            ChemicalStack contents = handler.getChemicalInTank(0);
+            if (contents == null || contents.isEmpty()
+                    || contents.getAmount() <= 0) {
+                return null;
+            }
+            ChemicalFuel fuel = contents.getData(
+                    IMekanismDataMapTypes.INSTANCE.chemicalFuel());
+            if (fuel == null || fuel.burnTicks() <= 0
+                    || fuel.energyPerTick() <= 0) {
+                return null;
+            }
+            long amount = contents.getAmount();
+            long work = (amount + MAX_GAS_BURN_RATE - 1) / MAX_GAS_BURN_RATE;
+            long fe;
+            try {
+                fe = Math.multiplyExact(amount, fuel.energyDensity());
+            } catch (ArithmeticException exception) {
+                return null;
+            }
+            return new TransformProviderApi.Result(
+                    StorageResourceKey.neoforgeEnergy(),
+                    fe,
+                    gasProviderId,
+                    work,
+                    List.of(new ItemStack(input.getItem())));
         }
-        long amount = contents.getAmount();
-        long work = (amount + MAX_GAS_BURN_RATE - 1) / MAX_GAS_BURN_RATE;
-        long fe;
-        try {
-            fe = Math.multiplyExact(amount, fuel.energyDensity());
-        } catch (ArithmeticException exception) {
-            return null;
+
+        @Override
+        public String revisionKey() {
+            return revision;
         }
-        return new TransformProviderApi.Result(
-                StorageResourceKey.neoforgeEnergy(),
-                fe,
-                ResourceLocation.fromNamespaceAndPath(
-                        AutoStorageApi.MOD_ID, "mekanism_gas_generator"),
-                work,
-                List.of(new ItemStack(input.getItem())));
+
+        static void rebuild(net.minecraft.server.MinecraftServer server) {
+            StringBuilder digest = new StringBuilder();
+            for (Item item : BuiltInRegistries.ITEM) {
+                net.minecraft.world.item.ItemStack stack =
+                        new net.minecraft.world.item.ItemStack(item);
+                IChemicalHandler handler = stack.getCapability(
+                        MekanismChemicalCompat.CHEMICAL_ITEM_CAPABILITY);
+                if (handler == null || handler.getChemicalTanks() <= 0) {
+                    continue;
+                }
+                ChemicalStack contents = handler.getChemicalInTank(0);
+                if (contents == null || contents.isEmpty()) continue;
+                ChemicalFuel fuel = contents.getData(
+                        IMekanismDataMapTypes.INSTANCE.chemicalFuel());
+                if (fuel != null) {
+                    digest.append(item).append('=')
+                            .append(fuel.burnTicks()).append('/')
+                            .append(fuel.energyPerTick()).append(';');
+                }
+            }
+            revision = digest.toString();
+        }
     }
 
     private static Item requiredItem(ResourceLocation id) {

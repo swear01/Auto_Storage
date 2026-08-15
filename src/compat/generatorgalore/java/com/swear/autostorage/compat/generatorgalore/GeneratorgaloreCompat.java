@@ -70,6 +70,8 @@ public final class GeneratorgaloreCompat {
                         MachineCategory.PROCESS,
                         MachineDescriptorApi.MAX_INSTALLED_COUNT,
                         null));
+        SolidFuelMapPattern pattern = new SolidFuelMapPattern(generator);
+        com.swear.autostorage.ConversionScanner.register(pattern);
         transforms.register(generatorId.getPath(), () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
@@ -78,87 +80,7 @@ public final class GeneratorgaloreCompat {
                         Component.translatable(
                                 "gui.auto_storage.station.generatorgalore_"
                                         + generator + "_generator"),
-                        input -> resolve(
-                                ResourceLocation.fromNamespaceAndPath(
-                                        "generatorgalore", generator),
-                                input)));
-    }
-
-    private static TransformProviderApi.Result resolve(
-            ResourceLocation generatorId,
-            ItemStack input
-    ) {
-        if (input == null || input.isEmpty()) return null;
-        GeneratorObject generator = GeneratorRegistry.generators.get(generatorId);
-        if (generator == null) return null;
-        GeneratorUtil.FuelType fuelType = generator.getFuelType();
-        if (fuelType == GeneratorUtil.FuelType.FLUID
-                || fuelType == GeneratorUtil.FuelType.POTION) {
-            return null;
-        }
-        long rate;
-        long work;
-        SolidFuelMap map = null;
-        Block block = generator.getBlockSupplier().get();
-        if (block != null) {
-            map = block.builtInRegistryHolder().getData(
-                    GeneratorGalore.SOLID_FUEL_MAP);
-        }
-        SolidFuelMap.SolidFuel fuel = null;
-        if (map != null) {
-            for (SolidFuelMap.SolidFuel candidate : map.fuels()) {
-                if (candidate.item().test(input)) {
-                    fuel = candidate;
-                    break;
-                }
-            }
-        }
-        if (fuel != null) {
-            rate = fuel.generationRate();
-            work = Math.multiplyExact(
-                    (long) fuel.burnTime(), (long) fuel.consumptionRate());
-        } else if (fuelType == GeneratorUtil.FuelType.ENCHANTMENT) {
-            Pair<Float, Integer> pair =
-                    GeneratorUtil.calculateEnchantmentGenerationRate(
-                            generator, input);
-            if (pair == null) return null;
-            rate = Math.round(pair.getFirst());
-            work = pair.getSecond();
-            return new TransformProviderApi.Result(
-                    StorageResourceKey.neoforgeEnergy(),
-                    safeMultiply(rate, work),
-                    ResourceLocation.fromNamespaceAndPath(
-                            AutoStorageApi.MOD_ID,
-                            "generatorgalore_"
-                                    + generatorId.getPath() + "_generator"),
-                    work,
-                    List.of(new ItemStack(Items.BOOK)));
-        } else if (fuelType == GeneratorUtil.FuelType.FOOD) {
-            Pair<Float, Integer> pair = GeneratorUtil.calculateFoodGenerationRate(
-                    generator, input);
-            if (pair == null) return null;
-            rate = Math.round(pair.getFirst());
-            work = pair.getSecond();
-        } else {
-            int burnTime = input.getBurnTime(RecipeType.SMELTING);
-            if (burnTime <= 0) return null;
-            rate = Math.round(generator.getGenerationRate());
-            work = Math.round(burnTime * generator.getConsumptionRate());
-        }
-        if (rate <= 0 || work <= 0) return null;
-        long fe = safeMultiply(rate, work);
-        List<ItemStack> retained = input.hasCraftingRemainingItem()
-                ? List.of(input.getCraftingRemainingItem())
-                : List.of();
-        return new TransformProviderApi.Result(
-                StorageResourceKey.neoforgeEnergy(),
-                fe,
-                ResourceLocation.fromNamespaceAndPath(
-                        AutoStorageApi.MOD_ID,
-                        "generatorgalore_"
-                                + generatorId.getPath() + "_generator"),
-                work,
-                retained);
+                        pattern::resolve));
     }
 
     private static long safeMultiply(long rate, long work) {
@@ -166,6 +88,120 @@ public final class GeneratorgaloreCompat {
             return Math.multiplyExact(rate, work);
         } catch (ArithmeticException exception) {
             return -1;
+        }
+    }
+
+    private static final class SolidFuelMapPattern
+            implements com.swear.autostorage.ConversionPattern {
+        private final String generator;
+
+        private SolidFuelMapPattern(String generator) {
+            this.generator = generator;
+        }
+
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "generatorgalore", generator + "_solid_fuel");
+        }
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {
+            if (input == null || input.isEmpty()) return null;
+            ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
+                    "generatorgalore", generator);
+            GeneratorObject generatorObject =
+                    GeneratorRegistry.generators.get(generatorId);
+            if (generatorObject == null) return null;
+            GeneratorUtil.FuelType fuelType = generatorObject.getFuelType();
+            if (fuelType == GeneratorUtil.FuelType.FLUID
+                    || fuelType == GeneratorUtil.FuelType.POTION) {
+                return null;
+            }
+            long rate;
+            long work;
+            SolidFuelMap map = null;
+            Block block = generatorObject.getBlockSupplier().get();
+            if (block != null) {
+                map = block.builtInRegistryHolder().getData(
+                        GeneratorGalore.SOLID_FUEL_MAP);
+            }
+            SolidFuelMap.SolidFuel fuel = null;
+            if (map != null) {
+                for (SolidFuelMap.SolidFuel candidate : map.fuels()) {
+                    if (candidate.item().test(input)) {
+                        fuel = candidate;
+                        break;
+                    }
+                }
+            }
+            if (fuel != null) {
+                rate = fuel.generationRate();
+                work = Math.multiplyExact(
+                        (long) fuel.burnTime(), (long) fuel.consumptionRate());
+            } else if (fuelType == GeneratorUtil.FuelType.ENCHANTMENT) {
+                Pair<Float, Integer> pair =
+                        GeneratorUtil.calculateEnchantmentGenerationRate(
+                                generatorObject, input);
+                if (pair == null) return null;
+                rate = Math.round(pair.getFirst());
+                work = pair.getSecond();
+                return new TransformProviderApi.Result(
+                        StorageResourceKey.neoforgeEnergy(),
+                        safeMultiply(rate, work),
+                        ResourceLocation.fromNamespaceAndPath(
+                                AutoStorageApi.MOD_ID,
+                                "generatorgalore_" + generator + "_generator"),
+                        work,
+                        List.of(new ItemStack(Items.BOOK)));
+            } else if (fuelType == GeneratorUtil.FuelType.FOOD) {
+                Pair<Float, Integer> pair = GeneratorUtil.calculateFoodGenerationRate(
+                        generatorObject, input);
+                if (pair == null) return null;
+                rate = Math.round(pair.getFirst());
+                work = pair.getSecond();
+            } else {
+                int burnTime = input.getBurnTime(RecipeType.SMELTING);
+                if (burnTime <= 0) return null;
+                rate = Math.round(generatorObject.getGenerationRate());
+                work = Math.round(burnTime * generatorObject.getConsumptionRate());
+            }
+            if (rate <= 0 || work <= 0) return null;
+            long fe = safeMultiply(rate, work);
+            if (fe <= 0) return null;
+            return new TransformProviderApi.Result(
+                    StorageResourceKey.neoforgeEnergy(),
+                    fe,
+                    ResourceLocation.fromNamespaceAndPath(
+                            AutoStorageApi.MOD_ID,
+                            "generatorgalore_" + generator + "_generator"),
+                    work,
+                    List.of());
+        }
+
+        @Override
+        public String revisionKey() {
+            GeneratorObject generatorObject = GeneratorRegistry.generators.get(
+                    ResourceLocation.fromNamespaceAndPath(
+                            "generatorgalore", generator));
+            if (generatorObject == null) return "";
+            StringBuilder digest = new StringBuilder();
+            digest.append(generatorObject.getGenerationRate()).append('/')
+                    .append(generatorObject.getConsumptionRate()).append(';');
+            Block block = generatorObject.getBlockSupplier().get();
+            if (block != null) {
+                SolidFuelMap map = block.builtInRegistryHolder().getData(
+                        GeneratorGalore.SOLID_FUEL_MAP);
+                if (map != null) {
+                    for (SolidFuelMap.SolidFuel fuel : map.fuels()) {
+                        digest.append(fuel.item()).append('=')
+                                .append(fuel.generationRate()).append('/')
+                                .append(fuel.burnTime()).append('/')
+                                .append(fuel.consumptionRate()).append(';');
+                    }
+                }
+            }
+            return digest.toString();
         }
     }
 
