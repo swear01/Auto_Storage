@@ -3881,7 +3881,9 @@ class StaticRegressionTests(unittest.TestCase):
         runtime_gui = {
             path.name for path in (textures / "gui").glob("*.png")
         }
-        self.assertEqual({"icons.png", "terminal_controls.png"}, runtime_gui)
+        self.assertEqual(
+            {"icons.png", "terminal_controls.png", "energy_icon.png"},
+            runtime_gui)
 
     def test_texture_family_manifest_palette_chassis_and_control_atlas_are_reproducible(self):
         art = ROOT / "art/texture-generation/20260714-terminal-family"
