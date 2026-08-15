@@ -78,6 +78,29 @@ public final class TerminalResourceRendererApi {
      *
      * @param <C> client render-context type
      */
+    /**
+     * Client-only: renders one typed resource with its registered renderer,
+     * returning {@code false} when no renderer is registered (caller falls
+     * back to the representative item).
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean render(
+            ResourceLocation kindId,
+            Object graphics,
+            StorageResourceKey key,
+            long amount,
+            int x,
+            int y,
+            float partialTick
+    ) {
+        Registration<?> registration = RENDERERS.get(kindId);
+        if (registration == null || !registration.contextType.isInstance(graphics)) {
+            return false;
+        }
+        return ((Renderer<Object>) registration.renderer)
+                .render(graphics, key, amount, x, y, partialTick);
+    }
+
     @FunctionalInterface
     public interface Renderer<C> {
         /**

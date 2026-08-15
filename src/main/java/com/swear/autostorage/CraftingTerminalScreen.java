@@ -901,10 +901,24 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             } else {
                 drawRaisedPanel(graphics, leftPos, topPos, row);
             }
-            graphics.renderItem(
-                    option.icon(),
-                    leftPos + row.x() + 2,
-                    topPos + row.y() + (row.height() - 16) / 2);
+            boolean rendered = option.target() != null
+                    && TerminalResourceRendererApi.render(
+                            option.target(),
+                            graphics,
+                            StorageResourceKey.of(
+                                    option.target(),
+                                    option.target(),
+                                    new net.minecraft.nbt.CompoundTag()),
+                            0,
+                            leftPos + row.x() + 2,
+                            topPos + row.y() + (row.height() - 16) / 2,
+                            0);
+            if (!rendered) {
+                graphics.renderItem(
+                        option.icon(),
+                        leftPos + row.x() + 2,
+                        topPos + row.y() + (row.height() - 16) / 2);
+            }
             String label = font.plainSubstrByWidth(
                     option.label().getString(), Math.max(1, row.width() - 22));
             graphics.drawString(

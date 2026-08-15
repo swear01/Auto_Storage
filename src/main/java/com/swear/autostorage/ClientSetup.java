@@ -26,6 +26,7 @@ public class ClientSetup {
         if (!ModList.get().isLoaded("emi") && !ModList.get().isLoaded("jei")) {
             throw new IllegalStateException("Auto Storage requires EMI or JEI on clients");
         }
+        registerEnergyGlyph();
         modEventBus.addListener(ClientSetup::registerScreens);
         modEventBus.addListener(
                 EventPriority.LOWEST,
@@ -64,6 +65,33 @@ public class ClientSetup {
             case JEI -> JeiRecipeDiagramBootstrap.createSearchSynchronizer();
             case NONE -> TerminalSearchSynchronizer.NONE;
         };
+    }
+
+    private static void registerEnergyGlyph() {
+        TerminalResourceRendererApi.register(
+                StorageResourceKindApi.ENERGY_KIND,
+                net.minecraft.client.gui.GuiGraphics.class,
+                ClientSetup::renderEnergyGlyph);
+    }
+
+    private static boolean renderEnergyGlyph(
+            Object graphics,
+            StorageResourceKey key,
+            long amount,
+            int x,
+            int y,
+            float partialTick
+    ) {
+        if (!(graphics instanceof net.minecraft.client.gui.GuiGraphics guiGraphics)
+                || !key.kindId().equals(StorageResourceKindApi.ENERGY_KIND)) {
+            return false;
+        }
+        guiGraphics.blit(
+                ResourceLocation.fromNamespaceAndPath(
+                        com.swear.autostorage.api.AutoStorageApi.MOD_ID,
+                        "textures/gui/energy_icon.png"),
+                x, y, 0, 0, 16, 16, 16, 16);
+        return true;
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {
