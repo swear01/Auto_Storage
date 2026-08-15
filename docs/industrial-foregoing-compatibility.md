@@ -58,3 +58,12 @@ smelting-burnable fuel **without a crafting remainder** converts to FE
 over the exact burn duration at `PitifulGeneratorConfig.powerPerTick`
 (default 30). Verified against Industrial Foregoing 3.6.38 bytecode.
 Coal: 1,600 work → 48,000 FE.
+
+## Furnace Mycelial Generator (Transform)
+
+`auto_storage:industrial_foregoing_mycelial_furnace` is a PROCESS
+descriptor (one work/tick) plus a time-based Transform use: any
+smelting-burnable fuel converts to burnTime × 80 FE over the exact burn
+duration, retaining crafting remainders. Verified against Industrial
+Foregoing 3.6.38 bytecode (`FurnaceGeneratorType.getTimeAndPowerGeneration`
+returns Pair(burnTime, 80)). Coal: 1,600 work → 128,000 FE.

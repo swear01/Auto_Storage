@@ -1745,7 +1745,7 @@ class StaticRegressionTests(unittest.TestCase):
             build,
             "industrial_foregoing",
             "industrialForegoingFixture",
-            10,
+            11,
         )
         self.assertNotIn('modId="industrialforegoing"', metadata)
         self.assertEqual(["industrialforegoing"], json.loads(module_index)["requires"])

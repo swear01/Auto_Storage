@@ -358,6 +358,44 @@ public final class IndustrialForegoingIntegrationGameTests {
         });
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void mycelial_furnace_converts_fuel_to_fe_over_exact_work(
+            GameTestHelper helper
+    ) {
+        withCore(helper, context -> {
+            var menu = transformMenu(context, new ItemStack(Items.COAL));
+            var use = menu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "industrial_foregoing_mycelial_furnace")))
+                    .findFirst()
+                    .orElse(null);
+            if (use == null || use.amountPerItem() != 1_600L * 80L
+                    || use.stationWorkPerItem() != 1600L) {
+                helper.fail("Mycelial furnace transform use is missing or wrong");
+                return;
+            }
+            selectTransform(menu, context, ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "industrial_foregoing_mycelial_furnace"));
+            if (menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 0) {
+                helper.fail("Mycelial furnace must reject without an installed machine");
+                return;
+            }
+            installStation(context, ifItem("mycelial_furnace"));
+            tick(context.core(), 1600);
+            if (!menu.clickMenuButton(context.player(), 2)
+                    || context.core().getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 1_600L * 80L
+                    || context.core().getStationWork(ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "industrial_foregoing_mycelial_furnace")) != 0) {
+                helper.fail("Mycelial furnace committed the wrong FE/work transaction");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
     private static final int TRANSFORM_PAGE_BUTTON = 15;
 
     private static CraftingTerminalMenu transformMenu(

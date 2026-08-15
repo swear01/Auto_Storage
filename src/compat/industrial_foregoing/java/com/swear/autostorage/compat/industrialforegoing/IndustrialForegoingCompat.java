@@ -55,6 +55,8 @@ public final class IndustrialForegoingCompat {
     private IndustrialForegoingCompat() {
     }
 
+    private static final long MYCELIAL_FURNACE_FE_PER_TICK = 80;
+
     public static void register(
             DeferredRegister<MachineDescriptor> machineDescriptors,
             DeferredRegister<RecipeFamily> recipeFamilies,
@@ -75,6 +77,18 @@ public final class IndustrialForegoingCompat {
                         Component.translatable(
                                 "gui.auto_storage.station.industrial_foregoing_pitiful_generator"),
                         IndustrialForegoingCompat::pitifulGeneratorTransform));
+        ResourceLocation furnaceId = id(
+                machineDescriptors.getNamespace(),
+                "industrial_foregoing_mycelial_furnace");
+        registerStation(machineDescriptors, furnaceId, "mycelial_furnace");
+        transformProviders.register(furnaceId.getPath(), () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.station.industrial_foregoing_mycelial_furnace"),
+                        IndustrialForegoingCompat::mycelialFurnaceTransform));
         String namespace = machineDescriptors.getNamespace();
         ResourceLocation dissolution = id(namespace, "industrial_foregoing_dissolution_chamber");
         ResourceLocation stonework = id(
@@ -367,6 +381,24 @@ public final class IndustrialForegoingCompat {
         } catch (NoSuchMethodException exception) {
             throw new IllegalStateException("Minecraft Item.onCraftedBy signature changed", exception);
         }
+    }
+
+
+    private static TransformProviderApi.Result mycelialFurnaceTransform(ItemStack input) {
+        if (input == null || input.isEmpty()) return null;
+        int burnTime = input.getBurnTime(RecipeType.SMELTING);
+        if (burnTime <= 0) return null;
+        long fe = Math.multiplyExact((long) burnTime, MYCELIAL_FURNACE_FE_PER_TICK);
+        List<ItemStack> retained = input.hasCraftingRemainingItem()
+                ? List.of(input.getCraftingRemainingItem())
+                : List.of();
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                fe,
+                ResourceLocation.fromNamespaceAndPath(
+                        AutoStorageApi.MOD_ID, "industrial_foregoing_mycelial_furnace"),
+                burnTime,
+                retained);
     }
 
     private static TransformProviderApi.Result pitifulGeneratorTransform(ItemStack input) {

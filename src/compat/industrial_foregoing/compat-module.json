@@ -4,7 +4,7 @@
     "maven.modrinth:titanium:${titanium_ci_version}"
   ],
   "entrypoint": "com.swear.autostorage.compat.industrialforegoing.IndustrialForegoingCompatModule",
-  "expectedTests": 10,
+  "expectedTests": 11,
   "fixture": "industrialForegoingFixture",
   "id": "auto_storage:industrial_foregoing",
   "matrix": {
