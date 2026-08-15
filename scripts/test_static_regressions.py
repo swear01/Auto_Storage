@@ -5818,7 +5818,8 @@ class StaticRegressionTests(unittest.TestCase):
             r"\bprivate\s+void\s+updateFuelPageButtons\s*\(",
             "CraftingTerminalScreen.updateFuelPageButtons",
         )
-        self.assertIn("boolean visible = fuel && pageCount > 1;", page_state)
+        self.assertIn("setWidgetVisible(buttons.previous(), fuel);", page_state)
+        self.assertIn("setWidgetVisible(buttons.next(), fuel);", page_state)
 
         scroll = self.java_block(
             screen,
