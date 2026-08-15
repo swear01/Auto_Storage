@@ -204,5 +204,6 @@
   "gui.auto_storage.station.generatorgalore_culinary_generator": "烹飪發電機",
   "gui.auto_storage.station.generatorgalore_enchantment_generator": "附魔發電機",
   "gui.auto_storage.station.generatorgalore_ender_generator": "終界發電機",
-  "gui.auto_storage.station.industrial_foregoing_mycelial_furnace": "熔爐菌絲發電機"
+  "gui.auto_storage.station.industrial_foregoing_mycelial_furnace": "熔爐菌絲發電機",
+  "gui.auto_storage.source.mekanism_energy_conversion": "能量轉換"
 }

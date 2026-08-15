@@ -70,7 +70,7 @@ cannot select a different output plan from the allocated input.
 |---|---|
 | Evaporating | Executed by the Thermal Evaporation multiblock |
 | Activating | Solar Neutron Activator progress depends on live dimension, biome, weather, and sky state |
-| Energy Conversion | Virtual recipe-viewer conversion, not a concrete workstation execution contract |
+| Chemical Conversion | Virtual recipe-viewer conversion, not a concrete workstation execution contract |
 | Chemical Conversion | Virtual recipe-viewer conversion, not a concrete workstation execution contract |
 
 This accounts for all 26 registered Mekanism recipe types: 22 supported and
@@ -119,6 +119,16 @@ SelfTest summary. It covers all nine basic/factory families, exact factory
 throughput, the 13 additional supported recipe types, typed-resource
 transactions, chemical-only output, overflow and rollback, recipe reload,
 bidirectional Rotary rejection, and the Nutritional synthetic-recipe boundary.
+
+## Energy Conversion (Transform)
+
+`auto_storage:mekanism_energy_conversion` is an **instant** Transform use
+(no station, no work): `c:dusts/redstone` converts to 10,000 FE and
+`c:storage_blocks/redstone` to 90,000 FE per item, matching the
+`mekanism:energy_conversion` datapack recipes (10.7.19.85: redstone →
+10,000, redstone block → 90,000). Mekanism has no physical workstation for
+these recipes; they are datapack-driven deterministic conversions, so the
+transform is instant rather than station-work based.
 
 ## Gas-Burning Generator (Transform)
 

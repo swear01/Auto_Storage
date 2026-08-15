@@ -6,6 +6,8 @@ import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.datamaps.IMekanismDataMapTypes;
 import mekanism.api.datamaps.chemical.attribute.ChemicalFuel;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -20,11 +22,27 @@ public final class MekanismTransformCompat {
     }
 
     private static final long MAX_GAS_BURN_RATE = 256;
+    private static final long REDSTONE_DUST_FE = 10_000;
+    private static final long REDSTONE_BLOCK_FE = 90_000;
+    private static final TagKey<Item> REDSTONE_DUST_TAG = TagKey.create(
+            Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath("c", "dusts/redstone"));
+    private static final TagKey<Item> REDSTONE_BLOCK_TAG = TagKey.create(
+            Registries.ITEM,
+            ResourceLocation.fromNamespaceAndPath("c", "storage_blocks/redstone"));
 
     public static void register(
             DeferredRegister<MachineDescriptor> machines,
             DeferredRegister<TransformProvider> transforms
     ) {
+        transforms.register("mekanism_energy_conversion", () ->
+                TransformProvider.of(
+                        StorageResourceKindApi.ENERGY_KIND,
+                        new ItemStack(Items.REDSTONE),
+                        Component.translatable("gui.auto_storage.resource_view.energy"),
+                        Component.translatable(
+                                "gui.auto_storage.source.mekanism_energy_conversion"),
+                        MekanismTransformCompat::energyConversionTransform));
         ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                 AutoStorageApi.MOD_ID, "mekanism_gas_generator");
         machines.register(generatorId.getPath(), () ->
@@ -49,6 +67,25 @@ public final class MekanismTransformCompat {
                         Component.translatable(
                                 "gui.auto_storage.station.mekanism_gas_generator"),
                         MekanismTransformCompat::gasTransform));
+    }
+
+    private static TransformProviderApi.Result energyConversionTransform(
+            ItemStack input
+    ) {
+        if (input == null || input.isEmpty()) return null;
+        long energy = 0;
+        if (input.is(REDSTONE_DUST_TAG)) {
+            energy = REDSTONE_DUST_FE;
+        } else if (input.is(REDSTONE_BLOCK_TAG)) {
+            energy = REDSTONE_BLOCK_FE;
+        } else {
+            return null;
+        }
+        return new TransformProviderApi.Result(
+                StorageResourceKey.neoforgeEnergy(),
+                energy,
+                null,
+                0);
     }
 
     private static TransformProviderApi.Result gasTransform(ItemStack input) {

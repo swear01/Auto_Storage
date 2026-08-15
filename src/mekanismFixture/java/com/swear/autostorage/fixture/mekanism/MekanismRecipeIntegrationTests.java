@@ -150,6 +150,57 @@ public final class MekanismRecipeIntegrationTests {
         });
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void energy_conversion_converts_redstone_to_instant_fe(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (level, core, player) -> {
+            var menu = transformMenu(core, player, new ItemStack(Items.REDSTONE));
+            var use = menu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(ENERGY_CONVERSION))
+                    .findFirst()
+                    .orElse(null);
+            if (use == null
+                    || use.amountPerItem() != 10_000L
+                    || use.stationWorkPerItem() != 0
+                    || use.stationId() != null) {
+                helper.fail("Energy conversion transform use is missing or wrong");
+                return;
+            }
+            selectTransform(menu, player, ENERGY_CONVERSION);
+            if (!menu.clickMenuButton(player, 2)
+                    || core.getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 10_000L
+                    || core.getStationWork(GAS_GENERATOR) != 0
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                            .getItem().isEmpty()) {
+                helper.fail("Energy conversion committed the wrong FE transaction");
+                return;
+            }
+            var blockMenu = transformMenu(
+                    core, player, new ItemStack(Items.REDSTONE_BLOCK));
+            var blockUse = blockMenu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(ENERGY_CONVERSION))
+                    .findFirst()
+                    .orElse(null);
+            if (blockUse == null || blockUse.amountPerItem() != 90_000L) {
+                helper.fail("Energy conversion block use is missing or wrong");
+                return;
+            }
+            selectTransform(blockMenu, player, ENERGY_CONVERSION);
+            if (!blockMenu.clickMenuButton(player, 2)
+                    || core.getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) != 100_000L) {
+                helper.fail("Energy conversion block committed the wrong FE");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static final ResourceLocation ENERGY_CONVERSION =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "mekanism_energy_conversion");
     private static final int TRANSFORM_PAGE_BUTTON = 15;
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final ResourceLocation GAS_GENERATOR =

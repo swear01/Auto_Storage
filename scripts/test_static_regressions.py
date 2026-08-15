@@ -1324,7 +1324,7 @@ class StaticRegressionTests(unittest.TestCase):
             "a weak-key map still leaks when each strongly held handler references its Core key",
         )
         self.assert_descriptor_driven_fixture(
-            build, "mekanism", "mekanismFixture", 48
+            build, "mekanism", "mekanismFixture", 49
         )
         self.assertIn('modId="mekanism"', fixture_metadata)
         self.assertIn('versionRange="[10.7,)"', fixture_metadata)
