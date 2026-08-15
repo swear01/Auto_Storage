@@ -19,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.HashMap;
@@ -31,33 +30,6 @@ public final class MekanismTransformCompat {
     }
 
     private static final long MAX_GAS_BURN_RATE = 256;
-    private static final Map<Item, ChemicalStack> CONVERSIONS = new HashMap<>();
-
-    static {
-        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
-                MekanismTransformCompat::onServerStarted);
-    }
-
-    private static void onServerStarted(ServerStartedEvent event) {
-        Map<Item, ChemicalStack> rebuilt = new HashMap<>();
-        for (RecipeHolder<?> holder :
-                event.getServer().getRecipeManager().getRecipes()) {
-            if (holder.value() instanceof ItemStackToChemicalRecipe recipe
-                    && MekanismRecipeType.CHEMICAL_CONVERSION.is(
-                            recipe.getType())) {
-                List<ItemStack> inputs = recipe.getInput().getRepresentations();
-                List<ChemicalStack> outputs = recipe.getOutputDefinition();
-                if (inputs.size() != 1 || outputs.size() != 1) continue;
-                ItemStack input = inputs.getFirst();
-                if (input.isEmpty() || input.getCount() != 1) continue;
-                ChemicalStack output = outputs.getFirst();
-                if (output.isEmpty() || output.getAmount() <= 0) continue;
-                rebuilt.put(input.getItem(), output);
-            }
-        }
-        CONVERSIONS.clear();
-        CONVERSIONS.putAll(rebuilt);
-    }
     private static final long REDSTONE_DUST_FE = 10_000;
     private static final long REDSTONE_BLOCK_FE = 90_000;
     private static final TagKey<Item> REDSTONE_DUST_TAG = TagKey.create(
@@ -67,18 +39,38 @@ public final class MekanismTransformCompat {
             Registries.ITEM,
             ResourceLocation.fromNamespaceAndPath("c", "storage_blocks/redstone"));
 
+    static {
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                MekanismTransformCompat::onServerStarted);
+    }
+
+    private static void onServerStarted(
+            net.neoforged.neoforge.event.server.ServerStartedEvent event
+    ) {
+        CHEMICAL_PATTERN.rebuild(event.getServer());
+        ENERGY_PATTERN.rebuild(event.getServer());
+    }
+
+    private static final ChemicalConversionPattern CHEMICAL_PATTERN =
+            new ChemicalConversionPattern();
+    private static final EnergyConversionPattern ENERGY_PATTERN =
+            new EnergyConversionPattern();
+
     public static void register(
             DeferredRegister<MachineDescriptor> machines,
             DeferredRegister<TransformProvider> transforms
     ) {
+        ConversionScanner.register(CHEMICAL_PATTERN);
         transforms.register("mekanism_chemical_conversion", () ->
                 TransformProvider.of(
                         StorageResourceKindApi.CHEMICAL_KIND,
                         new ItemStack(Items.GLOWSTONE_DUST),
-                        Component.translatable("gui.auto_storage.resource_view.chemical"),
+                        Component.translatable(
+                                "gui.auto_storage.resource_view.chemical"),
                         Component.translatable(
                                 "gui.auto_storage.source.mekanism_chemical_conversion"),
-                        MekanismTransformCompat::chemicalConversionTransform));
+                        CHEMICAL_PATTERN::resolve));
+        ConversionScanner.register(ENERGY_PATTERN);
         transforms.register("mekanism_energy_conversion", () ->
                 TransformProvider.of(
                         StorageResourceKindApi.ENERGY_KIND,
@@ -86,7 +78,7 @@ public final class MekanismTransformCompat {
                         Component.translatable("gui.auto_storage.resource_view.energy"),
                         Component.translatable(
                                 "gui.auto_storage.source.mekanism_energy_conversion"),
-                        MekanismTransformCompat::energyConversionTransform));
+                        ENERGY_PATTERN::resolve));
         ResourceLocation generatorId = ResourceLocation.fromNamespaceAndPath(
                 AutoStorageApi.MOD_ID, "mekanism_gas_generator");
         machines.register(generatorId.getPath(), () ->
@@ -113,36 +105,141 @@ public final class MekanismTransformCompat {
                         MekanismTransformCompat::gasTransform));
     }
 
-    private static TransformProviderApi.Result chemicalConversionTransform(
-            ItemStack input
-    ) {
-        if (input == null || input.isEmpty() || input.getCount() != 1) return null;
-        ChemicalStack output = CONVERSIONS.get(input.getItem());
-        if (output == null || output.isEmpty() || output.getAmount() <= 0) return null;
-        return new TransformProviderApi.Result(
-                MekanismChemicalCompat.key(output),
-                output.getAmount(),
-                null,
-                0);
+    private static final class ChemicalConversionPattern
+            implements com.swear.autostorage.ConversionPattern {
+        private static final Map<Item, ChemicalStack> CONVERSIONS = new HashMap<>();
+        private static String revision = "";
+
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "mekanism", "chemical_conversion");
+        }
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {
+            if (input == null || input.isEmpty() || input.getCount() != 1) {
+                return null;
+            }
+            ChemicalStack output = CONVERSIONS.get(input.getItem());
+            if (output == null || output.isEmpty() || output.getAmount() <= 0) {
+                return null;
+            }
+            return new TransformProviderApi.Result(
+                    MekanismChemicalCompat.key(output),
+                    output.getAmount(),
+                    null,
+                    0);
+        }
+
+        @Override
+        public String revisionKey() {
+            return revision;
+        }
+
+        static void rebuild(net.minecraft.server.MinecraftServer server) {
+            Map<Item, ChemicalStack> rebuilt = new HashMap<>();
+            StringBuilder digest = new StringBuilder();
+            for (RecipeHolder<?> holder :
+                    server.getRecipeManager().getRecipes()) {
+                if (holder.value()
+                        instanceof ItemStackToChemicalRecipe recipe
+                        && MekanismRecipeType.CHEMICAL_CONVERSION.is(
+                                recipe.getType())) {
+                    List<ItemStack> inputs =
+                            recipe.getInput().getRepresentations();
+                    List<ChemicalStack> outputs =
+                            recipe.getOutputDefinition();
+                    if (inputs.size() != 1 || outputs.size() != 1) {
+                        continue;
+                    }
+                    ItemStack input = inputs.getFirst();
+                    if (input.isEmpty() || input.getCount() != 1) {
+                        continue;
+                    }
+                    ChemicalStack output = outputs.getFirst();
+                    if (output.isEmpty() || output.getAmount() <= 0) {
+                        continue;
+                    }
+                    rebuilt.put(input.getItem(), output);
+                    digest.append(holder.id()).append('=')
+                            .append(output.getAmount()).append(';');
+                }
+            }
+            CONVERSIONS.clear();
+            CONVERSIONS.putAll(rebuilt);
+            revision = digest.toString();
+        }
     }
 
-    private static TransformProviderApi.Result energyConversionTransform(
-            ItemStack input
-    ) {
-        if (input == null || input.isEmpty()) return null;
-        long energy = 0;
-        if (input.is(REDSTONE_DUST_TAG)) {
-            energy = REDSTONE_DUST_FE;
-        } else if (input.is(REDSTONE_BLOCK_TAG)) {
-            energy = REDSTONE_BLOCK_FE;
-        } else {
-            return null;
+    private static final class EnergyConversionPattern
+            implements com.swear.autostorage.ConversionPattern {
+        private static final Map<Item, Long> CONVERSIONS = new HashMap<>();
+        private static String revision = "";
+
+        @Override
+        public ResourceLocation patternId() {
+            return ResourceLocation.fromNamespaceAndPath(
+                    "mekanism", "energy_conversion");
         }
-        return new TransformProviderApi.Result(
-                StorageResourceKey.neoforgeEnergy(),
-                energy,
-                null,
-                0);
+
+        @Override
+        public TransformProviderApi.Result resolve(ItemStack input) {
+            if (input == null || input.isEmpty() || input.getCount() != 1) {
+                return null;
+            }
+            Long energy = CONVERSIONS.get(input.getItem());
+            if (energy == null || energy <= 0) {
+                return null;
+            }
+            return new TransformProviderApi.Result(
+                    StorageResourceKey.neoforgeEnergy(),
+                    energy,
+                    null,
+                    0);
+        }
+
+        @Override
+        public String revisionKey() {
+            return revision;
+        }
+
+        static void rebuild(net.minecraft.server.MinecraftServer server) {
+            Map<Item, Long> rebuilt = new HashMap<>();
+            StringBuilder digest = new StringBuilder();
+            for (RecipeHolder<?> holder :
+                    server.getRecipeManager().getRecipes()) {
+                if (holder.value()
+                        instanceof mekanism.api.recipes.ItemStackToEnergyRecipe
+                                recipe
+                        && MekanismRecipeType.ENERGY_CONVERSION.is(
+                                recipe.getType())) {
+                    List<ItemStack> inputs =
+                            recipe.getInput().getRepresentations();
+                    if (inputs.size() != 1) {
+                        continue;
+                    }
+                    ItemStack input = inputs.getFirst();
+                    if (input.isEmpty() || input.getCount() != 1) {
+                        continue;
+                    }
+                    long[] outputs = recipe.getOutputDefinition();
+                    if (outputs.length != 1) {
+                        continue;
+                    }
+                    long energy = outputs[0];
+                    if (energy <= 0) {
+                        continue;
+                    }
+                    rebuilt.put(input.getItem(), energy);
+                    digest.append(holder.id()).append('=')
+                            .append(energy).append(';');
+                }
+            }
+            CONVERSIONS.clear();
+            CONVERSIONS.putAll(rebuilt);
+            revision = digest.toString();
+        }
     }
 
     private static TransformProviderApi.Result gasTransform(ItemStack input) {

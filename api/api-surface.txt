@@ -31,6 +31,18 @@ public final class com.swear.autostorage.BusFilterRule$Type extends java.lang.En
   public static com.swear.autostorage.BusFilterRule$Type valueOf(java.lang.String);
 }
 
+public interface com.swear.autostorage.ConversionPattern {
+  public abstract net.minecraft.resources.ResourceLocation patternId();
+  public abstract com.swear.autostorage.TransformProviderApi$Result resolve(net.minecraft.world.item.ItemStack);
+  public abstract java.lang.String revisionKey();
+}
+
+public final class com.swear.autostorage.ConversionScanner {
+  public static void register(com.swear.autostorage.ConversionPattern);
+  public static com.swear.autostorage.ConversionPattern pattern(net.minecraft.resources.ResourceLocation);
+  public static java.lang.String revisionKey();
+}
+
 public final class com.swear.autostorage.EnergyCost extends java.lang.Record {
   public com.swear.autostorage.EnergyCost(com.swear.autostorage.EnergyType, long, com.swear.autostorage.EnergyType, long);
   public final java.lang.String toString();

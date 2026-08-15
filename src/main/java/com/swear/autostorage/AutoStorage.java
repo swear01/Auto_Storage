@@ -117,6 +117,10 @@ public class AutoStorage {
                     builder -> builder.maxId(
                             MachineVariantContributorApi.MAX_CONTRIBUTORS - 1));
     static {
+        // Runtime conversion providers are registered by the modules that
+        // own their patterns (for example MekanismTransformCompat registers
+        // one provider per conversion pattern); ConversionScanner only owns
+        // the pattern registry and the combined revision digest.
         MachineEnergyTable.registerBuiltIns(MACHINE_DESCRIPTORS);
         StorageResourceKinds.registerBuiltIns(RESOURCE_KINDS);
         StorageResourceContainerStrategies.registerBuiltIns(RESOURCE_CONTAINER_STRATEGIES);

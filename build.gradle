@@ -647,6 +647,8 @@ tasks.named(sourceSets.pneumaticCraftFixture.processResourcesTaskName).configure
 def apiClassNames = [
         'AutoStorageCapabilityApi',
         'BusFilterRule',
+        'ConversionPattern',
+        'ConversionScanner',
         'EnergyCost',
         'EnergyType',
         'ExactRational',

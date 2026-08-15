@@ -201,6 +201,9 @@ public final class MekanismRecipeIntegrationTests {
     private static final ResourceLocation ENERGY_CONVERSION =
             ResourceLocation.fromNamespaceAndPath(
                     AutoStorage.MODID, "mekanism_energy_conversion");
+    private static final ResourceLocation CHEMICAL_CONVERSION =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "mekanism_chemical_conversion");
     @GameTest(template = "craftingtests.platform")
     public static void chemical_conversion_converts_dusts_to_instant_chemicals(
             GameTestHelper helper
@@ -290,6 +293,19 @@ public final class MekanismRecipeIntegrationTests {
         });
     }
 
+    private static int countEnergyHolders(GameTestHelper helper) {
+        int count = 0;
+        for (var holder : helper.getLevel().getRecipeManager().getRecipes()) {
+            if (holder.value()
+                    instanceof mekanism.api.recipes.ItemStackToEnergyRecipe recipe
+                    && mekanism.common.recipe.MekanismRecipeType
+                            .ENERGY_CONVERSION.is(recipe.getType())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static long conversionAmount(GameTestHelper helper, Item item) {
         for (var holder : helper.getLevel().getRecipeManager().getRecipes()) {
             if (holder.value() instanceof mekanism.api.recipes.ItemStackToChemicalRecipe recipe
@@ -310,9 +326,6 @@ public final class MekanismRecipeIntegrationTests {
                 ResourceLocation.fromNamespaceAndPath("mekanism", path));
     }
 
-    private static final ResourceLocation CHEMICAL_CONVERSION =
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "mekanism_chemical_conversion");
     private static final int TRANSFORM_PAGE_BUTTON = 15;
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final ResourceLocation GAS_GENERATOR =

@@ -1,4 +1,8 @@
-# Notes
+2026-08-14 #118 ConversionScanner core 完成：
+- `ConversionPattern`（patternId/resolve/revisionKey）+ `ConversionScanner`（pattern registry + revision 匯總）加入 api jar（apiClassNames + api-surface.txt 更新）。
+- 設計修正：單一 runtime provider 只回傳第一個匹配（紅石粉同時匹配 chemical 10mb + energy 10,000FE）→ 改為 **per-pattern providers**（MekanismTransformCompat 註冊兩個 patterns + 兩個 providers，input 可有多個不同輸出的 uses）。ConversionScanner 只做 pattern 註冊表 + revision digest。
+- Mekanism Energy Conversion 從硬編碼（10,000/90,000）遷入 live recipe 讀取（ENERGY_CONVERSION holders，`getOutputDefinition()` 回傳 long[] 非 List）。
+- 踩坑：`List.copyOf().sort()` 拋 UnsupportedOperationException；批量 replace 誤改 fixture 的 selectTransform 常數；`MinecraftServer.getServer()` 不存在於 1.21.1（用 ServerStartedEvent）。
 
 2026-08-14 #116 已發（runtime datapack-driven conversion detection）：使用者要求 Auto Storage 不寫死配方 — 模組自己掃描已安裝 mods 的 conversion 配方（chemical/energy conversion、generator fuels 等），datapack 變更自動反映，帶 cache；pattern 由使用者提供。目前唯一 live 的：Mekanism Chemical Conversion（ServerStartedEvent 重建）、GeneratorGalore（live JSON registry + SolidFuelMap datamap）。
 - Metallurgic Infusing 的 infusion 消耗是 per-recipe（`getNeededAmount`：多數 10、clay→slime block 40、gilded blackstone 100）— Auto Storage family 讀 exact amount，無寫死。
