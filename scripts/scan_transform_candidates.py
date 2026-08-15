@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Batch transform-candidate scan over a mods directory.
 
-Runs the Compat Kit three-layer detector (name_term, hierarchy, bytecode)
-over every jar in a Prism instance mods folder and writes
+Runs the Compat Kit four-layer detector (name_term, hierarchy, bytecode,
+conversion) over every jar in a Prism instance mods folder and writes
 build/transform-candidates/candidates.json plus a per-mod summary with
 spec-rejection hints (multiblock / passive / fluid-input) for review.
+Companion: `dump_conversion_recipes.py` lists every item->resource
+conversion recipe payload (chemical_conversion / energy_conversion etc.).
 """
 import argparse
 import concurrent.futures

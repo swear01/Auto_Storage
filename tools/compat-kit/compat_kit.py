@@ -158,6 +158,11 @@ TRANSFORM_EXCLUDED_TERMS = (
     "generatortags",
     "generatorgeartags",
 )
+TRANSFORM_CONVERSION_TERMS = (
+    "chemicalconversionrecipe", "chemical_conversion",
+    "energyconversionrecipe", "energy_conversion",
+    "toenergyrecipe", "getpotentialconversion",
+)
 TRANSFORM_BEHAVIOR_PATTERNS = (
     ("burn_time", re.compile(r"\bgetBurnTime\b"), "getBurnTime"),
     ("mana_production", re.compile(r"\baddMana\b"), "addMana"),
@@ -1422,6 +1427,34 @@ def transform_candidates(jar_path: Path, *, javap: Path | None = None) -> list[d
             ancestor = hierarchy_evidence(binary)
             if ancestor is not None:
                 evidence.append(("hierarchy", ancestor))
+        conversion_term = next(
+            (term for term in TRANSFORM_CONVERSION_TERMS
+             if term in lowered),
+            None
+        )
+        if conversion_term is None and metadata is not None:
+            seen = set()
+            current = binary
+            while current and current not in seen:
+                seen.add(current)
+                parent_metadata = metadata_by_class.get(current)
+                if parent_metadata is None:
+                    break
+                for parent in (
+                    [parent_metadata["super_class"]]
+                    if parent_metadata["super_class"] is not None
+                    else []
+                ) + parent_metadata["interfaces"]:
+                    lowered_parent = parent.lower()
+                    if any(term in lowered_parent
+                           for term in TRANSFORM_CONVERSION_TERMS):
+                        conversion_term = parent
+                        break
+                if conversion_term is not None:
+                    break
+                current = parent_metadata["super_class"]
+        if conversion_term is not None:
+            evidence.append(("conversion", conversion_term))
         if not evidence:
             continue
         bytecode = ""

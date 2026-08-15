@@ -259,6 +259,33 @@ public final class MekanismRecipeIntegrationTests {
                         + " redstone=" + core.getResourceAmount(use.output()));
                 return;
             }
+            ItemStack enrichedRedstone = new ItemStack(
+                    mekItem("enriched_redstone"));
+            long enrichedAmount = conversionAmount(
+                    helper, mekItem("enriched_redstone"));
+            if (enrichedAmount != 80L) {
+                helper.fail("Enriched redstone conversion must be 80 mb, got "
+                        + enrichedAmount);
+                return;
+            }
+            var enrichedMenu = transformMenu(
+                    core, player, enrichedRedstone);
+            var enrichedUse = enrichedMenu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(CHEMICAL_CONVERSION))
+                    .findFirst()
+                    .orElse(null);
+            if (enrichedUse == null
+                    || enrichedUse.amountPerItem() != 80L) {
+                helper.fail("Enriched redstone use is missing or wrong");
+                return;
+            }
+            selectTransform(enrichedMenu, player, CHEMICAL_CONVERSION);
+            if (!enrichedMenu.clickMenuButton(player, 2)
+                    || core.getResourceAmount(enrichedUse.output())
+                            != expectedAmount + 80L) {
+                helper.fail("Enriched redstone committed wrong amount");
+                return;
+            }
             helper.succeed();
         });
     }
