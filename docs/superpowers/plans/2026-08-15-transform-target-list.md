@@ -105,8 +105,11 @@ conversion source is rejected — it would show dead targets.
 
 ## Implementation steps
 
-1. Target record gains priority + order; `targets()` and
-   `getTransformTargetsForInput()` sort CORE-first.
+1. ~~Target record gains priority + order; `targets()` and
+   `getTransformTargetsForInput()` sort CORE-first.~~ DONE — CORE order
+   (FE, furnace_fuel, blaze_fuel, Mana) pinned first via
+   `CORE_TARGET_ORDER`, MOD kinds follow sorted by label; fixture asserts
+   no non-core target precedes FE.
 2. Menu exposes per-target use counts (browse mode) from `uses()`.
 3. Screen renders the count badge; fixture asserts ordering + badge.
 4. Docs: this plan, overview Transform paragraph, notes.

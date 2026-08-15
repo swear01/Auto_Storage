@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import com.swear.autostorage.api.AutoStorageApi;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +137,43 @@ public final class TransformProviderApi {
                         provider.representative(),
                         provider.targetLabel()))
                 .forEach(target -> putTarget(result, target));
-        return List.copyOf(result.values());
+        List<Target> ordered = new ArrayList<>(result.values());
+        ordered.sort(Comparator
+                .comparingInt((Target target) -> {
+                    int core = CORE_TARGET_ORDER.indexOf(target.id());
+                    return core < 0 ? Integer.MAX_VALUE : core;
+                })
+                .thenComparing(target -> target.label().getString()));
+        return List.copyOf(ordered);
+    }
+
+    /**
+     * Core universal resources pinned at the top of the Transform target
+     * sidebar in a fixed, stable order; module-produced kinds follow sorted
+     * by label.
+     */
+    private static final List<ResourceLocation> CORE_TARGET_ORDER = List.of(
+            StorageResourceKindApi.ENERGY_KIND,
+            energyTargetId(EnergyType.FURNACE_FUEL),
+            energyTargetId(EnergyType.BLAZE_FUEL),
+            StorageResourceKindApi.BOTANIA_MANA_KIND);
+
+    /**
+     * Input-first target picker: with an input item present, only targets
+     * that have at least one use for that exact input are listed, so the
+     * player never browses unrelated output resources. Empty input keeps
+     * the full browse list.
+     */
+    static List<Target> targetsForInput(
+            List<MachineDescriptor> descriptors,
+            ItemStack input,
+            List<Use> uses
+    ) {
+        if (input.isEmpty()) return targets(descriptors);
+        return targets(descriptors).stream()
+                .filter(target -> uses.stream()
+                        .anyMatch(use -> use.targetId().equals(target.id())))
+                .toList();
     }
 
     private static void putTarget(

@@ -380,6 +380,56 @@ public final class MekanismRecipeIntegrationTests {
         });
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void transform_targets_pin_core_resources_first(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (level, core, player) -> {
+            var menu = new CraftingTerminalMenu(
+                    604, player.getInventory(), core);
+            menu.clickMenuButton(player, TRANSFORM_PAGE_BUTTON);
+            List<com.swear.autostorage.TransformProviderApi.Target> targets =
+                    menu.getTransformTargetsForInput();
+            if (targets.size() < 2) {
+                helper.fail("Transform target list is unexpectedly short");
+                return;
+            }
+            java.util.List<ResourceLocation> ids = targets.stream()
+                    .map(com.swear.autostorage.TransformProviderApi.Target::id)
+                    .toList();
+            ResourceLocation energy = StorageResourceKey
+                    .neoforgeEnergy().kindId();
+            int energyIndex = ids.indexOf(energy);
+            if (energyIndex < 0) {
+                helper.fail("FE target must be present: " + ids);
+                return;
+            }
+            ResourceLocation furnaceFuel = ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "furnace_fuel");
+            ResourceLocation blazeFuel = ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "blaze_fuel");
+            for (int index = 0; index < energyIndex; index++) {
+                if (!ids.get(index).equals(furnaceFuel)
+                        && !ids.get(index).equals(blazeFuel)
+                        && !ids.get(index).equals(energy)) {
+                    helper.fail("Non-core target precedes FE: "
+                            + ids.get(index) + " before " + energy);
+                    return;
+                }
+            }
+            if (ids.indexOf(ResourceLocation.fromNamespaceAndPath(
+                    "mekanism", "chemical")) > energyIndex) {
+                // MOD kinds must follow the core resources; verify relative order.
+                if (energyIndex != 0 && !ids.get(energyIndex - 1).equals(furnaceFuel)
+                        && !ids.get(energyIndex - 1).equals(blazeFuel)) {
+                    helper.fail("FE must follow the fuel pools: " + ids);
+                    return;
+                }
+            }
+            helper.succeed();
+        });
+    }
+
     private static final int TRANSFORM_PAGE_BUTTON = 15;
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final ResourceLocation GAS_GENERATOR =

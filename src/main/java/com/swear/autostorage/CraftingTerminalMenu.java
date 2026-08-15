@@ -919,13 +919,10 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
      * the full browse list.
      */
     public List<TransformProviderApi.Target> getTransformTargetsForInput() {
-        ItemStack input = getSlot(FUEL_INPUT_SLOT).getItem();
-        if (input.isEmpty()) return getTransformTargets();
-        List<TransformProviderApi.Use> uses = getTransformUses();
-        return getTransformTargets().stream()
-                .filter(target -> uses.stream()
-                        .anyMatch(use -> use.targetId().equals(target.id())))
-                .toList();
+        return TransformProviderApi.targetsForInput(
+                descriptorSnapshot,
+                getSlot(FUEL_INPUT_SLOT).getItem(),
+                getTransformUses());
     }
 
     public List<TransformProviderApi.Use> getTransformUses() {
