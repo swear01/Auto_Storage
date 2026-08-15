@@ -661,11 +661,13 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             boolean fuel
     ) {
         if (buttons == null) return;
-        boolean visible = fuel && pageCount > 1;
-        setWidgetVisible(buttons.previous(), visible);
-        setWidgetVisible(buttons.next(), visible);
-        buttons.previous().active = visible && page > 0;
-        buttons.next().active = visible && page + 1 < pageCount;
+        // Keep the page buttons visible (disabled) even for a single page so
+        // the sidebar bottom does not collapse into an empty band; the
+        // indicator still only renders for multi-page lists.
+        setWidgetVisible(buttons.previous(), fuel);
+        setWidgetVisible(buttons.next(), fuel);
+        buttons.previous().active = fuel && pageCount > 1 && page > 0;
+        buttons.next().active = fuel && pageCount > 1 && page + 1 < pageCount;
     }
 
     private void updateToggleButton(TerminalCycleButton button, String key, boolean enabled) {
