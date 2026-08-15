@@ -70,7 +70,7 @@ cannot select a different output plan from the allocated input.
 |---|---|
 | Evaporating | Executed by the Thermal Evaporation multiblock |
 | Activating | Solar Neutron Activator progress depends on live dimension, biome, weather, and sky state |
-| Chemical Conversion | Virtual recipe-viewer conversion, not a concrete workstation execution contract |
+| — | — |
 | Chemical Conversion | Virtual recipe-viewer conversion, not a concrete workstation execution contract |
 
 This accounts for all 26 registered Mekanism recipe types: 22 supported and
@@ -119,6 +119,21 @@ SelfTest summary. It covers all nine basic/factory families, exact factory
 throughput, the 13 additional supported recipe types, typed-resource
 transactions, chemical-only output, overflow and rollback, recipe reload,
 bidirectional Rotary rejection, and the Nutritional synthetic-recipe boundary.
+
+## Chemical Conversion (Transform)
+
+`auto_storage:mekanism_chemical_conversion` is an **instant** Transform use
+(no station, no work) driven by the live `mekanism:chemical_conversion`
+datapack recipes (rebuilt on server start): `c:dusts/redstone` → 10 mb
+`mekanism:redstone` infusion, gold/diamond/refined-obsidian/tin dusts →
+10 mb each, osmium ingot → 200 mb / block → 1,800 mb `mekanism:osmium`,
+coal/charcoal → carbon, salt/sulfur/flint/bio/fungi conversions. These
+conversions ARE executed in-world by `ChemicalInventorySlot`
+(`getPotentialConversion` fills chemical tanks from items), so the audit's
+old "virtual viewer conversion" classification for Chemical Conversion was
+wrong; it is now an instant transform feeding the Metallurgic Infuser
+infusion tank and Osmium Compressor chemical tank. Output is the
+`mekanism:chemical` storage kind.
 
 ## Energy Conversion (Transform)
 

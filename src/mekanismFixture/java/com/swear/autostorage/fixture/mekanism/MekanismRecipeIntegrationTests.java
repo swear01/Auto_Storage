@@ -201,6 +201,91 @@ public final class MekanismRecipeIntegrationTests {
     private static final ResourceLocation ENERGY_CONVERSION =
             ResourceLocation.fromNamespaceAndPath(
                     AutoStorage.MODID, "mekanism_energy_conversion");
+    @GameTest(template = "craftingtests.platform")
+    public static void chemical_conversion_converts_dusts_to_instant_chemicals(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (level, core, player) -> {
+            var menu = transformMenu(core, player, new ItemStack(Items.REDSTONE));
+            var use = menu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(CHEMICAL_CONVERSION))
+                    .findFirst()
+                    .orElse(null);
+            if (use == null
+                    || use.stationWorkPerItem() != 0
+                    || use.stationId() != null
+                    || !use.output().kindId().equals(
+                            StorageResourceKindApi.CHEMICAL_KIND)) {
+                helper.fail("Chemical conversion redstone use is missing or wrong");
+                return;
+            }
+            long expectedAmount = conversionAmount(helper, Items.REDSTONE);
+            if (use.amountPerItem() != expectedAmount) {
+                helper.fail("Chemical conversion redstone amount is wrong: "
+                        + use.amountPerItem() + " != " + expectedAmount);
+                return;
+            }
+            selectTransform(menu, player, CHEMICAL_CONVERSION);
+            if (!menu.clickMenuButton(player, 2)
+                    || core.getResourceAmount(use.output()) != expectedAmount
+                    || !menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                            .getItem().isEmpty()) {
+                helper.fail("Chemical conversion redstone committed wrong amount");
+                return;
+            }
+            var osmiumMenu = transformMenu(
+                    core, player,
+                    new ItemStack(mekItem("ingot_osmium")));
+            var osmiumUse = osmiumMenu.getTransformUses().stream()
+                    .filter(candidate -> candidate.id().equals(CHEMICAL_CONVERSION))
+                    .findFirst()
+                    .orElse(null);
+            long osmiumAmount = conversionAmount(helper, mekItem("ingot_osmium"));
+            if (osmiumUse == null
+                    || osmiumUse.amountPerItem() != osmiumAmount) {
+                helper.fail("Chemical conversion osmium use is missing or wrong");
+                return;
+            }
+            selectTransform(osmiumMenu, player, CHEMICAL_CONVERSION);
+            boolean committed = osmiumMenu.clickMenuButton(player, 2);
+            if (!committed
+                    || core.getResourceAmount(osmiumUse.output())
+                            != osmiumAmount
+                    || core.getResourceAmount(use.output())
+                            != expectedAmount) {
+                helper.fail("Chemical conversion osmium committed wrong amount: "
+                        + "clicked=" + committed + " osmium="
+                        + core.getResourceAmount(osmiumUse.output())
+                        + " redstone=" + core.getResourceAmount(use.output()));
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static long conversionAmount(GameTestHelper helper, Item item) {
+        for (var holder : helper.getLevel().getRecipeManager().getRecipes()) {
+            if (holder.value() instanceof mekanism.api.recipes.ItemStackToChemicalRecipe recipe
+                    && mekanism.common.recipe.MekanismRecipeType.CHEMICAL_CONVERSION
+                            .is(recipe.getType())) {
+                for (ItemStack input : recipe.getInput().getRepresentations()) {
+                    if (input.is(item)) {
+                        return recipe.getOutputDefinition().getFirst().getAmount();
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static Item mekItem(String path) {
+        return BuiltInRegistries.ITEM.get(
+                ResourceLocation.fromNamespaceAndPath("mekanism", path));
+    }
+
+    private static final ResourceLocation CHEMICAL_CONVERSION =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "mekanism_chemical_conversion");
     private static final int TRANSFORM_PAGE_BUTTON = 15;
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final ResourceLocation GAS_GENERATOR =
