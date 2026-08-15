@@ -190,5 +190,6 @@
   "gui.auto_storage.station.powah_magmator": "Magmator",
   "gui.auto_storage.station.productivebees_honey_generator": "Honey Generator",
   "gui.auto_storage.station.rftoolspower_coal_generator": "Coal Generator",
-  "gui.auto_storage.station.mekanism_gas_generator": "Gas-Burning Generator"
+  "gui.auto_storage.station.mekanism_gas_generator": "Gas-Burning Generator",
+  "gui.auto_storage.station.justdirethings_generator_t1": "Simple Coal Generator"
 }

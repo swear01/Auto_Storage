@@ -2756,6 +2756,48 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn('modId="rftoolspower"', fixture_metadata)
         self.assertIn("Coal Generator (Transform)", compatibility_doc)
 
+    def test_justdirethings_compat_is_optional_and_isolated(self):
+        build = self.read_required("build.gradle")
+        metadata = self.read_required("src/main/templates/META-INF/neoforge.mods.toml")
+        module_index = self.read_compat_module("justdirethings")
+        module = self.read_required(
+            "src/compat/justdirethings/java/com/swear/autostorage/compat/"
+            "justdirethings/JustdirethingsCompatModule.java"
+        )
+        compat = self.read_required(
+            "src/compat/justdirethings/java/com/swear/autostorage/compat/"
+            "justdirethings/JustdirethingsCompat.java"
+        )
+        fixture_metadata = self.read_required(
+            "src/justdirethingsFixture/resources/META-INF/neoforge.mods.toml"
+        )
+        compatibility_doc = self.read_required(
+            "docs/justdirethings-compatibility.md"
+        )
+
+        self.assertNotRegex(
+            build,
+            r'(?m)^\s*runtimeOnly\s+"[^"]*justdirethings',
+        )
+        self.assertEqual(
+            ["curse.maven:justdirethings-1002348:7463040"],
+            json.loads(module_index)["dependencies"],
+        )
+        self.assert_descriptor_driven_fixture(
+            build, "justdirethings", "justdirethingsFixture", 5
+        )
+        self.assertNotIn('modId="justdirethings"', metadata)
+        self.assertEqual(["justdirethings"], json.loads(module_index)["requires"])
+        self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn(
+            "JustdirethingsCompat.register(MACHINES, RECIPES, TRANSFORMS)",
+            module,
+        )
+        self.assertIn("Config.GENERATOR_T1_BURN_SPEED_MULTIPLIER", compat)
+        self.assertIn("Config.GENERATOR_T1_FE_PER_FUEL_TICK", compat)
+        self.assertIn('modId="justdirethings"', fixture_metadata)
+        self.assertIn("Simple Coal Generator (Transform)", compatibility_doc)
+
     def test_oritech_energy_per_tick_reads_live_config_without_null_fallback(self):
         compat = self.read_required(
             "src/compat/oritech/java/com/swear/autostorage/compat/"

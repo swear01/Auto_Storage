@@ -1,0 +1,41 @@
+{
+  "auditArtifact": {
+    "dependency": "curse.maven:justdirethings-1002348:7463040",
+    "sha256": "6e5f7dd7091cc271fee66b0df62bde2250e8b52397b51dd911f79c088eb22d2f"
+  },
+  "dependencies": [
+    "curse.maven:justdirethings-1002348:7463040"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.justdirethings.JustdirethingsCompatModule",
+  "expectedTests": 5,
+  "fixture": "justdirethingsFixture",
+  "id": "auto_storage:justdirethings",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [],
+    "mods": [
+      "justdirethings"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "justdirethings"
+      ],
+      "sha256": "cafb0b367815384072f669bb40b56dd9f42e16b57fbbc60ec3d40053909bc0d4"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://www.cursemaven.com"
+  ],
+  "requires": [
+    "justdirethings"
+  ],
+  "runtimeDependencies": [
+    "curse.maven:justdirethings-1002348:7463040"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatJustdirethings"
+}

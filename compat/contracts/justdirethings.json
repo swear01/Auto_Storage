@@ -1,0 +1,232 @@
+{
+ "families": [
+  {
+   "class": "com.direwolf20.justdirethings.datagen.recipes.AbilityRecipe",
+   "costs": [],
+   "decision": "JDT ability smithing recipes (datagen AbilityRecipe implements SmithingRecipe) apply ability components to items through the smithing table UX with world/entity mutation; not a deterministic storage transaction.",
+   "evidence": [
+    "com.direwolf20.justdirethings.datagen.recipes.AbilityRecipe#public_signature"
+   ],
+   "id": "ability_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "com.direwolf20.justdirethings.datagen.recipes.FluidDropRecipe",
+   "costs": [],
+   "decision": "JDT fluid drop recipes place fluid in the world on block break (world mutation); not a storage transaction.",
+   "evidence": [
+    "com.direwolf20.justdirethings.datagen.recipes.FluidDropRecipe#public_signature"
+   ],
+   "id": "fluid_drop_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "com.direwolf20.justdirethings.datagen.recipes.GooSpreadRecipe",
+   "costs": [],
+   "decision": "JDT goo spread recipes convert world blocks over time; world mutation.",
+   "evidence": [
+    "com.direwolf20.justdirethings.datagen.recipes.GooSpreadRecipe#public_signature"
+   ],
+   "id": "goo_spread_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "com.direwolf20.justdirethings.datagen.recipes.GooSpreadRecipeTag",
+   "costs": [],
+   "decision": "JDT goo spread tag recipes convert world blocks over time; world mutation.",
+   "evidence": [
+    "com.direwolf20.justdirethings.datagen.recipes.GooSpreadRecipeTag#public_signature"
+   ],
+   "id": "goo_spread_recipe_tag",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "com.direwolf20.justdirethings.datagen.recipes.PaxelRecipe",
+   "costs": [],
+   "decision": "JDT paxel recipes attach tool components to paxel items with world-mutation craft effects; not a deterministic storage transaction.",
+   "evidence": [
+    "com.direwolf20.justdirethings.datagen.recipes.PaxelRecipe#public_signature"
+   ],
+   "id": "paxel_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  }
+ ],
+ "kind": "auto_storage_compat_contract",
+ "matrix": {
+  "acceptedRecipes": [],
+  "descriptors": [],
+  "mods": [
+   "justdirethings"
+  ],
+  "recipeInventory": {
+   "namespaces": [
+    "justdirethings"
+   ],
+   "sha256": "cafb0b367815384072f669bb40b56dd9f42e16b57fbbc60ec3d40053909bc0d4"
+  },
+  "rejectedDescriptors": [],
+  "rejectedResourceKinds": [],
+  "resourceKinds": []
+ },
+ "schema": 1,
+ "source_audit_sha256": "6e5f7dd7091cc271fee66b0df62bde2250e8b52397b51dd911f79c088eb22d2f",
+ "source_recipe_data_sha256": "016f9f19e0091365fdb606034fc6a0e66031246c3588f1b5177feedb7e4fc6b0",
+ "source_recipe_inventory_sha256": "b988376216abbd49303c48c7514ee30531b09e0608f6279cb6912cf2676c640f",
+ "target": {
+  "display_name": "Just Dire Things",
+  "mod_id": "justdirethings",
+  "version": "1.5.7",
+  "dependency": "curse.maven:justdirethings-1002348:7463040",
+  "repositories": [
+   "https://www.cursemaven.com"
+  ],
+  "runtime_dependencies": []
+ },
+ "verification": {
+  "fixture": "justdirethingsFixture",
+  "expected_game_tests": 5,
+  "game_test_task": "runJustdirethingsGameTestServer",
+  "gradle_tasks": [
+   "build",
+   "runGameTestServer",
+   "runRecipeAddonGameTestServer",
+   "runJustdirethingsGameTestServer",
+   "runCompatibilityMatrixGameTestServer"
+  ],
+  "checks": [
+   "absent_target_no_classload",
+   "present_target_load_once",
+   "ingredient_shortage_atomic",
+   "destination_capacity_atomic",
+   "checked_overflow_atomic",
+   "stale_recipe_holder_atomic",
+   "catalyst_tool_remainder_exact",
+   "multi_output_merge_exact",
+   "mixed_resource_rollback_atomic",
+   "dedicated_server_client_isolation",
+   "api_only_compilation",
+   "all_mod_coexistence"
+  ],
+  "evidence": {
+   "absent_target_no_classload": [
+    {
+     "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "stale_recipe_holder_atomic": [
+    {
+     "marker": "Unknown recipe id must fail closed",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "multi_output_merge_exact": [
+    {
+     "marker": "Typed family changed the wrong exact resources or output amounts",
+     "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+     "task": "runRecipeAddonGameTestServer"
+    }
+   ],
+   "mixed_resource_rollback_atomic": [
+    {
+     "marker": "Failed typed family commit partially mutated resources",
+     "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+     "task": "runRecipeAddonGameTestServer"
+    }
+   ],
+   "all_mod_coexistence": [
+    {
+     "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+     "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+     "task": "runCompatibilityMatrixGameTestServer"
+    }
+   ],
+   "api_only_compilation": [
+    {
+     "marker": "compileAddonExampleJava",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "dedicated_server_client_isolation": [
+    {
+     "marker": "verifyCompatIsolation",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "present_target_load_once": [
+    {
+     "marker": "Just Dire Things unsafe machine contract was registered",
+     "source": "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsIntegrationGameTests.java",
+     "task": "runJustdirethingsGameTestServer"
+    }
+   ],
+   "ingredient_shortage_atomic": [
+    {
+     "marker": "Just Dire Things missing-ingredient transform was not an atomic no-op",
+     "source": "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsIntegrationGameTests.java",
+     "task": "runJustdirethingsGameTestServer"
+    }
+   ],
+   "destination_capacity_atomic": [
+    {
+     "marker": "Just Dire Things full destination transform was not an atomic no-op",
+     "source": "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsIntegrationGameTests.java",
+     "task": "runJustdirethingsGameTestServer"
+    }
+   ],
+   "checked_overflow_atomic": [
+    {
+     "marker": "Long.MAX_VALUE",
+     "source": "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsIntegrationGameTests.java",
+     "task": "runJustdirethingsGameTestServer"
+    }
+   ],
+   "catalyst_tool_remainder_exact": [
+    {
+     "marker": "Just Dire Things generator committed the wrong FE/work/input transaction",
+     "source": "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsIntegrationGameTests.java",
+     "task": "runJustdirethingsGameTestServer"
+    }
+   ]
+  }
+ }
+}
