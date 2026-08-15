@@ -317,6 +317,7 @@ public final class com.swear.autostorage.StorageResourceTransaction$Builder {
 
 public final class com.swear.autostorage.TerminalResourceRendererApi {
   public static synchronized <C> void register(net.minecraft.resources.ResourceLocation, java.lang.Class<C>, com.swear.autostorage.TerminalResourceRendererApi$Renderer<C>);
+  public static boolean render(net.minecraft.resources.ResourceLocation, java.lang.Object, com.swear.autostorage.StorageResourceKey, long, int, int, float);
 }
 
 public interface com.swear.autostorage.TerminalResourceRendererApi$Renderer<C> {
