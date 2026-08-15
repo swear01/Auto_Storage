@@ -912,6 +912,22 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         return TransformProviderApi.targets(descriptorSnapshot);
     }
 
+    /**
+     * Input-first target picker: with an input item present, only targets
+     * that have at least one use for that exact input are listed, so the
+     * player never browses unrelated output resources. Empty input keeps
+     * the full browse list.
+     */
+    public List<TransformProviderApi.Target> getTransformTargetsForInput() {
+        ItemStack input = getSlot(FUEL_INPUT_SLOT).getItem();
+        if (input.isEmpty()) return getTransformTargets();
+        List<TransformProviderApi.Use> uses = getTransformUses();
+        return getTransformTargets().stream()
+                .filter(target -> uses.stream()
+                        .anyMatch(use -> use.targetId().equals(target.id())))
+                .toList();
+    }
+
     public List<TransformProviderApi.Use> getTransformUses() {
         return TransformProviderApi.uses(
                 getSlot(FUEL_INPUT_SLOT).getItem(), descriptorSnapshot);

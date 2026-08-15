@@ -50,6 +50,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     private FuelPageButtons fuelSearchPageButtons;
     private CraftingTerminalPage lastPage;
     private ResourceLocation lastTransformTarget;
+    private ItemStack lastFuelInput = ItemStack.EMPTY;
     private int transformUsePage;
     private int transformTargetPage;
     private int timedStationPage;
@@ -683,6 +684,13 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     protected void containerTick() {
         super.containerTick();
         TerminalPreferences preferences = displayedPreferences();
+        ItemStack fuelInput = menu.getSlot(
+                CraftingTerminalMenu.FUEL_INPUT_SLOT).getItem();
+        if (!ItemStack.isSameItemSameComponents(fuelInput, lastFuelInput)) {
+            lastFuelInput = fuelInput.copy();
+            transformTargetPage = 0;
+            refreshTransformTargets();
+        }
         if (lastUtilitySortMode != preferences.sortMode()
                 || lastUtilitySortOrder != preferences.sortOrder()) {
             lastUtilitySortMode = preferences.sortMode();

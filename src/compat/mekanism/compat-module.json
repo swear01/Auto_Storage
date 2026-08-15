@@ -4,7 +4,7 @@
     "maven.modrinth:emi:${emi_runtime_version}"
   ],
   "entrypoint": "com.swear.autostorage.compat.mekanism.MekanismCompatModule",
-  "expectedTests": 50,
+  "expectedTests": 51,
   "fixture": "mekanismFixture",
   "id": "auto_storage:mekanism",
   "matrix": {

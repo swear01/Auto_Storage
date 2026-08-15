@@ -326,6 +326,60 @@ public final class MekanismRecipeIntegrationTests {
                 ResourceLocation.fromNamespaceAndPath("mekanism", path));
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void transform_targets_are_input_first_when_input_present(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (level, core, player) -> {
+            var menu = new CraftingTerminalMenu(
+                    603, player.getInventory(), core);
+            menu.clickMenuButton(player, TRANSFORM_PAGE_BUTTON);
+            List<com.swear.autostorage.TransformProviderApi.Target> emptyInput =
+                    menu.getTransformTargetsForInput();
+            if (emptyInput.size() < 2) {
+                helper.fail("Empty input must keep the full target browse list");
+                return;
+            }
+            menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .set(new ItemStack(Items.REDSTONE));
+            List<com.swear.autostorage.TransformProviderApi.Target> withInput =
+                    menu.getTransformTargetsForInput();
+            List<com.swear.autostorage.TransformProviderApi.Use> redstoneUses =
+                    menu.getTransformUses();
+            if (withInput.isEmpty()
+                    || withInput.stream().noneMatch(target ->
+                            target.id().equals(StorageResourceKey
+                                    .neoforgeEnergy().kindId()))
+                    || withInput.stream().noneMatch(target ->
+                            target.id().equals(StorageResourceKindApi
+                                    .CHEMICAL_KIND))) {
+                helper.fail("Input-first targets must list every use for the input: "
+                        + withInput.stream().map(
+                                com.swear.autostorage.TransformProviderApi.Target::id)
+                                .toList()
+                        + " uses=" + redstoneUses.stream().map(
+                                com.swear.autostorage.TransformProviderApi.Use::targetId)
+                                .toList());
+                return;
+            }
+            for (com.swear.autostorage.TransformProviderApi.Target target : withInput) {
+                if (menu.getTransformUses().stream()
+                        .noneMatch(use -> use.targetId().equals(target.id()))) {
+                    helper.fail("Input-first target has no use for the input: "
+                            + target.id());
+                    return;
+                }
+            }
+            menu.getSlot(CraftingTerminalMenu.FUEL_INPUT_SLOT)
+                    .set(ItemStack.EMPTY);
+            if (menu.getTransformTargetsForInput().size() != emptyInput.size()) {
+                helper.fail("Clearing the input must restore the full browse list");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
     private static final int TRANSFORM_PAGE_BUTTON = 15;
     private static final int STORAGE_PAGE_BUTTON = 14;
     private static final ResourceLocation GAS_GENERATOR =
