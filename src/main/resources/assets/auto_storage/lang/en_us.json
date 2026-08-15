@@ -206,5 +206,6 @@
   "gui.auto_storage.station.generatorgalore_ender_generator": "Ender Generator",
   "gui.auto_storage.station.industrial_foregoing_mycelial_furnace": "Furnace Mycelial Generator",
   "gui.auto_storage.source.mekanism_energy_conversion": "Energy Conversion",
-  "gui.auto_storage.source.mekanism_chemical_conversion": "Chemical Conversion"
+  "gui.auto_storage.source.mekanism_chemical_conversion": "Chemical Conversion",
+  "gui.auto_storage.resource_view.chemical": "Chemicals"
 }
