@@ -44,6 +44,7 @@ final class CraftableRecipeCatalog {
         synchronized (CACHE) {
             CACHE.clear();
         }
+        BuiltInRecipeAdapters.clearIngredientExpansionCache();
     }
 
     static void releaseTransientMatches() {

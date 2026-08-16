@@ -704,13 +704,58 @@ final class BuiltInRecipeAdapters {
         for (Ingredient ingredient : ingredients) {
             if (ingredient.isEmpty()) continue;
             exhaustive &= hasExhaustiveItemCoverage(ingredient);
-            for (ItemStack stack : ingredient.getItems()) {
+            for (ItemStack stack : expandedItems(ingredient)) {
                 if (!stack.isEmpty()) representatives.add(stack.copyWithCount(1));
             }
         }
         return exhaustive
                 ? RecipeCandidateIndex.exhaustive(representatives)
                 : RecipeCandidateIndex.nonExhaustive(representatives);
+    }
+
+    private static final Map<Object, ItemStack[]> INGREDIENT_EXPANSION_CACHE =
+            new java.util.HashMap<>();
+
+    static void clearIngredientExpansionCache() {
+        INGREDIENT_EXPANSION_CACHE.clear();
+    }
+
+    /**
+     * Expands one ingredient with a shared cache keyed by its value
+     * structure (tag location / item / component identity). Equivalent
+     * ingredients in different recipe holders expand once instead of once
+     * per holder — the dominant cost of catalog classification on large
+     * packs (ATM10: ~92k recipes).
+     */
+    private static ItemStack[] expandedItems(Ingredient ingredient) {
+        Object key = expansionKey(ingredient);
+        ItemStack[] cached = key == null ? null
+                : INGREDIENT_EXPANSION_CACHE.get(key);
+        if (cached != null) return cached;
+        ItemStack[] expanded = ingredient.getItems();
+        if (key != null) {
+            INGREDIENT_EXPANSION_CACHE.put(key, expanded);
+        }
+        return expanded;
+    }
+
+    private static Object expansionKey(Ingredient ingredient) {
+        net.minecraft.world.item.crafting.Ingredient.Value[] values =
+                ingredient.getValues();
+        if (values == null) return null;
+        List<Object> key = new java.util.ArrayList<>(values.length);
+        for (net.minecraft.world.item.crafting.Ingredient.Value value : values) {
+            if (value instanceof Ingredient.TagValue tagValue) {
+                key.add(tagValue.tag());
+            } else if (value instanceof Ingredient.ItemValue itemValue) {
+                key.add(itemValue.item().getItem());
+            } else {
+                // DataComponentValue and other custom values: identity is
+                // conservative (no cross-holder reuse, still safe).
+                key.add(value);
+            }
+        }
+        return key;
     }
 
     private static boolean hasExhaustiveItemCoverage(Ingredient ingredient) {
