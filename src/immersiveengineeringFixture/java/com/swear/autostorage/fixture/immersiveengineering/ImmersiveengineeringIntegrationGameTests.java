@@ -1,6 +1,17 @@
 package com.swear.autostorage.fixture.immersiveengineering;
 
 import com.swear.autostorage.CraftingTerminalMenu;
+import com.swear.autostorage.Action;
+import com.swear.autostorage.ItemKey;
+import com.swear.autostorage.StorageCoreBlockEntity;
+import com.swear.autostorage.StorageResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import com.swear.autostorage.AutoStorage;
 import com.swear.autostorage.IsolatedRecipeInventoryEvidence;
 import net.minecraft.gametest.framework.GameTest;
@@ -28,12 +39,14 @@ public final class ImmersiveengineeringIntegrationGameTests {
             helper.fail("Immersive Engineering mod is not loaded");
             return;
         }
-        if (AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getNamespace().equals("immersiveengineering")
+        if (AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
+                        .filter(id -> id.getNamespace().equals("immersiveengineering")
                                 || id.getPath().startsWith("immersiveengineering_"))
-                || AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
-                        .anyMatch(id -> id.getNamespace().equals("immersiveengineering")
-                                || id.getPath().startsWith("immersiveengineering_"))) {
+                        .anyMatch(id -> !id.equals(SAWMILL))
+                || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
+                        .filter(id -> id.getNamespace().equals("immersiveengineering")
+                                || id.getPath().startsWith("immersiveengineering_"))
+                        .anyMatch(id -> !id.equals(SAWMILL))) {
             helper.fail("Immersive Engineering unsafe multiblock contract was registered");
             return;
         }
@@ -130,6 +143,175 @@ public final class ImmersiveengineeringIntegrationGameTests {
             }
         }
         helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void sawmill_converts_logs_to_planks_with_energy_and_work(
+            GameTestHelper helper
+    ) {
+        withCore(helper, (level, core, player) -> {
+            var manager = level.getRecipeManager();
+            int sawmillHolders = 0;
+            for (var h : manager.getRecipes()) {
+                if (h.id().getNamespace().equals("immersiveengineering")
+                        && h.value().getType().toString().contains("sawmill")) {
+                    sawmillHolders++;
+                }
+            }
+            var holder = manager.byKey(ie("sawmill/oak_log")).orElse(null);
+            if (holder == null
+                    || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+                if (holder != null) {
+                    helper.fail("Sawmill recipe must be supported: sawmill/oak_log type="
+                            + holder.value().getType());
+                    return;
+                }
+                helper.fail("Sawmill recipe must be supported: sawmill/oak_log"
+                        + " holders=" + sawmillHolders + " type="
+                        + (holder == null ? "null" : holder.value().getType()));
+                return;
+            }
+            seedItem(core, Items.OAK_LOG, 1);
+            seedResource(core, StorageResourceKey.neoforgeEnergy(), 1_000_000L);
+            installStation(core, player, ieItem("sawmill"));
+            addCoreTicks(core, 10_000);
+            var menu = new CraftingTerminalMenu(
+                    610, player.getInventory(), core);
+            boolean requested = menu.handleRecipeRequest(
+                    level, ie("sawmill/oak_log"), 1,
+                    com.swear.autostorage.CraftingDestination.NONE, player);
+            boolean committed = requested
+                    && menu.computeCraftPreview(core, player).craftable() >= 1
+                    && menu.handleRecipeRequest(
+                            level, ie("sawmill/oak_log"), 1,
+                            com.swear.autostorage.CraftingDestination.STORAGE, player);
+            long planks = core.getItemCount(ItemKey.of(new ItemStack(Items.OAK_PLANKS)));
+            long logs = core.getItemCount(ItemKey.of(new ItemStack(Items.OAK_LOG)));
+            if (!committed) {
+                helper.fail("Sawmill craft did not commit: planks=" + planks
+                        + " logs=" + logs + " craftable=" + menu.getCraftableCount());
+                return;
+            }
+            if (planks != 6) {
+                helper.fail("Sawmill craft produced the wrong planks count: "
+                        + planks + " (logs left=" + logs
+                        + " craftable=" + menu.getCraftableCount()
+                        + " work=" + core.getStationWork(SAWMILL)
+                        + " energy=" + core.getResourceAmount(
+                                StorageResourceKey.neoforgeEnergy())
+                        + " type=" + holder.value().getType()
+                        + " same=" + (holder.value().getType()
+                                == blusunrize.immersiveengineering.api.crafting
+                                        .IERecipeTypes.SAWMILL.get())
+                        + " family=" + AutoStorage.RECIPE_FAMILY_REGISTRY
+                                .containsKey(SAWMILL)
+                        + " installed=" + core.isMachineInstalled(SAWMILL)
+                        + " types=" + core.getTypeCount()
+                        + " committed=" + committed);
+                return;
+            }
+            if (core.getItemCount(ItemKey.of(new ItemStack(Items.OAK_LOG))) != 0
+                    || core.getResourceAmount(
+                            StorageResourceKey.neoforgeEnergy()) >= 1_000_000L) {
+                helper.fail("Sawmill craft did not consume input and energy");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static final ResourceLocation SAWMILL =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_sawmill");
+    private static final int STATIONS_PAGE_BUTTON = 29;
+    private static final int STORAGE_PAGE_BUTTON = 14;
+
+    private static void withCore(
+            GameTestHelper helper,
+            FixtureAssertion assertion
+    ) {
+        var level = helper.getLevel();
+        var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
+        level.setBlock(
+                corePos,
+                AutoStorage.STORAGE_CORE.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        level.setBlock(
+                corePos.south(),
+                AutoStorage.STORAGE_UNIT_T1.get().defaultBlockState(),
+                Block.UPDATE_ALL);
+        helper.runAfterDelay(2, () -> {
+            if (!(level.getBlockEntity(corePos) instanceof StorageCoreBlockEntity core)) {
+                helper.fail("Core not found");
+                return;
+            }
+            core.rebuildNetwork(level);
+            var player = helper.makeMockPlayer(GameType.SURVIVAL);
+            player.setPos(
+                    corePos.getX() + 0.5,
+                    corePos.getY() + 0.5,
+                    corePos.getZ() + 0.5);
+            assertion.run(level, core, player);
+        });
+    }
+
+    private static void seedItem(StorageCoreBlockEntity core, Item item, int count) {
+        if (core.insertResource(
+                StorageResourceKey.item(new ItemStack(item), core.getLevel().registryAccess()),
+                count, Action.EXECUTE) != count) {
+            throw new IllegalStateException("Could not seed " + item);
+        }
+    }
+
+    private static void seedResource(
+            StorageCoreBlockEntity core,
+            StorageResourceKey key,
+            long amount
+    ) {
+        if (core.insertResource(key, amount, Action.EXECUTE) != amount) {
+            throw new IllegalStateException("Could not seed " + key);
+        }
+    }
+
+    private static void installStation(
+            StorageCoreBlockEntity core,
+            Player player,
+            Item stationItem
+    ) {
+        ItemStack station = new ItemStack(stationItem);
+        var menu = new CraftingTerminalMenu(
+                611, player.getInventory(), core);
+        menu.clickMenuButton(player, STATIONS_PAGE_BUTTON);
+        for (int index = CraftingTerminalMenu.MACHINE_SLOT_START;
+             index < CraftingTerminalMenu.MACHINE_SLOT_START
+                     + CraftingTerminalMenu.MACHINE_SLOT_COUNT;
+             index++) {
+            var slot = menu.getSlot(index);
+            if (!slot.isActive() || !slot.mayPlace(station)) continue;
+            slot.set(station.copy());
+            slot.setChanged();
+            menu.clickMenuButton(player, STORAGE_PAGE_BUTTON);
+            return;
+        }
+        menu.clickMenuButton(player, STORAGE_PAGE_BUTTON);
+        throw new IllegalStateException("Could not install IE sawmill station");
+    }
+
+    private static void addCoreTicks(StorageCoreBlockEntity core, int ticks) {
+        for (int tick = 0; tick < ticks; tick++) core.tick();
+    }
+
+    private static Item ieItem(String path) {
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ie(path));
+    }
+
+    @FunctionalInterface
+    private interface FixtureAssertion {
+        void run(
+                net.minecraft.server.level.ServerLevel level,
+                StorageCoreBlockEntity core,
+                Player player
+        );
     }
 
     private static void assertUnsupported(GameTestHelper helper, ResourceLocation... recipeIds) {

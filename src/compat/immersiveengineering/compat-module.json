@@ -16,7 +16,7 @@
     "net.neoforged:bus:8.0.5"
   ],
   "entrypoint": "com.swear.autostorage.compat.immersiveengineering.ImmersiveengineeringCompatModule",
-  "expectedTests": 8,
+  "expectedTests": 9,
   "fixture": "immersiveengineeringFixture",
   "id": "auto_storage:immersiveengineering",
   "matrix": {

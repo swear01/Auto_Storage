@@ -17,6 +17,7 @@ public final class ImmersiveengineeringCompatModule implements AutoStorageCompat
 
     @Override
     public void register(AutoStorageCompatContext context) {
+        ImmersiveengineeringCompat.register(MACHINES, RECIPES);
         context.register(addon -> addon
                 .machineDescriptors(MACHINES)
                 .recipeFamilies(RECIPES));

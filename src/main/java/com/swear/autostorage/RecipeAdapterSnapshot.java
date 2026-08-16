@@ -65,6 +65,12 @@ record RecipeAdapterSnapshot(
                     discoveryTypes.add(key.recipeType());
                 });
 
+        com.swear.autostorage.AutoStorage.LOGGER.info(
+                "RecipeAdapterSnapshot: families={} discoveryTypes={} sawmill={}",
+                registeredFamilies.size(),
+                discoveryTypes.size(),
+                discoveryTypes.stream().anyMatch(t ->
+                        t.toString().contains("sawmill")));
         return new RecipeAdapterSnapshot(
                 new RecipeAdapterRegistry(adapters), List.copyOf(discoveryTypes));
     }

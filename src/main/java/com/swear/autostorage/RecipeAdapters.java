@@ -11,6 +11,12 @@ final class RecipeAdapters {
     private RecipeAdapters() {
     }
 
+    static void invalidateSnapshot() {
+        synchronized (RecipeAdapters.class) {
+            snapshot = null;
+        }
+    }
+
     static RecipeAdapterSnapshot snapshot() {
         RecipeAdapterSnapshot current = snapshot;
         if (current != null) return current;

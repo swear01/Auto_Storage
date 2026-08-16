@@ -2597,8 +2597,14 @@ class StaticRegressionTests(unittest.TestCase):
             module_index,
         )
         descriptor = json.loads(module_index)
-        self.assertEqual([], descriptor["matrix"]["descriptors"])
-        self.assertEqual([], descriptor["matrix"]["acceptedRecipes"])
+        self.assertEqual(
+            ["auto_storage:immersiveengineering_sawmill"],
+            descriptor["matrix"]["descriptors"],
+        )
+        self.assertEqual(
+            ["immersiveengineering:sawmill"],
+            descriptor["matrix"]["acceptedRecipes"],
+        )
         self.assertEqual(
             ["immersiveengineering"],
             descriptor["matrix"]["recipeInventory"]["namespaces"],

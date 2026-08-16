@@ -423,6 +423,7 @@ public class AutoStorage {
     ) {
         AutoStorageAddonLifecycle.runRecipeReloads();
         invalidateDatapackCaches();
+        RecipeAdapters.invalidateSnapshot();
         CraftableRecipeCatalog.invalidate();
         CraftableRecipeCatalog.prewarm(event.getServer().overworld());
     }
