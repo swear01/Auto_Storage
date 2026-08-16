@@ -740,6 +740,7 @@ final class BuiltInRecipeAdapters {
     }
 
     private static Object expansionKey(Ingredient ingredient) {
+        if (ingredient.getCustomIngredient() != null) return null;
         net.minecraft.world.item.crafting.Ingredient.Value[] values =
                 ingredient.getValues();
         if (values == null) return null;
