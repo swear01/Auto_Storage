@@ -25,6 +25,18 @@ final class CraftableRecipeCatalog {
     private CatalogIndex index;
 
     static void prewarm(Level level) {
+        long started = System.nanoTime();
+        RecipeManager manager = level.getRecipeManager();
+        boolean built;
+        synchronized (CACHE) {
+            CatalogIndex cached = CACHE.get(manager);
+            built = cached == null
+                    || cached.recipeSnapshot() != manager.getRecipes();
+        }
+        AutoStorage.LOGGER.info(
+                "Craftable prewarm: {} ({} ms cache check)",
+                built ? "building" : "cache hit",
+                (System.nanoTime() - started) / 1_000_000L);
         new CraftableRecipeCatalog().ensureCurrent(level);
     }
 
@@ -115,6 +127,7 @@ final class CraftableRecipeCatalog {
                     .forEach(supported::add);
         }
 
+        long classifiedAt = System.nanoTime();
         Map<Item, List<Integer>> byIngredient = new HashMap<>();
         List<CatalogEntry> entries = new ArrayList<>(supported.size());
         List<Integer> unindexed = new ArrayList<>();
@@ -139,17 +152,22 @@ final class CraftableRecipeCatalog {
             }
         }
 
+        long requirementsAt = System.nanoTime();
         Map<Item, int[]> immutableIndex = new HashMap<>();
         byIngredient.forEach((item, indices) -> immutableIndex.put(
                 item, indices.stream().mapToInt(Integer::intValue).toArray()));
-        long elapsedMillis = (System.nanoTime() - started) / 1_000_000L;
+        long indexAt = System.nanoTime();
         AutoStorage.LOGGER.info(
-                "Craftable catalog built in {} ms: total={}, supported={}, unindexed={}, ingredientKeys={}",
-                elapsedMillis,
+                "Craftable catalog built in {} ms: total={}, supported={}, unindexed={}, ingredientKeys={} "
+                        + "(classify {} ms, entries {} ms, index {} ms)",
+                (indexAt - started) / 1_000_000L,
                 recipeSnapshot.size(),
                 supported.size(),
                 unindexed.size(),
-                immutableIndex.size());
+                immutableIndex.size(),
+                (classifiedAt - started) / 1_000_000L,
+                (requirementsAt - classifiedAt) / 1_000_000L,
+                (indexAt - requirementsAt) / 1_000_000L);
         return new CatalogIndex(
                 recipeSnapshot,
                 List.copyOf(entries),
