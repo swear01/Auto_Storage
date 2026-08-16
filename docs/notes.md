@@ -731,3 +731,20 @@ Source: https://github.com/refinedmods/refinedstorage2
 - **合成 preview(A7)**:用 simulate 路徑算「可做 N / 缺什麼」顯示,不異動狀態。
 - **增量網路成長(A1,安全範圍)**:放置 callback 先 coalesce 到 next tick；單一方塊接到既有 connected set 時，`StorageCoreBlockEntity.tryIncrementalAdd` 用 cached-set bounded path check 確認不越過 full rebuild depth/member guard 後加入(不讀整個 world graph)。**破壞/批次/不確定拓樸一律 full `rebuildNetwork`**(移除可能分裂網路,放置若 bridge detached segment 或連到多個 core 也屬不確定)。`capacityOf()` 是兩條路徑唯一的容量計算來源;GameTest 守護 simple growth、programmatic placement、piston move、depth boundary、detached bridge full rebuild、multi-core bridge conflicted。
 - **仍未採用(未來)**:**P3 增量 grid delta**(grid 改收差異、不整份重建)與完整常駐 network graph;目前分頁式 grid(≤81 格,vanilla 已增量同步)低價值,除非改成整列表 client grid 才值得。
+## 2026-08-16 Machine audit verdicts: FluxNetworks / Occultism / Ice and Fire (#133)
+
+- FluxNetworks 8.0.0: 15 recipes are all vanilla-shaped crafting (already covered by built-in
+  families); the Flux energy network (Controller/Plug/Point/Storage) is bidirectional
+  transfer/storage — not a one-way conversion, out of Transform scope. No module.
+- Occultism 1.223.0: no block-entity conversion machines; Spirit Fire, rituals, and miners
+  are world/ritual mechanics (spirit-fire recipes consume live world blocks), not
+  deterministic item-to-stored-resource conversions. No module.
+- Ice and Fire 2.0-beta.17: Dragon Forge is a multiblock gated on dragon blood; no
+  deterministic item-to-stored-resource machine. No module.
+- EvilCraft 1.2.89 remaining machines (#134): 17 block entities verified. Blood Infuser is
+  the only deterministic item/resource converter and is already supported. BloodChest/
+  ColossalBloodChest (storage/auto-feed), DarkTank (fluid tank), EnvironmentalAccumulator +
+  Sanguinary (weather-dependent), Purifier (action/component/enchantment/chance registry),
+  SpiritFurnace (soul reanimation), SpiritPortal/Reanimator (entity), EntangledChalice,
+  DisplayStand, EternalWater, BloodStain, BoxOfEternalClosure, InvisibleRedstone are
+  storage/world/entity mechanics — no deterministic item-to-resource conversion. Fail closed.

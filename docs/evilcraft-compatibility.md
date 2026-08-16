@@ -35,3 +35,21 @@ The 18-jar Prism EMI/TMRV pack therefore omits EvilCraft and Cyclops Core and re
 ```bash
 ./gradlew runEvilCraftGameTestServer
 ```
+
+## Remaining-machines audit (#134)
+
+Seventeen EvilCraft block entities were re-verified against the Transform scope
+(one-way deterministic item-to-stored-resource conversions). Only the Blood
+Infuser qualifies and is supported above. Everything else is storage,
+world/entity, or non-deterministic mechanics and stays fail-closed:
+
+| Block entity | Verdict |
+|---|---|
+| Blood Infuser | supported (installable timed station, see above) |
+| BloodChest / ColossalBloodChest | storage + auto-feeding, not a conversion |
+| DarkTank | fluid tank, passive storage |
+| EnvironmentalAccumulator (+ Sanguinary) | weather/ritual-dependent, non-deterministic |
+| Purifier | action-registry / component / enchantment / chance, not an exact recipe family |
+| Spirit Furnace | soul reanimation (entity/world mutation) |
+| Spirit Portal / Reanimator | entity revival, world mutation |
+| Entangled Chalice / DisplayStand / Eternal Water / BloodStain / Box of Eternal Closure / Invisible Redstone | storage / world / render mechanics |
