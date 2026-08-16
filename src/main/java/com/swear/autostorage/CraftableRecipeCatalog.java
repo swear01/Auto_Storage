@@ -13,25 +13,26 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 final class CraftableRecipeCatalog {
-    private static final Map<RecipeManager, CatalogIndex> CACHE =
-            Collections.synchronizedMap(new WeakHashMap<>());
+    // Keyed by the live recipe snapshot collection identity (not the
+    // RecipeManager): the same snapshot reuses the index across manager
+    // instances, and a datapack reload produces a new snapshot list that
+    // misses and rebuilds exactly once.
+    private static final Map<Collection<RecipeHolder<?>>, CatalogIndex> CACHE =
+            Collections.synchronizedMap(new java.util.HashMap<>());
 
     private CatalogIndex index;
 
     static void prewarm(Level level) {
         long started = System.nanoTime();
-        RecipeManager manager = level.getRecipeManager();
+        Collection<RecipeHolder<?>> snapshot = level.getRecipeManager().getRecipes();
         boolean built;
         synchronized (CACHE) {
-            CatalogIndex cached = CACHE.get(manager);
-            built = cached == null
-                    || cached.recipeSnapshot() != manager.getRecipes();
+            CatalogIndex cached = CACHE.get(snapshot);
+            built = cached == null;
         }
         AutoStorage.LOGGER.info(
                 "Craftable prewarm: {} ({} ms cache check)",
@@ -100,10 +101,10 @@ final class CraftableRecipeCatalog {
         Collection<RecipeHolder<?>> currentSnapshot = manager.getRecipes();
         if (index != null && currentSnapshot == index.recipeSnapshot()) return index;
         synchronized (CACHE) {
-            CatalogIndex cached = CACHE.get(manager);
-            if (cached == null || cached.recipeSnapshot() != currentSnapshot) {
+            CatalogIndex cached = CACHE.get(currentSnapshot);
+            if (cached == null) {
                 cached = buildIndex(level, currentSnapshot);
-                CACHE.put(manager, cached);
+                CACHE.put(currentSnapshot, cached);
             }
             index = cached;
         }
