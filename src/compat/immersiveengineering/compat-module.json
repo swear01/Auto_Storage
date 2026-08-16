@@ -20,8 +20,12 @@
   "fixture": "immersiveengineeringFixture",
   "id": "auto_storage:immersiveengineering",
   "matrix": {
-    "acceptedRecipes": [],
-    "descriptors": [],
+    "acceptedRecipes": [
+      "immersiveengineering:sawmill"
+    ],
+    "descriptors": [
+      "auto_storage:immersiveengineering_sawmill"
+    ],
     "mods": [
       "immersiveengineering"
     ],
