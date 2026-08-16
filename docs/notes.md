@@ -1,3 +1,8 @@
+2026-08-16 IE multiblock 擴充設計（#135/#136）：
+- IE 無獨立 dummy item — multiblock 由 master block item 代表（crusher/sawmill/arc_furnace/alloy_smelter/bottling_machine/metal_press — 放置生成結構，BlockEntityDummy 佔位）— station item 用機器 block item（內建渲染）。
+- 工匠錘（immersiveengineering:hammer）= workstation 工具 — craft 需錘子（ToolCost，無耐久消耗，符合 IE 組裝語意）。
+- 確定性 subsets：sawmill 72（100%）、arc_furnace 48、bottling 28（item+fluid→item）、crusher 20、alloy 8、metal_press 4；energy 欄位 = 成本；TagOutput 只收明確 item；chance/roll（hammer_crushing 30、mineral_mix 24、crusher secondary 86）fail-closed。
+
 2026-08-14 #118 ConversionScanner core 完成：
 - `ConversionPattern`（patternId/resolve/revisionKey）+ `ConversionScanner`（pattern registry + revision 匯總）加入 api jar（apiClassNames + api-surface.txt 更新）。
 - 設計修正：單一 runtime provider 只回傳第一個匹配（紅石粉同時匹配 chemical 10mb + energy 10,000FE）→ 改為 **per-pattern providers**（MekanismTransformCompat 註冊兩個 patterns + 兩個 providers，input 可有多個不同輸出的 uses）。ConversionScanner 只做 pattern 註冊表 + revision digest。
