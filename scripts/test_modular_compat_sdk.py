@@ -415,9 +415,19 @@ class ModularCompatSdkTests(unittest.TestCase):
             actual_recipe_classes,
             {family["class"] for family in contract["families"]},
         )
-        self.assertTrue(
-            all(family["status"] == "rejected" for family in contract["families"])
-        )
+        by_id = {family["id"]: family for family in contract["families"]}
+        self.assertEqual(
+            "accepted", by_id["item_melting_recipe"]["status"])
+        self.assertEqual(
+            "accepted", by_id["item_casting_recipe"]["status"])
+        self.assertEqual(
+            "accepted", by_id["block_casting_recipe"]["status"])
+        self.assertEqual(
+            "rejected", by_id["fluid_alloying_recipe"]["status"])
+        self.assertEqual(
+            "rejected", by_id["entity_melting_recipe"]["status"])
+        self.assertEqual(
+            "rejected", by_id["i_casting_recipe"]["status"])
         self.assertEqual(
             audit["recipe_data"]["digest"],
             contract["source_recipe_data_sha256"],

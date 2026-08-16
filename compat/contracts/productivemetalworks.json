@@ -1,260 +1,384 @@
 {
-  "families": [
+ "families": [
+  {
+   "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
+   "costs": [
     {
-      "class": "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe",
-      "costs": [],
-      "decision": "Basin casting depends on live CastingBlockEntity coolingTime, Config.foundryCoolingModifier, optional CastingRecipeEvent injection, cast-replacement mold semantics, and fluid normally poured from Foundry taps; no complete simulate-then-commit station contract without live block/multiblock state.",
-      "evidence": [
-        "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe#public_signature",
-        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/BlockCastingRecipe.java",
-        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/CastingBlockEntity.java#serverTick"
-      ],
-      "id": "block_casting_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
-      "costs": [],
-      "decision": "Entity melting consumes live entities and is entity/world mutation outside Auto Storage recipe transactions.",
-      "evidence": [
-        "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe#public_signature",
-        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/EntityMeltingRecipe.java"
-      ],
-      "id": "entity_melting_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
-      "costs": [],
-      "decision": "Fluid alloying executes inside the Foundry multiblock against live tank contents, upgrade-modified speed, and controller fuel state; payload alone cannot bypass retained multiblock execution.",
-      "evidence": [
-        "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe#public_signature",
-        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/FluidAlloyingRecipe.java#matches",
-        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryControllerBlockEntity.java"
-      ],
-      "id": "fluid_alloying_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
-      "costs": [],
-      "decision": "Abstract casting Recipe interface shared by the separately audited ItemCastingRecipe and BlockCastingRecipe implementations. It has no standalone serializer, recipe type, or complete output contract, while its methods require live Level and FluidStack state. Binding the interface as one family would merge distinct live casting-table and basin semantics that are already rejected.",
-      "evidence": [
-        "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe#public_signature",
-        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ICastingRecipe.java"
-      ],
-      "id": "i_casting_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
-      "costs": [],
-      "decision": "Table casting depends on live CastingBlockEntity coolingTime, Config.foundryCoolingModifier, optional CastingRecipeEvent injection, consumeCast/mold replacement, bucket FluidUtil fill side path, and fluid normally poured from Foundry taps; no complete simulate-then-commit contract without live block state.",
-      "evidence": [
-        "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe#public_signature",
-        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemCastingRecipe.java#matches",
-        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/CastingBlockEntity.java#serverTick",
-        "src/main/java/cy/jdkdigital/productivemetalworks/event/CastingRecipeEvent.java"
-      ],
-      "id": "item_casting_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
-    },
-    {
-      "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
-      "costs": [],
-      "decision": "Item melting requires a formed Foundry multiblock, live FuelMap temperature/speed/consumption, upgrade speed modifiers, and tank/capacitor fuel drain; temperature-gated match cannot be represented as an unconfigured installed station transaction.",
-      "evidence": [
-        "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe#public_signature",
-        "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ItemMeltingRecipe.java#matches",
-        "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryControllerBlockEntity.java#meltItems"
-      ],
-      "id": "item_melting_recipe",
-      "inputs": [],
-      "outputs": [],
-      "recipe_type": null,
-      "risks": [
-        "world_mutation"
-      ],
-      "station": null,
-      "status": "rejected"
+     "amount": "1000 (CastingBlockEntity coolingTime base)",
+     "resource_kind": "auto_storage:station_work"
     }
-  ],
-  "kind": "auto_storage_compat_contract",
-  "matrix": {
-    "acceptedRecipes": [],
-    "descriptors": [],
-    "mods": [
-      "productivemetalworks"
-    ],
-    "recipeInventory": {
-      "namespaces": [
-        "productivemetalworks"
-      ],
-      "sha256": "a17a7208231825e5c0c9f0c801867dfbf09e0bbfbb228018562ae01460f1fee7"
+   ],
+   "decision": "Accept deterministic basin casting with the same contract as table casting (consumed cast + exact fluid to one exact item; consume_cast=true only; 18/19 basin recipes qualify).",
+   "evidence": [
+    "cy.jdkdigital.productivemetalworks.recipe.BlockCastingRecipe#public_signature"
+   ],
+   "id": "block_casting_recipe",
+   "inputs": [
+    {
+     "amount": 1,
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.cast single Ingredient (consume_cast=true only)"
     },
-    "rejectedDescriptors": [],
-    "rejectedResourceKinds": [],
-    "resourceKinds": []
-  },
-  "schema": 1,
-  "source_audit_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124",
-  "source_recipe_data_sha256": "d3bee949a7a15e789e4f5aa5df37434cb500b0686294a40c4e354b734815a380",
-  "source_recipe_inventory_sha256": "c8f78deabfe554ade90c23bcb2bd89b268d57262b564b8a6ab7b2dac65ebf511",
-  "target": {
-    "dependency": "curse.maven:productivemetalworks-1184570:7884786",
-    "display_name": "Productive Metalworks",
-    "mod_id": "productivemetalworks",
-    "repositories": [
-      "https://www.cursemaven.com/"
-    ],
-    "runtime_dependencies": [],
-    "version": "1.21.1-1.15.0"
-  },
-  "verification": {
-    "checks": [
-      "absent_target_no_classload",
-      "present_target_load_once",
-      "ingredient_shortage_atomic",
-      "destination_capacity_atomic",
-      "checked_overflow_atomic",
-      "stale_recipe_holder_atomic",
-      "catalyst_tool_remainder_exact",
-      "multi_output_merge_exact",
-      "mixed_resource_rollback_atomic",
-      "dedicated_server_client_isolation",
-      "api_only_compilation",
-      "all_mod_coexistence"
-    ],
-    "evidence": {
-      "absent_target_no_classload": [
-        {
-          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
-          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
-          "task": "runGameTestServer"
-        }
-      ],
-      "all_mod_coexistence": [
-        {
-          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
-          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
-          "task": "runCompatibilityMatrixGameTestServer"
-        }
-      ],
-      "api_only_compilation": [
-        {
-          "marker": "compileAddonExampleJava",
-          "source": "build.gradle",
-          "task": "build"
-        }
-      ],
-      "catalyst_tool_remainder_exact": [
-        {
-          "marker": "Missing representative Productive Metalworks recipe casting/cast/ingot",
-          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
-          "task": "runProductivemetalworksGameTestServer"
-        }
-      ],
-      "checked_overflow_atomic": [
-        {
-          "marker": "Audited Productive Metalworks recipe type is empty",
-          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
-          "task": "runProductivemetalworksGameTestServer"
-        }
-      ],
-      "dedicated_server_client_isolation": [
-        {
-          "marker": "verifyCompatIsolation",
-          "source": "build.gradle",
-          "task": "build"
-        }
-      ],
-      "destination_capacity_atomic": [
-        {
-          "marker": "Unsafe Productive Metalworks recipe type accepted",
-          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
-          "task": "runProductivemetalworksGameTestServer"
-        }
-      ],
-      "ingredient_shortage_atomic": [
-        {
-          "marker": "Unsafe Productive Metalworks recipe was accepted: melting/ancient_debris",
-          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
-          "task": "runProductivemetalworksGameTestServer"
-        }
-      ],
-      "mixed_resource_rollback_atomic": [
-        {
-          "marker": "Failed typed family commit partially mutated resources",
-          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
-          "task": "runRecipeAddonGameTestServer"
-        }
-      ],
-      "multi_output_merge_exact": [
-        {
-          "marker": "Typed family changed the wrong exact resources or output amounts",
-          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
-          "task": "runRecipeAddonGameTestServer"
-        }
-      ],
-      "present_target_load_once": [
-        {
-          "marker": "Productive Metalworks unsafe foundry contract was registered",
-          "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
-          "task": "runProductivemetalworksGameTestServer"
-        }
-      ],
-      "stale_recipe_holder_atomic": [
-        {
-          "marker": "Unknown recipe id must fail closed",
-          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
-          "task": "runGameTestServer"
-        }
-      ]
-    },
-    "expected_game_tests": 8,
-    "fixture": "productivemetalworksFixture",
-    "game_test_task": "runProductivemetalworksGameTestServer",
-    "gradle_tasks": [
-      "build",
-      "runGameTestServer",
-      "runRecipeAddonGameTestServer",
-      "runProductivemetalworksGameTestServer",
-      "runCompatibilityMatrixGameTestServer"
+    {
+     "amount": "recipe.fluid.amount()",
+     "resource_kind": "minecraft:fluid",
+     "role": "consume",
+     "selector": "recipe.fluid SizedFluidIngredient"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.result.getCount()",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.result exact ItemStack"
+    }
+   ],
+   "recipe_type": "productivemetalworks:block_casting",
+   "risks": [
+    "world_mutation"
+   ],
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:productivemetalworks_casting_table",
+    "variants": [
+     {
+      "bounds": "plain block item; upgrades are not inferred",
+      "item": "productivemetalworks:casting_table",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     },
+     {
+      "bounds": "plain block item; upgrades are not inferred",
+      "item": "productivemetalworks:casting_basin",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
     ]
+   },
+   "status": "accepted"
+  },
+  {
+   "class": "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe",
+   "costs": [],
+   "decision": "Entity melting consumes live entities and is entity/world mutation outside Auto Storage recipe transactions.",
+   "evidence": [
+    "cy.jdkdigital.productivemetalworks.recipe.EntityMeltingRecipe#public_signature",
+    "src/main/java/cy/jdkdigital/productivemetalworks/recipe/EntityMeltingRecipe.java"
+   ],
+   "id": "entity_melting_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe",
+   "costs": [],
+   "decision": "Fluid alloying executes inside the Foundry multiblock against live tank contents, upgrade-modified speed, and controller fuel state; payload alone cannot bypass retained multiblock execution.",
+   "evidence": [
+    "cy.jdkdigital.productivemetalworks.recipe.FluidAlloyingRecipe#public_signature",
+    "src/main/java/cy/jdkdigital/productivemetalworks/recipe/FluidAlloyingRecipe.java#matches",
+    "src/main/java/cy/jdkdigital/productivemetalworks/common/block/entity/FoundryControllerBlockEntity.java"
+   ],
+   "id": "fluid_alloying_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe",
+   "costs": [],
+   "decision": "Abstract casting Recipe interface shared by the separately audited ItemCastingRecipe and BlockCastingRecipe implementations. It has no standalone serializer, recipe type, or complete output contract, while its methods require live Level and FluidStack state. Binding the interface as one family would merge distinct live casting-table and basin semantics that are already rejected.",
+   "evidence": [
+    "cy.jdkdigital.productivemetalworks.recipe.ICastingRecipe#public_signature",
+    "src/main/java/cy/jdkdigital/productivemetalworks/recipe/ICastingRecipe.java"
+   ],
+   "id": "i_casting_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe",
+   "costs": [
+    {
+     "amount": "1000 (CastingBlockEntity coolingTime base)",
+     "resource_kind": "auto_storage:station_work"
+    }
+   ],
+   "decision": "Accept deterministic table casting: one consumed cast item plus one exact fluid amount produce one exact item. Only consume_cast=true recipes are accepted (molds that are reused per craft are not modeled); the casting table/basin blocks are the station and cooling is abstracted as 1000 ticks of station work (CastingBlockEntity coolingTime base; Config modifier and cooling events are not simulated).",
+   "evidence": [
+    "cy.jdkdigital.productivemetalworks.recipe.ItemCastingRecipe#public_signature"
+   ],
+   "id": "item_casting_recipe",
+   "inputs": [
+    {
+     "amount": 1,
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.cast single Ingredient (consume_cast=true only)"
+    },
+    {
+     "amount": "recipe.fluid.amount()",
+     "resource_kind": "minecraft:fluid",
+     "role": "consume",
+     "selector": "recipe.fluid SizedFluidIngredient"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.result.getCount()",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.result exact ItemStack"
+    }
+   ],
+   "recipe_type": "productivemetalworks:item_casting",
+   "risks": [
+    "world_mutation"
+   ],
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:productivemetalworks_casting_table",
+    "variants": [
+     {
+      "bounds": "plain block item; upgrades are not inferred",
+      "item": "productivemetalworks:casting_table",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     },
+     {
+      "bounds": "plain block item; upgrades are not inferred",
+      "item": "productivemetalworks:casting_basin",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
+  },
+  {
+   "class": "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe",
+   "costs": [
+    {
+     "amount": "sum of result mb (minimum 1)",
+     "resource_kind": "auto_storage:station_work"
+    }
+   ],
+   "decision": "Accept deterministic item melting: the Foundry melts one item into one or more exact fluid results (39 single, 6 double, 1 triple in the 1,118-recipe data set; no chance). Temperature (min/max) is a fuel/coil condition abstracted by the installed foundry controller station. Work = sum of result mb (the block entity's getTimeInSlot = total result amount ticks at one work/tick). Fuel-map temperature, speed, consumption, and upgrades are not simulated.",
+   "evidence": [
+    "cy.jdkdigital.productivemetalworks.recipe.ItemMeltingRecipe#public_signature"
+   ],
+   "id": "item_melting_recipe",
+   "inputs": [
+    {
+     "amount": 1,
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.item single Ingredient"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "stack.getAmount() per result FluidStack",
+     "resource_kind": "minecraft:fluid",
+     "role": "primary",
+     "selector": "recipe.result[*] exact FluidStack"
+    }
+   ],
+   "recipe_type": "productivemetalworks:item_melting",
+   "risks": [
+    "world_mutation"
+   ],
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:productivemetalworks_foundry",
+    "variants": [
+     {
+      "bounds": "plain block item; upgrades are not inferred",
+      "item": "productivemetalworks:gray_foundry_controller",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
   }
+ ],
+ "kind": "auto_storage_compat_contract",
+ "matrix": {
+  "acceptedRecipes": [
+   "productivemetalworks:item_melting",
+   "productivemetalworks:item_casting",
+   "productivemetalworks:block_casting"
+  ],
+  "descriptors": [
+   "auto_storage:productivemetalworks_foundry",
+   "auto_storage:productivemetalworks_casting_table"
+  ],
+  "mods": [
+   "productivemetalworks"
+  ],
+  "recipeInventory": {
+   "namespaces": [
+    "productivemetalworks"
+   ],
+   "sha256": "a17a7208231825e5c0c9f0c801867dfbf09e0bbfbb228018562ae01460f1fee7"
+  },
+  "rejectedDescriptors": [],
+  "rejectedResourceKinds": [],
+  "resourceKinds": []
+ },
+ "schema": 1,
+ "source_audit_sha256": "1dcf9e10fc457c92d9ed466336104927169817cd509ca9ca69dec734f994d124",
+ "source_recipe_data_sha256": "d3bee949a7a15e789e4f5aa5df37434cb500b0686294a40c4e354b734815a380",
+ "source_recipe_inventory_sha256": "c8f78deabfe554ade90c23bcb2bd89b268d57262b564b8a6ab7b2dac65ebf511",
+ "target": {
+  "dependency": "curse.maven:productivemetalworks-1184570:7884786",
+  "display_name": "Productive Metalworks",
+  "mod_id": "productivemetalworks",
+  "repositories": [
+   "https://www.cursemaven.com/"
+  ],
+  "runtime_dependencies": [],
+  "version": "1.21.1-1.15.0"
+ },
+ "verification": {
+  "checks": [
+   "absent_target_no_classload",
+   "present_target_load_once",
+   "ingredient_shortage_atomic",
+   "destination_capacity_atomic",
+   "checked_overflow_atomic",
+   "stale_recipe_holder_atomic",
+   "catalyst_tool_remainder_exact",
+   "multi_output_merge_exact",
+   "mixed_resource_rollback_atomic",
+   "dedicated_server_client_isolation",
+   "api_only_compilation",
+   "all_mod_coexistence"
+  ],
+  "evidence": {
+   "absent_target_no_classload": [
+    {
+     "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "present_target_load_once": [
+    {
+     "marker": "Melting recipe must be supported: melting/ancient_debris",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "ingredient_shortage_atomic": [
+    {
+     "marker": "Melting craft did not commit",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "destination_capacity_atomic": [
+    {
+     "marker": "Basin casting did not consume cast and fluid",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "checked_overflow_atomic": [
+    {
+     "marker": "Productive Metalworks recipe counts drifted",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "stale_recipe_holder_atomic": [
+    {
+     "marker": "Unsafe Productive Metalworks mold recipe was accepted",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "catalyst_tool_remainder_exact": [
+    {
+     "marker": "Melting craft did not consume the clock",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "multi_output_merge_exact": [
+    {
+     "marker": "Melting craft produced the wrong secondary fluid",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "mixed_resource_rollback_atomic": [
+    {
+     "marker": "Unsafe Productive Metalworks recipe type accepted",
+     "source": "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java",
+     "task": "runProductivemetalworksGameTestServer"
+    }
+   ],
+   "dedicated_server_client_isolation": [
+    {
+     "marker": "verifyCompatIsolation",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "api_only_compilation": [
+    {
+     "marker": "compileAddonExampleJava",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "all_mod_coexistence": [
+    {
+     "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+     "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+     "task": "runCompatibilityMatrixGameTestServer"
+    }
+   ]
+  },
+  "expected_game_tests": 8,
+  "fixture": "productivemetalworksFixture",
+  "game_test_task": "runProductivemetalworksGameTestServer",
+  "gradle_tasks": [
+   "build",
+   "runGameTestServer",
+   "runRecipeAddonGameTestServer",
+   "runProductivemetalworksGameTestServer",
+   "runCompatibilityMatrixGameTestServer"
+  ]
+ }
 }

@@ -17,6 +17,7 @@ public final class ProductivemetalworksCompatModule implements AutoStorageCompat
 
     @Override
     public void register(AutoStorageCompatContext context) {
+        ProductivemetalworksCompat.register(MACHINES, RECIPES);
         context.register(addon -> addon
                 .machineDescriptors(MACHINES)
                 .recipeFamilies(RECIPES));

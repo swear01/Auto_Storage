@@ -2234,9 +2234,8 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertRegex(
             fixture,
-            r'if \(types\.size\(\) != 4\) \{\s*'
-            r'helper\.fail\("Expected 4 unique audited Productive Metalworks '
-            r'recipe types, but found " \+ types\.size\(\)\);',
+            r'helper\.fail\("Productive Metalworks recipe counts drifted: '
+            r'melting="\s*\+\s*melting',
         )
         self.assertIn(
             'id.getNamespace().equals("productivemetalworks")',

@@ -29,11 +29,11 @@ public final class TypedRecipePlan {
         List<TypedRecipeOutput> primaryItems = primaryOutputs.stream()
                 .filter(output -> output.key().kindId().equals(StorageResourceKindApi.ITEM_KIND))
                 .toList();
-        selectionOutput = !primaryItems.isEmpty()
-                ? primaryItems.getFirst()
-                : primaryOutputs.size() == 1
+        selectionOutput = !primaryOutputs.isEmpty()
+                ? (primaryItems.isEmpty()
                         ? primaryOutputs.getFirst()
-                        : null;
+                        : primaryItems.getFirst())
+                : null;
         presentationOutput = builder.presentationOutput.copy();
         width = builder.width;
         height = builder.height;
