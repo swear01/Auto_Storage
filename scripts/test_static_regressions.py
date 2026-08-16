@@ -2647,7 +2647,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("recipeInventory", compatibility_doc)
         self.assertIn('"status": "rejected"', contract)
-        self.assertNotIn('"status": "accepted"', contract)
+        self.assertIn('"status": "accepted"', contract)
         self.assertIn('"matrix"', contract)
         self.assertIn("immersiveengineering", audit)
 

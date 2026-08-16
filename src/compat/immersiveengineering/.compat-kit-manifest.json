@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "0cd46073a969e6c13ec18f0dc6aabde241ccbabda55236e052f457f6b65c5b16",
+  "contract_sha256": "ae5698915d7e22af1d1fe2824c3a85e52e596fb9c2381d86315beace29f46bb9",
   "files": {
-    "src/compat/immersiveengineering/compat-module.json": "ca56c9542b04f908b3038f789ec1e15688ad6836b64725da220f0e11c3238606",
+    "src/compat/immersiveengineering/compat-module.json": "ce3bfc0fcf8575e06686055a97fc9f3766e861c554670893bb2e563a2f839171",
     "src/compat/immersiveengineering/java/com/swear/autostorage/compat/immersiveengineering/ImmersiveengineeringCompatModule.java": "74aabc93ce54f2aebf4c383b519a8001327c4f3325a661727793011e7753d749",
     "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/immersiveengineering/ImmersiveengineeringFixtureMod.java": "ea01eecb60f235f59931fea288a644e98c1e073dfffef97d952cc9222a9523bc",
     "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/immersiveengineering/ImmersiveengineeringIntegrationGameTests.java": "560594db21bcb3d1261924b92fa812ee74f4d24756d0863c5b2faa3cd306f196",

@@ -962,7 +962,7 @@
     }
    ]
   },
-  "expected_game_tests": 8,
+  "expected_game_tests": 9,
   "fixture": "immersiveengineeringFixture",
   "game_test_task": "runImmersiveengineeringGameTestServer",
   "gradle_tasks": [
