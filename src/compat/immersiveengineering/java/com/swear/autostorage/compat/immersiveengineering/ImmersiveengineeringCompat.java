@@ -1,7 +1,16 @@
 package com.swear.autostorage.compat.immersiveengineering;
 
+import blusunrize.immersiveengineering.api.crafting.AlloyRecipe;
+import blusunrize.immersiveengineering.api.crafting.ArcFurnaceRecipe;
+import blusunrize.immersiveengineering.api.crafting.BottlingMachineRecipe;
+import blusunrize.immersiveengineering.api.crafting.CrusherRecipe;
 import blusunrize.immersiveengineering.api.crafting.IERecipeTypes;
+import blusunrize.immersiveengineering.api.crafting.MetalPressRecipe;
+import blusunrize.immersiveengineering.api.crafting.MultiblockRecipe;
 import blusunrize.immersiveengineering.api.crafting.SawmillRecipe;
+import blusunrize.immersiveengineering.api.crafting.TagOutput;
+import com.swear.autostorage.EnergyCost;
+import com.swear.autostorage.EnergyType;
 import com.swear.autostorage.MachineCategory;
 import com.swear.autostorage.MachineDescriptor;
 import com.swear.autostorage.MachineDescriptorApi;
@@ -13,7 +22,6 @@ import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
 import com.swear.autostorage.StorageResourceKey;
-import com.swear.autostorage.TransformProviderApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
@@ -27,17 +35,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.List;
 import java.util.Objects;
 
 public final class ImmersiveengineeringCompat {
-    private static final ResourceLocation SAWMILL_ITEM =
-            ResourceLocation.fromNamespaceAndPath("immersiveengineering", "sawmill");
-    private static final ResourceLocation SAWMILL_TYPE =
-            ResourceLocation.fromNamespaceAndPath("immersiveengineering", "sawmill");
-
     private ImmersiveengineeringCompat() {
     }
 
@@ -55,80 +59,388 @@ public final class ImmersiveengineeringCompat {
             throw new IllegalArgumentException(
                     "Immersive Engineering family register targets the wrong registry");
         }
-        ResourceLocation sawmillId = ResourceLocation.fromNamespaceAndPath(
-                machineDescriptors.getNamespace(), "immersiveengineering_sawmill");
-        machineDescriptors.register(sawmillId.getPath(), () ->
-                MachineDescriptor.installableVariants(
-                        sawmillId,
-                        Component.translatable(
-                                "gui.auto_storage.station.immersiveengineering_sawmill"),
-                        () -> List.of(MachineVariant.of(
-                                new ItemStack(requiredItem(SAWMILL_ITEM)),
-                                MachineWorkRate.ONE)),
-                        MachineCategory.PROCESS,
-                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
-                        null));
-        recipeFamilies.register(sawmillId.getPath(), () ->
+        registerSawmill(machineDescriptors, recipeFamilies);
+        registerArcFurnace(machineDescriptors, recipeFamilies);
+        registerBottling(machineDescriptors, recipeFamilies);
+        registerCrusher(machineDescriptors, recipeFamilies);
+        registerAlloy(machineDescriptors, recipeFamilies);
+        registerMetalPress(machineDescriptors, recipeFamilies);
+    }
+
+    private static void registerSawmill(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {
+        ResourceLocation id = descriptorId(machineDescriptors, "sawmill");
+        registerStation(machineDescriptors, id, "sawmill");
+        recipeFamilies.register(id.getPath(), () ->
                 RecipeFamilyFactories.deterministicResources(
                         SawmillRecipe.class,
-                        ImmersiveengineeringCompat::sawmillType,
-                        sawmillId,
+                        () -> IERecipeTypes.SAWMILL.get(),
+                        id,
                         ImmersiveengineeringCompat::supportsSawmill,
                         ImmersiveengineeringCompat::sawmillPlan,
+                        recipe -> RecipeFamilyCost.stationWorkAndTool(
+                                recipe.getBaseTime(),
+                                ResourceLocation.fromNamespaceAndPath(
+                                "auto_storage", "engineers_hammer"), 1),
+                        RecipePresentationKind.CRAFTING));
+    }
+
+    private static void registerArcFurnace(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {
+        ResourceLocation id = descriptorId(machineDescriptors, "arc_furnace");
+        registerStation(machineDescriptors, id, "arc_furnace");
+        recipeFamilies.register(id.getPath(), () ->
+                RecipeFamilyFactories.deterministicResources(
+                        ArcFurnaceRecipe.class,
+                        () -> IERecipeTypes.ARC_FURNACE.get(),
+                        id,
+                        ImmersiveengineeringCompat::supportsArcFurnace,
+                        ImmersiveengineeringCompat::arcFurnacePlan,
+                        recipe -> RecipeFamilyCost.stationWorkAndTool(
+                                recipe.getBaseTime(),
+                                ResourceLocation.fromNamespaceAndPath(
+                                "auto_storage", "engineers_hammer"), 1),
+                        RecipePresentationKind.CRAFTING));
+    }
+
+    private static void registerBottling(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {
+        ResourceLocation id = descriptorId(machineDescriptors, "bottling_machine");
+        registerStation(machineDescriptors, id, "bottling_machine");
+        recipeFamilies.register(id.getPath(), () ->
+                RecipeFamilyFactories.deterministicResources(
+                        BottlingMachineRecipe.class,
+                        () -> IERecipeTypes.BOTTLING_MACHINE.get(),
+                        id,
+                        ImmersiveengineeringCompat::supportsBottling,
+                        ImmersiveengineeringCompat::bottlingPlan,
+                        recipe -> RecipeFamilyCost.stationWorkAndTool(
+                                recipe.getBaseTime(),
+                                ResourceLocation.fromNamespaceAndPath(
+                                "auto_storage", "engineers_hammer"), 1),
+                        RecipePresentationKind.CRAFTING));
+    }
+
+    private static void registerCrusher(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {
+        ResourceLocation id = descriptorId(machineDescriptors, "crusher");
+        registerStation(machineDescriptors, id, "crusher");
+        recipeFamilies.register(id.getPath(), () ->
+                RecipeFamilyFactories.deterministicResources(
+                        CrusherRecipe.class,
+                        () -> IERecipeTypes.CRUSHER.get(),
+                        id,
+                        ImmersiveengineeringCompat::supportsCrusher,
+                        ImmersiveengineeringCompat::crusherPlan,
+                        recipe -> RecipeFamilyCost.stationWorkAndTool(
+                                recipe.getBaseTime(),
+                                ResourceLocation.fromNamespaceAndPath(
+                                "auto_storage", "engineers_hammer"), 1),
+                        RecipePresentationKind.CRAFTING));
+    }
+
+    private static void registerAlloy(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {
+        ResourceLocation id = descriptorId(machineDescriptors, "alloy_smelter");
+        registerStation(machineDescriptors, id, "alloy_smelter");
+        recipeFamilies.register(id.getPath(), () ->
+                RecipeFamilyFactories.deterministicResources(
+                        AlloyRecipe.class,
+                        () -> IERecipeTypes.ALLOY.get(),
+                        id,
+                        ImmersiveengineeringCompat::supportsAlloy,
+                        ImmersiveengineeringCompat::alloyPlan,
+                        recipe -> RecipeFamilyCost.stationWorkAndTool(
+                                recipe.time,
+                                ResourceLocation.fromNamespaceAndPath(
+                                "auto_storage", "engineers_hammer"), 1),
+                        RecipePresentationKind.CRAFTING));
+    }
+
+    private static void registerMetalPress(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            DeferredRegister<RecipeFamily> recipeFamilies
+    ) {
+        ResourceLocation id = descriptorId(machineDescriptors, "metal_press");
+        registerStation(machineDescriptors, id, "metal_press");
+        recipeFamilies.register(id.getPath(), () ->
+                RecipeFamilyFactories.deterministicResources(
+                        MetalPressRecipe.class,
+                        () -> IERecipeTypes.METAL_PRESS.get(),
+                        id,
+                        ImmersiveengineeringCompat::supportsMetalPress,
+                        ImmersiveengineeringCompat::metalPressPlan,
                         recipe -> RecipeFamilyCost.stationWork(recipe.getBaseTime()),
                         RecipePresentationKind.CRAFTING));
     }
 
+    private static ResourceLocation descriptorId(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            String machine
+    ) {
+        return ResourceLocation.fromNamespaceAndPath(
+                machineDescriptors.getNamespace(),
+                "immersiveengineering_" + machine);
+    }
+
+    private static void registerStation(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            ResourceLocation id,
+            String machine
+    ) {
+        machineDescriptors.register(id.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        id,
+                        Component.translatable(
+                                "gui.auto_storage.station.immersiveengineering_"
+                                        + machine),
+                        () -> List.of(MachineVariant.of(
+                                new ItemStack(requiredItem(
+                                        ResourceLocation.fromNamespaceAndPath(
+                                                "immersiveengineering", machine))),
+                                MachineWorkRate.ONE)),
+                        MachineCategory.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
+    }
+
+    // ---------- Sawmill ----------
+
     private static boolean supportsSawmill(SawmillRecipe recipe) {
-        boolean ok = recipe != null
+        return recipe != null
                 && recipe.input != null
                 && !recipe.input.isEmpty()
                 && recipe.output != null
                 && !recipe.output.get().isEmpty()
                 && recipe.getBaseTime() > 0;
-        org.slf4j.LoggerFactory.getLogger("IECompat")
-                .info("sawmill supports called: ok={}", ok);
-        return ok;
     }
 
     private static TypedRecipePlan sawmillPlan(
             SawmillRecipe recipe,
             HolderLookup.Provider registries
     ) {
+        return singleItemPlan(recipe, recipe.input, recipe.output, recipe.getBaseEnergy(), registries);
+    }
+
+    // ---------- Arc Furnace ----------
+
+    private static boolean supportsArcFurnace(ArcFurnaceRecipe recipe) {
         try {
-            return sawmillPlanInternal(recipe, registries);
+            boolean ok = recipe != null
+                    && recipe.input != null
+                    && !recipe.input.getBaseIngredient().isEmpty()
+                    && recipe.output != null
+                    && recipe.output.getLazyList().size() == 1
+                    && !recipe.output.getLazyList().get(0).get().isEmpty()
+                    && (recipe.secondaryOutputs == null || recipe.secondaryOutputs.isEmpty())
+                    && recipe.slag != null && recipe.slag.get().isEmpty()
+                    && recipe.getBaseTime() > 0;
+            org.slf4j.LoggerFactory.getLogger("IECompat").info(
+                    "arc supports {}: in={} out={} sec={} slag={} time={}",
+                    ok,
+                    recipe == null ? null : recipe.input.getBaseIngredient().getItems().length,
+                    recipe == null || recipe.output == null ? null
+                            : recipe.output.getLazyList().size(),
+                    recipe == null ? null : (recipe.secondaryOutputs == null ? 0
+                            : recipe.secondaryOutputs.size()),
+                    recipe == null || recipe.slag == null ? null : recipe.slag.get(),
+                    recipe == null ? -1 : recipe.getBaseTime());
+            return ok;
         } catch (RuntimeException failure) {
             org.slf4j.LoggerFactory.getLogger("IECompat")
-                    .error("sawmill plan failed", failure);
+                    .error("arc supports threw", failure);
+            return false;
+        }
+    }
+
+    private static TypedRecipePlan arcFurnacePlan(
+            ArcFurnaceRecipe recipe,
+            HolderLookup.Provider registries
+    ) {
+        try {
+            TypedRecipePlan plan = multiItemPlan(recipe, recipe.input, recipe.additives, recipe.output.getLazyList().get(0), recipe.getBaseEnergy(), registries);
+            org.slf4j.LoggerFactory.getLogger("IECompat").info(
+                    "arc plan: inputs={} keys={}",
+                    plan.inputs().size(),
+                    plan.inputs().stream()
+                            .flatMap(i -> i.alternatives().stream())
+                            .map(k -> k.kindId().toString() + "/" + k.resourceId())
+                            .toList());
+            return plan;
+        } catch (RuntimeException failure) {
+            org.slf4j.LoggerFactory.getLogger("IECompat")
+                    .error("arc plan failed", failure);
             throw failure;
         }
     }
 
-    private static TypedRecipePlan sawmillPlanInternal(
-            SawmillRecipe recipe,
+    // ---------- Bottling Machine ----------
+
+    private static boolean supportsBottling(BottlingMachineRecipe recipe) {
+        return recipe != null
+                && recipe.inputs != null && !recipe.inputs.isEmpty()
+                && recipe.output != null && recipe.output.getLazyList().size() == 1
+                && !recipe.output.getLazyList().get(0).get().isEmpty()
+                && recipe.getBaseTime() > 0;
+    }
+
+    private static TypedRecipePlan bottlingPlan(
+            BottlingMachineRecipe recipe,
             HolderLookup.Provider registries
     ) {
-        Ingredient ingredient = recipe.input;
-        ItemStack output = recipe.output.get().copy();
-        if (output.isEmpty()) {
-            throw new IllegalStateException("Immersive Engineering sawmill result is empty");
-        }
-        int inputCount = 1 + (recipe.getBaseEnergy() > 0 ? 1 : 0);
-        int width = Math.min(3, inputCount);
         TypedRecipePlan.Builder builder = TypedRecipePlan.builder()
-                .input(TypedRecipeInput.consumeAny(keys(ingredient, registries), 1))
-                .output(TypedRecipeOutput.primary(
-                        StorageResourceKey.item(output.copyWithCount(1), registries),
-                        output.getCount()))
-                .presentationOutput(output);
-        if (recipe.getBaseEnergy() > 0) {
+                .input(TypedRecipeInput.consumeAny(
+                        keys(recipe.inputs.get(0).getBaseIngredient(), registries),
+                        recipe.inputs.get(0).getCount()))
+                .output(primary(recipe.output.getLazyList().get(0), registries));
+        addFluidInput(builder, recipe.fluidInput);
+        return finish(builder, recipe.output.getLazyList().get(0), recipe.getBaseEnergy());
+    }
+
+    // ---------- Crusher ----------
+
+    private static boolean supportsCrusher(CrusherRecipe recipe) {
+        return recipe != null
+                && recipe.input != null && !recipe.input.isEmpty()
+                && recipe.output != null && !recipe.output.get().isEmpty()
+                && (recipe.secondaryOutputs == null || recipe.secondaryOutputs.isEmpty())
+                && recipe.getBaseTime() > 0;
+    }
+
+    private static TypedRecipePlan crusherPlan(
+            CrusherRecipe recipe,
+            HolderLookup.Provider registries
+    ) {
+        return singleItemPlan(recipe, recipe.input, recipe.output, recipe.getBaseEnergy(), registries);
+    }
+
+    // ---------- Alloy ----------
+
+    private static boolean supportsAlloy(AlloyRecipe recipe) {
+        return recipe != null
+                && recipe.input0 != null && !recipe.input0.getBaseIngredient().isEmpty()
+                && recipe.input1 != null && !recipe.input1.getBaseIngredient().isEmpty()
+                && recipe.output != null && !recipe.output.get().isEmpty()
+                && recipe.time > 0;
+    }
+
+    private static TypedRecipePlan alloyPlan(
+            AlloyRecipe recipe,
+            HolderLookup.Provider registries
+    ) {
+        return multiItemPlan(recipe, null, List.of(recipe.input0, recipe.input1), recipe.output, 0, registries);
+    }
+
+    // ---------- Metal Press ----------
+
+    private static boolean supportsMetalPress(MetalPressRecipe recipe) {
+        return recipe != null
+                && recipe.input != null && !recipe.input.getBaseIngredient().isEmpty()
+                && recipe.output != null && !recipe.output.get().isEmpty()
+                && recipe.mold != null
+                && recipe.getBaseTime() > 0;
+    }
+
+    private static TypedRecipePlan metalPressPlan(
+            MetalPressRecipe recipe,
+            HolderLookup.Provider registries
+    ) {
+        return multiItemPlan(recipe, recipe.input, List.of(), recipe.output, recipe.getBaseEnergy(), registries);
+    }
+
+    // ---------- shared helpers ----------
+
+    private static TypedRecipePlan singleItemPlan(
+            MultiblockRecipe recipe,
+            Ingredient ingredient,
+            TagOutput output,
+            int energy,
+            HolderLookup.Provider registries
+    ) {
+        blusunrize.immersiveengineering.api.crafting.IngredientWithSize primary =
+                new blusunrize.immersiveengineering.api.crafting.IngredientWithSize(
+                        ingredient, 1);
+        return multiItemPlan(recipe, primary, List.of(), output, energy, registries);
+    }
+
+    private static TypedRecipePlan multiItemPlan(
+            Object recipe,
+            blusunrize.immersiveengineering.api.crafting.IngredientWithSize primary,
+            List<blusunrize.immersiveengineering.api.crafting.IngredientWithSize> additives,
+            TagOutput output,
+            int energy,
+            HolderLookup.Provider registries
+    ) {
+        TypedRecipePlan.Builder builder = TypedRecipePlan.builder();
+        if (primary != null) {
+            builder.input(TypedRecipeInput.consumeAny(
+                    keys(primary.getBaseIngredient(), registries),
+                    primary.getCount()));
+        }
+        for (blusunrize.immersiveengineering.api.crafting.IngredientWithSize additive : additives) {
+            builder.input(TypedRecipeInput.consumeAny(
+                    keys(additive.getBaseIngredient(), registries),
+                    additive.getCount()));
+        }
+        builder.output(primaryOutput(output, registries));
+        return finish(builder, output, energy);
+    }
+
+    private static TypedRecipePlan finish(
+            TypedRecipePlan.Builder builder,
+            TagOutput output,
+            int energy
+    ) {
+        ItemStack stack = output.get();
+        if (energy > 0) {
             builder.input(TypedRecipeInput.consume(
-                    StorageResourceKey.neoforgeEnergy(),
-                    recipe.getBaseEnergy()));
+                    StorageResourceKey.neoforgeEnergy(), energy));
         }
         return builder
-                .layout(width, (inputCount + width - 1) / width, true)
+                .presentationOutput(stack.copy())
+                .layout(3, 3, true)
                 .build();
+    }
+
+    private static void addFluidInput(
+            TypedRecipePlan.Builder builder,
+            SizedFluidIngredient fluidInput
+    ) {
+        if (fluidInput != null && fluidInput.amount() > 0) {
+            for (var stack : fluidInput.getFluids()) {
+                builder.input(TypedRecipeInput.consume(
+                        StorageResourceKey.fluid(stack.copyWithAmount(1), null),
+                        fluidInput.amount()));
+                break;
+            }
+        }
+    }
+
+    private static TypedRecipeOutput primaryOutput(
+            TagOutput output,
+            HolderLookup.Provider registries
+    ) {
+        ItemStack stack = output.get().copy();
+        return TypedRecipeOutput.primary(
+                StorageResourceKey.item(stack.copyWithCount(1), registries),
+                stack.getCount());
+    }
+
+    private static TypedRecipeOutput primary(
+            TagOutput output,
+            HolderLookup.Provider registries
+    ) {
+        return primaryOutput(output, registries);
     }
 
     private static List<StorageResourceKey> keys(
@@ -141,13 +453,6 @@ public final class ImmersiveengineeringCompat {
                         stack.copyWithCount(1), registries))
                 .distinct()
                 .toList();
-    }
-
-    private static RecipeType<SawmillRecipe> sawmillType() {
-        // IE registers recipes with its own IERecipeTypes instances (not the
-        // vanilla RecipeType registry), so the family must bind the exact
-        // static type instance instead of a registry lookup.
-        return IERecipeTypes.SAWMILL.get();
     }
 
     private static Item requiredItem(ResourceLocation id) {

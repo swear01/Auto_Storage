@@ -16,15 +16,25 @@
     "net.neoforged:bus:8.0.5"
   ],
   "entrypoint": "com.swear.autostorage.compat.immersiveengineering.ImmersiveengineeringCompatModule",
-  "expectedTests": 9,
+  "expectedTests": 10,
   "fixture": "immersiveengineeringFixture",
   "id": "auto_storage:immersiveengineering",
   "matrix": {
     "acceptedRecipes": [
-      "immersiveengineering:sawmill"
+      "immersiveengineering:sawmill",
+      "immersiveengineering:arc_furnace",
+      "immersiveengineering:bottling_machine",
+      "immersiveengineering:crusher",
+      "immersiveengineering:alloy",
+      "immersiveengineering:metal_press"
     ],
     "descriptors": [
-      "auto_storage:immersiveengineering_sawmill"
+      "auto_storage:immersiveengineering_sawmill",
+      "auto_storage:immersiveengineering_arc_furnace",
+      "auto_storage:immersiveengineering_bottling_machine",
+      "auto_storage:immersiveengineering_crusher",
+      "auto_storage:immersiveengineering_alloy_smelter",
+      "auto_storage:immersiveengineering_metal_press"
     ],
     "mods": [
       "immersiveengineering"

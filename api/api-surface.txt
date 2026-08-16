@@ -195,6 +195,8 @@ public final class com.swear.autostorage.RecipeFamilyApi {
 }
 
 public final class com.swear.autostorage.RecipeFamilyCost {
+  public static com.swear.autostorage.RecipeFamilyCost tool(net.minecraft.resources.ResourceLocation, long);
+  public static com.swear.autostorage.RecipeFamilyCost stationWorkAndTool(long, net.minecraft.resources.ResourceLocation, long);
   public static com.swear.autostorage.RecipeFamilyCost free();
   public static com.swear.autostorage.RecipeFamilyCost energy(com.swear.autostorage.EnergyCost);
   public static com.swear.autostorage.RecipeFamilyCost stationWork(long);

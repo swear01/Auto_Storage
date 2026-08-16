@@ -2,39 +2,137 @@
  "families": [
   {
    "class": "blusunrize.immersiveengineering.api.crafting.AlloyRecipe",
-   "costs": [],
-   "decision": "Alloy Smelter is a stone multiblock whose FurnaceHandler burns live vanilla furnace fuel; TagOutput may resolve via mod-preference for tag results. No simulate-then-commit station/fuel contract.",
+   "costs": [
+    {
+     "amount": "recipe.time",
+     "resource_kind": "auto_storage:station_work"
+    },
+    {
+     "amount": "1 per craft",
+     "resource_kind": "auto_storage:engineers_hammer"
+    }
+   ],
+   "decision": "Accept deterministic alloy recipes: two sized item inputs, single explicit item result, work = recipe.time. Station = alloy_smelter master block item.",
    "evidence": [
     "blusunrize.immersiveengineering.api.crafting.AlloyRecipe#public_signature"
    ],
    "id": "alloy_recipe",
-   "inputs": [],
-   "outputs": [],
-   "recipe_type": null,
+   "inputs": [
+    {
+     "amount": "recipe.input0.count",
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.input0 IngredientWithSize"
+    },
+    {
+     "amount": "recipe.input1.count",
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.input1 IngredientWithSize"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.output.get().count (explicit item only)",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.output TagOutput"
+    }
+   ],
+   "recipe_type": "immersiveengineering:alloy",
    "risks": [
     "world_mutation"
    ],
-   "station": null,
-   "status": "rejected"
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:immersiveengineering_alloy_smelter",
+    "variants": [
+     {
+      "bounds": "plain alloy_smelter master block item",
+      "item": "immersiveengineering:alloy_smelter",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.ArcFurnaceRecipe",
-   "costs": [],
-   "decision": "Arc Furnace is a multiblock with live RecipeMultiplier energy/time modifiers and chance secondary outputs (randomness).",
+   "costs": [
+    {
+     "amount": "recipe.baseTime",
+     "resource_kind": "auto_storage:station_work"
+    },
+    {
+     "amount": "recipe.baseEnergy (zero omits FE)",
+     "resource_kind": "neoforge_energy"
+    },
+    {
+     "amount": "1 per craft",
+     "resource_kind": "auto_storage:engineers_hammer"
+    },
+    {
+     "amount": "1 per craft",
+     "resource_kind": "auto_storage:graphite_electrode"
+    }
+   ],
+   "decision": "Accept the deterministic arc-furnace subset: single explicit item result, no chance secondary outputs, empty slag, additives supported as additional consumed inputs, energy from baseEnergy, work = baseTime. Multiblock abstracted by the arc_furnace master block item station.",
    "evidence": [
     "blusunrize.immersiveengineering.api.crafting.ArcFurnaceRecipe#public_signature"
    ],
    "id": "arc_furnace_recipe",
-   "inputs": [],
-   "outputs": [],
-   "recipe_type": null,
+   "inputs": [
+    {
+     "amount": 1,
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.input (single IngredientWithSize)"
+    },
+    {
+     "amount": "recipe.additives[i].count",
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.additives[*] IngredientWithSize alternatives"
+    },
+    {
+     "amount": "recipe.baseEnergy when > 0",
+     "resource_kind": "neoforge_energy",
+     "role": "consume",
+     "selector": "auto_storage:neoforge_energy"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.output lazy[0].count (explicit item only)",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.output TagOutputList first explicit item"
+    }
+   ],
+   "recipe_type": "immersiveengineering:arc_furnace",
    "risks": [
     "multiblock",
     "randomness",
     "world_mutation"
    ],
-   "station": null,
-   "status": "rejected"
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:immersiveengineering_arc_furnace",
+    "variants": [
+     {
+      "bounds": "plain arc_furnace master block item",
+      "item": "immersiveengineering:arc_furnace",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.ArcRecyclingRecipe",
@@ -109,21 +207,73 @@
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.BottlingMachineRecipe",
-   "costs": [],
-   "decision": "Bottling Machine is a multiblock with live RecipeMultiplier energy/time modifiers.",
+   "costs": [
+    {
+     "amount": "recipe.baseTime",
+     "resource_kind": "auto_storage:station_work"
+    },
+    {
+     "amount": "recipe.baseEnergy",
+     "resource_kind": "neoforge_energy"
+    },
+    {
+     "amount": "1 per craft",
+     "resource_kind": "auto_storage:engineers_hammer"
+    }
+   ],
+   "decision": "Accept the deterministic bottling subset: single explicit item result (28/28 no chance), one item input plus a sized fluid input, energy from baseEnergy, work = baseTime. Station = bottling_machine master block item.",
    "evidence": [
     "blusunrize.immersiveengineering.api.crafting.BottlingMachineRecipe#public_signature"
    ],
    "id": "bottling_machine_recipe",
-   "inputs": [],
-   "outputs": [],
-   "recipe_type": null,
+   "inputs": [
+    {
+     "amount": "recipe.inputs[0].count",
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.inputs[0] IngredientWithSize"
+    },
+    {
+     "amount": "recipe.fluidInput.amount",
+     "resource_kind": "minecraft:fluid",
+     "role": "consume",
+     "selector": "recipe.fluidInput SizedFluidIngredient"
+    },
+    {
+     "amount": "recipe.baseEnergy when > 0",
+     "resource_kind": "neoforge_energy",
+     "role": "consume",
+     "selector": "auto_storage:neoforge_energy"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.output lazy[0].count",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.output TagOutputList first explicit item"
+    }
+   ],
+   "recipe_type": "immersiveengineering:bottling_machine",
    "risks": [
     "multiblock",
     "world_mutation"
    ],
-   "station": null,
-   "status": "rejected"
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:immersiveengineering_bottling_machine",
+    "variants": [
+     {
+      "bounds": "plain bottling_machine master block item",
+      "item": "immersiveengineering:bottling_machine",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.ClocheFertilizer",
@@ -180,22 +330,68 @@
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.CrusherRecipe",
-   "costs": [],
-   "decision": "Crusher is a multiblock with live RecipeMultiplier modifiers and chance secondary outputs (randomness).",
+   "costs": [
+    {
+     "amount": "recipe.baseTime",
+     "resource_kind": "auto_storage:station_work"
+    },
+    {
+     "amount": "recipe.baseEnergy",
+     "resource_kind": "neoforge_energy"
+    },
+    {
+     "amount": "1 per craft",
+     "resource_kind": "auto_storage:engineers_hammer"
+    }
+   ],
+   "decision": "Accept the deterministic crusher subset: single explicit item result, empty chance secondary outputs, energy from baseEnergy, work = baseTime. Station = crusher master block item.",
    "evidence": [
     "blusunrize.immersiveengineering.api.crafting.CrusherRecipe#public_signature"
    ],
    "id": "crusher_recipe",
-   "inputs": [],
-   "outputs": [],
-   "recipe_type": null,
+   "inputs": [
+    {
+     "amount": 1,
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.input (single Ingredient)"
+    },
+    {
+     "amount": "recipe.baseEnergy when > 0",
+     "resource_kind": "neoforge_energy",
+     "role": "consume",
+     "selector": "auto_storage:neoforge_energy"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.output.get().count (explicit item only)",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.output TagOutput"
+    }
+   ],
+   "recipe_type": "immersiveengineering:crusher",
    "risks": [
     "multiblock",
     "randomness",
     "world_mutation"
    ],
-   "station": null,
-   "status": "rejected"
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:immersiveengineering_crusher",
+    "variants": [
+     {
+      "bounds": "plain crusher master block item",
+      "item": "immersiveengineering:crusher",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.FermenterRecipe",
@@ -217,21 +413,67 @@
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.MetalPressRecipe",
-   "costs": [],
-   "decision": "Metal Press is a multiblock requiring a retained mold item plus live RecipeMultiplier modifiers.",
+   "costs": [
+    {
+     "amount": "recipe.baseTime",
+     "resource_kind": "auto_storage:station_work"
+    },
+    {
+     "amount": "recipe.baseEnergy",
+     "resource_kind": "neoforge_energy"
+    },
+    {
+     "amount": "1 per craft",
+     "resource_kind": "auto_storage:engineers_hammer"
+    }
+   ],
+   "decision": "Accept deterministic metal press recipes: sized item input, explicit item result, work = baseTime. Station = metal_press master block item.",
    "evidence": [
     "blusunrize.immersiveengineering.api.crafting.MetalPressRecipe#public_signature"
    ],
    "id": "metal_press_recipe",
-   "inputs": [],
-   "outputs": [],
-   "recipe_type": null,
+   "inputs": [
+    {
+     "amount": "recipe.input.count",
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.input IngredientWithSize"
+    },
+    {
+     "amount": "recipe.baseEnergy when > 0",
+     "resource_kind": "neoforge_energy",
+     "role": "consume",
+     "selector": "auto_storage:neoforge_energy"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.output.get().count (explicit item only)",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.output TagOutput"
+    }
+   ],
+   "recipe_type": "immersiveengineering:metal_press",
    "risks": [
     "multiblock",
     "world_mutation"
    ],
-   "station": null,
-   "status": "rejected"
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:immersiveengineering_metal_press",
+    "variants": [
+     {
+      "bounds": "plain metal_press master block item",
+      "item": "immersiveengineering:metal_press",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.MixerRecipe",
@@ -962,7 +1204,7 @@
     }
    ]
   },
-  "expected_game_tests": 9,
+  "expected_game_tests": 10,
   "fixture": "immersiveengineeringFixture",
   "game_test_task": "runImmersiveengineeringGameTestServer",
   "gradle_tasks": [

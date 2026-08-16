@@ -22,6 +22,7 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.List;
 
 @GameTestHolder(ImmersiveengineeringFixtureMod.MODID)
@@ -42,11 +43,11 @@ public final class ImmersiveengineeringIntegrationGameTests {
         if (AutoStorage.RECIPE_FAMILY_REGISTRY.keySet().stream()
                         .filter(id -> id.getNamespace().equals("immersiveengineering")
                                 || id.getPath().startsWith("immersiveengineering_"))
-                        .anyMatch(id -> !id.equals(SAWMILL))
+                        .anyMatch(id -> !SUPPORTED_MACHINES.contains(id))
                 || AutoStorage.MACHINE_DESCRIPTOR_REGISTRY.keySet().stream()
                         .filter(id -> id.getNamespace().equals("immersiveengineering")
                                 || id.getPath().startsWith("immersiveengineering_"))
-                        .anyMatch(id -> !id.equals(SAWMILL))) {
+                        .anyMatch(id -> !SUPPORTED_MACHINES.contains(id))) {
             helper.fail("Immersive Engineering unsafe multiblock contract was registered");
             return;
         }
@@ -54,14 +55,11 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void alloy_smelter_recipes_fail_closed(GameTestHelper helper) {
+    public static void alloy_smelter_recipes_are_supported(GameTestHelper helper) {
         var holder = helper.getLevel().getRecipeManager().byKey(ie("alloysmelter/electrum")).orElse(null);
-        if (holder == null) {
-            helper.fail("Missing representative Immersive Engineering recipe alloysmelter/electrum");
-            return;
-        }
-        if (CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-            helper.fail("Unsafe Immersive Engineering recipe was accepted: alloysmelter/electrum");
+        if (holder == null
+                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+            helper.fail("Alloy Smelter recipe must be supported: alloysmelter/electrum");
             return;
         }
         helper.succeed();
@@ -87,8 +85,15 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void crusher_recipes_fail_closed(GameTestHelper helper) {
-        assertUnsupported(helper, ie("crusher/amethyst"));
+    public static void crusher_recipes_are_supported(GameTestHelper helper) {
+        var holder = helper.getLevel().getRecipeManager()
+                .byKey(ie("crusher/amethyst")).orElse(null);
+        if (holder == null
+                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+            helper.fail("Crusher recipe must be supported: crusher/amethyst");
+            return;
+        }
+        helper.succeed();
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -97,8 +102,20 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void metal_press_and_arc_furnace_fail_closed(GameTestHelper helper) {
-        assertUnsupported(helper, ie("metalpress/blaze_rod"), ie("arcfurnace/dust_iron"));
+    public static void metal_press_and_arc_furnace_recipes_are_supported(
+            GameTestHelper helper
+    ) {
+        for (ResourceLocation recipeId : List.of(
+                ie("metalpress/blaze_rod"), ie("arcfurnace/dust_iron"))) {
+            var holder = helper.getLevel().getRecipeManager()
+                    .byKey(recipeId).orElse(null);
+            if (holder == null
+                    || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+                helper.fail("Machine recipe must be supported: " + recipeId);
+                return;
+            }
+        }
+        helper.succeed();
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -109,13 +126,9 @@ public final class ImmersiveengineeringIntegrationGameTests {
         var manager = helper.getLevel().getRecipeManager();
         var types = new LinkedHashSet<net.minecraft.world.item.crafting.RecipeType<?>>();
         for (ResourceLocation recipeId : List.of(
-                ie("alloysmelter/electrum"),
                 ie("cokeoven/charcoal"),
                 ie("blastfurnace/steel"),
-                ie("crusher/amethyst"),
-                ie("cloche/allium"),
-                ie("metalpress/blaze_rod"),
-                ie("arcfurnace/dust_iron"))) {
+                ie("cloche/allium"))) {
             var holder = manager.byKey(recipeId).orElse(null);
             if (holder == null) {
                 helper.fail("Missing audited Immersive Engineering recipe " + recipeId);
@@ -123,7 +136,7 @@ public final class ImmersiveengineeringIntegrationGameTests {
             }
             types.add(holder.value().getType());
         }
-        if (types.size() != 7) {
+        if (types.size() != 3) {
             helper.fail("Audited Immersive Engineering recipe type is empty");
             return;
         }
@@ -173,6 +186,12 @@ public final class ImmersiveengineeringIntegrationGameTests {
             }
             seedItem(core, Items.OAK_LOG, 1);
             seedResource(core, StorageResourceKey.neoforgeEnergy(), 1_000_000L);
+            if (!core.addDescriptorTransform(
+                    com.swear.autostorage.MachineEnergyTable.HAMMER_ID,
+                    new ItemStack(ieItem("hammer")))) {
+                helper.fail("Could not seed engineer's hammer resource");
+                return;
+            }
             installStation(core, player, ieItem("sawmill"));
             addCoreTicks(core, 10_000);
             var menu = new CraftingTerminalMenu(
@@ -220,6 +239,37 @@ public final class ImmersiveengineeringIntegrationGameTests {
         });
     }
 
+    @GameTest(template = "craftingtests.platform")
+    public static void arc_furnace_recipe_is_supported_with_deterministic_plan(
+            GameTestHelper helper
+    ) {
+        var holder = helper.getLevel().getRecipeManager()
+                .byKey(ie("arcfurnace/insulating_glass")).orElse(null);
+        if (holder == null
+                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+            helper.fail("Arc Furnace recipe must be supported: arcfurnace/insulating_glass");
+            return;
+        }
+        helper.succeed();
+    }
+
+    private static final Set<ResourceLocation> SUPPORTED_MACHINES = Set.of(
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_sawmill"),
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_arc_furnace"),
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_bottling_machine"),
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_crusher"),
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_alloy_smelter"),
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_metal_press"));
+
+    private static final ResourceLocation ARC_FURNACE =
+            ResourceLocation.fromNamespaceAndPath(
+                    AutoStorage.MODID, "immersiveengineering_arc_furnace");
     private static final ResourceLocation SAWMILL =
             ResourceLocation.fromNamespaceAndPath(
                     AutoStorage.MODID, "immersiveengineering_sawmill");

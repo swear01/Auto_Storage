@@ -35,6 +35,8 @@ public final class MachineEnergyTable {
     public static final ResourceLocation STONECUTTER_ID = id("stonecutter");
     public static final ResourceLocation SMITHING_TABLE_ID = id("smithing_table");
     public static final ResourceLocation AXE_ID = id("axe");
+    public static final ResourceLocation HAMMER_ID = id("engineers_hammer");
+    public static final ResourceLocation ELECTRODE_ID = id("graphite_electrode");
 
     private static final List<ResourceLocation> BUILT_IN_ORDER = List.of(
             FURNACE_ID,
@@ -91,6 +93,31 @@ public final class MachineEnergyTable {
                 stack -> AxeEnergy.isInfinite(stack)
                         ? new MachineDescriptor.TransformAmount(0, true)
                         : new MachineDescriptor.TransformAmount(AxeEnergy.finiteValue(stack), false)));
+        descriptors.register(HAMMER_ID.getPath(), () -> MachineDescriptor.transform(
+                HAMMER_ID,
+                new ItemStack(net.minecraft.world.item.Items.STONE_AXE),
+                Ingredient.of(
+                        net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                                net.minecraft.resources.ResourceLocation
+                                        .fromNamespaceAndPath(
+                                                "immersiveengineering", "hammer"))),
+                stack -> ToolDurability.finiteValue(stack) > 0
+                        ? new MachineDescriptor.TransformAmount(
+                                ToolDurability.finiteValue(stack), false)
+                        : new MachineDescriptor.TransformAmount(0, false)));
+        descriptors.register(ELECTRODE_ID.getPath(), () -> MachineDescriptor.transform(
+                ELECTRODE_ID,
+                new ItemStack(net.minecraft.world.item.Items.STICK),
+                Ingredient.of(
+                        net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                                net.minecraft.resources.ResourceLocation
+                                        .fromNamespaceAndPath(
+                                                "immersiveengineering",
+                                                "graphite_electrode"))),
+                stack -> ToolDurability.finiteValue(stack) > 0
+                        ? new MachineDescriptor.TransformAmount(
+                                ToolDurability.finiteValue(stack), false)
+                        : new MachineDescriptor.TransformAmount(0, false)));
     }
 
     public static int size() {

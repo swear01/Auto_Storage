@@ -2586,7 +2586,7 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
 
         self.assert_descriptor_driven_fixture(
-            build, "immersiveengineering", "immersiveengineeringFixture", 9
+            build, "immersiveengineering", "immersiveengineeringFixture", 10
         )
         self.assertNotIn('modId="immersiveengineering"', metadata)
         self.assertIn('"immersiveengineering"', module_index)
@@ -2598,11 +2598,25 @@ class StaticRegressionTests(unittest.TestCase):
         )
         descriptor = json.loads(module_index)
         self.assertEqual(
-            ["auto_storage:immersiveengineering_sawmill"],
+            [
+                "auto_storage:immersiveengineering_sawmill",
+                "auto_storage:immersiveengineering_arc_furnace",
+                "auto_storage:immersiveengineering_bottling_machine",
+                "auto_storage:immersiveengineering_crusher",
+                "auto_storage:immersiveengineering_alloy_smelter",
+                "auto_storage:immersiveengineering_metal_press",
+            ],
             descriptor["matrix"]["descriptors"],
         )
         self.assertEqual(
-            ["immersiveengineering:sawmill"],
+            [
+                "immersiveengineering:sawmill",
+                "immersiveengineering:arc_furnace",
+                "immersiveengineering:bottling_machine",
+                "immersiveengineering:crusher",
+                "immersiveengineering:alloy",
+                "immersiveengineering:metal_press",
+            ],
             descriptor["matrix"]["acceptedRecipes"],
         )
         self.assertEqual(
