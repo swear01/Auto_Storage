@@ -1,3 +1,9 @@
+2026-08-16 Arc Furnace 設計（#136 補充）：
+- 多工 = station work 累計機制天然支援（多個 crafts 同時累計 work）— rate 對應電弧吞吐。
+- 78 recipes：48 無機率（確定性），9 個含 additives（多輸入合金 — deterministicResources 1-81 inputs ✓），0 多輸出。
+- 石墨電極（graphite_electrode，耐久 ~16）＝ ToolCost：合成需庫存電極 + 每次扣耐久（真實電極損耗；不需額外石墨→能量轉換）。
+- 30 個 chance（slag/secondary）fail-closed；tag_empty conditions 由 recipe manager 載入時解析。
+
 2026-08-16 IE multiblock 擴充設計（#135/#136）：
 - IE 無獨立 dummy item — multiblock 由 master block item 代表（crusher/sawmill/arc_furnace/alloy_smelter/bottling_machine/metal_press — 放置生成結構，BlockEntityDummy 佔位）— station item 用機器 block item（內建渲染）。
 - 工匠錘（immersiveengineering:hammer）= workstation 工具 — craft 需錘子（ToolCost，無耐久消耗，符合 IE 組裝語意）。
