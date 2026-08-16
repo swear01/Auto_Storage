@@ -1026,6 +1026,9 @@ configurations {
 
 repositories {
     mavenCentral()
+    flatDir {
+        dirs = ["${rootProject.projectDir}/compat/local"]
+    }
     exclusiveContent {
         forRepository {
             maven {

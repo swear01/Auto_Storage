@@ -1,0 +1,258 @@
+{
+ "families": [
+  {
+   "class": "cy.jdkdigital.productivetrees.recipe.SawmillRecipe",
+   "costs": [
+    {
+     "amount": "recipeTime/tickRate (200/10 = 20 ticks)",
+     "resource_kind": "auto_storage:station_work"
+    }
+   ],
+   "decision": "Accept the deterministic sawmill family: 173/173 data recipes have a single tag ingredient input and three explicit ItemStack outputs (output, secondary sawdust, tertiary) with no chance rolls. The block entity consumes one input, runs recipeTime=200 at tickRate=10 (20 ticks = 1 work at one work/tick), and always inserts all three outputs; upgrades are not inferred. The sawmill block is the station. Time upgrades (productivelib UPGRADE_TIME/2) alter live speed and are not simulated.",
+   "evidence": [
+    "cy.jdkdigital.productivetrees.recipe.SawmillRecipe#public_signature"
+   ],
+   "id": "sawmill_recipe",
+   "inputs": [
+    {
+     "amount": 1,
+     "resource_kind": "item",
+     "role": "consume",
+     "selector": "recipe.input() single Ingredient (173/173 tag-based)"
+    }
+   ],
+   "outputs": [
+    {
+     "amount": "recipe.output().getCount()",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.output() explicit ItemStack"
+    },
+    {
+     "amount": "recipe.secondary().getCount() when non-empty",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.secondary() explicit ItemStack"
+    },
+    {
+     "amount": "recipe.tertiary().getCount() when non-empty",
+     "resource_kind": "item",
+     "role": "primary",
+     "selector": "recipe.tertiary() explicit ItemStack"
+    }
+   ],
+   "recipe_type": "productivetrees:sawmill",
+   "risks": [
+    "world_mutation"
+   ],
+   "station": {
+    "category": "process",
+    "descriptor_id": "auto_storage:productivetrees_sawmill",
+    "variants": [
+     {
+      "bounds": "plain sawmill block; time upgrades are not inferred",
+      "item": "productivetrees:sawmill",
+      "rate": {
+       "denominator": 1,
+       "numerator": 1
+      }
+     }
+    ]
+   },
+   "status": "accepted"
+  },
+  {
+   "class": "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe",
+   "costs": [],
+   "decision": "Log stripping is an interactive Stripper block process gated on a loaded axe in SLOT_AXE with live durability consumption; the jar ships no log_stripping data recipes (absent from the 3,504-recipe inventory), so there is nothing deterministic to run.",
+   "evidence": [
+    "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe#public_signature"
+   ],
+   "id": "log_stripping_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe",
+   "costs": [],
+   "decision": "Tree fruiting attaches fruit to growing world trees; it is world mutation, not an item-to-stored-resource conversion.",
+   "evidence": [
+    "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe#public_signature"
+   ],
+   "id": "tree_fruiting_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  },
+  {
+   "class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe",
+   "costs": [],
+   "decision": "Tree pollination modifies world leaves and drops based on live bee/leaf state; it is world mutation, not an item-to-stored-resource conversion.",
+   "evidence": [
+    "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe#public_signature"
+   ],
+   "id": "tree_pollination_recipe",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
+   "risks": [
+    "world_mutation"
+   ],
+   "station": null,
+   "status": "rejected"
+  }
+ ],
+ "kind": "auto_storage_compat_contract",
+ "matrix": {
+  "acceptedRecipes": [
+   "productivetrees:sawmill"
+  ],
+  "descriptors": [
+   "auto_storage:productivetrees_sawmill"
+  ],
+  "mods": [
+   "productivetrees"
+  ],
+  "recipeInventory": {
+   "namespaces": [
+    "productivetrees"
+   ],
+   "sha256": "eccbcc9cd809eaa8f8cb312d4dffeb3941b0c5bda9d152f94de785b457a963f1"
+  },
+  "rejectedDescriptors": [],
+  "rejectedResourceKinds": [],
+  "resourceKinds": []
+ },
+ "schema": 1,
+ "source_audit_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d",
+ "source_recipe_data_sha256": "eccbcc9cd809eaa8f8cb312d4dffeb3941b0c5bda9d152f94de785b457a963f1",
+ "source_recipe_inventory_sha256": "b5d4f7ab55ab1f4b74727525b0047b5cd5712ddff917024a0514da44c9e92a0f",
+ "target": {
+  "display_name": "Productive Trees",
+  "mod_id": "productivetrees",
+  "version": "1.21.1-1.0.0"
+ },
+ "verification": {
+  "checks": [
+   "absent_target_no_classload",
+   "present_target_load_once",
+   "ingredient_shortage_atomic",
+   "destination_capacity_atomic",
+   "checked_overflow_atomic",
+   "stale_recipe_holder_atomic",
+   "catalyst_tool_remainder_exact",
+   "multi_output_merge_exact",
+   "mixed_resource_rollback_atomic",
+   "dedicated_server_client_isolation",
+   "api_only_compilation",
+   "all_mod_coexistence"
+  ],
+  "evidence": {
+   "absent_target_no_classload": [
+    {
+     "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
+    }
+   ],
+   "present_target_load_once": [
+    {
+     "marker": "Sawmill recipe must be supported: sawmill/dark_oak_planks_from_log",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "ingredient_shortage_atomic": [
+    {
+     "marker": "Sawmill craft committed without an input log",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "destination_capacity_atomic": [
+    {
+     "marker": "Sawmill craft committed into a full destination",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "checked_overflow_atomic": [
+    {
+     "marker": "Sawmill recipe not supported:",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "stale_recipe_holder_atomic": [
+    {
+     "marker": "Sawmill craft committed without the sawmill station",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "catalyst_tool_remainder_exact": [
+    {
+     "marker": "Sawmill craft did not consume the input log",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "multi_output_merge_exact": [
+    {
+     "marker": "Sawmill craft produced the wrong sawdust count",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "mixed_resource_rollback_atomic": [
+    {
+     "marker": "Unsafe Productive Trees recipe type accepted",
+     "source": "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java",
+     "task": "runProductivetreesGameTestServer"
+    }
+   ],
+   "dedicated_server_client_isolation": [
+    {
+     "marker": "verifyCompatIsolation",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "api_only_compilation": [
+    {
+     "marker": "compileAddonExampleJava",
+     "source": "build.gradle",
+     "task": "build"
+    }
+   ],
+   "all_mod_coexistence": [
+    {
+     "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+     "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+     "task": "runCompatibilityMatrixGameTestServer"
+    }
+   ]
+  },
+  "expected_game_tests": 8,
+  "fixture": "productivetreesFixture",
+  "game_test_task": "runProductivetreesGameTestServer",
+  "gradle_tasks": [
+   "build",
+   "runGameTestServer",
+   "runRecipeAddonGameTestServer",
+   "runProductivetreesGameTestServer",
+   "runCompatibilityMatrixGameTestServer"
+  ]
+ }
+}

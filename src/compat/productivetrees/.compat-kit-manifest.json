@@ -1,0 +1,16 @@
+{
+  "contract_sha256": "0e70727e4157b0a4a4e2dc8cf1578c81006d15231e27a0f51dbf2f4e720c4209",
+  "files": {
+    "compat/audits/productivetrees/1.0.0.json": "8fe777b3b43de41d121e39bb01af7dcd8823673caa5c3623b0dad6c22e660f37",
+    "compat/contracts/productivetrees.json": "9d4ec504892ac1c96ad9d514ce912c735a8d5b482a3df43adc33b3c17144a835",
+    "src/compat/productivetrees/compat-module.json": "aaaf8b0ec90ea0eea964ca48c431e3bda943082b8711113219795edcd461de70",
+    "src/compat/productivetrees/java/com/swear/autostorage/compat/productivetrees/ProductivetreesCompat.java": "f4761f563bc51661746569b1d3826b285599d3df7b810cd973f451818e243754",
+    "src/compat/productivetrees/java/com/swear/autostorage/compat/productivetrees/ProductivetreesCompatModule.java": "121ec6511760aa835645b0b5238f2201187aed4f631de1b15b472e5fd4cd1e95",
+    "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesFixtureMod.java": "698a9eb2c012853872428dc38c03c60a7f6aab129ef1937b06daeda79cf4d4c3",
+    "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java": "70c2b35867b5ba05525afec7aec2da487ed45652cd31511b62f76c5b142cc5f8",
+    "src/productivetreesFixture/resources/META-INF/neoforge.mods.toml": "669e974b3bcdb93b80c6bee765c0318aec6fd319df06fc4b2a358d7bdfe193df",
+    "src/productivetreesFixture/resources/data/auto_storage_productivetrees_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
+  },
+  "schema": 1,
+  "tool_version": "2.3.1"
+}

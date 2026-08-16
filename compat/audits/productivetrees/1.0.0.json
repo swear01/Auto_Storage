@@ -1,0 +1,4022 @@
+{
+  "ancestry_classpath": [
+    {
+      "sha256": "137f60018968a50c6f00e3a8ca9be790391792d2f3e6eff66237f2e9b3bc1353",
+      "size": 1529892
+    },
+    {
+      "sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f",
+      "size": 56279815
+    },
+    {
+      "sha256": "65202adf4dccf7b3033537e539e23eccc541c6a15ad88d87fa1c5a09ceb3359f",
+      "size": 295093
+    },
+    {
+      "sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7",
+      "size": 154249
+    },
+    {
+      "sha256": "9d48d198bc6eacf3b7729f4d60b91e661cfa15d105264ba225dee87b1d547ba1",
+      "size": 5216551
+    },
+    {
+      "sha256": "b68691f94f0727fc517cac2ab55bd6658d1179cc8cc715fe610b60c37469bc4c",
+      "size": 1111538
+    }
+  ],
+  "ancestry_dependencies": [],
+  "artifact": {
+    "class_count": 158,
+    "class_inventory_sha256": "96130a330430aac88fd87b8428c3a84ea38c8c39311cd38533ef3be2a3f65959",
+    "sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d",
+    "size": 13914805
+  },
+  "candidates": {
+    "block_entity_classes": [
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"EntitySpawnerBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {\n  public cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public static void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PollenSifterBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity implements net.minecraft.world.MenuProvider,cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity {\n  public int tickRate;\n  public int recipeTime;\n  public int progress;\n  public static int SLOT_IN;\n  public static int SLOT_OUT;\n  public final net.neoforged.neoforge.items.IItemHandlerModifiable inventoryHandler;\n  public cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.network.chat.Component getName();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler();\n  public net.neoforged.neoforge.items.IItemHandlerModifiable getUpgradeHandler();\n  public static void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity);\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"PollinatedLeavesBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {\n  public cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.world.item.ItemStack getResult();\n  public void setResult(net.minecraft.world.item.ItemStack);\n  public net.minecraft.world.level.block.Block getLeafA();\n  public void setLeafA(net.minecraft.world.level.block.Block);\n  public net.minecraft.world.level.block.Block getLeafB();\n  public void setLeafB(net.minecraft.world.level.block.Block);\n  public net.minecraft.nbt.CompoundTag getUpdateTag(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket();\n  public void onDataPacket(net.minecraft.network.Connection, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket, net.minecraft.core.HolderLookup$Provider);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.network.protocol.Packet getUpdatePacket();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity",
+            "net.minecraft.world.level.block.entity.HangingSignBlockEntity",
+            "net.minecraft.world.level.block.entity.SignBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity",
+            "net.minecraft.world.level.block.entity.HangingSignBlockEntity",
+            "net.minecraft.world.level.block.entity.SignBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ProductiveHangingSignBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity extends net.minecraft.world.level.block.entity.HangingSignBlockEntity {\n  public cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.world.level.block.entity.BlockEntityType<?> getType();\n  public boolean isValidBlockState(net.minecraft.world.level.block.state.BlockState);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity",
+            "net.minecraft.world.level.block.entity.SignBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity",
+            "net.minecraft.world.level.block.entity.SignBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"ProductiveSignBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity extends net.minecraft.world.level.block.entity.SignBlockEntity {\n  public cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.world.level.block.entity.BlockEntityType<?> getType();\n  public boolean isValidBlockState(net.minecraft.world.level.block.state.BlockState);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"SawmillBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity implements net.minecraft.world.MenuProvider,cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity {\n  public int tickRate;\n  public int recipeTime;\n  public int progress;\n  public static int SLOT_IN;\n  public static int SLOT_OUT;\n  public static int SLOT_SECONDARY;\n  public static int SLOT_TERTIARY;\n  public final net.neoforged.neoforge.items.IItemHandlerModifiable inventoryHandler;\n  public cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.network.chat.Component getName();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler();\n  public net.neoforged.neoforge.items.IItemHandlerModifiable getUpgradeHandler();\n  public static void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity);\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n  public void loadPacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n  public void savePacketNBT(net.minecraft.nbt.CompoundTag, net.minecraft.core.HolderLookup$Provider);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"StripperBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity implements net.minecraft.world.MenuProvider,cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity {\n  public static int SLOT_IN;\n  public static int SLOT_OUT;\n  public static int SLOT_AXE;\n  public static int SLOT_BARK;\n  public final net.neoforged.neoforge.items.IItemHandlerModifiable inventoryHandler;\n  public cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.network.chat.Component getName();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler();\n  public net.neoforged.neoforge.items.IItemHandlerModifiable getUpgradeHandler();\n  public static void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity);\n  public net.minecraft.world.item.ItemStack getAxe();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TimeTravellerDisplayBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity {\n  public static int SLOT_IN;\n  public final net.neoforged.neoforge.items.IItemHandlerModifiable inventoryHandler;\n  public cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.network.chat.Component getName();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler();\n  public net.minecraft.world.item.ItemStack getItem();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+            "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+            "net.minecraft.world.level.block.entity.BlockEntity"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"WoodWorkerBlockEntity.java\"\npublic class cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity extends cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity implements net.minecraft.world.MenuProvider {\n  public static int SLOT_IN;\n  public static int SLOT_OUT;\n  public static int SLOT_AXE;\n  public final net.neoforged.neoforge.items.IItemHandlerModifiable inventoryHandler;\n  public cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.network.chat.Component getName();\n  public net.neoforged.neoforge.items.IItemHandler getItemHandler();\n  public static void tick(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity);\n  public net.minecraft.world.item.ItemStack getAxe();\n  public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int, net.minecraft.world.entity.player.Inventory, net.minecraft.world.entity.player.Player);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity"
+      }
+    ],
+    "client_viewer_classes": [
+      {
+        "class": "cy.jdkdigital.productivetrees.client.particle.ColoredParticleType",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ColoredParticleType.java\"\npublic class cy.jdkdigital.productivetrees.client.particle.ColoredParticleType extends net.minecraft.core.particles.ParticleType<cy.jdkdigital.productivetrees.client.particle.ColoredParticleType> implements net.minecraft.core.particles.ParticleOptions {\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivetrees.client.particle.ColoredParticleType> codec();\n  public net.minecraft.network.codec.StreamCodec<? super net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivetrees.client.particle.ColoredParticleType> streamCodec();\n  public cy.jdkdigital.productivetrees.client.particle.ColoredParticleType(int);\n  public cy.jdkdigital.productivetrees.client.particle.ColoredParticleType();\n  public void setColor(int);\n  public int getColor();\n  public cy.jdkdigital.productivetrees.client.particle.ColoredParticleType getType();\n  public net.minecraft.core.particles.ParticleType getType();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.client.particle.ColoredParticleType"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.client.particle.PetalParticle",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PetalParticle.java\"\npublic class cy.jdkdigital.productivetrees.client.particle.PetalParticle extends net.minecraft.client.particle.CherryParticle {\n}",
+        "source_class": "cy.jdkdigital.productivetrees.client.particle.PetalParticle"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.client.particle.PetalParticle$Provider",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PetalParticle.java\"\npublic class cy.jdkdigital.productivetrees.client.particle.PetalParticle$Provider implements net.minecraft.client.particle.ParticleProvider<cy.jdkdigital.productivetrees.client.particle.ColoredParticleType> {\n  public cy.jdkdigital.productivetrees.client.particle.PetalParticle$Provider(net.minecraft.client.particle.SpriteSet);\n  public net.minecraft.client.particle.Particle createParticle(cy.jdkdigital.productivetrees.client.particle.ColoredParticleType, net.minecraft.client.multiplayer.ClientLevel, double, double, double, double, double, double);\n  public net.minecraft.client.particle.Particle createParticle(net.minecraft.core.particles.ParticleOptions, net.minecraft.client.multiplayer.ClientLevel, double, double, double, double, double, double);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.client.particle.PetalParticle.Provider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.client.render.block.PollinatedLeavesBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PollinatedLeavesBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivetrees.client.render.block.PollinatedLeavesBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity> {\n  public cy.jdkdigital.productivetrees.client.render.block.PollinatedLeavesBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.client.render.block.PollinatedLeavesBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.client.render.block.StripperBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"StripperBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivetrees.client.render.block.StripperBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity> {\n  public cy.jdkdigital.productivetrees.client.render.block.StripperBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.client.render.block.StripperBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.client.render.block.TimeTravellerDisplayBlockEntityRenderer",
+        "classification": {
+          "evidence": [
+            ".client."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TimeTravellerDisplayBlockEntityRenderer.java\"\npublic class cy.jdkdigital.productivetrees.client.render.block.TimeTravellerDisplayBlockEntityRenderer implements net.minecraft.client.renderer.blockentity.BlockEntityRenderer<cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity> {\n  public cy.jdkdigital.productivetrees.client.render.block.TimeTravellerDisplayBlockEntityRenderer(net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider$Context);\n  public void render(cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n  public void render(net.minecraft.world.level.block.entity.BlockEntity, float, com.mojang.blaze3d.vertex.PoseStack, net.minecraft.client.renderer.MultiBufferSource, int, int);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.client.render.block.TimeTravellerDisplayBlockEntityRenderer"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.emi.FruitingEmiRecipe",
+        "classification": {
+          "evidence": [
+            ".emi."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FruitingEmiRecipe.java\"\npublic class cy.jdkdigital.productivetrees.integrations.emi.FruitingEmiRecipe extends dev.emi.emi.api.recipe.BasicEmiRecipe {\n  public cy.jdkdigital.productivetrees.integrations.emi.FruitingEmiRecipe(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe>);\n  public void addWidgets(dev.emi.emi.api.widget.WidgetHolder);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.emi.FruitingEmiRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.emi.PollinationEmiRecipe",
+        "classification": {
+          "evidence": [
+            ".emi."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"PollinationEmiRecipe.java\"\npublic class cy.jdkdigital.productivetrees.integrations.emi.PollinationEmiRecipe extends dev.emi.emi.api.recipe.BasicEmiRecipe {\n  public cy.jdkdigital.productivetrees.integrations.emi.PollinationEmiRecipe(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe>);\n  public void addWidgets(dev.emi.emi.api.widget.WidgetHolder);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.emi.PollinationEmiRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.emi.ProductiveTreesEmiPlugin",
+        "classification": {
+          "evidence": [
+            ".emi."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ProductiveTreesEmiPlugin.java\"\npublic class cy.jdkdigital.productivetrees.integrations.emi.ProductiveTreesEmiPlugin implements dev.emi.emi.api.EmiPlugin {\n  public static final dev.emi.emi.api.recipe.EmiRecipeCategory POLLINATION_CATEGORY;\n  public static final dev.emi.emi.api.recipe.EmiRecipeCategory STRIPPING_CATEGORY;\n  public static final dev.emi.emi.api.recipe.EmiRecipeCategory SAWMILL_CATEGORY;\n  public static final dev.emi.emi.api.recipe.EmiRecipeCategory FRUITING_CATEGORY;\n  public cy.jdkdigital.productivetrees.integrations.emi.ProductiveTreesEmiPlugin();\n  public void register(dev.emi.emi.api.EmiRegistry);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.emi.ProductiveTreesEmiPlugin"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.emi.SawmillEmiRecipe",
+        "classification": {
+          "evidence": [
+            ".emi."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SawmillEmiRecipe.java\"\npublic class cy.jdkdigital.productivetrees.integrations.emi.SawmillEmiRecipe extends dev.emi.emi.api.recipe.BasicEmiRecipe {\n  public cy.jdkdigital.productivetrees.integrations.emi.SawmillEmiRecipe(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivetrees.recipe.SawmillRecipe>);\n  public void addWidgets(dev.emi.emi.api.widget.WidgetHolder);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.emi.SawmillEmiRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.emi.StripperEmiRecipe",
+        "classification": {
+          "evidence": [
+            ".emi."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"StripperEmiRecipe.java\"\npublic class cy.jdkdigital.productivetrees.integrations.emi.StripperEmiRecipe extends dev.emi.emi.api.recipe.BasicEmiRecipe {\n  public cy.jdkdigital.productivetrees.integrations.emi.StripperEmiRecipe(net.minecraft.world.item.crafting.RecipeHolder<cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe>);\n  public void addWidgets(dev.emi.emi.api.widget.WidgetHolder);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.emi.StripperEmiRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.jei.LogStrippingRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LogStrippingRecipeCategory.java\"\npublic class cy.jdkdigital.productivetrees.integrations.jei.LogStrippingRecipeCategory implements mezz.jei.api.recipe.category.IRecipeCategory<cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe> {\n  public cy.jdkdigital.productivetrees.integrations.jei.LogStrippingRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe> getRecipeType();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.jei.LogStrippingRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.jei.ProductiveTreesJeiPlugin",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ProductiveTreesJeiPlugin.java\"\npublic class cy.jdkdigital.productivetrees.integrations.jei.ProductiveTreesJeiPlugin implements mezz.jei.api.IModPlugin {\n  public static final mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe> TREE_POLLINATION_TYPE;\n  public static final mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe> TREE_FRUITING_TYPE;\n  public static final mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe> LOG_STRIPPING_TYPE;\n  public static final mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.SawmillRecipe> SAWMILL_TYPE;\n  public cy.jdkdigital.productivetrees.integrations.jei.ProductiveTreesJeiPlugin();\n  public net.minecraft.resources.ResourceLocation getPluginUid();\n  public void registerRecipeCatalysts(mezz.jei.api.registration.IRecipeCatalystRegistration);\n  public void registerCategories(mezz.jei.api.registration.IRecipeCategoryRegistration);\n  public void registerRuntime(mezz.jei.api.registration.IRuntimeRegistration);\n  public void registerRecipes(mezz.jei.api.registration.IRecipeRegistration);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.jei.ProductiveTreesJeiPlugin"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.jei.SawmillRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SawmillRecipeCategory.java\"\npublic class cy.jdkdigital.productivetrees.integrations.jei.SawmillRecipeCategory implements mezz.jei.api.recipe.category.IRecipeCategory<cy.jdkdigital.productivetrees.recipe.SawmillRecipe> {\n  public cy.jdkdigital.productivetrees.integrations.jei.SawmillRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.SawmillRecipe> getRecipeType();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, cy.jdkdigital.productivetrees.recipe.SawmillRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.jei.SawmillRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.jei.TreeFruitingRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TreeFruitingRecipeCategory.java\"\npublic class cy.jdkdigital.productivetrees.integrations.jei.TreeFruitingRecipeCategory implements mezz.jei.api.recipe.category.IRecipeCategory<cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe> {\n  public cy.jdkdigital.productivetrees.integrations.jei.TreeFruitingRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe> getRecipeType();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.jei.TreeFruitingRecipeCategory"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.integrations.jei.TreePollinationRecipeCategory",
+        "classification": {
+          "evidence": [
+            ".jei."
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TreePollinationRecipeCategory.java\"\npublic class cy.jdkdigital.productivetrees.integrations.jei.TreePollinationRecipeCategory implements mezz.jei.api.recipe.category.IRecipeCategory<cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe> {\n  public cy.jdkdigital.productivetrees.integrations.jei.TreePollinationRecipeCategory(mezz.jei.api.helpers.IGuiHelper);\n  public mezz.jei.api.recipe.RecipeType<cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe> getRecipeType();\n  public net.minecraft.network.chat.Component getTitle();\n  public mezz.jei.api.gui.drawable.IDrawable getBackground();\n  public mezz.jei.api.gui.drawable.IDrawable getIcon();\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe, mezz.jei.api.recipe.IFocusGroup);\n  public void setRecipe(mezz.jei.api.gui.builder.IRecipeLayoutBuilder, java.lang.Object, mezz.jei.api.recipe.IFocusGroup);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.integrations.jei.TreePollinationRecipeCategory"
+      }
+    ],
+    "datagen_classes": [
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.BeeProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BeeProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.BeeProvider extends cy.jdkdigital.productivebees.datagen.BeeProvider {\n  public cy.jdkdigital.productivetrees.datagen.BeeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.BeeProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.BlockTagProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BlockTagProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.BlockTagProvider extends net.neoforged.neoforge.common.data.BlockTagsProvider {\n  public cy.jdkdigital.productivetrees.datagen.BlockTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.BlockTagProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.DataMapProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataMapProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.DataMapProvider extends net.neoforged.neoforge.common.data.DataMapProvider {\n  public cy.jdkdigital.productivetrees.datagen.DataMapProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.DataMapProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.FeatureProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"FeatureProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.FeatureProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.productivetrees.datagen.FeatureProvider(net.minecraft.data.PackOutput);\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.FeatureProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.ItemTagProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ItemTagProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.ItemTagProvider extends net.minecraft.data.tags.ItemTagsProvider {\n  public cy.jdkdigital.productivetrees.datagen.ItemTagProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>, java.util.concurrent.CompletableFuture<net.minecraft.data.tags.TagsProvider$TagLookup<net.minecraft.world.level.block.Block>>, net.neoforged.neoforge.common.data.ExistingFileHelper);\n  public static java.lang.String tagName(java.lang.String);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.ItemTagProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.LanguageProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LanguageProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.LanguageProvider extends net.neoforged.neoforge.common.data.LanguageProvider {\n  public cy.jdkdigital.productivetrees.datagen.LanguageProvider(net.minecraft.data.PackOutput);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.LanguageProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.LootDataProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootDataProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.LootDataProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.productivetrees.datagen.LootDataProvider(net.minecraft.data.PackOutput, java.util.List<net.minecraft.data.loot.LootTableProvider$SubProviderEntry>, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.LootDataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.LootDataProvider$LootProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootDataProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.LootDataProvider$LootProvider extends net.minecraft.data.loot.BlockLootSubProvider {\n  public cy.jdkdigital.productivetrees.datagen.LootDataProvider$LootProvider(net.minecraft.core.HolderLookup$Provider);\n  public void dropSelf(net.minecraft.world.level.block.Block);\n  public void dropDoor(net.minecraft.world.level.block.Block);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.LootDataProvider.LootProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.LootModifierProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"LootModifierProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.LootModifierProvider extends net.neoforged.neoforge.common.data.GlobalLootModifierProvider {\n  public cy.jdkdigital.productivetrees.datagen.LootModifierProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.LootModifierProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.ModelProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ModelProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.ModelProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.productivetrees.datagen.ModelProvider(net.minecraft.data.PackOutput);\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n  public com.google.gson.JsonObject createFruitTemplate(net.minecraft.resources.ResourceLocation, java.util.Map<net.minecraft.data.models.model.TextureSlot, net.minecraft.resources.ResourceLocation>);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.ModelProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ModelProvider.java\"\nclass cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator {\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.ModelProvider.ModelGenerator"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator$WoodProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ModelProvider.java\"\nclass cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator$WoodProvider {\n  public cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator$WoodProvider(cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator);\n  public cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator$WoodProvider wood(java.lang.String, net.minecraft.world.level.block.Block, boolean);\n  public cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator$WoodProvider logWithHorizontal(java.lang.String, net.minecraft.world.level.block.Block, boolean);\n  public cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator$WoodProvider logWithHorizontal(java.lang.String, net.minecraft.world.level.block.Block, boolean, java.lang.String);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.ModelProvider.ModelGenerator.WoodProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.ProductiveTreesDataProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"ProductiveTreesDataProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.ProductiveTreesDataProvider {\n  public cy.jdkdigital.productivetrees.datagen.ProductiveTreesDataProvider();\n  public static void gatherData(net.neoforged.neoforge.data.event.GatherDataEvent);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.ProductiveTreesDataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.RecipeProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RecipeProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.RecipeProvider extends net.minecraft.data.recipes.RecipeProvider implements net.neoforged.neoforge.common.conditions.IConditionBuilder {\n  public cy.jdkdigital.productivetrees.datagen.RecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, java.lang.String, java.lang.String, float);\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, java.lang.String, net.minecraft.world.level.block.Block, float);\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, java.lang.String, net.minecraft.world.item.crafting.Ingredient, float);\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, float);\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, net.minecraft.world.level.block.Block, net.minecraft.world.level.block.Block, float);\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, net.minecraft.world.level.block.Block, net.minecraft.world.level.block.Block, java.lang.String, float);\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, net.minecraft.world.level.block.Block, net.minecraft.world.level.block.Block, net.minecraft.world.level.block.Block, float);\n  public static void treeBreeding(net.minecraft.data.recipes.RecipeOutput, java.lang.String, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, float);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.RecipeProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.RecipeProvider$BotanyPotsCompat",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"RecipeProvider.java\"\nclass cy.jdkdigital.productivetrees.datagen.RecipeProvider$BotanyPotsCompat {\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.RecipeProvider.BotanyPotsCompat"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CompatLootDataProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider(net.minecraft.data.PackOutput, java.util.List<net.minecraft.data.loot.LootTableProvider$SubProviderEntry>, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider$LootProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CompatLootDataProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider$LootProvider extends net.minecraft.data.loot.BlockLootSubProvider {\n  public cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider$LootProvider(net.minecraft.core.HolderLookup$Provider);\n  public static net.minecraft.world.level.storage.loot.LootTable$Builder genHiveDrop(net.minecraft.world.level.block.Block);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider.LootProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CompatModelProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider implements net.minecraft.data.DataProvider {\n  public cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider(net.minecraft.data.PackOutput);\n  public java.util.concurrent.CompletableFuture<?> run(net.minecraft.data.CachedOutput);\n  public java.lang.String getName();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider$ModelGenerator",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CompatModelProvider.java\"\nclass cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider$ModelGenerator {\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider.ModelGenerator"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatRecipeProvider",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"CompatRecipeProvider.java\"\npublic class cy.jdkdigital.productivetrees.datagen.compat.CompatRecipeProvider extends net.minecraft.data.recipes.RecipeProvider implements net.neoforged.neoforge.common.conditions.IConditionBuilder {\n  public cy.jdkdigital.productivetrees.datagen.compat.CompatRecipeProvider(net.minecraft.data.PackOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup$Provider>);\n  public java.lang.String getName();\n  public void buildHiveRecipe(java.lang.String, cy.jdkdigital.productivetrees.registry.WoodObject, net.minecraft.data.recipes.RecipeOutput);\n  public void buildBoxRecipe(java.lang.String, cy.jdkdigital.productivetrees.registry.WoodObject, net.minecraft.data.recipes.RecipeOutput);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.compat.CompatRecipeProvider"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.dynamic.DataGenPackFinder",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DataGenPackFinder.java\"\npublic class cy.jdkdigital.productivetrees.datagen.dynamic.DataGenPackFinder implements net.minecraft.server.packs.repository.RepositorySource {\n  public cy.jdkdigital.productivetrees.datagen.dynamic.DataGenPackFinder(net.minecraft.server.packs.PackType);\n  public void loadPacks(java.util.function.Consumer<net.minecraft.server.packs.repository.Pack>);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.dynamic.DataGenPackFinder"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.dynamic.DynamicDataPack",
+        "classification": {
+          "evidence": [
+            "datagen"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"DynamicDataPack.java\"\npublic class cy.jdkdigital.productivetrees.datagen.dynamic.DynamicDataPack extends net.minecraft.server.packs.PathPackResources {\n  public cy.jdkdigital.productivetrees.datagen.dynamic.DynamicDataPack(java.nio.file.Path, net.minecraft.server.packs.PackType, net.minecraft.server.packs.PackLocationInfo);\n  public <T> T getMetadataSection(net.minecraft.server.packs.metadata.MetadataSectionSerializer<T>) throws java.io.IOException;\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.dynamic.DynamicDataPack"
+      }
+    ],
+    "recipe_builders": [
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"BotanyPotBlockDerivedCropRecipeBuilder.java\"\npublic final class cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder extends java.lang.Record implements net.minecraft.data.recipes.RecipeBuilder {\n  public cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder(net.minecraft.world.level.block.Block, java.util.Optional<net.minecraft.world.item.crafting.Ingredient>, net.minecraft.world.item.crafting.Ingredient, int, java.util.Optional<java.util.List<net.darkhax.botanypots.common.api.data.display.types.Display>>, int, java.util.Optional<java.util.List<net.darkhax.botanypots.common.api.data.itemdrops.ItemDropProvider>>, java.util.Optional<net.darkhax.botanypots.common.impl.data.display.types.BasicOptions>, java.util.Optional<net.minecraft.resources.ResourceLocation>, java.util.Optional<net.minecraft.advancements.critereon.BlockPredicate>, float, float);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder direct(net.minecraft.world.level.block.Block, java.util.Optional<net.minecraft.world.item.crafting.Ingredient>, net.minecraft.world.item.crafting.Ingredient, int, java.util.Optional<java.util.List<net.darkhax.botanypots.common.api.data.display.types.Display>>, int, java.util.Optional<java.util.List<net.darkhax.botanypots.common.api.data.itemdrops.ItemDropProvider>>, java.util.Optional<net.darkhax.botanypots.common.impl.data.display.types.BasicOptions>, java.util.Optional<net.minecraft.resources.ResourceLocation>, java.util.Optional<net.minecraft.advancements.critereon.BlockPredicate>, float, float);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder drops(net.minecraft.world.level.block.Block, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, java.util.List<net.darkhax.botanypots.common.api.data.itemdrops.ItemDropProvider>, java.util.List<net.darkhax.botanypots.common.api.data.display.types.Display>);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder drops(net.minecraft.world.level.block.Block, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, java.util.List<net.darkhax.botanypots.common.api.data.itemdrops.ItemDropProvider>);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder drops(net.minecraft.world.level.block.Block, net.minecraft.world.item.crafting.Ingredient, java.util.List<net.darkhax.botanypots.common.api.data.itemdrops.ItemDropProvider>);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.level.block.Block block();\n  public java.util.Optional<net.minecraft.world.item.crafting.Ingredient> seed();\n  public net.minecraft.world.item.crafting.Ingredient soil();\n  public int growTime();\n  public java.util.Optional<java.util.List<net.darkhax.botanypots.common.api.data.display.types.Display>> display();\n  public int lightLevel();\n  public java.util.Optional<java.util.List<net.darkhax.botanypots.common.api.data.itemdrops.ItemDropProvider>> drops();\n  public java.util.Optional<net.darkhax.botanypots.common.impl.data.display.types.BasicOptions> renderOptions();\n  public java.util.Optional<net.minecraft.resources.ResourceLocation> functionId();\n  public java.util.Optional<net.minecraft.advancements.critereon.BlockPredicate> potPredicate();\n  public float baseYield();\n  public float yieldScale();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.recipe.SawmillRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SawmillRecipeBuilder.java\"\npublic final class cy.jdkdigital.productivetrees.datagen.recipe.SawmillRecipeBuilder extends java.lang.Record implements net.minecraft.data.recipes.RecipeBuilder {\n  public cy.jdkdigital.productivetrees.datagen.recipe.SawmillRecipeBuilder(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.SawmillRecipeBuilder direct(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.SawmillRecipeBuilder tree(cy.jdkdigital.productivetrees.registry.WoodObject, net.minecraft.tags.TagKey<net.minecraft.world.item.Item>, net.minecraft.world.level.block.Block);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.item.crafting.Ingredient log();\n  public net.minecraft.world.item.ItemStack plank();\n  public net.minecraft.world.item.ItemStack secondary();\n  public net.minecraft.world.item.ItemStack tertiary();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.recipe.SawmillRecipeBuilder"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.recipe.TreePollinationRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TreePollinationRecipeBuilder.java\"\npublic final class cy.jdkdigital.productivetrees.datagen.recipe.TreePollinationRecipeBuilder extends java.lang.Record implements net.minecraft.data.recipes.RecipeBuilder {\n  public cy.jdkdigital.productivetrees.datagen.recipe.TreePollinationRecipeBuilder(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, float);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.TreePollinationRecipeBuilder direct(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, float);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n  public final java.lang.String toString();\n  public final int hashCode();\n  public final boolean equals(java.lang.Object);\n  public net.minecraft.world.item.crafting.Ingredient leafA();\n  public net.minecraft.world.item.crafting.Ingredient leafB();\n  public net.minecraft.world.item.ItemStack result();\n  public float chance();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.recipe.TreePollinationRecipeBuilder"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder",
+        "classification": {
+          "evidence": [
+            "recipebuilder"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"TreetapRecipeBuilder.java\"\npublic final class cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder implements net.minecraft.data.recipes.RecipeBuilder {\n  public static cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder direct(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, java.lang.String, net.neoforged.neoforge.fluids.FluidStack, boolean, int);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder direct(net.minecraft.world.level.block.Block, net.minecraft.world.item.ItemStack, net.neoforged.neoforge.fluids.FluidStack, int);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder direct(net.minecraft.world.level.block.Block, net.minecraft.world.item.ItemStack, java.lang.String, int);\n  public static cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder direct(net.minecraft.world.level.block.Block, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, java.lang.String, int);\n  public net.minecraft.data.recipes.RecipeBuilder unlockedBy(java.lang.String, net.minecraft.advancements.Criterion<?>);\n  public net.minecraft.data.recipes.RecipeBuilder group(java.lang.String);\n  public net.minecraft.world.item.Item getResult();\n  public void save(net.minecraft.data.recipes.RecipeOutput, net.minecraft.resources.ResourceLocation);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder"
+      }
+    ],
+    "recipe_classes": [
+      {
+        "class": "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe",
+            "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe",
+            "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"LogStrippingRecipe.java\"\npublic class cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe extends cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe {\n  public cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);\n  public cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe(net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.recipe.SawmillRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.SawmillRecipe",
+            "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.SawmillRecipe",
+            "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"SawmillRecipe.java\"\npublic class cy.jdkdigital.productivetrees.recipe.SawmillRecipe extends cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe {\n  public cy.jdkdigital.productivetrees.recipe.SawmillRecipe(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack, net.minecraft.world.item.ItemStack);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.recipe.SawmillRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TreeFruitingRecipe.java\"\npublic class cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public final net.minecraft.world.item.crafting.Ingredient tree;\n  public final net.minecraft.world.item.ItemStack result;\n  public cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack);\n  public boolean isSpecial();\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe",
+            "net.minecraft.world.item.crafting.Recipe"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TreePollinationRecipe.java\"\npublic class cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.RecipeInput> {\n  public final net.minecraft.world.item.crafting.Ingredient leafA;\n  public final net.minecraft.world.item.crafting.Ingredient leafB;\n  public final net.minecraft.world.item.ItemStack result;\n  public final float chance;\n  public cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, float);\n  public boolean isSpecial();\n  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);\n  public boolean matches(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);\n  public boolean canCraftInDimensions(int, int);\n  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);\n  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();\n  public net.minecraft.world.item.crafting.RecipeType<?> getType();\n}",
+        "source_class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe"
+      }
+    ],
+    "recipe_serializers": [
+      {
+        "class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TreeFruitingRecipe.java\"\npublic class cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe> STREAM_CODEC;\n  public cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe> streamCodec();\n  public static cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe.Serializer"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer",
+        "classification": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "hierarchy": {
+          "evidence": [
+            "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer",
+            "net.minecraft.world.item.crafting.RecipeSerializer"
+          ],
+          "method": "class_hierarchy"
+        },
+        "public_signature": "Compiled from \"TreePollinationRecipe.java\"\npublic class cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer implements net.minecraft.world.item.crafting.RecipeSerializer<cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe> {\n  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe> STREAM_CODEC;\n  public cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer();\n  public com.mojang.serialization.MapCodec<cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe> codec();\n  public net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe> streamCodec();\n  public static cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe fromNetwork(net.minecraft.network.RegistryFriendlyByteBuf);\n  public static void toNetwork(net.minecraft.network.RegistryFriendlyByteBuf, cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe.Serializer"
+      }
+    ],
+    "recipe_types": [],
+    "resource_apis": [
+      {
+        "class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MapleSap.java\"\npublic abstract class cy.jdkdigital.productivetrees.common.fluid.MapleSap extends net.neoforged.neoforge.fluids.BaseFlowingFluid {\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap$Flowing",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MapleSap.java\"\npublic class cy.jdkdigital.productivetrees.common.fluid.MapleSap$Flowing extends cy.jdkdigital.productivetrees.common.fluid.MapleSap {\n  public cy.jdkdigital.productivetrees.common.fluid.MapleSap$Flowing();\n  public boolean isSource(net.minecraft.world.level.material.FluidState);\n  public int getAmount(net.minecraft.world.level.material.FluidState);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap.Flowing"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap$Source",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MapleSap.java\"\npublic class cy.jdkdigital.productivetrees.common.fluid.MapleSap$Source extends cy.jdkdigital.productivetrees.common.fluid.MapleSap {\n  public cy.jdkdigital.productivetrees.common.fluid.MapleSap$Source();\n  public boolean isSource(net.minecraft.world.level.material.FluidState);\n  public int getAmount(net.minecraft.world.level.material.FluidState);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap.Source"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.common.fluid.type.MapleSapType",
+        "classification": {
+          "evidence": [
+            "fluid"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"MapleSapType.java\"\npublic class cy.jdkdigital.productivetrees.common.fluid.type.MapleSapType extends net.neoforged.neoforge.fluids.FluidType {\n  public cy.jdkdigital.productivetrees.common.fluid.type.MapleSapType();\n  public void initializeClient(java.util.function.Consumer<net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions>);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.fluid.type.MapleSapType"
+      }
+    ],
+    "station_classes": [
+      {
+        "class": "cy.jdkdigital.productivetrees.common.block.Sawmill",
+        "classification": {
+          "evidence": [
+            "mill"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"Sawmill.java\"\npublic class cy.jdkdigital.productivetrees.common.block.Sawmill extends cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock {\n  public static final com.mojang.serialization.MapCodec<cy.jdkdigital.productivetrees.common.block.Sawmill> CODEC;\n  public cy.jdkdigital.productivetrees.common.block.Sawmill(net.minecraft.world.level.block.state.BlockBehaviour$Properties);\n  public <T extends net.minecraft.world.level.block.entity.BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.entity.BlockEntityType<T>);\n  public net.minecraft.world.level.block.RenderShape getRenderShape(net.minecraft.world.level.block.state.BlockState);\n  public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);\n  public void openGui(net.minecraft.server.level.ServerPlayer, cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.common.block.Sawmill"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.inventory.SawmillContainer",
+        "classification": {
+          "evidence": [
+            "mill"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SawmillContainer.java\"\npublic class cy.jdkdigital.productivetrees.inventory.SawmillContainer extends cy.jdkdigital.productivelib.container.AbstractContainer<cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity> {\n  public cy.jdkdigital.productivetrees.inventory.SawmillContainer(int, net.minecraft.world.entity.player.Inventory, net.minecraft.network.FriendlyByteBuf);\n  public cy.jdkdigital.productivetrees.inventory.SawmillContainer(int, net.minecraft.world.entity.player.Inventory, cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.inventory.SawmillContainer"
+      },
+      {
+        "class": "cy.jdkdigital.productivetrees.inventory.screen.SawmillScreen",
+        "classification": {
+          "evidence": [
+            "mill"
+          ],
+          "method": "name_term"
+        },
+        "hierarchy": null,
+        "public_signature": "Compiled from \"SawmillScreen.java\"\npublic class cy.jdkdigital.productivetrees.inventory.screen.SawmillScreen extends cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen<cy.jdkdigital.productivetrees.inventory.SawmillContainer> {\n  public cy.jdkdigital.productivetrees.inventory.screen.SawmillScreen(cy.jdkdigital.productivetrees.inventory.SawmillContainer, net.minecraft.world.entity.player.Inventory, net.minecraft.network.chat.Component);\n  public void render(net.minecraft.client.gui.GuiGraphics, int, int, float);\n}",
+        "source_class": "cy.jdkdigital.productivetrees.inventory.screen.SawmillScreen"
+      }
+    ]
+  },
+  "kind": "auto_storage_compat_audit",
+  "recipe_data": {
+    "declared_recipes": 3504,
+    "digest": "eccbcc9cd809eaa8f8cb312d4dffeb3941b0c5bda9d152f94de785b457a963f1",
+    "effective_recipes": 3504,
+    "format": 1,
+    "overrides": [],
+    "serializers": [
+      {
+        "condition_types": [
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 163,
+        "fields": [
+          "display",
+          "drops",
+          "grow_time",
+          "input",
+          "neoforge:conditions",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 163,
+        "sample_recipe_ids": [
+          "productivetrees:botanypots/alder",
+          "productivetrees:botanypots/allspice",
+          "productivetrees:botanypots/almond",
+          "productivetrees:botanypots/apricot",
+          "productivetrees:botanypots/aquilaria",
+          "productivetrees:botanypots/asai_palm",
+          "productivetrees:botanypots/ash",
+          "productivetrees:botanypots/aspen",
+          "productivetrees:botanypots/avocado",
+          "productivetrees:botanypots/balsa",
+          "productivetrees:botanypots/balsam_fir",
+          "productivetrees:botanypots/banana",
+          "productivetrees:botanypots/bay_leaf",
+          "productivetrees:botanypots/beech",
+          "productivetrees:botanypots/beliy_naliv_apple",
+          "productivetrees:botanypots/black_cherry"
+        ],
+        "serializer_id": "botanypots:crop"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 163,
+        "fields": [
+          "input",
+          "main_output",
+          "neoforge:conditions",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 163,
+        "sample_recipe_ids": [
+          "productivetrees:mekanism/sawmill/alder",
+          "productivetrees:mekanism/sawmill/allspice",
+          "productivetrees:mekanism/sawmill/almond",
+          "productivetrees:mekanism/sawmill/apricot",
+          "productivetrees:mekanism/sawmill/aquilaria",
+          "productivetrees:mekanism/sawmill/asai_palm",
+          "productivetrees:mekanism/sawmill/ash",
+          "productivetrees:mekanism/sawmill/aspen",
+          "productivetrees:mekanism/sawmill/avocado",
+          "productivetrees:mekanism/sawmill/balsa",
+          "productivetrees:mekanism/sawmill/balsam_fir",
+          "productivetrees:mekanism/sawmill/banana",
+          "productivetrees:mekanism/sawmill/bay_leaf",
+          "productivetrees:mekanism/sawmill/beech",
+          "productivetrees:mekanism/sawmill/beliy_naliv_apple",
+          "productivetrees:mekanism/sawmill/black_cherry"
+        ],
+        "serializer_id": "mekanism:sawing"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded",
+          "neoforge:not"
+        ],
+        "conditional_recipes": 326,
+        "fields": [
+          "category",
+          "group",
+          "key",
+          "neoforge:conditions",
+          "pattern",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 1,
+          "pattern": 3
+        },
+        "recipe_count": 2216,
+        "sample_recipe_ids": [
+          "productivetrees:blue_dye_from_haematoxylin",
+          "productivetrees:bookshelves/alder_bookshelf",
+          "productivetrees:bookshelves/allspice_bookshelf",
+          "productivetrees:bookshelves/almond_bookshelf",
+          "productivetrees:bookshelves/apricot_bookshelf",
+          "productivetrees:bookshelves/aquilaria_bookshelf",
+          "productivetrees:bookshelves/asai_palm_bookshelf",
+          "productivetrees:bookshelves/ash_bookshelf",
+          "productivetrees:bookshelves/aspen_bookshelf",
+          "productivetrees:bookshelves/avocado_bookshelf",
+          "productivetrees:bookshelves/balsa_bookshelf",
+          "productivetrees:bookshelves/balsam_fir_bookshelf",
+          "productivetrees:bookshelves/banana_bookshelf",
+          "productivetrees:bookshelves/bay_leaf_bookshelf",
+          "productivetrees:bookshelves/beech_bookshelf",
+          "productivetrees:bookshelves/beliy_naliv_apple_bookshelf"
+        ],
+        "serializer_id": "minecraft:crafting_shaped"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 164,
+        "fields": [
+          "category",
+          "group",
+          "ingredients",
+          "neoforge:conditions",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "ingredients": 2,
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 581,
+        "sample_recipe_ids": [
+          "productivetrees:button/alder_button",
+          "productivetrees:button/allspice_button",
+          "productivetrees:button/almond_button",
+          "productivetrees:button/apricot_button",
+          "productivetrees:button/aquilaria_button",
+          "productivetrees:button/asai_palm_button",
+          "productivetrees:button/ash_button",
+          "productivetrees:button/aspen_button",
+          "productivetrees:button/avocado_button",
+          "productivetrees:button/balsa_button",
+          "productivetrees:button/balsam_fir_button",
+          "productivetrees:button/banana_button",
+          "productivetrees:button/bay_leaf_button",
+          "productivetrees:button/beech_button",
+          "productivetrees:button/beliy_naliv_apple_button",
+          "productivetrees:button/black_cherry_button"
+        ],
+        "serializer_id": "minecraft:crafting_shapeless"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "cookingtime",
+          "experience",
+          "ingredient",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {},
+        "recipe_count": 28,
+        "sample_recipe_ids": [
+          "productivetrees:cured_rubber",
+          "productivetrees:maple_syrup",
+          "productivetrees:roasting/roasted_almond_crate_smelting",
+          "productivetrees:roasting/roasted_almond_smelting",
+          "productivetrees:roasting/roasted_beechnut_crate_smelting",
+          "productivetrees:roasting/roasted_beechnut_smelting",
+          "productivetrees:roasting/roasted_brazil_nut_crate_smelting",
+          "productivetrees:roasting/roasted_brazil_nut_smelting",
+          "productivetrees:roasting/roasted_butternut_crate_smelting",
+          "productivetrees:roasting/roasted_butternut_smelting",
+          "productivetrees:roasting/roasted_candlenut_crate_smelting",
+          "productivetrees:roasting/roasted_candlenut_smelting",
+          "productivetrees:roasting/roasted_cashew_crate_smelting",
+          "productivetrees:roasting/roasted_cashew_smelting",
+          "productivetrees:roasting/roasted_chestnut_crate_smelting",
+          "productivetrees:roasting/roasted_chestnut_smelting"
+        ],
+        "serializer_id": "minecraft:smelting"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "category",
+          "cookingtime",
+          "experience",
+          "ingredient",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {},
+        "recipe_count": 26,
+        "sample_recipe_ids": [
+          "productivetrees:roasting/roasted_almond_crate_smoking",
+          "productivetrees:roasting/roasted_almond_smoking",
+          "productivetrees:roasting/roasted_beechnut_crate_smoking",
+          "productivetrees:roasting/roasted_beechnut_smoking",
+          "productivetrees:roasting/roasted_brazil_nut_crate_smoking",
+          "productivetrees:roasting/roasted_brazil_nut_smoking",
+          "productivetrees:roasting/roasted_butternut_crate_smoking",
+          "productivetrees:roasting/roasted_butternut_smoking",
+          "productivetrees:roasting/roasted_candlenut_crate_smoking",
+          "productivetrees:roasting/roasted_candlenut_smoking",
+          "productivetrees:roasting/roasted_cashew_crate_smoking",
+          "productivetrees:roasting/roasted_cashew_smoking",
+          "productivetrees:roasting/roasted_chestnut_crate_smoking",
+          "productivetrees:roasting/roasted_chestnut_smoking",
+          "productivetrees:roasting/roasted_coffee_bean_crate_smoking",
+          "productivetrees:roasting/roasted_coffee_bean_smoking"
+        ],
+        "serializer_id": "minecraft:smoking"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded",
+          "productivelib:lazy"
+        ],
+        "conditional_recipes": 1,
+        "fields": [
+          "chance",
+          "item",
+          "neoforge:conditions",
+          "result",
+          "source",
+          "type"
+        ],
+        "max_array_sizes": {
+          "neoforge:conditions": 2
+        },
+        "recipe_count": 1,
+        "sample_recipe_ids": [
+          "productivetrees:allergy_bee"
+        ],
+        "serializer_id": "productivebees:bee_conversion"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "input",
+          "output",
+          "secondary",
+          "tertiary",
+          "type"
+        ],
+        "max_array_sizes": {},
+        "recipe_count": 173,
+        "sample_recipe_ids": [
+          "productivetrees:sawmill/acacia_planks_from_log",
+          "productivetrees:sawmill/alder_planks_from_log",
+          "productivetrees:sawmill/allspice_planks_from_log",
+          "productivetrees:sawmill/almond_planks_from_log",
+          "productivetrees:sawmill/apricot_planks_from_log",
+          "productivetrees:sawmill/aquilaria_planks_from_log",
+          "productivetrees:sawmill/asai_palm_planks_from_log",
+          "productivetrees:sawmill/ash_planks_from_log",
+          "productivetrees:sawmill/aspen_planks_from_log",
+          "productivetrees:sawmill/avocado_planks_from_log",
+          "productivetrees:sawmill/balsa_planks_from_log",
+          "productivetrees:sawmill/balsam_fir_planks_from_log",
+          "productivetrees:sawmill/banana_planks_from_log",
+          "productivetrees:sawmill/bay_leaf_planks_from_log",
+          "productivetrees:sawmill/beech_planks_from_log",
+          "productivetrees:sawmill/beliy_naliv_apple_planks_from_log"
+        ],
+        "serializer_id": "productivetrees:sawmill"
+      },
+      {
+        "condition_types": [],
+        "conditional_recipes": 0,
+        "fields": [
+          "chance",
+          "leafA",
+          "leafB",
+          "result",
+          "type"
+        ],
+        "max_array_sizes": {
+          "leafB": 3
+        },
+        "recipe_count": 148,
+        "sample_recipe_ids": [
+          "productivetrees:pollination/alder",
+          "productivetrees:pollination/allspice",
+          "productivetrees:pollination/almond",
+          "productivetrees:pollination/apricot",
+          "productivetrees:pollination/aquilaria",
+          "productivetrees:pollination/asai_palm",
+          "productivetrees:pollination/ash",
+          "productivetrees:pollination/aspen",
+          "productivetrees:pollination/avocado",
+          "productivetrees:pollination/balsa",
+          "productivetrees:pollination/balsam_fir",
+          "productivetrees:pollination/banana",
+          "productivetrees:pollination/beech",
+          "productivetrees:pollination/beliy_naliv_apple",
+          "productivetrees:pollination/black_cherry",
+          "productivetrees:pollination/black_locust"
+        ],
+        "serializer_id": "productivetrees:tree_pollination"
+      },
+      {
+        "condition_types": [
+          "neoforge:mod_loaded"
+        ],
+        "conditional_recipes": 5,
+        "fields": [
+          "collect_bucket",
+          "display_fluid",
+          "fluid_color",
+          "harvest_item",
+          "life_cycle",
+          "log",
+          "neoforge:conditions",
+          "particle_color",
+          "processing_time",
+          "required_block_count",
+          "result",
+          "type",
+          "wooden_result"
+        ],
+        "max_array_sizes": {
+          "life_cycle": 0,
+          "neoforge:conditions": 1
+        },
+        "recipe_count": 5,
+        "sample_recipe_ids": [
+          "productivetrees:rubber",
+          "productivetrees:treetap/date_palm_juice",
+          "productivetrees:treetap/dracaena_sap",
+          "productivetrees:treetap/maple_sap",
+          "productivetrees:treetap/sandalwood_oil"
+        ],
+        "serializer_id": "treetap:tap_extract"
+      }
+    ],
+    "sources": [
+      {
+        "declared_recipes": 3504,
+        "id": "target_jar",
+        "sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+      }
+    ]
+  },
+  "risks": [
+    {
+      "code": "world_mutation",
+      "disposition": "needs_decision",
+      "evidence": [
+        "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe: world API via cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+        "cy.jdkdigital.productivetrees.recipe.SawmillRecipe: world API via cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+        "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe: world API",
+        "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe: world API"
+      ]
+    }
+  ],
+  "scanner_format": 17,
+  "schema": 1,
+  "source": {
+    "files": [],
+    "revision": null
+  },
+  "structural_candidate_inventory_sha256": "ac2eab09a214e164eb2f04491529b89d101bd1555984952b0b76111177c4d37c",
+  "structural_class_graph": [
+    {
+      "class": "com.almostreliable.unified.api.plugin.AlmostUnifiedPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "65202adf4dccf7b3033537e539e23eccc541c6a15ad88d87fa1c5a09ceb3359f"
+    },
+    {
+      "class": "com.almostreliable.unified.api.unification.recipe.RecipeUnifier",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "65202adf4dccf7b3033537e539e23eccc541c6a15ad88d87fa1c5a09ceb3359f"
+    },
+    {
+      "class": "cy.jdkdigital.productivebees.datagen.BeeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "9d48d198bc6eacf3b7729f4d60b91e661cfa15d105264ba225dee87b1d547ba1"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "cy.jdkdigital.productivelib.common.block.entity.ICapabilityBlockEntity",
+          "net.minecraft.world.Nameable"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.ICapabilityBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivelib.container.AbstractContainer",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.inventory.AbstractContainerMenu"
+      },
+      "owner_sha256": "6671c8aa783d5fc3056b5a24b041edcf51b9c774b68fd85a790ae3346e4550e7"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.Config",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.Config$Server",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.ProductiveTrees",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.client.particle.ColoredParticleType",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.core.particles.ParticleOptions"
+        ],
+        "super_class": "net.minecraft.core.particles.ParticleType"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.client.particle.PetalParticle",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.particle.CherryParticle"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.client.particle.PetalParticle$Provider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.particle.ParticleProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.client.render.block.PollinatedLeavesBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.client.render.block.StripperBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.client.render.block.TimeTravellerDisplayBlockEntityRenderer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.client.renderer.blockentity.BlockEntityRenderer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.CoconutSproutBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.block.SimpleWaterloggedBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.FallingBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.EntitySpawner",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.PollenSifter",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.PollinatedLeaves",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.block.EntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.LeavesBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveBranchLeavesBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.block.ProductiveLeavesBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveCeilingHangingSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.CeilingHangingSignBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveDanglerFruitBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.block.ProductiveFruitBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveDrippyFruitBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.block.ProductiveFruitBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveDroppyFruitBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.block.ProductiveDanglerFruitBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveFruitBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.block.ProductiveLeavesBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveLeavesBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.LeavesBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveLogBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.block.ProductiveRotatedPillarBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductivePlankBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveRotatedPillarBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.RotatedPillarBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveSaplingBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.SaplingBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveStandingSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.StandingSignBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveWallHangingSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.WallHangingSignBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveWallSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.WallSignBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.ProductiveWoodBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.block.ProductiveRotatedPillarBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.Sawmill",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.Stripper",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.TimeTravellerDisplay",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.WoodWorker",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.CapabilityContainerBlock"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.MenuProvider",
+          "cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.HangingSignBlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.SignBlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.MenuProvider",
+          "cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.MenuProvider",
+          "cy.jdkdigital.productivelib.common.block.entity.IUpgradeableBlockEntity"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.MenuProvider"
+        ],
+        "super_class": "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.CocoaPodDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.EntityPlacerDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.FruitLeafPlacerDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.FruitLeafReplacerDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.FruitTrunkDanglerDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.LeafTrimDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.RootDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.TaperDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.TemplateTreeConfiguration",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.TemplateTreeFeature",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.Feature"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.feature.TrunkVineDecorator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.fluids.BaseFlowingFluid"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap$Flowing",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap$Source",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.common.fluid.MapleSap"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.fluid.type.MapleSapType",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.fluids.FluidType"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.item.PollenItem",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.item.Item"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.BeeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivebees.datagen.BeeProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.BlockTagProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.BlockTagsProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.DataMapProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.DataMapProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.FeatureProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.ItemTagProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.ItemTagsProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.LanguageProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.LanguageProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.LootDataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.LootDataProvider$LootProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.loot.BlockLootSubProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.LootModifierProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.neoforged.neoforge.common.data.GlobalLootModifierProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.ModelProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.ModelProvider$ModelGenerator$WoodProvider",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.ProductiveTreesDataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.RecipeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.common.conditions.IConditionBuilder"
+        ],
+        "super_class": "net.minecraft.data.recipes.RecipeProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.RecipeProvider$BotanyPotsCompat",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatLootDataProvider$LootProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.loot.BlockLootSubProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatModelProvider$ModelGenerator",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.compat.CompatRecipeProvider",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.neoforged.neoforge.common.conditions.IConditionBuilder"
+        ],
+        "super_class": "net.minecraft.data.recipes.RecipeProvider"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.dynamic.DataGenPackFinder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.server.packs.repository.RepositorySource"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.dynamic.DynamicDataPack",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.server.packs.PathPackResources"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.recipe.BotanyPotBlockDerivedCropRecipeBuilder",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.recipe.SawmillRecipeBuilder",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.recipe.TreePollinationRecipeBuilder",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.datagen.recipe.TreetapRecipeBuilder",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [
+          "net.minecraft.data.recipes.RecipeBuilder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.event.ClientEventHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.event.EventHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.AspenFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.BallFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.ConeFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.ConiferFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.DiamondFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.FlameFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.FrondFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.PlumeFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.RayFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.RoughFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.TaperedFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.foliageplacers.WillowFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.CenteredUpwardsBranchingTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.UpwardsBranchingTrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.ConiferTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.EmergentTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.FlutedTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.LayeredTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.LightningTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.MultiStemTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.ParasolTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.SpiralTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.SpreadingTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.StuddedTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.TaperedMegaTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.TrunkPlacerCodecs",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.UnlimitedGiantTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.UnlimitedStraightTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.WhorledTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.feature.trunkplacers.WideTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.au.AlmostUnifiedCompat",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "com.almostreliable.unified.api.plugin.AlmostUnifiedPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.au.AlmostUnifiedCompat$Unifier",
+      "metadata": {
+        "access_flags": 32,
+        "interfaces": [
+          "com.almostreliable.unified.api.unification.recipe.RecipeUnifier"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.emi.FruitingEmiRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.emi.emi.api.recipe.BasicEmiRecipe"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.emi.PollinationEmiRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.emi.emi.api.recipe.BasicEmiRecipe"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.emi.ProductiveTreesEmiPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "dev.emi.emi.api.EmiPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.emi.SawmillEmiRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.emi.emi.api.recipe.BasicEmiRecipe"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.emi.StripperEmiRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "dev.emi.emi.api.recipe.BasicEmiRecipe"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.jei.LogStrippingRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.jei.ProductiveTreesJeiPlugin",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.IModPlugin"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.jei.SawmillRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.jei.TreeFruitingRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.jei.TreePollinationRecipeCategory",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "mezz.jei.api.recipe.category.IRecipeCategory"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.integrations.productivebees.CompatHandler",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.PollenSifterContainer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.container.AbstractContainer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.SawmillContainer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.container.AbstractContainer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.StripperContainer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.container.AbstractContainer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.WoodWorkerContainer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.container.AbstractContainer"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.screen.PollenSifterScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.screen.SawmillScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.screen.StripperScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.client.screen.AbstractUpgradeableContainerScreen"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.inventory.screen.WoodworkerScreen",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.RecipeHelper",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.SawmillRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.ClientRegistration",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.ModTags",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeFinder",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeObject",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "cy.jdkdigital.productivetrees.registry.WoodObject"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeObject$Decoration",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeObject$Fruit",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeObject$GrowthCondition",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeObject$MutationInfo",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeObject$TintStyle",
+      "metadata": {
+        "access_flags": 16433,
+        "interfaces": [
+          "net.minecraft.util.StringRepresentable"
+        ],
+        "super_class": "java.lang.Enum"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.TreeRegistrator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.WoodObject",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.registry.WoodObject$TreeColors",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.util.CropConfig",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.util.TreeCreator",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.util.TreeUtil",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.util.WoodSet",
+      "metadata": {
+        "access_flags": 49,
+        "interfaces": [],
+        "super_class": "java.lang.Record"
+      },
+      "owner_sha256": "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d"
+    },
+    {
+      "class": "dev.emi.emi.api.EmiPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b68691f94f0727fc517cac2ab55bd6658d1179cc8cc715fe610b60c37469bc4c"
+    },
+    {
+      "class": "dev.emi.emi.api.recipe.BasicEmiRecipe",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "dev.emi.emi.api.recipe.EmiRecipe"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b68691f94f0727fc517cac2ab55bd6658d1179cc8cc715fe610b60c37469bc4c"
+    },
+    {
+      "class": "dev.emi.emi.api.recipe.EmiRecipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "b68691f94f0727fc517cac2ab55bd6658d1179cc8cc715fe610b60c37469bc4c"
+    },
+    {
+      "class": "mezz.jei.api.IModPlugin",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "137f60018968a50c6f00e3a8ca9be790391792d2f3e6eff66237f2e9b3bc1353"
+    },
+    {
+      "class": "mezz.jei.api.recipe.category.IRecipeCategory",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "137f60018968a50c6f00e3a8ca9be790391792d2f3e6eff66237f2e9b3bc1353"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.Renderable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.TabOrderedElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.ContainerEventHandler"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.ContainerEventHandler",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.events.GuiEventListener"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.components.events.GuiEventListener",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.client.gui.components.TabOrderedElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.Screen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.components.Renderable"
+        ],
+        "super_class": "net.minecraft.client.gui.components.events.AbstractContainerEventHandler"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.AbstractContainerScreen",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.client.gui.screens.inventory.MenuAccess"
+        ],
+        "super_class": "net.minecraft.client.gui.screens.Screen"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.gui.screens.inventory.MenuAccess",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.particle.CherryParticle",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.particle.TextureSheetParticle"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.particle.Particle",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.particle.ParticleProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.particle.SingleQuadParticle",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.particle.Particle"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.particle.TextureSheetParticle",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.client.particle.SingleQuadParticle"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.client.renderer.blockentity.BlockEntityRenderer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.core.particles.ParticleOptions",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.core.particles.ParticleType",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.DataProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.loot.BlockLootSubProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.loot.LootTableSubProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.loot.LootTableSubProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeBuilder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.recipes.RecipeProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.TagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.ItemTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.data.tags.TagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.AbstractPackResources",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.server.packs.PackResources"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.PackResources",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "java.lang.AutoCloseable",
+          "net.neoforged.neoforge.common.extensions.IPackResourcesExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.PathPackResources",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.server.packs.AbstractPackResources"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.server.packs.repository.RepositorySource",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.util.StringRepresentable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.MenuProvider",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.inventory.MenuConstructor",
+          "net.neoforged.neoforge.client.extensions.IMenuProviderExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.Nameable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.flag.FeatureElement",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.AbstractContainerMenu",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.inventory.MenuConstructor",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.Item",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement",
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IItemExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.Recipe",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.item.crafting.RecipeSerializer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.ItemLike",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BaseEntityBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.level.block.EntityBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.Block",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.ItemLike",
+          "net.neoforged.neoforge.common.extensions.IBlockExtension"
+        ],
+        "super_class": "net.minecraft.world.level.block.state.BlockBehaviour"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BonemealableBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BucketPickup",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBucketPickupExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.BushBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.CeilingHangingSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.SignBlock"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.EntityBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.Fallable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.FallingBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.level.block.Fallable"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.LeavesBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.block.SimpleWaterloggedBlock",
+          "net.neoforged.neoforge.common.IShearable"
+        ],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.LiquidBlockContainer",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.RotatedPillarBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.Block"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.SaplingBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [
+          "net.minecraft.world.level.block.BonemealableBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.BushBlock"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.SignBlock",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.level.block.SimpleWaterloggedBlock"
+        ],
+        "super_class": "net.minecraft.world.level.block.BaseEntityBlock"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.SimpleWaterloggedBlock",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [
+          "net.minecraft.world.level.block.BucketPickup",
+          "net.minecraft.world.level.block.LiquidBlockContainer"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.StandingSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.SignBlock"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.WallHangingSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.SignBlock"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.WallSignBlock",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.SignBlock"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.BlockEntity",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IBlockEntityExtension"
+        ],
+        "super_class": "net.neoforged.neoforge.attachment.AttachmentHolder"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.HangingSignBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.SignBlockEntity"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.entity.SignBlockEntity",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.block.entity.BlockEntity"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.block.state.BlockBehaviour",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.world.flag.FeatureElement"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.Feature",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.levelgen.feature.trunkplacers.UpwardsBranchingTrunkPlacer",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.material.FlowingFluid",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.material.Fluid"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.minecraft.world.level.material.Fluid",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.common.extensions.IFluidExtension"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.AttachmentHolder",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.neoforged.neoforge.attachment.IAttachmentHolder"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.attachment.IAttachmentHolder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.client.extensions.IMenuProviderExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.IShearable",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.conditions.IConditionBuilder",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.BlockTagsProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.data.tags.IntrinsicHolderTagsProvider"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.DataMapProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.GlobalLootModifierProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.data.LanguageProvider",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [
+          "net.minecraft.data.DataProvider"
+        ],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockEntityExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBlockExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IBucketPickupExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IFluidExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IItemExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.common.extensions.IPackResourcesExtension",
+      "metadata": {
+        "access_flags": 1537,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.fluids.BaseFlowingFluid",
+      "metadata": {
+        "access_flags": 1057,
+        "interfaces": [],
+        "super_class": "net.minecraft.world.level.material.FlowingFluid"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    },
+    {
+      "class": "net.neoforged.neoforge.fluids.FluidType",
+      "metadata": {
+        "access_flags": 33,
+        "interfaces": [],
+        "super_class": "java.lang.Object"
+      },
+      "owner_sha256": "2382ea29e50ff9deb46fa393d1e49c3a54b5d6273c252d0208d3fed903e8eb5f"
+    }
+  ],
+  "structural_hierarchy": [
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.EntitySpawnerBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.PollenSifterBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.PollinatedLeavesBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.ProductiveHangingSignBlockEntity",
+          "net.minecraft.world.level.block.entity.HangingSignBlockEntity",
+          "net.minecraft.world.level.block.entity.SignBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.ProductiveSignBlockEntity",
+          "net.minecraft.world.level.block.entity.SignBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.SawmillBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.StripperBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.TimeTravellerDisplayBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.common.block.entity.WoodWorkerBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.CapabilityBlockEntity",
+          "cy.jdkdigital.productivelib.common.block.entity.AbstractBlockEntity",
+          "net.minecraft.world.level.block.entity.BlockEntity"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.recipe.LogStrippingRecipe",
+          "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.SawmillRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.recipe.SawmillRecipe",
+          "cy.jdkdigital.productivelib.common.recipe.TripleOutputRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.recipe.TreeFruitingRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe",
+          "net.minecraft.world.item.crafting.Recipe"
+        ],
+        "method": "class_hierarchy"
+      }
+    },
+    {
+      "class": "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer",
+      "classification": {
+        "evidence": [
+          "cy.jdkdigital.productivetrees.recipe.TreePollinationRecipe$Serializer",
+          "net.minecraft.world.item.crafting.RecipeSerializer"
+        ],
+        "method": "class_hierarchy"
+      }
+    }
+  ],
+  "target": {
+    "display_name": "Productive Trees",
+    "mod_id": "productivetrees",
+    "version": "1.21.1-1.0.0"
+  }
+}

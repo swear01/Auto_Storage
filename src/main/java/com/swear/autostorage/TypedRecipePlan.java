@@ -29,9 +29,9 @@ public final class TypedRecipePlan {
         List<TypedRecipeOutput> primaryItems = primaryOutputs.stream()
                 .filter(output -> output.key().kindId().equals(StorageResourceKindApi.ITEM_KIND))
                 .toList();
-        selectionOutput = primaryItems.size() == 1
+        selectionOutput = !primaryItems.isEmpty()
                 ? primaryItems.getFirst()
-                : primaryItems.isEmpty() && primaryOutputs.size() == 1
+                : primaryOutputs.size() == 1
                         ? primaryOutputs.getFirst()
                         : null;
         presentationOutput = builder.presentationOutput.copy();

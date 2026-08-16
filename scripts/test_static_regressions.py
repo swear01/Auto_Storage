@@ -2665,6 +2665,27 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn('"matrix"', contract)
         self.assertIn("immersiveengineering", audit)
 
+    def test_productivetrees_compat_matrix_descriptor(self):
+        descriptor = json.loads(
+            (ROOT / "src/compat/productivetrees/compat-module.json").read_text())
+        self.assertEqual(
+            ["auto_storage:productivetrees_sawmill"],
+            descriptor["matrix"]["descriptors"],
+        )
+        self.assertEqual(
+            ["productivetrees:sawmill"],
+            descriptor["matrix"]["acceptedRecipes"],
+        )
+        self.assertEqual(
+            ["productivetrees"],
+            descriptor["matrix"]["recipeInventory"]["namespaces"],
+        )
+        self.assertEqual(8, descriptor["expectedTests"])
+        self.assertEqual(
+            "bddbff2dbf41e22d14d5a1c080762c5a7f0882b7574f055420e7de7f1892bc9d",
+            descriptor["auditArtifact"]["sha256"],
+        )
+
     def test_pneumaticcraft_fixture_locks_unsafe_contracts_out(self):
         build = self.read_required("build.gradle")
         properties = self.read_required("gradle.properties")

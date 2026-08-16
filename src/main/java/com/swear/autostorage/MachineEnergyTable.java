@@ -93,27 +93,37 @@ public final class MachineEnergyTable {
                 stack -> AxeEnergy.isInfinite(stack)
                         ? new MachineDescriptor.TransformAmount(0, true)
                         : new MachineDescriptor.TransformAmount(AxeEnergy.finiteValue(stack), false)));
-        descriptors.register(HAMMER_ID.getPath(), () -> MachineDescriptor.transform(
+        registerToolDurabilityTransform(
+                descriptors,
                 HAMMER_ID,
                 new ItemStack(net.minecraft.world.item.Items.STONE_AXE),
-                Ingredient.of(
-                        net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
-                                net.minecraft.resources.ResourceLocation
-                                        .fromNamespaceAndPath(
-                                                "immersiveengineering", "hammer"))),
-                stack -> ToolDurability.finiteValue(stack) > 0
-                        ? new MachineDescriptor.TransformAmount(
-                                ToolDurability.finiteValue(stack), false)
-                        : new MachineDescriptor.TransformAmount(0, false)));
-        descriptors.register(ELECTRODE_ID.getPath(), () -> MachineDescriptor.transform(
+                "immersiveengineering",
+                "hammer");
+        registerToolDurabilityTransform(
+                descriptors,
                 ELECTRODE_ID,
                 new ItemStack(net.minecraft.world.item.Items.STICK),
-                Ingredient.of(
-                        net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
-                                net.minecraft.resources.ResourceLocation
-                                        .fromNamespaceAndPath(
-                                                "immersiveengineering",
-                                                "graphite_electrode"))),
+                "immersiveengineering",
+                "graphite_electrode");
+    }
+
+    private static void registerToolDurabilityTransform(
+            DeferredRegister<MachineDescriptor> descriptors,
+            ResourceLocation id,
+            ItemStack presentation,
+            String modNamespace,
+            String itemPath
+    ) {
+        net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                        modNamespace, itemPath));
+        if (item == net.minecraft.world.item.Items.AIR) {
+            return;
+        }
+        descriptors.register(id.getPath(), () -> MachineDescriptor.transform(
+                id,
+                presentation,
+                Ingredient.of(item),
                 stack -> ToolDurability.finiteValue(stack) > 0
                         ? new MachineDescriptor.TransformAmount(
                                 ToolDurability.finiteValue(stack), false)
