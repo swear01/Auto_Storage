@@ -5870,7 +5870,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("Map<RecipeFamilyKey, RecipeAdapter>", registry)
         self.assertIn("exactAdaptersByKey.get", registry)
         self.assertIn("static final Map<Collection<RecipeHolder<?>>, CatalogIndex> CACHE", catalog)
-        self.assertIn("Map<RecipeManager", catalog) is False
+        self.assertNotIn("Map<RecipeManager", catalog)
         self.assertIn("static void prewarm", catalog)
         self.assertIn("CraftableRecipeCatalog.prewarm", entrypoint)
         for phase in [
