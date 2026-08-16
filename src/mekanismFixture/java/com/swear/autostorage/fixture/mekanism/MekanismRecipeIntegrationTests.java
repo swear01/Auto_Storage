@@ -387,37 +387,19 @@ public final class MekanismRecipeIntegrationTests {
                 helper.fail("Transform target list is unexpectedly short");
                 return;
             }
-            java.util.List<ResourceLocation> ids = targets.stream()
-                    .map(com.swear.autostorage.TransformProviderApi.Target::id)
-                    .toList();
-            ResourceLocation energy = StorageResourceKey
-                    .neoforgeEnergy().kindId();
-            int energyIndex = ids.indexOf(energy);
-            if (energyIndex < 0) {
-                helper.fail("FE target must be present: " + ids);
+            java.util.List<com.swear.autostorage.TransformProviderApi.Target> copy =
+                    new java.util.ArrayList<>(targets);
+            copy.sort(java.util.Comparator.comparing(
+                    target -> target.label().getString()));
+            if (!copy.equals(targets)) {
+                helper.fail("Targets must be sorted by label: " + targets);
                 return;
             }
-            ResourceLocation furnaceFuel = ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "furnace_fuel");
-            ResourceLocation blazeFuel = ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "blaze_fuel");
-            for (int index = 0; index < energyIndex; index++) {
-                if (!ids.get(index).equals(furnaceFuel)
-                        && !ids.get(index).equals(blazeFuel)
-                        && !ids.get(index).equals(energy)) {
-                    helper.fail("Non-core target precedes FE: "
-                            + ids.get(index) + " before " + energy);
-                    return;
-                }
-            }
-            if (ids.indexOf(ResourceLocation.fromNamespaceAndPath(
-                    "mekanism", "chemical")) > energyIndex) {
-                // MOD kinds must follow the core resources; verify relative order.
-                if (energyIndex != 0 && !ids.get(energyIndex - 1).equals(furnaceFuel)
-                        && !ids.get(energyIndex - 1).equals(blazeFuel)) {
-                    helper.fail("FE must follow the fuel pools: " + ids);
-                    return;
-                }
+            if (targets.stream()
+                    .noneMatch(target -> target.id().equals(StorageResourceKey
+                            .neoforgeEnergy().kindId()))) {
+                helper.fail("FE target must be present");
+                return;
             }
             helper.succeed();
         });

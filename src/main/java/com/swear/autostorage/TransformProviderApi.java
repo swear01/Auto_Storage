@@ -138,23 +138,10 @@ public final class TransformProviderApi {
                         provider.targetLabel()))
                 .forEach(target -> putTarget(result, target));
         List<Target> ordered = new ArrayList<>(result.values());
-        ordered.sort(Comparator
-                .comparingInt((Target target) ->
-                        CORE_TARGET_ORDER.contains(target.id()) ? 0 : 1)
-                .thenComparing(target -> target.label().getString()));
+        ordered.sort(Comparator.comparing(
+                target -> target.label().getString()));
         return List.copyOf(ordered);
     }
-
-    /**
-     * Core universal resources pinned at the top of the Transform target
-     * sidebar in a fixed, stable order; module-produced kinds follow sorted
-     * by label.
-     */
-    private static final List<ResourceLocation> CORE_TARGET_ORDER = List.of(
-            StorageResourceKindApi.ENERGY_KIND,
-            energyTargetId(EnergyType.FURNACE_FUEL),
-            energyTargetId(EnergyType.BLAZE_FUEL),
-            StorageResourceKindApi.BOTANIA_MANA_KIND);
 
 
 

@@ -400,10 +400,15 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
                 transformTargetSearchBox == null ? "" : transformTargetSearchBox.getValue());
         filteredTransformTargets = fuelTargetOptions().stream()
                 .filter(option -> query.matches(option.searchEntry()))
-                .sorted(TerminalEntryComparator.forMode(
-                        displayedPreferences().sortMode(),
-                        displayedPreferences().sortOrder(),
-                        FuelTargetOption::sortStack))
+                .sorted(java.util.Comparator.comparing(
+                        option -> option.labelText().getString()))
+                .toList();
+        // Auto is always pinned first; the rest follow alphabetically.
+        filteredTransformTargets = java.util.stream.Stream.concat(
+                        filteredTransformTargets.stream()
+                                .filter(option -> option.target() == null),
+                        filteredTransformTargets.stream()
+                                .filter(option -> option.target() != null))
                 .toList();
         transformTargetPage = Math.clamp(
                 transformTargetPage, 0, transformTargetPageCount() - 1);
@@ -1816,6 +1821,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             ItemStack iconStack,
             Component labelText
     ) {
+
         private FuelTargetOption {
             iconStack = iconStack.copyWithCount(1);
         }
