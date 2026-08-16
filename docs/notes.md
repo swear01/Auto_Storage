@@ -1,3 +1,8 @@
+2026-08-16 工具耐久→transform 資源（用戶指示）：
+- 複製 Axe Energy 模式：工具 item 的剩餘耐久 × (unbreaking+1) × count → typed 資源（axe: MachineEnergyTable.AXE_ID transform descriptor；craft 經 hasAxeEnergy/consumeAxeEnergy 消耗）。
+- IE 電極：新增 ELECTRODE_ID transform descriptor（graphite_electrode → 耐久點數）；Arc Furnace 每 craft 消耗 N 點電極資源（取代 ToolCost 扣耐久想法 — 用戶要資源模型）。
+- 可泛化到任何可消耗工具。
+
 2026-08-16 Arc Furnace 設計（#136 補充）：
 - 多工 = station work 累計機制天然支援（多個 crafts 同時累計 work）— rate 對應電弧吞吐。
 - 78 recipes：48 無機率（確定性），9 個含 additives（多輸入合金 — deterministicResources 1-81 inputs ✓），0 多輸出。
