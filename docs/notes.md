@@ -748,3 +748,18 @@ Source: https://github.com/refinedmods/refinedstorage2
   SpiritFurnace (soul reanimation), SpiritPortal/Reanimator (entity), EntangledChalice,
   DisplayStand, EternalWater, BloodStain, BoxOfEternalClosure, InvisibleRedstone are
   storage/world/entity mechanics — no deterministic item-to-resource conversion. Fail closed.
+
+## 2026-08-16 FluxNetworks flux recipe re-audit (#133 follow-up)
+
+The "Flux Recipe" is NOT a recipe — it is `EventHandler.onPlayerInteract`
+(left-click) world mechanics gated on `enableFluxRecipe` (server config,
+default true). Verified in FluxNetworks 8.0.0 bytecode: left-clicking an
+obsidian block whose two-below block is bedrock or flux_block collects
+redstone ItemEntitys (≤512) one block below the obsidian, removes the
+obsidian, and drops flux_dust 1:1 with the collected redstone count. No tool
+is required. This is world mutation (consumes a world block + ground item
+entities with a variable 1..512 batch size), so it stays fail-closed like the
+Botania world-consumption flowers. The 1:1 redstone→flux_dust core could be
+abstracted as a Transform resource later if the user wants it; the obsidian
+per-batch cost and the bedrock/flux-block base would be abstracted like
+Theurgy braziers.
