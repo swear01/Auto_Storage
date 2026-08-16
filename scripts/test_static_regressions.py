@@ -2586,7 +2586,7 @@ class StaticRegressionTests(unittest.TestCase):
         build = self.read_required("build.gradle")
 
         self.assert_descriptor_driven_fixture(
-            build, "immersiveengineering", "immersiveengineeringFixture", 8
+            build, "immersiveengineering", "immersiveengineeringFixture", 9
         )
         self.assertNotIn('modId="immersiveengineering"', metadata)
         self.assertIn('"immersiveengineering"', module_index)
