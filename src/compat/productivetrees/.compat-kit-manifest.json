@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "2db6c0cc899b5148370247cfb877d17a96af2b22c7182eac297bfd3f5c36181e",
+  "contract_sha256": "367c3da6b5cb691fbcbfa2df75111b19cb5232fe90341a2f6ad62cc60da33297",
   "files": {
     "compat/audits/productivetrees/1.0.0.json": "8fe777b3b43de41d121e39bb01af7dcd8823673caa5c3623b0dad6c22e660f37",
     "compat/contracts/productivetrees.json": "2db6c0cc899b5148370247cfb877d17a96af2b22c7182eac297bfd3f5c36181e",
