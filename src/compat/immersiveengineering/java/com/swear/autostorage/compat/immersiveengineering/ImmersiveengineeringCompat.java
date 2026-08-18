@@ -248,20 +248,8 @@ public final class ImmersiveengineeringCompat {
                     && (recipe.secondaryOutputs == null || recipe.secondaryOutputs.isEmpty())
                     && recipe.slag != null && recipe.slag.get().isEmpty()
                     && recipe.getBaseTime() > 0;
-            org.slf4j.LoggerFactory.getLogger("IECompat").info(
-                    "arc supports {}: in={} out={} sec={} slag={} time={}",
-                    ok,
-                    recipe == null ? null : recipe.input.getBaseIngredient().getItems().length,
-                    recipe == null || recipe.output == null ? null
-                            : recipe.output.getLazyList().size(),
-                    recipe == null ? null : (recipe.secondaryOutputs == null ? 0
-                            : recipe.secondaryOutputs.size()),
-                    recipe == null || recipe.slag == null ? null : recipe.slag.get(),
-                    recipe == null ? -1 : recipe.getBaseTime());
             return ok;
         } catch (RuntimeException failure) {
-            org.slf4j.LoggerFactory.getLogger("IECompat")
-                    .error("arc supports threw", failure);
             return false;
         }
     }
@@ -272,17 +260,8 @@ public final class ImmersiveengineeringCompat {
     ) {
         try {
             TypedRecipePlan plan = multiItemPlan(recipe, recipe.input, recipe.additives, recipe.output.getLazyList().get(0), recipe.getBaseEnergy(), registries);
-            org.slf4j.LoggerFactory.getLogger("IECompat").info(
-                    "arc plan: inputs={} keys={}",
-                    plan.inputs().size(),
-                    plan.inputs().stream()
-                            .flatMap(i -> i.alternatives().stream())
-                            .map(k -> k.kindId().toString() + "/" + k.resourceId())
-                            .toList());
             return plan;
         } catch (RuntimeException failure) {
-            org.slf4j.LoggerFactory.getLogger("IECompat")
-                    .error("arc plan failed", failure);
             throw failure;
         }
     }

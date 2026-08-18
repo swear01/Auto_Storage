@@ -67,8 +67,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                         core,
                         List.of(),
                         Map.of(),
-                        Map.of(),
-                        Map.of(),
+                        new HashMap<>(),
+                        new HashMap<>(),
                         new IdentityHashMap<>());
             }
             Map<ItemKey, Long> amountsByKey = new HashMap<>();
@@ -102,9 +102,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
 
         private List<IngredientSource> sources(Item item) {
-            return core == null
-                    ? sourcesByItem.getOrDefault(item, List.of())
-                    : core.storedItemSources(item);
+            if (core == null) return sourcesByItem.getOrDefault(item, List.of());
+            return sourcesByItem.computeIfAbsent(item, core::storedItemSources);
         }
 
         long amount(ItemKey key) {
@@ -114,9 +113,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
 
         private long amount(Item item) {
-            return core == null
-                    ? amountsByItem.getOrDefault(item, 0L)
-                    : core.storedItemAmount(item);
+            if (core == null) return amountsByItem.getOrDefault(item, 0L);
+            return amountsByItem.computeIfAbsent(item, core::storedItemAmount);
         }
 
         List<IngredientSource> matching(RecipeAdapterMatch.Input input) {

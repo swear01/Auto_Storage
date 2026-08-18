@@ -1,3 +1,5 @@
+2026-08-18 PR #143 CI performance follow-up：GitHub matrix 的 cold Craftable listing 在完整 optional pack 下偶發超過 50 ms；先移除 Immersive Engineering Arc Furnace compatibility hot path 的逐recipe INFO/ERROR logging，再讓每次 Craftable listing 對 Core 的 `storedItemSources(item)` 與 item-total lookup 做 listing-local lazy memoization，避免 30k exact variants 反覆建立同item source list，也不在 listing 開始時 eager 複製整個30k source map。10k/30k matrix 都通過 3/3；craftable prepare 分別為 31.061/36.932 ms，shared index 1,730,040/5,927,784 bytes，per-menu 120,397/119,880 bytes。50 ms、9 MiB、128 KiB thresholds 未放寬。
+
 2026-08-16 工具耐久→transform 資源（用戶指示）：
 - 複製 Axe Energy 模式：工具 item 的剩餘耐久 × (unbreaking+1) × count → typed 資源（axe: MachineEnergyTable.AXE_ID transform descriptor；craft 經 hasAxeEnergy/consumeAxeEnergy 消耗）。
 - IE 電極：新增 ELECTRODE_ID transform descriptor（graphite_electrode → 耐久點數）；Arc Furnace 每 craft 消耗 N 點電極資源（取代 ToolCost 扣耐久想法 — 用戶要資源模型）。
