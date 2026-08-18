@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "60918a5a21d00d63c5c8685bd46b9d34a4dec706f6e6d00baff213676d29764e",
+  "contract_sha256": "06429633e228efb43a39ea175914b7761e832dc9618faf2515d8891fd8bfe674",
   "files": {
     "src/compat/immersiveengineering/compat-module.json": "d63a070ea195de2f45f06f931a918daab2c6cdc1ab63e990bf3b63c3f1f46106",
     "src/compat/immersiveengineering/java/com/swear/autostorage/compat/immersiveengineering/ImmersiveengineeringCompatModule.java": "74aabc93ce54f2aebf4c383b519a8001327c4f3325a661727793011e7753d749",

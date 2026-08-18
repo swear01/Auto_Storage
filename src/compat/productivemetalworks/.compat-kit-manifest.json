@@ -1,5 +1,5 @@
 {
-  "contract_sha256": "994f313394d57135743dc3f430ea7cf0e021f18bd6e98b9563cb86d317c95d56",
+  "contract_sha256": "6be065561e9247df7a4f6ee33ecd67cce27cb59676b08b628382981f26a118a4",
   "files": {
     "compat/audits/productivemetalworks/1.15.0.json": "d0c23928ed20a6ac279bf66306b91ce81037afde44a5b9a5b12b4b55765ae759",
     "compat/contracts/productivemetalworks.json": "6be065561e9247df7a4f6ee33ecd67cce27cb59676b08b628382981f26a118a4",
