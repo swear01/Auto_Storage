@@ -316,14 +316,11 @@ final class CraftableRecipeCatalog {
                 Level level
         ) {
             if (!adapter.requiresAvailableStacksForVariants()
-                    && baseMatch.typedRecipePlan().isPresent()) {
+                    && !baseMatch.contract().pendingTypedPlan()) {
                 return List.of(baseMatch);
             }
-            if (adapter.requiresAvailableStacksForVariants()) {
-                return baseMatch.resolveVariantsFromSnapshot(
-                        availableStacks, level);
-            }
-            return baseMatch.resolveVariantsFromSnapshot(List.of(), level);
+            return baseMatch.resolveVariantsFromSnapshot(
+                    availableStacks, level);
         }
     }
 

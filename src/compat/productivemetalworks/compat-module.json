@@ -12,9 +12,9 @@
     "id": "auto_storage:productivemetalworks",
     "matrix": {
         "acceptedRecipes": [
-            "productivemetalworks:item_melting",
-            "productivemetalworks:item_casting",
-            "productivemetalworks:block_casting"
+            "productivemetalworks:melting/ancient_debris",
+            "productivemetalworks:casting/ender_eye",
+            "productivemetalworks:casting/blue_foundry_capacitor"
         ],
         "descriptors": [
             "auto_storage:productivemetalworks_foundry",

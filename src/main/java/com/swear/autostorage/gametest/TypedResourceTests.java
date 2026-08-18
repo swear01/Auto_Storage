@@ -135,11 +135,11 @@ public final class TypedResourceTests {
             var entries = core.getTerminalDisplayStacks(
                     "", SortMode.NAME, SortOrder.ASCENDING, TerminalResourceView.ENERGY);
             ItemStack entry = entries.size() == 1 ? entries.getFirst() : ItemStack.EMPTY;
-            if (!entry.is(Items.REDSTONE)
+            if (!entry.is(Items.LIGHTNING_ROD)
                     || TerminalDisplayStack.amount(entry) != 1_200
                     || !Component.translatable("gui.auto_storage.resource.neoforge_energy")
                     .equals(entry.get(DataComponents.CUSTOM_NAME))) {
-                helper.fail("NeoForge Energy terminal entry used its carrier item as the resource identity");
+                helper.fail("NeoForge Energy terminal entry used the wrong lightning-rod representative");
                 return;
             }
             if (energy.extractEnergy(350, true) != 350 || energy.getEnergyStored() != 1_200) {

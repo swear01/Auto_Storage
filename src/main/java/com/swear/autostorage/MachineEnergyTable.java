@@ -3,6 +3,7 @@ package com.swear.autostorage;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -114,20 +115,22 @@ public final class MachineEnergyTable {
             String modNamespace,
             String itemPath
     ) {
-        net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
-                        modNamespace, itemPath));
-        if (item == net.minecraft.world.item.Items.AIR) {
-            return;
-        }
-        descriptors.register(id.getPath(), () -> MachineDescriptor.transform(
-                id,
-                presentation,
-                Ingredient.of(item),
-                stack -> ToolDurability.finiteValue(stack) > 0
-                        ? new MachineDescriptor.TransformAmount(
-                                ToolDurability.finiteValue(stack), false)
-                        : new MachineDescriptor.TransformAmount(0, false)));
+        ResourceLocation itemId = ResourceLocation.fromNamespaceAndPath(modNamespace, itemPath);
+        if (!net.neoforged.fml.ModList.get().isLoaded(modNamespace)) return;
+        descriptors.register(id.getPath(), () -> {
+            Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemId);
+            if (item == Items.AIR) {
+                throw new IllegalStateException("Missing loaded tool item " + itemId);
+            }
+            return MachineDescriptor.transform(
+                    id,
+                    presentation,
+                    Ingredient.of(item),
+                    stack -> ToolDurability.finiteValue(stack) > 0
+                            ? new MachineDescriptor.TransformAmount(
+                                    ToolDurability.finiteValue(stack), false)
+                            : new MachineDescriptor.TransformAmount(0, false));
+        });
     }
 
     public static int size() {

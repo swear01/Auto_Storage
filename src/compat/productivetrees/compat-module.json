@@ -13,7 +13,7 @@
     "id": "auto_storage:productivetrees",
     "matrix": {
         "acceptedRecipes": [
-            "productivetrees:sawmill"
+            "productivetrees:sawmill/dark_oak_planks_from_log"
         ],
         "descriptors": [
             "auto_storage:productivetrees_sawmill"

@@ -21,12 +21,12 @@
   "id": "auto_storage:immersiveengineering",
   "matrix": {
     "acceptedRecipes": [
-      "immersiveengineering:sawmill",
-      "immersiveengineering:arc_furnace",
-      "immersiveengineering:bottling_machine",
-      "immersiveengineering:crusher",
-      "immersiveengineering:alloy",
-      "immersiveengineering:metal_press"
+      "immersiveengineering:sawmill/oak_log",
+      "immersiveengineering:arcfurnace/insulating_glass",
+      "immersiveengineering:bottling/black_concrete_powder",
+      "immersiveengineering:crusher/amethyst",
+      "immersiveengineering:alloysmelter/electrum",
+      "immersiveengineering:metalpress/blaze_rod"
     ],
     "descriptors": [
       "auto_storage:immersiveengineering_sawmill",

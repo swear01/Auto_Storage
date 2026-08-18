@@ -1,9 +1,9 @@
 {
-  "contract_sha256": "fbefe7e0f2cb1f813e69ae884e771e28debf71131897a838d76ed29d6a7eaba9",
+  "contract_sha256": "6be065561e9247df7a4f6ee33ecd67cce27cb59676b08b628382981f26a118a4",
   "files": {
     "compat/audits/productivemetalworks/1.15.0.json": "d0c23928ed20a6ac279bf66306b91ce81037afde44a5b9a5b12b4b55765ae759",
-    "compat/contracts/productivemetalworks.json": "fbefe7e0f2cb1f813e69ae884e771e28debf71131897a838d76ed29d6a7eaba9",
-    "src/compat/productivemetalworks/compat-module.json": "d8ba42b74c0601661f15542ee9bd793ac6fc3fb36f263d8c4094f33bcd07b1c9",
+    "compat/contracts/productivemetalworks.json": "6be065561e9247df7a4f6ee33ecd67cce27cb59676b08b628382981f26a118a4",
+    "src/compat/productivemetalworks/compat-module.json": "7fbfbdb1e868dd6c5f3203f8b75f4cf95179d2786e68ac70ff1ecdb18884611e",
     "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompat.java": "565da1449a2b74916daa2cbb9ce0f8419bea30db57d2095a87ad2b8e460117b9",
     "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompatModule.java": "75575b84e11e4979ed51a0ee9f454c0c865f496a0c49032af87be1050950233c",
     "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksFixtureMod.java": "de0407a0f8c25bc49c659bd49c4b7d61a74c9a36e3290d9cc19d9619b095a85b",

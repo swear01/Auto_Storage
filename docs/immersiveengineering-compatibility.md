@@ -1,15 +1,15 @@
 # Immersive Engineering Compatibility
 
 Auto Storage's Compat Kit review of Immersive Engineering `12.4.2-194`
-accepts **zero production recipe families**. This is an evidence-backed
-fail-closed result (outcome **C**), not an absent-mod fallback and not an empty
-recipe adapter claiming support.
+accepts six deterministic machine families: Sawmill, Arc Furnace, Bottling
+Machine, Crusher, Alloy Smelter, and Metal Press. The remaining custom recipe
+classes and live multiblock mechanisms remain fail-closed.
 
 The present-mod module entrypoint loads only when `immersiveengineering` is
-installed and registers no stations or recipe families. Vanilla-class recipes
-that Immersive Engineering ships under its namespace (crafting, smelting,
-smoking, stonecutting) remain covered by Auto Storage's built-in exact adapters
-without a custom module.
+installed and registers the six reviewed master-block stations and their
+bounded recipe families. Vanilla-class recipes that Immersive Engineering
+ships under its namespace (crafting, smelting, smoking, stonecutting) remain
+covered by Auto Storage's built-in exact adapters.
 
 ## Reproducible audit evidence
 
@@ -42,27 +42,33 @@ multi-version matrix.
 ## Audited recipe candidates
 
 Compat Kit format-17 structural scan keeps **44** actual recipe-class candidates
-(legacy format-7 name-shaped inventory of 128 is superseded). Every candidate is
-rejected in the committed contract. The runtime machine families behind that
-inventory include:
+(legacy format-7 name-shaped inventory of 128 is superseded). Six deterministic
+subsets are accepted in the committed contract; the remaining candidates are
+rejected. The runtime machine families behind that inventory include:
 
 | Family | Result | Reason |
 |---|---|---|
-| Alloy Smelter | rejected | stone multiblock; live vanilla furnace fuel burn; `TagOutput` may resolve via mod preference |
+| Alloy Smelter | accepted subset | master-block station; exact two-item inputs, output, base energy, and work time |
 | Coke Oven | rejected | stone multiblock; creosote tank capacity/batching is live state |
 | Blast Furnace / BlastFurnaceFuel | rejected | stone multiblock; separate live burn state; tag preference outputs |
-| Crusher / Arc Furnace / Arc recycling | rejected | multiblock; live `RecipeMultiplier` energy/time; chance secondaries |
-| Metal Press / packing helpers | rejected | multiblock; retained mold; live multipliers |
-| Bottling / Fermenter / Squeezer / Mixer / Refinery / Sawmill | rejected | multiblock with live multipliers and/or fluid inventory state |
+| Crusher | accepted subset | master-block station; explicit item output, base energy, and work time; chance/tag secondaries rejected |
+| Arc Furnace | accepted subset | master-block station; explicit additives/output, base energy, and work time; slag/chance boundaries rejected |
+| Arc recycling | rejected | live recycling and multiblock state |
+| Metal Press | accepted subset | master-block station; explicit mold/input/output, base energy, and work time |
+| Metal Press packing helpers | rejected | retained mold and unsupported helper semantics |
+| Bottling Machine | accepted subset | master-block station; exact item/fluid inputs, output, base energy, and work time |
+| Sawmill | accepted subset | master-block station; one explicit item input/output, base energy, and work time; secondary tag rolls rejected |
+| Fermenter / Squeezer / Mixer / Refinery | rejected | multiblock with live multipliers and/or fluid inventory state |
 | Blueprint crafting | rejected | typed Engineers Blueprint plus workbench/auto-workbench multiblock path |
 | Garden Cloche / ClocheFertilizer | rejected | `StackWithChance` plus `ApiUtils.RANDOM` outputs / live growth modifiers |
 | GeneratorFuel / ThermoelectricSource / WindmillBiome / MineralMix | rejected | live energy/world configuration, not craftable Auto Storage families |
 | Special crafting / fluid-aware / jerrycan / repair / shader helpers | rejected | not independent deterministic Auto Storage machine families |
 
-Typed resources were not introduced. Multiblock composition, live fuel/tank
+The accepted families use the existing item, NeoForge Energy, station-work,
+and engineer's-hammer tool transaction. Multiblock composition, live fuel/tank
 state, config-backed `DoubleSupplier` multipliers, chance outputs, and
-`TagOutput` preference resolution cannot be reduced to a simulate-then-commit
-plan without approximating those conditions away.
+`TagOutput` preference resolution remain rejected where they cannot be reduced
+to a simulate-then-commit plan without approximating those conditions away.
 
 ## Future acceptance boundary
 
@@ -77,18 +83,18 @@ energy/time that do not depend on mutable `RecipeMultiplier` suppliers.
 ./gradlew runImmersiveengineeringGameTestServer
 ```
 
-Eight present-mod GameTests prove the module registers no Immersive Engineering
-stations/families, representative Alloy/Coke Oven/Blast Furnace/Crusher/Cloche/
-Metal Press/Arc Furnace recipes stay unsupported, and every loaded recipe in
-each audited custom recipe type remains fail closed. The isolated fixture also
-verifies the owning descriptor's `immersiveengineering` namespace
+Ten present-mod GameTests prove the six reviewed stations/families register,
+representative accepted machine recipes execute or classify, unsafe
+Coke Oven/Blast Furnace/Cloche boundaries remain unsupported, and every loaded
+recipe in each audited custom recipe type remains fail closed. The isolated
+fixture also verifies the owning descriptor's `immersiveengineering` namespace
 `recipeInventory` digest
 `b733a4b670dbb507a71df7f819c2296f627d42f2ed89240c6040c9c55c445c7d`
 (1100 loaded recipe ids) via `IsolatedRecipeInventoryEvidence`. The all-mod
 compatibility matrix loads the representative artifact through the module
-descriptor and asserts the zero-family boundary via empty
-`descriptors`/`acceptedRecipes`; combined coexistence and unclaimed inventories
-are recorded only in the matrix report.
+descriptor and checks exact representative IDs for all six accepted families;
+combined coexistence and unclaimed inventories are recorded only in the matrix
+report.
 
 ```bash
 tools/compat-kit/compat-kit verify \
@@ -114,13 +120,16 @@ the same unchanged gate twice at 52.990 and 68.603 ms. The latter run had
 20,012 recipes, 453 candidates, 98 variants, and 86 outputs; 44 ms was in
 variant resolution rather than a full scan of IE's ~1,100 unclaimed recipes.
 
-The root cause was stack-independent, already-resolved typed catalog matches still
-calling `RecipeAdapterMatch.resolveVariantsFromSnapshot`, which repeated
-adapter resolution. `CatalogEntry.resolveVariants` now uses that listing-local
-base match directly when it already contains a typed plan and the adapter reports
-that variants do not require available stacks. Built-in and legacy item adapters
-still run their level/output validation; pending typed plans and stack-dependent
-smithing/dynamic variants retain the existing resolution path.
+The root cause was stack-independent catalog matches repeatedly calling
+`RecipeAdapterMatch.resolveVariantsFromSnapshot`, plus an exhaustive ingredient
+fall-through that rescanned all stored sources after proving the exact item
+count was insufficient. `CatalogEntry.resolveVariants` now reuses every
+stack-independent listing-local base match; stack-dependent smithing/dynamic
+variants retain the existing resolution path, as do dynamic families with a
+pending typed plan. Exhaustive item coverage now
+fails immediately when its exact amount is short, while non-exhaustive/custom
+ingredients still scan matching sources. Actual selection and craft execution
+continue to revalidate the live holder and full transaction.
 This does not restore `fixedVariants` or any recipe-keyed retained cache; the
 next-tick `releaseTransientMatches()` lifetime from #79 remains unchanged.
 
@@ -142,3 +151,10 @@ nonnegative GC-delta shared floor of 0 bytes. They remain useful baselines, but
 no longer justify labeling the CI failures as contention-only.
 
 Shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
+
+The current combined matrix now uses concrete representative recipe IDs rather
+than recipe-type IDs for all accepted families. The 10,000-type run passed with
+`craftable_prepare_ms = 33.857`, `shared_index_retained_bytes = 5,923,664`,
+and per-menu retained bytes below the 128 KiB gate. The 30,000-type stress run
+passed with `craftable_prepare_ms = 45.453`, `shared_index_retained_bytes =
+5,952,816`, and per-menu retained bytes below the same gate.

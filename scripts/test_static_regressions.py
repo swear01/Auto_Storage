@@ -2609,12 +2609,12 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertEqual(
             [
-                "immersiveengineering:sawmill",
-                "immersiveengineering:arc_furnace",
-                "immersiveengineering:bottling_machine",
-                "immersiveengineering:crusher",
-                "immersiveengineering:alloy",
-                "immersiveengineering:metal_press",
+                "immersiveengineering:sawmill/oak_log",
+                "immersiveengineering:arcfurnace/insulating_glass",
+                "immersiveengineering:bottling/black_concrete_powder",
+                "immersiveengineering:crusher/amethyst",
+                "immersiveengineering:alloysmelter/electrum",
+                "immersiveengineering:metalpress/blaze_rod",
             ],
             descriptor["matrix"]["acceptedRecipes"],
         )
@@ -2653,7 +2653,7 @@ class StaticRegressionTests(unittest.TestCase):
             r"id\.getNamespace\(\)\.equals\(\"immersiveengineering\"\)\s*"
             r"\|\|\s*id\.getPath\(\)\.startsWith\(\"immersiveengineering_\"\)",
         )
-        self.assertIn("outcome **C**", compatibility_doc)
+        self.assertIn("accepts six deterministic machine families", compatibility_doc)
         self.assertIn(
             "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
             compatibility_doc,
@@ -2672,7 +2672,7 @@ class StaticRegressionTests(unittest.TestCase):
             descriptor["matrix"]["descriptors"],
         )
         self.assertEqual(
-            ["productivetrees:sawmill"],
+            ["productivetrees:sawmill/dark_oak_planks_from_log"],
             descriptor["matrix"]["acceptedRecipes"],
         )
         self.assertEqual(
@@ -6080,15 +6080,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertRegex(
             resolve,
             r"if\s*\(\s*!adapter\.requiresAvailableStacksForVariants\(\)\s*"
-            r"&&\s*baseMatch\.typedRecipePlan\(\)\.isPresent\(\)\s*\)\s*\{\s*"
+            r"&&\s*!baseMatch\.contract\(\)\.pendingTypedPlan\(\)\s*\)\s*\{\s*"
             r"return\s+List\.of\(baseMatch\);",
-            "an already-resolved stack-independent typed match must not rerun adapter "
-            "variant resolution during Craftable preparation",
-        )
-        self.assertNotIn(
-            "pendingTypedPlan",
-            resolve,
-            "legacy and built-in contracts still need adapter-level output validation",
+            "a stack-independent match must not rerun adapter variant resolution during "
+            "Craftable preparation",
         )
         self.assertLess(
             resolve.index("return List.of(baseMatch)"),
