@@ -6077,6 +6077,7 @@ class StaticRegressionTests(unittest.TestCase):
             r"\bprivate\s+List<RecipeAdapterMatch>\s+resolveVariants\s*\(",
             "CraftableRecipeCatalog.CatalogEntry.resolveVariants",
         )
+        self.assertIn("if (baseMatch == null) return List.of();", resolve)
         self.assertRegex(
             resolve,
             r"if\s*\(\s*!adapter\.requiresAvailableStacksForVariants\(\)\s*"

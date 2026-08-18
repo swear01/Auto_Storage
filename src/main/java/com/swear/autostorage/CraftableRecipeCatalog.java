@@ -315,6 +315,7 @@ final class CraftableRecipeCatalog {
                 List<ItemStack> availableStacks,
                 Level level
         ) {
+            if (baseMatch == null) return List.of();
             if (!adapter.requiresAvailableStacksForVariants()
                     && !baseMatch.contract().pendingTypedPlan()) {
                 return List.of(baseMatch);
