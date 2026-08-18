@@ -1184,9 +1184,9 @@
    ],
    "ingredient_shortage_atomic": [
     {
-     "marker": "Unsafe Immersive Engineering recipe was accepted: alloysmelter/electrum",
-     "source": "src/immersiveengineeringFixture/java/com/swear/autostorage/fixture/immersiveengineering/ImmersiveengineeringIntegrationGameTests.java",
-     "task": "runImmersiveengineeringGameTestServer"
+     "marker": "No-energy smelting must not consume cobblestone",
+     "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+     "task": "runGameTestServer"
     }
    ],
    "mixed_resource_rollback_atomic": [

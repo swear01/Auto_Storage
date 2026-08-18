@@ -2575,6 +2575,10 @@ class StaticRegressionTests(unittest.TestCase):
         fixture_metadata = self.read_required(
             "src/immersiveengineeringFixture/resources/META-INF/neoforge.mods.toml"
         )
+        compat = self.read_required(
+            "src/compat/immersiveengineering/java/com/swear/autostorage/compat/"
+            "immersiveengineering/ImmersiveengineeringCompat.java"
+        )
         compatibility_doc = self.read_required(
             "docs/immersiveengineering-compatibility.md"
         )
@@ -2631,6 +2635,8 @@ class StaticRegressionTests(unittest.TestCase):
             descriptor["matrix"]["recipeInventory"]["sha256"],
         )
         self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("recipe.inputs.size() == 1", compat)
+        self.assertIn("RecipeFamilyCost.stationWorkAndTool", compat)
         self.assertNotIn("import blusunrize.immersiveengineering.", module)
         self.assertIn('modId="immersiveengineering"', fixture_metadata)
         self.assertIn(

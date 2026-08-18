@@ -180,7 +180,10 @@ public final class ImmersiveengineeringCompat {
                         id,
                         ImmersiveengineeringCompat::supportsMetalPress,
                         ImmersiveengineeringCompat::metalPressPlan,
-                        recipe -> RecipeFamilyCost.stationWork(recipe.getBaseTime()),
+                        recipe -> RecipeFamilyCost.stationWorkAndTool(
+                                recipe.getBaseTime(),
+                                ResourceLocation.fromNamespaceAndPath(
+                                        "auto_storage", "engineers_hammer"), 1),
                         RecipePresentationKind.CRAFTING));
     }
 
@@ -288,7 +291,7 @@ public final class ImmersiveengineeringCompat {
 
     private static boolean supportsBottling(BottlingMachineRecipe recipe) {
         return recipe != null
-                && recipe.inputs != null && !recipe.inputs.isEmpty()
+                && recipe.inputs != null && recipe.inputs.size() == 1
                 && recipe.output != null && recipe.output.getLazyList().size() == 1
                 && !recipe.output.getLazyList().get(0).get().isEmpty()
                 && recipe.getBaseTime() > 0;

@@ -54,9 +54,9 @@ rejected. The runtime machine families behind that inventory include:
 | Crusher | accepted subset | master-block station; explicit item output, base energy, and work time; chance/tag secondaries rejected |
 | Arc Furnace | accepted subset | master-block station; explicit additives/output, base energy, and work time; slag/chance boundaries rejected |
 | Arc recycling | rejected | live recycling and multiblock state |
-| Metal Press | accepted subset | master-block station; explicit mold/input/output, base energy, and work time |
+| Metal Press | accepted subset | master-block station; explicit mold/input/output, base energy, work time, and one engineer's-hammer tool unit |
 | Metal Press packing helpers | rejected | retained mold and unsupported helper semantics |
-| Bottling Machine | accepted subset | master-block station; exact item/fluid inputs, output, base energy, and work time |
+| Bottling Machine | accepted subset | master-block station; exactly one item input plus exact fluid input, output, base energy, and work time |
 | Sawmill | accepted subset | master-block station; one explicit item input/output, base energy, and work time; secondary tag rolls rejected |
 | Fermenter / Squeezer / Mixer / Refinery | rejected | multiblock with live multipliers and/or fluid inventory state |
 | Blueprint crafting | rejected | typed Engineers Blueprint plus workbench/auto-workbench multiblock path |
