@@ -7,7 +7,6 @@ import blusunrize.immersiveengineering.api.crafting.CrusherRecipe;
 import blusunrize.immersiveengineering.api.crafting.IERecipeTypes;
 import blusunrize.immersiveengineering.api.crafting.MetalPressRecipe;
 import blusunrize.immersiveengineering.api.crafting.MultiblockRecipe;
-import blusunrize.immersiveengineering.api.crafting.SawmillRecipe;
 import blusunrize.immersiveengineering.api.crafting.TagOutput;
 import com.swear.autostorage.EnergyCost;
 import com.swear.autostorage.EnergyType;
@@ -22,11 +21,13 @@ import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceKindApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
 import com.swear.autostorage.api.AutoStorageApi;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -59,32 +60,11 @@ public final class ImmersiveengineeringCompat {
             throw new IllegalArgumentException(
                     "Immersive Engineering family register targets the wrong registry");
         }
-        registerSawmill(machineDescriptors, recipeFamilies);
         registerArcFurnace(machineDescriptors, recipeFamilies);
         registerBottling(machineDescriptors, recipeFamilies);
         registerCrusher(machineDescriptors, recipeFamilies);
         registerAlloy(machineDescriptors, recipeFamilies);
         registerMetalPress(machineDescriptors, recipeFamilies);
-    }
-
-    private static void registerSawmill(
-            DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
-    ) {
-        ResourceLocation id = descriptorId(machineDescriptors, "sawmill");
-        registerStation(machineDescriptors, id, "sawmill");
-        recipeFamilies.register(id.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
-                        SawmillRecipe.class,
-                        () -> IERecipeTypes.SAWMILL.get(),
-                        id,
-                        ImmersiveengineeringCompat::supportsSawmill,
-                        ImmersiveengineeringCompat::sawmillPlan,
-                        recipe -> RecipeFamilyCost.stationWorkAndTool(
-                                recipe.getBaseTime(),
-                                ResourceLocation.fromNamespaceAndPath(
-                                "auto_storage", "engineers_hammer"), 1),
-                        RecipePresentationKind.CRAFTING));
     }
 
     private static void registerArcFurnace(
@@ -217,24 +197,6 @@ public final class ImmersiveengineeringCompat {
                         null));
     }
 
-    // ---------- Sawmill ----------
-
-    private static boolean supportsSawmill(SawmillRecipe recipe) {
-        return recipe != null
-                && recipe.input != null
-                && !recipe.input.isEmpty()
-                && recipe.output != null
-                && !recipe.output.get().isEmpty()
-                && recipe.getBaseTime() > 0;
-    }
-
-    private static TypedRecipePlan sawmillPlan(
-            SawmillRecipe recipe,
-            HolderLookup.Provider registries
-    ) {
-        return singleItemPlan(recipe, recipe.input, recipe.output, recipe.getBaseEnergy(), registries);
-    }
-
     // ---------- Arc Furnace ----------
 
     private static boolean supportsArcFurnace(ArcFurnaceRecipe recipe) {
@@ -259,8 +221,17 @@ public final class ImmersiveengineeringCompat {
             HolderLookup.Provider registries
     ) {
         try {
-            TypedRecipePlan plan = multiItemPlan(recipe, recipe.input, recipe.additives, recipe.output.getLazyList().get(0), recipe.getBaseEnergy(), registries);
-            return plan;
+            return multiItemPlan(
+                    recipe,
+                    recipe.input,
+                    recipe.additives,
+                    recipe.output.getLazyList().get(0),
+                    recipe.getBaseEnergy(),
+                    registries,
+                    List.of(TypedRecipeInput.consume(
+                            descriptorResourceKey(ResourceLocation.fromNamespaceAndPath(
+                                    "auto_storage", "graphite_electrode")),
+                            1)));
         } catch (RuntimeException failure) {
             throw failure;
         }
@@ -363,6 +334,19 @@ public final class ImmersiveengineeringCompat {
             int energy,
             HolderLookup.Provider registries
     ) {
+        return multiItemPlan(
+                recipe, primary, additives, output, energy, registries, List.of());
+    }
+
+    private static TypedRecipePlan multiItemPlan(
+            Object recipe,
+            blusunrize.immersiveengineering.api.crafting.IngredientWithSize primary,
+            List<blusunrize.immersiveengineering.api.crafting.IngredientWithSize> additives,
+            TagOutput output,
+            int energy,
+            HolderLookup.Provider registries,
+            List<TypedRecipeInput> extraInputs
+    ) {
         TypedRecipePlan.Builder builder = TypedRecipePlan.builder();
         if (primary != null) {
             builder.input(TypedRecipeInput.consumeAny(
@@ -374,6 +358,7 @@ public final class ImmersiveengineeringCompat {
                     keys(additive.getBaseIngredient(), registries),
                     additive.getCount()));
         }
+        for (TypedRecipeInput extraInput : extraInputs) builder.input(extraInput);
         builder.output(primaryOutput(output, registries));
         return finish(builder, output, energy);
     }
@@ -435,6 +420,15 @@ public final class ImmersiveengineeringCompat {
                         stack.copyWithCount(1), registries))
                 .distinct()
                 .toList();
+    }
+
+    private static StorageResourceKey descriptorResourceKey(ResourceLocation descriptorId) {
+        CompoundTag variant = new CompoundTag();
+        variant.putString("descriptorId", descriptorId.toString());
+        return StorageResourceKey.of(
+                StorageResourceKindApi.WORK_KIND,
+                ResourceLocation.fromNamespaceAndPath("auto_storage", "descriptor"),
+                variant);
     }
 
     private static Item requiredItem(ResourceLocation id) {

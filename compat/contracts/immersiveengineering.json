@@ -513,66 +513,25 @@
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.SawmillRecipe",
-   "costs": [
-    {
-     "amount": "recipe.baseTime",
-     "resource_kind": "auto_storage:station_work"
-    },
-    {
-     "amount": "recipe.baseEnergy (zero omits the FE input)",
-     "resource_kind": "neoforge_energy"
-    }
-   ],
-   "decision": "Accept the deterministic sawmill subset: every data recipe has an explicit item result (72/72 verified; no tag results) and a single item input. The multiblock is abstracted by the sawmill master block item station; secondaryOutputs (43 tag-based wood-chip rolls) are excluded because tag resolution is ambiguous, and RecipeMultiplier modifiers are not inferred. Work = recipe.baseTime ticks at one work/tick; energy = recipe.baseEnergy.",
+   "costs": [],
+   "decision": "Reject the current Sawmill recipe family: every representative data recipe has a sawblade-dependent stripped/output mode and/or secondary stripping/output products. The station descriptor does not model sawblade state, and dropping any of those products would not be an exact simulate-then-commit transaction.",
    "evidence": [
     "src/api/java/blusunrize/immersiveengineering/api/crafting/SawmillRecipe.java#input",
-    "src/api/java/blusunrize/immersiveengineering/api/crafting/SawmillRecipe.java#output",
+    "src/api/java/blusunrize/immersiveengineering/api/crafting/SawmillRecipe.java#stripped",
+    "src/api/java/blusunrize/immersiveengineering/api/crafting/SawmillRecipe.java#secondaryStripping",
     "src/api/java/blusunrize/immersiveengineering/api/crafting/SawmillRecipe.java#secondaryOutputs",
     "blusunrize.immersiveengineering.api.crafting.SawmillRecipe#public_signature"
    ],
    "id": "sawmill_recipe",
-   "inputs": [
-    {
-     "amount": 1,
-     "resource_kind": "item",
-     "role": "consume",
-     "selector": "recipe.input (single simple Ingredient)"
-    },
-    {
-     "amount": "recipe.baseEnergy when > 0",
-     "resource_kind": "neoforge_energy",
-     "role": "consume",
-     "selector": "auto_storage:neoforge_energy"
-    }
-   ],
-   "outputs": [
-    {
-     "amount": "recipe.output.get().count (explicit item result only)",
-     "resource_kind": "item",
-     "role": "primary",
-     "selector": "recipe.output TagOutput resolved to an explicit item stack"
-    }
-   ],
-   "recipe_type": "immersiveengineering:sawmill",
+   "inputs": [],
+   "outputs": [],
+   "recipe_type": null,
    "risks": [
     "multiblock",
     "world_mutation"
    ],
-   "station": {
-    "category": "process",
-    "descriptor_id": "auto_storage:immersiveengineering_sawmill",
-    "variants": [
-     {
-      "bounds": "plain sawmill master block item; RecipeMultiplier upgrades are not inferred",
-      "item": "immersiveengineering:sawmill",
-      "rate": {
-       "denominator": 1,
-       "numerator": 1
-      }
-     }
-    ]
-   },
-   "status": "accepted"
+   "station": null,
+   "status": "rejected"
   },
   {
    "class": "blusunrize.immersiveengineering.api.crafting.SqueezerRecipe",

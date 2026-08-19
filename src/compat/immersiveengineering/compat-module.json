@@ -21,7 +21,6 @@
   "id": "auto_storage:immersiveengineering",
   "matrix": {
     "acceptedRecipes": [
-      "immersiveengineering:sawmill/oak_log",
       "immersiveengineering:arcfurnace/insulating_glass",
       "immersiveengineering:bottling/black_concrete_powder",
       "immersiveengineering:crusher/amethyst",
@@ -29,7 +28,6 @@
       "immersiveengineering:metalpress/blaze_rod"
     ],
     "descriptors": [
-      "auto_storage:immersiveengineering_sawmill",
       "auto_storage:immersiveengineering_arc_furnace",
       "auto_storage:immersiveengineering_bottling_machine",
       "auto_storage:immersiveengineering_crusher",

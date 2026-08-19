@@ -20,6 +20,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,13 +50,18 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             List<EnergyPreview> energies
     ) {}
     private record IngredientNeed(RecipeAdapterMatch.Input ingredient, long count) {}
+    private record DataComponentMatchingKey(
+            List<Item> items,
+            Object components,
+            boolean strict
+    ) {}
     private record IngredientAvailability(
             StorageCoreBlockEntity core,
             List<IngredientSource> allSources,
             Map<ItemKey, Long> amountsByKey,
             Map<Item, Long> amountsByItem,
             Map<Item, List<IngredientSource>> sourcesByItem,
-            Map<RecipeAdapterMatch.Input, List<IngredientSource>> matchingCache
+            Map<Object, List<IngredientSource>> matchingCache
     ) {
         static IngredientAvailability create(
                 StorageCoreBlockEntity core,
@@ -69,7 +75,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                         Map.of(),
                         new HashMap<>(),
                         new HashMap<>(),
-                        new IdentityHashMap<>());
+                        new HashMap<>());
             }
             Map<ItemKey, Long> amountsByKey = new HashMap<>();
             Map<Item, Long> amountsByItem = new HashMap<>();
@@ -90,7 +96,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     Map.copyOf(amountsByKey),
                     Map.copyOf(amountsByItem),
                     Map.copyOf(sourcesByItem),
-                    new IdentityHashMap<>());
+                    new HashMap<>());
         }
 
         List<IngredientSource> sources() {
@@ -118,7 +124,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         }
 
         List<IngredientSource> matching(RecipeAdapterMatch.Input input) {
-            return matchingCache.computeIfAbsent(input, ignored -> {
+            return matchingCache.computeIfAbsent(matchingCacheKey(input), ignored -> {
                 List<Item> items = input.representativeItems();
                 if (!input.representativeItemsExhaustive() || items.isEmpty()) {
                     boolean vanillaValues = hasExhaustiveVanillaValues(input);
@@ -136,6 +142,17 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 for (Item item : items) matching.addAll(sources(item));
                 return List.copyOf(matching);
             });
+        }
+
+        private static Object matchingCacheKey(RecipeAdapterMatch.Input input) {
+            if (input.identity() instanceof Ingredient ingredient
+                    && ingredient.getCustomIngredient() instanceof DataComponentIngredient component) {
+                return new DataComponentMatchingKey(
+                        component.items().stream().map(holder -> holder.value()).toList(),
+                        component.components(),
+                        component.isStrict());
+            }
+            return input;
         }
 
         long matchingAllItemVariants(RecipeAdapterMatch.Input input) {
@@ -3835,6 +3852,10 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 continue;
             }
             RecipeAdapterMatch baseMatch = candidate.match();
+            if (baseMatch != null
+                    && !baseMatch.validatesSimulation(baseMatch.holder())) {
+                baseMatch = null;
+            }
             if (baseMatch != null && !hasPotentialRecipeInputs(
                     baseMatch, core, availability)) {
                 baseMatch = null;
@@ -4000,7 +4021,11 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             return true;
         }
         if (match.contract().pendingTypedPlan()) return true;
-        for (IngredientNeed need : summarizeIngredients(match.orderedInputs())) {
+        List<IngredientNeed> needs = summarizeIngredients(match.orderedInputs());
+        if (needs.stream().anyMatch(need ->
+                need.ingredient().representativeItems().isEmpty()
+                        || isFluidAwareIngredient(need.ingredient()))) return false;
+        for (IngredientNeed need : needs) {
             if (need.ingredient().matchesAllItemVariants()) {
                 if (availability.matchingAllItemVariants(need.ingredient())
                         < need.count()) return false;
@@ -4024,6 +4049,13 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             if (available < need.count()) return false;
         }
         return true;
+    }
+
+    private static boolean isFluidAwareIngredient(RecipeAdapterMatch.Input input) {
+        return input.identity() instanceof Ingredient ingredient
+                && ingredient.getCustomIngredient() != null
+                && ingredient.getCustomIngredient().getClass().getName().endsWith(
+                        ".IngredientFluidStack");
     }
 
     private static boolean typedInputsAvailableForOne(

@@ -2602,7 +2602,6 @@ class StaticRegressionTests(unittest.TestCase):
         descriptor = json.loads(module_index)
         self.assertEqual(
             [
-                "auto_storage:immersiveengineering_sawmill",
                 "auto_storage:immersiveengineering_arc_furnace",
                 "auto_storage:immersiveengineering_bottling_machine",
                 "auto_storage:immersiveengineering_crusher",
@@ -2613,7 +2612,6 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertEqual(
             [
-                "immersiveengineering:sawmill/oak_log",
                 "immersiveengineering:arcfurnace/insulating_glass",
                 "immersiveengineering:bottling/black_concrete_powder",
                 "immersiveengineering:crusher/amethyst",
@@ -2659,7 +2657,7 @@ class StaticRegressionTests(unittest.TestCase):
             r"id\.getNamespace\(\)\.equals\(\"immersiveengineering\"\)\s*"
             r"\|\|\s*id\.getPath\(\)\.startsWith\(\"immersiveengineering_\"\)",
         )
-        self.assertIn("accepts six deterministic machine families", compatibility_doc)
+        self.assertIn("accepts five deterministic machine families", compatibility_doc)
         self.assertIn(
             "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
             compatibility_doc,
@@ -6084,10 +6082,15 @@ class StaticRegressionTests(unittest.TestCase):
             "CraftableRecipeCatalog.CatalogEntry.resolveVariants",
         )
         self.assertIn("if (baseMatch == null) return List.of();", resolve)
+        self.assertIn(
+            "RecipeAdapterMatch.Contract contract = baseMatch.contract();",
+            resolve,
+        )
+        self.assertIn("if (contract == null) return List.of();", resolve)
         self.assertRegex(
             resolve,
             r"if\s*\(\s*!adapter\.requiresAvailableStacksForVariants\(\)\s*"
-            r"&&\s*!baseMatch\.contract\(\)\.pendingTypedPlan\(\)\s*\)\s*\{\s*"
+            r"&&\s*!contract\.pendingTypedPlan\(\)\s*\)\s*\{\s*"
             r"return\s+List\.of\(baseMatch\);",
             "a stack-independent match must not rerun adapter variant resolution during "
             "Craftable preparation",

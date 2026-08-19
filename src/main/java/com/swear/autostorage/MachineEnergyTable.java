@@ -97,13 +97,11 @@ public final class MachineEnergyTable {
         registerToolDurabilityTransform(
                 descriptors,
                 HAMMER_ID,
-                new ItemStack(net.minecraft.world.item.Items.STONE_AXE),
                 "immersiveengineering",
                 "hammer");
         registerToolDurabilityTransform(
                 descriptors,
                 ELECTRODE_ID,
-                new ItemStack(net.minecraft.world.item.Items.STICK),
                 "immersiveengineering",
                 "graphite_electrode");
     }
@@ -111,7 +109,6 @@ public final class MachineEnergyTable {
     private static void registerToolDurabilityTransform(
             DeferredRegister<MachineDescriptor> descriptors,
             ResourceLocation id,
-            ItemStack presentation,
             String modNamespace,
             String itemPath
     ) {
@@ -120,11 +117,11 @@ public final class MachineEnergyTable {
         descriptors.register(id.getPath(), () -> {
             Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemId);
             if (item == Items.AIR) {
-                throw new IllegalStateException("Missing loaded tool item " + itemId);
+                throw new IllegalStateException("Missing tool item in registry: " + itemId);
             }
             return MachineDescriptor.transform(
                     id,
-                    presentation,
+                    item.getDefaultInstance(),
                     Ingredient.of(item),
                     stack -> ToolDurability.finiteValue(stack) > 0
                             ? new MachineDescriptor.TransformAmount(

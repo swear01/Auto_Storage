@@ -8,6 +8,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def canonical_contract_sha256(path):
+    payload = json.dumps(
+        json.loads(path.read_text()),
+        ensure_ascii=False,
+        indent=2,
+        sort_keys=True,
+    ) + "\n"
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
 class ModularCompatSdkTests(unittest.TestCase):
     def test_theurgy_manifest_tracks_rebased_matrix_evidence(self):
         module_root = ROOT / "src/compat/theurgy"
@@ -438,7 +448,7 @@ class ModularCompatSdkTests(unittest.TestCase):
             contract["verification"]["evidence"]["all_mod_coexistence"][0]["marker"],
         )
         self.assertEqual(
-            hashlib.sha256(contract_path.read_bytes()).hexdigest(),
+            canonical_contract_sha256(contract_path),
             manifest["contract_sha256"],
         )
         for relative_path, expected_sha256 in manifest["files"].items():
