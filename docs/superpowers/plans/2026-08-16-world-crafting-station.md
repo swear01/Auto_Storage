@@ -92,7 +92,7 @@ simulate-then-commit transaction (no world mutation at craft time).
 5. Reload the saved registry and remove the station; availability follows both.
 6. Install the station item in the Core as the second availability source.
 
-The isolated fixture contains fifteen GameTests for these boundaries,
+The isolated fixture contains sixteen GameTests for these boundaries,
 including config gating, block drops, base-cache transitions, and stale
 persisted-state rejection.
 

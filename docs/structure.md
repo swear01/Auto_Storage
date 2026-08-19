@@ -64,7 +64,7 @@
 | `src/compat/productivemetalworks/` | Productive Metalworks present-mod entrypoint；registers Foundry melting與casting stations/families。 |
 | `src/productivemetalworksFixture/` | 代表性 Productive Metalworks 1.15.0 present-mod 隔離 fixture；9 個 tests 鎖住 melting/alloying/casting/entity boundaries與legacy basin persistence migration。 |
 | `docs/fluxnetworks-compatibility.md` | Flux Networks 8.0.0 audit、原始 world mechanic 的 fail-closed 邊界，以及只做固定 1:1 redstone → flux_dust 的 persisted Flux Station。 |
-| `src/compat/fluxnetworks/` / `src/fluxnetworksFixture/` | Flux Station block/catalog module與descriptor-owned 15-test isolated fixture；config gate、cached world-station state、optional resource isolation與terminal synchronization皆由fixture驗證。 |
+| `src/compat/fluxnetworks/` / `src/fluxnetworksFixture/` | Flux Station block/catalog module與descriptor-owned 16-test isolated fixture；config gate、cached world-station state、optional resource isolation與terminal synchronization皆由fixture驗證。 |
 | `src/pneumaticCraftFixture/` | 代表性PneumaticCraft 8.2.22 present-mod隔離fixture；9個tests鎖住Air與七類machine recipes不被不安全接受。 |
 | `src/extendedCraftingFixture/` | 代表性Extended Crafting 7.0.8 + Cucumber 8.0.16隔離GameTest fixture；4個tests驗Ultimate Table gating、9×9/81-position exact commit、one-short no-op、full-destination rollback與真實Ultimate Singularity component identity。 |
 | `docs/extended-crafting-compatibility.md` | Extended Crafting shaped-table/Ultimate Singularity支持、81-input boundary、representative fixture政策與fail-closed transformer邊界。 |

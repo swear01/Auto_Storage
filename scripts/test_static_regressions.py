@@ -3633,6 +3633,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertEqual("auto_storage:block/flux_station", block_model["textures"]["all"])
         self.assertEqual("auto_storage:block/flux_station", item_model["textures"]["layer0"])
         self.assertTrue((ROOT / "src/main/resources/assets/auto_storage/textures/block/flux_station.png").is_file())
+        flux_module = self.read_required(
+            "src/compat/fluxnetworks/java/com/swear/autostorage/compat/fluxnetworks/FluxnetworksCompatModule.java"
+        )
+        self.assertIn("fluxBlock != Blocks.AIR", flux_module)
+        self.assertNotIn("fluxBlock != null", flux_module)
 
     def test_stations_can_switch_between_all_and_installed_descriptors(self):
         screen = self.read_required(

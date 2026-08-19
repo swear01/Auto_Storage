@@ -98,6 +98,7 @@ public final class FluxnetworksCompatModule implements AutoStorageCompatModule {
         var below = level.getBlockState(pos.below(2));
         Block fluxBlock = BuiltInRegistries.BLOCK.get(FLUX_BLOCK_ID);
         return FluxConfig.enableFluxRecipe
-                && (below.is(Blocks.BEDROCK) || fluxBlock != null && below.is(fluxBlock));
+                && (below.is(Blocks.BEDROCK)
+                        || fluxBlock != Blocks.AIR && below.is(fluxBlock));
     }
 }

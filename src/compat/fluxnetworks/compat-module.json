@@ -7,7 +7,7 @@
     "curse.maven:flux-networks-248020:6089446"
   ],
   "entrypoint": "com.swear.autostorage.compat.fluxnetworks.FluxnetworksCompatModule",
-  "expectedTests": 15,
+  "expectedTests": 16,
   "fixture": "fluxnetworksFixture",
   "id": "auto_storage:fluxnetworks",
   "matrix": {

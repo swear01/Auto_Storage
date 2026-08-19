@@ -172,6 +172,19 @@ public final class FluxnetworksIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
+    public static void air_base_fails_closed(GameTestHelper helper) {
+        BlockPos station = helper.absolutePos(new BlockPos(11, 3, 2));
+        helper.getLevel().setBlock(station.below(2), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+        placeStation(helper, station);
+        if (WorldStations.isPresentAt(
+                helper.getLevel(), FluxnetworksCompatModule.FLUX_STATION_ID, station)) {
+            helper.fail("Flux Station accepted air as its base");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
     public static void bedrock_base_is_available(GameTestHelper helper) {
         BlockPos station = helper.absolutePos(new BlockPos(3, 3, 2));
         helper.getLevel().setBlock(station.below(2), Blocks.BEDROCK.defaultBlockState(), Block.UPDATE_ALL);
