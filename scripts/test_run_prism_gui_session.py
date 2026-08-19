@@ -97,6 +97,10 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
                 "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
             },
+            "flux-station": {
+                "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
+                "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
+            },
             "terminal-scale": {
                 "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
                 "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
@@ -111,6 +115,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "terminal-left-rail": "storage_terminal",
                 "bus-configuration": "import_bus",
                 "crafting-fuel-page": "crafting_terminal",
+                "flux-station": "flux_station",
                 "terminal-scale": "crafting_terminal",
                 "patchouli-guide": "overview",
             }.get(scenario_name, "overview"),
@@ -136,7 +141,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                             "count": 1,
                         },
                     }
-                    if scenario_name == "terminal-scale"
+                    if scenario_name in {"flux-station", "terminal-scale"}
                     else {}
                 ),
                 "inventory": [],
@@ -152,7 +157,11 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                     if scenario_name == "crafting-fuel-page"
                     else {}
                 ),
-                "stored_items": {},
+                "stored_items": (
+                    {"minecraft:redstone": 64}
+                    if scenario_name == "flux-station"
+                    else {}
+                ),
                 "stored_stacks": [],
                 **(
                     {
@@ -175,6 +184,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             "bootstrap": {
                 "core_preloaded": scenario_name in {
                     "crafting-fuel-page",
+                    "flux-station",
                     "terminal-scale",
                 },
                 **(
@@ -212,6 +222,13 @@ class RunPrismGuiSessionTests(unittest.TestCase):
                 "depth": 24,
             },
         }
+
+    def test_flux_station_scenario_has_visual_and_transaction_checks(self):
+        mod = self.load_script()
+        checks = "\n".join(mod.SCENARIOS["flux-station"]["checks"])
+        self.assertIn("dedicated Flux Station texture", checks)
+        self.assertIn("1 redstone -> 1 flux dust", checks)
+        self.assertIn("no world block/entity mutation", checks)
 
     def test_patchouli_handoff_uses_current_preloaded_guide_name(self):
         mod = self.load_script()

@@ -162,6 +162,7 @@ TARGETS = {
     "crafting_terminal": {"block": [1, 80, 0], "stand": [1.5, 80.0, 4.5], "face": [1.5, 80.5, 0.5]},
     "import_bus": {"block": [-1, 80, -1], "stand": [-4.5, 80.0, -0.5], "face": [-0.5, 80.5, -0.5]},
     "export_bus": {"block": [1, 80, -1], "stand": [4.5, 80.0, -0.5], "face": [1.5, 80.5, -0.5]},
+    "flux_station": {"block": [2, 80, 0], "stand": [2.5, 80.0, 4.5], "face": [2.5, 80.5, 0.5]},
     "overview": {"stand": [0.5, 85.0, 9.5], "face": [0.5, 80.0, -1.5]},
 }
 
@@ -185,6 +186,20 @@ BASELINE = {
         "finite_type_slots": 785,
         "unlimited": True,
     },
+}
+
+FLUX_STATION_CORE_BASELINE = {
+    "storage_id": GUI_CORE_STORAGE_ID,
+    "network_id": GUI_CORE_NETWORK_ID,
+    "stored_items": {
+        "minecraft:redstone": 64,
+    },
+    "stored_stacks": [],
+    "installed_stations": {},
+    "descriptor_consumables": {},
+    "station_work": {},
+    "typed_resources": [],
+    "energy": dict(BASELINE["energy"]),
 }
 
 EXTENDED_CRAFTING_SINGULARITIES = (
@@ -800,6 +815,35 @@ SCENARIO_PROFILES = {
             "setblock 0 80 -1 auto_storage:creative_storage_unit",
         ),
         "type_capacity": {"finite_type_slots": 0, "unlimited": True},
+        "reset_world": False,
+        "player_kit": {
+            "hotbar": {
+                "1": {"slot": "hotbar.0", "item": "auto_storage:storage_terminal", "count": 1},
+                "2": {"slot": "hotbar.1", "item": "auto_storage:crafting_terminal", "count": 1},
+            },
+            "inventory": [],
+        },
+        "hotbar_views": {
+            "1": {"slot": 0, "function": "view_storage_terminal", "target": "storage_terminal"},
+            "2": {"slot": 1, "function": "view_crafting_terminal", "target": "crafting_terminal"},
+        },
+    },
+    "flux-station": {
+        "start_target": "flux_station",
+        "target_names": ("storage_core", "storage_terminal", "crafting_terminal", "flux_station"),
+        "setup_blocks": (
+            "setblock 0 80 0 auto_storage:storage_core"
+            "{storageSchema:1,storageId:[I;"
+            + ",".join(str(value) for value in GUI_CORE_STORAGE_ID)
+            + "]}",
+            "setblock -1 80 0 auto_storage:storage_terminal",
+            "setblock 1 80 0 auto_storage:crafting_terminal",
+            "setblock 0 80 -1 auto_storage:creative_storage_unit",
+            "setblock 2 78 0 minecraft:bedrock",
+            "setblock 2 80 0 auto_storage:flux_station",
+        ),
+        "type_capacity": {"finite_type_slots": 0, "unlimited": True},
+        "core_baseline": FLUX_STATION_CORE_BASELINE,
         "reset_world": False,
         "player_kit": {
             "hotbar": {
