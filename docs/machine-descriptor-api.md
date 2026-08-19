@@ -33,6 +33,7 @@ The registry key and `MachineDescriptor.id()` must be identical. IDs are persist
 
 - `PROCESS`: installable aggregate, maximum 1–`Integer.MAX_VALUE` (2,147,483,647). It may generate one existing `EnergyType`, or descriptor-keyed station work when `energyType` is `null`.
 - `INSTANT`: installable stack, normally maximum 1. It unlocks an adapter-defined action without generating energy.
+- World-station descriptors use `MachineDescriptor.worldStation(...)`. Their block is a second availability source: the same descriptor is available from the installed item or a registered world station, while the station's server-side base predicate is checked at use time. `WorldStations` persists placed positions per dimension and validates the current block/base without scanning the world.
 
 ## Transform providers and shared targets
 

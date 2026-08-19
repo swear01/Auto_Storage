@@ -29,6 +29,7 @@ public record MachineDescriptorStatePacket(
                         states.add(new State(
                                 buf.readResourceLocation(),
                                 buf.readVarLong(),
+                                buf.readBoolean(),
                                 buf.readBoolean()));
                     }
                     return new MachineDescriptorStatePacket(containerId, List.copyOf(states));
@@ -45,6 +46,7 @@ public record MachineDescriptorStatePacket(
                         buf.writeResourceLocation(state.descriptorId());
                         buf.writeVarLong(state.amount());
                         buf.writeBoolean(state.infinite());
+                        buf.writeBoolean(state.worldAvailable());
                     }
                 }
             };
@@ -58,7 +60,12 @@ public record MachineDescriptorStatePacket(
         return TYPE;
     }
 
-    public record State(ResourceLocation descriptorId, long amount, boolean infinite) {
+    public record State(
+            ResourceLocation descriptorId,
+            long amount,
+            boolean infinite,
+            boolean worldAvailable
+    ) {
         public State {
             if (amount < 0 || infinite && amount != 0) {
                 throw new IllegalArgumentException("Invalid descriptor state for " + descriptorId);

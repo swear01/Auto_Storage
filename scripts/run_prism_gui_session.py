@@ -189,6 +189,19 @@ SCENARIOS = {
             CURRENT_RUN_LOG_CHECK,
         ],
     },
+    "flux-station": {
+        "description": "Inspect the Flux Station texture, world-station availability, and fixed terminal conversion.",
+        "manual_gui_required": True,
+        "hotbar_keys": ["1", "2"],
+        "checks": [
+            "Pass the fullscreen gate before pressing hotbar/use/click/scroll.",
+            "The scenario starts aimed at the placed auto_storage:flux_station on its bedrock base; inspect the dedicated Flux Station texture at native size and confirm it is distinct from the Storage Core while retaining the Auto Storage chassis style.",
+            "hotbar `2`, then `u`: open the Crafting Terminal and open Stations. Show: Installed must include Flux Station from the world block even though its item is not installed in the Core.",
+            "Open the Flux conversion preview and confirm it shows exactly 1 redstone -> 1 flux dust, with the station available from the world block and no world block/entity mutation during the storage transaction.",
+            "Confirm the player inventory remains empty apart from terminal navigation and close with F11 -> bordered window -> Command-Q.",
+            CURRENT_RUN_LOG_CHECK,
+        ],
+    },
     "terminal-scale": {
         "description": "Verify terminal responsiveness and layout with synthetic exact variants plus every runtime item and station.",
         "manual_gui_required": True,
@@ -940,6 +953,7 @@ def validate_scenario_manifest(
         "terminal-left-rail": "storage_terminal",
         "bus-configuration": "import_bus",
         "crafting-fuel-page": "crafting_terminal",
+        "flux-station": "flux_station",
         "terminal-scale": "crafting_terminal",
         "patchouli-guide": "overview",
     }[scenario_name]
@@ -1049,7 +1063,7 @@ def run_session(
         require_running_normal_prism()
         verify_deployed_auto_storage_jar(DEFAULT_PROJECT_DIR, minecraft_dir)
         verify_deployed_fusion_jar(minecraft_dir)
-        if scenario_name in {"crafting-fuel-page", "terminal-scale"}:
+        if scenario_name in {"crafting-fuel-page", "flux-station", "terminal-scale"}:
             verify_deployed_gui_support_jars(DEFAULT_PROJECT_DIR, minecraft_dir)
         cleanup_existing_func(instance_dir, minecraft_dir, instance, world)
     instance_cfg_changed = configure_instance_func(instance_dir)

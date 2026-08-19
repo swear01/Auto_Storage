@@ -1,6 +1,6 @@
 # World Crafting-Station Block Plan
 
-> Status: design (issue #137). User decisions 2026-08-16: one block variant
+> Status: Flux Station server implementation, cache, config gate, optional-resource isolation, and fixture coverage are implemented; visual review and player acquisition decision remain deferred. User decisions 2026-08-16: one block variant
 > per mechanism recipe, styled like the original block with the Auto Storage
 > house style; placed at the original interact position (bottom base
 > required, e.g. bedrock for Flux); fixed 1 input -> 1 output per terminal
@@ -37,15 +37,15 @@ the availability check is a cheap block-state lookup and Block Metadata
 
 ### 2. Detection: server-side placement registry (low frequency)
 
-- A server-side `WorldStationRegistry` per dimension key:
-  `Map<ResourceKey<Level>, Set<BlockPos>>`.
-- `BlockEvent.EntityPlaceEvent` / `BlockEvent.BreakEvent` (and chunk
-  unload/load persistence) update the set; lookup is O(1) memory, no
-  per-tick or per-open world scan.
+- A server-side `WorldStationRegistry` per dimension key with placed and
+  cached-valid position sets plus an availability revision.
+- Station lifecycle, base-neighbor updates, and chunk load refresh the cached
+  validity; lookup is O(1) memory, no per-tick or per-open world scan.
 - Persistence: positions are saved to the world's Auto Storage data
   (`auto_storage` NBT per dimension) so a server restart restores the set
-  without scanning chunks; a placed station works even when its chunk is
-  unloaded (same semantics as "installed").
+  without scanning chunks. Persisted positions in unloaded chunks remain
+  unavailable until that chunk loads and the station/base is revalidated;
+  stale or invalid saved entries fail closed.
 - Availability: `isStationAvailable` consults the registry for the
   descriptor's variant block when the station has no installable-variant
   item (or in addition to it); sharing the existing MachineDescriptor check
@@ -76,28 +76,29 @@ simulate-then-commit transaction (no world mutation at craft time).
 
 ### 5. Contract & docs
 
-- FluxNetworks contract gains one accepted family (redstone -> flux dust,
-  fixed 1:1) with evidence tied to the new GameTests; the world-mechanic
-  risk stays recorded but is now bounded by the station block.
+- FluxNetworks has a format-17 audit/contract for the target's custom recipe
+  classes; those classes remain rejected. The new synthetic Flux Station
+  conversion is covered by the module fixture and does not infer semantics from
+  FluxNetworks recipe data. The original world-mechanic risk stays recorded;
+  the Auto Storage station exposes only the fixed 1:1 storage transaction.
 - `docs/notes.md` re-audit entry updated; new compatibility doc section.
 
 ## Test plan (GameTests)
 
-1. Place station block on bedrock -> family supported, craft executes
-   (storage redstone -> storage dust), base/first station remains.
-2. Break the station block -> fail-closed.
-3. Place without base -> station not available (fail-closed).
-4. Batch craft through the terminal batch controls (e.g. 64 redstone ->
-   64 dust) in one transaction.
-5. Server-restart persistence: placed station still available after
-   reload without scanning the world.
-6. Registry eviction on block break + dimension isolation.
+1. Register the station block, item, descriptor, and synthetic conversion.
+2. Place station on bedrock or flux_block and execute the 1:1 conversion.
+3. Place without a valid base -> station not available.
+4. Batch craft through the terminal batch controls (64 redstone -> 64 dust).
+5. Reload the saved registry and remove the station; availability follows both.
+6. Install the station item in the Core as the second availability source.
+
+The isolated fixture contains nineteen GameTests for these boundaries,
+including config gating, block drops, base-cache transitions, and stale
+persisted-state rejection.
 
 ## Open items
 
-- Whether the original Flux condition also accepts `flux_block` as base
-  (keep original set, default yes) or only bedrock per user's wording.
-- Exact house-style trim for the variant textures (needs a visual pass in
-  the Prism GUI checklist before release).
-- Which mechanism gets the second variant (Botania world-consumption
-  flowers re-evaluated per recipe after Flux lands).
+- Exact house-style trim for the variant texture (needs a visual pass in the
+  Prism GUI checklist before release).
+- Decide whether the station is Creative-only or receives a survival recipe;
+  the issue does not define its materials yet.

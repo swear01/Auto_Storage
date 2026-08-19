@@ -1,5 +1,6 @@
 {
   "block.auto_storage.storage_core": "Storage Core",
+  "block.auto_storage.flux_station": "Flux Station",
   "block.auto_storage.storage_unit_t1": "Storage Unit (Tier 1)",
   "block.auto_storage.storage_unit_t2": "Storage Unit (Tier 2)",
   "block.auto_storage.storage_unit_t3": "Storage Unit (Tier 3)",
@@ -29,6 +30,7 @@
   "gui.auto_storage.page_craftable": "Craftable",
   "gui.auto_storage.page_transform": "Transform",
   "gui.auto_storage.page_stations": "Stations",
+  "gui.auto_storage.station.flux_station": "Flux Station",
   "gui.auto_storage.craft_max": "Max",
   "gui.auto_storage.search_mode.off": "Off",
   "gui.auto_storage.search_mode.emi": "Viewer",

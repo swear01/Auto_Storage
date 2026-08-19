@@ -345,6 +345,14 @@ Choose `MachineCategory.PROCESS`, `INSTANT`, or `TRANSFORM`; addon code does not
 depend on the internal `MachineEnergyTable`.
 See [Machine Descriptor API](machine-descriptor-api.md).
 
+For a world-mechanic family, use `MachineDescriptor.worldStation(...)` with a
+`WorldStationBlock` and register its base predicate through `WorldStations`.
+The block's placement/removal lifecycle updates the persisted per-dimension
+registry. Register a `SyntheticRecipeCatalogs.Catalog` for a holder that is not
+backed by `RecipeManager`; the holder must use a deterministic
+`WorldStationConversionRecipe` or another reviewed public recipe type so the
+normal terminal transaction and current-holder checks remain authoritative.
+
 ### Deterministic recipe families
 
 Use `RecipeFamilyApi.createDeferredRegister(MOD_ID)`. One entry covers one exact

@@ -147,6 +147,23 @@ class PreparePrismGuiWorldTests(unittest.TestCase):
             )
             self.assertEqual(121_000, crafting_manifest["baseline"]["stored_items"]["minecraft:oak_log"])
             self.assertEqual(19, len(crafting_manifest["baseline"]["stored_stacks"]))
+
+            flux = root / "flux"
+            flux.mkdir()
+            flux_manifest = mod.install_datapack(flux, "flux-station")
+            self.assertEqual("flux_station", flux_manifest["start_target"])
+            self.assertEqual(
+                {"storage_core", "storage_terminal", "crafting_terminal", "flux_station"},
+                set(flux_manifest["targets"]),
+            )
+            self.assertEqual(
+                64,
+                flux_manifest["baseline"]["stored_items"]["minecraft:redstone"],
+            )
+            self.assertEqual([], flux_manifest["player_kit"]["inventory"])
+            setup = (flux / "datapacks/auto_storage_gui_test/data/auto_storage_gui_test/function/setup.mcfunction").read_text()
+            self.assertIn("setblock 2 78 0 minecraft:bedrock", setup)
+            self.assertIn("setblock 2 80 0 auto_storage:flux_station", setup)
             self.assertEqual(
                 "ironfurnaces:iron_furnace",
                 crafting_manifest["baseline"]["installed_stations"]["auto_storage:furnace"]["item"],

@@ -113,6 +113,7 @@ class StaticRegressionTests(unittest.TestCase):
             "auto_storage:block/storage_core": "core_rune_crystal",
             "auto_storage:block/storage_terminal": "storage_item_grid",
             "auto_storage:block/crafting_terminal": "crafting_grid_mark",
+            "auto_storage:block/flux_station": "flux_station_energy_core",
             **{
                 f"auto_storage:block/storage_unit_t{tier}": f"storage_cell_tier_{tier}"
                 for tier in range(1, 7)
@@ -335,7 +336,7 @@ class StaticRegressionTests(unittest.TestCase):
             "src/main/java/com/swear/autostorage/AutoStorage.java"
         )
 
-        self.assertIn('event.registrar(MODID).versioned("1.5")', mod)
+        self.assertIn('event.registrar(MODID).versioned("1.6")', mod)
 
     def test_emi_public_widget_holder_matches_emi_unbounded_add_contract(self):
         renderer = self.read_required(
@@ -3596,9 +3597,54 @@ class StaticRegressionTests(unittest.TestCase):
             variant_stacks.index("match.orderedInputs()"),
         )
 
+    def test_world_station_availability_uses_revision_cache(self):
+        world_stations = self.read_required(
+            "src/main/java/com/swear/autostorage/WorldStations.java"
+        )
+        menu = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
+        )
+        auto_storage = self.read_required(
+            "src/main/java/com/swear/autostorage/AutoStorage.java"
+        )
+        self.assertNotIn("positions.stream().anyMatch", world_stations)
+        self.assertIn("VALID_COUNTS", world_stations)
+        self.assertIn("onChunkUnload", world_stations)
+        self.assertIn("worldStationRevision", menu)
+        self.assertIn("WorldStations.revision", menu)
+        self.assertIn("ChunkEvent.Unload", auto_storage)
+
+    def test_optional_flux_resources_do_not_leak_into_main_runtime(self):
+        loot_table = ROOT / (
+            "src/compat/fluxnetworks/resources/data/auto_storage/"
+            "loot_table/blocks/flux_station.json"
+        )
+        world_station_block = self.read_required(
+            "src/main/java/com/swear/autostorage/WorldStationBlock.java"
+        )
+        block_model = json.loads(self.read_required(
+            "src/main/resources/assets/auto_storage/models/block/flux_station.json"
+        ))
+        item_model = json.loads(self.read_required(
+            "src/main/resources/assets/auto_storage/models/item/flux_station.json"
+        ))
+        self.assertFalse(loot_table.exists())
+        self.assertIn("getDrops", world_station_block)
+        self.assertEqual("auto_storage:block/flux_station", block_model["textures"]["all"])
+        self.assertEqual("auto_storage:block/flux_station", item_model["textures"]["layer0"])
+        self.assertTrue((ROOT / "src/main/resources/assets/auto_storage/textures/block/flux_station.png").is_file())
+        flux_module = self.read_required(
+            "src/compat/fluxnetworks/java/com/swear/autostorage/compat/fluxnetworks/FluxnetworksCompatModule.java"
+        )
+        self.assertIn("fluxBlock != Blocks.AIR", flux_module)
+        self.assertNotIn("fluxBlock != null", flux_module)
+
     def test_stations_can_switch_between_all_and_installed_descriptors(self):
         screen = self.read_required(
             "src/main/java/com/swear/autostorage/CraftingTerminalScreen.java"
+        )
+        menu = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
         )
         en_us = json.loads(self.read_required(
             "src/main/resources/assets/auto_storage/lang/en_us.json"
@@ -3611,7 +3657,10 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("StationDisplayMode.ALL", screen)
         self.assertIn("INSTALLED(\"gui.auto_storage.station_display.installed\")", screen)
         self.assertIn("isStationInstalled(", screen)
+        self.assertIn("isWorldStationAvailable", screen)
         self.assertIn("stationDisplayMode.shows(", screen)
+        self.assertIn("descriptorStateRevision", screen)
+        self.assertIn("descriptorStateRevision", menu)
         self.assertIn("rebuildWidgets()", screen)
         self.assertIn("stationDisplayModeBtn", self.java_block(
             screen,
@@ -4043,6 +4092,7 @@ class StaticRegressionTests(unittest.TestCase):
             "auto_storage:block/storage_core": {"#3FDCE5", "#9A5CE8"},
             "auto_storage:block/storage_terminal": {"#3FDCE5"},
             "auto_storage:block/crafting_terminal": {"#3FDCE5", "#9A5CE8"},
+            "auto_storage:block/flux_station": {"#3FDCE5", "#9A5CE8"},
             "auto_storage:block/creative_storage_unit": {"#3FDCE5", "#C083FF"},
             "auto_storage:block/import_bus_front": {"#2EA8FF"},
             "auto_storage:block/export_bus_front": {"#FF8A24"},
@@ -6290,6 +6340,7 @@ class StaticRegressionTests(unittest.TestCase):
             "src/main/java/com/swear/autostorage/AutoStorage.java"
         ))
         self.assertIn("descriptorId", packet)
+        self.assertIn("worldAvailable", packet)
         self.assertIn('TAG_MACHINE_DESCRIPTORS = "machineDescriptors"', record)
         self.assertIn("unresolvedMachineEntries", record)
         self.assertNotIn("recoverUnregisteredMachine", core)

@@ -211,6 +211,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             long craftableRevision,
             long machineRevision,
             long topologyRevision,
+            long worldStationRevision,
             String filter,
             SortMode sortMode,
             SortOrder sortOrder,
@@ -321,6 +322,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private Container machineContainer;
     private final List<MachineDescriptor> descriptorSnapshot;
     private final Map<ResourceLocation, MachineDescriptorStatePacket.State> descriptorStates = new HashMap<>();
+    private int descriptorStateRevision;
     private final List<RecipeHolder<?>> currentRecipes = new ArrayList<>();
     private final CraftableRecipeCatalog craftableRecipeCatalog = new CraftableRecipeCatalog();
     private final AxeTransformationCatalog axeTransformationCatalog = new AxeTransformationCatalog();
@@ -348,6 +350,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private int lastPlayerInventoryFingerprint;
     private long lastTopologyRevision;
     private long lastMachineRevision;
+    private long worldStationRevision;
     private Map<ResourceLocation, Long> lastDynamicRecipeState = Map.of();
     private final long[] nextCraftableEnergyThreshold = new long[EnergyType.values().length];
     private final Map<ResourceLocation, Long> nextCraftableStationThreshold = new HashMap<>();
@@ -364,6 +367,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         this.lastPlayerInventoryFingerprint = playerInventoryFingerprint();
         this.lastTopologyRevision = core.getTopologyRevision();
         this.lastMachineRevision = core.getMachineRevision();
+        this.worldStationRevision = WorldStations.revision(core.getLevel());
         this.lastDynamicRecipeState = currentDynamicRecipeState();
         Arrays.fill(nextCraftableEnergyThreshold, Long.MAX_VALUE);
         refreshEnergyAmounts(core);
@@ -904,6 +908,15 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         return descriptorId.equals(MachineEnergyTable.AXE_ID) && infiniteAxeEnergy;
     }
 
+    public boolean isWorldStationAvailable(ResourceLocation descriptorId) {
+        MachineDescriptorStatePacket.State state = descriptorStates.get(descriptorId);
+        return state != null && state.worldAvailable();
+    }
+
+    int descriptorStateRevision() {
+        return descriptorStateRevision;
+    }
+
     void applyDescriptorStates(List<MachineDescriptorStatePacket.State> states) {
         descriptorStates.clear();
         for (MachineDescriptorStatePacket.State state : states) {
@@ -911,6 +924,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 descriptorStates.put(state.descriptorId(), state);
             }
         }
+        descriptorStateRevision++;
     }
 
     static int fuelTargetButtonId(EnergyType target) {
@@ -1485,7 +1499,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         fuelRequired = 0;
     }
 
-    void lookUpRecipes(Level level, ItemStack output) {
+    public void lookUpRecipes(Level level, ItemStack output) {
         output = TerminalDisplayStack.strip(output);
         selectedRecipeId = null;
         currentRecipes.clear();
@@ -1513,6 +1527,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             }
         }
         for (RecipeHolder<?> holder : axeTransformationCatalog.recipes(level, core)) {
+            RecipeAdapterMatch match = classifyAvailable(holder, core);
+            if (match == null) continue;
+            ItemStack result = match.presentationOutput(List.of(), level);
+            if (!result.isEmpty() && ItemStack.isSameItemSameComponents(result, output)) {
+                currentRecipes.add(holder);
+            }
+        }
+        for (RecipeHolder<?> holder : SyntheticRecipeCatalogs.recipes(level)) {
             RecipeAdapterMatch match = classifyAvailable(holder, core);
             if (match == null) continue;
             ItemStack result = match.presentationOutput(List.of(), level);
@@ -1994,7 +2016,11 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     ) {
         RecipeHolder<?> managed = level.getRecipeManager().byKey(recipeId).orElse(null);
         if (managed != null) return managed;
-        return core == null ? null : axeTransformationCatalog.byId(level, core, recipeId);
+        RecipeHolder<?> axe = core == null ? null
+                : axeTransformationCatalog.byId(level, core, recipeId);
+        if (axe != null) return axe;
+        return core == null ? null
+                : SyntheticRecipeCatalogs.byId(level, recipeId);
     }
 
     public CraftPreview computeCraftPreview(StorageCoreBlockEntity core, Player player) {
@@ -2365,9 +2391,15 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             return station.representativeStack();
         }
         int stationSlot = MachineEnergyTable.findSlot(match.stationDescriptorId());
-        if (stationSlot < 0) throw new IllegalStateException("Recipe presentation station has no slot");
-        ItemStack installed = core.getMachineContainer().getItem(stationSlot);
-        if (!station.accepts(installed)) {
+        ItemStack installed = stationSlot < 0
+                ? ItemStack.EMPTY
+                : core.getMachineContainer().getItem(stationSlot);
+        if (station.worldStationBlockId() != null
+                && WorldStations.isPresent(core.getLevel(), station.worldStationBlockId())
+                && !station.accepts(installed)) {
+            return station.representativeStack();
+        }
+        if (stationSlot < 0 || !station.accepts(installed)) {
             throw new IllegalStateException("Recipe presentation station is not installed");
         }
         return installed.copyWithCount(1);
@@ -3156,9 +3188,12 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     && core.hasDescriptorAmount(toolCost.descriptorId(), toolCost.amountPerCraft());
         }
         int stationSlot = MachineEnergyTable.findSlot(station.id());
-        return stationSlot >= 0
-                && MachineEnergyTable.isInstalled(core, stationSlot)
-                && hasToolForCrafts(core, toolCost, 1);
+        boolean installed = stationSlot >= 0
+                && MachineEnergyTable.isInstalled(core, stationSlot);
+        ResourceLocation worldBlock = station.worldStationBlockId();
+        boolean worldPresent = worldBlock != null
+                && WorldStations.isPresent(core.getLevel(), worldBlock);
+        return (installed || worldPresent) && hasToolForCrafts(core, toolCost, 1);
     }
 
     private static boolean hasToolForCrafts(
@@ -3313,17 +3348,23 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             if (topologyChanged) lastTopologyRevision = core.getTopologyRevision();
             boolean machinesChanged = core != null && core.getMachineRevision() != lastMachineRevision;
             if (machinesChanged) lastMachineRevision = core.getMachineRevision();
+            long currentWorldStationRevision = core == null
+                    ? worldStationRevision
+                    : WorldStations.revision(core.getLevel());
+            boolean worldStationsChanged = currentWorldStationRevision != worldStationRevision;
+            if (worldStationsChanged) worldStationRevision = currentWorldStationRevision;
             Map<ResourceLocation, Long> dynamicRecipeState = currentDynamicRecipeState();
             boolean dynamicRecipeStateChanged =
                     !dynamicRecipeState.equals(lastDynamicRecipeState);
             if (dynamicRecipeStateChanged) lastDynamicRecipeState = dynamicRecipeState;
-            sendDescriptorState = machinesChanged;
+            sendDescriptorState = machinesChanged || worldStationsChanged;
 
             if (core != null && (topologyChanged || machinesChanged
-                    || dynamicRecipeStateChanged
+                    || worldStationsChanged || dynamicRecipeStateChanged
                     || playerInventoryChanged && usePlayerInventory)) {
                 if (machinesChanged) refreshEnergyAmounts(core);
-                if (topologyChanged || machinesChanged || page == CraftingTerminalPage.CRAFTABLE) {
+                if (topologyChanged || machinesChanged || worldStationsChanged
+                        || page == CraftingTerminalPage.CRAFTABLE) {
                     refreshDisplayItems(core);
                 }
                 updatePreview(core, playerInventory.player);
@@ -3350,13 +3391,15 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     descriptor.id(),
                     descriptorStateAmount(core, descriptor),
                     descriptor.category() == MachineCategory.TRANSFORM
-                            && core.hasInfiniteDescriptor(descriptor.id())));
+                            && core.hasInfiniteDescriptor(descriptor.id()),
+                    worldStationAvailable(core, descriptor)));
         }
         PacketDistributor.sendToPlayer(serverPlayer, new MachineDescriptorStatePacket(containerId, states));
     }
 
     private static boolean hasDescriptorState(MachineDescriptor descriptor) {
-        return descriptor.category() == MachineCategory.TRANSFORM
+        return descriptor.worldStationBlockId() != null
+                || descriptor.category() == MachineCategory.TRANSFORM
                 || descriptor.category() == MachineCategory.PROCESS
                 && descriptor.energyType() == null;
     }
@@ -3365,6 +3408,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         return descriptor.category() == MachineCategory.PROCESS
                 ? core.getStationWork(descriptor.id())
                 : core.getDescriptorAmount(descriptor.id());
+    }
+
+    private static boolean worldStationAvailable(
+            StorageCoreBlockEntity core,
+            MachineDescriptor descriptor
+    ) {
+        ResourceLocation blockId = descriptor.worldStationBlockId();
+        return blockId != null && WorldStations.isPresent(core.getLevel(), blockId);
     }
 
     private int playerInventoryFingerprint() {
@@ -3391,7 +3442,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     descriptor.id(),
                     descriptorStateAmount(core, descriptor),
                     descriptor.category() == MachineCategory.TRANSFORM
-                            && core.hasInfiniteDescriptor(descriptor.id())));
+                            && core.hasInfiniteDescriptor(descriptor.id()),
+                    worldStationAvailable(core, descriptor)));
         }
     }
 
@@ -3705,6 +3757,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                     core.getCraftableRevision(),
                     core.getMachineRevision(),
                     core.getTopologyRevision(),
+                    worldStationRevision,
                     currentFilter,
                     getSortMode(),
                     getSortOrder(),
@@ -3738,6 +3791,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 || cache.resourceView() != getResourceView()
                 || !cache.dynamicRecipeState().equals(
                         currentDynamicRecipeState())
+                || cache.worldStationRevision() != WorldStations.revision(level)
                 || generatedWorkCrossedThreshold(core, cache)) {
             return false;
         }
@@ -3886,6 +3940,27 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             }
         }
         for (RecipeHolder<?> holder : axeTransformationCatalog.recipes(level, core)) {
+            long variantStarted = System.nanoTime();
+            RecipeAdapterMatch match = classifyAvailable(holder, core);
+            variantResolutionNanos += System.nanoTime() - variantStarted;
+            if (match == null) continue;
+            variants++;
+            ItemStack output = match.presentationOutput(List.of(), level);
+            if (output.isEmpty()) continue;
+            StorageResourceKey key = StorageResourceKey.item(output, level.registryAccess());
+            if (!getResourceView().matches(key)
+                    || !matchesCraftableFilter(key, output, query, level)) continue;
+            long previewStarted = System.nanoTime();
+            CraftableStatus status = computeCraftableStatus(match, core, availability);
+            previewSimulationNanos += System.nanoTime() - previewStarted;
+            if (!status.craftable()) {
+                recordNextCraftableThreshold(match, status.inputsAvailable(), core);
+                continue;
+            }
+            craftableOutputs.putIfAbsent(key, new CraftableOutput(
+                    key, output.copyWithCount(1), core.getResourceAmount(key)));
+        }
+        for (RecipeHolder<?> holder : SyntheticRecipeCatalogs.recipes(level)) {
             long variantStarted = System.nanoTime();
             RecipeAdapterMatch match = classifyAvailable(holder, core);
             variantResolutionNanos += System.nanoTime() - variantStarted;
@@ -4244,6 +4319,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             }
         }
         for (RecipeHolder<?> holder : axeTransformationCatalog.recipes(level, core)) {
+            RecipeAdapterMatch match = classifyAvailable(holder, core);
+            if (match == null) continue;
+            ItemStack result = match.presentationOutput(List.of(), level);
+            if (!result.isEmpty() && ItemStack.isSameItemSameComponents(result, output)) {
+                recipes.add(holder);
+            }
+        }
+        for (RecipeHolder<?> holder : SyntheticRecipeCatalogs.recipes(level)) {
             RecipeAdapterMatch match = classifyAvailable(holder, core);
             if (match == null) continue;
             ItemStack result = match.presentationOutput(List.of(), level);

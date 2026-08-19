@@ -1,0 +1,185 @@
+{
+  "families": [
+    {
+      "class": "sonar.fluxnetworks.common.crafting.ConfigWipeRecipe",
+      "costs": [],
+      "decision": "Flux Networks config-wipe recipes mutate mod configuration/state and are not deterministic storage transactions; no Auto Storage family is registered.",
+      "evidence": [
+        "sonar.fluxnetworks.common.crafting.ConfigWipeRecipe#public_signature"
+      ],
+      "id": "config_wipe_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": "fluxnetworks:config_wipe_recipe",
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    },
+    {
+      "class": "sonar.fluxnetworks.common.crafting.FluxStorageRecipe",
+      "costs": [],
+      "decision": "Flux Networks storage recipes retain custom runtime semantics and are not part of the reviewed world-station conversion; no Auto Storage family is registered.",
+      "evidence": [
+        "sonar.fluxnetworks.common.crafting.FluxStorageRecipe#public_signature"
+      ],
+      "id": "flux_storage_recipe",
+      "inputs": [],
+      "outputs": [],
+      "recipe_type": "fluxnetworks:flux_storage_recipe",
+      "risks": [
+        "generic_ingredients",
+        "world_mutation"
+      ],
+      "station": null,
+      "status": "rejected"
+    }
+  ],
+  "kind": "auto_storage_compat_contract",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [
+      "auto_storage:flux_station"
+    ],
+    "mods": [
+      "fluxnetworks"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "fluxnetworks"
+      ],
+      "sha256": "832af3df8768a0cf0bca4a713dadcb8c6a9bacdb0db8ccaf1558a3f8186573e4"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "schema": 1,
+  "source_audit_sha256": "29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6",
+  "source_recipe_data_sha256": "5079f49c56f2de879c05d74386c698dcce4de1d5c6c69d95490c4bbbb12e6e2c",
+  "source_recipe_inventory_sha256": "85c0d88922bd613bcc72ea27d6cb40b930f4bb71f8c19248cb5275b8522d9a5d",
+  "target": {
+    "display_name": "Flux Networks",
+    "mod_id": "fluxnetworks",
+    "version": "8.0.0",
+    "dependency": "curse.maven:flux-networks-248020:6089446",
+    "repositories": [
+      "https://www.cursemaven.com"
+    ],
+    "runtime_dependencies": []
+  },
+  "verification": {
+    "checks": [
+      "absent_target_no_classload",
+      "present_target_load_once",
+      "ingredient_shortage_atomic",
+      "destination_capacity_atomic",
+      "checked_overflow_atomic",
+      "stale_recipe_holder_atomic",
+      "catalyst_tool_remainder_exact",
+      "multi_output_merge_exact",
+      "mixed_resource_rollback_atomic",
+      "dedicated_server_client_isolation",
+      "api_only_compilation",
+      "all_mod_coexistence"
+    ],
+    "evidence": {
+      "absent_target_no_classload": [
+        {
+          "marker": "verifyAbsentOptionalCompatDoesNotResolve(helper);",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "present_target_load_once": [
+        {
+          "marker": "Flux Station block, item, or descriptor was not registered",
+          "source": "src/fluxnetworksFixture/java/com/swear/autostorage/fixture/fluxnetworks/FluxnetworksIntegrationGameTests.java",
+          "task": "runFluxnetworksGameTestServer"
+        }
+      ],
+      "ingredient_shortage_atomic": [
+        {
+          "marker": "No-energy smelting must not consume cobblestone",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "destination_capacity_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "checked_overflow_atomic": [
+        {
+          "marker": "One-item-short Storage capacity must reject the whole batch before mutation",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "stale_recipe_holder_atomic": [
+        {
+          "marker": "Unknown recipe id must fail closed",
+          "source": "src/main/java/com/swear/autostorage/gametest/CraftingTests.java",
+          "task": "runGameTestServer"
+        }
+      ],
+      "catalyst_tool_remainder_exact": [
+        {
+          "marker": "Installed Flux Station did not provide availability",
+          "source": "src/fluxnetworksFixture/java/com/swear/autostorage/fixture/fluxnetworks/FluxnetworksIntegrationGameTests.java",
+          "task": "runFluxnetworksGameTestServer"
+        }
+      ],
+      "multi_output_merge_exact": [
+        {
+          "marker": "Typed family changed the wrong exact resources or output amounts",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "mixed_resource_rollback_atomic": [
+        {
+          "marker": "Failed typed family commit partially mutated resources",
+          "source": "src/recipeAddonFixture/java/com/swear/autostorage/fixture/recipe/RecipeFamilyIntegrationTests.java",
+          "task": "runRecipeAddonGameTestServer"
+        }
+      ],
+      "dedicated_server_client_isolation": [
+        {
+          "marker": "verifyCompatIsolation",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "api_only_compilation": [
+        {
+          "marker": "compileAddonExampleJava",
+          "source": "build.gradle",
+          "task": "build"
+        }
+      ],
+      "all_mod_coexistence": [
+        {
+          "marker": "manifest.assertCoexistence(helper, \"Descriptor matrix coexistence\")",
+          "source": "src/compatibilityMatrixFixture/java/com/swear/autostorage/fixture/compatibilitymatrix/CompatibilityMatrixGameTests.java",
+          "task": "runCompatibilityMatrixGameTestServer"
+        }
+      ]
+    },
+    "expected_game_tests": 19,
+    "fixture": "fluxnetworksFixture",
+    "game_test_task": "runFluxnetworksGameTestServer",
+    "gradle_tasks": [
+      "build",
+      "runGameTestServer",
+      "runRecipeAddonGameTestServer",
+      "runFluxnetworksGameTestServer",
+      "runCompatibilityMatrixGameTestServer"
+    ]
+  }
+}

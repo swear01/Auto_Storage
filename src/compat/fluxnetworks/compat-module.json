@@ -1,0 +1,43 @@
+{
+  "auditArtifact": {
+    "dependency": "curse.maven:flux-networks-248020:6089446",
+    "sha256": "29e511b2d76f85bd247aa213a92bb059ecc037fcc3fed82baffcff97b638d3a6"
+  },
+  "dependencies": [
+    "curse.maven:flux-networks-248020:6089446"
+  ],
+  "entrypoint": "com.swear.autostorage.compat.fluxnetworks.FluxnetworksCompatModule",
+  "expectedTests": 19,
+  "fixture": "fluxnetworksFixture",
+  "id": "auto_storage:fluxnetworks",
+  "matrix": {
+    "acceptedRecipes": [],
+    "descriptors": [
+      "auto_storage:flux_station"
+    ],
+    "mods": [
+      "fluxnetworks"
+    ],
+    "recipeInventory": {
+      "namespaces": [
+        "fluxnetworks"
+      ],
+      "sha256": "832af3df8768a0cf0bca4a713dadcb8c6a9bacdb0db8ccaf1558a3f8186573e4"
+    },
+    "rejectedDescriptors": [],
+    "rejectedResourceKinds": [],
+    "resourceKinds": []
+  },
+  "repositories": [
+    "https://www.cursemaven.com"
+  ],
+  "requires": [
+    "fluxnetworks"
+  ],
+  "runtimeDependencies": [
+    "curse.maven:flux-networks-248020:6089446"
+  ],
+  "schema": 1,
+  "side": "both",
+  "sourceSet": "compatFluxnetworks"
+}

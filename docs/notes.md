@@ -1,3 +1,5 @@
+2026-08-20 Flux Station integration correction：client descriptor-state packets now trigger a screen rebuild so world-only Stations visibility cannot remain stale after a revision update. Persisted valid-position bits are not trusted on load; only currently loaded blocks are revalidated, stale/invalid/unknown entries fail closed, chunk unload removes cached availability until chunk load refreshes it, and loaded non-overworld dimensions are revalidated at startup. Config re-enable refreshes loaded station positions. The Flux fixture covers stale persistence, unload/reload, config re-enable, disabled terminal crafting, and missing/air Flux base rejection. A dedicated Flux Station texture is generated and its models no longer reuse the Core texture; the player-facing acquisition choice remains explicitly undecided. The optional Flux base lookup also rejects the registry's `Blocks.AIR` sentinel rather than testing for null.
+
 2026-08-19 PR #143 review correction：Arc Furnace 的 accepted plan 現在明確 consume 一個 `auto_storage:graphite_electrode` descriptor-work unit，並由 fixture 先驗無 electrode 的 atomic rejection、再驗成功 craft 後 exact decrement；Machine descriptor 的 hammer/electrode representative 延遲取 target registry item。Immersive Engineering Sawmill 的真實 recipe 同時有 sawblade-dependent stripped/output mode 與 secondary products，station abstraction 沒有 blade state，故整個目前 Sawmill family fail-closed，不再註冊虛假的可用 station或丟失secondary。Compat contract、matrix accepted IDs、fixture與active docs同步為兩個IE accepted families；Crusher、Alloy Smelter與Metal Press也維持fail-closed，避免fuel、mold或TagOutput preference遺失。
 
 2026-08-19 PR #143 latest-head Codex follow-up：IE current acceptance is narrowed to Arc Furnace/Bottling only (Alloy live furnace fuel, Crusher/Metal Press TagOutput origin, and Metal Press mold state remain rejected); Bottling preserves every fluid alternative. Productive Metalworks separates casting-table and casting-basin descriptors and explicitly migrates legacy basin machine/work entries; Productive Trees marks sawdust/tertiary as remainders and the fixture exercises a non-empty tertiary output; melting work accumulates with checked `long` arithmetic. Contract matrices, fixtures, manifests and active docs were regenerated together. The same review also closes the Productive Trees contract/descriptor inventory digest drift and applies the shared-index 9 MiB gate to both 10k and 30k runs.
@@ -744,7 +746,9 @@ Source: https://github.com/refinedmods/refinedstorage2
 
 - FluxNetworks 8.0.0: 15 recipes are all vanilla-shaped crafting (already covered by built-in
   families); the Flux energy network (Controller/Plug/Point/Storage) is bidirectional
-  transfer/storage — not a one-way conversion, out of Transform scope. No module.
+  transfer/storage — not a one-way conversion, out of Transform scope. The separate
+  world-mechanic Flux Station integration is documented in
+  `docs/fluxnetworks-compatibility.md`.
 - Occultism 1.223.0: no block-entity conversion machines; Spirit Fire, rituals, and miners
   are world/ritual mechanics (spirit-fire recipes consume live world blocks), not
   deterministic item-to-stored-resource conversions. No module.
@@ -767,8 +771,17 @@ obsidian block whose two-below block is bedrock or flux_block collects
 redstone ItemEntitys (≤512) one block below the obsidian, removes the
 obsidian, and drops flux_dust 1:1 with the collected redstone count. No tool
 is required. This is world mutation (consumes a world block + ground item
-entities with a variable 1..512 batch size), so it stays fail-closed like the
-Botania world-consumption flowers. The 1:1 redstone→flux_dust core could be
-abstracted as a Transform resource later if the user wants it; the obsidian
-per-batch cost and the bedrock/flux-block base would be abstracted like
-Theurgy braziers.
+entities with a variable 1..512 batch size), so the original FluxNetworks event
+remains fail-closed. The approved Auto Storage Flux Station does not emulate
+that event: it exposes only a fixed 1 redstone → 1 flux_dust storage transaction,
+preserves the bedrock/flux-block base check, and uses a persisted server-side
+station registry.
+
+The Flux Station registry now stores cached-valid positions and a per-dimension
+availability revision. Station/base/chunk lifecycle updates refresh that cache;
+Terminal Craftable and client Stations state consume the revision without
+scanning the world during a craft. The module also honors FluxNetworks'
+`enableFluxRecipe` setting and provides the block drop in code rather than
+shipping an optional loot table that would reference `auto_storage:flux_station`
+when FluxNetworks is absent. A survival acquisition recipe remains undecided;
+no materials are inferred from the compatibility audit.

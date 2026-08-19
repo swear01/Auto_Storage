@@ -35,7 +35,9 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
 
     @Override
     public boolean supports(RecipePresentation presentation, Geometry geometry) {
-        if (presentation.isEmpty() || presentation.kind() == RecipePresentationKind.AXE) {
+        if (presentation.isEmpty()
+                || presentation.kind() == RecipePresentationKind.AXE
+                || presentation.kind() == RecipePresentationKind.WORLD_STATION) {
             return false;
         }
         IRecipeLayoutDrawable<?> layout = compatibleLayout(presentation);

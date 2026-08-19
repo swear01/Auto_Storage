@@ -6,7 +6,8 @@ public enum RecipePresentationKind {
     COOKING,
     STONECUTTING,
     SMITHING,
-    AXE;
+    AXE,
+    WORLD_STATION;
 
     static RecipePresentationKind fromOrdinal(int ordinal) {
         if (ordinal < 0 || ordinal >= values().length) {

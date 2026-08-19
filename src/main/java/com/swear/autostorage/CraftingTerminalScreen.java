@@ -73,6 +73,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     private int recipeLedgerOffset;
     private SortMode lastUtilitySortMode;
     private SortOrder lastUtilitySortOrder;
+    private int descriptorStateRevision;
     private StationDisplayMode stationDisplayMode = StationDisplayMode.ALL;
 
     public CraftingTerminalScreen(CraftingTerminalMenu menu, Inventory playerInv, Component title) {
@@ -81,6 +82,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         preferredViewerBinding = ClientSetup.selectedViewerBinding();
         preferredViewerGeneration = ClientSetup.viewerGeneration();
         preferredRecipeDiagramRenderer = ClientSetup.createRecipeDiagramRenderer();
+        descriptorStateRevision = menu.descriptorStateRevision();
     }
 
     private RecipeDiagramRenderer preferredRecipeDiagramRenderer() {
@@ -697,6 +699,15 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             lastFuelInput = fuelInput.copy();
             transformTargetPage = 0;
             refreshTransformTargets();
+        }
+        if (descriptorStateRevision != menu.descriptorStateRevision()) {
+            descriptorStateRevision = menu.descriptorStateRevision();
+            timedStationPage = 0;
+            instantStationPage = 0;
+            fuelSearchPage = 0;
+            refreshFuelSearchResults();
+            rebuildWidgets();
+            return;
         }
         if (lastUtilitySortMode != preferences.sortMode()
                 || lastUtilitySortOrder != preferences.sortOrder()) {
@@ -1728,10 +1739,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     }
 
     private boolean isStationInstalled(int machineSlot) {
-        return machineSlot >= 0
-                && machineSlot < menu.getMachineDescriptors().size()
-                && menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
-                .hasItem();
+        if (machineSlot < 0 || machineSlot >= menu.getMachineDescriptors().size()) return false;
+        MachineDescriptor descriptor = descriptorAt(machineSlot);
+        return menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).hasItem()
+                || descriptor != null && menu.isWorldStationAvailable(descriptor.id());
     }
 
     private void setStationDisplayMode(StationDisplayMode mode) {
@@ -1748,10 +1759,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         if (descriptor == null) return ItemStack.EMPTY;
         ItemStack stack = descriptor.representativeStack();
         stack.set(DataComponents.CUSTOM_NAME, descriptor.stationLabel());
-        return TerminalDisplayStack.create(
-                stack,
-                menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
-                        .getItem().getCount());
+        long count = menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
+                .getItem().getCount();
+        if (count == 0 && menu.isWorldStationAvailable(descriptor.id())) count = 1;
+        return TerminalDisplayStack.create(stack, count);
     }
 
     private List<FuelTargetOption> fuelTargetOptions() {
