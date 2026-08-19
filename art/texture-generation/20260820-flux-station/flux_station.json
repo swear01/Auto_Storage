@@ -1,0 +1,30 @@
+{
+  "created_at_utc": "20260819T162842Z",
+  "type": "block",
+  "subject": "dark obsidian Flux energy station block with a cyan-violet crystal core and Auto Storage cyan-magenta trim",
+  "model": "retro-diffusion/rd-fast",
+  "style": "mc_texture",
+  "tileable": false,
+  "prompt": "flat front-on Minecraft pixel-art block tile, readable at 16x16, dark obsidian stone, one centered cyan-violet energy crystal and subtle Auto Storage frame, no text, no symbols, no perspective, no scene, no border, seamless material face",
+  "size": 16,
+  "reference_image": "src/main/resources/assets/auto_storage/textures/block/storage_core.png",
+  "img2img": true,
+  "input": {
+    "prompt": "flat front-on Minecraft pixel-art block tile, readable at 16x16, dark obsidian stone, one centered cyan-violet energy crystal and subtle Auto Storage frame, no text, no symbols, no perspective, no scene, no border, seamless material face",
+    "style": "mc_texture",
+    "width": 16,
+    "height": 16,
+    "num_images": 1,
+    "tile_x": false,
+    "tile_y": false,
+    "remove_bg": false,
+    "bypass_prompt_expansion": false,
+    "input_image": "[data:uri omitted]",
+    "strength": 0.68
+  },
+  "final_png": "src/main/resources/assets/auto_storage/textures/block/flux_station.png",
+  "preview_png": "art/texture-generation/20260820-flux-station/flux_station.preview.png",
+  "raw_png": null,
+  "selected_source": "art/texture-generation/20260714-terminal-family/selected/flux_station.png",
+  "postprocessed_runtime": "src/main/resources/assets/auto_storage/textures/block/flux_station.png"
+}

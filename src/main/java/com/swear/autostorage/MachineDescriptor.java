@@ -29,6 +29,8 @@ public final class MachineDescriptor {
     private final Supplier<List<MachineVariant>> variantSource;
     @Nullable
     private final TransformValue transformValue;
+    @Nullable
+    private final ResourceLocation worldStationBlockId;
 
     private MachineDescriptor(
             ResourceLocation id,
@@ -40,7 +42,8 @@ public final class MachineDescriptor {
             @Nullable EnergyType energyType,
             int energyPerTick,
             @Nullable Supplier<List<MachineVariant>> variantSource,
-            @Nullable TransformValue transformValue
+            @Nullable TransformValue transformValue,
+            @Nullable ResourceLocation worldStationBlockId
     ) {
         this.id = Objects.requireNonNull(id);
         this.stationLabel = stationLabel;
@@ -52,6 +55,7 @@ public final class MachineDescriptor {
         this.energyPerTick = energyPerTick;
         this.variantSource = variantSource;
         this.transformValue = transformValue;
+        this.worldStationBlockId = worldStationBlockId;
         validate();
     }
 
@@ -73,6 +77,7 @@ public final class MachineDescriptor {
                 maxInstalledCount,
                 energyType,
                 energyPerTick,
+                null,
                 null,
                 null);
     }
@@ -97,7 +102,29 @@ public final class MachineDescriptor {
                 energyType,
                 0,
                 variants,
+                null,
                 null);
+    }
+
+    public static MachineDescriptor worldStation(
+            ResourceLocation id,
+            Component stationLabel,
+            ItemStack representative,
+            ResourceLocation worldStationBlockId
+    ) {
+        Objects.requireNonNull(worldStationBlockId, "worldStationBlockId");
+        return new MachineDescriptor(
+                id,
+                Objects.requireNonNull(stationLabel, "stationLabel"),
+                Objects.requireNonNull(representative),
+                Ingredient.of(representative),
+                MachineCategory.INSTANT,
+                1,
+                null,
+                0,
+                null,
+                null,
+                worldStationBlockId);
     }
 
     public static MachineDescriptor transform(
@@ -116,7 +143,8 @@ public final class MachineDescriptor {
                 null,
                 0,
                 null,
-                Objects.requireNonNull(transformValue));
+                Objects.requireNonNull(transformValue),
+                null);
     }
 
     static MachineDescriptor clientSynced(
@@ -146,7 +174,8 @@ public final class MachineDescriptor {
                 energyType,
                 energyPerTick,
                 null,
-                clientOnly);
+                clientOnly,
+                null);
     }
 
     static MachineDescriptor clientSyncedVariants(
@@ -171,8 +200,15 @@ public final class MachineDescriptor {
         }
         if (category == MachineCategory.TRANSFORM) {
             if (stationLabel != null || maxInstalledCount != 0 || energyType != null || energyPerTick != 0
-                    || transformValue == null) {
+                    || transformValue == null || worldStationBlockId != null) {
                 throw new IllegalArgumentException("Invalid transform descriptor: " + id);
+            }
+            return;
+        }
+        if (worldStationBlockId != null) {
+            if (variantSource != null || transformValue != null || stationLabel == null
+                    || stationLabel.getString().isBlank()) {
+                throw new IllegalArgumentException("Invalid world-station descriptor: " + id);
             }
             return;
         }
@@ -209,6 +245,11 @@ public final class MachineDescriptor {
 
     public MachineCategory category() {
         return category;
+    }
+
+    @Nullable
+    public ResourceLocation worldStationBlockId() {
+        return worldStationBlockId;
     }
 
     public int maxInstalledCount() {

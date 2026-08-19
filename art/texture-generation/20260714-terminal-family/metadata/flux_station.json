@@ -1,0 +1,14 @@
+{
+  "model": "retro-diffusion/rd-fast",
+  "size": 16,
+  "seed": 71421,
+  "type": "block",
+  "subject": "dark obsidian Flux energy station block with a cyan-violet crystal core and Auto Storage cyan-magenta trim",
+  "prompt": "flat front-on Minecraft pixel-art block tile, readable at 16x16, dark obsidian stone, one centered cyan-violet energy crystal and subtle Auto Storage frame, no text, no symbols, no perspective, no scene, no border, seamless material face",
+  "reference_image": "selected/chassis.png",
+  "img2img": true,
+  "strength": 0.68,
+  "postprocess": "palette-quantized and shared-chassis pixels restored",
+  "runtime": "src/main/resources/assets/auto_storage/textures/block/flux_station.png",
+  "preview": "art/texture-generation/20260820-flux-station/flux_station.preview.png"
+}

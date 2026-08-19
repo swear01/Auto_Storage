@@ -41,6 +41,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.level.ChunkTicketLevelUpdatedEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -280,6 +281,8 @@ public class AutoStorage {
         NeoForge.EVENT_BUS.addListener(WrenchActions::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
         NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
+        NeoForge.EVENT_BUS.addListener(this::onChunkUnload);
+        NeoForge.EVENT_BUS.addListener(this::onNeighborNotify);
         NeoForge.EVENT_BUS.addListener(this::onChunkTicketLevelUpdated);
         NeoForge.EVENT_BUS.addListener(this::onServerStarted);
         NeoForge.EVENT_BUS.addListener(this::onDatapackSync);
@@ -289,7 +292,7 @@ public class AutoStorage {
             ClientSetup.register(modEventBus);
         }
         modEventBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) -> {
-            var registrar = event.registrar(MODID).versioned("1.5");
+            var registrar = event.registrar(MODID).versioned("1.6");
             registrar.playToServer(SearchFilterPacket.TYPE, SearchFilterPacket.STREAM_CODEC, this::handleSearchFilter);
             registrar.playToServer(TerminalSettingsPacket.TYPE, TerminalSettingsPacket.STREAM_CODEC, this::handleTerminalSettings);
             registrar.playToServer(TerminalScrollPacket.TYPE, TerminalScrollPacket.STREAM_CODEC, this::handleTerminalScroll);
@@ -425,6 +428,7 @@ public class AutoStorage {
         invalidateDatapackCaches();
         RecipeAdapters.invalidateSnapshot();
         CraftableRecipeCatalog.invalidate();
+        WorldStations.load(event.getServer().overworld());
         CraftableRecipeCatalog.prewarm(event.getServer().overworld());
     }
 
@@ -524,7 +528,21 @@ public class AutoStorage {
     private void onChunkLoad(ChunkEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel level)
                 || !(event.getChunk() instanceof LevelChunk chunk)) return;
+        WorldStations.onChunkLoad(level, chunk.getPos());
         queueNetworkChunkLoad(level, chunk.getPos());
+    }
+
+    private void onChunkUnload(ChunkEvent.Unload event) {
+        if (event.getLevel() instanceof ServerLevel level
+                && event.getChunk() instanceof LevelChunk chunk) {
+            WorldStations.onChunkUnload(level, chunk.getPos());
+        }
+    }
+
+    private void onNeighborNotify(BlockEvent.NeighborNotifyEvent event) {
+        if (event.getLevel() instanceof ServerLevel level) {
+            WorldStations.onNeighborNotify(level, event.getPos());
+        }
     }
 
     private static void queueNetworkChunkLoad(ServerLevel level, ChunkPos chunkPos) {

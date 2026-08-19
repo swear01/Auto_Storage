@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "auto_storage:block/flux_station"
+    }
+  }
+}

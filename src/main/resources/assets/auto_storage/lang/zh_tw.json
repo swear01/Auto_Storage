@@ -1,5 +1,6 @@
 {
   "block.auto_storage.storage_core": "儲存核心",
+  "block.auto_storage.flux_station": "Flux 工作站",
   "block.auto_storage.storage_unit_t1": "儲存單元（階級 1）",
   "block.auto_storage.storage_unit_t2": "儲存單元（階級 2）",
   "block.auto_storage.storage_unit_t3": "儲存單元（階級 3）",
@@ -29,6 +30,7 @@
   "gui.auto_storage.page_craftable": "可合成",
   "gui.auto_storage.page_transform": "轉換",
   "gui.auto_storage.page_stations": "工作站",
+  "gui.auto_storage.station.flux_station": "Flux 工作站",
   "gui.auto_storage.craft_max": "最大",
   "gui.auto_storage.search_mode.off": "關閉",
   "gui.auto_storage.search_mode.emi": "配方瀏覽器",

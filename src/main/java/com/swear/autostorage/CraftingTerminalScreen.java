@@ -1728,10 +1728,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     }
 
     private boolean isStationInstalled(int machineSlot) {
-        return machineSlot >= 0
-                && machineSlot < menu.getMachineDescriptors().size()
-                && menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
-                .hasItem();
+        if (machineSlot < 0 || machineSlot >= menu.getMachineDescriptors().size()) return false;
+        MachineDescriptor descriptor = descriptorAt(machineSlot);
+        return menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot).hasItem()
+                || descriptor != null && menu.isWorldStationAvailable(descriptor.id());
     }
 
     private void setStationDisplayMode(StationDisplayMode mode) {
@@ -1748,10 +1748,10 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         if (descriptor == null) return ItemStack.EMPTY;
         ItemStack stack = descriptor.representativeStack();
         stack.set(DataComponents.CUSTOM_NAME, descriptor.stationLabel());
-        return TerminalDisplayStack.create(
-                stack,
-                menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
-                        .getItem().getCount());
+        long count = menu.getSlot(CraftingTerminalMenu.MACHINE_SLOT_START + machineSlot)
+                .getItem().getCount();
+        if (count == 0 && menu.isWorldStationAvailable(descriptor.id())) count = 1;
+        return TerminalDisplayStack.create(stack, count);
     }
 
     private List<FuelTargetOption> fuelTargetOptions() {

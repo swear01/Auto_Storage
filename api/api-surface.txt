@@ -115,12 +115,14 @@ public final class com.swear.autostorage.MachineCategory extends java.lang.Enum<
 public final class com.swear.autostorage.MachineDescriptor {
   public static com.swear.autostorage.MachineDescriptor installable(net.minecraft.resources.ResourceLocation, net.minecraft.world.item.ItemStack, net.minecraft.world.item.crafting.Ingredient, com.swear.autostorage.MachineCategory, int, com.swear.autostorage.EnergyType, int);
   public static com.swear.autostorage.MachineDescriptor installableVariants(net.minecraft.resources.ResourceLocation, net.minecraft.network.chat.Component, java.util.function.Supplier<java.util.List<com.swear.autostorage.MachineVariant>>, com.swear.autostorage.MachineCategory, int, com.swear.autostorage.EnergyType);
+  public static com.swear.autostorage.MachineDescriptor worldStation(net.minecraft.resources.ResourceLocation, net.minecraft.network.chat.Component, net.minecraft.world.item.ItemStack, net.minecraft.resources.ResourceLocation);
   public static com.swear.autostorage.MachineDescriptor transform(net.minecraft.resources.ResourceLocation, net.minecraft.world.item.ItemStack, net.minecraft.world.item.crafting.Ingredient, com.swear.autostorage.MachineDescriptor$TransformValue);
   public net.minecraft.resources.ResourceLocation id();
   public net.minecraft.network.chat.Component stationLabel();
   public net.minecraft.world.item.ItemStack representativeStack();
   public net.minecraft.world.item.crafting.Ingredient acceptedItems();
   public com.swear.autostorage.MachineCategory category();
+  public net.minecraft.resources.ResourceLocation worldStationBlockId();
   public int maxInstalledCount();
   public com.swear.autostorage.EnergyType energyType();
   public int energyPerTick();
@@ -223,6 +225,7 @@ public final class com.swear.autostorage.RecipePresentationKind extends java.lan
   public static final com.swear.autostorage.RecipePresentationKind STONECUTTING;
   public static final com.swear.autostorage.RecipePresentationKind SMITHING;
   public static final com.swear.autostorage.RecipePresentationKind AXE;
+  public static final com.swear.autostorage.RecipePresentationKind WORLD_STATION;
   public static com.swear.autostorage.RecipePresentationKind[] values();
   public static com.swear.autostorage.RecipePresentationKind valueOf(java.lang.String);
 }
@@ -316,6 +319,17 @@ public final class com.swear.autostorage.StorageResourceTransaction {
 public final class com.swear.autostorage.StorageResourceTransaction$Builder {
   public com.swear.autostorage.StorageResourceTransaction$Builder add(com.swear.autostorage.StorageResourceKey, long);
   public com.swear.autostorage.StorageResourceTransaction build();
+}
+
+public final class com.swear.autostorage.SyntheticRecipeCatalogs {
+  public static void register(com.swear.autostorage.SyntheticRecipeCatalogs$Catalog);
+  public static java.util.List<net.minecraft.world.item.crafting.RecipeHolder<?>> recipes(net.minecraft.world.level.Level);
+  public static net.minecraft.world.item.crafting.RecipeHolder<?> byId(net.minecraft.world.level.Level, net.minecraft.resources.ResourceLocation);
+}
+
+public interface com.swear.autostorage.SyntheticRecipeCatalogs$Catalog {
+  public abstract java.util.List<net.minecraft.world.item.crafting.RecipeHolder<?>> recipes(net.minecraft.world.level.Level);
+  public abstract net.minecraft.world.item.crafting.RecipeHolder<?> byId(net.minecraft.world.level.Level, net.minecraft.resources.ResourceLocation);
 }
 
 public final class com.swear.autostorage.TerminalResourceRendererApi {
@@ -465,6 +479,42 @@ public final class com.swear.autostorage.TypedRecipePlan$Builder {
   public com.swear.autostorage.TypedRecipePlan$Builder presentationOutput(net.minecraft.world.item.ItemStack);
   public com.swear.autostorage.TypedRecipePlan$Builder layout(int, int, boolean);
   public com.swear.autostorage.TypedRecipePlan build();
+}
+
+public class com.swear.autostorage.WorldStationBlock extends net.minecraft.world.level.block.Block {
+  public com.swear.autostorage.WorldStationBlock(net.minecraft.world.level.block.state.BlockBehaviour$Properties, net.minecraft.resources.ResourceLocation);
+}
+
+public final class com.swear.autostorage.WorldStationConversionRecipe implements net.minecraft.world.item.crafting.Recipe<net.minecraft.world.item.crafting.SingleRecipeInput> {
+  public static final net.minecraft.world.item.crafting.RecipeType<com.swear.autostorage.WorldStationConversionRecipe> TYPE;
+  public com.swear.autostorage.WorldStationConversionRecipe(net.minecraft.world.item.crafting.Ingredient, net.minecraft.world.item.ItemStack, net.minecraft.resources.ResourceLocation);
+  public net.minecraft.world.item.crafting.Ingredient input();
+  public net.minecraft.world.item.ItemStack result();
+  public net.minecraft.resources.ResourceLocation stationDescriptorId();
+  public boolean matches(net.minecraft.world.item.crafting.SingleRecipeInput, net.minecraft.world.level.Level);
+  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.SingleRecipeInput, net.minecraft.core.HolderLookup$Provider);
+  public boolean canCraftInDimensions(int, int);
+  public net.minecraft.world.item.ItemStack getResultItem(net.minecraft.core.HolderLookup$Provider);
+  public net.minecraft.core.NonNullList<net.minecraft.world.item.crafting.Ingredient> getIngredients();
+  public net.minecraft.world.item.ItemStack getToastSymbol();
+  public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer();
+  public net.minecraft.world.item.crafting.RecipeType<?> getType();
+  public net.minecraft.world.item.ItemStack assemble(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.core.HolderLookup$Provider);
+  public boolean matches(net.minecraft.world.item.crafting.RecipeInput, net.minecraft.world.level.Level);
+}
+
+public final class com.swear.autostorage.WorldStations {
+  public static void define(net.minecraft.resources.ResourceLocation, com.swear.autostorage.WorldStations$BasePredicate);
+  public static void define(net.minecraft.resources.ResourceLocation, java.util.function.BooleanSupplier, com.swear.autostorage.WorldStations$BasePredicate);
+  public static boolean isDefined(net.minecraft.resources.ResourceLocation);
+  public static long revision(net.minecraft.world.level.Level);
+  public static boolean isPresent(net.minecraft.world.level.Level, net.minecraft.resources.ResourceLocation);
+  public static boolean isPresentAt(net.minecraft.world.level.Level, net.minecraft.resources.ResourceLocation, net.minecraft.core.BlockPos);
+  public static void load(net.minecraft.server.level.ServerLevel);
+}
+
+public interface com.swear.autostorage.WorldStations$BasePredicate {
+  public abstract boolean test(net.minecraft.world.level.Level, net.minecraft.core.BlockPos);
 }
 
 public final class com.swear.autostorage.api.AutoStorageAddon {

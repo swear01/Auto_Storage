@@ -1272,6 +1272,16 @@
       "source": "selected/remote_terminal.png",
       "metadata": "metadata/remote_terminal.json",
       "sha256": "4c4430418900969ed136888caf93ff8a048f103bf2cf34b4239c3fef63fa9dea"
+    },
+    "auto_storage:block/flux_station": {
+      "role": "flux_station_energy_core",
+      "runtime": "src/main/resources/assets/auto_storage/textures/block/flux_station.png",
+      "source": "selected/flux_station.png",
+      "metadata": "metadata/flux_station.json",
+      "sha256": "30cfff722fda5976c53bd17b4c45feceb14cfbb764604cc0d092006230c8a841",
+      "symmetry_axes": [
+        "x"
+      ]
     }
   },
   "connected_textures": {
