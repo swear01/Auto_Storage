@@ -3643,6 +3643,9 @@ class StaticRegressionTests(unittest.TestCase):
         screen = self.read_required(
             "src/main/java/com/swear/autostorage/CraftingTerminalScreen.java"
         )
+        menu = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
+        )
         en_us = json.loads(self.read_required(
             "src/main/resources/assets/auto_storage/lang/en_us.json"
         ))
@@ -3656,6 +3659,8 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("isStationInstalled(", screen)
         self.assertIn("isWorldStationAvailable", screen)
         self.assertIn("stationDisplayMode.shows(", screen)
+        self.assertIn("descriptorStateRevision", screen)
+        self.assertIn("descriptorStateRevision", menu)
         self.assertIn("rebuildWidgets()", screen)
         self.assertIn("stationDisplayModeBtn", self.java_block(
             screen,

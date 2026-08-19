@@ -322,6 +322,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     private Container machineContainer;
     private final List<MachineDescriptor> descriptorSnapshot;
     private final Map<ResourceLocation, MachineDescriptorStatePacket.State> descriptorStates = new HashMap<>();
+    private int descriptorStateRevision;
     private final List<RecipeHolder<?>> currentRecipes = new ArrayList<>();
     private final CraftableRecipeCatalog craftableRecipeCatalog = new CraftableRecipeCatalog();
     private final AxeTransformationCatalog axeTransformationCatalog = new AxeTransformationCatalog();
@@ -912,6 +913,10 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         return state != null && state.worldAvailable();
     }
 
+    int descriptorStateRevision() {
+        return descriptorStateRevision;
+    }
+
     void applyDescriptorStates(List<MachineDescriptorStatePacket.State> states) {
         descriptorStates.clear();
         for (MachineDescriptorStatePacket.State state : states) {
@@ -919,6 +924,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 descriptorStates.put(state.descriptorId(), state);
             }
         }
+        descriptorStateRevision++;
     }
 
     static int fuelTargetButtonId(EnergyType target) {

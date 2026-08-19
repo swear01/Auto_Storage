@@ -25,6 +25,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.fml.ModList;
@@ -384,6 +385,83 @@ public final class FluxnetworksIntegrationGameTests {
                 helper.getLevel(), FluxnetworksCompatModule.FLUX_STATION_ID, station)) {
             helper.fail("Broken Flux Station remained available");
             return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(
+            template = "craftingtests.platform",
+            batch = "flux_station_persistence")
+    public static void loaded_non_overworld_station_revalidates_on_reload(GameTestHelper helper) {
+        ServerLevel nether = helper.getLevel().getServer().getLevel(Level.NETHER);
+        if (nether == null) {
+            helper.fail("Nether level is unavailable");
+            return;
+        }
+        BlockPos station = new BlockPos(0, 80, 0);
+        nether.setBlock(station.below(2), Blocks.BEDROCK.defaultBlockState(), Block.UPDATE_ALL);
+        nether.setBlock(
+                station,
+                BuiltInRegistries.BLOCK.get(FluxnetworksCompatModule.FLUX_STATION_ID)
+                        .defaultBlockState(),
+                Block.UPDATE_ALL);
+        WorldStations.load(helper.getLevel());
+        if (!WorldStations.isPresentAt(nether, FluxnetworksCompatModule.FLUX_STATION_ID, station)) {
+            helper.fail("Loaded non-overworld Flux Station was not revalidated after reload");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(
+            template = "craftingtests.platform",
+            batch = "flux_station_persistence")
+    public static void unknown_persisted_station_fails_closed_after_reload(GameTestHelper helper) {
+        ResourceLocation unknownId = ResourceLocation.fromNamespaceAndPath(
+                "missing_flux_dependency", "missing_station");
+        BlockPos station = helper.absolutePos(new BlockPos(12, 3, 2));
+        helper.getLevel().setBlock(station, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+        try {
+            addStaleSavedPosition(helper.getLevel(), unknownId, station);
+            WorldStations.load(helper.getLevel());
+        } catch (ReflectiveOperationException exception) {
+            helper.fail("Could not create unknown saved station state: " + exception);
+            return;
+        } catch (RuntimeException exception) {
+            helper.fail("Unknown persisted station crashed reload: " + exception);
+            return;
+        }
+        if (WorldStations.isPresentAt(helper.getLevel(), unknownId, station)) {
+            helper.fail("Unknown persisted Flux Station became available");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(
+            template = "craftingtests.platform",
+            batch = "flux_config")
+    public static void reenabled_flux_recipe_refreshes_station_cache(GameTestHelper helper) {
+        boolean previous = FluxConfig.enableFluxRecipe;
+        FluxConfig.enableFluxRecipe = false;
+        try {
+            BlockPos station = helper.absolutePos(new BlockPos(13, 3, 2));
+            helper.getLevel().setBlock(
+                    station.below(2), Blocks.BEDROCK.defaultBlockState(), Block.UPDATE_ALL);
+            placeStation(helper, station);
+            if (WorldStations.isPresent(
+                    helper.getLevel(), FluxnetworksCompatModule.FLUX_STATION_ID)) {
+                helper.fail("Disabled Flux Station was available before re-enable");
+                return;
+            }
+            FluxConfig.enableFluxRecipe = true;
+            if (!WorldStations.isPresent(
+                    helper.getLevel(), FluxnetworksCompatModule.FLUX_STATION_ID)) {
+                helper.fail("Re-enabled Flux Station did not refresh its cache");
+                return;
+            }
+        } finally {
+            FluxConfig.enableFluxRecipe = previous;
         }
         helper.succeed();
     }

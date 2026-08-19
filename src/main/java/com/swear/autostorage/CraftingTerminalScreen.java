@@ -73,6 +73,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     private int recipeLedgerOffset;
     private SortMode lastUtilitySortMode;
     private SortOrder lastUtilitySortOrder;
+    private int descriptorStateRevision;
     private StationDisplayMode stationDisplayMode = StationDisplayMode.ALL;
 
     public CraftingTerminalScreen(CraftingTerminalMenu menu, Inventory playerInv, Component title) {
@@ -81,6 +82,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         preferredViewerBinding = ClientSetup.selectedViewerBinding();
         preferredViewerGeneration = ClientSetup.viewerGeneration();
         preferredRecipeDiagramRenderer = ClientSetup.createRecipeDiagramRenderer();
+        descriptorStateRevision = menu.descriptorStateRevision();
     }
 
     private RecipeDiagramRenderer preferredRecipeDiagramRenderer() {
@@ -697,6 +699,15 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
             lastFuelInput = fuelInput.copy();
             transformTargetPage = 0;
             refreshTransformTargets();
+        }
+        if (descriptorStateRevision != menu.descriptorStateRevision()) {
+            descriptorStateRevision = menu.descriptorStateRevision();
+            timedStationPage = 0;
+            instantStationPage = 0;
+            fuelSearchPage = 0;
+            refreshFuelSearchResults();
+            rebuildWidgets();
+            return;
         }
         if (lastUtilitySortMode != preferences.sortMode()
                 || lastUtilitySortOrder != preferences.sortOrder()) {

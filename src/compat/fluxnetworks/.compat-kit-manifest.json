@@ -1,13 +1,13 @@
 {
-  "contract_sha256": "5bd7519bc318c485280287adb88cd482deece28a8a7d6836ea5329e8f9700311",
+  "contract_sha256": "70453dc59db139135c545e719a5c1677636cac44234f3b429921e5deb3005cab",
   "files": {
     "compat/audits/fluxnetworks/8.0.0.json": "54794d5ce8c7d6e70edd2fb3c783e57ab0497a4731d877cdd643a259da979363",
-    "compat/contracts/fluxnetworks.json": "132e3011757b1eaa39bb37c5e913aa9a17f46f9e519103afd194985676ff6418",
-    "src/compat/fluxnetworks/compat-module.json": "375c0926330e84b2b7efcd5cd97292a2f68b4cf3a78b67476ac877b422384845",
+    "compat/contracts/fluxnetworks.json": "bd2571c48b76bfa72273b159c3e2d012d54a6cbe9f5c79f5bed1dc227798bc24",
+    "src/compat/fluxnetworks/compat-module.json": "53b73661380e36fb781d5545490988d80fc7f159c153c36aef523db81a5896a7",
     "src/compat/fluxnetworks/java/com/swear/autostorage/compat/fluxnetworks/FluxConversionCatalog.java": "6179c3d46556863645a8362de0d02bf969a0f34e14be28344c9bdb78d9164c4b",
     "src/compat/fluxnetworks/java/com/swear/autostorage/compat/fluxnetworks/FluxnetworksCompatModule.java": "f1b376151fa15f70583607fdfae66053ee9d1d013fed1b6fb86fb12857643781",
     "src/fluxnetworksFixture/java/com/swear/autostorage/fixture/fluxnetworks/FluxnetworksFixtureMod.java": "b1f382ac0bc8faa17dbdb4068ed3f7711e5e078def569584694f2df042c6dfca",
-    "src/fluxnetworksFixture/java/com/swear/autostorage/fixture/fluxnetworks/FluxnetworksIntegrationGameTests.java": "8c53fd536eed57908121489020c5c24e5a1cbae38e2f62e28cca03cd09bc286b",
+    "src/fluxnetworksFixture/java/com/swear/autostorage/fixture/fluxnetworks/FluxnetworksIntegrationGameTests.java": "49d297e55e306fceea6b3b7481ca91ac15c1e516735697698c1fb37d7b9127c9",
     "src/fluxnetworksFixture/resources/META-INF/neoforge.mods.toml": "0726f32aa979ec5edf81867a4a32017899b0aad9a09b49de106d853ea52a7468",
     "src/fluxnetworksFixture/resources/data/auto_storage_fluxnetworks_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

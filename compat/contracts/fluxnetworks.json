@@ -171,7 +171,7 @@
         }
       ]
     },
-    "expected_game_tests": 16,
+    "expected_game_tests": 19,
     "fixture": "fluxnetworksFixture",
     "game_test_task": "runFluxnetworksGameTestServer",
     "gradle_tasks": [

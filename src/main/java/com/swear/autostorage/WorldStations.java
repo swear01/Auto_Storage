@@ -13,6 +13,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -71,7 +72,7 @@ public final class WorldStations {
 
     public static long revision(Level level) {
         if (level == null) return 0;
-        syncEnabled(level.dimension());
+        syncEnabled(level);
         return REVISIONS.getOrDefault(level.dimension(), 0L);
     }
 
@@ -117,7 +118,7 @@ public final class WorldStations {
 
     public static boolean isPresent(Level level, ResourceLocation blockId) {
         if (level == null || !isDefined(blockId)) return false;
-        syncEnabled(level.dimension());
+        syncEnabled(level);
         if (!ENABLED.get(blockId).getAsBoolean()) return false;
         return VALID_COUNTS
                 .getOrDefault(level.dimension(), Map.of())
@@ -126,7 +127,7 @@ public final class WorldStations {
 
     public static boolean isPresentAt(Level level, ResourceLocation blockId, BlockPos pos) {
         if (level == null || pos == null || !isDefined(blockId)) return false;
-        syncEnabled(level.dimension());
+        syncEnabled(level);
         if (!ENABLED.get(blockId).getAsBoolean()) return false;
         return VALID
                 .getOrDefault(level.dimension(), Map.of())
@@ -193,7 +194,12 @@ public final class WorldStations {
             REVISIONS.put(dimension, REVISIONS.getOrDefault(dimension, 0L) + 1L);
         }
         saved.validPositions.clear();
+        Map<ResourceKey<Level>, ServerLevel> loadedLevels = new HashMap<>();
+        for (ServerLevel loadedLevel : level.getServer().getAllLevels()) {
+            loadedLevels.put(loadedLevel.dimension(), loadedLevel);
+        }
         saved.positions.forEach((dimension, byBlock) -> byBlock.forEach((blockId, positions) -> {
+            if (!isDefined(blockId)) return;
             Set<BlockPos> placed = PLACED.computeIfAbsent(
                     dimension, ignored -> new ConcurrentHashMap<>())
                     .computeIfAbsent(blockId, ignored -> ConcurrentHashMap.newKeySet());
@@ -202,8 +208,9 @@ public final class WorldStations {
                 BASE_WATCHERS.computeIfAbsent(dimension, ignored -> new ConcurrentHashMap<>())
                         .computeIfAbsent(pos.below(2), ignored -> ConcurrentHashMap.newKeySet())
                         .add(blockId);
-                if (dimension.equals(level.dimension())) {
-                    refresh(level, blockId, pos);
+                ServerLevel loadedLevel = loadedLevels.get(dimension);
+                if (loadedLevel != null) {
+                    refresh(loadedLevel, blockId, pos);
                 }
             }
         }));
@@ -214,9 +221,10 @@ public final class WorldStations {
         Set<BlockPos> positions = PLACED
                 .getOrDefault(level.dimension(), Map.of())
                 .getOrDefault(blockId, Set.of());
-        if (!positions.contains(pos.immutable()) || !level.isLoaded(pos)) return;
+        BasePredicate definition = DEFINITIONS.get(blockId);
+        if (definition == null || !positions.contains(pos.immutable()) || !level.isLoaded(pos)) return;
         boolean valid = level.getBlockState(pos).is(BuiltInRegistries.BLOCK.get(blockId))
-                && DEFINITIONS.get(blockId).test(level, pos);
+                && definition.test(level, pos);
         StationSavedData saved = data(level);
         if (valid) {
             addValid(level, blockId, pos, saved);
@@ -263,13 +271,28 @@ public final class WorldStations {
         REVISIONS.merge(dimension, 1L, Long::sum);
     }
 
-    private static void syncEnabled(ResourceKey<Level> dimension) {
+    private static void syncEnabled(Level level) {
+        ResourceKey<Level> dimension = level.dimension();
         Map<ResourceLocation, Boolean> states = ENABLED_STATES.computeIfAbsent(
                 dimension, ignored -> new ConcurrentHashMap<>());
         for (Map.Entry<ResourceLocation, BooleanSupplier> entry : ENABLED.entrySet()) {
             boolean current = entry.getValue().getAsBoolean();
             Boolean previous = states.put(entry.getKey(), current);
-            if (previous != null && previous != current) bumpRevision(dimension);
+            if (previous != null && previous != current) {
+                bumpRevision(dimension);
+                if (level instanceof ServerLevel serverLevel) {
+                    refreshAll(serverLevel, entry.getKey());
+                }
+            }
+        }
+    }
+
+    private static void refreshAll(ServerLevel level, ResourceLocation blockId) {
+        Set<BlockPos> positions = PLACED
+                .getOrDefault(level.dimension(), Map.of())
+                .getOrDefault(blockId, Set.of());
+        for (BlockPos pos : Set.copyOf(positions)) {
+            refresh(level, blockId, pos);
         }
     }
 

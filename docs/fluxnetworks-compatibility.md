@@ -40,7 +40,7 @@ compatibility module does not leak a loot table referencing `flux_station` into
 servers where Flux Networks is absent. When `enableFluxRecipe` is disabled,
 the synthetic recipe and world availability are fail-closed.
 
-The isolated `fluxnetworksFixture` runs sixteen GameTests covering registration,
+The isolated `fluxnetworksFixture` runs nineteen GameTests covering registration,
 synthetic recipe exposure, config gating, block drops, both accepted bases,
 invalid-base/cache transitions, 1:1 conversion, exact batching,
 installed-item availability, registry reload/removal behavior, and stale
