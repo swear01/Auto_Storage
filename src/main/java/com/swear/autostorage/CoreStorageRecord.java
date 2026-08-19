@@ -50,6 +50,9 @@ final class CoreStorageRecord {
     private final List<CompoundTag> unresolvedDescriptorEntries = new ArrayList<>();
     private final List<CompoundTag> unresolvedMachineEntries = new ArrayList<>();
     private final List<CompoundTag> unresolvedMachineWorkEntries = new ArrayList<>();
+    private final Map<ResourceLocation, ResourceLocation> legacyMachineWorkMigrations =
+            new java.util.HashMap<>();
+    private final Set<ResourceLocation> ambiguousMachineWorkMigrations = new HashSet<>();
     private StorageResourceLedger resourceLedger = new StorageResourceLedger();
     private final List<CompoundTag> unresolvedInventoryEntries = new ArrayList<>();
     private final SimpleContainer machines;
@@ -309,17 +312,28 @@ final class CoreStorageRecord {
                     unresolvedMachineEntries.add(entry.copy());
                     continue;
                 }
-                ResourceLocation descriptorId = ResourceLocation.tryParse(entry.getString(TAG_DESCRIPTOR_ID));
-                MachineDescriptor descriptor = descriptorId == null ? null : MachineEnergyTable.get(descriptorId);
+                ResourceLocation persistedDescriptorId = ResourceLocation.tryParse(
+                        entry.getString(TAG_DESCRIPTOR_ID));
                 ItemStack stack = parsePersistedItem(entry.getCompound(TAG_ITEM), registries);
+                ResourceLocation descriptorId = MachineEnergyTable.migratePersistenceDescriptor(
+                        persistedDescriptorId, stack);
+                CompoundTag normalizedEntry = entry;
+                if (!java.util.Objects.equals(persistedDescriptorId, descriptorId)) {
+                    normalizedEntry = entry.copy();
+                    normalizedEntry.putString(TAG_DESCRIPTOR_ID, descriptorId.toString());
+                }
+                MachineDescriptor descriptor = descriptorId == null ? null : MachineEnergyTable.get(descriptorId);
                 long persistedCount = entry.contains(TAG_COUNT, Tag.TAG_LONG)
                         ? entry.getLong(TAG_COUNT) : stack.getCount();
                 int slot = descriptorId == null ? -1 : MachineEnergyTable.findSlot(descriptorId);
                 if (descriptor == null || descriptor.category() == MachineCategory.TRANSFORM
                         || stack.isEmpty() || slot < 0 || !descriptor.accepts(stack)
                         || persistedCount <= 0 || persistedCount > Integer.MAX_VALUE) {
-                    unresolvedMachineEntries.add(entry.copy());
+                    unresolvedMachineEntries.add(normalizedEntry.copy());
                     continue;
+                }
+                if (!java.util.Objects.equals(persistedDescriptorId, descriptorId)) {
+                    rememberLegacyMachineWorkMigration(persistedDescriptorId, descriptorId);
                 }
                 stack.setCount((int) persistedCount);
 
@@ -330,7 +344,7 @@ final class CoreStorageRecord {
                     machines.setItem(slot, stack.copyWithCount(existing.getCount() + accepted));
                 }
                 if (accepted < stack.getCount()) {
-                    CompoundTag remainder = entry.copy();
+                    CompoundTag remainder = normalizedEntry.copy();
                     remainder.put(TAG_ITEM, stack.copyWithCount(1).save(registries));
                     remainder.putLong(TAG_COUNT, stack.getCount() - accepted);
                     unresolvedMachineEntries.add(remainder);
@@ -344,17 +358,33 @@ final class CoreStorageRecord {
     private void loadMachineWorkEntries(ListTag entries) {
         for (int index = 0; index < entries.size(); index++) {
             CompoundTag entry = entries.getCompound(index);
-            ResourceLocation descriptorId = ResourceLocation.tryParse(entry.getString(TAG_DESCRIPTOR_ID));
+            ResourceLocation persistedDescriptorId = ResourceLocation.tryParse(
+                    entry.getString(TAG_DESCRIPTOR_ID));
+            boolean hasVariantItemId = entry.contains(TAG_VARIANT_ITEM_ID, Tag.TAG_STRING);
+            ResourceLocation variantItemId = hasVariantItemId
+                    ? ResourceLocation.tryParse(entry.getString(TAG_VARIANT_ITEM_ID)) : null;
+            ResourceLocation descriptorId = MachineEnergyTable.migratePersistenceDescriptor(
+                    persistedDescriptorId, variantItemId);
+            if (!hasVariantItemId && persistedDescriptorId != null
+                    && !ambiguousMachineWorkMigrations.contains(persistedDescriptorId)) {
+                descriptorId = legacyMachineWorkMigrations.getOrDefault(
+                        persistedDescriptorId, descriptorId);
+            }
+            CompoundTag normalizedEntry = entry;
+            if (!java.util.Objects.equals(persistedDescriptorId, descriptorId)) {
+                normalizedEntry = entry.copy();
+                normalizedEntry.putString(TAG_DESCRIPTOR_ID, descriptorId.toString());
+            }
             MachineDescriptor descriptor = descriptorId == null ? null : MachineEnergyTable.get(descriptorId);
             if (descriptor == null || descriptor.category() != MachineCategory.PROCESS
                     || !entry.contains(TAG_AMOUNT, Tag.TAG_LONG)
                     || entry.getLong(TAG_AMOUNT) < 0) {
-                unresolvedMachineWorkEntries.add(entry.copy());
+                unresolvedMachineWorkEntries.add(normalizedEntry.copy());
                 continue;
             }
             long amount = entry.getLong(TAG_AMOUNT);
             if (descriptor.energyType() != null && amount > 0) {
-                unresolvedMachineWorkEntries.add(entry.copy());
+                unresolvedMachineWorkEntries.add(normalizedEntry.copy());
                 continue;
             }
             boolean hasRemainder = entry.contains(TAG_VARIANT_ITEM_ID, Tag.TAG_STRING)
@@ -373,7 +403,7 @@ final class CoreStorageRecord {
                                     entry.getLong(TAG_RATE_DENOMINATOR)),
                             entry.getLong(TAG_REMAINDER));
                 } catch (RuntimeException exception) {
-                    unresolvedMachineWorkEntries.add(entry.copy());
+                    unresolvedMachineWorkEntries.add(normalizedEntry.copy());
                     continue;
                 }
             }
@@ -383,6 +413,23 @@ final class CoreStorageRecord {
                         "station work exists in both legacy and typed storage for " + descriptorId);
             }
             if (remainder != null) machineWorkRemainders.put(descriptorId, remainder);
+        }
+    }
+
+    private void rememberLegacyMachineWorkMigration(
+            ResourceLocation legacyDescriptorId,
+            ResourceLocation currentDescriptorId
+    ) {
+        if (legacyDescriptorId == null || currentDescriptorId == null
+                || legacyDescriptorId.equals(currentDescriptorId)
+                || ambiguousMachineWorkMigrations.contains(legacyDescriptorId)) {
+            return;
+        }
+        ResourceLocation previous = legacyMachineWorkMigrations.putIfAbsent(
+                legacyDescriptorId, currentDescriptorId);
+        if (previous != null && !previous.equals(currentDescriptorId)) {
+            legacyMachineWorkMigrations.remove(legacyDescriptorId);
+            ambiguousMachineWorkMigrations.add(legacyDescriptorId);
         }
     }
 

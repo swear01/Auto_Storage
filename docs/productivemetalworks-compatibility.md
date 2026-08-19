@@ -47,6 +47,11 @@ multi-version matrix.
 - `auto_storage:productivemetalworks_casting_basin` — PROCESS station
   installable only with the `casting_basin` block item; block casting runs here.
 
+The module registers an exact persistence migration for legacy
+`productivemetalworks_casting_table` entries whose variant item is
+`productivemetalworks:casting_basin`; both the installed basin and its
+fractional station-work record are rewritten to the basin descriptor on load.
+
 ## CI policy
 
 `runProductivemetalworksGameTestServer` runs eight isolated tests covering the

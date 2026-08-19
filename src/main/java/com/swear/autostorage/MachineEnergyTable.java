@@ -1,5 +1,6 @@
 package com.swear.autostorage;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +12,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,8 @@ public final class MachineEnergyTable {
             SMITHING_TABLE_ID,
             AXE_ID);
     private static volatile List<MachineDescriptor> cachedEntries;
+    private static final Map<LegacyVariantKey, ResourceLocation> PERSISTENCE_MIGRATIONS =
+            new HashMap<>();
 
     private MachineEnergyTable() {
     }
@@ -191,6 +195,41 @@ public final class MachineEnergyTable {
                 .orElse(null);
     }
 
+    static synchronized void registerPersistenceMigration(
+            ResourceLocation legacyDescriptorId,
+            ResourceLocation variantItemId,
+            ResourceLocation currentDescriptorId
+    ) {
+        LegacyVariantKey key = new LegacyVariantKey(
+                java.util.Objects.requireNonNull(legacyDescriptorId, "legacyDescriptorId"),
+                java.util.Objects.requireNonNull(variantItemId, "variantItemId"));
+        ResourceLocation current = java.util.Objects.requireNonNull(
+                currentDescriptorId, "currentDescriptorId");
+        ResourceLocation previous = PERSISTENCE_MIGRATIONS.putIfAbsent(key, current);
+        if (previous != null && !previous.equals(current)) {
+            throw new IllegalArgumentException(
+                    "Conflicting machine persistence migration for " + key);
+        }
+    }
+
+    static ResourceLocation migratePersistenceDescriptor(
+            ResourceLocation descriptorId,
+            ItemStack stack
+    ) {
+        if (descriptorId == null || stack == null || stack.isEmpty()) return descriptorId;
+        return migratePersistenceDescriptor(
+                descriptorId, BuiltInRegistries.ITEM.getKey(stack.getItem()));
+    }
+
+    static ResourceLocation migratePersistenceDescriptor(
+            ResourceLocation descriptorId,
+            ResourceLocation variantItemId
+    ) {
+        if (descriptorId == null || variantItemId == null) return descriptorId;
+        return PERSISTENCE_MIGRATIONS.getOrDefault(
+                new LegacyVariantKey(descriptorId, variantItemId), descriptorId);
+    }
+
     public static int findSlot(ItemStack stack) {
         List<MachineDescriptor> entries = entries();
         for (int slot = 0; slot < entries.size(); slot++) {
@@ -301,6 +340,12 @@ public final class MachineEnergyTable {
                 maxInstalledCount,
                 energyType,
                 energyPerTick);
+    }
+
+    private record LegacyVariantKey(
+            ResourceLocation descriptorId,
+            ResourceLocation variantItemId
+    ) {
     }
 
     private static void validateRegistryId(ResourceLocation registryId, MachineDescriptor descriptor) {

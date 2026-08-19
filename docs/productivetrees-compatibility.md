@@ -43,6 +43,8 @@ multi-version matrix.
 the `productivetrees:sawmill` block item (built-in rendering, one work/tick).
 Sawmill crafts consume one log from storage, deliver the planks as the selected
 primary, and route sawdust/tertiary as exact remainders in the same transaction.
+The isolated fixture also exercises a non-empty tertiary output so that path is
+covered by a real commit, not only by the family contract.
 
 ## CI policy
 

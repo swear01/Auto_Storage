@@ -92,6 +92,11 @@ public final class ProductivemetalworksCompat {
                         RecipePresentationKind.CRAFTING));
 
         ResourceLocation basinId = descriptorId(machineDescriptors, "casting_basin");
+        MachineDescriptorApi.registerPersistenceMigration(
+                tableId,
+                ResourceLocation.fromNamespaceAndPath(
+                        "productivemetalworks", "casting_basin"),
+                basinId);
         registerCastingStation(machineDescriptors, basinId, "casting_basin");
         recipeFamilies.register(basinId.getPath(), () ->
                 RecipeFamilyFactories.deterministicResources(

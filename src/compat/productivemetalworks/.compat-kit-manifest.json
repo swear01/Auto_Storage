@@ -1,13 +1,14 @@
 {
-  "contract_sha256": "dafdda2f454eb9d252f5bdb9fd7f7b282f8cfe987f740c54155b6db2752b72e0",
+  "contract_sha256": "d2397195a408cbb609c14d96523c400467dcb63c89b3cad7f7312bddc4b12d50",
   "files": {
     "compat/audits/productivemetalworks/1.15.0.json": "d0c23928ed20a6ac279bf66306b91ce81037afde44a5b9a5b12b4b55765ae759",
-    "compat/contracts/productivemetalworks.json": "b81abb3216a566c72d5b7261d5c5802f2084ca0f9290324180a5dcb30a571691",
-    "src/compat/productivemetalworks/compat-module.json": "fce72ce7f745238e63f2b608b2cb30786a89182acb730722261da221c6d9291a",
-    "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompat.java": "47009b964734b96bdd54918564b4fea475bc905482c043c7859759adb7955d2e",
+    "compat/contracts/productivemetalworks.json": "7b601f71ce15d7b7fcf662194fed9dadb1fa52eccdbf4b741f955abae49ed18e",
+    "src/compat/productivemetalworks/compat-module.json": "2520da7d1611e31fd6b7505892316e3b3ddb68de45e4b3fa5201bb836fa485ff",
+    "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompat.java": "139462fa88849b7f204a527b723729a5e64788905f554a9dd4338072a7b4a0d5",
     "src/compat/productivemetalworks/java/com/swear/autostorage/compat/productivemetalworks/ProductivemetalworksCompatModule.java": "75575b84e11e4979ed51a0ee9f454c0c865f496a0c49032af87be1050950233c",
     "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksFixtureMod.java": "de0407a0f8c25bc49c659bd49c4b7d61a74c9a36e3290d9cc19d9619b095a85b",
-    "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java": "13c0310e7caa59b3ce2805ebca145bca9508cd2007ada3de18652ded551ea83d"
+    "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksIntegrationGameTests.java": "13c0310e7caa59b3ce2805ebca145bca9508cd2007ada3de18652ded551ea83d",
+    "src/productivemetalworksFixture/java/com/swear/autostorage/fixture/productivemetalworks/ProductivemetalworksPersistenceMigrationGameTests.java": "4f2eaa43ceaf3e4bb7d76ac2a131d49aaa5e5d8bee3b019322d1eb7bf6ea0107"
   },
   "schema": 1,
   "tool_version": "0.3.1"

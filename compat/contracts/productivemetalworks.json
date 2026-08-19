@@ -355,7 +355,7 @@
     }
    ]
   },
-  "expected_game_tests": 8,
+  "expected_game_tests": 9,
   "fixture": "productivemetalworksFixture",
   "game_test_task": "runProductivemetalworksGameTestServer",
   "gradle_tasks": [

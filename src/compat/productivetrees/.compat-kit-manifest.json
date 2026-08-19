@@ -1,13 +1,13 @@
 {
-  "contract_sha256": "2c77ab18657dbc3fa141ee7d928d68a747f24c102c5a63483cb5be51204d37b7",
+  "contract_sha256": "0bf90815285e6b41389c57cf34a3b10a94a293d12241cf8dd0a4c37d462e42a9",
   "files": {
     "compat/audits/productivetrees/1.0.0.json": "8fe777b3b43de41d121e39bb01af7dcd8823673caa5c3623b0dad6c22e660f37",
-    "compat/contracts/productivetrees.json": "46bab29502f46cde1dcb8daed9e02a588594dbdb331eaec8109385015f56e48a",
+    "compat/contracts/productivetrees.json": "cd3a3c250b1a9930accb64d845ebfb1d4b0ef084f800ff9b44aaaf15a8118d57",
     "src/compat/productivetrees/compat-module.json": "470a98d50e822c8137e19a5155a003b771791f277c8d5f42b26a9e79f4d18fed",
     "src/compat/productivetrees/java/com/swear/autostorage/compat/productivetrees/ProductivetreesCompat.java": "0ac9248eaf9732014c4542d9c8a9f8347ed7d7e8938b7fe938a6796c6e91b807",
     "src/compat/productivetrees/java/com/swear/autostorage/compat/productivetrees/ProductivetreesCompatModule.java": "121ec6511760aa835645b0b5238f2201187aed4f631de1b15b472e5fd4cd1e95",
     "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesFixtureMod.java": "698a9eb2c012853872428dc38c03c60a7f6aab129ef1937b06daeda79cf4d4c3",
-    "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java": "70c2b35867b5ba05525afec7aec2da487ed45652cd31511b62f76c5b142cc5f8",
+    "src/productivetreesFixture/java/com/swear/autostorage/fixture/productivetrees/ProductivetreesIntegrationGameTests.java": "fdb18dddc0a9269468f6538382e8b324b348004d5560c2f3baf2c46658da5ed4",
     "src/productivetreesFixture/resources/META-INF/neoforge.mods.toml": "669e974b3bcdb93b80c6bee765c0318aec6fd319df06fc4b2a358d7bdfe193df",
     "src/productivetreesFixture/resources/data/auto_storage_productivetrees_fixture/structure/craftingtests.platform.nbt": "4f9baea23014a7ecde3871c56eba0271274269ed00688fc981bd3e6116c4dfbc"
   },

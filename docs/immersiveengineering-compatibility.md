@@ -160,8 +160,8 @@ Shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
 
 The current combined matrix now uses concrete representative recipe IDs rather
 than recipe-type IDs for all accepted families. The latest 10,000-type run
-passed with `craftable_prepare_ms = 22.833`,
-`shared_index_retained_bytes = 5,893,976`, and per-menu retained bytes of
-119,880. The 30,000-type stress run passed with `craftable_prepare_ms = 25.257`,
-`shared_index_retained_bytes = 5,864,936`, and per-menu retained bytes of
-119,862.
+passed with `craftable_prepare_ms = 36.344`,
+`shared_index_retained_bytes = 5,894,704`, and per-menu retained bytes of
+119,526. The 30,000-type stress run passed with `craftable_prepare_ms = 32.742`,
+`shared_index_retained_bytes = 5,862,608`, and per-menu retained bytes of
+120,001.

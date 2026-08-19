@@ -376,8 +376,7 @@ public final class CraftablePerformanceGameTests {
                         "craftable_prepare_ms must be < 50: "
                                 + millis(craftablePreparationNanos));
             }
-            if (STORED_TYPE_COUNT == 10_000
-                    && indexRetainedBytes >= MAX_BASELINE_INDEX_RETAINED_BYTES) {
+            if (indexRetainedBytes >= MAX_BASELINE_INDEX_RETAINED_BYTES) {
                 throw new IllegalStateException(
                         "Craftable shared index retained " + indexRetainedBytes + " bytes");
             }

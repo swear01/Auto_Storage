@@ -1173,6 +1173,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("assertRecipeInventories", matrix)
         self.assertIn("CompatibilityMatrixManifest", matrix)
         self.assertIn("CompatibilityMatrixManifest", coexistence)
+        self.assertNotIn("STORED_TYPE_COUNT == 10_000", matrix)
+        self.assertIn(
+            "if (indexRetainedBytes >= MAX_BASELINE_INDEX_RETAINED_BYTES)",
+            matrix,
+        )
         self.assertNotIn('"ae2"', coexistence)
         self.assertNotIn("ae2_inscriber", coexistence)
         companions = self.read_required(
@@ -2665,6 +2670,9 @@ class StaticRegressionTests(unittest.TestCase):
     def test_productivetrees_compat_matrix_descriptor(self):
         descriptor = json.loads(
             (ROOT / "src/compat/productivetrees/compat-module.json").read_text())
+        contract = json.loads(
+            (ROOT / "compat/contracts/productivetrees.json").read_text())
+        self.assertEqual(contract["matrix"], descriptor["matrix"])
         self.assertEqual(
             ["auto_storage:productivetrees_sawmill"],
             descriptor["matrix"]["descriptors"],

@@ -7,7 +7,7 @@
         "curse.maven:productivemetalworks-1184570:7884786"
     ],
     "entrypoint": "com.swear.autostorage.compat.productivemetalworks.ProductivemetalworksCompatModule",
-    "expectedTests": 8,
+    "expectedTests": 9,
     "fixture": "productivemetalworksFixture",
     "id": "auto_storage:productivemetalworks",
     "matrix": {
