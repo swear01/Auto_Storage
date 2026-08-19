@@ -55,14 +55,8 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void alloy_smelter_recipes_are_supported(GameTestHelper helper) {
-        var holder = helper.getLevel().getRecipeManager().byKey(ie("alloysmelter/electrum")).orElse(null);
-        if (holder == null
-                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-            helper.fail("Alloy Smelter recipe must be supported: alloysmelter/electrum");
-            return;
-        }
-        helper.succeed();
+    public static void alloy_smelter_recipes_fail_closed(GameTestHelper helper) {
+        assertUnsupported(helper, ie("alloysmelter/electrum"));
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -85,15 +79,8 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void crusher_recipes_are_supported(GameTestHelper helper) {
-        var holder = helper.getLevel().getRecipeManager()
-                .byKey(ie("crusher/amethyst")).orElse(null);
-        if (holder == null
-                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-            helper.fail("Crusher recipe must be supported: crusher/amethyst");
-            return;
-        }
-        helper.succeed();
+    public static void crusher_recipes_fail_closed(GameTestHelper helper) {
+        assertUnsupported(helper, ie("crusher/amethyst"));
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -105,13 +92,12 @@ public final class ImmersiveengineeringIntegrationGameTests {
     public static void metal_press_and_arc_furnace_recipes_are_supported(
             GameTestHelper helper
     ) {
-        for (ResourceLocation recipeId : List.of(
-                ie("metalpress/blaze_rod"), ie("arcfurnace/dust_iron"))) {
+        for (ResourceLocation recipeId : List.of(ie("arcfurnace/dust_iron"))) {
             var holder = helper.getLevel().getRecipeManager()
                     .byKey(recipeId).orElse(null);
             if (holder == null
                     || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-                helper.fail("Machine recipe must be supported: " + recipeId);
+                helper.fail("Arc Furnace recipe must be supported: " + recipeId);
                 return;
             }
         }
@@ -159,32 +145,35 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void sawmill_converts_logs_to_planks_with_energy_and_work(
+    public static void sawmill_recipes_with_secondary_outputs_fail_closed(
+            GameTestHelper helper
+    ) {
+        var holder = helper.getLevel().getRecipeManager()
+                .byKey(ie("sawmill/oak_log")).orElse(null);
+        if (holder == null) {
+            helper.fail("Missing representative Immersive Engineering recipe sawmill/oak_log");
+            return;
+        }
+        if (CraftingTerminalMenu.supportsRecipeHolder(holder)) {
+            helper.fail("Sawmill recipe with secondary outputs was accepted");
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
+    public static void arc_furnace_recipe_is_supported_with_deterministic_plan(
             GameTestHelper helper
     ) {
         withCore(helper, (level, core, player) -> {
-            var manager = level.getRecipeManager();
-            int sawmillHolders = 0;
-            for (var h : manager.getRecipes()) {
-                if (h.id().getNamespace().equals("immersiveengineering")
-                        && h.value().getType().toString().contains("sawmill")) {
-                    sawmillHolders++;
-                }
-            }
-            var holder = manager.byKey(ie("sawmill/oak_log")).orElse(null);
+            var holder = level.getRecipeManager()
+                    .byKey(ie("arcfurnace/dust_iron")).orElse(null);
             if (holder == null
                     || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-                if (holder != null) {
-                    helper.fail("Sawmill recipe must be supported: sawmill/oak_log type="
-                            + holder.value().getType());
-                    return;
-                }
-                helper.fail("Sawmill recipe must be supported: sawmill/oak_log"
-                        + " holders=" + sawmillHolders + " type="
-                        + (holder == null ? "null" : holder.value().getType()));
+                helper.fail("Arc Furnace recipe must be supported: arcfurnace/dust_iron");
                 return;
             }
-            seedItem(core, Items.OAK_LOG, 1);
+            seedItem(core, ieItem("dust_iron"), 1);
             seedResource(core, StorageResourceKey.neoforgeEnergy(), 1_000_000L);
             if (!core.addDescriptorTransform(
                     com.swear.autostorage.MachineEnergyTable.HAMMER_ID,
@@ -192,87 +181,50 @@ public final class ImmersiveengineeringIntegrationGameTests {
                 helper.fail("Could not seed engineer's hammer resource");
                 return;
             }
-            installStation(core, player, ieItem("sawmill"));
+            installStation(core, player, ieItem("arc_furnace"));
             addCoreTicks(core, 10_000);
-            var menu = new CraftingTerminalMenu(
-                    610, player.getInventory(), core);
-            boolean requested = menu.handleRecipeRequest(
-                    level, ie("sawmill/oak_log"), 1,
-                    com.swear.autostorage.CraftingDestination.NONE, player);
-            boolean committed = requested
-                    && menu.computeCraftPreview(core, player).craftable() >= 1
-                    && menu.handleRecipeRequest(
-                            level, ie("sawmill/oak_log"), 1,
-                            com.swear.autostorage.CraftingDestination.STORAGE, player);
-            long planks = core.getItemCount(ItemKey.of(new ItemStack(Items.OAK_PLANKS)));
-            long logs = core.getItemCount(ItemKey.of(new ItemStack(Items.OAK_LOG)));
-            if (!committed) {
-                helper.fail("Sawmill craft did not commit: planks=" + planks
-                        + " logs=" + logs + " craftable=" + menu.getCraftableCount());
+            var menu = new CraftingTerminalMenu(612, player.getInventory(), core);
+            boolean acceptedWithoutElectrode = menu.handleRecipeRequest(
+                    level, ie("arcfurnace/dust_iron"), 1,
+                    com.swear.autostorage.CraftingDestination.STORAGE, player);
+            if (acceptedWithoutElectrode) {
+                helper.fail("Arc Furnace craft must require a graphite electrode");
                 return;
             }
-            if (planks != 6) {
-                helper.fail("Sawmill craft produced the wrong planks count: "
-                        + planks + " (logs left=" + logs
-                        + " craftable=" + menu.getCraftableCount()
-                        + " work=" + core.getStationWork(SAWMILL)
-                        + " energy=" + core.getResourceAmount(
-                                StorageResourceKey.neoforgeEnergy())
-                        + " type=" + holder.value().getType()
-                        + " same=" + (holder.value().getType()
-                                == blusunrize.immersiveengineering.api.crafting
-                                        .IERecipeTypes.SAWMILL.get())
-                        + " family=" + AutoStorage.RECIPE_FAMILY_REGISTRY
-                                .containsKey(SAWMILL)
-                        + " installed=" + core.isMachineInstalled(SAWMILL)
-                        + " types=" + core.getTypeCount()
-                        + " committed=" + committed);
+            if (!core.addDescriptorTransform(
+                    com.swear.autostorage.MachineEnergyTable.ELECTRODE_ID,
+                    new ItemStack(ieItem("graphite_electrode")))) {
+                helper.fail("Could not seed graphite electrode resource");
                 return;
             }
-            if (core.getItemCount(ItemKey.of(new ItemStack(Items.OAK_LOG))) != 0
-                    || core.getResourceAmount(
-                            StorageResourceKey.neoforgeEnergy()) >= 1_000_000L) {
-                helper.fail("Sawmill craft did not consume input and energy");
+            long electrodeBefore = core.getDescriptorAmount(
+                    com.swear.autostorage.MachineEnergyTable.ELECTRODE_ID);
+            boolean committed = menu.handleRecipeRequest(
+                    level, ie("arcfurnace/dust_iron"), 1,
+                    com.swear.autostorage.CraftingDestination.STORAGE, player);
+            long iron = core.getItemCount(ItemKey.of(new ItemStack(Items.IRON_INGOT)));
+            long electrodeAfter = core.getDescriptorAmount(
+                    com.swear.autostorage.MachineEnergyTable.ELECTRODE_ID);
+            if (!committed || iron != 1 || electrodeAfter != electrodeBefore - 1) {
+                helper.fail("Arc Furnace craft did not consume the electrode atomically: "
+                        + "committed=" + committed + " iron=" + iron
+                        + " electrodeBefore=" + electrodeBefore
+                        + " electrodeAfter=" + electrodeAfter);
                 return;
             }
             helper.succeed();
         });
     }
 
-    @GameTest(template = "craftingtests.platform")
-    public static void arc_furnace_recipe_is_supported_with_deterministic_plan(
-            GameTestHelper helper
-    ) {
-        var holder = helper.getLevel().getRecipeManager()
-                .byKey(ie("arcfurnace/insulating_glass")).orElse(null);
-        if (holder == null
-                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-            helper.fail("Arc Furnace recipe must be supported: arcfurnace/insulating_glass");
-            return;
-        }
-        helper.succeed();
-    }
-
     private static final Set<ResourceLocation> SUPPORTED_MACHINES = Set.of(
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_sawmill"),
             ResourceLocation.fromNamespaceAndPath(
                     AutoStorage.MODID, "immersiveengineering_arc_furnace"),
             ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_bottling_machine"),
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_crusher"),
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_alloy_smelter"),
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_metal_press"));
+                    AutoStorage.MODID, "immersiveengineering_bottling_machine"));
 
     private static final ResourceLocation ARC_FURNACE =
             ResourceLocation.fromNamespaceAndPath(
                     AutoStorage.MODID, "immersiveengineering_arc_furnace");
-    private static final ResourceLocation SAWMILL =
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_sawmill");
     private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int STORAGE_PAGE_BUTTON = 14;
 

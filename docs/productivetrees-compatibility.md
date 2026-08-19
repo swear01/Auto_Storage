@@ -32,7 +32,7 @@ multi-version matrix.
 
 | Family | Result | Reason |
 |---|---|---|
-| Sawmill (`productivetrees:sawmill`, 173 recipes) | accepted | deterministic single-tag-ingredient input, three explicit ItemStack outputs (output/secondary sawdust/tertiary) with no chance rolls; work = recipeTime(200)/tickRate(10) = 20 ticks at one work/tick; the sawmill block is the station; time upgrades are not inferred |
+| Sawmill (`productivetrees:sawmill`, 173 recipes) | accepted | deterministic single-tag-ingredient input, one explicit primary ItemStack plus secondary/tertiary remainder ItemStacks with no chance rolls; work = recipeTime(200)/tickRate(10) = 20 ticks at one work/tick; the sawmill block is the station; time upgrades are not inferred |
 | Log stripping | rejected | interactive Stripper block process gated on a loaded axe with live durability; no `log_stripping` data recipes ship in the jar |
 | Tree fruiting | rejected | attaches fruit to growing world trees; world mutation |
 | Tree pollination | rejected | modifies world leaves/drops from live bee state; world mutation |
@@ -41,8 +41,10 @@ multi-version matrix.
 
 `auto_storage:productivetrees_sawmill` is a PROCESS station installable with
 the `productivetrees:sawmill` block item (built-in rendering, one work/tick).
-Sawmill crafts consume one log from storage and insert all three outputs
-(planks, sawdust, tertiary) into storage in the same transaction.
+Sawmill crafts consume one log from storage, deliver the planks as the selected
+primary, and route sawdust/tertiary as exact remainders in the same transaction.
+The isolated fixture also exercises a non-empty tertiary output so that path is
+covered by a real commit, not only by the family contract.
 
 ## CI policy
 

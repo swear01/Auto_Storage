@@ -1,8 +1,10 @@
 package com.swear.autostorage;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -10,6 +12,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +52,8 @@ public final class MachineEnergyTable {
             SMITHING_TABLE_ID,
             AXE_ID);
     private static volatile List<MachineDescriptor> cachedEntries;
+    private static final Map<LegacyVariantKey, ResourceLocation> PERSISTENCE_MIGRATIONS =
+            new HashMap<>();
 
     private MachineEnergyTable() {
     }
@@ -96,13 +101,11 @@ public final class MachineEnergyTable {
         registerToolDurabilityTransform(
                 descriptors,
                 HAMMER_ID,
-                new ItemStack(net.minecraft.world.item.Items.STONE_AXE),
                 "immersiveengineering",
                 "hammer");
         registerToolDurabilityTransform(
                 descriptors,
                 ELECTRODE_ID,
-                new ItemStack(net.minecraft.world.item.Items.STICK),
                 "immersiveengineering",
                 "graphite_electrode");
     }
@@ -110,24 +113,25 @@ public final class MachineEnergyTable {
     private static void registerToolDurabilityTransform(
             DeferredRegister<MachineDescriptor> descriptors,
             ResourceLocation id,
-            ItemStack presentation,
             String modNamespace,
             String itemPath
     ) {
-        net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
-                        modNamespace, itemPath));
-        if (item == net.minecraft.world.item.Items.AIR) {
-            return;
-        }
-        descriptors.register(id.getPath(), () -> MachineDescriptor.transform(
-                id,
-                presentation,
-                Ingredient.of(item),
-                stack -> ToolDurability.finiteValue(stack) > 0
-                        ? new MachineDescriptor.TransformAmount(
-                                ToolDurability.finiteValue(stack), false)
-                        : new MachineDescriptor.TransformAmount(0, false)));
+        ResourceLocation itemId = ResourceLocation.fromNamespaceAndPath(modNamespace, itemPath);
+        if (!net.neoforged.fml.ModList.get().isLoaded(modNamespace)) return;
+        descriptors.register(id.getPath(), () -> {
+            Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemId);
+            if (item == Items.AIR) {
+                throw new IllegalStateException("Missing tool item in registry: " + itemId);
+            }
+            return MachineDescriptor.transform(
+                    id,
+                    item.getDefaultInstance(),
+                    Ingredient.of(item),
+                    stack -> ToolDurability.finiteValue(stack) > 0
+                            ? new MachineDescriptor.TransformAmount(
+                                    ToolDurability.finiteValue(stack), false)
+                            : new MachineDescriptor.TransformAmount(0, false));
+        });
     }
 
     public static int size() {
@@ -189,6 +193,41 @@ public final class MachineEnergyTable {
                 .filter(descriptor -> descriptor.id().equals(id))
                 .findFirst()
                 .orElse(null);
+    }
+
+    static synchronized void registerPersistenceMigration(
+            ResourceLocation legacyDescriptorId,
+            ResourceLocation variantItemId,
+            ResourceLocation currentDescriptorId
+    ) {
+        LegacyVariantKey key = new LegacyVariantKey(
+                java.util.Objects.requireNonNull(legacyDescriptorId, "legacyDescriptorId"),
+                java.util.Objects.requireNonNull(variantItemId, "variantItemId"));
+        ResourceLocation current = java.util.Objects.requireNonNull(
+                currentDescriptorId, "currentDescriptorId");
+        ResourceLocation previous = PERSISTENCE_MIGRATIONS.putIfAbsent(key, current);
+        if (previous != null && !previous.equals(current)) {
+            throw new IllegalArgumentException(
+                    "Conflicting machine persistence migration for " + key);
+        }
+    }
+
+    static ResourceLocation migratePersistenceDescriptor(
+            ResourceLocation descriptorId,
+            ItemStack stack
+    ) {
+        if (descriptorId == null || stack == null || stack.isEmpty()) return descriptorId;
+        return migratePersistenceDescriptor(
+                descriptorId, BuiltInRegistries.ITEM.getKey(stack.getItem()));
+    }
+
+    static ResourceLocation migratePersistenceDescriptor(
+            ResourceLocation descriptorId,
+            ResourceLocation variantItemId
+    ) {
+        if (descriptorId == null || variantItemId == null) return descriptorId;
+        return PERSISTENCE_MIGRATIONS.getOrDefault(
+                new LegacyVariantKey(descriptorId, variantItemId), descriptorId);
     }
 
     public static int findSlot(ItemStack stack) {
@@ -301,6 +340,12 @@ public final class MachineEnergyTable {
                 maxInstalledCount,
                 energyType,
                 energyPerTick);
+    }
+
+    private record LegacyVariantKey(
+            ResourceLocation descriptorId,
+            ResourceLocation variantItemId
+    ) {
     }
 
     private static void validateRegistryId(ResourceLocation registryId, MachineDescriptor descriptor) {

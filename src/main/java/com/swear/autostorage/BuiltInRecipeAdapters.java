@@ -760,8 +760,13 @@ final class BuiltInRecipeAdapters {
     }
 
     private static boolean hasExhaustiveItemCoverage(Ingredient ingredient) {
-        return ingredient.isSimple()
-                || ingredient.getCustomIngredient() instanceof DataComponentIngredient;
+        if (ingredient.isSimple()
+                || ingredient.getCustomIngredient() instanceof DataComponentIngredient) {
+            return true;
+        }
+        return ingredient.getCustomIngredient() != null
+                && ingredient.getCustomIngredient().getClass().getName().equals(
+                        "com.enderio.enderio.api.conduits.ConduitIngredient");
     }
 
     private static List<RecipeAdapterMatch.Input> smithingInputs(SmithingRecipe recipe) {

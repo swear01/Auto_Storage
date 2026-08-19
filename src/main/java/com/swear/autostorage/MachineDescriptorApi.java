@@ -19,4 +19,13 @@ public final class MachineDescriptorApi {
     public static DeferredRegister<MachineDescriptor> createDeferredRegister(String modId) {
         return DeferredRegister.create(REGISTRY_KEY, modId);
     }
+
+    public static void registerPersistenceMigration(
+            ResourceLocation legacyDescriptorId,
+            ResourceLocation variantItemId,
+            ResourceLocation currentDescriptorId
+    ) {
+        MachineEnergyTable.registerPersistenceMigration(
+                legacyDescriptorId, variantItemId, currentDescriptorId);
+    }
 }

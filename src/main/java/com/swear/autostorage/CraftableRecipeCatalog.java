@@ -315,15 +315,15 @@ final class CraftableRecipeCatalog {
                 List<ItemStack> availableStacks,
                 Level level
         ) {
+            if (baseMatch == null) return List.of();
+            RecipeAdapterMatch.Contract contract = baseMatch.contract();
+            if (contract == null) return List.of();
             if (!adapter.requiresAvailableStacksForVariants()
-                    && baseMatch.typedRecipePlan().isPresent()) {
+                    && !contract.pendingTypedPlan()) {
                 return List.of(baseMatch);
             }
-            if (adapter.requiresAvailableStacksForVariants()) {
-                return baseMatch.resolveVariantsFromSnapshot(
-                        availableStacks, level);
-            }
-            return baseMatch.resolveVariantsFromSnapshot(List.of(), level);
+            return baseMatch.resolveVariantsFromSnapshot(
+                    availableStacks, level);
         }
     }
 

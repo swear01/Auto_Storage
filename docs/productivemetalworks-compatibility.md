@@ -43,8 +43,14 @@ multi-version matrix.
   the `productivemetalworks:gray_foundry_controller` block item (built-in
   rendering, one work/tick); melting runs here.
 - `auto_storage:productivemetalworks_casting_table` — PROCESS station
-  installable with the `casting_table` or `casting_basin` block item; casting
-  runs here.
+  installable only with the `casting_table` block item; item casting runs here.
+- `auto_storage:productivemetalworks_casting_basin` — PROCESS station
+  installable only with the `casting_basin` block item; block casting runs here.
+
+The module registers an exact persistence migration for legacy
+`productivemetalworks_casting_table` entries whose variant item is
+`productivemetalworks:casting_basin`; both the installed basin and its
+fractional station-work record are rewritten to the basin descriptor on load.
 
 ## CI policy
 

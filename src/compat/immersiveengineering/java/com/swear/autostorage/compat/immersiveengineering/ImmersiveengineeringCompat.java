@@ -1,13 +1,9 @@
 package com.swear.autostorage.compat.immersiveengineering;
 
-import blusunrize.immersiveengineering.api.crafting.AlloyRecipe;
 import blusunrize.immersiveengineering.api.crafting.ArcFurnaceRecipe;
 import blusunrize.immersiveengineering.api.crafting.BottlingMachineRecipe;
-import blusunrize.immersiveengineering.api.crafting.CrusherRecipe;
 import blusunrize.immersiveengineering.api.crafting.IERecipeTypes;
-import blusunrize.immersiveengineering.api.crafting.MetalPressRecipe;
 import blusunrize.immersiveengineering.api.crafting.MultiblockRecipe;
-import blusunrize.immersiveengineering.api.crafting.SawmillRecipe;
 import blusunrize.immersiveengineering.api.crafting.TagOutput;
 import com.swear.autostorage.EnergyCost;
 import com.swear.autostorage.EnergyType;
@@ -22,11 +18,13 @@ import com.swear.autostorage.RecipeFamilyCost;
 import com.swear.autostorage.RecipeFamilyFactories;
 import com.swear.autostorage.RecipePresentationKind;
 import com.swear.autostorage.StorageResourceKey;
+import com.swear.autostorage.StorageResourceKindApi;
 import com.swear.autostorage.TypedRecipeInput;
 import com.swear.autostorage.TypedRecipeOutput;
 import com.swear.autostorage.TypedRecipePlan;
 import com.swear.autostorage.api.AutoStorageApi;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -59,32 +57,8 @@ public final class ImmersiveengineeringCompat {
             throw new IllegalArgumentException(
                     "Immersive Engineering family register targets the wrong registry");
         }
-        registerSawmill(machineDescriptors, recipeFamilies);
         registerArcFurnace(machineDescriptors, recipeFamilies);
         registerBottling(machineDescriptors, recipeFamilies);
-        registerCrusher(machineDescriptors, recipeFamilies);
-        registerAlloy(machineDescriptors, recipeFamilies);
-        registerMetalPress(machineDescriptors, recipeFamilies);
-    }
-
-    private static void registerSawmill(
-            DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
-    ) {
-        ResourceLocation id = descriptorId(machineDescriptors, "sawmill");
-        registerStation(machineDescriptors, id, "sawmill");
-        recipeFamilies.register(id.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
-                        SawmillRecipe.class,
-                        () -> IERecipeTypes.SAWMILL.get(),
-                        id,
-                        ImmersiveengineeringCompat::supportsSawmill,
-                        ImmersiveengineeringCompat::sawmillPlan,
-                        recipe -> RecipeFamilyCost.stationWorkAndTool(
-                                recipe.getBaseTime(),
-                                ResourceLocation.fromNamespaceAndPath(
-                                "auto_storage", "engineers_hammer"), 1),
-                        RecipePresentationKind.CRAFTING));
     }
 
     private static void registerArcFurnace(
@@ -127,63 +101,6 @@ public final class ImmersiveengineeringCompat {
                         RecipePresentationKind.CRAFTING));
     }
 
-    private static void registerCrusher(
-            DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
-    ) {
-        ResourceLocation id = descriptorId(machineDescriptors, "crusher");
-        registerStation(machineDescriptors, id, "crusher");
-        recipeFamilies.register(id.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
-                        CrusherRecipe.class,
-                        () -> IERecipeTypes.CRUSHER.get(),
-                        id,
-                        ImmersiveengineeringCompat::supportsCrusher,
-                        ImmersiveengineeringCompat::crusherPlan,
-                        recipe -> RecipeFamilyCost.stationWorkAndTool(
-                                recipe.getBaseTime(),
-                                ResourceLocation.fromNamespaceAndPath(
-                                "auto_storage", "engineers_hammer"), 1),
-                        RecipePresentationKind.CRAFTING));
-    }
-
-    private static void registerAlloy(
-            DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
-    ) {
-        ResourceLocation id = descriptorId(machineDescriptors, "alloy_smelter");
-        registerStation(machineDescriptors, id, "alloy_smelter");
-        recipeFamilies.register(id.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
-                        AlloyRecipe.class,
-                        () -> IERecipeTypes.ALLOY.get(),
-                        id,
-                        ImmersiveengineeringCompat::supportsAlloy,
-                        ImmersiveengineeringCompat::alloyPlan,
-                        recipe -> RecipeFamilyCost.stationWorkAndTool(
-                                recipe.time,
-                                ResourceLocation.fromNamespaceAndPath(
-                                "auto_storage", "engineers_hammer"), 1),
-                        RecipePresentationKind.CRAFTING));
-    }
-
-    private static void registerMetalPress(
-            DeferredRegister<MachineDescriptor> machineDescriptors,
-            DeferredRegister<RecipeFamily> recipeFamilies
-    ) {
-        ResourceLocation id = descriptorId(machineDescriptors, "metal_press");
-        registerStation(machineDescriptors, id, "metal_press");
-        recipeFamilies.register(id.getPath(), () ->
-                RecipeFamilyFactories.deterministicResources(
-                        MetalPressRecipe.class,
-                        () -> IERecipeTypes.METAL_PRESS.get(),
-                        id,
-                        ImmersiveengineeringCompat::supportsMetalPress,
-                        ImmersiveengineeringCompat::metalPressPlan,
-                        recipe -> RecipeFamilyCost.stationWork(recipe.getBaseTime()),
-                        RecipePresentationKind.CRAFTING));
-    }
-
     private static ResourceLocation descriptorId(
             DeferredRegister<MachineDescriptor> machineDescriptors,
             String machine
@@ -214,24 +131,6 @@ public final class ImmersiveengineeringCompat {
                         null));
     }
 
-    // ---------- Sawmill ----------
-
-    private static boolean supportsSawmill(SawmillRecipe recipe) {
-        return recipe != null
-                && recipe.input != null
-                && !recipe.input.isEmpty()
-                && recipe.output != null
-                && !recipe.output.get().isEmpty()
-                && recipe.getBaseTime() > 0;
-    }
-
-    private static TypedRecipePlan sawmillPlan(
-            SawmillRecipe recipe,
-            HolderLookup.Provider registries
-    ) {
-        return singleItemPlan(recipe, recipe.input, recipe.output, recipe.getBaseEnergy(), registries);
-    }
-
     // ---------- Arc Furnace ----------
 
     private static boolean supportsArcFurnace(ArcFurnaceRecipe recipe) {
@@ -245,20 +144,8 @@ public final class ImmersiveengineeringCompat {
                     && (recipe.secondaryOutputs == null || recipe.secondaryOutputs.isEmpty())
                     && recipe.slag != null && recipe.slag.get().isEmpty()
                     && recipe.getBaseTime() > 0;
-            org.slf4j.LoggerFactory.getLogger("IECompat").info(
-                    "arc supports {}: in={} out={} sec={} slag={} time={}",
-                    ok,
-                    recipe == null ? null : recipe.input.getBaseIngredient().getItems().length,
-                    recipe == null || recipe.output == null ? null
-                            : recipe.output.getLazyList().size(),
-                    recipe == null ? null : (recipe.secondaryOutputs == null ? 0
-                            : recipe.secondaryOutputs.size()),
-                    recipe == null || recipe.slag == null ? null : recipe.slag.get(),
-                    recipe == null ? -1 : recipe.getBaseTime());
             return ok;
         } catch (RuntimeException failure) {
-            org.slf4j.LoggerFactory.getLogger("IECompat")
-                    .error("arc supports threw", failure);
             return false;
         }
     }
@@ -268,18 +155,18 @@ public final class ImmersiveengineeringCompat {
             HolderLookup.Provider registries
     ) {
         try {
-            TypedRecipePlan plan = multiItemPlan(recipe, recipe.input, recipe.additives, recipe.output.getLazyList().get(0), recipe.getBaseEnergy(), registries);
-            org.slf4j.LoggerFactory.getLogger("IECompat").info(
-                    "arc plan: inputs={} keys={}",
-                    plan.inputs().size(),
-                    plan.inputs().stream()
-                            .flatMap(i -> i.alternatives().stream())
-                            .map(k -> k.kindId().toString() + "/" + k.resourceId())
-                            .toList());
-            return plan;
+            return multiItemPlan(
+                    recipe,
+                    recipe.input,
+                    recipe.additives,
+                    recipe.output.getLazyList().get(0),
+                    recipe.getBaseEnergy(),
+                    registries,
+                    List.of(TypedRecipeInput.consume(
+                            descriptorResourceKey(ResourceLocation.fromNamespaceAndPath(
+                                    "auto_storage", "graphite_electrode")),
+                            1)));
         } catch (RuntimeException failure) {
-            org.slf4j.LoggerFactory.getLogger("IECompat")
-                    .error("arc plan failed", failure);
             throw failure;
         }
     }
@@ -288,7 +175,10 @@ public final class ImmersiveengineeringCompat {
 
     private static boolean supportsBottling(BottlingMachineRecipe recipe) {
         return recipe != null
-                && recipe.inputs != null && !recipe.inputs.isEmpty()
+                && recipe.inputs != null && recipe.inputs.size() == 1
+                && recipe.fluidInput != null
+                && recipe.fluidInput.amount() > 0
+                && recipe.fluidInput.getFluids().length > 0
                 && recipe.output != null && recipe.output.getLazyList().size() == 1
                 && !recipe.output.getLazyList().get(0).get().isEmpty()
                 && recipe.getBaseTime() > 0;
@@ -303,75 +193,11 @@ public final class ImmersiveengineeringCompat {
                         keys(recipe.inputs.get(0).getBaseIngredient(), registries),
                         recipe.inputs.get(0).getCount()))
                 .output(primary(recipe.output.getLazyList().get(0), registries));
-        addFluidInput(builder, recipe.fluidInput);
+        addFluidInput(builder, recipe.fluidInput, registries);
         return finish(builder, recipe.output.getLazyList().get(0), recipe.getBaseEnergy());
     }
 
-    // ---------- Crusher ----------
-
-    private static boolean supportsCrusher(CrusherRecipe recipe) {
-        return recipe != null
-                && recipe.input != null && !recipe.input.isEmpty()
-                && recipe.output != null && !recipe.output.get().isEmpty()
-                && (recipe.secondaryOutputs == null || recipe.secondaryOutputs.isEmpty())
-                && recipe.getBaseTime() > 0;
-    }
-
-    private static TypedRecipePlan crusherPlan(
-            CrusherRecipe recipe,
-            HolderLookup.Provider registries
-    ) {
-        return singleItemPlan(recipe, recipe.input, recipe.output, recipe.getBaseEnergy(), registries);
-    }
-
-    // ---------- Alloy ----------
-
-    private static boolean supportsAlloy(AlloyRecipe recipe) {
-        return recipe != null
-                && recipe.input0 != null && !recipe.input0.getBaseIngredient().isEmpty()
-                && recipe.input1 != null && !recipe.input1.getBaseIngredient().isEmpty()
-                && recipe.output != null && !recipe.output.get().isEmpty()
-                && recipe.time > 0;
-    }
-
-    private static TypedRecipePlan alloyPlan(
-            AlloyRecipe recipe,
-            HolderLookup.Provider registries
-    ) {
-        return multiItemPlan(recipe, null, List.of(recipe.input0, recipe.input1), recipe.output, 0, registries);
-    }
-
-    // ---------- Metal Press ----------
-
-    private static boolean supportsMetalPress(MetalPressRecipe recipe) {
-        return recipe != null
-                && recipe.input != null && !recipe.input.getBaseIngredient().isEmpty()
-                && recipe.output != null && !recipe.output.get().isEmpty()
-                && recipe.mold != null
-                && recipe.getBaseTime() > 0;
-    }
-
-    private static TypedRecipePlan metalPressPlan(
-            MetalPressRecipe recipe,
-            HolderLookup.Provider registries
-    ) {
-        return multiItemPlan(recipe, recipe.input, List.of(), recipe.output, recipe.getBaseEnergy(), registries);
-    }
-
     // ---------- shared helpers ----------
-
-    private static TypedRecipePlan singleItemPlan(
-            MultiblockRecipe recipe,
-            Ingredient ingredient,
-            TagOutput output,
-            int energy,
-            HolderLookup.Provider registries
-    ) {
-        blusunrize.immersiveengineering.api.crafting.IngredientWithSize primary =
-                new blusunrize.immersiveengineering.api.crafting.IngredientWithSize(
-                        ingredient, 1);
-        return multiItemPlan(recipe, primary, List.of(), output, energy, registries);
-    }
 
     private static TypedRecipePlan multiItemPlan(
             Object recipe,
@@ -380,6 +206,19 @@ public final class ImmersiveengineeringCompat {
             TagOutput output,
             int energy,
             HolderLookup.Provider registries
+    ) {
+        return multiItemPlan(
+                recipe, primary, additives, output, energy, registries, List.of());
+    }
+
+    private static TypedRecipePlan multiItemPlan(
+            Object recipe,
+            blusunrize.immersiveengineering.api.crafting.IngredientWithSize primary,
+            List<blusunrize.immersiveengineering.api.crafting.IngredientWithSize> additives,
+            TagOutput output,
+            int energy,
+            HolderLookup.Provider registries,
+            List<TypedRecipeInput> extraInputs
     ) {
         TypedRecipePlan.Builder builder = TypedRecipePlan.builder();
         if (primary != null) {
@@ -392,6 +231,7 @@ public final class ImmersiveengineeringCompat {
                     keys(additive.getBaseIngredient(), registries),
                     additive.getCount()));
         }
+        for (TypedRecipeInput extraInput : extraInputs) builder.input(extraInput);
         builder.output(primaryOutput(output, registries));
         return finish(builder, output, energy);
     }
@@ -414,16 +254,15 @@ public final class ImmersiveengineeringCompat {
 
     private static void addFluidInput(
             TypedRecipePlan.Builder builder,
-            SizedFluidIngredient fluidInput
+            SizedFluidIngredient fluidInput,
+            HolderLookup.Provider registries
     ) {
-        if (fluidInput != null && fluidInput.amount() > 0) {
-            for (var stack : fluidInput.getFluids()) {
-                builder.input(TypedRecipeInput.consume(
-                        StorageResourceKey.fluid(stack.copyWithAmount(1), null),
-                        fluidInput.amount()));
-                break;
-            }
-        }
+        List<StorageResourceKey> alternatives = java.util.Arrays.stream(
+                fluidInput.getFluids())
+                .map(stack -> StorageResourceKey.fluid(
+                        stack.copyWithAmount(1), registries))
+                .toList();
+        builder.input(TypedRecipeInput.consumeAny(alternatives, fluidInput.amount()));
     }
 
     private static TypedRecipeOutput primaryOutput(
@@ -453,6 +292,15 @@ public final class ImmersiveengineeringCompat {
                         stack.copyWithCount(1), registries))
                 .distinct()
                 .toList();
+    }
+
+    private static StorageResourceKey descriptorResourceKey(ResourceLocation descriptorId) {
+        CompoundTag variant = new CompoundTag();
+        variant.putString("descriptorId", descriptorId.toString());
+        return StorageResourceKey.of(
+                StorageResourceKindApi.WORK_KIND,
+                ResourceLocation.fromNamespaceAndPath("auto_storage", "descriptor"),
+                variant);
     }
 
     private static Item requiredItem(ResourceLocation id) {

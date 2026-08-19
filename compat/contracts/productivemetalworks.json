@@ -41,16 +41,8 @@
    ],
    "station": {
     "category": "process",
-    "descriptor_id": "auto_storage:productivemetalworks_casting_table",
+    "descriptor_id": "auto_storage:productivemetalworks_casting_basin",
     "variants": [
-     {
-      "bounds": "plain block item; upgrades are not inferred",
-      "item": "productivemetalworks:casting_table",
-      "rate": {
-       "denominator": 1,
-       "numerator": 1
-      }
-     },
      {
       "bounds": "plain block item; upgrades are not inferred",
       "item": "productivemetalworks:casting_basin",
@@ -168,14 +160,6 @@
        "denominator": 1,
        "numerator": 1
       }
-     },
-     {
-      "bounds": "plain block item; upgrades are not inferred",
-      "item": "productivemetalworks:casting_basin",
-      "rate": {
-       "denominator": 1,
-       "numerator": 1
-      }
      }
     ]
    },
@@ -234,13 +218,14 @@
  "kind": "auto_storage_compat_contract",
  "matrix": {
   "acceptedRecipes": [
-   "productivemetalworks:item_melting",
-   "productivemetalworks:item_casting",
-   "productivemetalworks:block_casting"
+   "productivemetalworks:melting/ancient_debris",
+   "productivemetalworks:casting/ender_eye",
+   "productivemetalworks:casting/blue_foundry_capacitor"
   ],
   "descriptors": [
    "auto_storage:productivemetalworks_foundry",
-   "auto_storage:productivemetalworks_casting_table"
+   "auto_storage:productivemetalworks_casting_table",
+   "auto_storage:productivemetalworks_casting_basin"
   ],
   "mods": [
    "productivemetalworks"
@@ -370,7 +355,7 @@
     }
    ]
   },
-  "expected_game_tests": 8,
+  "expected_game_tests": 9,
   "fixture": "productivemetalworksFixture",
   "game_test_task": "runProductivemetalworksGameTestServer",
   "gradle_tasks": [

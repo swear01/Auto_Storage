@@ -76,28 +76,39 @@ public final class ProductivetreesIntegrationGameTests {
     ) {
         withCore(helper, (level, core, player) -> {
             var manager = level.getRecipeManager();
-            var holder = manager.byKey(pt("sawmill/dark_oak_planks_from_log")).orElse(null);
+            var holder = manager.byKey(pt("sawmill/brazilwood_planks_from_log")).orElse(null);
             if (holder == null
                     || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-                helper.fail("Sawmill recipe must be supported: sawmill/dark_oak_planks_from_log");
+                helper.fail("Sawmill recipe must be supported: sawmill/brazilwood_planks_from_log");
                 return;
             }
-            seedItem(core, Items.DARK_OAK_LOG, 1);
+            seedItem(core, ptItem("brazilwood_log"), 1);
             installStation(core, player, ptItem("sawmill"));
             addCoreTicks(core, 10_000);
             var menu = new CraftingTerminalMenu(
                     610, player.getInventory(), core);
             boolean requested = menu.handleRecipeRequest(
-                    level, pt("sawmill/dark_oak_planks_from_log"), 1,
+                    level, pt("sawmill/brazilwood_planks_from_log"), 1,
                     CraftingDestination.NONE, player);
             boolean committed = requested
                     && menu.computeCraftPreview(core, player).craftable() >= 1
                     && menu.handleRecipeRequest(
-                            level, pt("sawmill/dark_oak_planks_from_log"), 1,
+                            level, pt("sawmill/brazilwood_planks_from_log"), 1,
                             CraftingDestination.STORAGE, player);
-            long planks = core.getItemCount(ItemKey.of(new ItemStack(Items.DARK_OAK_PLANKS)));
+            var recipe = (cy.jdkdigital.productivetrees.recipe.SawmillRecipe)
+                    holder.value();
+            ItemStack tertiary = recipe.tertiary().copy();
+            if (tertiary.isEmpty()) {
+                helper.fail("Brazilwood sawmill recipe must have a tertiary output");
+                return;
+            }
+            long planks = core.getItemCount(ItemKey.of(
+                    new ItemStack(ptItem("brazilwood_planks"))));
             long sawdust = core.getItemCount(ItemKey.of(new ItemStack(ptItem("sawdust"))));
-            long logs = core.getItemCount(ItemKey.of(new ItemStack(Items.DARK_OAK_LOG)));
+            long tertiaryCount = core.getItemCount(ItemKey.of(
+                    tertiary.copyWithCount(1)));
+            long logs = core.getItemCount(ItemKey.of(
+                    new ItemStack(ptItem("brazilwood_log"))));
             if (!committed || planks != 6) {
                 helper.fail("Sawmill craft did not commit: planks=" + planks
                         + " logs=" + logs + " sawdust=" + sawdust
@@ -108,6 +119,11 @@ public final class ProductivetreesIntegrationGameTests {
             if (sawdust != 2) {
                 helper.fail("Sawmill craft produced the wrong sawdust count: "
                         + sawdust + " (planks=" + planks + " logs=" + logs + ")");
+                return;
+            }
+            if (tertiaryCount != tertiary.getCount()) {
+                helper.fail("Sawmill craft produced the wrong tertiary count: "
+                        + tertiaryCount + " expected=" + tertiary.getCount());
                 return;
             }
             if (logs != 0) {

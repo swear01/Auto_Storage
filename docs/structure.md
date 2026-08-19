@@ -60,9 +60,9 @@
 | `docs/railcraft-compatibility.md` | Railcraft Reborn 1.2.10 exact target/source/6-artifact ancestry scanner-format-17 audit、52→13 candidate migration及零production-family fail-closed判定。 |
 | `src/railcraftFixture/` | 代表性Railcraft Reborn 1.2.10 present-mod隔離fixture；8個tests鎖住Crusher/Blast/Coke/Rolling、special crafting、descriptor ownership與all-candidate fail-closed。 |
 | `docs/pneumaticcraft-compatibility.md` | PneumaticCraft Air/pressure/heat/multiblock API審計與零production-family fail-closed判定。 |
-| `docs/productivemetalworks-compatibility.md` | Productive Metalworks 1.15.0 scanner-format-17 audit：Foundry/casting 全數拒絕與零production-family fail-closed（outcome C）。 |
-| `src/compat/productivemetalworks/` | Productive Metalworks present-mod entrypoint；registers no stations/families。 |
-| `src/productivemetalworksFixture/` | 代表性 Productive Metalworks 1.15.0 present-mod 隔離 fixture；8 個 tests 鎖住 melting/alloying/casting/entity boundaries。 |
+| `docs/productivemetalworks-compatibility.md` | Productive Metalworks 1.15.0 scanner-format-17 audit：Foundry melting與consume-cast table/basin casting accepted；alloying、entity melting與reusable molds fail closed。 |
+| `src/compat/productivemetalworks/` | Productive Metalworks present-mod entrypoint；registers Foundry melting與casting stations/families。 |
+| `src/productivemetalworksFixture/` | 代表性 Productive Metalworks 1.15.0 present-mod 隔離 fixture；9 個 tests 鎖住 melting/alloying/casting/entity boundaries與legacy basin persistence migration。 |
 | `src/pneumaticCraftFixture/` | 代表性PneumaticCraft 8.2.22 present-mod隔離fixture；9個tests鎖住Air與七類machine recipes不被不安全接受。 |
 | `src/extendedCraftingFixture/` | 代表性Extended Crafting 7.0.8 + Cucumber 8.0.16隔離GameTest fixture；4個tests驗Ultimate Table gating、9×9/81-position exact commit、one-short no-op、full-destination rollback與真實Ultimate Singularity component identity。 |
 | `docs/extended-crafting-compatibility.md` | Extended Crafting shaped-table/Ultimate Singularity支持、81-input boundary、representative fixture政策與fail-closed transformer邊界。 |
@@ -87,8 +87,8 @@
 | `src/justdirethingsFixture/` | 代表性Just Dire Things隔離GameTest fixture；5個tests驗descriptor、vanilla crafting支援、Generator exact FE/work與兩個atomic rollback。 |
 | `src/compat/generatorgalore/` | Generator Galore 1.21.1-1.6.3 Compat Kit contract module：十二台generator stations（live JSON registry + SolidFuelMap datamap，rate×burnTime×consumptionRate；enchantment retained書）。 |
 | `src/generatorgaloreFixture/` | 代表性Generator Galore隔離GameTest fixture；15個tests驗十二台generator exact FE/work（coal/food/enchanted book/ender pearl/dragon breath）、retained book與兩個atomic rollback。 |
-| `docs/immersiveengineering-compatibility.md` | Immersive Engineering 12.4.2-194 scanner-format-17 audit：44 actual recipe classes 全拒、10/9 ancestry、multiblock/live fuel/chance/TagOutput 邊界與零production-family outcome C。 |
-| `src/immersiveengineeringFixture/` | 代表性 Immersive Engineering present-mod隔離fixture；8個tests鎖住 Alloy/Coke Oven/Blast Furnace/Crusher/Cloche/Metal Press/Arc Furnace 與全受審type掃描仍fail closed。 |
+| `docs/immersiveengineering-compatibility.md` | Immersive Engineering 12.4.2-194 scanner-format-17 audit：44 actual recipe classes，Arc Furnace與Bottling Machine兩個deterministic machine subsets accepted，其餘multiblock/live fuel/chance/TagOutput 邊界維持 fail closed。 |
+| `src/immersiveengineeringFixture/` | 代表性 Immersive Engineering present-mod隔離fixture；10個tests鎖住兩個accepted machine families、Coke Oven/Blast Furnace/Cloche fail-closed與全受審type掃描。 |
 | `docs/integrated-dynamics-compatibility.md` | Integrated Dynamics 1.33.3 format-17審計（1,475 target classes／10 structural recipe classes／18 ancestry）、Drying Basin / Mechanical Drying Basin / Mechanical Squeezer exact item/fluid/FE/work contract（fluid primary only when item output truly absent）、Coal Generator station（burnTime×20）、multi-mod `--mod-id` scan evidence、contract-owned exact-SHA runtime transform與11個isolated GameTests。 |
 | `src/integratedDynamicsFixture/` | 隔離載入代表性Integrated Dynamics 1.33.3 + Cyclops Core + Common Capabilities；10個GameTests驗三個deterministic families（含 Mechanical Drying Basin FE/work）、exact fluid remainder、chance/manual Squeezer/derived item+fluid fail-closed、item destination capacity與fluid `Long.MAX_VALUE` overflow atomic rollback。 |
 | `docs/integrated-crafting-compatibility.md` | Integrated Crafting 1.4.6 format-17 Outcome C audit（80 target classes／1 recipe class／4 ancestry）與零production-family fail-closed判定。 |

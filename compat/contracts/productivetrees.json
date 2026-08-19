@@ -31,13 +31,13 @@
     {
      "amount": "recipe.secondary().getCount() when non-empty",
      "resource_kind": "item",
-     "role": "primary",
+     "role": "remainder",
      "selector": "recipe.secondary() explicit ItemStack"
     },
     {
      "amount": "recipe.tertiary().getCount() when non-empty",
      "resource_kind": "item",
-     "role": "primary",
+     "role": "remainder",
      "selector": "recipe.tertiary() explicit ItemStack"
     }
    ],
@@ -116,7 +116,7 @@
  "kind": "auto_storage_compat_contract",
  "matrix": {
   "acceptedRecipes": [
-   "productivetrees:sawmill"
+   "productivetrees:sawmill/dark_oak_planks_from_log"
   ],
   "descriptors": [
    "auto_storage:productivetrees_sawmill"
@@ -128,7 +128,7 @@
    "namespaces": [
     "productivetrees"
    ],
-   "sha256": "eccbcc9cd809eaa8f8cb312d4dffeb3941b0c5bda9d152f94de785b457a963f1"
+   "sha256": "6a0c5c6c6c814277425756bd668778e85cba99eaae70c903fa44cdd37ed01c32"
   },
   "rejectedDescriptors": [],
   "rejectedResourceKinds": [],

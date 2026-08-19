@@ -1,13 +1,22 @@
+2026-08-19 PR #143 review correction：Arc Furnace 的 accepted plan 現在明確 consume 一個 `auto_storage:graphite_electrode` descriptor-work unit，並由 fixture 先驗無 electrode 的 atomic rejection、再驗成功 craft 後 exact decrement；Machine descriptor 的 hammer/electrode representative 延遲取 target registry item。Immersive Engineering Sawmill 的真實 recipe 同時有 sawblade-dependent stripped/output mode 與 secondary products，station abstraction 沒有 blade state，故整個目前 Sawmill family fail-closed，不再註冊虛假的可用 station或丟失secondary。Compat contract、matrix accepted IDs、fixture與active docs同步為兩個IE accepted families；Crusher、Alloy Smelter與Metal Press也維持fail-closed，避免fuel、mold或TagOutput preference遺失。
+
+2026-08-19 PR #143 latest-head Codex follow-up：IE current acceptance is narrowed to Arc Furnace/Bottling only (Alloy live furnace fuel, Crusher/Metal Press TagOutput origin, and Metal Press mold state remain rejected); Bottling preserves every fluid alternative. Productive Metalworks separates casting-table and casting-basin descriptors and explicitly migrates legacy basin machine/work entries; Productive Trees marks sawdust/tertiary as remainders and the fixture exercises a non-empty tertiary output; melting work accumulates with checked `long` arithmetic. Contract matrices, fixtures, manifests and active docs were regenerated together. The same review also closes the Productive Trees contract/descriptor inventory digest drift and applies the shared-index 9 MiB gate to both 10k and 30k runs.
+
+2026-08-18 PR #143 CI performance follow-up：GitHub matrix 的 cold Craftable listing 在完整 optional pack 下偶發超過 50 ms；先移除 Immersive Engineering Arc Furnace compatibility hot path 的逐recipe INFO/ERROR logging，再讓每次 Craftable listing 對 Core 的 `storedItemSources(item)` 與 item-total lookup 做 listing-local lazy memoization，避免 30k exact variants 反覆建立同item source list，也不在 listing 開始時 eager 複製整個30k source map；同一DataComponent predicate在一次listing內共用matching結果，沒有item representatives的custom/fluid-aware ingredient直接fail-closed，EnderIO ConduitIngredient則採其完整item coverage。10k/30k matrix 都通過 3/3；最新 reviewfix3 craftable prepare 分別為 36.344/32.742 ms，shared index 5,894,704/5,862,608 bytes，per-menu 119,526/120,001 bytes。50 ms、9 MiB、128 KiB thresholds 未放寬。
+
 2026-08-16 工具耐久→transform 資源（用戶指示）：
 - 複製 Axe Energy 模式：工具 item 的剩餘耐久 × (unbreaking+1) × count → typed 資源（axe: MachineEnergyTable.AXE_ID transform descriptor；craft 經 hasAxeEnergy/consumeAxeEnergy 消耗）。
 - IE 電極：新增 ELECTRODE_ID transform descriptor（graphite_electrode → 耐久點數）；Arc Furnace 每 craft 消耗 N 點電極資源（取代 ToolCost 扣耐久想法 — 用戶要資源模型）。
 - 可泛化到任何可消耗工具。
+- Optional tool descriptors resolve their target item inside the deferred
+  descriptor supplier after the target mod's item registry is ready; absent
+  mods never register the descriptor and loaded-but-missing items fail loudly.
 
 2026-08-16 Arc Furnace 設計（#136 補充）：
 - 多工 = station work 累計機制天然支援（多個 crafts 同時累計 work）— rate 對應電弧吞吐。
 - 78 recipes：48 無機率（確定性），9 個含 additives（多輸入合金 — deterministicResources 1-81 inputs ✓），0 多輸出。
 - 石墨電極（graphite_electrode，耐久 ~16）＝ ToolCost：合成需庫存電極 + 每次扣耐久（真實電極損耗；不需額外石墨→能量轉換）。
-- 30 個 chance（slag/secondary）fail-closed；tag_empty conditions 由 recipe manager 載入時解析。
+- 30 個 chance（slag/secondary）fail-closed；tag_empty conditions 由 recipe manager 載入時解析。Immersive Engineering 的 Arc Furnace 與 Bottling Machine deterministic subsets 使用 master-block station、energy/work/tool atomic transaction；Arc Furnace 另消耗 graphite electrode descriptor resource，Bottling 只接受恰一個 item input；Sawmill、Crusher、Alloy Smelter、Metal Press與其餘multiblock/live/chance/TagOutput邊界維持fail-closed。
 
 2026-08-16 IE multiblock 擴充設計（#135/#136）：
 - IE 無獨立 dummy item — multiblock 由 master block item 代表（crusher/sawmill/arc_furnace/alloy_smelter/bottling_machine/metal_press — 放置生成結構，BlockEntityDummy 佔位）— station item 用機器 block item（內建渲染）。
@@ -358,9 +367,9 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 | Extended Crafting 整合測試 | `./gradlew runExtendedCraftingGameTestServer`（隔離載入代表性Extended Crafting 7.0.8與Cucumber 8.0.16，固定要求4個Ultimate Table gating、9×9/81-position exact commit、one-short no-op、destination rollback與真實Ultimate Singularity component identity GameTests全過；不是玩家端exact dependency pin） |
 | Ender IO 整合測試 | `./gradlew runEnderIoGameTestServer`（隔離載入代表性Ender IO 8.2.11-beta artifact，固定要求6個Alloy Smelting registration/rate、官方Conductive Alloy配方、FE/work/ingredient shortage、destination overflow rollback，以及smelting-batch與Sag Mill fail-closed GameTests全過；不是玩家端exact dependency pin） |
 | Theurgy 整合測試 | `./gradlew runTheurgyGameTestServer`（隔離載入代表性Theurgy 1.73.1、Modonomicon 1.105.0與GeckoLib 4.5.8，固定要求9個Calcination/Distillation/Liquefaction registration、item/solvent/work、rejected-family、shortage/overflow rollback GameTests全過；不是玩家端exact dependency pin） |
-| Productive Metalworks 整合測試 | `./gradlew runProductivemetalworksGameTestServer`（隔離載入代表性 Productive Metalworks 1.15.0，固定要求8個Foundry melting/alloying/casting/entity fail-closed GameTests全過；不是玩家端exact dependency pin） |
+| Productive Metalworks 整合測試 | `./gradlew runProductivemetalworksGameTestServer`（隔離載入代表性 Productive Metalworks 1.15.0，固定要求9個Foundry melting/alloying/casting/entity與legacy basin persistence migration GameTests全過；不是玩家端exact dependency pin） |
 | Actually Additions 整合測試 | `./gradlew runActuallyadditionsGameTestServer`（隔離載入代表性Actually Additions 1.3.26，固定要求14個Crushing/Pressing/Fermenting registration/FE/work/fluid/bucketless/primary-and-secondary-chance/guaranteed-secondary/rollback GameTests全過；不是玩家端exact dependency pin） |
-| Immersive Engineering 整合測試 | `./gradlew runImmersiveengineeringGameTestServer`（隔離載入代表性12.4.2-194，固定要求8個multiblock/live-fuel/chance/TagOutput fail-closed GameTests全過；不是玩家端exact dependency pin；亦可由 `runCompatFixtureGameTestServers` aggregate 覆蓋） |
+| Immersive Engineering 整合測試 | `./gradlew runImmersiveengineeringGameTestServer`（隔離載入代表性12.4.2-194，固定要求10個六個deterministic machine family與multiblock/live-fuel/chance/TagOutput fail-closed邊界GameTests全過；不是玩家端exact dependency pin；亦可由 `runCompatFixtureGameTestServers` aggregate 覆蓋） |
 | Integrated Dynamics 整合測試 | `./gradlew runIntegratedDynamicsGameTestServer`（隔離載入代表性1.33.3、Cyclops Core與Common Capabilities，固定要求10個Drying Basin/Mechanical Drying Basin/Mechanical Squeezer/chance/derived-output fail-closed GameTests全過；不是玩家端exact dependency pin） |
 | Integrated Crafting 整合測試 | `./gradlew runIntegratedCraftingGameTestServer`（隔離載入代表性1.4.6與ID companions，固定要求4個present-mod/零family/DeadBush fail-closed GameTests全過；不是玩家端exact dependency pin） |
 | Optional-mod fixtures aggregate | `./gradlew runCompatFixtureGameTestServers`（由所有`compat-module.json`的fixture metadata自動形成依序執行的aggregate；新增完整descriptor不需修改共享task清單） |

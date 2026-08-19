@@ -151,6 +151,7 @@ public final class com.swear.autostorage.MachineDescriptorApi {
   public static final int MAX_INSTALLED_COUNT;
   public static final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<com.swear.autostorage.MachineDescriptor>> REGISTRY_KEY;
   public static net.neoforged.neoforge.registries.DeferredRegister<com.swear.autostorage.MachineDescriptor> createDeferredRegister(java.lang.String);
+  public static void registerPersistenceMigration(net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation, net.minecraft.resources.ResourceLocation);
 }
 
 public final class com.swear.autostorage.MachineVariant {

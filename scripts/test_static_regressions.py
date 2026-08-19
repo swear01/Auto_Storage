@@ -1173,6 +1173,11 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("assertRecipeInventories", matrix)
         self.assertIn("CompatibilityMatrixManifest", matrix)
         self.assertIn("CompatibilityMatrixManifest", coexistence)
+        self.assertNotIn("STORED_TYPE_COUNT == 10_000", matrix)
+        self.assertIn(
+            "if (indexRetainedBytes >= MAX_BASELINE_INDEX_RETAINED_BYTES)",
+            matrix,
+        )
         self.assertNotIn('"ae2"', coexistence)
         self.assertNotIn("ae2_inscriber", coexistence)
         companions = self.read_required(
@@ -2575,6 +2580,10 @@ class StaticRegressionTests(unittest.TestCase):
         fixture_metadata = self.read_required(
             "src/immersiveengineeringFixture/resources/META-INF/neoforge.mods.toml"
         )
+        compat = self.read_required(
+            "src/compat/immersiveengineering/java/com/swear/autostorage/compat/"
+            "immersiveengineering/ImmersiveengineeringCompat.java"
+        )
         compatibility_doc = self.read_required(
             "docs/immersiveengineering-compatibility.md"
         )
@@ -2598,23 +2607,15 @@ class StaticRegressionTests(unittest.TestCase):
         descriptor = json.loads(module_index)
         self.assertEqual(
             [
-                "auto_storage:immersiveengineering_sawmill",
                 "auto_storage:immersiveengineering_arc_furnace",
                 "auto_storage:immersiveengineering_bottling_machine",
-                "auto_storage:immersiveengineering_crusher",
-                "auto_storage:immersiveengineering_alloy_smelter",
-                "auto_storage:immersiveengineering_metal_press",
             ],
             descriptor["matrix"]["descriptors"],
         )
         self.assertEqual(
             [
-                "immersiveengineering:sawmill",
-                "immersiveengineering:arc_furnace",
-                "immersiveengineering:bottling_machine",
-                "immersiveengineering:crusher",
-                "immersiveengineering:alloy",
-                "immersiveengineering:metal_press",
+                "immersiveengineering:arcfurnace/insulating_glass",
+                "immersiveengineering:bottling/black_concrete_powder",
             ],
             descriptor["matrix"]["acceptedRecipes"],
         )
@@ -2631,6 +2632,8 @@ class StaticRegressionTests(unittest.TestCase):
             descriptor["matrix"]["recipeInventory"]["sha256"],
         )
         self.assertIn("implements AutoStorageCompatModule", module)
+        self.assertIn("recipe.inputs.size() == 1", compat)
+        self.assertIn("RecipeFamilyCost.stationWorkAndTool", compat)
         self.assertNotIn("import blusunrize.immersiveengineering.", module)
         self.assertIn('modId="immersiveengineering"', fixture_metadata)
         self.assertIn(
@@ -2653,7 +2656,7 @@ class StaticRegressionTests(unittest.TestCase):
             r"id\.getNamespace\(\)\.equals\(\"immersiveengineering\"\)\s*"
             r"\|\|\s*id\.getPath\(\)\.startsWith\(\"immersiveengineering_\"\)",
         )
-        self.assertIn("outcome **C**", compatibility_doc)
+        self.assertIn("accepts two deterministic machine families", compatibility_doc)
         self.assertIn(
             "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
             compatibility_doc,
@@ -2667,12 +2670,15 @@ class StaticRegressionTests(unittest.TestCase):
     def test_productivetrees_compat_matrix_descriptor(self):
         descriptor = json.loads(
             (ROOT / "src/compat/productivetrees/compat-module.json").read_text())
+        contract = json.loads(
+            (ROOT / "compat/contracts/productivetrees.json").read_text())
+        self.assertEqual(contract["matrix"], descriptor["matrix"])
         self.assertEqual(
             ["auto_storage:productivetrees_sawmill"],
             descriptor["matrix"]["descriptors"],
         )
         self.assertEqual(
-            ["productivetrees:sawmill"],
+            ["productivetrees:sawmill/dark_oak_planks_from_log"],
             descriptor["matrix"]["acceptedRecipes"],
         )
         self.assertEqual(
@@ -6077,18 +6083,19 @@ class StaticRegressionTests(unittest.TestCase):
             r"\bprivate\s+List<RecipeAdapterMatch>\s+resolveVariants\s*\(",
             "CraftableRecipeCatalog.CatalogEntry.resolveVariants",
         )
+        self.assertIn("if (baseMatch == null) return List.of();", resolve)
+        self.assertIn(
+            "RecipeAdapterMatch.Contract contract = baseMatch.contract();",
+            resolve,
+        )
+        self.assertIn("if (contract == null) return List.of();", resolve)
         self.assertRegex(
             resolve,
             r"if\s*\(\s*!adapter\.requiresAvailableStacksForVariants\(\)\s*"
-            r"&&\s*baseMatch\.typedRecipePlan\(\)\.isPresent\(\)\s*\)\s*\{\s*"
+            r"&&\s*!contract\.pendingTypedPlan\(\)\s*\)\s*\{\s*"
             r"return\s+List\.of\(baseMatch\);",
-            "an already-resolved stack-independent typed match must not rerun adapter "
-            "variant resolution during Craftable preparation",
-        )
-        self.assertNotIn(
-            "pendingTypedPlan",
-            resolve,
-            "legacy and built-in contracts still need adapter-level output validation",
+            "a stack-independent match must not rerun adapter variant resolution during "
+            "Craftable preparation",
         )
         self.assertLess(
             resolve.index("return List.of(baseMatch)"),
