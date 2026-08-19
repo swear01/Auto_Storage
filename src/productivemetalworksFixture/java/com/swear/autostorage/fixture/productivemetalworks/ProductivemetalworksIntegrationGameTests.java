@@ -142,10 +142,21 @@ public final class ProductivemetalworksIntegrationGameTests {
             }
             seedItem(core, pmwItem("blue_fire_bricks"), 1);
             seedResource(core, fluid(core, "molten_redstone"), 1000);
+            installStation(core, player, pmwItem("casting_table"));
+            addCoreTicks(core, 10_000);
+            var wrongStationMenu = new CraftingTerminalMenu(
+                    611, player.getInventory(), core);
+            boolean acceptedAtTable = wrongStationMenu.handleRecipeRequest(
+                    level, pmw("casting/blue_foundry_capacitor"), 1,
+                    CraftingDestination.STORAGE, player);
+            if (acceptedAtTable) {
+                helper.fail("Basin casting recipe was accepted at the casting table");
+                return;
+            }
             installStation(core, player, pmwItem("casting_basin"));
             addCoreTicks(core, 10_000);
             var menu = new CraftingTerminalMenu(
-                    611, player.getInventory(), core);
+                    612, player.getInventory(), core);
             boolean requested = menu.handleRecipeRequest(
                     level, pmw("casting/blue_foundry_capacitor"), 1,
                     CraftingDestination.NONE, player);
@@ -284,7 +295,7 @@ public final class ProductivemetalworksIntegrationGameTests {
                     AutoStorage.MODID, "productivemetalworks_casting_table"),
             ResourceLocation.fromNamespaceAndPath(
                     AutoStorage.MODID,
-                    "productivemetalworks_casting_table_basin"));
+                    "productivemetalworks_casting_basin"));
 
     private static final int STATIONS_PAGE_BUTTON = 29;
     private static final int STORAGE_PAGE_BUTTON = 14;

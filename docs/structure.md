@@ -60,7 +60,7 @@
 | `docs/railcraft-compatibility.md` | Railcraft Reborn 1.2.10 exact target/source/6-artifact ancestry scanner-format-17 audit、52→13 candidate migration及零production-family fail-closed判定。 |
 | `src/railcraftFixture/` | 代表性Railcraft Reborn 1.2.10 present-mod隔離fixture；8個tests鎖住Crusher/Blast/Coke/Rolling、special crafting、descriptor ownership與all-candidate fail-closed。 |
 | `docs/pneumaticcraft-compatibility.md` | PneumaticCraft Air/pressure/heat/multiblock API審計與零production-family fail-closed判定。 |
-| `docs/productivemetalworks-compatibility.md` | Productive Metalworks 1.15.0 scanner-format-17 audit：Foundry melting與consume-cast casting accepted；alloying、entity melting與reusable molds fail closed。 |
+| `docs/productivemetalworks-compatibility.md` | Productive Metalworks 1.15.0 scanner-format-17 audit：Foundry melting與consume-cast table/basin casting accepted；alloying、entity melting與reusable molds fail closed。 |
 | `src/compat/productivemetalworks/` | Productive Metalworks present-mod entrypoint；registers Foundry melting與casting stations/families。 |
 | `src/productivemetalworksFixture/` | 代表性 Productive Metalworks 1.15.0 present-mod 隔離 fixture；8 個 tests 鎖住 melting/alloying/casting/entity boundaries。 |
 | `src/pneumaticCraftFixture/` | 代表性PneumaticCraft 8.2.22 present-mod隔離fixture；9個tests鎖住Air與七類machine recipes不被不安全接受。 |

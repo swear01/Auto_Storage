@@ -2604,9 +2604,6 @@ class StaticRegressionTests(unittest.TestCase):
             [
                 "auto_storage:immersiveengineering_arc_furnace",
                 "auto_storage:immersiveengineering_bottling_machine",
-                "auto_storage:immersiveengineering_crusher",
-                "auto_storage:immersiveengineering_alloy_smelter",
-                "auto_storage:immersiveengineering_metal_press",
             ],
             descriptor["matrix"]["descriptors"],
         )
@@ -2614,9 +2611,6 @@ class StaticRegressionTests(unittest.TestCase):
             [
                 "immersiveengineering:arcfurnace/insulating_glass",
                 "immersiveengineering:bottling/black_concrete_powder",
-                "immersiveengineering:crusher/amethyst",
-                "immersiveengineering:alloysmelter/electrum",
-                "immersiveengineering:metalpress/blaze_rod",
             ],
             descriptor["matrix"]["acceptedRecipes"],
         )
@@ -2657,7 +2651,7 @@ class StaticRegressionTests(unittest.TestCase):
             r"id\.getNamespace\(\)\.equals\(\"immersiveengineering\"\)\s*"
             r"\|\|\s*id\.getPath\(\)\.startsWith\(\"immersiveengineering_\"\)",
         )
-        self.assertIn("accepts five deterministic machine families", compatibility_doc)
+        self.assertIn("accepts two deterministic machine families", compatibility_doc)
         self.assertIn(
             "45942985a4a4aebf265b8e22a0c54a96208637471f36f2532ff5d4911322debc",
             compatibility_doc,

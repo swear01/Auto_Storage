@@ -79,43 +79,25 @@ public final class ProductivemetalworksCompat {
             DeferredRegister<MachineDescriptor> machineDescriptors,
             DeferredRegister<RecipeFamily> recipeFamilies
     ) {
-        ResourceLocation id = descriptorId(machineDescriptors, "casting_table");
-        machineDescriptors.register(id.getPath(), () ->
-                MachineDescriptor.installableVariants(
-                        id,
-                        Component.translatable(
-                                "gui.auto_storage.station.productivemetalworks_"
-                                        + "casting_table"),
-                        () -> List.of(
-                                MachineVariant.of(
-                                        new ItemStack(requiredItem(
-                                                ResourceLocation.fromNamespaceAndPath(
-                                                        "productivemetalworks",
-                                                        "casting_table"))),
-                                        MachineWorkRate.ONE),
-                                MachineVariant.of(
-                                        new ItemStack(requiredItem(
-                                                ResourceLocation.fromNamespaceAndPath(
-                                                        "productivemetalworks",
-                                                        "casting_basin"))),
-                                        MachineWorkRate.ONE)),
-                        MachineCategory.PROCESS,
-                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
-                        null));
-        recipeFamilies.register(id.getPath(), () ->
+        ResourceLocation tableId = descriptorId(machineDescriptors, "casting_table");
+        registerCastingStation(machineDescriptors, tableId, "casting_table");
+        recipeFamilies.register(tableId.getPath(), () ->
                 RecipeFamilyFactories.deterministicResources(
                         ItemCastingRecipe.class,
                         () -> MetalworksRegistrator.ITEM_CASTING_TYPE.get(),
-                        id,
+                        tableId,
                         ProductivemetalworksCompat::supportsCasting,
                         ProductivemetalworksCompat::castingPlan,
                         recipe -> RecipeFamilyCost.stationWork(CASTING_WORK_TICKS),
                         RecipePresentationKind.CRAFTING));
-        recipeFamilies.register(id.getPath() + "_basin", () ->
+
+        ResourceLocation basinId = descriptorId(machineDescriptors, "casting_basin");
+        registerCastingStation(machineDescriptors, basinId, "casting_basin");
+        recipeFamilies.register(basinId.getPath(), () ->
                 RecipeFamilyFactories.deterministicResources(
                         BlockCastingRecipe.class,
                         () -> MetalworksRegistrator.BLOCK_CASTING_TYPE.get(),
-                        id,
+                        basinId,
                         ProductivemetalworksCompat::supportsCasting,
                         ProductivemetalworksCompat::castingPlan,
                         recipe -> RecipeFamilyCost.stationWork(CASTING_WORK_TICKS),
@@ -129,6 +111,27 @@ public final class ProductivemetalworksCompat {
         return ResourceLocation.fromNamespaceAndPath(
                 machineDescriptors.getNamespace(),
                 "productivemetalworks_" + machine);
+    }
+
+    private static void registerCastingStation(
+            DeferredRegister<MachineDescriptor> machineDescriptors,
+            ResourceLocation id,
+            String itemPath
+    ) {
+        machineDescriptors.register(id.getPath(), () ->
+                MachineDescriptor.installableVariants(
+                        id,
+                        Component.translatable(
+                                "gui.auto_storage.station.productivemetalworks_"
+                                        + itemPath),
+                        () -> List.of(MachineVariant.of(
+                                new ItemStack(requiredItem(
+                                        ResourceLocation.fromNamespaceAndPath(
+                                                "productivemetalworks", itemPath))),
+                                MachineWorkRate.ONE)),
+                        MachineCategory.PROCESS,
+                        MachineDescriptorApi.MAX_INSTALLED_COUNT,
+                        null));
     }
 
     private static void registerFoundryStation(
@@ -184,11 +187,16 @@ public final class ProductivemetalworksCompat {
     }
 
     private static RecipeFamilyCost meltingCost(ItemMeltingRecipe recipe) {
-        int work = 0;
-        for (FluidStack stack : recipe.result) {
-            work += stack.getAmount();
+        long work = 0;
+        try {
+            for (FluidStack stack : recipe.result) {
+                work = Math.addExact(work, stack.getAmount());
+            }
+        } catch (ArithmeticException exception) {
+            throw new IllegalArgumentException(
+                    "Productive Metalworks melting work overflow", exception);
         }
-        return RecipeFamilyCost.stationWork(Math.max(1, work));
+        return RecipeFamilyCost.stationWork(Math.max(1L, work));
     }
 
     // ---------- Casting ----------

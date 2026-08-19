@@ -127,7 +127,7 @@ public final class ProductivetreesCompat {
             extra.add(recipe.tertiary().copy());
         }
         for (ItemStack stack : extra) {
-            builder.output(primary(stack, registries));
+            builder.output(remainder(stack, registries));
         }
         return builder
                 .presentationOutput(output)
@@ -142,6 +142,15 @@ public final class ProductivetreesCompat {
             HolderLookup.Provider registries
     ) {
         return TypedRecipeOutput.primary(
+                StorageResourceKey.item(stack.copyWithCount(1), registries),
+                stack.getCount());
+    }
+
+    private static TypedRecipeOutput remainder(
+            ItemStack stack,
+            HolderLookup.Provider registries
+    ) {
+        return TypedRecipeOutput.remainder(
                 StorageResourceKey.item(stack.copyWithCount(1), registries),
                 stack.getCount());
     }

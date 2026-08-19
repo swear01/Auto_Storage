@@ -55,14 +55,8 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void alloy_smelter_recipes_are_supported(GameTestHelper helper) {
-        var holder = helper.getLevel().getRecipeManager().byKey(ie("alloysmelter/electrum")).orElse(null);
-        if (holder == null
-                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-            helper.fail("Alloy Smelter recipe must be supported: alloysmelter/electrum");
-            return;
-        }
-        helper.succeed();
+    public static void alloy_smelter_recipes_fail_closed(GameTestHelper helper) {
+        assertUnsupported(helper, ie("alloysmelter/electrum"));
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -85,15 +79,8 @@ public final class ImmersiveengineeringIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
-    public static void crusher_recipes_are_supported(GameTestHelper helper) {
-        var holder = helper.getLevel().getRecipeManager()
-                .byKey(ie("crusher/amethyst")).orElse(null);
-        if (holder == null
-                || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-            helper.fail("Crusher recipe must be supported: crusher/amethyst");
-            return;
-        }
-        helper.succeed();
+    public static void crusher_recipes_fail_closed(GameTestHelper helper) {
+        assertUnsupported(helper, ie("crusher/amethyst"));
     }
 
     @GameTest(template = "craftingtests.platform")
@@ -105,13 +92,12 @@ public final class ImmersiveengineeringIntegrationGameTests {
     public static void metal_press_and_arc_furnace_recipes_are_supported(
             GameTestHelper helper
     ) {
-        for (ResourceLocation recipeId : List.of(
-                ie("metalpress/blaze_rod"), ie("arcfurnace/dust_iron"))) {
+        for (ResourceLocation recipeId : List.of(ie("arcfurnace/dust_iron"))) {
             var holder = helper.getLevel().getRecipeManager()
                     .byKey(recipeId).orElse(null);
             if (holder == null
                     || !CraftingTerminalMenu.supportsRecipeHolder(holder)) {
-                helper.fail("Machine recipe must be supported: " + recipeId);
+                helper.fail("Arc Furnace recipe must be supported: " + recipeId);
                 return;
             }
         }
@@ -234,13 +220,7 @@ public final class ImmersiveengineeringIntegrationGameTests {
             ResourceLocation.fromNamespaceAndPath(
                     AutoStorage.MODID, "immersiveengineering_arc_furnace"),
             ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_bottling_machine"),
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_crusher"),
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_alloy_smelter"),
-            ResourceLocation.fromNamespaceAndPath(
-                    AutoStorage.MODID, "immersiveengineering_metal_press"));
+                    AutoStorage.MODID, "immersiveengineering_bottling_machine"));
 
     private static final ResourceLocation ARC_FURNACE =
             ResourceLocation.fromNamespaceAndPath(

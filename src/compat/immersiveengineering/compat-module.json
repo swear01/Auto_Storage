@@ -22,17 +22,11 @@
   "matrix": {
     "acceptedRecipes": [
       "immersiveengineering:arcfurnace/insulating_glass",
-      "immersiveengineering:bottling/black_concrete_powder",
-      "immersiveengineering:crusher/amethyst",
-      "immersiveengineering:alloysmelter/electrum",
-      "immersiveengineering:metalpress/blaze_rod"
+      "immersiveengineering:bottling/black_concrete_powder"
     ],
     "descriptors": [
       "auto_storage:immersiveengineering_arc_furnace",
-      "auto_storage:immersiveengineering_bottling_machine",
-      "auto_storage:immersiveengineering_crusher",
-      "auto_storage:immersiveengineering_alloy_smelter",
-      "auto_storage:immersiveengineering_metal_press"
+      "auto_storage:immersiveengineering_bottling_machine"
     ],
     "mods": [
       "immersiveengineering"

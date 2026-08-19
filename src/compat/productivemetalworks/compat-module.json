@@ -18,7 +18,8 @@
         ],
         "descriptors": [
             "auto_storage:productivemetalworks_foundry",
-            "auto_storage:productivemetalworks_casting_table"
+            "auto_storage:productivemetalworks_casting_table",
+            "auto_storage:productivemetalworks_casting_basin"
         ],
         "mods": [
             "productivemetalworks"

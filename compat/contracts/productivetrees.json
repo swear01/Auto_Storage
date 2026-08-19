@@ -31,13 +31,13 @@
     {
      "amount": "recipe.secondary().getCount() when non-empty",
      "resource_kind": "item",
-     "role": "primary",
+     "role": "remainder",
      "selector": "recipe.secondary() explicit ItemStack"
     },
     {
      "amount": "recipe.tertiary().getCount() when non-empty",
      "resource_kind": "item",
-     "role": "primary",
+     "role": "remainder",
      "selector": "recipe.tertiary() explicit ItemStack"
     }
    ],

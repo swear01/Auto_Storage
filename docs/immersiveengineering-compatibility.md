@@ -1,14 +1,14 @@
 # Immersive Engineering Compatibility
 
 Auto Storage's Compat Kit review of Immersive Engineering `12.4.2-194`
-accepts five deterministic machine families: Arc Furnace, Bottling Machine,
-Crusher, Alloy Smelter, and Metal Press. Sawmill remains fail-closed because its
-sawblade-dependent modes and secondary products are not represented by the
-station abstraction. The remaining custom recipe classes and live multiblock
-mechanisms remain fail-closed.
+accepts two deterministic machine families: Arc Furnace and Bottling Machine.
+Sawmill, Crusher, Alloy Smelter, and Metal Press remain fail-closed because their
+sawblade/fuel/mold/tag-output state is not represented by the exact transaction.
+The remaining custom recipe classes and live multiblock mechanisms remain
+fail-closed.
 
 The present-mod module entrypoint loads only when `immersiveengineering` is
-installed and registers the five reviewed master-block stations and their
+installed and registers the two reviewed master-block stations and their
 bounded recipe families. Vanilla-class recipes that Immersive Engineering
 ships under its namespace (crafting, smelting, smoking, stonecutting) remain
 covered by Auto Storage's built-in exact adapters.
@@ -44,19 +44,19 @@ multi-version matrix.
 ## Audited recipe candidates
 
 Compat Kit format-17 structural scan keeps **44** actual recipe-class candidates
-(legacy format-7 name-shaped inventory of 128 is superseded). Five deterministic
+(legacy format-7 name-shaped inventory of 128 is superseded). Two deterministic
 subsets are accepted in the committed contract; the remaining candidates are
 rejected. The runtime machine families behind that inventory include:
 
 | Family | Result | Reason |
 |---|---|---|
-| Alloy Smelter | accepted subset | master-block station; exact two-item inputs, output, base energy, and work time |
+| Alloy Smelter | rejected | live vanilla furnace fuel is not represented by the exact transaction |
 | Coke Oven | rejected | stone multiblock; creosote tank capacity/batching is live state |
 | Blast Furnace / BlastFurnaceFuel | rejected | stone multiblock; separate live burn state; tag preference outputs |
-| Crusher | accepted subset | master-block station; explicit item output, base energy, and work time; chance/tag secondaries rejected |
+| Crusher | rejected | public TagOutput origin is not exposed, so tag-backed output preference cannot be fail-closed |
 | Arc Furnace | accepted subset | master-block station; explicit additives/output, base energy, and work time; slag/chance boundaries rejected |
 | Arc recycling | rejected | live recycling and multiblock state |
-| Metal Press | accepted subset | master-block station; explicit mold/input/output, base energy, work time, and one engineer's-hammer tool unit |
+| Metal Press | rejected | mold retention and public TagOutput origin are not represented by the exact transaction |
 | Metal Press packing helpers | rejected | retained mold and unsupported helper semantics |
 | Bottling Machine | accepted subset | master-block station; exactly one item input plus exact fluid input, output, base energy, and work time |
 | Sawmill | rejected | sawblade-dependent stripped/output modes and secondary products are not represented by the station abstraction |
@@ -87,17 +87,17 @@ energy/time that do not depend on mutable `RecipeMultiplier` suppliers.
 ./gradlew runImmersiveengineeringGameTestServer
 ```
 
-Ten present-mod GameTests prove the five reviewed stations/families register,
-representative accepted machine recipes execute or classify, the representative
-Sawmill recipe remains fail closed, unsafe Coke Oven/Blast Furnace/Cloche
-boundaries remain unsupported, and every loaded recipe in each of those three
-rejected custom recipe types remains fail closed.
+Ten present-mod GameTests prove the two reviewed stations/families register,
+representative accepted machine recipes execute or classify, Sawmill/Crusher/
+Alloy Smelter/Metal Press boundaries remain fail closed, unsafe Coke Oven/Blast
+Furnace/Cloche boundaries remain unsupported, and every loaded recipe in each of
+those three rejected custom recipe types remains fail closed.
 The isolated fixture also verifies the owning descriptor's `immersiveengineering` namespace
 `recipeInventory` digest
 `b733a4b670dbb507a71df7f819c2296f627d42f2ed89240c6040c9c55c445c7d`
 (1100 loaded recipe ids) via `IsolatedRecipeInventoryEvidence`. The all-mod
 compatibility matrix loads the representative artifact through the module
-descriptor and checks exact representative IDs for all five accepted families;
+descriptor and checks exact representative IDs for both accepted families;
 combined coexistence and unclaimed inventories are recorded only in the matrix
 report.
 
@@ -160,8 +160,8 @@ Shared retained-index gate remains `9L * 1024L * 1024L` (=9,437,184 bytes).
 
 The current combined matrix now uses concrete representative recipe IDs rather
 than recipe-type IDs for all accepted families. The latest 10,000-type run
-passed with `craftable_prepare_ms = 40.542`,
-`shared_index_retained_bytes = 5,920,488`, and per-menu retained bytes of
-119,685. The 30,000-type stress run passed with `craftable_prepare_ms = 29.273`,
-`shared_index_retained_bytes = 5,918,152`, and per-menu retained bytes of
-120,087.
+passed with `craftable_prepare_ms = 22.833`,
+`shared_index_retained_bytes = 5,893,976`, and per-menu retained bytes of
+119,880. The 30,000-type stress run passed with `craftable_prepare_ms = 25.257`,
+`shared_index_retained_bytes = 5,864,936`, and per-menu retained bytes of
+119,862.
