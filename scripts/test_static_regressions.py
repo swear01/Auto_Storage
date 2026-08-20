@@ -3639,6 +3639,27 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("fluxBlock != Blocks.AIR", flux_module)
         self.assertNotIn("fluxBlock != null", flux_module)
 
+    def test_flux_station_survival_recipe_bridges_both_mods(self):
+        recipe = json.loads(self.read_required(
+            "src/main/resources/data/auto_storage/recipe/flux_station.json"
+        ))
+        self.assertEqual(
+            [{"type": "neoforge:mod_loaded", "modid": "fluxnetworks"}],
+            recipe["neoforge:conditions"],
+        )
+        self.assertEqual("minecraft:crafting_shaped", recipe["type"])
+        self.assertEqual(
+            "auto_storage:flux_station",
+            recipe["result"]["id"],
+        )
+        self.assertEqual(1, recipe["result"]["count"])
+        ingredients = {value["item"] for value in recipe["key"].values()}
+        self.assertIn("auto_storage:storage_core", ingredients)
+        self.assertIn("fluxnetworks:flux_controller", ingredients)
+        self.assertIn("fluxnetworks:flux_block", ingredients)
+        self.assertIn("fluxnetworks:flux_core", ingredients)
+        self.assertIn("fluxnetworks:flux_dust", ingredients)
+
     def test_stations_can_switch_between_all_and_installed_descriptors(self):
         screen = self.read_required(
             "src/main/java/com/swear/autostorage/CraftingTerminalScreen.java"

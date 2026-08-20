@@ -29,7 +29,7 @@ ENTRIES = {
         "getting_started",
         1,
         "minecraft:crafting_table",
-        ("patchouli:crafting",) * 7,
+        ("patchouli:crafting",) * 8,
     ),
     "connecting_blocks": (
         "getting_started",

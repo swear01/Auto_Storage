@@ -69,6 +69,40 @@ public final class FluxnetworksIntegrationGameTests {
     }
 
     @GameTest(template = "craftingtests.platform")
+    public static void flux_station_survival_recipe_is_registered(GameTestHelper helper) {
+        var holder = helper.getLevel().getRecipeManager().byKey(
+                ResourceLocation.fromNamespaceAndPath(AutoStorage.MODID, "flux_station"))
+                .orElse(null);
+        if (holder == null) {
+            helper.fail("Flux Station survival recipe was not loaded");
+            return;
+        }
+        if (!holder.value().getResultItem(helper.getLevel().registryAccess()).is(
+                BuiltInRegistries.ITEM.get(FluxnetworksCompatModule.FLUX_STATION_ID))) {
+            helper.fail("Flux Station survival recipe has the wrong output");
+            return;
+        }
+        var required = Set.of(
+                FluxnetworksCompatModule.FLUX_DUST_ID,
+                FluxnetworksCompatModule.FLUX_BLOCK_ID,
+                ResourceLocation.fromNamespaceAndPath("fluxnetworks", "flux_core"),
+                ResourceLocation.fromNamespaceAndPath("fluxnetworks", "flux_controller"),
+                ResourceLocation.fromNamespaceAndPath("auto_storage", "storage_core"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "obsidian"));
+        var ingredientItems = new java.util.HashSet<ResourceLocation>();
+        for (var ingredient : holder.value().getIngredients()) {
+            for (var stack : ingredient.getItems()) {
+                ingredientItems.add(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+            }
+        }
+        if (!ingredientItems.containsAll(required)) {
+            helper.fail("Flux Station survival recipe does not bridge both mods: " + ingredientItems);
+            return;
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "craftingtests.platform")
     public static void station_drops_its_registered_item(GameTestHelper helper) {
         BlockPos station = helper.absolutePos(new BlockPos(8, 3, 2));
         Block stationBlock = BuiltInRegistries.BLOCK.get(FluxnetworksCompatModule.FLUX_STATION_ID);

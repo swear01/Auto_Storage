@@ -1,0 +1,40 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "fluxnetworks"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "auto_storage:flux_network_bridge",
+  "pattern": [
+    "DOD",
+    "CSC",
+    "BAB"
+  ],
+  "key": {
+    "D": {
+      "item": "fluxnetworks:flux_dust"
+    },
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "B": {
+      "item": "fluxnetworks:flux_block"
+    },
+    "C": {
+      "item": "fluxnetworks:flux_core"
+    },
+    "S": {
+      "item": "auto_storage:storage_core"
+    },
+    "A": {
+      "item": "fluxnetworks:flux_controller"
+    }
+  },
+  "result": {
+    "id": "auto_storage:flux_station",
+    "count": 1
+  }
+}

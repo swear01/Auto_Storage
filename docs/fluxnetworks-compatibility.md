@@ -26,6 +26,13 @@ not consume ground item entities, remove world blocks, or emulate the original
 left-click event. The conversion is deliberately only the fixed 1:1 storage
 transaction.
 
+The station has a survival recipe conditional on Flux Networks being loaded. Its
+3x3 layout uses 2 `fluxnetworks:flux_dust`, 2 `minecraft:obsidian`, 2
+`fluxnetworks:flux_block`, 2 `fluxnetworks:flux_core`, 1
+`fluxnetworks:flux_controller`, and 1 `auto_storage:storage_core`. This makes
+the station a deliberate bridge between the two mods rather than a creative-only
+registration.
+
 Placed stations are tracked server-side per dimension in `WorldStations` and
 persisted through saved data. Validity is cached with a revision, refreshed on
 station/base/chunk changes, and unknown, invalid, or unloaded entries fail
