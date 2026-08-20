@@ -966,6 +966,11 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    prismGuiFluxnetworks {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
     prismGuiBotania {
         canBeConsumed = false
         canBeResolved = true
@@ -1338,6 +1343,7 @@ dependencies {
     prismGuiTmrv "maven.modrinth:tmrv:${tmrv_ci_version}"
     prismGuiMekanism "maven.modrinth:mekanism:${mekanism_ci_version}"
     prismGuiMekanismGenerators "maven.modrinth:mekanism-generators:a6gl7srE"
+    prismGuiFluxnetworks "curse.maven:flux-networks-248020:6089446"
     prismGuiBotania "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"
     prismGuiCurios "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}"
     prismGuiModernIndustrialization "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}"
@@ -1684,6 +1690,9 @@ tasks.register("stagePrismGuiSupportMods", Sync) {
     }
     from(configurations.prismGuiMekanismGenerators) {
         rename { "mekanism-generators-gui-test.jar" }
+    }
+    from(configurations.prismGuiFluxnetworks) {
+        rename { "flux-networks-gui-test.jar" }
     }
     from(configurations.prismGuiBotania) {
         rename { "botania-gui-test.jar" }
