@@ -40,6 +40,8 @@ class DeployPrismDevTests(unittest.TestCase):
 
             command = run.call_args.args[0]
             self.assertIn("--no-daemon", command)
+            self.assertIn("-x", command)
+            self.assertIn("compatKitArchive", command)
             self.assertEqual(project, run.call_args.kwargs["cwd"])
             self.assertEqual(str(jdk), run.call_args.kwargs["env"]["JAVA_HOME"])
 

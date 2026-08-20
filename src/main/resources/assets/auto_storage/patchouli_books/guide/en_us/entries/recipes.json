@@ -45,6 +45,11 @@
       "recipe": "auto_storage:remote_terminal",
       "text": "Craft the portable Remote Terminal for travel, and keep a replacement Guide Book available for players who join later.",
       "recipe2": "auto_storage:guide_book"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "auto_storage:flux_station",
+      "text": "When Flux Networks is installed, bridge its controller and flux materials to an Auto Storage Core to craft the Flux Station."
     }
   ]
 }
