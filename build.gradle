@@ -961,6 +961,11 @@ configurations {
         canBeResolved = true
         transitive = false
     }
+    prismGuiMekanismGenerators {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
     prismGuiBotania {
         canBeConsumed = false
         canBeResolved = true
@@ -1332,6 +1337,7 @@ dependencies {
     prismGuiFarmersDelight "maven.modrinth:farmers-delight:${farmers_delight_ci_version}"
     prismGuiTmrv "maven.modrinth:tmrv:${tmrv_ci_version}"
     prismGuiMekanism "maven.modrinth:mekanism:${mekanism_ci_version}"
+    prismGuiMekanismGenerators "maven.modrinth:mekanism-generators:a6gl7srE"
     prismGuiBotania "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"
     prismGuiCurios "top.theillusivec4.curios:curios-neoforge:${botania_curios_ci_version}"
     prismGuiModernIndustrialization "maven.modrinth:modern-industrialization:${modern_industrialization_ci_version}"
@@ -1675,6 +1681,9 @@ tasks.register("stagePrismGuiSupportMods", Sync) {
     }
     from(configurations.prismGuiMekanism) {
         rename { "mekanism-gui-test.jar" }
+    }
+    from(configurations.prismGuiMekanismGenerators) {
+        rename { "mekanism-generators-gui-test.jar" }
     }
     from(configurations.prismGuiBotania) {
         rename { "botania-gui-test.jar" }

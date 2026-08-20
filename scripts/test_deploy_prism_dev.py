@@ -16,6 +16,7 @@ class DeployPrismDevTests(unittest.TestCase):
     CURIOS_BYTES = b"curios gui test artifact"
     BATCHED_SUPPORT = {
         "macfix-gui-test.jar": b"macfix gui test artifact",
+        "mekanism-generators-gui-test.jar": b"mekanism generators gui test artifact",
         "modern-industrialization-gui-test.jar": b"modern industrialization gui test artifact",
         "guideme-gui-test.jar": b"guideme gui test artifact",
         "ars-nouveau-gui-test.jar": b"ars nouveau gui test artifact",
@@ -28,6 +29,21 @@ class DeployPrismDevTests(unittest.TestCase):
         "extended-crafting-gui-test.jar": b"extended crafting gui test artifact",
         "cucumber-gui-test.jar": b"cucumber gui test artifact",
     }
+
+    def test_mekanism_finders_keep_core_and_generators_separate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            mods = Path(tmp)
+            (mods / "mekanism-gui-test.jar").write_bytes(b"core")
+            (mods / "mekanism-generators-gui-test.jar").write_bytes(b"generators")
+
+            self.assertEqual(
+                ["mekanism-gui-test.jar"],
+                [path.name for path in deploy_prism_dev.mekanism_jars(mods)],
+            )
+            self.assertEqual(
+                ["mekanism-generators-gui-test.jar"],
+                [path.name for path in deploy_prism_dev.mekanism_generators_jars(mods)],
+            )
 
     def test_gradle_build_uses_single_use_daemon(self):
         with tempfile.TemporaryDirectory() as tmp:

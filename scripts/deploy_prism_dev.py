@@ -35,6 +35,7 @@ IRON_FURNACES_FILENAME = "iron-furnaces-gui-test.jar"
 FARMERS_DELIGHT_FILENAME = "farmers-delight-gui-test.jar"
 TMRV_FILENAME = "tmrv-gui-test.jar"
 MEKANISM_FILENAME = "mekanism-gui-test.jar"
+MEKANISM_GENERATORS_FILENAME = "mekanism-generators-gui-test.jar"
 BOTANIA_FILENAME = "botania-gui-test.jar"
 CURIOS_FILENAME = "curios-gui-test.jar"
 MODERN_INDUSTRIALIZATION_FILENAME = "modern-industrialization-gui-test.jar"
@@ -128,7 +129,22 @@ def tmrv_jars(mods_dir: Path) -> list[Path]:
 
 
 def mekanism_jars(mods_dir: Path) -> list[Path]:
-    return sorted({*mods_dir.glob("mekanism*.jar"), *mods_dir.glob("Mekanism*.jar")})
+    return sorted(
+        path
+        for path in {
+            *mods_dir.glob("mekanism*.jar"),
+            *mods_dir.glob("Mekanism*.jar"),
+        }
+        if "generators" not in path.stem.lower()
+    )
+
+
+def mekanism_generators_jars(mods_dir: Path) -> list[Path]:
+    return sorted({
+        *mods_dir.glob("mekanism-generators*.jar"),
+        *mods_dir.glob("mekanismgenerators*.jar"),
+        *mods_dir.glob("MekanismGenerators*.jar"),
+    })
 
 
 def botania_jars(mods_dir: Path) -> list[Path]:
@@ -217,6 +233,7 @@ SUPPORT_ARTIFACTS = (
     (FARMERS_DELIGHT_FILENAME, farmers_delight_jars),
     (TMRV_FILENAME, tmrv_jars),
     (MEKANISM_FILENAME, mekanism_jars),
+    (MEKANISM_GENERATORS_FILENAME, mekanism_generators_jars),
     (BOTANIA_FILENAME, botania_jars),
     (CURIOS_FILENAME, curios_jars),
     (MODERN_INDUSTRIALIZATION_FILENAME, modern_industrialization_jars),
