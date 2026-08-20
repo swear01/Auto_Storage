@@ -2982,6 +2982,11 @@ class StaticRegressionTests(unittest.TestCase):
             build,
         )
         self.assertIn(
+            'prismGuiMekanismGenerators "maven.modrinth:mekanism-generators:a6gl7srE"',
+            build,
+        )
+        self.assertIn('rename { "mekanism-generators-gui-test.jar" }', build)
+        self.assertIn(
             'prismGuiBotania "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"',
             build,
         )
