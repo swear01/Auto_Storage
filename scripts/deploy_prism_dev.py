@@ -36,6 +36,7 @@ FARMERS_DELIGHT_FILENAME = "farmers-delight-gui-test.jar"
 TMRV_FILENAME = "tmrv-gui-test.jar"
 MEKANISM_FILENAME = "mekanism-gui-test.jar"
 MEKANISM_GENERATORS_FILENAME = "mekanism-generators-gui-test.jar"
+FLUXNETWORKS_FILENAME = "flux-networks-gui-test.jar"
 BOTANIA_FILENAME = "botania-gui-test.jar"
 CURIOS_FILENAME = "curios-gui-test.jar"
 MODERN_INDUSTRIALIZATION_FILENAME = "modern-industrialization-gui-test.jar"
@@ -147,6 +148,14 @@ def mekanism_generators_jars(mods_dir: Path) -> list[Path]:
     })
 
 
+def fluxnetworks_jars(mods_dir: Path) -> list[Path]:
+    return sorted({
+        *mods_dir.glob("flux-networks*.jar"),
+        *mods_dir.glob("fluxnetworks*.jar"),
+        *mods_dir.glob("FluxNetworks*.jar"),
+    })
+
+
 def botania_jars(mods_dir: Path) -> list[Path]:
     return sorted({*mods_dir.glob("botania*.jar"), *mods_dir.glob("Botania*.jar")})
 
@@ -234,6 +243,7 @@ SUPPORT_ARTIFACTS = (
     (TMRV_FILENAME, tmrv_jars),
     (MEKANISM_FILENAME, mekanism_jars),
     (MEKANISM_GENERATORS_FILENAME, mekanism_generators_jars),
+    (FLUXNETWORKS_FILENAME, fluxnetworks_jars),
     (BOTANIA_FILENAME, botania_jars),
     (CURIOS_FILENAME, curios_jars),
     (MODERN_INDUSTRIALIZATION_FILENAME, modern_industrialization_jars),

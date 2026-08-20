@@ -1156,7 +1156,7 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             mods = minecraft / "mods"
             staged.mkdir(parents=True)
             mods.mkdir(parents=True)
-            self.assertEqual(19, len(mod.SUPPORT_ARTIFACTS))
+            self.assertEqual(20, len(mod.SUPPORT_ARTIFACTS))
             self.assertIn(
                 "macfix-gui-test.jar",
                 {filename for filename, _ in mod.SUPPORT_ARTIFACTS},
@@ -1167,6 +1167,10 @@ class RunPrismGuiSessionTests(unittest.TestCase):
             )
             self.assertIn(
                 "mekanism-generators-gui-test.jar",
+                {filename for filename, _ in mod.SUPPORT_ARTIFACTS},
+            )
+            self.assertIn(
+                "flux-networks-gui-test.jar",
                 {filename for filename, _ in mod.SUPPORT_ARTIFACTS},
             )
             self.assertIn(

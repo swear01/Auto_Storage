@@ -2987,6 +2987,11 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn('rename { "mekanism-generators-gui-test.jar" }', build)
         self.assertIn(
+            'prismGuiFluxnetworks "curse.maven:flux-networks-248020:6089446"',
+            build,
+        )
+        self.assertIn('rename { "flux-networks-gui-test.jar" }', build)
+        self.assertIn(
             'prismGuiBotania "vazkii.botania:botania-neoforge-1.21.1:${botania_ci_version}"',
             build,
         )

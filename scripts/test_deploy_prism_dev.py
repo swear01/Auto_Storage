@@ -17,6 +17,7 @@ class DeployPrismDevTests(unittest.TestCase):
     BATCHED_SUPPORT = {
         "macfix-gui-test.jar": b"macfix gui test artifact",
         "mekanism-generators-gui-test.jar": b"mekanism generators gui test artifact",
+        "flux-networks-gui-test.jar": b"flux networks gui test artifact",
         "modern-industrialization-gui-test.jar": b"modern industrialization gui test artifact",
         "guideme-gui-test.jar": b"guideme gui test artifact",
         "ars-nouveau-gui-test.jar": b"ars nouveau gui test artifact",
