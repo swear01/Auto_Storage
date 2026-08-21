@@ -13,11 +13,16 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.UUID;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class StorageTerminalMenu extends AbstractContainerMenu {
     static final int SORT_ORDER_BUTTON = 11;
@@ -37,6 +42,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     public static final int DISPLAY_COLS = 9;
     public static final int DISPLAY_SLOTS = MAX_DISPLAY_ROWS * DISPLAY_COLS;
     public static final int PLAYER_INVENTORY_SLOTS = 36;
+    private final Inventory playerInventory;
     private BlockPos corePos;
     private BlockPos accessPos;
     private boolean remoteAccess;
@@ -44,6 +50,19 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     private final ResourceKey<Level> coreDimension;
     private List<BlockPos> accessPath = List.of();
     protected final SimpleContainer displayInventory;
+    private final TerminalRepositoryServer repositoryServer = new TerminalRepositoryServer();
+    private final TerminalClientRepository clientRepository;
+    private List<ItemStack> repositoryStacks = List.of();
+    private StorageCoreBlockEntity repositoryBuildCore;
+    private boolean repositoryBuildPending;
+    private final Map<StorageResourceKey, ItemStack> repositoryChangedStacks =
+            new LinkedHashMap<>();
+    private final Set<StorageResourceKey> repositoryChangedKeys = new HashSet<>();
+    private final Set<StorageResourceKey> repositoryRemovedKeys = new HashSet<>();
+    private boolean repositoryFullRequested = true;
+    private boolean repositoryFullListPending = true;
+    private boolean repositoryDirty = true;
+    private boolean repositoryCoreWasValid = true;
     protected int scrollOffset;
     protected int totalItemTypes;
     protected String currentFilter = "";
@@ -65,11 +84,16 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         @Override
         public void onChanged(ItemKey key, long delta, long newAmount, Actor actor) {
             storageDirty = true;
+            if (observedCore != null && observedCore.getLevel() != null) {
+                markRepositoryKey(StorageResourceBridge.itemKey(
+                        key, observedCore.getLevel().registryAccess()));
+            }
         }
 
         @Override
         public void onEnergyChanged(EnergyType type, long newAmount) {
             energyDirty = true;
+            markRepositoryKey(StorageResourceBridge.energyKey(type));
         }
 
         @Override
@@ -80,6 +104,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         ) {
             if (delta < 0) stationWorkDecreased = true;
             else stationWorkIncreases.merge(descriptorId, newAmount, Math::max);
+            markRepositoryKey(StorageResourceBridge.stationWorkKey(descriptorId));
         }
 
         @Override
@@ -89,7 +114,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                 long newAmount,
                 Actor actor
         ) {
-            if (StorageResourceBridge.stationWorkDescriptorId(key).isPresent()) return;
+            markRepositoryKey(key);
             if (key.kindId().equals(StorageResourceBridge.WORK_KIND)) energyDirty = true;
             else storageDirty = true;
         }
@@ -161,6 +186,96 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     public SearchMode getSearchMode() { return searchMode; }
     public TerminalResourceView getResourceView() { return resourceView; }
 
+    TerminalClientRepository clientRepository() {
+        return clientRepository;
+    }
+
+    protected final StorageResourceKey repositoryKey(long serial) {
+        return repositoryServer.keyFor(serial);
+    }
+
+    protected final ItemStack repositoryDisplay(long serial) {
+        return repositoryServer.displayFor(serial);
+    }
+
+    protected final void requestRepositoryFull() {
+        repositoryServer.requestFull();
+        repositoryFullRequested = true;
+        repositoryDirty = true;
+    }
+
+    protected final void setRepositoryStacks(List<ItemStack> stacks) {
+        repositoryBuildCore = null;
+        repositoryBuildPending = false;
+        repositoryStacks = stacks.stream().map(ItemStack::copy).toList();
+        repositoryChangedKeys.clear();
+        repositoryChangedStacks.clear();
+        repositoryRemovedKeys.clear();
+        repositoryFullListPending = true;
+        requestRepositoryFull();
+    }
+
+    private void markRepositoryKey(StorageResourceKey key) {
+        if (key == null) return;
+        repositoryChangedKeys.add(key);
+        repositoryDirty = true;
+    }
+
+    protected final void queueRepositoryBuild(StorageCoreBlockEntity core) {
+        repositoryBuildCore = core;
+        repositoryBuildPending = true;
+        repositoryFullListPending = true;
+        requestRepositoryFull();
+    }
+
+    private void buildRepositoryStacks() {
+        if (!repositoryBuildPending) return;
+        if (!(playerInventory.player instanceof ServerPlayer)) {
+            repositoryBuildCore = null;
+            repositoryBuildPending = false;
+            repositoryStacks = List.of();
+            repositoryChangedKeys.clear();
+            repositoryChangedStacks.clear();
+            repositoryRemovedKeys.clear();
+            repositoryFullListPending = false;
+            return;
+        }
+        StorageCoreBlockEntity core = repositoryBuildCore;
+        repositoryBuildCore = null;
+        repositoryBuildPending = false;
+        repositoryStacks = core == null || !core.isStorageAvailable()
+                ? List.of()
+                : core.getTerminalDisplayStacks(
+                        "", SortMode.NAME, SortOrder.ASCENDING, TerminalResourceView.ALL);
+        repositoryChangedKeys.clear();
+        repositoryChangedStacks.clear();
+        repositoryRemovedKeys.clear();
+    }
+
+    private void updateRepositoryChanges(StorageCoreBlockEntity core) {
+        if (repositoryBuildPending || repositoryFullListPending
+                || repositoryChangedKeys.isEmpty() || core.getLevel() == null) return;
+        Set<StorageResourceKey> occupied = new HashSet<>(core.getResourceKeys());
+        for (StorageResourceKey key : repositoryChangedKeys) {
+            if (!occupied.contains(key) || !StorageResourceKinds.isRegistered(key)) {
+                repositoryChangedStacks.remove(key);
+                repositoryRemovedKeys.add(key);
+                continue;
+            }
+            ItemStack representative = StorageResourceKinds.representative(
+                    key, core.getLevel().registryAccess());
+            long amount = core.getResourceAmount(key);
+            ExactRational pending = core.getResourcePending(key);
+            ItemStack display = key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
+                    ? TerminalDisplayStack.create(representative, amount, pending)
+                    : TerminalResourceDisplay.create(representative, key, amount, pending);
+            repositoryChangedStacks.put(key, display);
+            repositoryRemovedKeys.remove(key);
+        }
+        repositoryChangedKeys.clear();
+        repositoryDirty = true;
+    }
+
     public TerminalPreferences getTerminalPreferences() {
         return new TerminalPreferences(
                 sortMode,
@@ -191,6 +306,9 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             boolean deferInitialization
     ) {
         super(menuType, containerId);
+        this.clientRepository = playerInv.player.level().isClientSide()
+                ? new TerminalClientRepository() : null;
+        this.playerInventory = playerInv;
         if (!core.isStorageAvailable()) {
             throw new IllegalArgumentException("Cannot open a terminal for unavailable Core storage");
         }
@@ -216,6 +334,9 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             boolean deferInitialization
     ) {
         super(menuType, containerId);
+        this.clientRepository = playerInv.player.level().isClientSide()
+                ? new TerminalClientRepository() : null;
+        this.playerInventory = playerInv;
         this.corePos = buf.readBlockPos();
         this.accessPos = buf.readBlockPos();
         this.remoteAccess = buf.readBoolean();
@@ -291,6 +412,14 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         this.currentFilter = filter != null ? filter : "";
         if (core == null) {
             totalItemTypes = 0;
+            repositoryBuildCore = null;
+            repositoryBuildPending = false;
+            repositoryChangedKeys.clear();
+            repositoryChangedStacks.clear();
+            repositoryRemovedKeys.clear();
+            repositoryStacks = List.of();
+            repositoryFullListPending = true;
+            requestRepositoryFull();
             replaceVisibleDisplayStacks(List.of(), visibleRows);
             return;
         }
@@ -306,6 +435,11 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         }
         scrollOffset = page.offset();
         replaceVisiblePageStacks(page.stacks(), visibleRows);
+        if (repositoryBuildPending || repositoryStacks.isEmpty()) {
+            queueRepositoryBuild(core);
+        } else {
+            updateRepositoryChanges(core);
+        }
     }
 
     protected final void refreshDisplayMetadata(StorageCoreBlockEntity core) {
@@ -422,6 +556,83 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             return;
         }
         super.clicked(slotIndex, button, clickType, player);
+    }
+
+    public boolean handleRepositoryAction(
+            TerminalRepositoryActionPacket packet,
+            Player player
+    ) {
+        if (player.level().isClientSide()
+                || player.isSpectator()
+                || !stillValid(player)
+                || packet.containerId() != containerId
+                || pageIsNotItemView()
+                || packet.serial() <= 0) return false;
+        StorageResourceKey key = repositoryKey(packet.serial());
+        ItemStack displayStack = repositoryDisplay(packet.serial());
+        if (key == null || displayStack.isEmpty()
+                || !getResourceView().matches(key)) return false;
+        return handleRepositoryEntryAction(
+                key, displayStack, packet.button(), packet.quickMove(), player);
+    }
+
+    protected boolean pageIsNotItemView() {
+        return false;
+    }
+
+    protected boolean handleRepositoryEntryAction(
+            StorageResourceKey key,
+            ItemStack displayStack,
+            int button,
+            boolean quickMove,
+            Player player
+    ) {
+        if (!key.kindId().equals(StorageResourceKindApi.ITEM_KIND)) return false;
+        StorageCoreBlockEntity core = getCore(player.level());
+        if (core == null || !getCarried().isEmpty()) return false;
+        ItemStack item = TerminalDisplayStack.strip(displayStack);
+        ItemKey itemKey = ItemKey.of(item);
+        long actualCount = core.getItemCount(itemKey);
+        long maxStack = item.getMaxStackSize();
+        long amount = quickMove
+                ? Math.min(actualCount, maxStack * 36)
+                : button == 0
+                        ? Math.min(actualCount, maxStack)
+                        : Math.max(1, (Math.min(actualCount, maxStack) + 1) / 2);
+        if (amount <= 0) amount = 1;
+        if (quickMove) {
+            if (extractToPlayer(core, itemKey, amount, player) <= 0) return false;
+        } else {
+            ItemStack extracted = core.extractItem(
+                    itemKey, amount, Action.EXECUTE, Actor.player(player));
+            if (extracted.isEmpty()) return false;
+            setCarried(extracted);
+        }
+        refreshDisplayItemsFiltered(core, currentFilter);
+        broadcastChanges();
+        return true;
+    }
+
+    public boolean handleRepositoryContainerTransfer(
+            TerminalRepositoryContainerTransferPacket packet,
+            Player player
+    ) {
+        if (player.level().isClientSide()
+                || player.isSpectator()
+                || !stillValid(player)
+                || packet.containerId() != containerId
+                || packet.stateId() != getStateId()
+                || packet.expectedView() != resourceView
+                || resourceView == TerminalResourceView.ITEM
+                || getCarried().isEmpty()
+                || pageIsNotItemView()) return false;
+        StorageResourceKey key = repositoryKey(packet.serial());
+        ItemStack displayStack = repositoryDisplay(packet.serial());
+        if (key == null || displayStack.isEmpty() || !resourceView.matches(key)) return false;
+        if (packet.direction() == TerminalContainerTransferDirection.DEPOSIT) {
+            return depositHeldResourceContainer(player);
+        }
+        return fillHeldResourceContainer(displayStack, player);
     }
 
     public boolean handleHeldContainerTransfer(
@@ -663,6 +874,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         sortOrder = preferences.sortOrder();
         searchMode = preferences.searchMode();
         resourceView = requestedView;
+        if (changed) requestRepositoryFull();
         return changed;
     }
 
@@ -689,11 +901,86 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                 && player.distanceToSqr(accessPos.getX() + 0.5, accessPos.getY() + 0.5, accessPos.getZ() + 0.5) <= 64.0;
     }
 
+    void applyRepositoryUpdate(TerminalRepositoryUpdatePacket packet) {
+        if (clientRepository == null || packet.containerId() != containerId) return;
+        if (!clientRepository.apply(packet)) {
+            PacketDistributor.sendToServer(new TerminalRepositoryResyncPacket(containerId));
+        }
+    }
+
+    private void sendRepositoryUpdate() {
+        if (repositoryBuildPending
+                || !repositoryDirty
+                || !(playerInventory.player instanceof ServerPlayer serverPlayer)) return;
+        List<TerminalRepositoryUpdatePacket> packets;
+        if (repositoryFullRequested) {
+            if (!repositoryFullListPending
+                    && (!repositoryChangedStacks.isEmpty()
+                    || !repositoryRemovedKeys.isEmpty())) {
+                repositoryServer.updateChanges(
+                        containerId, repositoryChangedStacks, repositoryRemovedKeys);
+                repositoryChangedStacks.clear();
+                repositoryRemovedKeys.clear();
+            }
+            packets = repositoryFullListPending
+                    ? repositoryServer.update(
+                            containerId,
+                            repositoryStacks,
+                            serverPlayer.registryAccess())
+                    : repositoryServer.fullSnapshot(containerId);
+            repositoryFullRequested = false;
+            repositoryFullListPending = false;
+            repositoryChangedKeys.clear();
+            repositoryChangedStacks.clear();
+            repositoryRemovedKeys.clear();
+        } else if (!repositoryChangedStacks.isEmpty()
+                || !repositoryRemovedKeys.isEmpty()) {
+            packets = repositoryServer.updateChanges(
+                    containerId, repositoryChangedStacks, repositoryRemovedKeys);
+            repositoryChangedStacks.clear();
+            repositoryRemovedKeys.clear();
+        } else {
+            repositoryDirty = false;
+            return;
+        }
+        for (TerminalRepositoryUpdatePacket packet : packets) {
+            PacketDistributor.sendToPlayer(serverPlayer, packet);
+        }
+        repositoryDirty = false;
+    }
+
+    public void sendFullRepository() {
+        requestRepositoryFull();
+        sendRepositoryUpdate();
+    }
+
+    @Override
+    public void sendAllDataToRemote() {
+        super.sendAllDataToRemote();
+        sendFullRepository();
+    }
+
     @Override
     public void broadcastChanges() {
         boolean observedCoreValid = observedCore != null && getCore(observedCore.getLevel()) == observedCore;
+        if (!observedCoreValid && repositoryCoreWasValid) {
+            repositoryCoreWasValid = false;
+            repositoryBuildCore = null;
+            repositoryBuildPending = false;
+            repositoryChangedKeys.clear();
+            repositoryChangedStacks.clear();
+            repositoryRemovedKeys.clear();
+            repositoryStacks = List.of();
+            repositoryFullListPending = true;
+            requestRepositoryFull();
+        } else if (observedCoreValid && !repositoryCoreWasValid) {
+            repositoryCoreWasValid = true;
+            refreshDisplayItems(observedCore);
+            requestRepositoryFull();
+        }
         boolean topologyDirty = observedCoreValid
                 && observedCore.getTopologyRevision() != observedTopologyRevision;
+        if (topologyDirty) queueRepositoryBuild(observedCore);
         if ((storageDirty || topologyDirty) && observedCoreValid) {
             storageDirty = false;
             observedTopologyRevision = observedCore.getTopologyRevision();
@@ -712,6 +999,9 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             onObservedStationWorkChanged(observedCore, increases, decreased);
         }
         super.broadcastChanges();
+        if (observedCoreValid) updateRepositoryChanges(observedCore);
+        buildRepositoryStacks();
+        sendRepositoryUpdate();
     }
 
     protected void onObservedStorageChanged(StorageCoreBlockEntity core) {

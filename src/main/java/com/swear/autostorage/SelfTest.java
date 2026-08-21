@@ -96,6 +96,7 @@ class SelfTest {
         testRecipeResourceAmountFormatter();
         testTerminalDisplayStack();
         testTerminalEntryComparator();
+        testTerminalRepository();
         testTerminalScrollbar();
         testAdaptiveTerminalLayout();
 
@@ -2371,6 +2372,96 @@ class SelfTest {
             assertTrue("storage rail+frame group is centered at height " + height,
                     Math.abs(groupLeft - (320 - groupRight)) <= 1);
         }
+    }
+
+    private static void testTerminalRepository() {
+        StorageResourceKey stone = StorageResourceKey.of(
+                StorageResourceKindApi.ITEM_KIND,
+                ResourceLocation.withDefaultNamespace("stone"),
+                new CompoundTag());
+        TerminalClientRepository repository = new TerminalClientRepository();
+        ItemStack initial = TerminalDisplayStack.create(new ItemStack(Items.STONE), 5);
+        assertTrue("terminal repository accepts an initial full entry",
+                repository.apply(new TerminalRepositoryUpdatePacket(
+                        1,
+                        1,
+                        true,
+                        0,
+                        1,
+                        List.of(new TerminalRepositoryEntry(1, stone, initial)))));
+        assertTrue("terminal repository exposes the exact initial amount",
+                TerminalDisplayStack.amount(repository.stackAt(0, 1)) == 5
+                        && repository.serialAt(0, 1) == 1);
+        assertTrue("terminal repository accepts an absolute amount delta",
+                repository.apply(new TerminalRepositoryUpdatePacket(
+                        1,
+                        2,
+                        false,
+                        0,
+                        1,
+                        List.of(new TerminalRepositoryEntry(
+                                1,
+                                null,
+                                TerminalDisplayStack.create(new ItemStack(Items.STONE), 9))))));
+        assertTrue("terminal repository replaces the changed presentation",
+                TerminalDisplayStack.amount(repository.stackAt(0, 1)) == 9);
+        assertTrue("terminal repository rejects an unknown delta serial",
+                !repository.apply(new TerminalRepositoryUpdatePacket(
+                        1,
+                        3,
+                        false,
+                        0,
+                        1,
+                        List.of(new TerminalRepositoryEntry(
+                                99,
+                                null,
+                                TerminalDisplayStack.create(new ItemStack(Items.DIRT), 1))))));
+        repository.apply(new TerminalRepositoryUpdatePacket(
+                1,
+                3,
+                true,
+                0,
+                1,
+                List.of(new TerminalRepositoryEntry(
+                        1,
+                        stone,
+                        TerminalDisplayStack.create(new ItemStack(Items.STONE), 9)))));
+        assertTrue("terminal repository removes an explicit tombstone",
+                repository.apply(new TerminalRepositoryUpdatePacket(
+                        1,
+                        4,
+                        false,
+                        0,
+                        1,
+                        List.of(new TerminalRepositoryEntry(1, null, ItemStack.EMPTY))))
+                        && repository.totalEntries() == 0);
+
+        TerminalClientRepository chunked = new TerminalClientRepository();
+        List<TerminalRepositoryEntry> many = new ArrayList<>();
+        for (int index = 0; index < 513; index++) {
+            many.add(new TerminalRepositoryEntry(
+                    index + 1,
+                    StorageResourceKey.of(
+                            StorageResourceKindApi.ITEM_KIND,
+                            ResourceLocation.fromNamespaceAndPath("selftest", "item_" + index),
+                            new CompoundTag()),
+                    TerminalDisplayStack.create(new ItemStack(Items.STONE), 1)));
+        }
+        chunked.apply(new TerminalRepositoryUpdatePacket(
+                2, 1, true, 0, 2, many.subList(0, 512)));
+        chunked.apply(new TerminalRepositoryUpdatePacket(
+                2, 1, true, 1, 2, many.subList(512, 513)));
+        List<TerminalRepositoryEntry> changed = many.stream()
+                .map(entry -> new TerminalRepositoryEntry(
+                        entry.serial(), null,
+                        TerminalDisplayStack.create(new ItemStack(Items.STONE), 2)))
+                .toList();
+        chunked.apply(new TerminalRepositoryUpdatePacket(
+                2, 2, false, 0, 2, changed.subList(0, 512)));
+        chunked.apply(new TerminalRepositoryUpdatePacket(
+                2, 2, false, 1, 2, changed.subList(512, 513)));
+        assertTrue("terminal repository applies every chunk of a large delta",
+                TerminalDisplayStack.amount(chunked.stackAt(512, 100)) == 2);
     }
 
     private static void testTerminalScrollbar() {

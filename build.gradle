@@ -1908,7 +1908,7 @@ tasks.named('check').configure {
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-def expectedSelfTestSummary = 'SelfTest: 204942 passed, 0 failed, 204942 total'
+def expectedSelfTestSummary = 'SelfTest: 204949 passed, 0 failed, 204949 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {

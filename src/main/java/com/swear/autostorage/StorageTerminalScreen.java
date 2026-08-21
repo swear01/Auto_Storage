@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -52,8 +53,6 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     private TerminalSearchSynchronizer searchSynchronizer;
     private EditBox searchBox;
     private final TerminalScrollbar scrollbar = new TerminalScrollbar();
-    private int lastRequestedScroll = Integer.MIN_VALUE;
-    private int lastObservedScroll = Integer.MIN_VALUE;
     private int searchTimer;
     private String lastSentSearch = "";
     private boolean searchBoxAutoSelected;
@@ -207,7 +206,20 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         updateViewSettingButtons();
         setItemViewControlsVisible(isItemViewActive());
         repositionSlots();
+        updateClientRepositoryView();
         sendSettings();
+    }
+
+    private void updateClientRepositoryView() {
+        TerminalClientRepository repository = menu.clientRepository();
+        if (repository == null) return;
+        TerminalPreferences preferences = displayedPreferences();
+        repository.setView(
+                searchBox == null ? "" : searchBox.getValue(),
+                preferences.sortMode(),
+                preferences.sortOrder(),
+                preferences.resourceView());
+        repository.setScrollOffset(repository.getScrollOffset(visibleRows), visibleRows);
     }
 
     protected void setItemViewControlsVisible(boolean visible) {
@@ -282,6 +294,21 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
 
     protected void replaceSlot(int menuIndex, int x, int y) {
         Slot delegate = semanticSlots.get(menuIndex);
+        TerminalClientRepository repository = menu.clientRepository();
+        if (repository != null && menuIndex < StorageTerminalMenu.DISPLAY_SLOTS) {
+            TerminalRepositorySlot moved = new TerminalRepositorySlot(
+                    delegate,
+                    repository,
+                    menuIndex,
+                    visibleRows,
+                    x,
+                    y,
+                    () -> menuIndex < visibleRows * StorageTerminalMenu.DISPLAY_COLS
+                            && delegate.isActive());
+            moved.index = menuIndex;
+            menu.slots.set(menuIndex, moved);
+            return;
+        }
         Slot moved = new Slot(delegate.container, delegate.getContainerSlot(), x, y) {
             @Override
             public void onQuickCraft(ItemStack oldStack, ItemStack newStack) {
@@ -564,10 +591,16 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         drawPanels(graphics, leftPos, topPos);
         if (!isItemViewActive()) return;
         if (searchBoxAutoSelected) drawAutoFocusMarker(graphics);
-        int totalItems = menu.getTotalItemTypes();
-        int maxOffset = Math.max(0,
-                totalItems - visibleRows * StorageTerminalMenu.DISPLAY_COLS);
-        int position = scrollbar.synchronize(menu.getScrollOffset(), maxOffset);
+        updateClientRepositoryView();
+        TerminalClientRepository repository = menu.clientRepository();
+        int totalItems = repository == null
+                ? menu.getTotalItemTypes() : repository.totalEntries();
+        int maxOffset = repository == null
+                ? Math.max(0, totalItems - visibleRows * StorageTerminalMenu.DISPLAY_COLS)
+                : repository.maxScrollOffset(visibleRows);
+        int position = repository == null
+                ? scrollbar.synchronize(menu.getScrollOffset(), maxOffset)
+                : scrollbar.synchronize(repository.getScrollOffset(visibleRows), maxOffset);
         drawScrollbar(
                 graphics,
                 leftPos + geometry.scrollbar().x() + SCROLL_TRACK_INSET,
@@ -790,6 +823,26 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     @Override
+    protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType clickType) {
+        TerminalClientRepository repository = menu.clientRepository();
+        if (repository != null
+                && slotId >= 0
+                && slotId < visibleRows * StorageTerminalMenu.DISPLAY_COLS
+                && (clickType == ClickType.PICKUP || clickType == ClickType.QUICK_MOVE)) {
+            long serial = repository.serialAt(slotId, visibleRows);
+            if (serial > 0 && minecraft != null && minecraft.getConnection() != null) {
+                minecraft.getConnection().send(new TerminalRepositoryActionPacket(
+                        menu.containerId,
+                        serial,
+                        mouseButton,
+                        clickType == ClickType.QUICK_MOVE));
+            }
+            return;
+        }
+        super.slotClicked(slot, slotId, mouseButton, clickType);
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         unfocusSearchOnOutsideClick(mouseX, mouseY);
         TerminalResourceView visibleResourceView = displayedPreferences().resourceView();
@@ -804,10 +857,14 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 .map(key -> !key.kindId().equals(StorageResourceKindApi.ITEM_KIND))
                 .orElse(false))) {
             if (minecraft != null && minecraft.getConnection() != null) {
-                minecraft.getConnection().send(new TerminalHeldContainerTransferPacket(
+                TerminalClientRepository repository = menu.clientRepository();
+                long serial = repository == null
+                        ? -1 : repository.serialAt(hoveredSlot.index, visibleRows);
+                if (serial <= 0) return true;
+                minecraft.getConnection().send(new TerminalRepositoryContainerTransferPacket(
                         menu.containerId,
                         menu.getStateId(),
-                        hoveredSlot.index,
+                        serial,
                         visibleResourceView,
                         button == 0
                                 ? TerminalContainerTransferDirection.WITHDRAW
@@ -816,10 +873,9 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
             return true;
         }
         if (isItemViewActive() && isOverScrollBar(mouseX, mouseY) && button == 0) {
-            lastRequestedScroll = Integer.MIN_VALUE;
             int maxOffset = maxScrollOffset();
-            int position = scrollbar.synchronize(menu.getScrollOffset(), maxOffset);
-            sendScrollTarget(scrollbar.press(
+            int position = clientScrollPosition(maxOffset);
+            setScrollTarget(scrollbar.press(
                     mouseY,
                     scrollTrackTop(),
                     scrollTrackHeight(),
@@ -857,7 +913,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (isItemViewActive() && scrollbar.isDragging()) {
-            sendScrollTarget(scrollbar.drag(
+            setScrollTarget(scrollbar.drag(
                     mouseY,
                     scrollTrackTop(),
                     scrollTrackHeight(),
@@ -872,8 +928,8 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         if (isItemViewActive() && (isOverGrid(mouseX, mouseY) || isOverScrollBar(mouseX, mouseY))) {
             double direction = scrollY != 0.0 ? scrollY : scrollX;
             int maxOffset = maxScrollOffset();
-            int position = scrollbar.synchronize(menu.getScrollOffset(), maxOffset);
-            if (direction != 0.0) sendScrollTarget(scrollbar.step(
+            int position = clientScrollPosition(maxOffset);
+            if (direction != 0.0) setScrollTarget(scrollbar.step(
                     position,
                     direction > 0
                             ? -StorageTerminalMenu.DISPLAY_COLS
@@ -918,15 +974,12 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     @Override
     protected void containerTick() {
         super.containerTick();
-        int serverScroll = menu.getScrollOffset();
-        if (serverScroll != lastObservedScroll) {
-            lastObservedScroll = serverScroll;
-            lastRequestedScroll = Integer.MIN_VALUE;
-        }
+        updateClientRepositoryView();
         if (isItemViewActive()) {
-            scrollbar.synchronize(serverScroll, maxScrollOffset());
-            scrollbar.tick(maxScrollOffset(), scrollPageStep())
-                    .ifPresent(this::sendScrollTarget);
+            int maxOffset = maxScrollOffset();
+            scrollbar.synchronize(clientScrollPosition(maxOffset), maxOffset);
+            scrollbar.tick(maxOffset, scrollPageStep())
+                    .ifPresent(this::setScrollTarget);
         } else {
             scrollbar.release();
         }
@@ -959,6 +1012,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     private void sendSearchPacket() {
+        if (menu.clientRepository() != null) return;
         String text = searchBox.getValue();
         if (text.equals(lastSentSearch)) return;
         lastSentSearch = text;
@@ -988,19 +1042,26 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     private int maxScrollOffset() {
-        return menu.getMaxScrollOffset();
+        TerminalClientRepository repository = menu.clientRepository();
+        return repository == null
+                ? menu.getMaxScrollOffset() : repository.maxScrollOffset(visibleRows);
+    }
+
+    private int clientScrollPosition(int maxOffset) {
+        TerminalClientRepository repository = menu.clientRepository();
+        return repository == null
+                ? scrollbar.synchronize(menu.getScrollOffset(), maxOffset)
+                : repository.getScrollOffset(visibleRows);
     }
 
     private int scrollPageStep() {
         return Math.max(1, visibleRows / 6) * StorageTerminalMenu.DISPLAY_COLS;
     }
 
-    private void sendScrollTarget(int target) {
-        if (minecraft == null || minecraft.getConnection() == null) return;
-        target = Math.clamp(target, 0, maxScrollOffset());
-        if (target == lastRequestedScroll) return;
-        lastRequestedScroll = target;
-        minecraft.getConnection().send(new TerminalScrollPacket(menu.containerId, target));
+    private void setScrollTarget(int target) {
+        TerminalClientRepository repository = menu.clientRepository();
+        if (repository == null) return;
+        repository.setScrollOffset(target, visibleRows);
     }
 
     protected static void drawScrollbar(
