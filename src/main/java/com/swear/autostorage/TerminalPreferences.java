@@ -95,7 +95,7 @@ public record TerminalPreferences(
         buf.writeVarInt(sortMode.ordinal());
         buf.writeVarInt(sortOrder.ordinal());
         buf.writeVarInt(searchMode.ordinal());
-        buf.writeVarInt(resourceView.ordinal());
+        buf.writeVarInt(resourceView.wireId());
         buf.writeVarInt(page.ordinal());
         buf.writeBoolean(usePlayerInventory);
         buf.writeVarInt(outputDestination.ordinal());
@@ -108,8 +108,8 @@ public record TerminalPreferences(
         SortMode sortMode = readEnum(buf, SortMode.values(), "sort mode");
         SortOrder sortOrder = readEnum(buf, SortOrder.values(), "sort order");
         SearchMode searchMode = readEnum(buf, SearchMode.values(), "search mode");
-        TerminalResourceView resourceView = readEnum(
-                buf, TerminalResourceView.values(), "resource view");
+        TerminalResourceView resourceView = TerminalResourceView.requireWireId(
+                buf.readVarInt());
         CraftingTerminalPage page = readEnum(buf, CraftingTerminalPage.values(), "page");
         boolean usePlayerInventory = buf.readBoolean();
         TerminalOutputDestination outputDestination = readEnum(

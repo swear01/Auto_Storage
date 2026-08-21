@@ -30,6 +30,10 @@ public record TerminalRepositoryUpdatePacket(
             STREAM_CODEC = new StreamCodec<>() {
         @Override
         public TerminalRepositoryUpdatePacket decode(RegistryFriendlyByteBuf buf) {
+            if (buf.readableBytes() > MAX_SERIALIZED_BYTES) {
+                throw new IllegalArgumentException(
+                        "Terminal repository packet exceeds serialized size limit");
+            }
             int packetStart = buf.readerIndex();
             int containerId = buf.readVarInt();
             long revision = buf.readVarLong();
@@ -64,6 +68,10 @@ public record TerminalRepositoryUpdatePacket(
                 }
                 ItemStack displayStack = ItemStack.STREAM_CODEC.decode(buf);
                 entries.add(new TerminalRepositoryEntry(serial, key, displayStack));
+                if (buf.readerIndex() - packetStart > MAX_SERIALIZED_BYTES) {
+                    throw new IllegalArgumentException(
+                            "Terminal repository packet exceeds serialized size limit");
+                }
             }
             if (buf.readerIndex() - packetStart > MAX_SERIALIZED_BYTES) {
                 throw new IllegalArgumentException(

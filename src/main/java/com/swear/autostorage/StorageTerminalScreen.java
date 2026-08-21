@@ -21,6 +21,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class StorageTerminalScreen<T extends StorageTerminalMenu> extends AbstractContainerScreen<T> {
@@ -54,6 +55,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     private EditBox searchBox;
     private final TerminalScrollbar scrollbar = new TerminalScrollbar();
     private int searchTimer;
+    private boolean clientRepositoryViewDirty = true;
     private String lastSentSearch = "";
     private boolean searchBoxAutoSelected;
     private float networkAmountScale = 1.0F;
@@ -212,13 +214,14 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
 
     private void updateClientRepositoryView() {
         TerminalClientRepository repository = menu.clientRepository();
-        if (repository == null) return;
+        if (repository == null || !clientRepositoryViewDirty) return;
         TerminalPreferences preferences = displayedPreferences();
         repository.setView(
                 searchBox == null ? "" : searchBox.getValue(),
                 preferences.sortMode(),
                 preferences.sortOrder(),
                 preferences.resourceView());
+        clientRepositoryViewDirty = false;
     }
 
     protected void setItemViewControlsVisible(boolean visible) {
@@ -302,7 +305,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                     visibleRows,
                     x,
                     y,
-                    () -> menuIndex < visibleRows * StorageTerminalMenu.DISPLAY_COLS
+                    () -> menuIndex < this.visibleRows * StorageTerminalMenu.DISPLAY_COLS
                             && delegate.isActive());
             moved.index = menuIndex;
             menu.slots.set(menuIndex, moved);
@@ -577,6 +580,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
 
     public void refreshSearch(String text) {
         searchBox.setValue(text);
+        clientRepositoryViewDirty = true;
     }
 
     @Override
@@ -591,15 +595,10 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         if (!isItemViewActive()) return;
         if (searchBoxAutoSelected) drawAutoFocusMarker(graphics);
         updateClientRepositoryView();
-        TerminalClientRepository repository = menu.clientRepository();
-        int totalItems = repository == null
-                ? menu.getTotalItemTypes() : repository.totalEntries();
-        int maxOffset = repository == null
-                ? Math.max(0, totalItems - visibleRows * StorageTerminalMenu.DISPLAY_COLS)
-                : repository.maxScrollOffset(visibleRows);
-        int position = repository == null
-                ? scrollbar.synchronize(menu.getScrollOffset(), maxOffset)
-                : scrollbar.synchronize(repository.getScrollOffset(visibleRows), maxOffset);
+        TerminalClientRepository repository = requireClientRepository();
+        int maxOffset = repository.maxScrollOffset(visibleRows);
+        int position = scrollbar.synchronize(
+                repository.getScrollOffset(visibleRows), maxOffset);
         drawScrollbar(
                 graphics,
                 leftPos + geometry.scrollbar().x() + SCROLL_TRACK_INSET,
@@ -977,6 +976,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     private void scheduleSearch(String ignored) {
+        clientRepositoryViewDirty = true;
         searchSynchronizer().synchronizeFromTerminal(
                 displayedPreferences().searchMode(), searchBox.getValue());
         searchTimer = SEARCH_DEBOUNCE_TICKS;
@@ -985,15 +985,6 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     @Override
     protected void containerTick() {
         super.containerTick();
-        updateClientRepositoryView();
-        if (isItemViewActive()) {
-            int maxOffset = maxScrollOffset();
-            scrollbar.synchronize(clientScrollPosition(maxOffset), maxOffset);
-            scrollbar.tick(maxOffset, scrollPageStep())
-                    .ifPresent(this::setScrollTarget);
-        } else {
-            scrollbar.release();
-        }
         preferenceSession.observe(menu.getTerminalPreferences()).ifPresent(preferences -> {
             TerminalClientPreferences.save(preferences);
         });
@@ -1002,6 +993,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 || preferences.sortMode() != lastSeenSortMode
                 || preferences.searchMode() != lastSeenSearchMode
                 || preferences.resourceView() != lastSeenResourceView) {
+            clientRepositoryViewDirty = true;
             boolean searchModeChanged = preferences.searchMode() != lastSeenSearchMode;
             updateViewSettingButtons();
             if (searchModeChanged) {
@@ -1011,6 +1003,15 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
         }
         synchronizeSearchFromEmi();
         if (searchTimer > 0 && --searchTimer == 0) sendSearchPacket();
+        updateClientRepositoryView();
+        if (isItemViewActive()) {
+            int maxOffset = maxScrollOffset();
+            scrollbar.synchronize(clientScrollPosition(maxOffset), maxOffset);
+            scrollbar.tick(maxOffset, scrollPageStep())
+                    .ifPresent(this::setScrollTarget);
+        } else {
+            scrollbar.release();
+        }
     }
 
     private void synchronizeSearchFromEmi() {
@@ -1018,6 +1019,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 displayedPreferences().searchMode());
         if (text == null || text.equals(searchBox.getValue())) return;
         searchBox.setValue(text);
+        clientRepositoryViewDirty = true;
         searchTimer = 0;
         sendSearchPacket();
     }
@@ -1052,17 +1054,17 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 && mouseY >= topPos + scrollbar.y() && mouseY < topPos + scrollbar.bottom();
     }
 
+    private TerminalClientRepository requireClientRepository() {
+        return Objects.requireNonNull(
+                menu.clientRepository(), "Terminal screen requires a client repository");
+    }
+
     private int maxScrollOffset() {
-        TerminalClientRepository repository = menu.clientRepository();
-        return repository == null
-                ? menu.getMaxScrollOffset() : repository.maxScrollOffset(visibleRows);
+        return requireClientRepository().maxScrollOffset(visibleRows);
     }
 
     private int clientScrollPosition(int maxOffset) {
-        TerminalClientRepository repository = menu.clientRepository();
-        return repository == null
-                ? scrollbar.synchronize(menu.getScrollOffset(), maxOffset)
-                : repository.getScrollOffset(visibleRows);
+        return requireClientRepository().getScrollOffset(visibleRows);
     }
 
     private int scrollPageStep() {
@@ -1070,9 +1072,7 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
     }
 
     private void setScrollTarget(int target) {
-        TerminalClientRepository repository = menu.clientRepository();
-        if (repository == null) return;
-        repository.setScrollOffset(target, visibleRows);
+        requireClientRepository().setScrollOffset(target, visibleRows);
     }
 
     protected static void drawScrollbar(

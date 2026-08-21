@@ -91,14 +91,14 @@ public enum TerminalResourceView {
     }
 
     public static TerminalResourceView byId(int id) {
-        return id >= 0 && id < values().length ? values()[id] : ITEM;
+        for (TerminalResourceView view : values()) {
+            if (view.wireId == id) return view;
+        }
+        return ITEM;
     }
 
     static TerminalResourceView requireById(int id) {
-        if (id < 0 || id >= values().length) {
-            throw new IllegalArgumentException("Unknown terminal resource view " + id);
-        }
-        return values()[id];
+        return requireWireId(id);
     }
 
 }

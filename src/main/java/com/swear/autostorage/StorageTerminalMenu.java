@@ -146,7 +146,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                     case 9 -> getIntWord(scrollOffset, 0);
                     case 10 -> getIntWord(scrollOffset, 1);
                     case 11 -> displayUnlimitedTypeCapacity ? 1 : 0;
-                    default -> resourceView.ordinal();
+                    default -> resourceView.wireId();
                 };
             }
             @Override public void set(int i, int v) {
@@ -163,7 +163,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                     case 9 -> scrollOffset = setIntWord(scrollOffset, 0, v);
                     case 10 -> scrollOffset = setIntWord(scrollOffset, 1, v);
                     case 11 -> displayUnlimitedTypeCapacity = v != 0;
-                    default -> resourceView = TerminalResourceView.byId(v);
+                    default -> resourceView = TerminalResourceView.requireWireId(v);
                 }
             }
             @Override public int getCount() { return 13; }

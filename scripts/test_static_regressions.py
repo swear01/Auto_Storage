@@ -3886,7 +3886,26 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("serialsByKey", client_repository)
         self.assertIn("HashSet", client_repository)
         self.assertIn("readerIndex()", packet)
+        self.assertIn("readableBytes()", packet)
+        self.assertIn("if (buf.readableBytes() > MAX_SERIALIZED_BYTES)", packet)
         self.assertIn("MAX_SERIALIZED_BYTES", packet)
+        decode_loop = self.java_block(
+            packet,
+            r"for\s*\(int\s+index\s*=\s*0;\s*index\s*<\s*entryCount;\s*index\+\+\)",
+            "TerminalRepositoryUpdatePacket.decode entries",
+        )
+        self.assertIn("packetStart", decode_loop)
+        self.assertIn("MAX_SERIALIZED_BYTES", decode_loop)
+        preferences = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalPreferences.java"
+        )
+        self.assertIn("resourceView.wireId()", preferences)
+        self.assertIn("TerminalResourceView.requireWireId", preferences)
+        self.assertIn("resourceView.wireId()", menu)
+        self.assertIn("TerminalResourceView.requireWireId", menu)
+        self.assertIn("requireClientRepository()", screen)
+        self.assertIn("clientRepositoryViewDirty", screen)
+        self.assertIn("this.visibleRows", screen)
 
     def test_terminal_packets_skip_identical_filter_and_layout_requests(self):
         menu = self.read_required(
