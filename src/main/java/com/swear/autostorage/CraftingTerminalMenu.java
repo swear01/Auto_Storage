@@ -3719,6 +3719,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         this.currentFilter = filter != null ? filter : "";
         if (core == null) {
             totalItemTypes = 0;
+            repositoryItemTypes = 0;
             setRepositoryStacks(List.of());
             replaceVisibleDisplayStacks(List.of(), getVisibleRows());
             return;
@@ -3750,6 +3751,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         List<ItemStack> visibleStacks = visibleCraftableDisplayStacks(
                 displayStacks, core.getLevel());
         totalItemTypes = visibleStacks.size();
+        repositoryItemTypes = displayStacks.size();
         refreshDisplayMetadata(core);
         int vRows = getVisibleRows();
         scrollTo(scrollOffset);
@@ -3862,6 +3864,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 .toList();
         List<ItemStack> visible = visibleCraftableDisplayStacks(updated, level);
         totalItemTypes = visible.size();
+        repositoryItemTypes = updated.size();
         refreshDisplayMetadata(core);
         scrollTo(scrollOffset);
         replaceVisibleDisplayStacks(visible, getVisibleRows());

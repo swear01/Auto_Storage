@@ -3789,6 +3789,13 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("scrollOffset = 0", full_apply)
         self.assertIn("repositoryCoreWasValid", menu)
         self.assertIn("repositoryBuildPending", menu)
+        self.assertIn("repositoryItemTypes", menu)
+        max_scroll = self.java_block(
+            menu,
+            r"\bint\s+getMaxScrollOffset\s*\(",
+            "StorageTerminalMenu.getMaxScrollOffset",
+        )
+        self.assertIn("repositoryItemTypes", max_scroll)
         self.assertIn("updateRepositoryChanges", menu)
         repository_build = self.java_block(
             menu,

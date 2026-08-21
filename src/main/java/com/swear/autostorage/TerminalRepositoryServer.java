@@ -34,6 +34,7 @@ final class TerminalRepositoryServer {
 
         revision++;
         previous = copy(current);
+        pruneSerials(current.keySet());
         fullPending = false;
         return chunk(containerId, revision, full, changes);
     }
@@ -75,13 +76,19 @@ final class TerminalRepositoryServer {
         if (entries.isEmpty()) return List.of();
         revision++;
         previous = copy(next);
+        pruneSerials(next.keySet());
         return chunk(containerId, revision, false, entries);
     }
 
     List<TerminalRepositoryUpdatePacket> fullSnapshot(int containerId) {
         revision++;
         fullPending = false;
+        pruneSerials(previous.keySet());
         return chunk(containerId, revision, true, fullEntries(previous));
+    }
+
+    private void pruneSerials(java.util.Set<StorageResourceKey> present) {
+        serials.keySet().removeIf(key -> !present.contains(key));
     }
 
     StorageResourceKey keyFor(long serial) {

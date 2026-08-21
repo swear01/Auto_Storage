@@ -33,6 +33,9 @@ public record TerminalRepositoryUpdatePacket(
             boolean full = buf.readBoolean();
             int chunkIndex = buf.readVarInt();
             int chunkCount = buf.readVarInt();
+            if (chunkCount <= 0 || chunkIndex < 0 || chunkIndex >= chunkCount) {
+                throw new IllegalArgumentException("Invalid terminal repository chunk");
+            }
             int entryCount = buf.readVarInt();
             if (entryCount < 0) {
                 throw new IllegalArgumentException("Negative terminal repository entry count");
@@ -76,10 +79,13 @@ public record TerminalRepositoryUpdatePacket(
         if (chunkCount <= 0 || chunkIndex < 0 || chunkIndex >= chunkCount) {
             throw new IllegalArgumentException("Invalid terminal repository chunk");
         }
-        entries = List.copyOf(entries);
+        if (entries == null) {
+            throw new IllegalArgumentException("Missing terminal repository entries");
+        }
         if (entries.size() > MAX_ENTRIES_PER_PACKET) {
             throw new IllegalArgumentException("Too many terminal repository entries");
         }
+        entries = List.copyOf(entries);
     }
 
     private void write(RegistryFriendlyByteBuf buf) {

@@ -71,7 +71,7 @@ final class TerminalRepositorySlot extends Slot {
 
     @Override
     public boolean mayPickup(Player player) {
-        return delegate.mayPickup(player);
+        return false;
     }
 
     @Override
@@ -91,7 +91,7 @@ final class TerminalRepositorySlot extends Slot {
 
     @Override
     public boolean allowModification(Player player) {
-        return delegate.allowModification(player);
+        return false;
     }
 
     @Override
@@ -106,11 +106,9 @@ final class TerminalRepositorySlot extends Slot {
 
     @Override
     public void onQuickCraft(ItemStack oldStack, ItemStack newStack) {
-        delegate.onQuickCraft(oldStack, newStack);
     }
 
     @Override
     public void onTake(Player player, ItemStack stack) {
-        delegate.onTake(player, stack);
     }
 }

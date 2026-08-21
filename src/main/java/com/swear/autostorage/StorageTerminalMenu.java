@@ -66,6 +66,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     private long lastRepositoryResyncGameTime = Long.MIN_VALUE;
     protected int scrollOffset;
     protected int totalItemTypes;
+    protected int repositoryItemTypes;
     protected String currentFilter = "";
     protected int displayTypeCount = 0;
     protected int displayMaxTypes = 0;
@@ -413,6 +414,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         this.currentFilter = filter != null ? filter : "";
         if (core == null) {
             totalItemTypes = 0;
+            repositoryItemTypes = 0;
             repositoryBuildCore = null;
             repositoryBuildPending = false;
             repositoryChangedKeys.clear();
@@ -428,6 +430,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         TerminalDisplayPage page = core.getTerminalDisplayPage(
                 currentFilter, sortMode, sortOrder, resourceView, scrollOffset, limit);
         totalItemTypes = page.totalTypes();
+        repositoryItemTypes = page.totalTypes();
         refreshDisplayMetadata(core);
         int alignedOffset = rowAlignedScrollOffset(page.offset());
         if (alignedOffset != page.offset()) {
@@ -491,7 +494,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     int getMaxScrollOffset() {
-        long totalRows = ((long) totalItemTypes + DISPLAY_COLS - 1) / DISPLAY_COLS;
+        long totalRows = ((long) repositoryItemTypes + DISPLAY_COLS - 1) / DISPLAY_COLS;
         long offset = Math.max(0L, totalRows - visibleRows) * DISPLAY_COLS;
         int largestAlignedInt = Integer.MAX_VALUE - Integer.MAX_VALUE % DISPLAY_COLS;
         return (int) Math.min(offset, largestAlignedInt);
