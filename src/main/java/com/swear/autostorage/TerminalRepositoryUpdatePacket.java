@@ -1,7 +1,5 @@
 package com.swear.autostorage;
 
-import io.netty.buffer.Unpooled;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -93,17 +91,12 @@ public record TerminalRepositoryUpdatePacket(
     }
 
     static int encodedEntrySize(
-            TerminalRepositoryEntry entry,
-            RegistryAccess registries
+            RegistryFriendlyByteBuf buf,
+            TerminalRepositoryEntry entry
     ) {
-        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
-                Unpooled.buffer(), registries);
-        try {
-            writeEntry(buf, entry);
-            return buf.readableBytes();
-        } finally {
-            buf.release();
-        }
+        buf.clear();
+        writeEntry(buf, entry);
+        return buf.readableBytes();
     }
 
     private void write(RegistryFriendlyByteBuf buf) {

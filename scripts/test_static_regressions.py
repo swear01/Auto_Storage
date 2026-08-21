@@ -3856,6 +3856,8 @@ class StaticRegressionTests(unittest.TestCase):
         held_transfer_packet = self.read_required(
             "src/main/java/com/swear/autostorage/TerminalHeldContainerTransferPacket.java"
         )
+        self.assertIn("requireWireId", transfer_packet)
+        self.assertIn("requireWireId", held_transfer_packet)
         self.assertIn("wireId()", transfer_packet)
         self.assertIn("wireId()", held_transfer_packet)
         self.assertIn("repositorySlot.serial()", screen)

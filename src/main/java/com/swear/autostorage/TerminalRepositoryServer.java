@@ -1,6 +1,8 @@
 package com.swear.autostorage;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -180,41 +182,47 @@ final class TerminalRepositoryServer {
             List<TerminalRepositoryEntry> entries,
             RegistryAccess registries
     ) {
-        List<List<TerminalRepositoryEntry>> chunks = new ArrayList<>();
-        List<TerminalRepositoryEntry> current = new ArrayList<>(
-                TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
-        int currentBytes = TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES;
-        for (TerminalRepositoryEntry entry : entries) {
-            int entryBytes = TerminalRepositoryUpdatePacket.encodedEntrySize(entry, registries);
-            if (entryBytes + TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES
-                    > TerminalRepositoryUpdatePacket.MAX_SERIALIZED_BYTES) {
-                throw new IllegalArgumentException(
-                        "Terminal repository entry exceeds packet size limit");
+        RegistryFriendlyByteBuf scratch = new RegistryFriendlyByteBuf(
+                Unpooled.buffer(), registries);
+        try {
+            List<List<TerminalRepositoryEntry>> chunks = new ArrayList<>();
+            List<TerminalRepositoryEntry> current = new ArrayList<>(
+                    TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
+            int currentBytes = TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES;
+            for (TerminalRepositoryEntry entry : entries) {
+                int entryBytes = TerminalRepositoryUpdatePacket.encodedEntrySize(scratch, entry);
+                if (entryBytes + TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES
+                        > TerminalRepositoryUpdatePacket.MAX_SERIALIZED_BYTES) {
+                    throw new IllegalArgumentException(
+                            "Terminal repository entry exceeds packet size limit");
+                }
+                if (!current.isEmpty()
+                        && (current.size() >= TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET
+                        || currentBytes + entryBytes
+                        > TerminalRepositoryUpdatePacket.MAX_SERIALIZED_BYTES)) {
+                    chunks.add(List.copyOf(current));
+                    current = new ArrayList<>(TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
+                    currentBytes = TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES;
+                }
+                current.add(entry);
+                currentBytes += entryBytes;
             }
-            if (!current.isEmpty()
-                    && (current.size() >= TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET
-                    || currentBytes + entryBytes
-                    > TerminalRepositoryUpdatePacket.MAX_SERIALIZED_BYTES)) {
-                chunks.add(List.copyOf(current));
-                current = new ArrayList<>(TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
-                currentBytes = TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES;
-            }
-            current.add(entry);
-            currentBytes += entryBytes;
-        }
-        if (!current.isEmpty() || chunks.isEmpty()) chunks.add(List.copyOf(current));
+            if (!current.isEmpty() || chunks.isEmpty()) chunks.add(List.copyOf(current));
 
-        int chunkCount = chunks.size();
-        List<TerminalRepositoryUpdatePacket> packets = new ArrayList<>(chunkCount);
-        for (int chunk = 0; chunk < chunkCount; chunk++) {
-            packets.add(new TerminalRepositoryUpdatePacket(
-                    containerId,
-                    revision,
-                    full,
-                    chunk,
-                    chunkCount,
-                    chunks.get(chunk)));
+            int chunkCount = chunks.size();
+            List<TerminalRepositoryUpdatePacket> packets = new ArrayList<>(chunkCount);
+            for (int chunk = 0; chunk < chunkCount; chunk++) {
+                packets.add(new TerminalRepositoryUpdatePacket(
+                        containerId,
+                        revision,
+                        full,
+                        chunk,
+                        chunkCount,
+                        chunks.get(chunk)));
+            }
+            return packets;
+        } finally {
+            scratch.release();
         }
-        return packets;
     }
 }

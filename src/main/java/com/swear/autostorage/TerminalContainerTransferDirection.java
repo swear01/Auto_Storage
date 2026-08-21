@@ -14,10 +14,11 @@ public enum TerminalContainerTransferDirection {
         return wireId;
     }
 
-    static TerminalContainerTransferDirection byWireId(int id) {
+    static TerminalContainerTransferDirection requireWireId(int id) {
         for (TerminalContainerTransferDirection direction : values()) {
             if (direction.wireId == id) return direction;
         }
-        return null;
+        throw new IllegalArgumentException(
+                "Unknown terminal container transfer direction wire id " + id);
     }
 }
