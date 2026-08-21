@@ -538,7 +538,7 @@ public class AutoStorage {
             var player = ctx.player();
             if (player != null && player.containerMenu instanceof StorageTerminalMenu menu
                     && menu.containerId == packet.containerId()) {
-                menu.sendFullRepository();
+                menu.handleRepositoryResync(packet, player);
             }
         });
     }

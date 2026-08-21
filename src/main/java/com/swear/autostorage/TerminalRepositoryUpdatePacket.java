@@ -34,7 +34,10 @@ public record TerminalRepositoryUpdatePacket(
             int chunkIndex = buf.readVarInt();
             int chunkCount = buf.readVarInt();
             int entryCount = buf.readVarInt();
-            if (entryCount < 0 || entryCount > MAX_ENTRIES_PER_PACKET) {
+            if (entryCount < 0) {
+                throw new IllegalArgumentException("Negative terminal repository entry count");
+            }
+            if (entryCount > MAX_ENTRIES_PER_PACKET) {
                 throw new IllegalArgumentException("Too many terminal repository entries");
             }
             List<TerminalRepositoryEntry> entries = new ArrayList<>(entryCount);

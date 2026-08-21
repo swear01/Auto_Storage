@@ -324,7 +324,12 @@ class StaticRegressionTests(unittest.TestCase):
             r"\bprivate\s+CraftableBuildResult\s+buildCraftableDisplayStacks\s*\(",
             "CraftingTerminalMenu.buildCraftableDisplayStacks",
         )
-        self.assertEqual(0, craftable.count("TerminalSearchQuery.compile"))
+        self.assertEqual(1, craftable.count("TerminalSearchQuery.compile"))
+        self.assertIn("query.matches(key, TerminalDisplayStack.strip(output))", craftable)
+        self.assertLess(
+            craftable.index("query.matches(key, TerminalDisplayStack.strip(output))"),
+            craftable.index("computeCraftableStatus"),
+        )
         self.assertNotIn("matchesCraftableFilter", craftable)
         self.assertIn("SEARCH_DEBOUNCE_TICKS = 2", screen)
 
@@ -3766,7 +3771,15 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("TerminalRepositoryResyncPacket.TYPE", entrypoint)
         self.assertIn("TerminalRepositoryActionPacket.TYPE", entrypoint)
         self.assertIn("TerminalRepositoryContainerTransferPacket.TYPE", entrypoint)
+        self.assertIn("handleRepositoryResync(packet, player)", entrypoint)
+        self.assertNotIn("menu.sendFullRepository()", entrypoint)
         self.assertIn("setScrollOffset", repository)
+        serial_at = self.java_block(
+            repository,
+            r"\blong\s+serialAt\s*\(",
+            "TerminalClientRepository.serialAt",
+        )
+        self.assertIn("long index", serial_at)
         self.assertIn("recoveryRequired", repository)
         full_apply = self.java_block(
             repository,
@@ -3814,8 +3827,15 @@ class StaticRegressionTests(unittest.TestCase):
             r"\bprivate\s+CraftableBuildResult\s+buildCraftableDisplayStacks\s*\(",
             "CraftingTerminalMenu.buildCraftableDisplayStacks",
         )
+        self.assertEqual(1, craftable_build.count("TerminalSearchQuery.compile"))
+        self.assertIn("query.matches(key, TerminalDisplayStack.strip(output))", craftable_build)
+        self.assertLess(
+            craftable_build.index("query.matches(key, TerminalDisplayStack.strip(output))"),
+            craftable_build.index("computeCraftableStatus"),
+        )
         self.assertNotIn("matchesCraftableFilter", craftable_build)
         self.assertIn("MAX_ENTRIES_PER_PACKET", packet)
+        self.assertIn("Negative terminal repository entry count", packet)
         self.assertNotIn("while (delta < 0)", screen)
         self.assertNotIn("while (delta >= 9)", screen)
 
@@ -3870,6 +3890,7 @@ class StaticRegressionTests(unittest.TestCase):
             "CraftingTerminalMenu.handleRepositoryAction",
         )
         self.assertIn("page == CraftingTerminalPage.STORAGE", action)
+        self.assertIn("if (packet.quickMove()) return false;", action)
         self.assertIn("selectOutput(player.level(), displayStack)", action)
         storage_refresh = self.java_block(
             menu,

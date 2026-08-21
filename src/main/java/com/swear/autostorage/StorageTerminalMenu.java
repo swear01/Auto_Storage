@@ -63,6 +63,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     private boolean repositoryFullListPending = true;
     private boolean repositoryDirty = true;
     private boolean repositoryCoreWasValid = true;
+    private long lastRepositoryResyncGameTime = Long.MIN_VALUE;
     protected int scrollOffset;
     protected int totalItemTypes;
     protected String currentFilter = "";
@@ -947,6 +948,20 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
             PacketDistributor.sendToPlayer(serverPlayer, packet);
         }
         repositoryDirty = false;
+    }
+
+    public void handleRepositoryResync(
+            TerminalRepositoryResyncPacket packet,
+            Player player
+    ) {
+        if (player.level().isClientSide()
+                || packet.containerId() != containerId
+                || !stillValid(player)) return;
+        long now = player.level().getGameTime();
+        if (lastRepositoryResyncGameTime != Long.MIN_VALUE
+                && now - lastRepositoryResyncGameTime < 20) return;
+        lastRepositoryResyncGameTime = now;
+        sendFullRepository();
     }
 
     public void sendFullRepository() {

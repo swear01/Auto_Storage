@@ -3689,11 +3689,11 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         if (page != CraftingTerminalPage.CRAFTABLE) {
             return super.handleRepositoryAction(packet, player);
         }
+        if (packet.quickMove()) return false;
         if (player.level().isClientSide()
                 || player.isSpectator()
                 || !stillValid(player)
                 || packet.containerId() != containerId
-                || packet.quickMove()
                 || !getCarried().isEmpty()) return false;
         StorageResourceKey key = repositoryKey(packet.serial());
         ItemStack displayStack = repositoryDisplay(packet.serial());
@@ -3951,6 +3951,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 core,
                 sources,
                 includesPlayerSources);
+        TerminalSearchQuery query = TerminalSearchQuery.compile(currentFilter);
         Map<StorageResourceKey, CraftableOutput> craftableOutputs = new LinkedHashMap<>();
         long candidateSelectionStarted = System.nanoTime();
         List<CraftableRecipeCatalog.Candidate> candidates =
@@ -3996,6 +3997,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 StorageResourceKey key =
                         match.selectionOutputKey(level, output).orElse(null);
                 if (key == null || output.isEmpty()) continue;
+                if (!currentFilter.isEmpty()
+                        && !query.matches(key, TerminalDisplayStack.strip(output))) continue;
                 long previewStarted = System.nanoTime();
                 CraftableStatus status = computeCraftableStatus(match, core, availability);
                 long previewNanos = System.nanoTime() - previewStarted;
@@ -4017,6 +4020,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             ItemStack output = match.presentationOutput(List.of(), level);
             if (output.isEmpty()) continue;
             StorageResourceKey key = StorageResourceKey.item(output, level.registryAccess());
+            if (!currentFilter.isEmpty()
+                    && !query.matches(key, TerminalDisplayStack.strip(output))) continue;
             long previewStarted = System.nanoTime();
             CraftableStatus status = computeCraftableStatus(match, core, availability);
             previewSimulationNanos += System.nanoTime() - previewStarted;
@@ -4036,6 +4041,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             ItemStack output = match.presentationOutput(List.of(), level);
             if (output.isEmpty()) continue;
             StorageResourceKey key = StorageResourceKey.item(output, level.registryAccess());
+            if (!currentFilter.isEmpty()
+                    && !query.matches(key, TerminalDisplayStack.strip(output))) continue;
             long previewStarted = System.nanoTime();
             CraftableStatus status = computeCraftableStatus(match, core, availability);
             previewSimulationNanos += System.nanoTime() - previewStarted;

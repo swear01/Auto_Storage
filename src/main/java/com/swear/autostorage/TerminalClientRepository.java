@@ -103,17 +103,19 @@ final class TerminalClientRepository {
     }
 
     long serialAt(int visibleIndex, int visibleRows) {
-        int index = scrollOffset + visibleIndex;
-        if (visibleIndex < 0 || visibleIndex >= visibleRows * StorageTerminalMenu.DISPLAY_COLS
-                || index >= visibleEntries().size()) return -1;
-        return visibleEntries().get(index).serial();
+        long index = (long) scrollOffset + visibleIndex;
+        if (visibleIndex < 0
+                || visibleIndex >= (long) visibleRows * StorageTerminalMenu.DISPLAY_COLS
+                || index < 0 || index >= visibleEntries().size()) return -1;
+        return visibleEntries().get((int) index).serial();
     }
 
     ItemStack stackAt(int visibleIndex, int visibleRows) {
-        int index = scrollOffset + visibleIndex;
-        if (visibleIndex < 0 || visibleIndex >= visibleRows * StorageTerminalMenu.DISPLAY_COLS
-                || index >= visibleEntries().size()) return ItemStack.EMPTY;
-        return visibleEntries().get(index).displayStack().copy();
+        long index = (long) scrollOffset + visibleIndex;
+        if (visibleIndex < 0
+                || visibleIndex >= (long) visibleRows * StorageTerminalMenu.DISPLAY_COLS
+                || index < 0 || index >= visibleEntries().size()) return ItemStack.EMPTY;
+        return visibleEntries().get((int) index).displayStack().copy();
     }
 
     long revision() {
