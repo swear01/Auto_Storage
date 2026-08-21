@@ -1,6 +1,6 @@
 package com.swear.autostorage;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ final class TerminalRepositoryServer {
     List<TerminalRepositoryUpdatePacket> update(
             int containerId,
             List<ItemStack> displayStacks,
-            HolderLookup.Provider registries
+            RegistryAccess registries
     ) {
         Map<StorageResourceKey, ItemStack> current = index(displayStacks, registries);
         boolean full = fullPending;
@@ -36,13 +36,14 @@ final class TerminalRepositoryServer {
         previous = copy(current);
         pruneSerials(current.keySet());
         fullPending = false;
-        return chunk(containerId, revision, full, changes);
+        return chunk(containerId, revision, full, changes, registries);
     }
 
     List<TerminalRepositoryUpdatePacket> updateChanges(
             int containerId,
             Map<StorageResourceKey, ItemStack> changed,
-            java.util.Set<StorageResourceKey> removed
+            java.util.Set<StorageResourceKey> removed,
+            RegistryAccess registries
     ) {
         if (changed.isEmpty() && removed.isEmpty()) return List.of();
         Map<StorageResourceKey, ItemStack> next = new LinkedHashMap<>();
@@ -77,14 +78,17 @@ final class TerminalRepositoryServer {
         revision++;
         previous = copy(next);
         pruneSerials(next.keySet());
-        return chunk(containerId, revision, false, entries);
+        return chunk(containerId, revision, false, entries, registries);
     }
 
-    List<TerminalRepositoryUpdatePacket> fullSnapshot(int containerId) {
+    List<TerminalRepositoryUpdatePacket> fullSnapshot(
+            int containerId,
+            RegistryAccess registries
+    ) {
         revision++;
         fullPending = false;
         pruneSerials(previous.keySet());
-        return chunk(containerId, revision, true, fullEntries(previous));
+        return chunk(containerId, revision, true, fullEntries(previous), registries);
     }
 
     private void pruneSerials(java.util.Set<StorageResourceKey> present) {
@@ -147,7 +151,7 @@ final class TerminalRepositoryServer {
 
     private static Map<StorageResourceKey, ItemStack> index(
             List<ItemStack> displayStacks,
-            HolderLookup.Provider registries
+            RegistryAccess registries
     ) {
         Map<StorageResourceKey, ItemStack> indexed = new LinkedHashMap<>();
         for (ItemStack display : displayStacks) {
@@ -173,23 +177,43 @@ final class TerminalRepositoryServer {
             int containerId,
             long revision,
             boolean full,
-            List<TerminalRepositoryEntry> entries
+            List<TerminalRepositoryEntry> entries,
+            RegistryAccess registries
     ) {
-        int chunkCount = Math.max(1,
-                (entries.size() + TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET - 1)
-                        / TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
+        List<List<TerminalRepositoryEntry>> chunks = new ArrayList<>();
+        List<TerminalRepositoryEntry> current = new ArrayList<>(
+                TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
+        int currentBytes = TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES;
+        for (TerminalRepositoryEntry entry : entries) {
+            int entryBytes = TerminalRepositoryUpdatePacket.encodedEntrySize(entry, registries);
+            if (entryBytes + TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES
+                    > TerminalRepositoryUpdatePacket.MAX_SERIALIZED_BYTES) {
+                throw new IllegalArgumentException(
+                        "Terminal repository entry exceeds packet size limit");
+            }
+            if (!current.isEmpty()
+                    && (current.size() >= TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET
+                    || currentBytes + entryBytes
+                    > TerminalRepositoryUpdatePacket.MAX_SERIALIZED_BYTES)) {
+                chunks.add(List.copyOf(current));
+                current = new ArrayList<>(TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
+                currentBytes = TerminalRepositoryUpdatePacket.MAX_PACKET_OVERHEAD_BYTES;
+            }
+            current.add(entry);
+            currentBytes += entryBytes;
+        }
+        if (!current.isEmpty() || chunks.isEmpty()) chunks.add(List.copyOf(current));
+
+        int chunkCount = chunks.size();
         List<TerminalRepositoryUpdatePacket> packets = new ArrayList<>(chunkCount);
         for (int chunk = 0; chunk < chunkCount; chunk++) {
-            int from = chunk * TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET;
-            int to = Math.min(entries.size(), from
-                    + TerminalRepositoryUpdatePacket.MAX_ENTRIES_PER_PACKET);
             packets.add(new TerminalRepositoryUpdatePacket(
                     containerId,
                     revision,
                     full,
                     chunk,
                     chunkCount,
-                    entries.subList(from, to)));
+                    chunks.get(chunk)));
         }
         return packets;
     }

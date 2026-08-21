@@ -3788,6 +3788,7 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertIn("scrollOffset = 0", full_apply)
         self.assertIn("repositoryCoreWasValid", menu)
+        self.assertIn("TerminalClientRepository", menu)
         self.assertIn("repositoryBuildPending", menu)
         self.assertIn("repositoryItemTypes", menu)
         max_scroll = self.java_block(
@@ -3842,24 +3843,25 @@ class StaticRegressionTests(unittest.TestCase):
         )
         self.assertNotIn("matchesCraftableFilter", craftable_build)
         self.assertIn("MAX_ENTRIES_PER_PACKET", packet)
+        self.assertIn("MAX_SERIALIZED_BYTES", packet)
         self.assertIn("Negative terminal repository entry count", packet)
+        repository_server = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalRepositoryServer.java"
+        )
+        self.assertIn("encodedEntrySize", repository_server)
+        self.assertIn("registryAccess", menu)
+        transfer_packet = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalRepositoryContainerTransferPacket.java"
+        )
+        held_transfer_packet = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalHeldContainerTransferPacket.java"
+        )
+        self.assertIn("wireId()", transfer_packet)
+        self.assertIn("wireId()", held_transfer_packet)
+        self.assertIn("repositorySlot.serial()", screen)
+        self.assertIn("!menu.getCarried().isEmpty()", screen)
         self.assertNotIn("while (delta < 0)", screen)
         self.assertNotIn("while (delta >= 9)", screen)
-
-    def test_terminal_scroll_uses_client_repository_without_server_packet(self):
-        menu = self.read_required(
-            "src/main/java/com/swear/autostorage/StorageTerminalMenu.java"
-        )
-        screen = self.read_required(
-            "src/main/java/com/swear/autostorage/StorageTerminalScreen.java"
-        )
-        entrypoint = self.read_required(
-            "src/main/java/com/swear/autostorage/AutoStorage.java"
-        )
-        self.assertIn("TerminalClientRepository", menu)
-        self.assertIn("TerminalRepositoryUpdatePacket", entrypoint)
-        self.assertNotIn("new TerminalScrollPacket(menu.containerId, target)", screen)
-        self.assertNotIn("menu.scrollTo(packet.offset())", entrypoint)
 
     def test_terminal_packets_skip_identical_filter_and_layout_requests(self):
         menu = self.read_required(

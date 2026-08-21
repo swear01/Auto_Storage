@@ -1,5 +1,7 @@
 package com.swear.autostorage;
 
+import io.netty.buffer.Unpooled;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -19,6 +21,8 @@ public record TerminalRepositoryUpdatePacket(
         List<TerminalRepositoryEntry> entries
 ) implements CustomPacketPayload {
     static final int MAX_ENTRIES_PER_PACKET = 512;
+    static final int MAX_PACKET_OVERHEAD_BYTES = 32;
+    static final int MAX_SERIALIZED_BYTES = 1_900_000;
 
     public static final Type<TerminalRepositoryUpdatePacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(
@@ -88,6 +92,20 @@ public record TerminalRepositoryUpdatePacket(
         entries = List.copyOf(entries);
     }
 
+    static int encodedEntrySize(
+            TerminalRepositoryEntry entry,
+            RegistryAccess registries
+    ) {
+        RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(
+                Unpooled.buffer(), registries);
+        try {
+            writeEntry(buf, entry);
+            return buf.readableBytes();
+        } finally {
+            buf.release();
+        }
+    }
+
     private void write(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(containerId);
         buf.writeVarLong(revision);
@@ -95,17 +113,22 @@ public record TerminalRepositoryUpdatePacket(
         buf.writeVarInt(chunkIndex);
         buf.writeVarInt(chunkCount);
         buf.writeVarInt(entries.size());
-        for (TerminalRepositoryEntry entry : entries) {
-            buf.writeVarLong(entry.serial());
-            StorageResourceKey key = entry.key();
-            buf.writeBoolean(key != null);
-            if (key != null) {
-                buf.writeResourceLocation(key.kindId());
-                buf.writeResourceLocation(key.resourceId());
-                buf.writeNbt(key.variantData());
-            }
-            ItemStack.STREAM_CODEC.encode(buf, entry.displayStack());
+        for (TerminalRepositoryEntry entry : entries) writeEntry(buf, entry);
+    }
+
+    private static void writeEntry(
+            RegistryFriendlyByteBuf buf,
+            TerminalRepositoryEntry entry
+    ) {
+        buf.writeVarLong(entry.serial());
+        StorageResourceKey key = entry.key();
+        buf.writeBoolean(key != null);
+        if (key != null) {
+            buf.writeResourceLocation(key.kindId());
+            buf.writeResourceLocation(key.resourceId());
+            buf.writeNbt(key.variantData());
         }
+        ItemStack.STREAM_CODEC.encode(buf, entry.displayStack());
     }
 
     @Override

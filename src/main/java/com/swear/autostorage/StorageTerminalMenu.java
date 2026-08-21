@@ -922,7 +922,10 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                     && (!repositoryChangedStacks.isEmpty()
                     || !repositoryRemovedKeys.isEmpty())) {
                 repositoryServer.updateChanges(
-                        containerId, repositoryChangedStacks, repositoryRemovedKeys);
+                        containerId,
+                        repositoryChangedStacks,
+                        repositoryRemovedKeys,
+                        serverPlayer.registryAccess());
                 repositoryChangedStacks.clear();
                 repositoryRemovedKeys.clear();
             }
@@ -931,7 +934,8 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                             containerId,
                             repositoryStacks,
                             serverPlayer.registryAccess())
-                    : repositoryServer.fullSnapshot(containerId);
+                    : repositoryServer.fullSnapshot(
+                            containerId, serverPlayer.registryAccess());
             repositoryFullRequested = false;
             repositoryFullListPending = false;
             repositoryChangedKeys.clear();
@@ -940,7 +944,10 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         } else if (!repositoryChangedStacks.isEmpty()
                 || !repositoryRemovedKeys.isEmpty()) {
             packets = repositoryServer.updateChanges(
-                    containerId, repositoryChangedStacks, repositoryRemovedKeys);
+                    containerId,
+                    repositoryChangedStacks,
+                    repositoryRemovedKeys,
+                    serverPlayer.registryAccess());
             repositoryChangedStacks.clear();
             repositoryRemovedKeys.clear();
         } else {

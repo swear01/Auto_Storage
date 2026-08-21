@@ -1,10 +1,23 @@
 package com.swear.autostorage;
 
 public enum TerminalContainerTransferDirection {
-    DEPOSIT,
-    WITHDRAW;
+    DEPOSIT(0),
+    WITHDRAW(1);
 
-    static TerminalContainerTransferDirection byId(int id) {
-        return id >= 0 && id < values().length ? values()[id] : null;
+    private final int wireId;
+
+    TerminalContainerTransferDirection(int wireId) {
+        this.wireId = wireId;
+    }
+
+    int wireId() {
+        return wireId;
+    }
+
+    static TerminalContainerTransferDirection byWireId(int id) {
+        for (TerminalContainerTransferDirection direction : values()) {
+            if (direction.wireId == id) return direction;
+        }
+        return null;
     }
 }

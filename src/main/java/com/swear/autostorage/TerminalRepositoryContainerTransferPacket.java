@@ -23,9 +23,9 @@ public record TerminalRepositoryContainerTransferPacket(
             int containerId = buf.readVarInt();
             int stateId = buf.readVarInt();
             long serial = buf.readVarLong();
-            TerminalResourceView view = TerminalResourceView.requireById(buf.readVarInt());
+            TerminalResourceView view = TerminalResourceView.requireWireId(buf.readVarInt());
             TerminalContainerTransferDirection direction =
-                    TerminalContainerTransferDirection.byId(buf.readVarInt());
+                    TerminalContainerTransferDirection.byWireId(buf.readVarInt());
             if (direction == null) {
                 throw new IllegalArgumentException("Unknown terminal container transfer direction");
             }
@@ -41,8 +41,8 @@ public record TerminalRepositoryContainerTransferPacket(
             buf.writeVarInt(packet.containerId());
             buf.writeVarInt(packet.stateId());
             buf.writeVarLong(packet.serial());
-            buf.writeVarInt(packet.expectedView().ordinal());
-            buf.writeVarInt(packet.direction().ordinal());
+            buf.writeVarInt(packet.expectedView().wireId());
+            buf.writeVarInt(packet.direction().wireId());
         }
     };
 

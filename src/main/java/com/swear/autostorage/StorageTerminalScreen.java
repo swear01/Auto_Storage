@@ -829,7 +829,9 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 && slotId >= 0
                 && slotId < visibleRows * StorageTerminalMenu.DISPLAY_COLS
                 && (clickType == ClickType.PICKUP || clickType == ClickType.QUICK_MOVE)) {
-            long serial = repository.serialAt(slotId, visibleRows);
+            long serial = slot instanceof TerminalRepositorySlot repositorySlot
+                    ? repositorySlot.serial()
+                    : repository.serialAt(slotId, visibleRows);
             if (serial > 0 && minecraft != null && minecraft.getConnection() != null) {
                 minecraft.getConnection().send(new TerminalRepositoryActionPacket(
                         menu.containerId,
@@ -858,8 +860,10 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 .orElse(false))) {
             if (minecraft != null && minecraft.getConnection() != null) {
                 TerminalClientRepository repository = menu.clientRepository();
-                long serial = repository == null
-                        ? -1 : repository.serialAt(hoveredSlot.index, visibleRows);
+                long serial = hoveredSlot instanceof TerminalRepositorySlot repositorySlot
+                        ? repositorySlot.serial()
+                        : repository == null
+                                ? -1 : repository.serialAt(hoveredSlot.index, visibleRows);
                 if (serial <= 0) return true;
                 minecraft.getConnection().send(new TerminalRepositoryContainerTransferPacket(
                         menu.containerId,
