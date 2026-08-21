@@ -219,7 +219,6 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 preferences.sortMode(),
                 preferences.sortOrder(),
                 preferences.resourceView());
-        repository.setScrollOffset(repository.getScrollOffset(visibleRows), visibleRows);
     }
 
     protected void setItemViewControlsVisible(boolean visible) {
@@ -860,19 +859,27 @@ public class StorageTerminalScreen<T extends StorageTerminalMenu> extends Abstra
                 .orElse(false))) {
             if (minecraft != null && minecraft.getConnection() != null) {
                 TerminalClientRepository repository = menu.clientRepository();
-                long serial = hoveredSlot instanceof TerminalRepositorySlot repositorySlot
-                        ? repositorySlot.serial()
-                        : repository == null
-                                ? -1 : repository.serialAt(hoveredSlot.index, visibleRows);
+                TerminalContainerTransferDirection direction = button == 0
+                        ? TerminalContainerTransferDirection.WITHDRAW
+                        : TerminalContainerTransferDirection.DEPOSIT;
+                if (repository == null) {
+                    minecraft.getConnection().send(new TerminalHeldContainerTransferPacket(
+                            menu.containerId,
+                            menu.getStateId(),
+                            hoveredSlot.index,
+                            visibleResourceView,
+                            direction));
+                    return true;
+                }
+                if (!(hoveredSlot instanceof TerminalRepositorySlot repositorySlot)) return true;
+                long serial = repositorySlot.serial();
                 if (serial <= 0) return true;
                 minecraft.getConnection().send(new TerminalRepositoryContainerTransferPacket(
                         menu.containerId,
                         menu.getStateId(),
                         serial,
                         visibleResourceView,
-                        button == 0
-                                ? TerminalContainerTransferDirection.WITHDRAW
-                                : TerminalContainerTransferDirection.DEPOSIT));
+                        direction));
             }
             return true;
         }

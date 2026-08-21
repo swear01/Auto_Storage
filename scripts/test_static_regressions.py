@@ -3861,6 +3861,8 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("wireId()", transfer_packet)
         self.assertIn("wireId()", held_transfer_packet)
         self.assertIn("repositorySlot.serial()", screen)
+        self.assertIn("new TerminalHeldContainerTransferPacket", screen)
+        self.assertNotIn("repository.serialAt(hoveredSlot.index", screen)
         self.assertIn("!menu.getCarried().isEmpty()", screen)
         self.assertNotIn("while (delta < 0)", screen)
         self.assertNotIn("while (delta >= 9)", screen)

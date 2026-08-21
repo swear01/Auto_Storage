@@ -76,12 +76,12 @@ final class TerminalRepositorySlot extends Slot {
 
     @Override
     public int getMaxStackSize() {
-        return delegate.getMaxStackSize();
+        return getItem().getMaxStackSize();
     }
 
     @Override
     public int getMaxStackSize(ItemStack stack) {
-        return delegate.getMaxStackSize(stack);
+        return stack.getMaxStackSize();
     }
 
     @Override
@@ -101,7 +101,7 @@ final class TerminalRepositorySlot extends Slot {
 
     @Override
     public boolean isFake() {
-        return delegate.isFake();
+        return true;
     }
 
     @Override
