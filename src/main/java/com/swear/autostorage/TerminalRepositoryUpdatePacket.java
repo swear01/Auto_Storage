@@ -30,9 +30,13 @@ public record TerminalRepositoryUpdatePacket(
             STREAM_CODEC = new StreamCodec<>() {
         @Override
         public TerminalRepositoryUpdatePacket decode(RegistryFriendlyByteBuf buf) {
+            int packetStart = buf.readerIndex();
             int containerId = buf.readVarInt();
             long revision = buf.readVarLong();
             boolean full = buf.readBoolean();
+            if (containerId < 0 || revision < 0) {
+                throw new IllegalArgumentException("Invalid terminal repository identity");
+            }
             int chunkIndex = buf.readVarInt();
             int chunkCount = buf.readVarInt();
             if (chunkCount <= 0 || chunkIndex < 0 || chunkIndex >= chunkCount) {
@@ -60,6 +64,10 @@ public record TerminalRepositoryUpdatePacket(
                 }
                 ItemStack displayStack = ItemStack.STREAM_CODEC.decode(buf);
                 entries.add(new TerminalRepositoryEntry(serial, key, displayStack));
+            }
+            if (buf.readerIndex() - packetStart > MAX_SERIALIZED_BYTES) {
+                throw new IllegalArgumentException(
+                        "Terminal repository packet exceeds serialized size limit");
             }
             return new TerminalRepositoryUpdatePacket(
                     containerId, revision, full, chunkIndex, chunkCount, entries);

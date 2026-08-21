@@ -5,11 +5,14 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class TerminalClientRepository {
     private final Map<Long, TerminalRepositoryEntry> entries = new HashMap<>();
+    private final Map<StorageResourceKey, Long> serialsByKey = new HashMap<>();
     private List<TerminalRepositoryEntry> visible = List.of();
     private long completedRevision = -1;
     private long fullRevision = -1;
@@ -128,6 +131,7 @@ final class TerminalClientRepository {
         if (packet.chunkIndex() == 0) {
             recoveryRequired = false;
             entries.clear();
+            serialsByKey.clear();
             scrollOffset = 0;
             fullRevision = packet.revision();
             expectedFullChunks = packet.chunkCount();
@@ -150,6 +154,7 @@ final class TerminalClientRepository {
 
     private boolean failRecovery() {
         entries.clear();
+        serialsByKey.clear();
         visible = List.of();
         fullInProgress = false;
         deltaInProgress = false;
@@ -159,21 +164,33 @@ final class TerminalClientRepository {
     }
 
     private boolean applyEntries(List<TerminalRepositoryEntry> updates) {
+        Set<Long> packetSerials = new HashSet<>();
+        Set<StorageResourceKey> packetKeys = new HashSet<>();
         for (TerminalRepositoryEntry update : updates) {
+            if (!packetSerials.add(update.serial())) return false;
             TerminalRepositoryEntry previous = entries.get(update.serial());
+            StorageResourceKey key;
             if (update.removed()) {
                 if (previous == null) return false;
-                entries.remove(update.serial());
-                continue;
+                key = previous.key();
+            } else {
+                if (update.key() == null && previous == null) return false;
+                if (update.key() != null && previous != null
+                        && !update.key().equals(previous.key())) return false;
+                key = update.key() != null ? update.key() : previous.key();
+                if (key == null) return false;
             }
-            if (update.key() == null && previous == null) return false;
-            if (update.key() != null && previous != null
-                    && !update.key().equals(previous.key())) return false;
-            StorageResourceKey key = update.key() != null
-                    ? update.key() : previous.key();
-            if (key == null) return false;
-            entries.put(update.serial(), new TerminalRepositoryEntry(
-                    update.serial(), key, update.displayStack()));
+            if (!packetKeys.add(key)) return false;
+            Long existingSerial = serialsByKey.get(key);
+            if (existingSerial != null && existingSerial != update.serial()) return false;
+            if (update.removed()) {
+                entries.remove(update.serial());
+                serialsByKey.remove(key);
+            } else {
+                entries.put(update.serial(), new TerminalRepositoryEntry(
+                        update.serial(), key, update.displayStack()));
+                serialsByKey.put(key, update.serial());
+            }
         }
         return true;
     }

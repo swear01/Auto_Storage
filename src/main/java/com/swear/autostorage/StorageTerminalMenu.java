@@ -629,6 +629,8 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
                 || packet.expectedView() != resourceView
                 || resourceView == TerminalResourceView.ITEM
                 || getCarried().isEmpty()
+                || this instanceof CraftingTerminalMenu crafting
+                && crafting.getPage() != CraftingTerminalPage.STORAGE
                 || pageIsNotItemView()) return false;
         StorageResourceKey key = repositoryKey(packet.serial());
         ItemStack displayStack = repositoryDisplay(packet.serial());
@@ -971,7 +973,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         if (lastRepositoryResyncGameTime != Long.MIN_VALUE
                 && now - lastRepositoryResyncGameTime < 20) return;
         lastRepositoryResyncGameTime = now;
-        sendFullRepository();
+        requestRepositoryFull();
     }
 
     public void sendFullRepository() {

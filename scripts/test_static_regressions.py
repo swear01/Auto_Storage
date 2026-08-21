@@ -3866,6 +3866,27 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("!menu.getCarried().isEmpty()", screen)
         self.assertNotIn("while (delta < 0)", screen)
         self.assertNotIn("while (delta >= 9)", screen)
+        resync = self.java_block(
+            menu,
+            r"\bpublic\s+void\s+handleRepositoryResync\s*\(",
+            "StorageTerminalMenu.handleRepositoryResync",
+        )
+        self.assertIn("requestRepositoryFull()", resync)
+        self.assertNotIn("sendFullRepository()", resync)
+        transfer = self.java_block(
+            menu,
+            r"\bpublic\s+boolean\s+handleRepositoryContainerTransfer\s*\(",
+            "StorageTerminalMenu.handleRepositoryContainerTransfer",
+        )
+        self.assertIn("CraftingTerminalPage.STORAGE", transfer)
+        self.assertIn("this instanceof CraftingTerminalMenu", transfer)
+        client_repository = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalClientRepository.java"
+        )
+        self.assertIn("serialsByKey", client_repository)
+        self.assertIn("HashSet", client_repository)
+        self.assertIn("readerIndex()", packet)
+        self.assertIn("MAX_SERIALIZED_BYTES", packet)
 
     def test_terminal_packets_skip_identical_filter_and_layout_requests(self):
         menu = self.read_required(
