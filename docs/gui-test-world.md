@@ -34,6 +34,7 @@
 | `terminal-left-rail` | storage_terminal | Core、Storage Terminal、Crafting Terminal；hotbar 1/2 只負責導航 | 兩種 terminal 的共用 rail、搜尋與置中 |
 | `bus-configuration` | import_bus | fresh Core、Import/Export Bus、兩個容器及最小互動 kit | 方向、filter、wrench 與 reset 流程 |
 | `crafting-fuel-page` | crafting_terminal | Creative Storage、完整代表性 items/typed resources、Transform reserves、Processing/Instant Stations、descriptor-keyed work；hotbar 3 的 Coal 是唯一視覺輸入 | 四頁共用 header/content bottom、自適應grid列數、立即row scroll、空白 top search、Transform logical source、Stations All/Installed與固定稀疏列、未安裝station明顯降低可見度、logical family tooltip、固定 type capacity、無外框recipe preview/header頁碼 |
+| `flux-station` | flux_station | Flux Station、bedrock base、64 redstone、Storage/Crafting terminals、空玩家背包 | dedicated station texture、world-station availability、animated Creating Flux shared Craftable card、bedrock/flux_block base explanation、1 redstone→1 flux dust、無 world block/entity mutation |
 | `terminal-scale` | crafting_terminal | on-demand 10,000或30,000個exact component variants、目前runtime registry每種非空item各`--items-per-type`個（預設64）、全部Processing/Instant descriptors、typed/work reserves、Storage/Crafting兩種Terminal、Creative Storage、單一production repository record、空玩家背包 | 兩種Terminal prepared open、Craftable與recipe preview、grab-offset thumb drag、track page/repeat、立即row wheel、framed widget states、長列表搜尋/排序/遠頁、4px recipe inset、craftable-first排序與`n / craftable (total)`；真正cold效能由matrix gate負責 |
 | `patchouli-guide` | overview | Guide Book | 章節、文字、連結與版面 |
 
@@ -62,6 +63,9 @@
   不得要求玩家先裝機器或搬運資源。
 - Core另預載Modern Industrialization Aluminum Blade與Macerator；展開並hover其EMI
   recipe diagram不得因recipe widget使用負座標或外擴drawable而crash。
+- `flux-station` 的自訂 Creating Flux diagram 必須只出現在 exact synthetic recipe 上，
+  留在 shared Craftable diagram bounds 內，保留 ledger/navigation/craft controls，並說明
+  bedrock 與 `fluxnetworks:flux_block` 兩種有效 base；其他 recipe 不得因相同形狀誤選動畫。
 - Instant Stations 預載 Ultimate Crafting Table；Core預載Extended Crafting預設19種
   exact component Singularity各1個。Scenario不再注入假Diamond recipe；玩家直接選
   真實Ultimate Singularity，preview必須重用EMI完整9×9 public widget而不是native

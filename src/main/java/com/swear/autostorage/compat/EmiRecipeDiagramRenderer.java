@@ -1,5 +1,6 @@
 package com.swear.autostorage.compat;
 
+import com.swear.autostorage.RecipeDiagramGeometry;
 import com.swear.autostorage.RecipeDiagramRenderer;
 import com.swear.autostorage.RecipePresentation;
 import com.swear.autostorage.RecipePresentationKind;
@@ -252,9 +253,10 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
                 diagram.width() / (float) cachedWidth,
                 diagram.height() / (float) cachedHeight));
         int scaledWidth = Math.round(cachedWidth * scale);
+        int scaledHeight = Math.round(cachedHeight * scale);
         return new WidgetState(
                 diagram.x() + (diagram.width() - scaledWidth) / 2,
-                diagram.y(),
+                diagram.y() + RecipeDiagramGeometry.centeredOffset(diagram.height(), scaledHeight),
                 scale,
                 cachedWidgets);
     }

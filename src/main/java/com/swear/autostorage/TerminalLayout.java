@@ -802,7 +802,8 @@ final class TerminalLayout {
         int chainWidth = inputGridSize + CONTROL_GAP + CONTROL_SIZE
                 + CONTROL_GAP + outputSize;
         int chainX = diagram.x() + Math.max(0, (diagram.width() - chainWidth) / 2);
-        int inputY = diagram.y() + 2;
+        int inputY = diagram.y()
+                + RecipeDiagramGeometry.centeredOffset(diagram.height(), inputGridSize);
         List<Rect> inputSlots = new ArrayList<>(RecipePresentation.MAX_INPUTS);
         for (int input = 0; input < RecipePresentation.MAX_INPUTS; input++) {
             inputSlots.add(new Rect(

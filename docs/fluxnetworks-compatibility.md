@@ -47,7 +47,16 @@ compatibility module does not leak a loot table referencing `flux_station` into
 servers where Flux Networks is absent. When `enableFluxRecipe` is disabled,
 the synthetic recipe and world availability are fail-closed.
 
-The isolated `fluxnetworksFixture` runs nineteen GameTests covering registration,
+## Craftable presentation
+
+The Flux `Creating Flux` diagram is selected only for the exact synthetic recipe ID
+and a server-synced `WORLD_STATION` presentation whose input, output, station,
+layout, and count all match the fixed 1:1 contract. It is clipped and centered
+inside the shared Craftable diagram bounds; the common ledger, navigation, craft
+controls, and transaction remain unchanged. A changed or overridden recipe falls
+back to the normal renderer, and the diagram explains both accepted base blocks.
+
+The isolated `fluxnetworksFixture` runs twenty GameTests covering registration,
 synthetic recipe exposure, config gating, block drops, both accepted bases,
 invalid-base/cache transitions, 1:1 conversion, exact batching,
 installed-item availability, registry reload/removal behavior, and stale

@@ -8,6 +8,10 @@ import java.util.List;
 public interface RecipeDiagramRenderer {
     boolean supports(RecipePresentation presentation, Geometry geometry);
 
+    default boolean usesSharedStationBadge() {
+        return true;
+    }
+
     void render(
             GuiGraphics graphics,
             Font font,

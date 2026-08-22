@@ -140,6 +140,7 @@ public final class RecipePresentation {
     private static final RecipePresentation EMPTY = new RecipePresentation();
 
     private final ResourceLocation recipeId;
+    private final ResourceLocation stationDescriptorId;
     private final RecipePresentationKind kind;
     private final int width;
     private final int height;
@@ -152,6 +153,7 @@ public final class RecipePresentation {
 
     private RecipePresentation() {
         recipeId = null;
+        stationDescriptorId = null;
         kind = RecipePresentationKind.NONE;
         width = 0;
         height = 0;
@@ -195,6 +197,7 @@ public final class RecipePresentation {
             throw new IllegalArgumentException("Recipe resource rows do not match presentation metadata");
         }
         this.recipeId = metadata.recipeId();
+        this.stationDescriptorId = metadata.stationDescriptorId();
         this.kind = metadata.kind();
         this.width = metadata.width();
         this.height = metadata.height();
@@ -218,6 +221,10 @@ public final class RecipePresentation {
 
     public ResourceLocation recipeId() {
         return recipeId;
+    }
+
+    public ResourceLocation stationDescriptorId() {
+        return stationDescriptorId;
     }
 
     public RecipePresentationKind kind() {
