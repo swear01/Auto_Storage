@@ -196,9 +196,11 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
                 diagram.width() / (float) cachedWidth,
                 diagram.height() / (float) cachedHeight));
         int scaledWidth = Math.round(cachedWidth * scale);
+        int scaledHeight = Math.round(cachedHeight * scale);
         return new LayoutState(
                 left + diagram.x() + (diagram.width() - scaledWidth) / 2,
-                top + diagram.y(),
+                top + diagram.y()
+                        + RecipeDiagramRenderer.centeredOffset(diagram.height(), scaledHeight),
                 scale,
                 layout);
     }

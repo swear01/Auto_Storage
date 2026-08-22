@@ -252,9 +252,10 @@ public final class EmiRecipeDiagramRenderer implements RecipeDiagramRenderer {
                 diagram.width() / (float) cachedWidth,
                 diagram.height() / (float) cachedHeight));
         int scaledWidth = Math.round(cachedWidth * scale);
+        int scaledHeight = Math.round(cachedHeight * scale);
         return new WidgetState(
                 diagram.x() + (diagram.width() - scaledWidth) / 2,
-                diagram.y(),
+                diagram.y() + RecipeDiagramRenderer.centeredOffset(diagram.height(), scaledHeight),
                 scale,
                 cachedWidgets);
     }

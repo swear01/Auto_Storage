@@ -8,6 +8,14 @@ import java.util.List;
 public interface RecipeDiagramRenderer {
     boolean supports(RecipePresentation presentation, Geometry geometry);
 
+    default boolean usesSharedStationBadge() {
+        return true;
+    }
+
+    static int centeredOffset(int containerSize, int contentSize) {
+        return Math.max(0, (containerSize - contentSize) / 2);
+    }
+
     void render(
             GuiGraphics graphics,
             Font font,

@@ -25,6 +25,7 @@ import java.util.function.IntSupplier;
 public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTerminalMenu> {
 
     private final NativeRecipeDiagramRenderer nativeRecipeDiagramRenderer;
+    private final FluxRecipeDiagramRenderer fluxRecipeDiagramRenderer;
     private ClientSetup.ViewerBinding preferredViewerBinding;
     private long preferredViewerGeneration;
     private RecipeDiagramRenderer preferredRecipeDiagramRenderer;
@@ -79,6 +80,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     public CraftingTerminalScreen(CraftingTerminalMenu menu, Inventory playerInv, Component title) {
         super(menu, playerInv, title);
         nativeRecipeDiagramRenderer = new NativeRecipeDiagramRenderer();
+        fluxRecipeDiagramRenderer = new FluxRecipeDiagramRenderer();
         preferredViewerBinding = ClientSetup.selectedViewerBinding();
         preferredViewerGeneration = ClientSetup.viewerGeneration();
         preferredRecipeDiagramRenderer = ClientSetup.createRecipeDiagramRenderer();
@@ -290,6 +292,9 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     }
 
     private RecipeDiagramRenderer activeRecipeDiagramRenderer(RecipePresentation presentation) {
+        if (fluxRecipeDiagramRenderer.supports(presentation, recipeDiagramGeometry)) {
+            return fluxRecipeDiagramRenderer;
+        }
         RecipeDiagramRenderer preferred = preferredRecipeDiagramRenderer();
         return preferred.supports(presentation, recipeDiagramGeometry)
                 ? preferred : nativeRecipeDiagramRenderer;
@@ -1416,6 +1421,7 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
     }
 
     private void renderRecipeStationHint(GuiGraphics graphics, RecipePresentation presentation) {
+        if (!activeRecipeDiagramRenderer(presentation).usesSharedStationBadge()) return;
         TerminalLayout.Rect station = geometry.recipeStation();
         int x = leftPos + station.x() + (station.width() - 16) / 2;
         int y = topPos + station.y() + (station.height() - 16) / 2;
@@ -1505,7 +1511,8 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         RecipePresentation presentation = menu.getRecipePresentation();
         if (presentation.isEmpty()) return;
         TerminalLayout.Rect station = geometry.recipeStation();
-        if (station.contains(mouseX - leftPos, mouseY - topPos)) {
+        if (station.contains(mouseX - leftPos, mouseY - topPos)
+                && activeRecipeDiagramRenderer(presentation).usesSharedStationBadge()) {
             graphics.renderTooltip(font, Component.translatable(
                     "gui.auto_storage.recipe_station",
                     displayedRecipeStation(presentation).getHoverName()),
@@ -1954,7 +1961,9 @@ public class CraftingTerminalScreen extends StorageTerminalScreen<CraftingTermin
         }
         if (displayedPreferences().page().isItemPage()) {
             RecipePresentation presentation = menu.getRecipePresentation();
-            if (!presentation.isEmpty() && geometry.recipeStation().contains(
+            if (!presentation.isEmpty()
+                    && activeRecipeDiagramRenderer(presentation).usesSharedStationBadge()
+                    && geometry.recipeStation().contains(
                     (int) mouseX - leftPos, (int) mouseY - topPos)) {
                 return true;
             }

@@ -230,6 +230,13 @@ class RunPrismGuiSessionTests(unittest.TestCase):
         self.assertIn("1 redstone -> 1 flux dust", checks)
         self.assertIn("no world block/entity mutation", checks)
 
+    def test_flux_station_scenario_checks_the_shared_animated_recipe_card(self):
+        mod = self.load_script()
+        checks = "\n".join(mod.SCENARIOS["flux-station"]["checks"])
+        self.assertIn("animated Creating Flux", checks)
+        self.assertIn("same Craftable recipe-card bounds", checks)
+        self.assertIn("bedrock and flux_block", checks)
+
     def test_patchouli_handoff_uses_current_preloaded_guide_name(self):
         mod = self.load_script()
         checks = "\n".join(mod.SCENARIOS["patchouli-guide"]["checks"])
