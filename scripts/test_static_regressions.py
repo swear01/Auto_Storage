@@ -3263,6 +3263,9 @@ class StaticRegressionTests(unittest.TestCase):
         interface = self.read_required(
             "src/main/java/com/swear/autostorage/RecipeDiagramRenderer.java"
         )
+        contract = self.read_required(
+            "src/main/java/com/swear/autostorage/FluxRecipePresentationContract.java"
+        )
         supports = self.java_block(
             renderer,
             r"\bpublic\s+boolean\s+supports\s*\(",
@@ -3275,13 +3278,18 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("fluxRecipeDiagramRenderer.supports", screen)
         self.assertIn("usesSharedStationBadge", interface)
         self.assertIn("usesSharedStationBadge", screen)
+        self.assertIn("presentation.shapeless()", contract)
+        self.assertIn("presentation.stationDescriptorId()", contract)
+        self.assertIn("ItemStack.isSameItemSameComponents", contract)
+        self.assertIn("private final ItemStack bedrockStack", renderer)
+        self.assertIn("private final ItemStack fluxBlockStack", renderer)
 
     def test_recipe_diagrams_share_vertical_centering_inside_the_diagram_bounds(self):
-        interface = self.read_required(
-            "src/main/java/com/swear/autostorage/RecipeDiagramRenderer.java"
-        )
         layout = self.read_required(
             "src/main/java/com/swear/autostorage/TerminalLayout.java"
+        )
+        geometry = self.read_required(
+            "src/main/java/com/swear/autostorage/RecipeDiagramGeometry.java"
         )
         emi = self.read_required(
             "src/main/java/com/swear/autostorage/compat/EmiRecipeDiagramRenderer.java"
@@ -3293,20 +3301,21 @@ class StaticRegressionTests(unittest.TestCase):
             "src/main/java/com/swear/autostorage/FluxRecipeDiagramRenderer.java"
         )
 
-        self.assertIn("static int centeredOffset(int containerSize, int contentSize)", interface)
+        self.assertIn("static int centeredOffset(int containerSize, int contentSize)", geometry)
         self.assertIn(
-            "RecipeDiagramRenderer.centeredOffset(diagram.height(), inputGridSize)",
+            "RecipeDiagramGeometry.centeredOffset(diagram.height(), inputGridSize)",
             layout,
         )
         self.assertIn(
-            "RecipeDiagramRenderer.centeredOffset(diagram.height(), scaledHeight)",
+            "RecipeDiagramGeometry.centeredOffset(diagram.height(), scaledHeight)",
             emi,
         )
         self.assertIn(
-            "RecipeDiagramRenderer.centeredOffset(diagram.height(), scaledHeight)",
+            "RecipeDiagramGeometry.centeredOffset(diagram.height(), scaledHeight)",
             jei,
         )
-        self.assertIn("RecipeDiagramRenderer.centeredOffset", flux)
+        self.assertIn("RecipeDiagramGeometry.centeredOffset", flux)
+        self.assertNotIn("RecipeDiagramRenderer.centeredOffset", layout)
         self.assertIn("graphics.enableScissor(", flux)
         self.assertIn("graphics.disableScissor()", flux)
 

@@ -1,5 +1,6 @@
 package com.swear.autostorage.compat;
 
+import com.swear.autostorage.RecipeDiagramGeometry;
 import com.swear.autostorage.RecipeDiagramRenderer;
 import com.swear.autostorage.RecipePresentation;
 import com.swear.autostorage.RecipePresentationKind;
@@ -200,7 +201,7 @@ public final class JeiRecipeDiagramRenderer implements RecipeDiagramRenderer {
         return new LayoutState(
                 left + diagram.x() + (diagram.width() - scaledWidth) / 2,
                 top + diagram.y()
-                        + RecipeDiagramRenderer.centeredOffset(diagram.height(), scaledHeight),
+                        + RecipeDiagramGeometry.centeredOffset(diagram.height(), scaledHeight),
                 scale,
                 layout);
     }

@@ -18,15 +18,18 @@ public final class FluxRecipeDiagramRenderer implements RecipeDiagramRenderer {
 
     private static final ResourceLocation FLUX_BLOCK_ID = ResourceLocation.fromNamespaceAndPath(
             "fluxnetworks", "flux_block");
-    private static final ResourceLocation FLUX_DUST_ID = ResourceLocation.fromNamespaceAndPath(
-            "fluxnetworks", "flux_dust");
-    private static final ResourceLocation REDSTONE_ID = ResourceLocation.fromNamespaceAndPath(
-            "minecraft", "redstone");
-    private static final ResourceLocation STATION_ID = ResourceLocation.fromNamespaceAndPath(
-            AutoStorage.MODID, "flux_station");
     private static final int CONTENT_WIDTH = 128;
     private static final int CONTENT_HEIGHT = 80;
     private static final int ANIMATION_TICKS = 80;
+
+    private final ItemStack bedrockStack;
+    private final ItemStack fluxBlockStack;
+
+    public FluxRecipeDiagramRenderer() {
+        bedrockStack = new ItemStack(Blocks.BEDROCK);
+        Block fluxBlock = BuiltInRegistries.BLOCK.get(FLUX_BLOCK_ID);
+        fluxBlockStack = fluxBlock == Blocks.AIR ? ItemStack.EMPTY : new ItemStack(fluxBlock);
+    }
 
     @Override
     public boolean supports(RecipePresentation presentation, Geometry geometry) {
@@ -139,23 +142,7 @@ public final class FluxRecipeDiagramRenderer implements RecipeDiagramRenderer {
     }
 
     private static boolean matchesExpectedRecipe(RecipePresentation presentation) {
-        List<ItemStack> inputs = presentation.inputs();
-        if (presentation.width() != 1 || presentation.height() != 1
-                || inputs.size() != RecipePresentation.MAX_INPUTS
-                || !isItem(inputs.getFirst(), REDSTONE_ID)
-                || !isItem(presentation.output(), FLUX_DUST_ID)
-                || presentation.output().getCount() != 1
-                || !isItem(presentation.station(), STATION_ID)) {
-            return false;
-        }
-        for (int index = 1; index < inputs.size(); index++) {
-            if (!inputs.get(index).isEmpty()) return false;
-        }
-        return true;
-    }
-
-    private static boolean isItem(ItemStack stack, ResourceLocation id) {
-        return !stack.isEmpty() && id.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+        return FluxRecipePresentationContract.matches(presentation);
     }
 
     private static RenderBounds renderBounds(Rect diagram, int left, int top) {
@@ -167,8 +154,8 @@ public final class FluxRecipeDiagramRenderer implements RecipeDiagramRenderer {
         int scaledWidth = Math.round(CONTENT_WIDTH * scale);
         int scaledHeight = Math.round(CONTENT_HEIGHT * scale);
         return new RenderBounds(
-                left + diagram.x() + RecipeDiagramRenderer.centeredOffset(diagram.width(), scaledWidth),
-                top + diagram.y() + RecipeDiagramRenderer.centeredOffset(diagram.height(), scaledHeight),
+                left + diagram.x() + RecipeDiagramGeometry.centeredOffset(diagram.width(), scaledWidth),
+                top + diagram.y() + RecipeDiagramGeometry.centeredOffset(diagram.height(), scaledHeight),
                 scale);
     }
 
@@ -178,11 +165,10 @@ public final class FluxRecipeDiagramRenderer implements RecipeDiagramRenderer {
         return (Math.floorMod(gameTime, (long) ANIMATION_TICKS) + partialTick) / ANIMATION_TICKS;
     }
 
-    private static ItemStack baseStack(float progress) {
-        Block base = progress < 0.5F
-                ? Blocks.BEDROCK
-                : BuiltInRegistries.BLOCK.get(FLUX_BLOCK_ID);
-        return new ItemStack(base == Blocks.AIR ? Blocks.BEDROCK : base);
+    private ItemStack baseStack(float progress) {
+        return progress < 0.5F || fluxBlockStack.isEmpty()
+                ? bedrockStack
+                : fluxBlockStack;
     }
 
     private static void renderStack(

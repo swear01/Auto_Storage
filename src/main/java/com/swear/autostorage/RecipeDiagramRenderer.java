@@ -12,10 +12,6 @@ public interface RecipeDiagramRenderer {
         return true;
     }
 
-    static int centeredOffset(int containerSize, int contentSize) {
-        return Math.max(0, (containerSize - contentSize) / 2);
-    }
-
     void render(
             GuiGraphics graphics,
             Font font,
