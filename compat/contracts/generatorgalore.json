@@ -62,7 +62,7 @@
   "version": "1.21.1-1.6.3",
   "dependency": "curse.maven:generatorgalore-691049:6799851",
   "repositories": [
-   "https://www.cursemaven.com"
+   "https://curse.cleanroommc.com"
   ],
   "runtime_dependencies": []
  },

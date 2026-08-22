@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "6e39b03301aca5426bb2430649ea8e0a5da51dfeb1a5208327ed3072cf9d8ba7",
+  "contract_sha256": "f86f0f2d050eea4a128065b44726f41f49e87bcdb479c76cf52ca72d2ebbcad9",
   "files": {
-    "src/compat/xycraft_machines/compat-module.json": "758f4463cd132d6f5946960ce918fbe2827f45c3eefecde14302d801b06da871",
+    "src/compat/xycraft_machines/compat-module.json": "0e8ddb487394060aae7b2ee7845f3b24e0d966db2bab56f8f0c79cbfa58118f6",
     "src/compat/xycraft_machines/java/com/swear/autostorage/compat/xycraftmachines/XycraftMachinesCompat.java": "f207a89e2e42cac1875fb6389a052c188d8359056dc0a15861f5ea68814ec01c",
     "src/compat/xycraft_machines/java/com/swear/autostorage/compat/xycraftmachines/XycraftMachinesCompatModule.java": "8cccb259b9ddd8abe4973e1ffe65a8b10b6ffef101ee3c69f6ddd79ec02b376d",
     "src/xycraftMachinesFixture/java/com/swear/autostorage/fixture/xycraftmachines/XycraftMachinesFixtureMod.java": "6313e4507b3258a43b3d1326bfc3203f2e2c17e51d78bc86f0340bd70484611a",

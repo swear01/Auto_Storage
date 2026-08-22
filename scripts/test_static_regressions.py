@@ -294,7 +294,7 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("TerminalSearchQuery.compile", transform_filter)
         self.assertIn("query.matches(option.searchEntry())", transform_filter)
 
-    def test_terminal_search_compiles_once_uses_core_metadata_cache_and_prefilters_craftable(self):
+    def test_terminal_search_compiles_once_uses_core_metadata_cache_and_filters_craftable_locally(self):
         query = self.read_required(
             "src/main/java/com/swear/autostorage/TerminalSearchQuery.java"
         )
@@ -325,10 +325,12 @@ class StaticRegressionTests(unittest.TestCase):
             "CraftingTerminalMenu.buildCraftableDisplayStacks",
         )
         self.assertEqual(1, craftable.count("TerminalSearchQuery.compile"))
+        self.assertIn("query.matches(key, TerminalDisplayStack.strip(output))", craftable)
         self.assertLess(
-            craftable.index("matchesCraftableFilter"),
+            craftable.index("query.matches(key, TerminalDisplayStack.strip(output))"),
             craftable.index("computeCraftableStatus"),
         )
+        self.assertNotIn("matchesCraftableFilter", craftable)
         self.assertIn("SEARCH_DEBOUNCE_TICKS = 2", screen)
 
     def test_terminal_preference_wire_change_bumps_network_protocol(self):
@@ -336,7 +338,7 @@ class StaticRegressionTests(unittest.TestCase):
             "src/main/java/com/swear/autostorage/AutoStorage.java"
         )
 
-        self.assertIn('event.registrar(MODID).versioned("1.6")', mod)
+        self.assertIn('event.registrar(MODID).versioned("1.7")', mod)
 
     def test_emi_public_widget_holder_matches_emi_unbounded_add_contract(self):
         renderer = self.read_required(
@@ -1154,7 +1156,7 @@ class StaticRegressionTests(unittest.TestCase):
                 descriptor["fixture"],
                 descriptor["expectedTests"],
             )
-        self.assertIn("SelfTest: 204942 passed, 0 failed, 204942 total", build)
+        self.assertIn("SelfTest: 204949 passed, 0 failed, 204949 total", build)
         self.assertNotIn("SelfTest: 1 TESTS FAILED!", build)
 
     def test_compatibility_matrix_uses_descriptor_owned_recipe_inventories(self):
@@ -3749,29 +3751,161 @@ class StaticRegressionTests(unittest.TestCase):
         self.assertIn("TerminalResourceDisplay.create(", inputs)
         self.assertIn("typedInput.amount()", inputs)
 
-    def test_terminal_scrollbar_sends_one_server_validated_absolute_packet(self):
-        packet = self.read_required(
-            "src/main/java/com/swear/autostorage/TerminalScrollPacket.java"
-        )
-        self.assertIn('"terminal_scroll"', packet)
-        self.assertGreaterEqual(packet.count("ByteBufCodecs.VAR_INT"), 2)
-
+    def test_terminal_scrollbar_uses_client_repository_without_server_scroll_packets(self):
         entrypoint = self.read_required(
             "src/main/java/com/swear/autostorage/AutoStorage.java"
         )
-        self.assertIn("TerminalScrollPacket.TYPE", entrypoint)
-        self.assertIn("menu.scrollTo(packet.offset())", entrypoint)
-
         screen = self.read_required(
             "src/main/java/com/swear/autostorage/StorageTerminalScreen.java"
         )
-        self.assertIn("new TerminalScrollPacket(menu.containerId, target)", screen)
+        repository = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalClientRepository.java"
+        )
         menu = self.read_required(
             "src/main/java/com/swear/autostorage/StorageTerminalMenu.java"
         )
-        self.assertIn("rowAlignedScrollOffset(", menu)
+        packet = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalRepositoryUpdatePacket.java"
+        )
+        self.assertIn("TerminalRepositoryUpdatePacket.TYPE", entrypoint)
+        self.assertIn("TerminalRepositoryResyncPacket.TYPE", entrypoint)
+        self.assertIn("TerminalRepositoryActionPacket.TYPE", entrypoint)
+        self.assertIn("TerminalRepositoryContainerTransferPacket.TYPE", entrypoint)
+        self.assertIn("handleRepositoryResync(packet, player)", entrypoint)
+        self.assertNotIn("menu.sendFullRepository()", entrypoint)
+        self.assertIn("setScrollOffset", repository)
+        serial_at = self.java_block(
+            repository,
+            r"\blong\s+serialAt\s*\(",
+            "TerminalClientRepository.serialAt",
+        )
+        self.assertIn("long index", serial_at)
+        self.assertIn("recoveryRequired", repository)
+        full_apply = self.java_block(
+            repository,
+            r"\bprivate\s+boolean\s+applyFull\s*\(",
+            "TerminalClientRepository.applyFull",
+        )
+        self.assertIn("scrollOffset = 0", full_apply)
+        self.assertIn("repositoryCoreWasValid", menu)
+        self.assertIn("TerminalClientRepository", menu)
+        self.assertIn("repositoryBuildPending", menu)
+        self.assertIn("repositoryItemTypes", menu)
+        max_scroll = self.java_block(
+            menu,
+            r"\bint\s+getMaxScrollOffset\s*\(",
+            "StorageTerminalMenu.getMaxScrollOffset",
+        )
+        self.assertIn("repositoryItemTypes", max_scroll)
+        self.assertIn("updateRepositoryChanges", menu)
+        repository_build = self.java_block(
+            menu,
+            r"\bprivate\s+void\s+buildRepositoryStacks\s*\(",
+            "StorageTerminalMenu.buildRepositoryStacks",
+        )
+        self.assertIn("playerInventory.player instanceof ServerPlayer", repository_build)
+        self.assertIn("updateChanges", self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalRepositoryServer.java"
+        ))
+        self.assertIn("repositoryStacks = List.of()", menu)
+        repository_action = self.java_block(
+            menu,
+            r"\bprotected\s+boolean\s+handleRepositoryEntryAction\s*\(",
+            "StorageTerminalMenu.handleRepositoryEntryAction",
+        )
+        self.assertIn("if (core == null || !getCarried().isEmpty()) return false;", repository_action)
+        self.assertIn("TerminalRepositorySlot", screen)
+        self.assertFalse(
+            (ROOT / "src/main/java/com/swear/autostorage/TerminalScrollPacket.java").exists()
+        )
+        self.assertNotIn("TerminalScrollPacket.TYPE", entrypoint)
+        self.assertNotIn("new TerminalScrollPacket", screen)
+        self.assertNotIn("menu.scrollTo(packet.offset())", entrypoint)
+        send_search = self.java_block(
+            screen,
+            r"\bprivate\s+void\s+sendSearchPacket\s*\(",
+            "StorageTerminalScreen.sendSearchPacket",
+        )
+        self.assertIn("if (menu.clientRepository() != null) return;", send_search)
+        craftable = self.read_required(
+            "src/main/java/com/swear/autostorage/CraftingTerminalMenu.java"
+        )
+        craftable_build = self.java_block(
+            craftable,
+            r"\bprivate\s+CraftableBuildResult\s+buildCraftableDisplayStacks\s*\(",
+            "CraftingTerminalMenu.buildCraftableDisplayStacks",
+        )
+        self.assertEqual(1, craftable_build.count("TerminalSearchQuery.compile"))
+        self.assertIn("query.matches(key, TerminalDisplayStack.strip(output))", craftable_build)
+        self.assertLess(
+            craftable_build.index("query.matches(key, TerminalDisplayStack.strip(output))"),
+            craftable_build.index("computeCraftableStatus"),
+        )
+        self.assertNotIn("matchesCraftableFilter", craftable_build)
+        self.assertIn("MAX_ENTRIES_PER_PACKET", packet)
+        self.assertIn("MAX_SERIALIZED_BYTES", packet)
+        self.assertIn("Negative terminal repository entry count", packet)
+        repository_server = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalRepositoryServer.java"
+        )
+        self.assertIn("encodedEntrySize", repository_server)
+        self.assertIn("registryAccess", menu)
+        transfer_packet = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalRepositoryContainerTransferPacket.java"
+        )
+        held_transfer_packet = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalHeldContainerTransferPacket.java"
+        )
+        self.assertIn("requireWireId", transfer_packet)
+        self.assertIn("requireWireId", held_transfer_packet)
+        self.assertIn("wireId()", transfer_packet)
+        self.assertIn("wireId()", held_transfer_packet)
+        self.assertIn("repositorySlot.serial()", screen)
+        self.assertIn("new TerminalHeldContainerTransferPacket", screen)
+        self.assertNotIn("repository.serialAt(hoveredSlot.index", screen)
+        self.assertIn("!menu.getCarried().isEmpty()", screen)
         self.assertNotIn("while (delta < 0)", screen)
         self.assertNotIn("while (delta >= 9)", screen)
+        resync = self.java_block(
+            menu,
+            r"\bpublic\s+void\s+handleRepositoryResync\s*\(",
+            "StorageTerminalMenu.handleRepositoryResync",
+        )
+        self.assertIn("requestRepositoryFull()", resync)
+        self.assertNotIn("sendFullRepository()", resync)
+        transfer = self.java_block(
+            menu,
+            r"\bpublic\s+boolean\s+handleRepositoryContainerTransfer\s*\(",
+            "StorageTerminalMenu.handleRepositoryContainerTransfer",
+        )
+        self.assertIn("CraftingTerminalPage.STORAGE", transfer)
+        self.assertIn("this instanceof CraftingTerminalMenu", transfer)
+        client_repository = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalClientRepository.java"
+        )
+        self.assertIn("serialsByKey", client_repository)
+        self.assertIn("HashSet", client_repository)
+        self.assertIn("readerIndex()", packet)
+        self.assertIn("readableBytes()", packet)
+        self.assertIn("if (buf.readableBytes() > MAX_SERIALIZED_BYTES)", packet)
+        self.assertIn("MAX_SERIALIZED_BYTES", packet)
+        decode_loop = self.java_block(
+            packet,
+            r"for\s*\(int\s+index\s*=\s*0;\s*index\s*<\s*entryCount;\s*index\+\+\)",
+            "TerminalRepositoryUpdatePacket.decode entries",
+        )
+        self.assertIn("packetStart", decode_loop)
+        self.assertIn("MAX_SERIALIZED_BYTES", decode_loop)
+        preferences = self.read_required(
+            "src/main/java/com/swear/autostorage/TerminalPreferences.java"
+        )
+        self.assertIn("resourceView.wireId()", preferences)
+        self.assertIn("TerminalResourceView.requireWireId", preferences)
+        self.assertIn("resourceView.wireId()", menu)
+        self.assertIn("TerminalResourceView.requireWireId", menu)
+        self.assertIn("requireClientRepository()", screen)
+        self.assertIn("clientRepositoryViewDirty", screen)
+        self.assertIn("this.visibleRows", screen)
 
     def test_terminal_packets_skip_identical_filter_and_layout_requests(self):
         menu = self.read_required(
@@ -3797,6 +3931,26 @@ class StaticRegressionTests(unittest.TestCase):
             "totalItemTypes - vRows * DISPLAY_COLS",
             menu,
         )
+        restore = self.java_block(
+            menu,
+            r"\bprivate\s+boolean\s+restoreSharedCraftableCache\s*\(",
+            "CraftingTerminalMenu.restoreSharedCraftableCache",
+        )
+        self.assertIn("setRepositoryStacks(updated)", restore)
+        action = self.java_block(
+            menu,
+            r"\bpublic\s+boolean\s+handleRepositoryAction\s*\(",
+            "CraftingTerminalMenu.handleRepositoryAction",
+        )
+        self.assertIn("page == CraftingTerminalPage.STORAGE", action)
+        self.assertIn("if (packet.quickMove()) return false;", action)
+        self.assertIn("selectOutput(player.level(), displayStack)", action)
+        storage_refresh = self.java_block(
+            menu,
+            r"\bpublic\s+void\s+refreshDisplayItemsFiltered\s*\(",
+            "CraftingTerminalMenu.refreshDisplayItemsFiltered",
+        )
+        self.assertIn("queueRepositoryBuild(core)", storage_refresh)
 
     def test_wrench_recovery_drop_uses_the_post_recovery_escrow(self):
         wrench = self.read_required(

@@ -19,6 +19,26 @@ def canonical_contract_sha256(path):
 
 
 class ModularCompatSdkTests(unittest.TestCase):
+    def test_curse_maven_metadata_uses_cleanroom_endpoint(self):
+        paths = [ROOT / "build.gradle"]
+        paths.extend(sorted((ROOT / "src/compat").glob("*/compat-module.json")))
+        paths.extend(sorted((ROOT / "compat/contracts").glob("*.json")))
+        relevant = [
+            path for path in paths
+            if "cursemaven.com" in path.read_text()
+            or "curse.cleanroommc.com" in path.read_text()
+        ]
+
+        self.assertTrue(relevant)
+        for path in relevant:
+            content = path.read_text()
+            self.assertNotIn("www.cursemaven.com", content, path)
+            self.assertIn("curse.cleanroommc.com", content, path)
+        self.assertIn(
+            'host == "curse.cleanroommc.com"',
+            (ROOT / "build.gradle").read_text(),
+        )
+
     def test_theurgy_manifest_tracks_rebased_matrix_evidence(self):
         module_root = ROOT / "src/compat/theurgy"
         contract_path = ROOT / "compat/contracts/theurgy.json"

@@ -3,13 +3,30 @@ package com.swear.autostorage;
 import net.minecraft.resources.ResourceLocation;
 
 public enum TerminalResourceView {
-    ITEM,
-    FLUID,
-    ENERGY,
-    GAS,
-    STATION_WORK,
-    OTHER,
-    ALL;
+    ITEM(0),
+    FLUID(1),
+    ENERGY(2),
+    GAS(3),
+    STATION_WORK(4),
+    OTHER(5),
+    ALL(6);
+
+    private final int wireId;
+
+    TerminalResourceView(int wireId) {
+        this.wireId = wireId;
+    }
+
+    int wireId() {
+        return wireId;
+    }
+
+    static TerminalResourceView requireWireId(int id) {
+        for (TerminalResourceView view : values()) {
+            if (view.wireId == id) return view;
+        }
+        throw new IllegalArgumentException("Unknown terminal resource view wire id " + id);
+    }
 
     public TerminalResourceView next() {
         return values()[(ordinal() + 1) % values().length];
@@ -74,14 +91,14 @@ public enum TerminalResourceView {
     }
 
     public static TerminalResourceView byId(int id) {
-        return id >= 0 && id < values().length ? values()[id] : ITEM;
+        for (TerminalResourceView view : values()) {
+            if (view.wireId == id) return view;
+        }
+        return ITEM;
     }
 
     static TerminalResourceView requireById(int id) {
-        if (id < 0 || id >= values().length) {
-            throw new IllegalArgumentException("Unknown terminal resource view " + id);
-        }
-        return values()[id];
+        return requireWireId(id);
     }
 
 }

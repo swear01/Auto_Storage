@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "1154140fca3a2ebcbf59e9d7d646af3ab4c356f2d27c3e9b7c02cfed7ad17f06",
+  "contract_sha256": "8197dbe6992a2a6f4d3b48da987e4f88c35ebd9fa1418c1eef1f5d54e31d9af1",
   "files": {
-    "src/compat/justdirethings/compat-module.json": "40932e656308fc8c1b622f6371496a07d445852f0fa5882d1cba882a598bf21a",
+    "src/compat/justdirethings/compat-module.json": "ea29132d654fb5e3a6a1614d8b43434afa0f42caf4253e46c50bdd0e254eb3d6",
     "src/compat/justdirethings/java/com/swear/autostorage/compat/justdirethings/JustdirethingsCompat.java": "fd41cedc59b6777da17beef15ea8b491b87644a11e201ce517abfe610cd88f02",
     "src/compat/justdirethings/java/com/swear/autostorage/compat/justdirethings/JustdirethingsCompatModule.java": "3d724c87ad4799bfd54608c4a1936f90286a06be1afb1a1a8045cbda672e8dd7",
     "src/justdirethingsFixture/java/com/swear/autostorage/fixture/justdirethings/JustdirethingsFixtureMod.java": "bc5fa1924fef32d9885fca8ea95aa3da3e796d069461e4ecc80a080ebab8867a",

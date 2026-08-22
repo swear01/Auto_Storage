@@ -29,7 +29,7 @@
     "resourceKinds": []
   },
   "repositories": [
-    "https://www.cursemaven.com"
+    "https://curse.cleanroommc.com"
   ],
   "requires": [
     "fluxnetworks"

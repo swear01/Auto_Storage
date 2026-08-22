@@ -1139,7 +1139,7 @@ public class TerminalFlowTests {
     }
 
     @GameTest(template = "platform")
-    public static void terminal_absolute_scroll_clamps_to_complete_rows(GameTestHelper helper) {
+    public static void terminal_server_scroll_state_clamps_to_complete_rows(GameTestHelper helper) {
         var level = helper.getLevel();
         var corePos = helper.absolutePos(new BlockPos(1, 3, 1));
         level.setBlock(corePos, AutoStorage.STORAGE_CORE.get().defaultBlockState(), Block.UPDATE_ALL);
@@ -1180,16 +1180,6 @@ public class TerminalFlowTests {
             menu.scrollTo(-1);
             if (menu.getScrollOffset() != 0) {
                 helper.fail("Absolute scroll must clamp negative offsets to zero");
-                return;
-            }
-
-            var wire = new net.minecraft.network.RegistryFriendlyByteBuf(
-                    io.netty.buffer.Unpooled.buffer(), level.registryAccess());
-            TerminalScrollPacket.STREAM_CODEC.encode(wire,
-                    new TerminalScrollPacket(menu.containerId, Integer.MAX_VALUE));
-            TerminalScrollPacket decoded = TerminalScrollPacket.STREAM_CODEC.decode(wire);
-            if (decoded.containerId() != menu.containerId || decoded.offset() != Integer.MAX_VALUE) {
-                helper.fail("TerminalScrollPacket codec must preserve container and absolute offset");
                 return;
             }
             helper.succeed();

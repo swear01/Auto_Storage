@@ -15,7 +15,7 @@ ships under its namespace remain covered by Auto Storage's built-in families.
 - target: Productive Bees `1.21.1-13.13.5` (`productivebees`);
 - CurseForge file `8022994` / exact Curse Maven coordinate
   `curse.maven:productivebees-377897:8022994`;
-- reviewed repository: `https://www.cursemaven.com/`;
+- reviewed repository: `https://curse.cleanroommc.com/`;
 - download URL used for local SHA verification:
   `https://mediafilez.forgecdn.net/files/8022/994/productivebees-1.21.1-13.13.5.jar`;
 - jar size: `5,216,551` bytes;

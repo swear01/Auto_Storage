@@ -1084,7 +1084,7 @@ repositories {
     }
     maven {
         name = "AE2AuditCurseMaven"
-        url = uri("https://www.cursemaven.com")
+        url = uri("https://curse.cleanroommc.com")
         content {
             includeGroup "curse.maven"
         }
@@ -1119,7 +1119,7 @@ repositories {
                 content {
                     includeGroup "dev.emi"
                 }
-            } else if (host == "www.cursemaven.com") {
+            } else if (host == "curse.cleanroommc.com") {
                 content {
                     includeGroup "curse.maven"
                 }
@@ -1908,7 +1908,7 @@ tasks.named('check').configure {
 }
 
 def baseGameTestLatestLog = layout.projectDirectory.file('run/logs/latest.log').asFile
-def expectedSelfTestSummary = 'SelfTest: 204942 passed, 0 failed, 204942 total'
+def expectedSelfTestSummary = 'SelfTest: 204949 passed, 0 failed, 204949 total'
 tasks.named('runGameTestServer').configure {
     doLast {
         if (!baseGameTestLatestLog.exists()) {

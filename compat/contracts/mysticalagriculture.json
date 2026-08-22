@@ -320,7 +320,7 @@
       "https://api.modrinth.com/maven",
       "https://maven.blakesmods.com",
       "https://maven.blamejared.com",
-      "https://www.cursemaven.com"
+      "https://curse.cleanroommc.com"
     ],
     "runtime_dependencies": [
       "maven.modrinth:cucumber:8421rqFF"

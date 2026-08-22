@@ -3615,6 +3615,7 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         if (page == CraftingTerminalPage.TRANSFORM) returnTransientInputs(player);
         StorageCoreBlockEntity core = getCore(player.level());
         page = nextPage;
+        requestRepositoryFull();
         selectedTransformUseId = null;
         scrollOffset = 0;
         if (core != null && page.isItemPage()) {
@@ -3657,6 +3658,54 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
     }
 
     @Override
+    protected boolean pageIsNotItemView() {
+        return !page.isItemPage();
+    }
+
+    @Override
+    public boolean handleRepositoryAction(
+            TerminalRepositoryActionPacket packet,
+            Player player
+    ) {
+        if (page == CraftingTerminalPage.STORAGE) {
+            if (packet.quickMove()) return super.handleRepositoryAction(packet, player);
+            if (player.level().isClientSide()
+                    || player.isSpectator()
+                    || !stillValid(player)
+                    || packet.containerId() != containerId
+                    || !getCarried().isEmpty()) return false;
+            StorageResourceKey key = repositoryKey(packet.serial());
+            ItemStack displayStack = repositoryDisplay(packet.serial());
+            if (key == null
+                    || !key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
+                    || displayStack.isEmpty()
+                    || !getResourceView().matches(key)) return false;
+            selectOutput(player.level(), displayStack);
+            StorageCoreBlockEntity core = getCore(player.level());
+            if (core != null) updatePreview(core, player);
+            broadcastChanges();
+            return true;
+        }
+        if (page != CraftingTerminalPage.CRAFTABLE) {
+            return super.handleRepositoryAction(packet, player);
+        }
+        if (packet.quickMove()) return false;
+        if (player.level().isClientSide()
+                || player.isSpectator()
+                || !stillValid(player)
+                || packet.containerId() != containerId
+                || !getCarried().isEmpty()) return false;
+        StorageResourceKey key = repositoryKey(packet.serial());
+        ItemStack displayStack = repositoryDisplay(packet.serial());
+        if (key == null || displayStack.isEmpty() || !getResourceView().matches(key)) return false;
+        selectOutput(player.level(), displayStack);
+        StorageCoreBlockEntity core = getCore(player.level());
+        if (core != null) updatePreview(core, player);
+        broadcastChanges();
+        return true;
+    }
+
+    @Override
     public void refreshDisplayItems(StorageCoreBlockEntity core) {
         if (!page.isItemPage()) {
             refreshDisplayMetadata(core);
@@ -3670,11 +3719,14 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         this.currentFilter = filter != null ? filter : "";
         if (core == null) {
             totalItemTypes = 0;
+            repositoryItemTypes = 0;
+            setRepositoryStacks(List.of());
             replaceVisibleDisplayStacks(List.of(), getVisibleRows());
             return;
         }
         if (page == CraftingTerminalPage.STORAGE) {
             super.refreshDisplayItemsFiltered(core, currentFilter);
+            queueRepositoryBuild(core);
             if (!selectedOutput.isEmpty()) {
                 if (selectedRecipeId != null) {
                     if (!isSelectedRecipeCurrent(core)) clearSelection();
@@ -3696,12 +3748,16 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         sortNanos = System.nanoTime() - sortStarted;
         cacheSharedCraftable(core, displayStacks);
 
-        totalItemTypes = displayStacks.size();
+        List<ItemStack> visibleStacks = visibleCraftableDisplayStacks(
+                displayStacks, core.getLevel());
+        totalItemTypes = visibleStacks.size();
+        repositoryItemTypes = displayStacks.size();
         refreshDisplayMetadata(core);
         int vRows = getVisibleRows();
         scrollTo(scrollOffset);
         long syncStarted = System.nanoTime();
-        replaceVisibleDisplayStacks(displayStacks, vRows);
+        replaceVisibleDisplayStacks(visibleStacks, vRows);
+        setRepositoryStacks(displayStacks);
         long syncNanos = System.nanoTime() - syncStarted;
 
         if (!selectedOutput.isEmpty()) {
@@ -3806,10 +3862,13 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         List<ItemStack> updated = cache.stacks().stream()
                 .map(stack -> updateCraftableDisplayAmount(core, stack))
                 .toList();
-        totalItemTypes = updated.size();
+        List<ItemStack> visible = visibleCraftableDisplayStacks(updated, level);
+        totalItemTypes = visible.size();
+        repositoryItemTypes = updated.size();
         refreshDisplayMetadata(core);
         scrollTo(scrollOffset);
-        replaceVisibleDisplayStacks(updated, getVisibleRows());
+        replaceVisibleDisplayStacks(visible, getVisibleRows());
+        setRepositoryStacks(updated);
         return true;
     }
 
@@ -3846,6 +3905,21 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
         return key.kindId().equals(StorageResourceKindApi.ITEM_KIND)
                 ? TerminalDisplayStack.create(icon, amount)
                 : TerminalResourceDisplay.create(icon, key, amount);
+    }
+
+    private List<ItemStack> visibleCraftableDisplayStacks(
+            List<ItemStack> stacks,
+            Level level
+    ) {
+        if (level == null) return List.of();
+        TerminalSearchQuery query = TerminalSearchQuery.compile(currentFilter);
+        return stacks.stream().filter(stack -> {
+            StorageResourceKey key = TerminalResourceDisplay.key(stack).orElseGet(() ->
+                    StorageResourceKey.item(
+                            TerminalDisplayStack.strip(stack), level.registryAccess()));
+            return getResourceView().matches(key)
+                    && query.matches(key, TerminalDisplayStack.strip(stack));
+        }).toList();
     }
 
     private boolean isSelectedRecipeCurrent(StorageCoreBlockEntity core) {
@@ -3925,8 +3999,9 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
                 ItemStack output = match.presentationOutput(List.of(), level);
                 StorageResourceKey key =
                         match.selectionOutputKey(level, output).orElse(null);
-                if (key == null || output.isEmpty() || !getResourceView().matches(key)
-                        || !matchesCraftableFilter(key, output, query, level)) continue;
+                if (key == null || output.isEmpty()) continue;
+                if (!currentFilter.isEmpty()
+                        && !query.matches(key, TerminalDisplayStack.strip(output))) continue;
                 long previewStarted = System.nanoTime();
                 CraftableStatus status = computeCraftableStatus(match, core, availability);
                 long previewNanos = System.nanoTime() - previewStarted;
@@ -3948,8 +4023,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             ItemStack output = match.presentationOutput(List.of(), level);
             if (output.isEmpty()) continue;
             StorageResourceKey key = StorageResourceKey.item(output, level.registryAccess());
-            if (!getResourceView().matches(key)
-                    || !matchesCraftableFilter(key, output, query, level)) continue;
+            if (!currentFilter.isEmpty()
+                    && !query.matches(key, TerminalDisplayStack.strip(output))) continue;
             long previewStarted = System.nanoTime();
             CraftableStatus status = computeCraftableStatus(match, core, availability);
             previewSimulationNanos += System.nanoTime() - previewStarted;
@@ -3969,8 +4044,8 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             ItemStack output = match.presentationOutput(List.of(), level);
             if (output.isEmpty()) continue;
             StorageResourceKey key = StorageResourceKey.item(output, level.registryAccess());
-            if (!getResourceView().matches(key)
-                    || !matchesCraftableFilter(key, output, query, level)) continue;
+            if (!currentFilter.isEmpty()
+                    && !query.matches(key, TerminalDisplayStack.strip(output))) continue;
             long previewStarted = System.nanoTime();
             CraftableStatus status = computeCraftableStatus(match, core, availability);
             previewSimulationNanos += System.nanoTime() - previewStarted;
@@ -4266,19 +4341,6 @@ public class CraftingTerminalMenu extends StorageTerminalMenu {
             nextCraftableEnergyThreshold[type.ordinal()] =
                     Math.min(nextCraftableEnergyThreshold[type.ordinal()], required);
         }
-    }
-
-    private static boolean matchesCraftableFilter(
-            StorageResourceKey key,
-            ItemStack representative,
-            TerminalSearchQuery query,
-            Level level
-    ) {
-        if (key.kindId().equals(StorageResourceKindApi.ITEM_KIND)) {
-            ItemKey item = StorageResourceBridge.itemKey(key, level.registryAccess()).orElse(null);
-            return item != null && query.matches(TerminalSearchEntry.create(item));
-        }
-        return query.matches(key, representative);
     }
 
     private void sortCraftableDisplayStacks(List<ItemStack> stacks) {

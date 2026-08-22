@@ -292,14 +292,29 @@ public class AutoStorage {
             ClientSetup.register(modEventBus);
         }
         modEventBus.addListener((net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) -> {
-            var registrar = event.registrar(MODID).versioned("1.6");
+            var registrar = event.registrar(MODID).versioned("1.7");
             registrar.playToServer(SearchFilterPacket.TYPE, SearchFilterPacket.STREAM_CODEC, this::handleSearchFilter);
             registrar.playToServer(TerminalSettingsPacket.TYPE, TerminalSettingsPacket.STREAM_CODEC, this::handleTerminalSettings);
-            registrar.playToServer(TerminalScrollPacket.TYPE, TerminalScrollPacket.STREAM_CODEC, this::handleTerminalScroll);
+            registrar.playToServer(
+                    TerminalRepositoryActionPacket.TYPE,
+                    TerminalRepositoryActionPacket.STREAM_CODEC,
+                    this::handleTerminalRepositoryAction);
+            registrar.playToServer(
+                    TerminalRepositoryContainerTransferPacket.TYPE,
+                    TerminalRepositoryContainerTransferPacket.STREAM_CODEC,
+                    this::handleTerminalRepositoryContainerTransfer);
+            registrar.playToServer(
+                    TerminalRepositoryResyncPacket.TYPE,
+                    TerminalRepositoryResyncPacket.STREAM_CODEC,
+                    this::handleTerminalRepositoryResync);
             registrar.playToServer(
                     TerminalHeldContainerTransferPacket.TYPE,
                     TerminalHeldContainerTransferPacket.STREAM_CODEC,
                     this::handleTerminalHeldContainerTransfer);
+            registrar.playToClient(
+                    TerminalRepositoryUpdatePacket.TYPE,
+                    TerminalRepositoryUpdatePacket.STREAM_CODEC,
+                    this::handleTerminalRepositoryUpdate);
             registrar.playToServer(CraftingRecipeSelectionPacket.TYPE, CraftingRecipeSelectionPacket.STREAM_CODEC,
                     this::handleCraftingRecipeSelection);
             registrar.playToClient(MachineDescriptorStatePacket.TYPE, MachineDescriptorStatePacket.STREAM_CODEC,
@@ -489,17 +504,54 @@ public class AutoStorage {
         });
     }
 
-    private void handleTerminalScroll(TerminalScrollPacket packet,
-                                      net.neoforged.neoforge.network.handling.IPayloadContext ctx) {
+    private void handleTerminalRepositoryAction(
+            TerminalRepositoryActionPacket packet,
+            net.neoforged.neoforge.network.handling.IPayloadContext ctx
+    ) {
         ctx.enqueueWork(() -> {
             var player = ctx.player();
-            if (player == null || !(player.containerMenu instanceof StorageTerminalMenu menu)
-                    || menu.containerId != packet.containerId()) return;
-            StorageCoreBlockEntity core = menu.getCore(player.level());
-            if (core != null) {
-                menu.scrollTo(packet.offset());
-                menu.refreshDisplayItems(core);
-                menu.broadcastChanges();
+            if (player != null && player.containerMenu instanceof StorageTerminalMenu menu
+                    && menu.containerId == packet.containerId()) {
+                menu.handleRepositoryAction(packet, player);
+            }
+        });
+    }
+
+    private void handleTerminalRepositoryContainerTransfer(
+            TerminalRepositoryContainerTransferPacket packet,
+            net.neoforged.neoforge.network.handling.IPayloadContext ctx
+    ) {
+        ctx.enqueueWork(() -> {
+            var player = ctx.player();
+            if (player != null && player.containerMenu instanceof StorageTerminalMenu menu
+                    && menu.containerId == packet.containerId()) {
+                menu.handleRepositoryContainerTransfer(packet, player);
+            }
+        });
+    }
+
+    private void handleTerminalRepositoryResync(
+            TerminalRepositoryResyncPacket packet,
+            net.neoforged.neoforge.network.handling.IPayloadContext ctx
+    ) {
+        ctx.enqueueWork(() -> {
+            var player = ctx.player();
+            if (player != null && player.containerMenu instanceof StorageTerminalMenu menu
+                    && menu.containerId == packet.containerId()) {
+                menu.handleRepositoryResync(packet, player);
+            }
+        });
+    }
+
+    private void handleTerminalRepositoryUpdate(
+            TerminalRepositoryUpdatePacket packet,
+            net.neoforged.neoforge.network.handling.IPayloadContext ctx
+    ) {
+        ctx.enqueueWork(() -> {
+            var player = ctx.player();
+            if (player != null && player.containerMenu instanceof StorageTerminalMenu menu
+                    && menu.containerId == packet.containerId()) {
+                menu.applyRepositoryUpdate(packet);
             }
         });
     }

@@ -1,7 +1,7 @@
 {
-  "contract_sha256": "fa66a2c3b53b9590f6ca16d1a0ae78bd6fffa0e4875a44616d9dbdd456c19895",
+  "contract_sha256": "727f86a997ee04db15743d1806fc0eb83e5aa2e7777ad0261864d79d1b291348",
   "files": {
-    "src/compat/generatorgalore/compat-module.json": "165528ed70be2173386a9bfc31e2a834919109fa67a49e46f38d0bc68b37c3d4",
+    "src/compat/generatorgalore/compat-module.json": "9ad9302865169d7c3c44a2b1b6267e9fc3426a4317e49097c2b146b843e56091",
     "src/compat/generatorgalore/java/com/swear/autostorage/compat/generatorgalore/GeneratorgaloreCompat.java": "06f5eb979458ded5f119bd282fb4641f46c87ae7e34354257c981f1abec5ab16",
     "src/compat/generatorgalore/java/com/swear/autostorage/compat/generatorgalore/GeneratorgaloreCompatModule.java": "72247e2de8efae1a0b5723789a111d4e7ab33d6a8c8849a4cbb5ed6868eeaef5",
     "src/generatorgaloreFixture/java/com/swear/autostorage/fixture/generatorgalore/GeneratorgaloreFixtureMod.java": "b2b868c42ac2e1dca4b48c0161636fde01a3185098cd92a543dc161a98bd7ce5",
