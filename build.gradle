@@ -1084,7 +1084,7 @@ repositories {
     }
     maven {
         name = "AE2AuditCurseMaven"
-        url = uri("https://www.cursemaven.com")
+        url = uri("https://curse.cleanroommc.com")
         content {
             includeGroup "curse.maven"
         }
@@ -1119,7 +1119,7 @@ repositories {
                 content {
                     includeGroup "dev.emi"
                 }
-            } else if (host == "www.cursemaven.com") {
+            } else if (host == "curse.cleanroommc.com") {
                 content {
                     includeGroup "curse.maven"
                 }

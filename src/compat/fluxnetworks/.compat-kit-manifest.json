@@ -1,9 +1,9 @@
 {
-  "contract_sha256": "15ef295599c83cf6307cd5b8afb52301e1bca4cf4ed8ae12a8517092572045d7",
+  "contract_sha256": "d07d7041a42ae54f4adf3d92d1b76ffc847c1bbbfc994a90afa8995fd9d70129",
   "files": {
     "compat/audits/fluxnetworks/8.0.0.json": "54794d5ce8c7d6e70edd2fb3c783e57ab0497a4731d877cdd643a259da979363",
-    "compat/contracts/fluxnetworks.json": "1f74bfa996d176a15e41261acef3e94d0e22de40c3beccab6ecec67193ed96b1",
-    "src/compat/fluxnetworks/compat-module.json": "1abbd7bd59fda1461df86242797ff302aa59197663ee78b255fffc0c63edfa7a",
+    "compat/contracts/fluxnetworks.json": "3c3476090e49d046af23b8b967fafcb6f8adfedf833ad66eb4e07603899eb1a6",
+    "src/compat/fluxnetworks/compat-module.json": "16aa5f64be3efc306bacc59e02335da63f1567f0d615e7500e80a2e52d028f61",
     "src/compat/fluxnetworks/java/com/swear/autostorage/compat/fluxnetworks/FluxConversionCatalog.java": "6179c3d46556863645a8362de0d02bf969a0f34e14be28344c9bdb78d9164c4b",
     "src/compat/fluxnetworks/java/com/swear/autostorage/compat/fluxnetworks/FluxnetworksCompatModule.java": "f1b376151fa15f70583607fdfae66053ee9d1d013fed1b6fb86fb12857643781",
     "src/fluxnetworksFixture/java/com/swear/autostorage/fixture/fluxnetworks/FluxnetworksFixtureMod.java": "b1f382ac0bc8faa17dbdb4068ed3f7711e5e078def569584694f2df042c6dfca",

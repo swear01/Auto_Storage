@@ -66,7 +66,7 @@
     "version": "8.0.0",
     "dependency": "curse.maven:flux-networks-248020:6089446",
     "repositories": [
-      "https://www.cursemaven.com"
+      "https://curse.cleanroommc.com"
     ],
     "runtime_dependencies": []
   },

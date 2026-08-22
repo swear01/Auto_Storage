@@ -113,7 +113,7 @@
   "version": "1.5.7",
   "dependency": "curse.maven:justdirethings-1002348:7463040",
   "repositories": [
-   "https://www.cursemaven.com"
+   "https://curse.cleanroommc.com"
   ],
   "runtime_dependencies": []
  },
