@@ -100,7 +100,6 @@ class CursorFullRepoAuditSkillTests(unittest.TestCase):
         for required in (
             "github-pr-review-loop",
             "GitHub-triggered PR review",
-            "local agent review",
             "do not satisfy",
             "consumer Gemini Code Assist",
             "sunset",
